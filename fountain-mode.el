@@ -1,16 +1,37 @@
-;; fountain-mode.el --- Emacs Major mode for editing Fountain-formatted text
+;; fountain-mode.el --- Emacs major mode for editing Fountain-formatted text
 ;; files
 
-;; Copyright (c) 2013 Paul W. Rankin <hello@paulwrankin.com>
-
-;; author: Paul W. Rankin <hello@paulwrankin.com>
-;; maintainer: Paul W. Rankin <hello@paulwrankin.com>
-;; created: 
-;; version: 0.5
-;; keywords: Fountain, screenplay
-;; url: http://rnkn.github.io/fountain-mode/
+;; author: Paul Rankin <paul@tilk.co>
+;; maintainer: Paul Rankin <paul@tilk.co>
+;; created: 2014-01-16
+;; version: 0.6
+;; keywords: Fountain, screenplay, screenwriting, scriptwriting
+;; url: http://github.com/rnkn/fountain-mode/
 
 ;; This file is not part of GNU Emacs.
+
+;; The MIT License (MIT)
+
+;; Copyright (c) 2014 Paul Rankin
+
+;; Permission is hereby granted, free of charge, to any person obtaining a copy
+;; of this software and associated documentation files (the "Software"), to deal
+;; in the Software without restriction, including without limitation the rights
+;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;; copies of the Software, and to permit persons to whom the Software is
+;; furnished to do so, subject to the following conditions:
+
+;; The above copyright notice and this permission notice shall be
+;; included in all copies or substantial portions of the Software.
+
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;; SOFTWARE.
+
 
 ;;; Code:
 
@@ -20,7 +41,7 @@
   "Major mode for editing Fountain-formatted text files."
   :prefix "fountain-"
   :group 'wp
-  :link '(url-link "http://rnkn.github.io/fountain-mode/"))
+  :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 
 ;;; Customizable Options =======================================================
@@ -59,18 +80,6 @@ CUT TO:
 
 DISSOLVE TO:"
   :type '(repeat (string :tag "Transition"))
-  :group 'fountain)
-
-(defcustom fountain-character-ext-list
-  '("(v.o.)" "(o.c.)")
-  "List of character extensions (case insensitive).
-Please include parantheses."
-  :type '(repeat (string :tag "Extension"))
-  :group 'fountain)
-
-(defcustom fountain-character-continued "(CONT'D)"
-  "String appended to characters with consecutive dialogue in same scene."
-  :type '(string :tag "Extension")
   :group 'fountain)
 
 (defcustom fountain-align-column-character 20
@@ -184,6 +193,7 @@ lines.")
       (group "=" (not (any "=")))
       (group (zero-or-more not-newline)))
   "Regular expression for matching synopses.")
+
 
 ;;; Faces ======================================================================
 
@@ -467,11 +477,13 @@ section, synopsis or is within a boneyard."
   "Keymap for Fountain Mode.")
 
 
-;;; Autoload ===================================================================
+;;; Mode Definition ============================================================
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
-  "Major mode for editing Fountain files."
+  "Major mode for editing Fountain-formatted text files.
+For more information on the Fountain markup format, visit
+<http://fountain.io>."
   (set (make-local-variable 'comment-start) "[[")
   (set (make-local-variable 'comment-end) "]]")
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
@@ -480,6 +492,5 @@ section, synopsis or is within a boneyard."
     (add-hook 'after-change-functions 'fountain-indent-refresh nil t)))
 
 (provide 'fountain-mode)
-
 
 ;;; fountain-mode.el ends here
