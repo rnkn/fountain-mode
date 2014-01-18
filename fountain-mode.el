@@ -1,10 +1,9 @@
-;; fountain-mode.el --- Emacs major mode for editing Fountain-formatted text
-;; files
+;; fountain-mode.el --- Emacs major mode for editing Fountain files
 
 ;; author: Paul Rankin <paul@tilk.co>
 ;; maintainer: Paul Rankin <paul@tilk.co>
 ;; created: 2014-01-16
-;; version: 0.6
+;; version: 0.7
 ;; keywords: Fountain, screenplay, screenwriting, scriptwriting
 ;; url: http://github.com/rnkn/fountain-mode/
 
@@ -244,6 +243,11 @@ lines.")
   "Face for comments."
   :group 'fountain-faces)
 
+(defface fountain-nonprinting-face
+  '((t (:foreground "dim gray")))
+  "Face for comments."
+  :group 'fountain-faces)
+
 (defface fountain-section-face
   '((t (:foreground "dark red")))
   "Face for sections."
@@ -261,8 +265,7 @@ lines.")
   `((,fountain-slugline-regexp . fountain-slugline-face)
     (,fountain-dot-slugline-regexp . fountain-dot-slugline-face)
     (,fountain-section-regexp . fountain-section-face)
-    (,fountain-synopsis-regexp . fountain-synopsis-face)
-    (,fountain-comment-regexp . fountain-comment-face))
+    (,fountain-synopsis-regexp . fountain-synopsis-face))
   "Font lock highlighting keywords.")
 
 
@@ -288,21 +291,6 @@ lines.")
     (forward-line 0)
     (looking-at-p fountain-line-empty-regexp)))
 
-(defun fountain-comment-p ()
-  "Return non-nil if line at point is a comment."
-  (save-excursion
-    (forward-line 0)
-    (looking-at-p fountain-comment-regexp)))
-
-(defun fountain-blank-p ()
-  "Return non-nil if line at point is considered blank.
-A line is blank if it is empty, or consists of a comment,
-section, synopsis or is within a boneyard."
-  (cond ((fountain-line-empty-p))
-        ((fountain-comment-p))
-        ((fountain-section-p))
-        ((fountain-synopsis-p))))
-
 (defun fountain-section-p ()
   "Return non-nil if line at point is a section heading."
   (save-excursion
@@ -317,7 +305,16 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
-  (ignore))
+  (comment-only-p (line-beginning-position) (line-end-position)))
+
+(defun fountain-blank-p ()
+  "Return non-nil if line at point is considered blank.
+A line is blank if it is empty, or consists of a comment,
+section, synopsis or is within a boneyard."
+  (cond ((fountain-line-empty-p))
+        ((fountain-boneyard-p))
+        ((fountain-section-p))
+        ((fountain-synopsis-p))))
 
 (defun fountain-frontmatter-p ()
   "Return non-nil if line at point is frontmatter."
@@ -330,7 +327,7 @@ section, synopsis or is within a boneyard."
     (and (or (bobp)
              (save-excursion
                (forward-line -1)
-               (fountain-line-empty-p)))
+               (fountain-blank-p)))
          (save-excursion
            (forward-line 1)
            (or (eobp)
@@ -344,7 +341,7 @@ section, synopsis or is within a boneyard."
     (and (or (bobp)
              (save-excursion
                (forward-line -1)
-               (fountain-line-empty-p)))
+               (fountain-blank-p)))
          (save-excursion
            (forward-line 1)
            (or (eobp)
@@ -454,8 +451,10 @@ section, synopsis or is within a boneyard."
 (defun fountain-insert-uuid ()
   "Insert a commented UUID."
   (interactive)
-  (comment-dwim nil)
-  (let ((str (downcase (shell-command-to-string "uuidgen"))))
+  (let ((comment-start "[[")
+        (comment-end "]]")
+        (str (downcase (shell-command-to-string "uuidgen"))))
+    (comment-dwim nil)
     (insert (car (split-string str "-")))))
 
 (defun fountain-insert-export-options ()
@@ -474,7 +473,17 @@ section, synopsis or is within a boneyard."
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-z") 'fountain-insert-uuid)
     map)
-  "Keymap for Fountain Mode.")
+  "Mode map for `fountain-mode'.")
+
+
+;;; Syntax Table ===============================================================
+
+(defvar fountain-mode-syntax-table
+  (let ((syntax (make-syntax-table)))
+    (modify-syntax-entry ?\/ ". 14" syntax)
+    (modify-syntax-entry ?* ". 23" syntax)
+    syntax)
+  "Syntax table for `fountain-mode'.")
 
 
 ;;; Mode Definition ============================================================
@@ -484,8 +493,11 @@ section, synopsis or is within a boneyard."
   "Major mode for editing Fountain-formatted text files.
 For more information on the Fountain markup format, visit
 <http://fountain.io>."
-  (set (make-local-variable 'comment-start) "[[")
-  (set (make-local-variable 'comment-end) "]]")
+  :group 'fountain
+  (set (make-local-variable 'comment-start) "/*")
+  (set (make-local-variable 'comment-end) "*/")
+  (set (make-local-variable 'font-lock-comment-face)
+       'fountain-nonprinting-face)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (when fountain-indent-elements
     (fountain-indent-refresh (point-min) (point-max) nil)
