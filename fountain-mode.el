@@ -44,14 +44,14 @@
 
 ;;; Customizable Options =======================================================
 
-(defcustom fountain-export-options-template
-  "title: 
-credit: 
-author: 
-draft date: 
-contact: 
+(defcustom fountain-metadata-template
+  "Title: 
+Credit: 
+Author: 
+Draft date: 
+Contact: 
 "
-  "Export options template inserted at the beginning of buffer."
+  "Metadata template inserted at the beginning of buffer."
   :type 'string
   :group 'fountain)
 
@@ -470,13 +470,13 @@ section, synopsis or is within a boneyard."
           (let ((str (downcase (shell-command-to-string "uuidgen"))))
             (insert (car (split-string str "-")))))))
 
-(defun fountain-insert-export-options ()
-  "Insert the export options template at the beginning of file."
+(defun fountain-metadata-insert ()
+  "Insert the metadata template at the beginning of file."
   (interactive)
   (save-excursion
     (save-restriction
       (goto-char (point-min))
-      (insert fountain-export-options-template "\n\n"))))
+      (insert fountain-metadata-template "\n\n"))))
 
 ;;; Mode Map ===================================================================
 
@@ -484,6 +484,7 @@ section, synopsis or is within a boneyard."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-z") 'fountain-note-dwim)
+    (define-key map (kbd "C-c C-x m") 'fountain-metadata-insert)
     map)
   "Mode map for `fountain-mode'.")
 
