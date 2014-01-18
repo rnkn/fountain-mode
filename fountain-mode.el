@@ -42,7 +42,6 @@
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
-
 ;;; Customizable Options =======================================================
 
 (defcustom fountain-export-options-template
@@ -114,7 +113,6 @@ as constituents of the larger scene. If you prefer to treat
 forced sluglines like regular sluglines, set this to nil."
   :type 'boolean
   :group 'fountain)
-
 
 ;;; Element Regular Expressions ================================================
 
@@ -193,7 +191,6 @@ lines.")
       (group (zero-or-more not-newline)))
   "Regular expression for matching synopses.")
 
-
 ;;; Faces ======================================================================
 
 (require 'font-lock)
@@ -257,7 +254,6 @@ lines.")
   "Face for synopses."
   :group 'fountain-faces)
 
-
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
@@ -267,7 +263,6 @@ lines.")
     (,fountain-synopsis-regexp . fountain-synopsis-face)
     (,fountain-note-regexp . fountain-note-face))
   "Font lock highlighting keywords.")
-
 
 ;;; Functions ==================================================================
 
@@ -403,9 +398,10 @@ section, synopsis or is within a boneyard."
              (fountain-line-empty-p)))))
 
 (defun fountain-note-p ()
-  "Return non-nil if line at point is a note."
+  "Return non-nil if line at point is within a note."
   (save-excursion
-    (forward-line 0)
+    (forward-paragraph -1)
+    (forward-char 1)
     (looking-at-p fountain-note-regexp)))
 
 (defun fountain-indent-add (column)
@@ -435,7 +431,6 @@ section, synopsis or is within a boneyard."
              (fountain-indent-add fountain-align-column-trans))
             ((fountain-indent-add 0)))
       (forward-line 1))))
-
 
 ;;; Interaction ================================================================
 
@@ -473,7 +468,6 @@ section, synopsis or is within a boneyard."
       (goto-char (point-min))
       (insert fountain-export-options-template "\n\n"))))
 
-
 ;;; Mode Map ===================================================================
 
 (defvar fountain-mode-map
@@ -483,7 +477,6 @@ section, synopsis or is within a boneyard."
     map)
   "Mode map for `fountain-mode'.")
 
-
 ;;; Syntax Table ===============================================================
 
 (defvar fountain-mode-syntax-table
@@ -492,7 +485,6 @@ section, synopsis or is within a boneyard."
     (modify-syntax-entry ?* ". 23" syntax)
     syntax)
   "Syntax table for `fountain-mode'.")
-
 
 ;;; Mode Definition ============================================================
 
