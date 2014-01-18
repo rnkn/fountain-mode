@@ -1,10 +1,9 @@
-;; fountain-mode.el --- Emacs major mode for editing Fountain-formatted text
-;; files
+;; fountain-mode.el --- Emacs major mode for editing Fountain files
 
 ;; author: Paul Rankin <paul@tilk.co>
 ;; maintainer: Paul Rankin <paul@tilk.co>
 ;; created: 2014-01-16
-;; version: 0.6
+;; version: 0.7
 ;; keywords: Fountain, screenplay, screenwriting, scriptwriting
 ;; url: http://github.com/rnkn/fountain-mode/
 
@@ -42,7 +41,6 @@
   :prefix "fountain-"
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
-
 
 ;;; Customizable Options =======================================================
 
@@ -116,7 +114,6 @@ forced sluglines like regular sluglines, set this to nil."
   :type 'boolean
   :group 'fountain)
 
-
 ;;; Element Regular Expressions ================================================
 
 (defconst fountain-line-empty-regexp
@@ -176,7 +173,7 @@ lines.")
       (group (zero-or-more not-newline)))
   "Regular expression for matching page breaks.")
 
-(defconst fountain-comment-regexp
+(defconst fountain-note-regexp
   (rx (group "[[")
       (group (zero-or-more not-newline (zero-or-one "\n")))
       (group "]]"))
@@ -193,7 +190,6 @@ lines.")
       (group "=" (not (any "=")))
       (group (zero-or-more not-newline)))
   "Regular expression for matching synopses.")
-
 
 ;;; Faces ======================================================================
 
@@ -215,8 +211,8 @@ lines.")
 (defvar fountain-character-face 'fountain-character-face
   "Face name to use for character names.")
 
-(defvar fountain-comment-face 'fountain-comment-face
-  "Face name to use for comments.")
+(defvar fountain-note-face 'fountain-note-face
+  "Face name to use for notes.")
 
 (defvar fountain-section-face 'fountain-section-face
   "Face name to use for sections.")
@@ -239,10 +235,14 @@ lines.")
   "Face for character names."
   :group 'fountain-faces)
 
-(defface fountain-comment-face
+(defface fountain-nonprinting-face
   '((t (:foreground "dim gray")))
   "Face for comments."
   :group 'fountain-faces)
+
+(defface fountain-note-face
+  '((t (:foreground "forest green")))
+  "Face for notes.")
 
 (defface fountain-section-face
   '((t (:foreground "dark red")))
@@ -254,7 +254,6 @@ lines.")
   "Face for synopses."
   :group 'fountain-faces)
 
-
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
@@ -262,9 +261,8 @@ lines.")
     (,fountain-dot-slugline-regexp . fountain-dot-slugline-face)
     (,fountain-section-regexp . fountain-section-face)
     (,fountain-synopsis-regexp . fountain-synopsis-face)
-    (,fountain-comment-regexp . fountain-comment-face))
+    (,fountain-note-regexp . fountain-note-face))
   "Font lock highlighting keywords.")
-
 
 ;;; Functions ==================================================================
 
@@ -288,21 +286,6 @@ lines.")
     (forward-line 0)
     (looking-at-p fountain-line-empty-regexp)))
 
-(defun fountain-comment-p ()
-  "Return non-nil if line at point is a comment."
-  (save-excursion
-    (forward-line 0)
-    (looking-at-p fountain-comment-regexp)))
-
-(defun fountain-blank-p ()
-  "Return non-nil if line at point is considered blank.
-A line is blank if it is empty, or consists of a comment,
-section, synopsis or is within a boneyard."
-  (cond ((fountain-line-empty-p))
-        ((fountain-comment-p))
-        ((fountain-section-p))
-        ((fountain-synopsis-p))))
-
 (defun fountain-section-p ()
   "Return non-nil if line at point is a section heading."
   (save-excursion
@@ -317,7 +300,17 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
-  (ignore))
+  (comment-only-p (line-beginning-position) (line-end-position)))
+
+(defun fountain-blank-p ()
+  "Return non-nil if line at point is considered blank.
+A line is blank if it is empty, or consists of a comment,
+section, synopsis or is within a boneyard."
+  (cond ((fountain-line-empty-p))
+        ((fountain-boneyard-p))
+        ((fountain-note-p))
+        ((fountain-section-p))
+        ((fountain-synopsis-p))))
 
 (defun fountain-frontmatter-p ()
   "Return non-nil if line at point is frontmatter."
@@ -330,7 +323,7 @@ section, synopsis or is within a boneyard."
     (and (or (bobp)
              (save-excursion
                (forward-line -1)
-               (fountain-line-empty-p)))
+               (fountain-blank-p)))
          (save-excursion
            (forward-line 1)
            (or (eobp)
@@ -344,7 +337,7 @@ section, synopsis or is within a boneyard."
     (and (or (bobp)
              (save-excursion
                (forward-line -1)
-               (fountain-line-empty-p)))
+               (fountain-blank-p)))
          (save-excursion
            (forward-line 1)
            (or (eobp)
@@ -404,6 +397,13 @@ section, synopsis or is within a boneyard."
          (or (eobp)
              (fountain-line-empty-p)))))
 
+(defun fountain-note-p ()
+  "Return non-nil if line at point is within a note."
+  (save-excursion
+    (forward-paragraph -1)
+    (forward-char 1)
+    (looking-at-p fountain-note-regexp)))
+
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
   (with-silent-modifications
@@ -432,7 +432,6 @@ section, synopsis or is within a boneyard."
             ((fountain-indent-add 0)))
       (forward-line 1))))
 
-
 ;;; Interaction ================================================================
 
 (defun fountain-upcase-line ()
@@ -451,12 +450,15 @@ section, synopsis or is within a boneyard."
   (interactive)
   (search-forward comment-start))
 
-(defun fountain-insert-uuid ()
-  "Insert a commented UUID."
-  (interactive)
-  (comment-dwim nil)
-  (let ((str (downcase (shell-command-to-string "uuidgen"))))
-    (insert (car (split-string str "-")))))
+(defun fountain-note-dwim (&optional arg)
+  "Insert a note. If prefixed with ARG, also insert a UUID."
+  (interactive "P")
+    (let ((comment-start "[[")
+          (comment-end "]]"))
+      (comment-dwim nil)
+      (if arg
+          (let ((str (downcase (shell-command-to-string "uuidgen"))))
+            (insert (car (split-string str "-")))))))
 
 (defun fountain-insert-export-options ()
   "Insert the export options template at the beginning of file."
@@ -466,16 +468,23 @@ section, synopsis or is within a boneyard."
       (goto-char (point-min))
       (insert fountain-export-options-template "\n\n"))))
 
-
 ;;; Mode Map ===================================================================
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-c C-z") 'fountain-insert-uuid)
+    (define-key map (kbd "C-c C-z") 'fountain-note-dwim)
     map)
-  "Keymap for Fountain Mode.")
+  "Mode map for `fountain-mode'.")
 
+;;; Syntax Table ===============================================================
+
+(defvar fountain-mode-syntax-table
+  (let ((syntax (make-syntax-table)))
+    (modify-syntax-entry ?\/ ". 14" syntax)
+    (modify-syntax-entry ?* ". 23" syntax)
+    syntax)
+  "Syntax table for `fountain-mode'.")
 
 ;;; Mode Definition ============================================================
 
@@ -484,8 +493,11 @@ section, synopsis or is within a boneyard."
   "Major mode for editing Fountain-formatted text files.
 For more information on the Fountain markup format, visit
 <http://fountain.io>."
-  (set (make-local-variable 'comment-start) "[[")
-  (set (make-local-variable 'comment-end) "]]")
+  :group 'fountain
+  (set (make-local-variable 'comment-start) "/*")
+  (set (make-local-variable 'comment-end) "*/")
+  (set (make-local-variable 'font-lock-comment-face)
+       'fountain-nonprinting-face)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (when fountain-indent-elements
     (fountain-indent-refresh (point-min) (point-max) nil)
