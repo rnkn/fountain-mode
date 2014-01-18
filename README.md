@@ -11,7 +11,8 @@ Features
 
 The following features are supported:
 
-- syntax highlighting for sluglines and forced sluglines
+- syntax highlighting for sluglines, forced sluglines, section
+  headings, synopses, and notes
 - auto-indentation for character, parenthetical, dialogue and
   transition elements (display only, does not modify file contents)
 - notes (comments)
