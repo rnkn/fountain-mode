@@ -4,7 +4,7 @@
 ;; Maintainer: Paul Rankin <paul@tilk.co>
 ;; Created: 2014-01-16
 ;; Version: 0.7
-;; Keywords: Fountain, screenplay, screenwriting, scriptwriting
+;; Keywords: wp
 ;; URL: http://github.com/rnkn/fountain-mode/
 
 ;; This file is not part of GNU Emacs.
