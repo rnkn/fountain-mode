@@ -1,11 +1,11 @@
 ;; fountain-mode.el --- Emacs major mode for editing Fountain files
 
-;; author: Paul Rankin <paul@tilk.co>
-;; maintainer: Paul Rankin <paul@tilk.co>
-;; created: 2014-01-16
-;; version: 0.7
-;; keywords: Fountain, screenplay, screenwriting, scriptwriting
-;; url: http://github.com/rnkn/fountain-mode/
+;; Author: Paul Rankin <paul@tilk.co>
+;; Maintainer: Paul Rankin <paul@tilk.co>
+;; Created: 2014-01-16
+;; Version: 0.7
+;; Keywords: Fountain, screenplay, screenwriting, scriptwriting
+;; URL: http://github.com/rnkn/fountain-mode/
 
 ;; This file is not part of GNU Emacs.
 
