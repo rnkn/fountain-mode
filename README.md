@@ -12,18 +12,18 @@ Features
 The following features are supported:
 
 - syntax highlighting for sluglines, forced sluglines, section
-  headings, synopses, and notes
+  headings, synopses, notes and boneyard
 - auto-indentation for character, parenthetical, dialogue and
   transition elements (display only, does not modify file contents)
-- notes (comments)
-- inserting UUIDs (bookmarks)
+- `S-RET` to upcase the line and insert a newline
+- `C-c C-z` to insert a note (prefix with `C-u` to insert with UUID)
+- boneyard (followers standard commenting behavior, e.g. `M-;`)
 - customizable indentation align-to columns, slugline prefixes,
   transition suffixes, and faces
 
 The following features are not yet supported:
 
 - syntax highlighting for all other elements, including emphasis
-- boneyard
 - metadata
 - dual dialogue
 - exporting
