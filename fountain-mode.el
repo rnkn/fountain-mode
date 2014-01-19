@@ -1,8 +1,6 @@
 ;;; fountain-mode.el --- Emacs major mode for editing screenplays in the Fountain markup format
 
 ;; Author: Paul Rankin <paul@tilk.co>
-;; Maintainer: Paul Rankin <paul@tilk.co>
-;; Created: 2014-01-16
 ;; Version: 0.7
 ;; Keywords: wp
 ;; URL: http://github.com/rnkn/fountain-mode/
