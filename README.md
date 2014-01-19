@@ -11,10 +11,10 @@ Features
 
 The following features are supported:
 
-- syntax highlighting for sluglines, forced sluglines, section
-  headings, synopses, notes and boneyard
-- auto-indentation for character, parenthetical, dialogue and
-  transition elements (display only, does not modify file contents)
+- syntax highlighting for sluglines, forced sluglines, section headings,
+  synopses, notes and boneyard elements
+- auto-indentation for character, parenthetical, dialogue and transition
+  elements (display only, does not modify file contents)
 - `S-RET` to upcase the line and insert a newline
 - `C-c C-z` to insert a note (prefix with `C-u` to insert with UUID)
 - boneyard (followers standard commenting behavior, e.g. `M-;`)
@@ -28,8 +28,8 @@ The following features are not yet supported:
 - dual dialogue
 - exporting
 
-The feature-set is quite basic at the moment, with many features yet
-to be added. Feature requests are encouraged.
+The feature-set is quite basic at the moment, with many features yet to
+be added. Feature requests are encouraged.
 
 It may raise some eyebrows that there is no current support for
 exporting to other formats. This is partly because I already use
@@ -59,8 +59,8 @@ following line to your `.emacs` or `init.el` file:
 
     (require 'fountain-mode)
 
-To load Fountain Mode whenever you open a `.fountain` file, also add
-the following:
+To load Fountain Mode whenever you open a `.fountain` file, also add the
+following:
 
     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
