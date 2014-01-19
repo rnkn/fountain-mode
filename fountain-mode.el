@@ -1,4 +1,4 @@
-;;; fountain-mode.el --- Emacs major mode for editing Fountain files
+;;; fountain-mode.el --- Emacs major mode for editing screenplays in the Fountain markup format
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Maintainer: Paul Rankin <paul@tilk.co>
