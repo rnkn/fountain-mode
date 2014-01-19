@@ -52,8 +52,10 @@ Requirements
 Installation
 ------------
 
-Put `fountain-mode.el` in your `load-path` and add the following line
-to your `.emacs` or `init.el` file:
+Fountain Mode is available through [MELPA][]
+
+Alternately, put `fountain-mode.el` in your `load-path` and add the
+following line to your `.emacs` or `init.el` file:
 
     (require 'fountain-mode)
 
