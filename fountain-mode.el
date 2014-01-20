@@ -1,7 +1,7 @@
 ;;; fountain-mode.el --- Major mode for editing Fountain-formatted text files
 
 ;; Author: Paul Rankin <paul@tilk.co>
-;; Version: 0.7
+;; Version: 0.7.1
 ;; Keywords: wp
 ;; URL: http://github.com/rnkn/fountain-mode/
 
