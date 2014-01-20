@@ -1,36 +1,36 @@
-;;; fountain-mode.el --- Emacs major mode for editing Fountain files
+;;; fountain-mode.el --- Major mode for editing Fountain-formatted text files
 
 ;; Author: Paul Rankin <paul@tilk.co>
-;; Maintainer: Paul Rankin <paul@tilk.co>
-;; Created: 2014-01-16
-;; Version: 0.7
+;; Version: 0.7.1
 ;; Keywords: wp
 ;; URL: http://github.com/rnkn/fountain-mode/
 
 ;; This file is not part of GNU Emacs.
 
-;; The MIT License (MIT)
+;; Copyright (C) 2014 Paul Rankin
 
-;; Copyright (c) 2014 Paul Rankin
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or (at
+;; your option) any later version.
 
-;; Permission is hereby granted, free of charge, to any person obtaining a copy
-;; of this software and associated documentation files (the "Software"), to deal
-;; in the Software without restriction, including without limitation the rights
-;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-;; copies of the Software, and to permit persons to whom the Software is
-;; furnished to do so, subject to the following conditions:
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
 
-;; The above copyright notice and this permission notice shall be
-;; included in all copies or substantial portions of the Software.
+;; You should have received a copy of the GNU General Public License
+;; along with this program. If not, see [http://www.gnu.org/licenses/].
 
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-;; SOFTWARE.
+;;; Commentary:
 
+;; Fountain Mode is a major mode for GNU Emacs for editing text files in
+;; Fountain markup format, a simple markup syntax for writing, editing
+;; and sharing screenplays in plain text. Fountain Mode is free
+;; software, licensed under the GNU GPL version 3.
+
+;; For more information on Fountain markup format, see
+;; [http://fountain.io]
 
 ;;; Code:
 
@@ -271,6 +271,14 @@ lines.")
   (buffer-substring-no-properties
    (line-beginning-position) (line-end-position)))
 
+(defun fountain-get-paragraph-bounds ()
+  "Return the beginning and end points of paragraph at point."
+  (let ((paragraph-beginning
+         (save-excursion (forward-paragraph -1) (point)))
+        (paragraph-end
+         (save-excursion (forward-paragraph 1) (point))))
+    (cons paragraph-beginning paragraph-end)))
+
 (defun fountain-trim-whitespace (str)
   "Trim the leading and trailing whitespace of STR."
   (setq str (mapconcat 'identity (split-string str) " ")))
@@ -400,9 +408,21 @@ section, synopsis or is within a boneyard."
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
   (save-excursion
-    (forward-paragraph -1)
-    (forward-char 1)
-    (looking-at-p fountain-note-regexp)))
+    (forward-line 0)
+    (let* ((marker (point))
+           (paragraph-end (cdr (fountain-get-paragraph-bounds)))
+           (paragraph-beginning (car (fountain-get-paragraph-bounds)))
+           (end (search-forward "]]" paragraph-end t))
+           (start (search-backward "[[" paragraph-beginning t)))
+      (unless (or (null start)
+                  (null end))
+        (and (goto-char end)
+             (looking-at-p (rx (zero-or-more blank) line-end))
+             (goto-char start)
+             (forward-line 0)
+             (looking-at-p fountain-note-regexp)
+             (>= marker start)
+             (<= marker end))))))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
@@ -415,22 +435,24 @@ section, synopsis or is within a boneyard."
 (defun fountain-indent-refresh (start end length)
   "Refresh indentation properties of restriction."
   (save-excursion
-    (goto-char end)
-    (forward-paragraph 1)
-    (setq end (point))
-    (goto-char start)
-    (forward-paragraph -1)
-    (while (< (point) end)
-      (cond ((fountain-character-p)
-             (fountain-indent-add fountain-align-column-character))
-            ((fountain-paren-p)
-             (fountain-indent-add fountain-align-column-paren))
-            ((fountain-dialogue-p)
-             (fountain-indent-add fountain-align-column-dialogue))
-            ((fountain-trans-p)
-             (fountain-indent-add fountain-align-column-trans))
-            ((fountain-indent-add 0)))
-      (forward-line 1))))
+    (let ((end
+           (progn (goto-char end)
+                  (cdr (fountain-get-paragraph-bounds))))
+          (start
+           (progn (goto-char start)
+                  (car (fountain-get-paragraph-bounds)))))
+      (goto-char start)
+      (while (< (point) end)
+        (cond ((fountain-character-p)
+               (fountain-indent-add fountain-align-column-character))
+              ((fountain-paren-p)
+               (fountain-indent-add fountain-align-column-paren))
+              ((fountain-dialogue-p)
+               (fountain-indent-add fountain-align-column-dialogue))
+              ((fountain-trans-p)
+               (fountain-indent-add fountain-align-column-trans))
+              ((fountain-indent-add 0)))
+        (forward-line 1)))))
 
 ;;; Interaction ================================================================
 
