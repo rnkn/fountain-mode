@@ -46,8 +46,9 @@ available here: <http://fountain.io/apps>
 Requirements
 ------------
 
-- Emacs 24 or later
-- the CLT `uuidgen` is required to insert UUIDs
+- Emacs 24.3.1 or later (not tested on earlier versions)
+- the CLT `uuidgen` is required to insert UUIDs (usually pre-installed
+  on OS X and Linux)
 
 Installation
 ------------
