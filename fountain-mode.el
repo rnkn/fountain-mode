@@ -271,6 +271,14 @@ lines.")
   (buffer-substring-no-properties
    (line-beginning-position) (line-end-position)))
 
+(defun fountain-get-paragraph-bounds ()
+  "Return the beginning and end points of paragraph at point."
+  (let ((paragraph-beginning
+         (save-excursion (forward-paragraph -1) (point)))
+        (paragraph-end
+         (save-excursion (forward-paragraph 1) (point))))
+    (cons paragraph-beginning paragraph-end)))
+
 (defun fountain-trim-whitespace (str)
   "Trim the leading and trailing whitespace of STR."
   (setq str (mapconcat 'identity (split-string str) " ")))
@@ -402,12 +410,8 @@ section, synopsis or is within a boneyard."
   (save-excursion
     (forward-line 0)
     (let* ((marker (point))
-           (paragraph-end
-            (save-excursion (forward-paragraph 1)
-                            (point)))
-           (paragraph-beginning
-            (save-excursion (forward-paragraph -1)
-                            (point)))
+           (paragraph-end (cdr (fountain-get-paragraph-bounds)))
+           (paragraph-beginning (car (fountain-get-paragraph-bounds)))
            (end (search-forward "]]" paragraph-end t))
            (start (search-backward "[[" paragraph-beginning t)))
       (unless (or (null start)
