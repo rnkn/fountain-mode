@@ -399,11 +399,11 @@ section, synopsis or is within a boneyard."
        (save-excursion
          (forward-line -1)
          (or (bobp)
-             (fountain-line-empty-p)))
+             (fountain-blank-p)))
        (save-excursion
          (forward-line 1)
          (or (eobp)
-             (fountain-line-empty-p)))))
+             (fountain-blank-p)))))
 
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
