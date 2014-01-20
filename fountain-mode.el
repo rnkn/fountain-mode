@@ -1,4 +1,4 @@
-;;; fountain-mode.el --- Emacs major mode for editing screenplays in Fountain markup format
+;;; fountain-mode.el --- Major mode for editing Fountain-formatted text files
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Version: 0.7
@@ -21,6 +21,16 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see [http://www.gnu.org/licenses/].
+
+;;; Commentary:
+
+;; Fountain Mode is a major mode for GNU Emacs for editing text files in
+;; Fountain markup format, a simple markup syntax for writing, editing
+;; and sharing screenplays in plain text. Fountain Mode is free
+;; software, licensed under the GNU GPL version 3.
+
+;; For more information on Fountain markup format, see
+;; [http://fountain.io]
 
 ;;; Code:
 
