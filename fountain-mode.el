@@ -400,9 +400,25 @@ section, synopsis or is within a boneyard."
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
   (save-excursion
-    (forward-paragraph -1)
-    (forward-char 1)
-    (looking-at-p fountain-note-regexp)))
+    (forward-line 0)
+    (let* ((marker (point))
+           (paragraph-end
+            (save-excursion (forward-paragraph 1)
+                            (point)))
+           (paragraph-beginning
+            (save-excursion (forward-paragraph -1)
+                            (point)))
+           (end (search-forward "]]" paragraph-end t))
+           (start (search-backward "[[" paragraph-beginning t)))
+      (unless (or (null start)
+                  (null end))
+        (and (goto-char end)
+             (looking-at-p (rx (zero-or-more blank) line-end))
+             (goto-char start)
+             (forward-line 0)
+             (looking-at-p fountain-note-regexp)
+             (>= marker start)
+             (<= marker end))))))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
