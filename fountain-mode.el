@@ -435,22 +435,24 @@ section, synopsis or is within a boneyard."
 (defun fountain-indent-refresh (start end length)
   "Refresh indentation properties of restriction."
   (save-excursion
-    (goto-char end)
-    (forward-paragraph 1)
-    (setq end (point))
-    (goto-char start)
-    (forward-paragraph -1)
-    (while (< (point) end)
-      (cond ((fountain-character-p)
-             (fountain-indent-add fountain-align-column-character))
-            ((fountain-paren-p)
-             (fountain-indent-add fountain-align-column-paren))
-            ((fountain-dialogue-p)
-             (fountain-indent-add fountain-align-column-dialogue))
-            ((fountain-trans-p)
-             (fountain-indent-add fountain-align-column-trans))
-            ((fountain-indent-add 0)))
-      (forward-line 1))))
+    (let ((end
+           (progn (goto-char end)
+                  (cdr (fountain-get-paragraph-bounds))))
+          (start
+           (progn (goto-char start)
+                  (car (fountain-get-paragraph-bounds)))))
+      (goto-char start)
+      (while (< (point) end)
+        (cond ((fountain-character-p)
+               (fountain-indent-add fountain-align-column-character))
+              ((fountain-paren-p)
+               (fountain-indent-add fountain-align-column-paren))
+              ((fountain-dialogue-p)
+               (fountain-indent-add fountain-align-column-dialogue))
+              ((fountain-trans-p)
+               (fountain-indent-add fountain-align-column-trans))
+              ((fountain-indent-add 0)))
+        (forward-line 1)))))
 
 ;;; Interaction ================================================================
 
