@@ -58,11 +58,15 @@ Fountain Mode is available through [MELPA][]
 Alternately, put `fountain-mode.el` in your `load-path` and add the
 following line to your `.emacs` or `init.el` file:
 
-    (require 'fountain-mode)
+```elisp
+(require 'fountain-mode)
+```
 
 To load Fountain Mode whenever you open a `.fountain` file, also add the
 following:
 
-    (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
+```elisp
+(add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
+```
 
 [MELPA]: http://melpa.milkbox.net "MELPA"
