@@ -208,9 +208,6 @@ lines.")
     'fountain-slugline-face)
   "Face name to use for forced sluglines.")
 
-(defvar fountain-character-face 'fountain-character-face
-  "Face name to use for character names.")
-
 (defvar fountain-note-face 'fountain-note-face
   "Face name to use for notes.")
 
@@ -228,11 +225,6 @@ lines.")
 (defface fountain-dot-slugline-face
   '((t (:weight bold)))
   "Face for forced sluglines."
-  :group 'fountain-faces)
-
-(defface fountain-character-face
-  '((t (:foreground "red")))
-  "Face for character names."
   :group 'fountain-faces)
 
 (defface fountain-nonprinting-face
