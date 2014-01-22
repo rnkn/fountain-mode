@@ -360,10 +360,10 @@ section, synopsis or is within a boneyard."
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
   (unless (or (fountain-blank-p)
+              (fountain-character-p)
               (fountain-paren-p))
     (save-excursion
       (forward-line -1)
-      (unless (bobp)                    ; FIXME character at bobp
         (or (fountain-character-p)
             (fountain-paren-p)
             (fountain-dialogue-p))))))
