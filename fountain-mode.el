@@ -312,10 +312,6 @@ section, synopsis or is within a boneyard."
         ((fountain-section-p))
         ((fountain-synopsis-p))))
 
-(defun fountain-frontmatter-p ()
-  "Return non-nil if line at point is frontmatter."
-  (ignore))
-
 (defun fountain-slugline-p ()
   "Return non-nil if line at point is a slugline."
   (save-excursion
