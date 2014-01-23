@@ -138,9 +138,10 @@ lines.")
   "Regular expression for matching forced sluglines.")
 
 (defconst fountain-character-regexp
-  (rx (zero-or-more blank)
-      (group (one-or-more (not (any lower "(" "\n"))))
-      (group (zero-or-one "(" (zero-or-more not-newline))))
+  (rx (group (zero-or-more blank))
+      (group (one-or-more (not (any lower "<>\\\n"))))
+      (group (zero-or-more blank))
+      line-end)
   "Regular expression for matching characters.")
 
 (defvar fountain-paren-regexp
@@ -308,75 +309,79 @@ A line is blank if it is empty, or consists of a comment,
 section, synopsis or is within a boneyard."
   (cond ((fountain-line-empty-p))
         ((fountain-boneyard-p))
-        ((fountain-note-p))
         ((fountain-section-p))
-        ((fountain-synopsis-p))))
+        ((fountain-synopsis-p))
+        ((fountain-note-p))))
 
 (defun fountain-slugline-p ()
   "Return non-nil if line at point is a slugline."
   (save-excursion
-    (forward-line 0)
-    (and (or (bobp)
-             (save-excursion
-               (forward-line -1)
-               (fountain-blank-p)))
-         (save-excursion
-           (forward-line 1)
-           (or (eobp)
-               (fountain-blank-p)))
-         (looking-at-p fountain-slugline-regexp))))
+    (save-restriction
+      (forward-line 0)
+      (and (or (bobp)
+               (save-excursion
+                 (forward-line -1)
+                 (fountain-blank-p)))
+           (save-excursion
+             (forward-line 1)
+             (or (eobp)
+                 (fountain-blank-p)))
+           (looking-at-p fountain-slugline-regexp)))))
 
 (defun fountain-dot-slugline-p ()
   "Return non-nil if line at point is a forced slugline."
   (save-excursion
-    (forward-line 0)
-    (and (or (bobp)
-             (save-excursion
-               (forward-line -1)
-               (fountain-blank-p)))
-         (save-excursion
-           (forward-line 1)
-           (or (eobp)
-               (fountain-blank-p)))
-         (looking-at-p fountain-dot-slugline-regexp))))
+    (save-restriction
+      (forward-line 0)
+      (and (or (bobp)
+               (save-excursion
+                 (forward-line -1)
+                 (fountain-blank-p)))
+           (save-excursion
+             (forward-line 1)
+             (or (eobp)
+                 (fountain-blank-p)))
+           (looking-at-p fountain-dot-slugline-regexp)))))
 
 (defun fountain-character-p ()
   "Return non-nil if line at point is a character name."
-  (unless (or (fountain-line-empty-p)
-              (fountain-slugline-p))
-    (and (let ((str (car (split-string (fountain-get-line) "("))))
-           (string= (upcase str) str))
-         (save-excursion
-           (forward-line 0)
-           (and (or (bobp)
-                    (save-excursion
-                      (forward-line -1)
-                      (fountain-line-empty-p)))
-                (save-excursion
-                  (forward-line 1)
-                  (unless (eobp)
-                    (not (fountain-blank-p)))))))))
+  (save-excursion
+    (save-restriction
+      (forward-line 0)
+      (and (let ((case-fold-search nil))
+             (looking-at-p fountain-character-regexp))
+           (or (bobp)
+               (save-excursion
+                 (forward-line -1)
+                 (fountain-line-empty-p)))
+           (save-excursion
+             (forward-line 1)
+             (unless (eobp)
+               (not (fountain-blank-p))))))))
 
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
-  (unless (or (fountain-blank-p)
+  (unless (or (fountain-line-empty-p)
               (fountain-paren-p))
     (save-excursion
-      (forward-line -1)
-      (unless (bobp)                    ; FIXME character at bobp
-        (or (fountain-character-p)
-            (fountain-paren-p)
-            (fountain-dialogue-p))))))
+      (save-restriction
+        (forward-line -1)                 ; FIXME character at bobp
+        (unless (or (fountain-line-empty-p)
+                    (bobp))
+          (or (fountain-character-p)
+              (fountain-paren-p)
+              (fountain-dialogue-p)))))))
 
 (defun fountain-paren-p ()
   "Return non-nil if line at point is a paranthetical."
   (save-excursion
-    (forward-line 0)
-    (and (looking-at-p fountain-paren-regexp)
-         (forward-line -1)
-         (unless (bobp)
-           (or (fountain-character-p)
-               (fountain-dialogue-p))))))
+    (save-restriction
+      (forward-line 0)
+      (and (looking-at-p fountain-paren-regexp)
+           (forward-line -1)
+           (unless (bobp)
+             (or (fountain-character-p)
+                 (fountain-dialogue-p)))))))
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
