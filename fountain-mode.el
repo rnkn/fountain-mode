@@ -69,10 +69,10 @@ can add \"int\", \"ext\", etc. here."
   :group 'fountain)
 
 (defcustom fountain-trans-list
-  '("fade in:" "to:" "fade out" "to black")
-  "List of transition endings (case insensitive).
+  '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
+  "List of transition endings (case sensitive).
 This list is used to match the endings of transitions,
-e.g. \"to:\" will match both the following:
+e.g. \"TO:\" will match both the following:
 
 CUT TO:
 
@@ -385,18 +385,19 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
-  (and (fountain-line-upper-p)
-       (save-excursion
-         (forward-line 0)
-         (looking-at-p fountain-trans-regexp))
-       (save-excursion
-         (forward-line -1)
-         (or (bobp)
-             (fountain-blank-p)))
-       (save-excursion
-         (forward-line 1)
-         (or (eobp)
-             (fountain-blank-p)))))
+  (save-excursion
+    (save-restriction
+      (forward-line 0)
+      (and (let ((case-fold-search nil))
+             (looking-at-p fountain-trans-regexp))
+           (save-excursion
+             (forward-line -1)
+             (or (bobp)
+                 (fountain-blank-p)))
+           (save-excursion
+             (forward-line 1)
+             (or (eobp)
+                 (fountain-blank-p)))))))
 
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
