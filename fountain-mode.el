@@ -1,7 +1,7 @@
 ;;; fountain-mode.el --- Major mode for editing Fountain-formatted text files
 
 ;; Author: Paul Rankin <paul@tilk.co>
-;; Version: 0.7.2
+;; Version: 0.7.3
 ;; Keywords: wp
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -69,10 +69,10 @@ can add \"int\", \"ext\", etc. here."
   :group 'fountain)
 
 (defcustom fountain-trans-list
-  '("fade in:" "to:" "fade out" "to black")
-  "List of transition endings (case insensitive).
+  '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
+  "List of transition endings (case sensitive).
 This list is used to match the endings of transitions,
-e.g. \"to:\" will match both the following:
+e.g. \"TO:\" will match both the following:
 
 CUT TO:
 
@@ -138,9 +138,10 @@ lines.")
   "Regular expression for matching forced sluglines.")
 
 (defconst fountain-character-regexp
-  (rx (zero-or-more blank)
-      (group (one-or-more (not (any lower "(" "\n"))))
-      (group (zero-or-one "(" (zero-or-more not-newline))))
+  (rx (group (zero-or-more blank))
+      (group (one-or-more (not (any lower "<>\\\n"))))
+      (group (zero-or-more blank))
+      line-end)
   "Regular expression for matching characters.")
 
 (defvar fountain-paren-regexp
@@ -308,108 +309,115 @@ A line is blank if it is empty, or consists of a comment,
 section, synopsis or is within a boneyard."
   (cond ((fountain-line-empty-p))
         ((fountain-boneyard-p))
-        ((fountain-note-p))
         ((fountain-section-p))
-        ((fountain-synopsis-p))))
+        ((fountain-synopsis-p))
+        ((fountain-note-p))))
 
 (defun fountain-slugline-p ()
   "Return non-nil if line at point is a slugline."
   (save-excursion
-    (forward-line 0)
-    (and (or (bobp)
-             (save-excursion
-               (forward-line -1)
-               (fountain-blank-p)))
-         (save-excursion
-           (forward-line 1)
-           (or (eobp)
-               (fountain-blank-p)))
-         (looking-at-p fountain-slugline-regexp))))
+    (save-restriction
+      (forward-line 0)
+      (and (or (bobp)
+               (save-excursion
+                 (forward-line -1)
+                 (fountain-blank-p)))
+           (save-excursion
+             (forward-line 1)
+             (or (eobp)
+                 (fountain-blank-p)))
+           (looking-at-p fountain-slugline-regexp)))))
 
 (defun fountain-dot-slugline-p ()
   "Return non-nil if line at point is a forced slugline."
   (save-excursion
-    (forward-line 0)
-    (and (or (bobp)
-             (save-excursion
-               (forward-line -1)
-               (fountain-blank-p)))
-         (save-excursion
-           (forward-line 1)
-           (or (eobp)
-               (fountain-blank-p)))
-         (looking-at-p fountain-dot-slugline-regexp))))
+    (save-restriction
+      (forward-line 0)
+      (and (or (bobp)
+               (save-excursion
+                 (forward-line -1)
+                 (fountain-blank-p)))
+           (save-excursion
+             (forward-line 1)
+             (or (eobp)
+                 (fountain-blank-p)))
+           (looking-at-p fountain-dot-slugline-regexp)))))
 
 (defun fountain-character-p ()
   "Return non-nil if line at point is a character name."
-  (unless (or (fountain-line-empty-p)
-              (fountain-slugline-p))
-    (and (let ((str (car (split-string (fountain-get-line) "("))))
-           (string= (upcase str) str))
-         (save-excursion
-           (forward-line 0)
-           (and (or (bobp)
-                    (save-excursion
-                      (forward-line -1)
-                      (fountain-line-empty-p)))
-                (save-excursion
-                  (forward-line 1)
-                  (unless (eobp)
-                    (not (fountain-blank-p)))))))))
+  (save-excursion
+    (save-restriction
+      (forward-line 0)
+      (and (let ((case-fold-search nil))
+             (looking-at-p fountain-character-regexp))
+           (or (bobp)
+               (save-excursion
+                 (forward-line -1)
+                 (fountain-line-empty-p)))
+           (save-excursion
+             (forward-line 1)
+             (unless (eobp)
+               (not (fountain-blank-p))))))))
 
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
-  (unless (or (fountain-blank-p)
+  (unless (or (fountain-line-empty-p)
               (fountain-paren-p))
     (save-excursion
-      (forward-line -1)
-        (or (fountain-character-p)
-            (fountain-paren-p)
-            (fountain-dialogue-p))))))
+      (save-restriction
+        (forward-line 0)
+        (unless (bobp)
+          (forward-line -1)
+          (or (fountain-character-p)
+              (fountain-paren-p)
+              (fountain-dialogue-p)))))))
 
 (defun fountain-paren-p ()
   "Return non-nil if line at point is a paranthetical."
   (save-excursion
-    (forward-line 0)
-    (and (looking-at-p fountain-paren-regexp)
-         (forward-line -1)
-         (unless (bobp)
-           (or (fountain-character-p)
-               (fountain-dialogue-p))))))
+    (save-restriction
+      (forward-line 0)
+      (and (looking-at-p fountain-paren-regexp)
+           (forward-line -1)
+           (unless (bobp)
+             (or (fountain-character-p)
+                 (fountain-dialogue-p)))))))
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
-  (and (fountain-line-upper-p)
-       (save-excursion
-         (forward-line 0)
-         (looking-at-p fountain-trans-regexp))
-       (save-excursion
-         (forward-line -1)
-         (or (bobp)
-             (fountain-blank-p)))
-       (save-excursion
-         (forward-line 1)
-         (or (eobp)
-             (fountain-blank-p)))))
+  (save-excursion
+    (save-restriction
+      (forward-line 0)
+      (and (let ((case-fold-search nil))
+             (looking-at-p fountain-trans-regexp))
+           (save-excursion
+             (forward-line -1)
+             (or (bobp)
+                 (fountain-blank-p)))
+           (save-excursion
+             (forward-line 1)
+             (or (eobp)
+                 (fountain-blank-p)))))))
 
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
   (save-excursion
-    (forward-line 0)
-    (let* ((marker (point))
-           (paragraph-beginning (car (fountain-get-paragraph-bounds)))
-           (paragraph-end (cdr (fountain-get-paragraph-bounds)))
-           (end (search-forward "]]" paragraph-end t))
-           (start (search-backward "[[" paragraph-beginning t)))
-      (unless (or (null start)
-                  (null end))
-        (and (goto-char end)
-             (looking-at-p (rx (zero-or-more blank) line-end))
-             (goto-char start)
-             (forward-line 0)
-             (looking-at-p fountain-note-regexp)
-             (>= marker start)
-             (<= marker end))))))
+    (save-restriction
+      (forward-line 0)
+      (let* ((marker (point))
+             (paragraph-end (cdr (fountain-get-paragraph-bounds)))
+             (paragraph-beginning (car (fountain-get-paragraph-bounds)))
+             (end (search-forward "]]" paragraph-end t))
+             (start (search-backward "[[" paragraph-beginning t)))
+        (unless (or (null start)
+                    (null end))
+          (and (goto-char end)
+               (looking-at-p (rx (zero-or-more blank) line-end))
+               (goto-char start)
+               (forward-line 0)
+               (looking-at-p fountain-note-regexp)
+               (>= marker start)
+               (<= marker end)))))))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
@@ -435,17 +443,23 @@ section, synopsis or is within a boneyard."
   "Refresh format between START and END."
   (save-excursion
     (save-restriction
-      (let ((start
-             (progn (goto-char start)
-                    (car (fountain-get-paragraph-bounds))))
-            (end
+      (let ((end
              (progn (goto-char end)
-                    (cdr (fountain-get-paragraph-bounds)))))
+                    (cdr (fountain-get-paragraph-bounds))))
+            (start
+             (progn (goto-char start)
+                    (car (fountain-get-paragraph-bounds)))))
         (goto-char start)
         (while (< (point) end)
-          (if fountain-indent-elements
-              (fountain-indent-refresh)
-            (fountain-indent-add 0))
+          (cond ((fountain-character-p)
+                 (fountain-indent-add fountain-align-column-character))
+                ((fountain-paren-p)
+                 (fountain-indent-add fountain-align-column-paren))
+                ((fountain-dialogue-p)
+                 (fountain-indent-add fountain-align-column-dialogue))
+                ((fountain-trans-p)
+                 (fountain-indent-add fountain-align-column-trans))
+                ((fountain-indent-add 0)))
           (forward-line 1))))))
 
 ;;; Interaction ================================================================
