@@ -451,15 +451,9 @@ section, synopsis or is within a boneyard."
                     (car (fountain-get-paragraph-bounds)))))
         (goto-char start)
         (while (< (point) end)
-          (cond ((fountain-character-p)
-                 (fountain-indent-add fountain-align-column-character))
-                ((fountain-paren-p)
-                 (fountain-indent-add fountain-align-column-paren))
-                ((fountain-dialogue-p)
-                 (fountain-indent-add fountain-align-column-dialogue))
-                ((fountain-trans-p)
-                 (fountain-indent-add fountain-align-column-trans))
-                ((fountain-indent-add 0)))
+          (if fountain-indent-elements
+              (fountain-indent-refresh)
+            (fountain-indent-add 0))
           (forward-line 1))))))
 
 ;;; Interaction ================================================================
