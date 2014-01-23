@@ -401,21 +401,22 @@ section, synopsis or is within a boneyard."
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
   (save-excursion
-    (forward-line 0)
-    (let* ((marker (point))
-           (paragraph-end (cdr (fountain-get-paragraph-bounds)))
-           (paragraph-beginning (car (fountain-get-paragraph-bounds)))
-           (end (search-forward "]]" paragraph-end t))
-           (start (search-backward "[[" paragraph-beginning t)))
-      (unless (or (null start)
-                  (null end))
-        (and (goto-char end)
-             (looking-at-p (rx (zero-or-more blank) line-end))
-             (goto-char start)
-             (forward-line 0)
-             (looking-at-p fountain-note-regexp)
-             (>= marker start)
-             (<= marker end))))))
+    (save-restriction
+      (forward-line 0)
+      (let* ((marker (point))
+             (paragraph-end (cdr (fountain-get-paragraph-bounds)))
+             (paragraph-beginning (car (fountain-get-paragraph-bounds)))
+             (end (search-forward "]]" paragraph-end t))
+             (start (search-backward "[[" paragraph-beginning t)))
+        (unless (or (null start)
+                    (null end))
+          (and (goto-char end)
+               (looking-at-p (rx (zero-or-more blank) line-end))
+               (goto-char start)
+               (forward-line 0)
+               (looking-at-p fountain-note-regexp)
+               (>= marker start)
+               (<= marker end)))))))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
@@ -428,24 +429,25 @@ section, synopsis or is within a boneyard."
 (defun fountain-indent-refresh (start end length)
   "Refresh indentation properties of restriction."
   (save-excursion
-    (let ((end
-           (progn (goto-char end)
-                  (cdr (fountain-get-paragraph-bounds))))
-          (start
-           (progn (goto-char start)
-                  (car (fountain-get-paragraph-bounds)))))
-      (goto-char start)
-      (while (< (point) end)
-        (cond ((fountain-character-p)
-               (fountain-indent-add fountain-align-column-character))
-              ((fountain-paren-p)
-               (fountain-indent-add fountain-align-column-paren))
-              ((fountain-dialogue-p)
-               (fountain-indent-add fountain-align-column-dialogue))
-              ((fountain-trans-p)
-               (fountain-indent-add fountain-align-column-trans))
-              ((fountain-indent-add 0)))
-        (forward-line 1)))))
+    (save-restriction
+      (let ((end
+             (progn (goto-char end)
+                    (cdr (fountain-get-paragraph-bounds))))
+            (start
+             (progn (goto-char start)
+                    (car (fountain-get-paragraph-bounds)))))
+        (goto-char start)
+        (while (< (point) end)
+          (cond ((fountain-character-p)
+                 (fountain-indent-add fountain-align-column-character))
+                ((fountain-paren-p)
+                 (fountain-indent-add fountain-align-column-paren))
+                ((fountain-dialogue-p)
+                 (fountain-indent-add fountain-align-column-dialogue))
+                ((fountain-trans-p)
+                 (fountain-indent-add fountain-align-column-trans))
+                ((fountain-indent-add 0)))
+          (forward-line 1))))))
 
 ;;; Interaction ================================================================
 
