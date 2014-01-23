@@ -365,9 +365,9 @@ section, synopsis or is within a boneyard."
               (fountain-paren-p))
     (save-excursion
       (save-restriction
-        (forward-line -1)                 ; FIXME character at bobp
-        (unless (or (fountain-line-empty-p)
-                    (bobp))
+        (forward-line 0)
+        (unless (bobp)
+          (forward-line -1)
           (or (fountain-character-p)
               (fountain-paren-p)
               (fountain-dialogue-p)))))))
