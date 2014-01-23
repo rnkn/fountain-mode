@@ -459,8 +459,9 @@ section, synopsis or is within a boneyard."
           (if fountain-indent-elements
               (fountain-indent-refresh)
             (fountain-indent-add 0))
-          (when (and (fountain-slugline-p)
-                     fountain-upcase-sluglines)
+          (when (and fountain-upcase-sluglines
+                     (fountain-slugline-p)
+                     (not (fountain-line-upper-p)))
             (fountain-upcase-line))
           (forward-line 1))))))
 
