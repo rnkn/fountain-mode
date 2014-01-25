@@ -106,6 +106,11 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-upcase-sluglines t
+  "Automatically upcase sluglines."
+  :type 'boolean
+  :group 'fountain)
+
 (defcustom fountain-dot-slugline-hierarchy t
   "If non-nil, forced sluglines will take a lower hierarchy.
 When writing, it is usually preferable to treat forced sluglines
@@ -436,27 +441,38 @@ section, synopsis or is within a boneyard."
     (put-text-property (line-beginning-position) (line-end-position)
                        'wrap-prefix `(space :align-to ,column))))
 
-(defun fountain-indent-refresh (start end length)
-  "Refresh indentation properties of restriction."
+(defun fountain-indent-refresh ()
+  "Refresh indentation properties at point."
+  (cond ((fountain-character-p)
+         (fountain-indent-add fountain-align-column-character))
+        ((fountain-paren-p)
+         (fountain-indent-add fountain-align-column-paren))
+        ((fountain-dialogue-p)
+         (fountain-indent-add fountain-align-column-dialogue))
+        ((fountain-trans-p)
+         (fountain-indent-add fountain-align-column-trans))
+        ((fountain-indent-add 0))))
+
+(defun fountain-format-refresh (start end length)
+  "Refresh format between START and END."
   (save-excursion
-    (let ((end
-           (progn (goto-char end)
-                  (cdr (fountain-get-paragraph-bounds))))
-          (start
-           (progn (goto-char start)
-                  (car (fountain-get-paragraph-bounds)))))
-      (goto-char start)
-      (while (< (point) end)
-        (cond ((fountain-character-p)
-               (fountain-indent-add fountain-align-column-character))
-              ((fountain-paren-p)
-               (fountain-indent-add fountain-align-column-paren))
-              ((fountain-dialogue-p)
-               (fountain-indent-add fountain-align-column-dialogue))
-              ((fountain-trans-p)
-               (fountain-indent-add fountain-align-column-trans))
-              ((fountain-indent-add 0)))
-        (forward-line 1)))))
+    (save-restriction
+      (let ((end
+             (progn (goto-char end)
+                    (cdr (fountain-get-paragraph-bounds))))
+            (start
+             (progn (goto-char start)
+                    (car (fountain-get-paragraph-bounds)))))
+        (goto-char start)
+        (while (< (point) end)
+          (if fountain-indent-elements
+              (fountain-indent-refresh)
+            (fountain-indent-add 0))
+          (when (and fountain-upcase-sluglines
+                     (fountain-slugline-p)
+                     (not (fountain-line-upper-p)))
+            (fountain-upcase-line))
+          (forward-line 1))))))
 
 ;;; Interaction ================================================================
 
@@ -526,9 +542,8 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-nonprinting-face)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
-  (when fountain-indent-elements
-    (fountain-indent-refresh (point-min) (point-max) nil)
-    (add-hook 'after-change-functions 'fountain-indent-refresh nil t)))
+  (fountain-format-refresh (point-min) (point-max) nil)
+  (add-hook 'after-change-functions 'fountain-format-refresh nil t))
 
 (provide 'fountain-mode)
 
