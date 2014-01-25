@@ -1,7 +1,7 @@
 ;;; fountain-mode.el --- Major mode for editing Fountain-formatted text files
 
 ;; Author: Paul Rankin <paul@tilk.co>
-;; Version: 0.8.0
+;; Version: 0.8.1
 ;; Keywords: wp
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -515,7 +515,7 @@ section, synopsis or is within a boneyard."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-z") 'fountain-note-dwim)
-    (define-key map (kbd "C-c C-x m") 'fountain-metadata-insert)
+    (define-key map (kbd "C-c C-x i") 'fountain-metadata-insert)
     map)
   "Mode map for `fountain-mode'.")
 
