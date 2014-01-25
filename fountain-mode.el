@@ -266,11 +266,13 @@ lines.")
 
 (defun fountain-get-paragraph-bounds ()
   "Return the beginning and end points of paragraph at point."
-  (let ((paragraph-beginning
-         (save-excursion (forward-paragraph -1) (point)))
-        (paragraph-end
-         (save-excursion (forward-paragraph 1) (point))))
-    (cons paragraph-beginning paragraph-end)))
+  (save-restriction
+    (widen)
+    (let ((paragraph-beginning
+           (save-excursion (forward-paragraph -1) (point)))
+          (paragraph-end
+           (save-excursion (forward-paragraph 1) (point))))
+      (cons paragraph-beginning paragraph-end))))
 
 (defun fountain-trim-whitespace (str)
   "Trim the leading and trailing whitespace of STR."
@@ -317,6 +319,7 @@ section, synopsis or is within a boneyard."
   "Return non-nil if line at point is a slugline."
   (save-excursion
     (save-restriction
+      (widen)
       (forward-line 0)
       (and (or (bobp)
                (save-excursion
@@ -332,6 +335,7 @@ section, synopsis or is within a boneyard."
   "Return non-nil if line at point is a forced slugline."
   (save-excursion
     (save-restriction
+      (widen)
       (forward-line 0)
       (and (or (bobp)
                (save-excursion
@@ -347,6 +351,7 @@ section, synopsis or is within a boneyard."
   "Return non-nil if line at point is a character name."
   (save-excursion
     (save-restriction
+      (widen)
       (forward-line 0)
       (and (let ((case-fold-search nil))
              (looking-at-p fountain-character-regexp))
@@ -365,6 +370,7 @@ section, synopsis or is within a boneyard."
               (fountain-paren-p))
     (save-excursion
       (save-restriction
+        (widen)
         (forward-line 0)
         (unless (bobp)
           (forward-line -1)
@@ -376,6 +382,7 @@ section, synopsis or is within a boneyard."
   "Return non-nil if line at point is a paranthetical."
   (save-excursion
     (save-restriction
+      (widen)
       (forward-line 0)
       (and (looking-at-p fountain-paren-regexp)
            (forward-line -1)
@@ -387,6 +394,7 @@ section, synopsis or is within a boneyard."
   "Return non-nil if line at point is a transition."
   (save-excursion
     (save-restriction
+      (widen)
       (forward-line 0)
       (and (let ((case-fold-search nil))
              (looking-at-p fountain-trans-regexp))
@@ -403,6 +411,7 @@ section, synopsis or is within a boneyard."
   "Return non-nil if line at point is within a note."
   (save-excursion
     (save-restriction
+      (widen)
       (forward-line 0)
       (let* ((marker (point))
              (paragraph-end (cdr (fountain-get-paragraph-bounds)))
@@ -430,25 +439,24 @@ section, synopsis or is within a boneyard."
 (defun fountain-indent-refresh (start end length)
   "Refresh indentation properties of restriction."
   (save-excursion
-    (save-restriction
-      (let ((end
-             (progn (goto-char end)
-                    (cdr (fountain-get-paragraph-bounds))))
-            (start
-             (progn (goto-char start)
-                    (car (fountain-get-paragraph-bounds)))))
-        (goto-char start)
-        (while (< (point) end)
-          (cond ((fountain-character-p)
-                 (fountain-indent-add fountain-align-column-character))
-                ((fountain-paren-p)
-                 (fountain-indent-add fountain-align-column-paren))
-                ((fountain-dialogue-p)
-                 (fountain-indent-add fountain-align-column-dialogue))
-                ((fountain-trans-p)
-                 (fountain-indent-add fountain-align-column-trans))
-                ((fountain-indent-add 0)))
-          (forward-line 1))))))
+    (let ((end
+           (progn (goto-char end)
+                  (cdr (fountain-get-paragraph-bounds))))
+          (start
+           (progn (goto-char start)
+                  (car (fountain-get-paragraph-bounds)))))
+      (goto-char start)
+      (while (< (point) end)
+        (cond ((fountain-character-p)
+               (fountain-indent-add fountain-align-column-character))
+              ((fountain-paren-p)
+               (fountain-indent-add fountain-align-column-paren))
+              ((fountain-dialogue-p)
+               (fountain-indent-add fountain-align-column-dialogue))
+              ((fountain-trans-p)
+               (fountain-indent-add fountain-align-column-trans))
+              ((fountain-indent-add 0)))
+        (forward-line 1)))))
 
 ;;; Interaction ================================================================
 
