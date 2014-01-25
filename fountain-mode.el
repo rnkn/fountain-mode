@@ -271,13 +271,11 @@ lines.")
 
 (defun fountain-get-paragraph-bounds ()
   "Return the beginning and end points of paragraph at point."
-  (save-restriction
-    (widen)
-    (let ((paragraph-beginning
-           (save-excursion (forward-paragraph -1) (point)))
-          (paragraph-end
-           (save-excursion (forward-paragraph 1) (point))))
-      (cons paragraph-beginning paragraph-end))))
+  (let ((paragraph-beginning
+         (save-excursion (forward-paragraph -1) (point)))
+        (paragraph-end
+         (save-excursion (forward-paragraph 1) (point))))
+    (cons paragraph-beginning paragraph-end)))
 
 (defun fountain-trim-whitespace (str)
   "Trim the leading and trailing whitespace of STR."
