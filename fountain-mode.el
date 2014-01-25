@@ -455,12 +455,12 @@ section, synopsis or is within a boneyard."
   "Refresh format between START and END."
   (save-excursion
     (save-restriction
-      (let ((end
-             (progn (goto-char end)
-                    (cdr (fountain-get-paragraph-bounds))))
-            (start
+      (let ((start
              (progn (goto-char start)
-                    (car (fountain-get-paragraph-bounds)))))
+                    (car (fountain-get-paragraph-bounds))))
+            (end
+             (progn (goto-char end)
+                    (cdr (fountain-get-paragraph-bounds)))))
         (goto-char start)
         (while (< (point) end)
           (if fountain-indent-elements
@@ -470,7 +470,8 @@ section, synopsis or is within a boneyard."
                      (fountain-slugline-p)
                      (not (fountain-line-upper-p)))
             (fountain-upcase-line))
-          (forward-line 1))))))
+          (forward-line 1))
+          (font-lock-fontify-region start end)))))
 
 ;;; Interaction ================================================================
 
