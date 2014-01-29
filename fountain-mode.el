@@ -106,11 +106,6 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-;; (defcustom fountain-upcase-sluglines t
-;;   "Automatically upcase sluglines."
-;;   :type 'boolean
-;;   :group 'fountain)
-
 (defcustom fountain-dot-slugline-hierarchy t
   "If non-nil, forced sluglines will take a lower hierarchy.
 When writing, it is usually preferable to treat forced sluglines
@@ -466,12 +461,8 @@ section, synopsis or is within a boneyard."
           (if fountain-indent-elements
               (fountain-indent-refresh)
             (fountain-indent-add 0))
-          ;; (when (and fountain-upcase-sluglines
-          ;;            (fountain-slugline-p)
-          ;;            (not (fountain-line-upper-p)))
-          ;;   (fountain-upcase-line))
           (forward-line 1))
-          (font-lock-fontify-region start end)))))
+        (font-lock-fontify-region start end)))))
 
 ;;; Interaction ================================================================
 
