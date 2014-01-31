@@ -55,15 +55,15 @@ Contact:
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-slugline-prefix-list
+(defcustom fountain-sceneheading-prefix-list
   '("int." "ext." "i/e." "est.")
-  "List of slugline prefixes (case insensitive).
-The default list requires that each slugline prefix be appended
+  "List of scene heading prefixes (case insensitive).
+The default list requires that each scene heading prefix be appended
 with a dot, like so:
 
 INT. HOUSE - DAY
 
-If you prefer not to append a dot to your slugline prefixes, you
+If you prefer not to append a dot to your scene heading prefixes, you
 can add \"int\", \"ext\", etc. here."
   :type '(repeat (string :tag "Prefix"))
   :group 'fountain)
@@ -106,11 +106,11 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-dot-slugline-hierarchy t
-  "If non-nil, forced sluglines will take a lower hierarchy.
-When writing, it is usually preferable to treat forced sluglines
+(defcustom fountain-dot-sceneheading-hierarchy t
+  "If non-nil, forced scene headings will take a lower hierarchy.
+When writing, it is usually preferable to treat forced scene headings
 as constituents of the larger scene. If you prefer to treat
-forced sluglines like regular sluglines, set this to nil."
+forced scene headings like regular scene headings, set this to nil."
   :type 'boolean
   :group 'fountain)
 
@@ -122,20 +122,20 @@ forced sluglines like regular sluglines, set this to nil."
       line-end)
   "Regular expression for matching an empty line.")
 
-(defvar fountain-slugline-regexp
+(defvar fountain-sceneheading-regexp
   (rx line-start
-      (eval `(or ,@fountain-slugline-prefix-list))
+      (eval `(or ,@fountain-sceneheading-prefix-list))
       (one-or-more " ")
       (zero-or-more not-newline))
-  "Regular expression for matching sluglines.
-Requires `fountain-slugline-p' for preceding and succeeding blank
+  "Regular expression for matching scene headings.
+Requires `fountain-sceneheading-p' for preceding and succeeding blank
 lines.")
 
-(defconst fountain-dot-slugline-regexp
+(defconst fountain-dot-sceneheading-regexp
   (rx line-start
       (group "." word-start)
       (group (zero-or-more not-newline)))
-  "Regular expression for matching forced sluglines.")
+  "Regular expression for matching forced scene headings.")
 
 (defconst fountain-character-regexp
   (rx (group (zero-or-more blank))
@@ -200,14 +200,14 @@ lines.")
   "Faces used in Fountain Mode"
   :group 'fountain)
 
-(defvar fountain-slugline-face 'fountain-slugline-face
-  "Face name to use for sluglines.")
+(defvar fountain-sceneheading-face 'fountain-sceneheading-face
+  "Face name to use for scene headings.")
 
-(defvar fountain-dot-slugline-face
-  (if fountain-dot-slugline-hierarchy
-      'fountain-dot-slugline-face
-    'fountain-slugline-face)
-  "Face name to use for forced sluglines.")
+(defvar fountain-dot-sceneheading-face
+  (if fountain-dot-sceneheading-hierarchy
+      'fountain-dot-sceneheading-face
+    'fountain-sceneheading-face)
+  "Face name to use for forced scene headings.")
 
 (defvar fountain-note-face 'fountain-note-face
   "Face name to use for notes.")
@@ -218,14 +218,14 @@ lines.")
 (defvar fountain-synopsis-face 'fountain-synopsis-face
   "Face name to use for synopses.")
 
-(defface fountain-slugline-face
+(defface fountain-sceneheading-face
   '((t (:weight bold :underline t)))
-  "Face for sluglines."
+  "Face for scene headings."
   :group 'fountain-faces)
 
-(defface fountain-dot-slugline-face
+(defface fountain-dot-sceneheading-face
   '((t (:weight bold)))
-  "Face for forced sluglines."
+  "Face for forced scene headings."
   :group 'fountain-faces)
 
 (defface fountain-nonprinting-face
@@ -250,8 +250,8 @@ lines.")
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
-  `((,fountain-slugline-regexp . fountain-slugline-face)
-    (,fountain-dot-slugline-regexp . fountain-dot-slugline-face)
+  `((,fountain-sceneheading-regexp . fountain-sceneheading-face)
+    (,fountain-dot-sceneheading-regexp . fountain-dot-sceneheading-face)
     (,fountain-section-regexp . fountain-section-face)
     (,fountain-synopsis-regexp . fountain-synopsis-face)
     (,fountain-note-regexp . fountain-note-face))
@@ -313,8 +313,8 @@ section, synopsis or is within a boneyard."
         ((fountain-synopsis-p))
         ((fountain-note-p))))
 
-(defun fountain-slugline-p ()
-  "Return non-nil if line at point is a slugline."
+(defun fountain-sceneheading-p ()
+  "Return non-nil if line at point is a scene heading."
   (save-excursion
     (save-restriction
       (widen)
@@ -327,10 +327,10 @@ section, synopsis or is within a boneyard."
              (forward-line 1)
              (or (eobp)
                  (fountain-blank-p)))
-           (looking-at-p fountain-slugline-regexp)))))
+           (looking-at-p fountain-sceneheading-regexp)))))
 
-(defun fountain-dot-slugline-p ()
-  "Return non-nil if line at point is a forced slugline."
+(defun fountain-dot-sceneheading-p ()
+  "Return non-nil if line at point is a forced scene heading."
   (save-excursion
     (save-restriction
       (widen)
@@ -343,7 +343,7 @@ section, synopsis or is within a boneyard."
              (forward-line 1)
              (or (eobp)
                  (fountain-blank-p)))
-           (looking-at-p fountain-dot-slugline-regexp)))))
+           (looking-at-p fountain-dot-sceneheading-regexp)))))
 
 (defun fountain-character-p ()
   "Return non-nil if line at point is a character name."
