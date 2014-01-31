@@ -426,6 +426,26 @@ section, synopsis or is within a boneyard."
                (>= marker start)
                (<= marker end)))))))
 
+(defun fountain-get-character ()
+  "Return character (line at point must be character)."
+  (fountain-trim-whitespace (car (split-string (fountain-get-line) "("))))
+
+(defun fountain-get-prior-character ()
+  "Return the prior character within the scene, nil otherwise."
+  (save-excursion
+    (save-restriction
+      (forward-line -1)
+      (while (not (or (fountain-character-p)
+                      (fountain-slugline-p)
+                      (bobp)))
+        (forward-line -1))
+      (when (fountain-character-p)
+        (fountain-get-character)))))
+
+(defun fountain-same-prior-character ()
+  "Return non-nil if character at point is identical to prior character."
+  (equal (fountain-get-character) (fountain-get-prior-character)))
+
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
   (with-silent-modifications
