@@ -431,13 +431,14 @@ section, synopsis or is within a boneyard."
 (defun fountain-get-prior-character ()
   "Return the prior character within the scene, nil otherwise."
   (save-excursion
-    (forward-line -1)
-    (unless (bobp)
-      (catch 'character                 ; FIXME could be `when'?
-        (while (not (fountain-slugline-p))
-          (if (fountain-character-p)
-              (throw 'character (fountain-get-character))
-            (forward-line -1)))))))
+    (save-restriction
+      (forward-line -1)
+      (while (not (or (fountain-character-p)
+                      (fountain-slugline-p)
+                      (bobp)))
+        (forward-line -1))
+      (when (fountain-character-p)
+        (fountain-get-character)))))
 
 (defun fountain-same-prior-character ()
   "Return non-nil if character at point is identical to prior character."
