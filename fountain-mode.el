@@ -55,7 +55,7 @@ Contact:
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-sceneheading-prefix-list
+(defcustom fountain-scene-heading-prefix-list
   '("int." "ext." "i/e." "est.")
   "List of scene heading prefixes (case insensitive).
 The default list requires that each scene heading prefix be appended
@@ -106,7 +106,7 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-dot-sceneheading-hierarchy t
+(defcustom fountain-dot-scene-heading-hierarchy t
   "If non-nil, forced scene headings will take a lower hierarchy.
 When writing, it is usually preferable to treat forced scene headings
 as constituents of the larger scene. If you prefer to treat
@@ -122,16 +122,16 @@ forced scene headings like regular scene headings, set this to nil."
       line-end)
   "Regular expression for matching an empty line.")
 
-(defvar fountain-sceneheading-regexp
+(defvar fountain-scene-heading-regexp
   (rx line-start
-      (eval `(or ,@fountain-sceneheading-prefix-list))
+      (eval `(or ,@fountain-scene-heading-prefix-list))
       (one-or-more " ")
       (zero-or-more not-newline))
   "Regular expression for matching scene headings.
-Requires `fountain-sceneheading-p' for preceding and succeeding blank
+Requires `fountain-scene-heading-p' for preceding and succeeding blank
 lines.")
 
-(defconst fountain-dot-sceneheading-regexp
+(defconst fountain-dot-scene-heading-regexp
   (rx line-start
       (group "." word-start)
       (group (zero-or-more not-newline)))
@@ -200,13 +200,13 @@ lines.")
   "Faces used in Fountain Mode"
   :group 'fountain)
 
-(defvar fountain-sceneheading-face 'fountain-sceneheading-face
+(defvar fountain-scene-heading-face 'fountain-scene-heading-face
   "Face name to use for scene headings.")
 
-(defvar fountain-dot-sceneheading-face
-  (if fountain-dot-sceneheading-hierarchy
-      'fountain-dot-sceneheading-face
-    'fountain-sceneheading-face)
+(defvar fountain-dot-scene-heading-face
+  (if fountain-dot-scene-heading-hierarchy
+      'fountain-dot-scene-heading-face
+    'fountain-scene-heading-face)
   "Face name to use for forced scene headings.")
 
 (defvar fountain-note-face 'fountain-note-face
@@ -218,12 +218,12 @@ lines.")
 (defvar fountain-synopsis-face 'fountain-synopsis-face
   "Face name to use for synopses.")
 
-(defface fountain-sceneheading-face
+(defface fountain-scene-heading-face
   '((t (:weight bold :underline t)))
   "Face for scene headings."
   :group 'fountain-faces)
 
-(defface fountain-dot-sceneheading-face
+(defface fountain-dot-scene-heading-face
   '((t (:weight bold)))
   "Face for forced scene headings."
   :group 'fountain-faces)
@@ -250,8 +250,8 @@ lines.")
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
-  `((,fountain-sceneheading-regexp . fountain-sceneheading-face)
-    (,fountain-dot-sceneheading-regexp . fountain-dot-sceneheading-face)
+  `((,fountain-scene-heading-regexp . fountain-scene-heading-face)
+    (,fountain-dot-scene-heading-regexp . fountain-dot-scene-heading-face)
     (,fountain-section-regexp . fountain-section-face)
     (,fountain-synopsis-regexp . fountain-synopsis-face)
     (,fountain-note-regexp . fountain-note-face))
@@ -313,7 +313,7 @@ section, synopsis or is within a boneyard."
         ((fountain-synopsis-p))
         ((fountain-note-p))))
 
-(defun fountain-sceneheading-p ()
+(defun fountain-scene-heading-p ()
   "Return non-nil if line at point is a scene heading."
   (save-excursion
     (save-restriction
@@ -327,9 +327,9 @@ section, synopsis or is within a boneyard."
              (forward-line 1)
              (or (eobp)
                  (fountain-blank-p)))
-           (looking-at-p fountain-sceneheading-regexp)))))
+           (looking-at-p fountain-scene-heading-regexp)))))
 
-(defun fountain-dot-sceneheading-p ()
+(defun fountain-dot-scene-heading-p ()
   "Return non-nil if line at point is a forced scene heading."
   (save-excursion
     (save-restriction
@@ -343,7 +343,7 @@ section, synopsis or is within a boneyard."
              (forward-line 1)
              (or (eobp)
                  (fountain-blank-p)))
-           (looking-at-p fountain-dot-sceneheading-regexp)))))
+           (looking-at-p fountain-dot-scene-heading-regexp)))))
 
 (defun fountain-character-p ()
   "Return non-nil if line at point is a character name."
@@ -430,21 +430,22 @@ section, synopsis or is within a boneyard."
   "Return character (line at point must be character)."
   (fountain-trim-whitespace (car (split-string (fountain-get-line) "("))))
 
-(defun fountain-get-prior-character ()
-  "Return the prior character within the scene, nil otherwise."
+(defun fountain-get-previous-character (num)
+  "Return NUMth previous character within scene, nil otherwise."
   (save-excursion
     (save-restriction
-      (forward-line -1)
-      (while (not (or (fountain-character-p)
-                      (fountain-slugline-p)
-                      (bobp)))
-        (forward-line -1))
-      (when (fountain-character-p)
-        (fountain-get-character)))))
+      (dotimes (var num (when (fountain-character-p)
+                          (fountain-get-character)))
+        (unless (fountain-scene-heading-p)
+          (forward-line -1)
+          (while (not (or (fountain-character-p)
+                          (fountain-scene-heading-p)
+                          (bobp)))
+            (forward-line -1)))))))
 
-(defun fountain-same-prior-character ()
+(defun fountain-same-previous-character ()
   "Return non-nil if character at point is identical to prior character."
-  (equal (fountain-get-character) (fountain-get-prior-character)))
+  (equal (fountain-get-character) (fountain-get-previous-character 1)))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
