@@ -54,7 +54,7 @@ author: ${fullname}
 draft date: ${longtime}
 contact: ${email}
 "
-  "Metadata template. See `fountain-template-alist'."
+  "Metadata template. See `fountain-format-template'."
   :type 'string
   :group 'fountain)
 
@@ -146,7 +146,7 @@ option to non-nil."
 
 (defcustom fountain-note-template
   "${time} - ${fullname}: "
-  "Template for inserting notes. See `fountain-template-alist'.
+  "Template for inserting notes. See `fountain-format-template'.
 
 The default (\"${time} - ${fullname}: \") will insert something
 similar too:
@@ -154,19 +154,6 @@ similar too:
 \[\[ 01/20/14 - Alan Smithee:  \]\]"
   :type 'string
   :group 'fountain)
-
-;;; Constants ==================================================================
-
-(defconst fountain-template-alist      ; FIXME returns fixed vars
-  '(("filename" . (file-name-base))   ; FIXME returns "fountain-mode"
-    ("longtime" . (format-time-string fountain-long-time-format))
-    ("time" . (format-time-string fountain-short-time-format))
-    ("fullname" . user-full-name)
-    ("nick" . (capitalize user-login-name))
-    ("email" . user-mail-address)
-    ("uuid" . (fountain-uuid)))
-  "Template expansion alist.
-Used for `fountain-note-template' and `fountain-metadata-template'.")
 
 ;;; Element Regular Expressions ================================================
 
@@ -564,7 +551,7 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
-If prefixed with ARG, only insert note delimiters (\"[[\" \"]]\")."
+If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]]\")."
   (interactive "P")
   (let ((comment-start "[[")
         (comment-end "]]"))
@@ -578,7 +565,14 @@ If prefixed with ARG, only insert note delimiters (\"[[\" \"]]\")."
         (insert (fountain-format-template fountain-note-template))))))
 
 (defun fountain-format-template (template)
-  "Format TEMPLATE accord to Fountain escapes."
+  "Format TEMPLATE according to the following list.
+
+  ${longtime}   Long date format (defined in `fountain-long-time-format')
+  ${time}       Short date format (defined in `fountain-short-time-format')
+  ${fullname}   User full name (defined in `user-full-name')
+  ${nick}       User first name (defined in `user-login-name')
+  ${email}      User email (defined in `user-mail-address')
+  ${uuid}       Insert a UUID (defined in `fountain-uuid-function')"
   (s-format template 'aget
             `(("longtime" . ,(format-time-string fountain-long-time-format))
               ("time" . ,(format-time-string fountain-short-time-format))
