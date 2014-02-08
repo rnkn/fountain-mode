@@ -114,6 +114,20 @@ forced scene headings like regular scene headings, set this to nil."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-switch-comment-syntax nil
+  "If non-nil, use \"//\" as default comment syntax.
+Fountain Mode supports two syntax for commenting (boneyard):
+
+/* this text is in a boneyard */
+
+// this text is
+// also in a boneyard
+
+The default is the former; if you prefer the latter, set this
+option to non-nil."
+  :type 'boolean
+  :group 'fountain)
+
 ;;; Element Regular Expressions ================================================
 
 (defconst fountain-line-empty-regexp
@@ -535,8 +549,9 @@ section, synopsis or is within a boneyard."
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
-    (modify-syntax-entry ?\/ ". 14" syntax)
-    (modify-syntax-entry ?* ". 23" syntax)
+    (modify-syntax-entry ?/ ". 124" syntax)
+    (modify-syntax-entry ?* ". 23b" syntax)
+    (modify-syntax-entry ?\n ">" syntax)
     syntax)
   "Syntax table for `fountain-mode'.")
 
@@ -548,8 +563,10 @@ section, synopsis or is within a boneyard."
 For more information on the Fountain markup format, visit
 <http://fountain.io>."
   :group 'fountain
-  (set (make-local-variable 'comment-start) "/*")
-  (set (make-local-variable 'comment-end) "*/")
+  (set (make-local-variable 'comment-start)
+       (if fountain-switch-comment-syntax "//" "/*"))
+  (set (make-local-variable 'comment-end)
+       (if fountain-switch-comment-syntax "" "/*"))
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-nonprinting-face)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
