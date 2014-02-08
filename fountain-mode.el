@@ -373,7 +373,7 @@ section, synopsis or is within a boneyard."
   (save-excursion
     (save-restriction
       (widen)
-      (when (fountain-get-character)
+      (when (s-present? (fountain-get-character))
         (let ((s (fountain-get-character)))
           (and (or (s-uppercase? s)
                    (s-starts-with? "@" s))
