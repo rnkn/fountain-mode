@@ -16,15 +16,17 @@ The following features are supported:
 - auto-indentation for character, parenthetical, dialogue and transition
   elements (display only, does not modify file contents)
 - `S-RET` to upcase the line and insert a newline
-- `C-c C-z` to insert a note (prefix with `C-u` to insert with UUID)
-- boneyard (followers standard commenting behavior, e.g. `M-;`)
+- `C-c C-z` to insert a note based on template
+- `C-c C-x i` to insert metadata based on template
+- both Fountain boneyard syntaxes (follows standard commenting behavior,
+  e.g. `M-;`)
 - customizable indentation align-to columns, slugline prefixes,
   transition suffixes, and faces
 
 The following features are not yet supported:
 
 - syntax highlighting for all other elements, including emphasis
-- metadata
+- reading metadata
 - dual dialogue
 - exporting
 
@@ -47,8 +49,11 @@ Requirements
 ------------
 
 - Emacs 24.3 or later (not tested on earlier versions)
+- [s.el][], the long lost Emacs string manipulation library.
 - the CLT `uuidgen` is required to insert UUIDs (usually pre-installed
   on OS X and Linux)
+
+[s.el]: https://github.com/magnars/s.el "s.el"
 
 Installation
 ------------
@@ -58,15 +63,11 @@ Fountain Mode is available through [MELPA][]
 Alternately, put `fountain-mode.el` in your `load-path` and add the
 following line to your `.emacs` or `init.el` file:
 
-```elisp
-(require 'fountain-mode)
-```
+    (require 'fountain-mode)
 
 To load Fountain Mode whenever you open a `.fountain` file, also add the
 following:
 
-```elisp
-(add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
-```
+    (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
 [MELPA]: http://melpa.milkbox.net "MELPA"
