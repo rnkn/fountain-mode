@@ -235,8 +235,6 @@ lines.")
 
 ;;; Faces ======================================================================
 
-(require 'font-lock)
-
 (defgroup fountain-faces nil
   "Faces used in Fountain Mode"
   :group 'fountain)
