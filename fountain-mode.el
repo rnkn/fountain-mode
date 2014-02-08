@@ -380,17 +380,18 @@ section, synopsis or is within a boneyard."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
-      (and (let ((case-fold-search nil))
-             (looking-at-p fountain-character-regexp))
-           (or (bobp)
+      (when (fountain-get-character)
+        (let ((s (fountain-get-character)))
+          (and (or (s-uppercase? s)
+                   (s-starts-with? "@" s))
+               (or (bobp)
+                   (save-excursion
+                     (forward-line -1)
+                     (fountain-line-empty-p)))
                (save-excursion
-                 (forward-line -1)
-                 (fountain-line-empty-p)))
-           (save-excursion
-             (forward-line 1)
-             (unless (eobp)
-               (not (fountain-blank-p))))))))
+                 (forward-line 1)
+                 (unless (eobp)
+                   (not (fountain-blank-p))))))))))
 
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
@@ -413,8 +414,8 @@ section, synopsis or is within a boneyard."
       (widen)
       (forward-line 0)
       (and (looking-at-p fountain-paren-regexp)
-           (forward-line -1)
            (unless (bobp)
+             (forward-line -1)
              (or (fountain-character-p)
                  (fountain-dialogue-p)))))))
 
@@ -458,13 +459,14 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-get-character ()
   "Return character (line at point must be character)."
-  (s-trim (car (s-slice-at "(" (fountain-get-line)))))
+  (when (s-present? (fountain-get-line))
+    (s-trim (car (s-slice-at "(" (fountain-get-line))))))
 
-(defun fountain-get-previous-character (num)
-  "Return NUMth previous character within scene, nil otherwise."
+(defun fountain-get-previous-character (n)
+  "Return Nth previous character within scene, nil otherwise."
   (save-excursion
     (save-restriction
-      (dotimes (var num (when (fountain-character-p)
+      (dotimes (var n (when (fountain-character-p)
                           (fountain-get-character)))
         (unless (fountain-scene-heading-p)
           (forward-line -1)
@@ -535,8 +537,8 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-uuid ()
   "Return a lowercase 8-digit UUID."
-  (let ((str (downcase (shell-command-to-string "uuidgen"))))
-    (car (split-string str "-"))))
+  (let ((s (downcase (shell-command-to-string "uuidgen"))))
+    (car (split-string s "-"))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
