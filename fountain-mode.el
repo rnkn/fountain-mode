@@ -48,7 +48,7 @@
 ;;; Customizable Options =======================================================
 
 (defcustom fountain-metadata-template
-  "title: ${filename}
+  "title:
 credit: written by
 author: ${fullname}
 draft date: ${longtime}
@@ -157,13 +157,14 @@ similar too:
 
 ;;; Constants ==================================================================
 
-(defconst fountain-template-alist
-  `(("longtime" . ,(format-time-string fountain-long-time-format))
-    ("time" . ,(format-time-string fountain-short-time-format))
-    ("fullname" . ,user-full-name)
-    ("nick" . ,(capitalize user-login-name))
-    ("email" . ,user-mail-address)
-    ("uuid" . ,(fountain-uuid)))
+(defconst fountain-template-alist      ; FIXME returns fixed vars
+  '(("filename" . (file-name-base))   ; FIXME returns "fountain-mode"
+    ("longtime" . (format-time-string fountain-long-time-format))
+    ("time" . (format-time-string fountain-short-time-format))
+    ("fullname" . user-full-name)
+    ("nick" . (capitalize user-login-name))
+    ("email" . user-mail-address)
+    ("uuid" . (fountain-uuid)))
   "Template expansion alist.
 Used for `fountain-note-template' and `fountain-metadata-template'.")
 
@@ -569,21 +570,30 @@ If prefixed with ARG, only insert note delimiters (\"[[\" \"]]\")."
         (comment-end "]]"))
     (if arg
         (comment-dwim nil)
-      (let ((str (s-format fountain-note-template
-                           'aget fountain-template-alist)))
+      (progn
         (unless (fountain-line-empty-p)
           (forward-paragraph 1))
         (open-line 1)
         (comment-indent)
-        (insert str)))))
+        (insert (fountain-format-template fountain-note-template))))))
+
+(defun fountain-format-template (template)
+  "Format TEMPLATE accord to Fountain escapes."
+  (s-format template 'aget
+            `(("longtime" . ,(format-time-string fountain-long-time-format))
+              ("time" . ,(format-time-string fountain-short-time-format))
+              ("fullname" . ,user-full-name)
+              ("nick" . ,(capitalize user-login-name))
+              ("email" . ,user-mail-address)
+              ("uuid" . ,(fountain-uuid)))))
 
 (defun fountain-insert-metadata ()
   "Insert the metadata template at the beginning of file."
   (interactive)
+  (widen)
+  (goto-char (point-min))
   (save-excursion
-    (save-restriction
-      (goto-char (point-min))
-      (insert fountain-metadata-template "\n"))))
+    (insert (fountain-format-template fountain-metadata-template) "\n")))
 
 ;;; Mode Map ===================================================================
 
