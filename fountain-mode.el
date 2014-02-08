@@ -311,11 +311,6 @@ lines.")
          (save-excursion (forward-paragraph 1) (point))))
     (cons paragraph-beginning paragraph-end)))
 
-(defun fountain-line-upper-p ()
-  "Return non-nil if line at point is uppercase."
-  (let ((str (fountain-get-line)))
-    (string= (upcase str) str)))
-
 (defun fountain-line-empty-p ()
   "Return non-nil if line at point is a newline or single space."
   (save-excursion
