@@ -178,13 +178,6 @@ lines.")
       (group (zero-or-more not-newline)))
   "Regular expression for matching forced scene headings.")
 
-(defconst fountain-character-regexp
-  (rx (group (zero-or-more blank))
-      (group (one-or-more (not (any lower "<>\\\n"))))
-      (group (zero-or-more blank))
-      line-end)
-  "Regular expression for matching characters.")
-
 (defvar fountain-paren-regexp
   (rx line-start
       (zero-or-more blank)
