@@ -311,10 +311,6 @@ lines.")
          (save-excursion (forward-paragraph 1) (point))))
     (cons paragraph-beginning paragraph-end)))
 
-(defun fountain-trim-whitespace (str)
-  "Trim the leading and trailing whitespace of STR."
-  (setq str (mapconcat 'identity (split-string str) " ")))
-
 (defun fountain-line-upper-p ()
   "Return non-nil if line at point is uppercase."
   (let ((str (fountain-get-line)))
@@ -467,7 +463,7 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-get-character ()
   "Return character (line at point must be character)."
-  (fountain-trim-whitespace (car (split-string (fountain-get-line) "("))))
+  (s-trim (car (s-slice-at "(" (fountain-get-line)))))
 
 (defun fountain-get-previous-character (num)
   "Return NUMth previous character within scene, nil otherwise."
