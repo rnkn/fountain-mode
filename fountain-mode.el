@@ -544,7 +544,10 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
       (progn
         (unless (fountain-line-empty-p)
           (forward-paragraph 1))
-        (open-line 1)
+        (unless (save-excursion
+                  (forward-line 1)
+                  (fountain-line-empty-p))
+          (open-line 1))
         (comment-indent)
         (insert (fountain-format-template fountain-note-template))))))
 
