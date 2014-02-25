@@ -157,7 +157,7 @@ similar too:
 
 ;;; Element Regular Expressions ================================================
 
-(defconst fountain-line-empty-regexp
+(defconst fountain-blank-regexp
   (rx line-start
       (zero-or-one " ")
       line-end)
@@ -169,14 +169,16 @@ similar too:
       (one-or-more " ")
       (zero-or-more not-newline))
   "Regular expression for matching scene headings.
-Requires `fountain-scene-heading-p' for preceding and succeeding blank
-lines.")
+Requires `fountain-scene-heading-p' for preceding and succeeding
+blank lines.")
 
 (defconst fountain-dot-scene-heading-regexp
   (rx line-start
       (group "." word-start)
       (group (zero-or-more not-newline)))
-  "Regular expression for matching forced scene headings.")
+  "Regular expression for matching forced scene headings.
+Requires `fountain-dot-scene-heading-p' for preceding and
+succeeding blank lines.")
 
 (defvar fountain-paren-regexp
   (rx line-start
@@ -184,22 +186,9 @@ lines.")
       "(" (zero-or-more not-newline) ")"
       (zero-or-more blank)
       line-end)
-  "Regular expression for matching parentheticals.")
-
-(defvar fountain-trans-regexp
-  (rx (or (and line-start
-               (zero-or-more blank)
-               ">"
-               (group (zero-or-more (any upper blank ":"))
-                      line-end))
-          (and line-start
-               (zero-or-more (any upper blank))
-               (eval `(or ,@fountain-trans-list))
-               (zero-or-one blank)
-               line-end)))
-  "Regular expression for matching transitions.
-Requires `fountain-trans-p' for preceding and succeeding blank
-lines.")
+  "Regular expression for matching parentheticals.
+Requires `fountain-paren-p' for preceding character or
+dialogue.")
 
 (defconst fountain-page-break-regexp
   (rx line-start
@@ -304,11 +293,11 @@ lines.")
          (save-excursion (forward-paragraph 1) (point))))
     (cons paragraph-beginning paragraph-end)))
 
-(defun fountain-line-empty-p ()
+(defun fountain-blank-p ()
   "Return non-nil if line at point is a newline or single space."
   (save-excursion
     (forward-line 0)
-    (looking-at-p fountain-line-empty-regexp)))
+    (looking-at-p fountain-blank-regexp)))
 
 (defun fountain-section-p ()
   "Return non-nil if line at point is a section heading."
@@ -326,11 +315,11 @@ lines.")
   "Return non-nil if line at point is within boneyard."
   (comment-only-p (line-beginning-position) (line-end-position)))
 
-(defun fountain-blank-p ()
-  "Return non-nil if line at point is considered blank.
-A line is blank if it is empty, or consists of a comment,
+(defun fountain-invisible-p ()
+  "Return non-nil if line at point is invisible.
+A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
-  (cond ((fountain-line-empty-p))
+  (cond ((fountain-blank-p))
         ((fountain-boneyard-p))
         ((fountain-section-p))
         ((fountain-synopsis-p))
@@ -342,15 +331,15 @@ section, synopsis or is within a boneyard."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (or (bobp)
+      (and (looking-at-p fountain-scene-heading-regexp)
+           (or (bobp)
                (save-excursion
                  (forward-line -1)
-                 (fountain-blank-p)))
+                 (fountain-invisible-p)))
            (save-excursion
              (forward-line 1)
              (or (eobp)
-                 (fountain-blank-p)))
-           (looking-at-p fountain-scene-heading-regexp)))))
+                 (fountain-invisible-p)))))))
 
 (defun fountain-dot-scene-heading-p ()
   "Return non-nil if line at point is a forced scene heading."
@@ -358,37 +347,37 @@ section, synopsis or is within a boneyard."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (or (bobp)
+      (and (looking-at-p fountain-dot-scene-heading-regexp)
+           (or (bobp)
                (save-excursion
                  (forward-line -1)
-                 (fountain-blank-p)))
+                 (fountain-invisible-p)))
            (save-excursion
              (forward-line 1)
              (or (eobp)
-                 (fountain-blank-p)))
-           (looking-at-p fountain-dot-scene-heading-regexp)))))
+                 (fountain-invisible-p)))))))
 
 (defun fountain-character-p ()
   "Return non-nil if line at point is a character name."
   (save-excursion
     (save-restriction
       (widen)
-      (when (s-present? (fountain-get-character))
-        (let ((s (fountain-get-character)))
+      (let ((s (fountain-get-character)))
+        (when s
           (and (or (s-uppercase? s)
                    (s-starts-with? "@" s))
                (or (bobp)
                    (save-excursion
                      (forward-line -1)
-                     (fountain-line-empty-p)))
+                     (fountain-blank-p)))
                (save-excursion
                  (forward-line 1)
                  (unless (eobp)
-                   (not (fountain-blank-p))))))))))
+                   (not (fountain-invisible-p))))))))))
 
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
-  (unless (or (fountain-line-empty-p)
+  (unless (or (fountain-blank-p)
               (fountain-paren-p))
     (save-excursion
       (save-restriction
@@ -418,16 +407,20 @@ section, synopsis or is within a boneyard."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (let ((case-fold-search nil))
-             (looking-at-p fountain-trans-regexp))
-           (save-excursion
-             (forward-line -1)
-             (or (bobp)
-                 (fountain-blank-p)))
-           (save-excursion
-             (forward-line 1)
-             (or (eobp)
-                 (fountain-blank-p)))))))
+      (when (s-present? (fountain-get-line))
+        (and (let ((s (s-trim (fountain-get-line))))
+               (or (unless (s-ends-with? "<" s)
+                     (s-starts-with? ">" s))
+                   (and (s-uppercase? s)
+                        (s-matches? (regexp-opt fountain-trans-list) s))))
+             (save-excursion
+               (forward-line -1)
+               (or (bobp)
+                   (fountain-invisible-p)))
+             (save-excursion
+               (forward-line 1)
+               (or (eobp)
+                   (fountain-invisible-p))))))))
 
 (defun fountain-note-p ()
   "Return non-nil if line at point is within a note."
@@ -440,15 +433,14 @@ section, synopsis or is within a boneyard."
              (paragraph-beginning (car (fountain-get-paragraph-bounds)))
              (end (search-forward "]]" paragraph-end t))
              (start (search-backward "[[" paragraph-beginning t)))
-        (unless (or (null start)
-                    (null end))
-          (and (goto-char end)
-               (looking-at-p (rx (zero-or-more blank) line-end))
-               (goto-char start)
-               (forward-line 0)
-               (looking-at-p fountain-note-regexp)
-               (>= marker start)
-               (<= marker end)))))))
+        (and start end
+             (goto-char end)
+             (looking-at-p (rx (zero-or-more blank) line-end))
+             (goto-char start)
+             (forward-line 0)
+             (looking-at-p fountain-note-regexp)
+             (>= marker start)
+             (<= marker end))))))
 
 (defun fountain-get-character ()
   "Return character (line at point must be character)."
@@ -460,7 +452,7 @@ section, synopsis or is within a boneyard."
   (save-excursion
     (save-restriction
       (dotimes (var n (when (fountain-character-p)
-                          (fountain-get-character)))
+                        (fountain-get-character)))
         (unless (fountain-scene-heading-p)
           (forward-line -1)
           (while (not (or (fountain-character-p)
@@ -542,11 +534,11 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (if arg
         (comment-dwim nil)
       (progn
-        (unless (fountain-line-empty-p)
+        (unless (fountain-blank-p)
           (forward-paragraph 1))
         (unless (save-excursion
                   (forward-line 1)
-                  (fountain-line-empty-p))
+                  (fountain-blank-p))
           (open-line 1))
         (comment-indent)
         (insert (fountain-format-template fountain-note-template))))))
