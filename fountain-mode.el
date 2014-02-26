@@ -587,6 +587,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
+    (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
