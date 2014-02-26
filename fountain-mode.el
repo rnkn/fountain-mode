@@ -515,6 +515,28 @@ section, synopsis or is within a boneyard."
   (upcase-region (line-beginning-position) (point))
   (newline))
 
+(defun fountain-forward-scene (&optional n)
+  "Move forward N scene headings (backward if N is negative)."
+ (interactive "^p")
+ (if (> n 0)
+     (dotimes (var n)
+       (when (fountain-scene-heading-p)
+         (forward-line 1))
+       (while (not (or (eobp)
+                       (fountain-scene-heading-p)))
+         (forward-line 1)))
+   (dotimes (var (* n -1))
+     (when (fountain-scene-heading-p)
+       (forward-line -1))
+     (while (not (or (bobp)
+                     (fountain-scene-heading-p)))
+       (forward-line -1)))))
+
+(defun fountain-backward-scene (&optional n)
+  "Move backward N scene headings (foward if N is negative)."
+  (interactive "^p")
+  (fountain-forward-scene (- n)))
+
 (defun fountain-next-comment ()
   "Find the next comment."
   (interactive)
@@ -573,6 +595,8 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
+    (define-key map (kbd "M-n") 'fountain-forward-scene)
+    (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
