@@ -529,7 +529,8 @@ section, synopsis or is within a boneyard."
   "Open line below current scene heading and insert synopsis."
   (interactive)
   (widen)
-  (while (not (fountain-scene-heading-p))
+  (while (not (or (fountain-scene-heading-p)
+                  (fountain-section-p)))
     (forward-line -1))
   (forward-line 1)
   (unless (save-excursion
