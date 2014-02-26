@@ -547,6 +547,21 @@ section, synopsis or is within a boneyard."
   (let ((s (downcase (shell-command-to-string "uuidgen"))))
     (car (split-string s "-"))))
 
+(defun fountain-insert-synopsis ()
+  "Open line below current scene heading and insert synopsis."
+  (interactive)
+  (widen)
+  (while (not (or (fountain-scene-heading-p)
+                  (fountain-section-p)))
+    (forward-line -1))
+  (forward-line 1)
+  (unless (and (fountain-blank-p)
+               (save-excursion
+                 (forward-line 1)
+                 (fountain-blank-p)))
+    (open-line 1))
+  (insert "= "))
+
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
 If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]]\")."
@@ -598,6 +613,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
+    (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
