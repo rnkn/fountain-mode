@@ -16,6 +16,7 @@ The following features are supported:
 - auto-indentation for character, parenthetical, dialogue and transition
   elements (display only, does not modify file contents)
 - `S-RET` to upcase the line and insert a newline
+- `M-n` and `M-p` to navigate by scene heading
 - `C-c C-z` to insert a note based on template
 - `C-c C-x i` to insert metadata based on template
 - both Fountain boneyard syntaxes (follows standard commenting behavior,
@@ -26,6 +27,7 @@ The following features are supported:
 The following features are not yet supported:
 
 - syntax highlighting for all other elements, including emphasis
+- menus
 - reading metadata
 - dual dialogue
 - exporting
