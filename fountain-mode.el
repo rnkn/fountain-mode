@@ -533,9 +533,10 @@ section, synopsis or is within a boneyard."
                   (fountain-section-p)))
     (forward-line -1))
   (forward-line 1)
-  (unless (save-excursion
-            (forward-line 1)
-            (fountain-blank-p))
+  (unless (and (fountain-blank-p)
+               (save-excursion
+                 (forward-line 1)
+                 (fountain-blank-p)))
     (open-line 1))
   (insert "= "))
 
