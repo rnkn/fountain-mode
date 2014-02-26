@@ -525,6 +525,19 @@ section, synopsis or is within a boneyard."
   (let ((s (downcase (shell-command-to-string "uuidgen"))))
     (car (split-string s "-"))))
 
+(defun fountain-insert-synopsis ()
+  "Open line below current scene heading and insert synopsis."
+  (interactive)
+  (widen)
+  (while (not (fountain-scene-heading-p))
+    (forward-line -1))
+  (forward-line 1)
+  (unless (save-excursion
+            (forward-line 1)
+            (fountain-blank-p))
+    (open-line 1))
+  (insert "= "))
+
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
 If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]]\")."
