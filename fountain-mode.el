@@ -552,16 +552,23 @@ section, synopsis or is within a boneyard."
   "Open line below current scene heading and insert synopsis."
   (interactive)
   (widen)
-  (while (not (or (fountain-scene-heading-p)
+  (push-mark)
+  (while (not (or (bobp)
+                  (fountain-scene-heading-p)
                   (fountain-section-p)))
     (forward-line -1))
-  (forward-line 1)
-  (unless (and (fountain-blank-p)
-               (save-excursion
-                 (forward-line 1)
-                 (fountain-blank-p)))
-    (open-line 1))
-  (insert "= "))
+  (if (bobp)
+      (progn
+        (pop-to-mark-command
+        (error "Before first scene or section heading"))
+    (progn
+      (forward-line 1)
+      (unless (and (fountain-blank-p)
+                   (save-excursion
+                     (forward-line 1)
+                     (fountain-blank-p)))
+        (open-line 1))
+      (insert "= "))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
