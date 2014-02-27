@@ -58,9 +58,10 @@ contact: ${email}
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-scene-heading-prefix-list
-  '("int." "ext." "i/e." "est.")
-  "List of scene heading prefixes (case insensitive).
+(eval-and-compile
+  (defcustom fountain-scene-heading-prefix-list
+    '("int." "ext." "i/e." "est.")
+    "List of scene heading prefixes (case insensitive).
 The default list requires that each scene heading prefix be appended
 with a dot, like so:
 
@@ -68,8 +69,8 @@ INT. HOUSE - DAY
 
 If you prefer not to append a dot to your scene heading prefixes, you
 can add \"int\", \"ext\", etc. here."
-  :type '(repeat (string :tag "Prefix"))
-  :group 'fountain)
+    :type '(repeat (string :tag "Prefix"))
+    :group 'fountain))
 
 (defcustom fountain-trans-list
   '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
