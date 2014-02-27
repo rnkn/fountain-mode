@@ -55,7 +55,6 @@ available here: <http://fountain.io/apps>
 Requirements
 ------------
 
-<<<<<<< HEAD
 - Emacs 24 (not tested on earlier versions)
 - [s.el][] the long lost Emacs string manipulation library.
 - the CLT `uuidgen` is required to insert UUIDs (usually pre-installed
