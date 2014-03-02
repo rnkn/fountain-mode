@@ -358,23 +358,27 @@ section, synopsis or is within a boneyard."
              (or (eobp)
                  (fountain-invisible-p)))))))
 
-(defun fountain-character-p ()
-  "Return non-nil if line at point is a character name."
+(defun fountain-get-character ()
+  "Return string if line at point is a character, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
-      (let ((s (fountain-get-character)))
-        (when s
-          (and (or (s-uppercase? s)
-                   (s-starts-with? "@" s))
-               (or (bobp)
+      (let ((s
+             (when (s-present? (fountain-get-line))
+               (s-presence
+                (s-trim (car (s-slice-at "(" (fountain-get-line))))))))
+        (when (and s
+                   (or (s-uppercase? s)
+                       (s-starts-with? "@" s))
+                   (or (bobp)
+                       (save-excursion
+                         (forward-line -1)
+                         (fountain-blank-p)))
                    (save-excursion
-                     (forward-line -1)
-                     (fountain-blank-p)))
-               (save-excursion
-                 (forward-line 1)
-                 (unless (eobp)
-                   (not (fountain-invisible-p))))))))))
+                     (forward-line 1)
+                     (unless (eobp)
+                       (not (fountain-invisible-p)))))
+          s)))))
 
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
@@ -386,7 +390,7 @@ section, synopsis or is within a boneyard."
         (forward-line 0)
         (unless (bobp)
           (forward-line -1)
-          (or (fountain-character-p)
+          (or (fountain-get-character)
               (fountain-paren-p)
               (fountain-dialogue-p)))))))
 
@@ -399,7 +403,7 @@ section, synopsis or is within a boneyard."
       (and (looking-at-p fountain-paren-regexp)
            (unless (bobp)
              (forward-line -1)
-             (or (fountain-character-p)
+             (or (fountain-get-character)
                  (fountain-dialogue-p)))))))
 
 (defun fountain-trans-p ()
@@ -443,20 +447,14 @@ section, synopsis or is within a boneyard."
              (>= marker start)
              (<= marker end))))))
 
-(defun fountain-get-character ()
-  "Return character (line at point must be character)."
-  (when (s-present? (fountain-get-line))
-    (s-trim (car (s-slice-at "(" (fountain-get-line))))))
-
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
     (save-restriction
-      (dotimes (var n (when (fountain-character-p)
-                        (fountain-get-character)))
+      (dotimes (var n (fountain-get-character))
         (unless (fountain-scene-heading-p)
           (forward-line -1)
-          (while (not (or (fountain-character-p)
+          (while (not (or (fountain-get-character)
                           (fountain-scene-heading-p)
                           (bobp)))
             (forward-line -1)))))))
@@ -475,7 +473,7 @@ section, synopsis or is within a boneyard."
 
 (defun fountain-indent-refresh ()
   "Refresh indentation properties at point."
-  (cond ((fountain-character-p)
+  (cond ((fountain-get-character)
          (fountain-indent-add fountain-align-column-character))
         ((fountain-paren-p)
          (fountain-indent-add fountain-align-column-paren))
