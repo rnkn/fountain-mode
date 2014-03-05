@@ -280,7 +280,7 @@ dialogue.")
   "Font lock highlighting keywords.")
 
 (defun fountain-match-scene-heading (limit)
-  "Set MATCH DATA to scene heading if found within LIMIT."
+  "Set match data to scene heading if found within LIMIT."
   (let ((m))
     (while (and (null m)
                 (< (point) limit))
@@ -342,15 +342,12 @@ section, synopsis or is within a boneyard."
         ((fountain-note-p))))
 
 (defun fountain-get-scene-heading ()
-  "Return scene heading if line at point is a scene heading, nil otherwise."
+  "Return scene heading if matches line at point, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (let ((s
-             (when (s-present? (fountain-get-line))
-               (s-presence
-                (s-trim (fountain-get-line))))))
+      (let ((s (s-presence (fountain-get-line))))
         (when (and s
                    (or (s-matches?
                         (concat "^"
