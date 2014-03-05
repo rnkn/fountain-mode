@@ -557,7 +557,7 @@ section, synopsis or is within a boneyard."
     (forward-line -1))
   (if (bobp)
       (progn
-        (pop-to-mark-command
+        (pop-to-mark-command)
         (error "Before first scene or section heading"))
     (progn
       (forward-line 1)
@@ -566,7 +566,7 @@ section, synopsis or is within a boneyard."
                      (forward-line 1)
                      (fountain-blank-p)))
         (open-line 1))
-      (insert "= ")))))
+      (insert "= "))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
