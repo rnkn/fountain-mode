@@ -367,7 +367,7 @@ section, synopsis or is within a boneyard."
           s)))))
 
 (defun fountain-get-character ()
-  "Return string if line at point is a character, nil otherwise."
+  "Return character if matches line at point, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
