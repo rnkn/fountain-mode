@@ -487,8 +487,15 @@ This function is ignored unless
           (if fountain-indent-elements
               (fountain-indent-refresh)
             (fountain-indent-add 0))
-          (forward-line 1))
-        (font-lock-fontify-region start end)))))
+          (forward-line 1))))))
+
+(defun fountain-format-remove ()
+  "Remove all indenting in buffer."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let ((fountain-indent-elements nil))
+        (fountain-format-refresh (point-min) (point-max))))))
 
 ;;; Interaction ================================================================
 
@@ -546,7 +553,7 @@ This function is ignored unless
     (forward-line -1))
   (if (bobp)
       (progn
-        (pop-to-mark-command
+        (pop-to-mark-command)
         (error "Before first scene or section heading"))
     (progn
       (forward-line 1)
@@ -555,7 +562,7 @@ This function is ignored unless
                      (forward-line 1)
                      (fountain-blank-p)))
         (open-line 1))
-      (insert "= ")))))
+      (insert "= "))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
@@ -671,7 +678,8 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-nonprinting-face)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
-  (jit-lock-register 'fountain-format-refresh))
+  (jit-lock-register 'fountain-format-refresh)
+  (add-hook 'change-major-mode-hook 'fountain-format-remove nil t))
 
 (provide 'fountain-mode)
 
