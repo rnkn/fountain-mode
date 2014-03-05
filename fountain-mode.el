@@ -483,7 +483,7 @@ section, synopsis or is within a boneyard."
          (fountain-indent-add fountain-align-column-trans))
         ((fountain-indent-add 0))))
 
-(defun fountain-format-refresh (start end length)
+(defun fountain-format-refresh (start end)
   "Refresh format between START and END."
   (save-excursion
     (save-restriction
@@ -566,7 +566,7 @@ section, synopsis or is within a boneyard."
                      (forward-line 1)
                      (fountain-blank-p)))
         (open-line 1))
-      (insert "= "))))
+      (insert "= ")))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
@@ -649,8 +649,7 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-nonprinting-face)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
-  (fountain-format-refresh (point-min) (point-max) nil)
-  (add-hook 'after-change-functions 'fountain-format-refresh nil t))
+  (jit-lock-register 'fountain-format-refresh))
 
 (provide 'fountain-mode)
 
