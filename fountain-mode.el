@@ -269,31 +269,6 @@ dialogue.")
   "Face for synopses."
   :group 'fountain-faces)
 
-;;; Font Lock ==================================================================
-
-(defvar fountain-font-lock-keywords
-  `((fountain-match-scene-heading . fountain-scene-heading-face)
-    (,fountain-dot-scene-heading-regexp . fountain-dot-scene-heading-face)
-    (,fountain-section-regexp . fountain-section-face)
-    (,fountain-synopsis-regexp . fountain-synopsis-face)
-    (,fountain-note-regexp . fountain-note-face))
-  "Font lock highlighting keywords.")
-
-(defun fountain-match-scene-heading (limit)
-  "Set match data to scene heading if found within LIMIT."
-  (let ((m))
-    (while (and (null m)
-                (< (point) limit))
-      (if (fountain-get-scene-heading)
-          (progn
-            (set-match-data
-             (list (set-marker (make-marker) (line-beginning-position))
-                   (set-marker (make-marker) (line-end-position))))
-            (forward-line 1)
-            (setq m t))
-        (forward-line 1)))
-    m))
-
 ;;; Functions ==================================================================
 
 (defun fountain-get-line ()
@@ -618,6 +593,34 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (goto-char (point-min))
   (save-excursion
     (insert (fountain-format-template fountain-metadata-template) "\n")))
+
+;;; Font Lock ==================================================================
+
+(defvar fountain-font-lock-keywords
+  `((fountain-match-scene-heading . fountain-scene-heading-face)
+    (,fountain-section-regexp . fountain-section-face)
+    (,fountain-synopsis-regexp . fountain-synopsis-face)
+    (,fountain-note-regexp . fountain-note-face))
+  "Font lock highlighting keywords.")
+
+(defun fountain-match-line (func limit)
+  "If FUNC matches within LIMIT set match data to line."
+  (let ((match))
+    (while (and (null match)
+                (< (point) limit))
+      (if (funcall func)
+          (progn
+            (set-match-data
+             (list (set-marker (make-marker) (line-beginning-position))
+                   (set-marker (make-marker) (line-end-position))))
+            (forward-line 1)
+            (setq match t))
+        (forward-line 1)))
+    match))
+
+(defun fountain-match-scene-heading (limit)
+  "Call `fountain-match-line' with `fountain-get-scene-heading'."
+  (fountain-match-line 'fountain-get-scene-heading limit))
 
 ;;; Mode Map ===================================================================
 
