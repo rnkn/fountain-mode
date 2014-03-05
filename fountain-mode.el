@@ -272,12 +272,27 @@ dialogue.")
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
-  `((,fountain-scene-heading-regexp . fountain-scene-heading-face)
+  `((fountain-match-scene-heading . fountain-scene-heading-face)
     (,fountain-dot-scene-heading-regexp . fountain-dot-scene-heading-face)
     (,fountain-section-regexp . fountain-section-face)
     (,fountain-synopsis-regexp . fountain-synopsis-face)
     (,fountain-note-regexp . fountain-note-face))
   "Font lock highlighting keywords.")
+
+(defun fountain-match-scene-heading (limit)
+  "Set MATCH DATA to scene heading if found within LIMIT."
+  (let ((m))
+    (while (and (null m)
+                (< (point) limit))
+      (if (fountain-get-scene-heading)
+          (progn
+            (set-match-data
+             (list (set-marker (make-marker) (line-beginning-position))
+                   (set-marker (make-marker) (line-end-position))))
+            (forward-line 1)
+            (setq m t))
+        (forward-line 1)))
+    m))
 
 ;;; Functions ==================================================================
 
@@ -326,37 +341,33 @@ section, synopsis or is within a boneyard."
         ((fountain-synopsis-p))
         ((fountain-note-p))))
 
-(defun fountain-scene-heading-p ()
-  "Return non-nil if line at point is a scene heading."
+(defun fountain-get-scene-heading ()
+  "Return scene heading if line at point is a scene heading, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (looking-at-p fountain-scene-heading-regexp)
-           (or (bobp)
-               (save-excursion
-                 (forward-line -1)
-                 (fountain-invisible-p)))
-           (save-excursion
-             (forward-line 1)
-             (or (eobp)
-                 (fountain-invisible-p)))))))
-
-(defun fountain-dot-scene-heading-p ()
-  "Return non-nil if line at point is a forced scene heading."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (and (looking-at-p fountain-dot-scene-heading-regexp)
-           (or (bobp)
-               (save-excursion
-                 (forward-line -1)
-                 (fountain-invisible-p)))
-           (save-excursion
-             (forward-line 1)
-             (or (eobp)
-                 (fountain-invisible-p)))))))
+      (let ((s
+             (when (s-present? (fountain-get-line))
+               (s-presence
+                (s-trim (fountain-get-line))))))
+        (when (and s
+                   (or (s-matches?
+                        (concat "^"
+                                (regexp-opt fountain-scene-heading-prefix-list)
+                                " ") s)
+                       (when (null fountain-dot-scene-heading-hierarchy)
+                         (s-matches?
+                           "^.\\<" s)))
+                   (or (bobp)
+                       (save-excursion
+                         (forward-line -1)
+                         (fountain-invisible-p)))
+                   (save-excursion
+                     (forward-line 1)
+                     (or (eobp)
+                         (fountain-invisible-p))))
+          s)))))
 
 (defun fountain-get-character ()
   "Return string if line at point is a character, nil otherwise."
@@ -566,7 +577,7 @@ section, synopsis or is within a boneyard."
                      (forward-line 1)
                      (fountain-blank-p)))
         (open-line 1))
-      (insert "= "))))
+      (insert "= ")))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note as per `fountain-note-template'.
