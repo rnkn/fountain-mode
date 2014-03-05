@@ -440,6 +440,7 @@ This function is ignored unless
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
     (save-restriction
+      (widen)
       (dotimes (var n (fountain-get-character))
         (unless (fountain-get-scene-heading)
           (forward-line -1)
@@ -476,6 +477,7 @@ This function is ignored unless
   "Refresh format between START and END."
   (save-excursion
     (save-restriction
+      (widen)
       (let ((start
              (progn (goto-char start)
                     (car (fountain-get-paragraph-bounds))))
@@ -494,7 +496,7 @@ This function is ignored unless
   (save-excursion
     (save-restriction
       (widen)
-      (let ((fountain-indent-elements nil))
+      (let (fountain-indent-elements)
         (fountain-format-refresh (point-min) (point-max))))))
 
 ;;; Interaction ================================================================
