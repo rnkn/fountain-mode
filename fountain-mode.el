@@ -159,9 +159,11 @@ similar too:
 ;;; Element Regular Expressions ================================================
 
 (defconst fountain-blank-regexp
-  (rx line-start
-      (zero-or-one " ")
-      line-end)
+  (rx (or buffer-start
+          buffer-end
+          (and line-start
+               (zero-or-one " ")
+               line-end)))
   "Regular expression for matching an empty line.")
 
 (defvar fountain-scene-heading-regexp
@@ -286,13 +288,15 @@ dialogue.")
   (buffer-substring-no-properties
    (line-beginning-position) (line-end-position)))
 
-(defun fountain-get-paragraph-bounds ()
-  "Return the beginning and end points of paragraph at point."
-  (let ((paragraph-beginning
-         (save-excursion (forward-paragraph -1) (point)))
-        (paragraph-end
-         (save-excursion (forward-paragraph 1) (point))))
-    (cons paragraph-beginning paragraph-end)))
+(defun fountain-get-block-bounds ()
+  "Return the beginning and end points of block at point."
+  (let ((block-beginning
+         (save-excursion
+           (re-search-backward fountain-blank-regexp)))
+        (block-end
+         (save-excursion
+           (re-search-forward fountain-blank-regexp))))
+    (cons block-beginning block-end)))
 
 (defun fountain-blank-p ()
   "Return non-nil if line at point is a newline or single space."
@@ -433,19 +437,23 @@ section, synopsis or is within a boneyard."
     (save-restriction
       (widen)
       (forward-line 0)
-      (let* ((marker (point))
-             (paragraph-end (cdr (fountain-get-paragraph-bounds)))
-             (paragraph-beginning (car (fountain-get-paragraph-bounds)))
-             (end (search-forward "]]" paragraph-end t))
-             (start (search-backward "[[" paragraph-beginning t)))
+      (let* ((m (point))
+             (block-beginning
+              (car (fountain-get-block-bounds)))
+             (block-end
+              (cdr (fountain-get-block-bounds)))
+             (end
+              (search-forward "]]" block-end t))
+             (start
+              (search-backward "[[" block-beginning t)))
         (and start end
              (goto-char end)
              (looking-at-p (rx (zero-or-more blank) line-end))
              (goto-char start)
              (forward-line 0)
              (looking-at-p fountain-note-regexp)
-             (>= marker start)
-             (<= marker end))))))
+             (>= m start)
+             (<= m end))))))
 
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
@@ -490,11 +498,13 @@ section, synopsis or is within a boneyard."
     (save-restriction
       (widen)
       (let ((start
-             (progn (goto-char start)
-                    (car (fountain-get-paragraph-bounds))))
+             (progn
+               (goto-char start)
+               (car (fountain-get-block-bounds))))
             (end
-             (progn (goto-char end)
-                    (cdr (fountain-get-paragraph-bounds)))))
+             (progn
+               (goto-char end)
+               (cdr (fountain-get-block-bounds)))))
         (goto-char start)
         (while (< (point) end)
           (if fountain-indent-elements
@@ -587,7 +597,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
         (comment-dwim nil)
       (progn
         (unless (fountain-blank-p)
-          (forward-paragraph 1))
+          (re-search-forward fountain-blank-regexp))
         (unless (save-excursion
                   (forward-line 1)
                   (fountain-blank-p))
