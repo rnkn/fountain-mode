@@ -451,6 +451,7 @@ section, synopsis or is within a boneyard."
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
     (save-restriction
+      (widen)
       (dotimes (var n (fountain-get-character))
         (unless (fountain-scene-heading-p)
           (forward-line -1)
@@ -487,6 +488,7 @@ section, synopsis or is within a boneyard."
   "Refresh format between START and END."
   (save-excursion
     (save-restriction
+      (widen)
       (let ((start
              (progn (goto-char start)
                     (car (fountain-get-paragraph-bounds))))
