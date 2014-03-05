@@ -505,7 +505,7 @@ section, synopsis or is within a boneyard."
   (save-excursion
     (save-restriction
       (widen)
-      (let ((fountain-indent-elements nil))
+      (let (fountain-indent-elements)
         (fountain-format-refresh (point-min) (point-max))))))
 
 ;;; Interaction ================================================================
