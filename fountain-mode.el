@@ -1,16 +1,11 @@
-;;; fountain-mode.el --- Major mode for editing Fountain-formatted text files
+;;; fountain-mode.el --- Major mode for screenwriting in Fountain plaintext markup
+
+;; Copyright (C) 2014  Paul Rankin
 
 ;; Author: Paul Rankin <paul@tilk.co>
-;; Version: 0.9.2
 ;; Keywords: wp
-;; Package-Requires: ((s "1.9.0"))
-;; URL: http://github.com/rnkn/fountain-mode/
 
-;; This file is not part of GNU Emacs.
-
-;; Copyright (C) 2014 Paul Rankin
-
-;; This program is free software: you can redistribute it and/or modify
+;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or (at
 ;; your option) any later version.
@@ -21,7 +16,7 @@
 ;; General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program. If not, see [http://www.gnu.org/licenses/].
+;; along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -31,7 +26,7 @@
 ;; software, licensed under the GNU GPL version 3.
 
 ;; For more information on Fountain markup format, see
-;; [http://fountain.io]
+;; <http://fountain.io>
 
 ;;; Code:
 
@@ -672,5 +667,4 @@ For more information on the Fountain markup format, visit
   (add-hook 'change-major-mode-hook 'fountain-format-remove nil t))
 
 (provide 'fountain-mode)
-
 ;;; fountain-mode.el ends here
