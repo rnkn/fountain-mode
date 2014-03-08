@@ -208,10 +208,7 @@ dialogue.")
 (defvar fountain-scene-heading-face 'fountain-scene-heading-face
   "Face name to use for scene headings.")
 
-(defvar fountain-dot-scene-heading-face
-  (if fountain-dot-scene-heading-hierarchy
-      'fountain-dot-scene-heading-face
-    'fountain-scene-heading-face)
+(defvar fountain-dot-scene-heading-face 'fountain-dot-scene-heading-face
   "Face name to use for forced scene headings.")
 
 (defvar fountain-note-face 'fountain-note-face
