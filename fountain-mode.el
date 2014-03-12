@@ -282,6 +282,17 @@ dialogue.")
     (forward-line 0)
     (looking-at-p fountain-synopsis-regexp)))
 
+(defun fountain-get-synopsis ()
+  "Return synopsis if matches line at point, nil otherwise."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (let ((s (s-presence (fountain-get-line))))
+        (when (and s
+                   (s-matches? fountain-synopsis-regexp s))
+          s)))))
+
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
   (comment-only-p (line-beginning-position) (line-end-position)))
