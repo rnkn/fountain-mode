@@ -230,11 +230,6 @@ dialogue.")
   "Face for forced scene headings."
   :group 'fountain-faces)
 
-(defface fountain-nonprinting-face
-  '((t (:foreground "dim gray")))
-  "Face for comments."
-  :group 'fountain-faces)
-
 (defface fountain-note-face
   '((t (:foreground "forest green")))
   "Face for notes.")
@@ -685,8 +680,7 @@ For more information on the Fountain markup format, visit
        (if fountain-switch-comment-syntax "//" "/*"))
   (set (make-local-variable 'comment-end)
        (if fountain-switch-comment-syntax "" "/*"))
-  (set (make-local-variable 'font-lock-comment-face)
-       'fountain-nonprinting-face)
+  (set (make-local-variable 'font-lock-comment-face) 'shadow)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (jit-lock-register 'fountain-format-refresh)
   (add-hook 'change-major-mode-hook 'fountain-format-remove nil t))
