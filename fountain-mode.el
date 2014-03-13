@@ -205,21 +205,6 @@ dialogue.")
   "Faces used in Fountain Mode"
   :group 'fountain)
 
-(defvar fountain-scene-heading-face 'fountain-scene-heading-face
-  "Face name to use for scene headings.")
-
-(defvar fountain-dot-scene-heading-face 'fountain-dot-scene-heading-face
-  "Face name to use for forced scene headings.")
-
-(defvar fountain-note-face 'fountain-note-face
-  "Face name to use for notes.")
-
-(defvar fountain-section-face 'fountain-section-face
-  "Face name to use for sections.")
-
-(defvar fountain-synopsis-face 'fountain-synopsis-face
-  "Face name to use for synopses.")
-
 (defface fountain-scene-heading-face
   '((t (:weight bold :underline t)))
   "Face for scene headings."
@@ -615,11 +600,11 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
-  `((fountain-match-scene-heading . fountain-scene-heading-face)
-    (fountain-match-dot-scene-heading . fountain-dot-scene-heading-face)
-    (,fountain-section-regexp . fountain-section-face)
-    (,fountain-synopsis-regexp . fountain-synopsis-face)
-    (,fountain-note-regexp . fountain-note-face))
+  `((fountain-match-scene-heading . 'fountain-scene-heading-face)
+    (fountain-match-dot-scene-heading . 'fountain-dot-scene-heading-face)
+    (,fountain-section-regexp . 'fountain-section-face)
+    (,fountain-synopsis-regexp . 'fountain-synopsis-face)
+    (,fountain-note-regexp . 'fountain-note-face))
   "Font lock highlighting keywords.")
 
 (defun fountain-match-line (func limit)
