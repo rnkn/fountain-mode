@@ -304,9 +304,9 @@ section, synopsis or is within a boneyard."
                         (concat "^"
                                 (regexp-opt fountain-scene-heading-prefix-list)
                                 " ") s)
-                       (when (null fountain-dot-scene-heading-hierarchy)
+                       (when fountain-forced-scene-heading-equal
                          (s-matches?
-                           "^\\.\\<" s)))
+                          "^\\.\\<" s)))
                    (or (bobp)
                        (save-excursion
                          (forward-line -1)
@@ -317,11 +317,11 @@ section, synopsis or is within a boneyard."
                          (fountain-invisible-p))))
           s)))))
 
-(defun fountain-get-dot-scene-heading ()
+(defun fountain-get-forced-scene-heading ()
   "Return forced scene heading if matches line at point, nil otherwise.
-This function is ignored unless
-`fountain-dot-scene-heading-hierarchy' is non-nil."
-  (when fountain-dot-scene-heading-hierarchy
+This function is ignored if `fountain-forced-scene-heading-equal'
+is non-nil."
+  (when (null fountain-forced-scene-heading-equal)
     (save-excursion
       (save-restriction
         (widen)
@@ -612,7 +612,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
 
 (defvar fountain-font-lock-keywords
   `((fountain-match-scene-heading . 'fountain-scene-heading-face)
-    (fountain-match-dot-scene-heading . 'fountain-dot-scene-heading-face)
+    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face)
     (,fountain-section-regexp . 'fountain-section-face)
     (,fountain-synopsis-regexp . 'fountain-synopsis-face)
     (,fountain-note-regexp . 'fountain-note-face))
@@ -637,9 +637,9 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   "Call `fountain-match-line' with `fountain-get-scene-heading'."
   (fountain-match-line 'fountain-get-scene-heading limit))
 
-(defun fountain-match-dot-scene-heading (limit)
-  "Call `fountain-match-line' with `fountain-get-dot-scene-heading'."
-  (fountain-match-line 'fountain-get-dot-scene-heading limit))
+(defun fountain-match-forced-scene-heading (limit)
+  "Call `fountain-match-line' with `fountain-get-forced-scene-heading'."
+  (fountain-match-line 'fountain-get-forced-scene-heading limit))
 
 ;;; Mode Map ===================================================================
 
