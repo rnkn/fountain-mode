@@ -49,13 +49,14 @@ author: ${fullname}
 draft date: ${longtime}
 contact: ${email}
 "
-  "Metadata template. See `fountain-format-template'."
+  "Metadata template to be inserted at beginning of buffer.
+See `fountain-format-template'."
   :type 'string
   :group 'fountain)
 
 (eval-and-compile
   (defcustom fountain-scene-heading-prefix-list
-    '("int." "ext." "i/e." "est.")
+    '("INT." "EXT." "I/E." "EST.")
     "List of scene heading prefixes (case insensitive).
 The default list requires that each scene heading prefix be appended
 with a dot, like so:
@@ -63,7 +64,7 @@ with a dot, like so:
 INT. HOUSE - DAY
 
 If you prefer not to append a dot to your scene heading prefixes, you
-can add \"int\", \"ext\", etc. here."
+can add \"INT\", \"EXT\", etc. here."
     :type '(repeat (string :tag "Prefix"))
     :group 'fountain))
 
@@ -77,6 +78,11 @@ CUT TO:
 
 DISSOLVE TO:"
   :type '(repeat (string :tag "Transition"))
+  :group 'fountain)
+
+(defcustom fountain-continued-dialog-marker "(CONT'D)"
+  "String to insert when same character speaks in succession."
+  :type 'string
   :group 'fountain)
 
 (defcustom fountain-align-column-character 20
@@ -105,12 +111,12 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-dot-scene-heading-hierarchy t
-  "If non-nil, forced scene headings will take a lower hierarchy.
-When writing, it is usually preferable to treat forced scene
-headings as constituents of the larger scene. If you prefer to
-treat forced scene headings like regular scene headings, set this
-to nil."
+(defcustom fountain-forced-scene-heading-equal nil
+  "If non-nil, forced scene headings will be treated as equal.
+It is usually preferable to treat forced scene headings as
+constituents of the larger scene. If you prefer to treat forced
+scene headings as equal to regular scene headings, set this to
+non-nil."
   :type 'boolean
   :group 'fountain)
 
@@ -170,12 +176,12 @@ similar too:
 Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
 
-(defconst fountain-dot-scene-heading-regexp
+(defconst fountain-forced-scene-heading-regexp
   (rx line-start
       (group "." word-start)
       (group (zero-or-more not-newline)))
   "Regular expression for matching forced scene headings.
-Requires `fountain-dot-scene-heading-p' for preceding and
+Requires `fountain-forced-scene-heading-p' for preceding and
 succeeding blank lines.")
 
 (defvar fountain-paren-regexp
@@ -242,7 +248,7 @@ dialogue.")
   "Face for scene headings."
   :group 'fountain-faces)
 
-(defface fountain-dot-scene-heading-face
+(defface fountain-forced-scene-heading-face
   '((t (:weight bold)))
   "Face for forced scene headings."
   :group 'fountain-faces)
@@ -270,7 +276,7 @@ dialogue.")
 
 (defvar fountain-font-lock-keywords
   `((,fountain-scene-heading-regexp . fountain-scene-heading-face)
-    (,fountain-dot-scene-heading-regexp . fountain-dot-scene-heading-face)
+    (,fountain-forced-scene-heading-regexp . fountain-forced-scene-heading-face)
     (,fountain-section-regexp . fountain-section-face)
     (,fountain-synopsis-regexp . fountain-synopsis-face)
     (,fountain-note-regexp . fountain-note-face))
@@ -341,13 +347,13 @@ section, synopsis or is within a boneyard."
              (or (eobp)
                  (fountain-invisible-p)))))))
 
-(defun fountain-dot-scene-heading-p ()
+(defun fountain-forced-scene-heading-p ()
   "Return non-nil if line at point is a forced scene heading."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (looking-at-p fountain-dot-scene-heading-regexp)
+      (and (looking-at-p fountain-forced-scene-heading-regexp)
            (or (bobp)
                (save-excursion
                  (forward-line -1)
