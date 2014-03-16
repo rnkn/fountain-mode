@@ -234,6 +234,11 @@ dialogue.")
 
 ;;; Functions ==================================================================
 
+(defun fountain-get-thing-at-point (regexp)
+  "Return match string if thing at point matches REGEXP."
+  (when (thing-at-point-looking-at regexp)
+    (match-string-no-properties 0)))
+
 (defun fountain-get-line ()
   "Return the line at point as a string."
   (buffer-substring-no-properties
@@ -255,29 +260,6 @@ dialogue.")
     (forward-line 0)
     (looking-at-p fountain-blank-regexp)))
 
-(defun fountain-section-p ()
-  "Return non-nil if line at point is a section heading."
-  (save-excursion
-    (forward-line 0)
-    (looking-at-p fountain-section-regexp)))
-
-(defun fountain-synopsis-p ()
-  "Return non-nil if line at point is a synopsis."
-  (save-excursion
-    (forward-line 0)
-    (looking-at-p fountain-synopsis-regexp)))
-
-(defun fountain-get-synopsis ()
-  "Return synopsis if matches line at point, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (let ((s (s-presence (fountain-get-line))))
-        (when (and s
-                   (s-matches? fountain-synopsis-regexp s))
-          s)))))
-
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
   (comment-only-p (line-beginning-position) (line-end-position)))
@@ -288,8 +270,8 @@ A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
   (cond ((fountain-blank-p))
         ((fountain-boneyard-p))
-        ((fountain-section-p))
-        ((fountain-synopsis-p))
+        ((fountain-get-thing-at-point fountain-section-regexp))
+        ((fountain-get-thing-at-point fountain-synopsis-regexp))
         ((fountain-note-p))))
 
 (defun fountain-get-scene-heading ()
@@ -550,7 +532,7 @@ is non-nil."
   (push-mark)
   (while (not (or (bobp)
                   (fountain-get-scene-heading)
-                  (fountain-section-p)))
+                  (fountain-get-thing-at-point fountain-section-regexp)))
     (forward-line -1))
   (if (bobp)
       (progn
