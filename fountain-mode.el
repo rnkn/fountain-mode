@@ -80,9 +80,10 @@ DISSOLVE TO:"
   :type '(repeat (string :tag "Transition"))
   :group 'fountain)
 
-(defcustom fountain-continued-dialog-marker "(CONT'D)"
-  "String to insert when same character speaks in succession."
-  :type 'string
+(defcustom fountain-continued-dialog-string "(CONT'D)"
+  "String to insert when same character speaks in succession.
+If nil, do not insert continuing dialog markers."
+  :type '(choice (const nil) string)
   :group 'fountain)
 
 (defcustom fountain-align-column-character 20
@@ -234,7 +235,7 @@ dialogue.")
 
 ;;; Functions ==================================================================
 
-(defun fountain-get-line ()
+(defun fountain-get-line ()             ; replace w/ thing-at-point
   "Return the line at point as a string."
   (buffer-substring-no-properties
    (line-beginning-position) (line-end-position)))
@@ -448,7 +449,29 @@ is non-nil."
 
 (defun fountain-same-previous-character ()
   "Return non-nil if character at point is identical to prior character."
-  (equal (fountain-get-character) (fountain-get-previous-character 1)))
+  (equal (fountain-get-character)
+         (fountain-get-previous-character 1)))
+
+(defun fountain-continued-dialog-refresh ()
+  "Refresh continued dialog markers at point."
+  (let ((s (fountain-get-line)))
+    (if (fountain-same-previous-character)
+        (unless (s-ends-with? fountain-continued-dialog-string s)
+          (fountain-continued-dialog-add))
+      (fountain-continued-dialog-remove))))
+
+(defun fountain-continued-dialog-add ()
+  "Add `fountain-continued-dialog-string' to character at point."
+  (forward-line 0)
+  (re-search-forward " *$" (line-end-position) t)
+  (replace-match (concat " " fountain-continued-dialog-string)))
+
+(defun fountain-continued-dialog-remove ()
+  "Remove `fountain-continued-dialog-string' from character at point."
+  (forward-line 0)
+  (while (re-search-forward  (concat " *" fountain-continued-dialog-string)
+                             (line-end-position) t)
+    (delete-region (match-beginning 0) (match-end 0))))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
@@ -472,23 +495,23 @@ is non-nil."
 
 (defun fountain-format-refresh (start end)
   "Refresh format between START and END."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let ((start
-             (progn
-               (goto-char start)
-               (car (fountain-get-block-bounds))))
-            (end
-             (progn
-               (goto-char end)
-               (cdr (fountain-get-block-bounds)))))
-        (goto-char start)
-        (while (< (point) end)
-          (if fountain-indent-elements
-              (fountain-indent-refresh)
-            (fountain-indent-add 0))
-          (forward-line 1))))))
+  (let ((start
+         (progn
+           (goto-char start)
+           (car (fountain-get-block-bounds))))
+        (end
+         (progn
+           (goto-char end)
+           (cdr (fountain-get-block-bounds)))))
+    (goto-char start)
+    (while (< (point) end)
+      (if fountain-indent-elements
+          (fountain-indent-refresh)
+        (fountain-indent-add 0))
+      (when (and fountain-continued-dialog-string
+                 (fountain-get-character))
+        (fountain-continued-dialog-refresh))
+      (forward-line 1))))
 
 (defun fountain-format-remove ()
   "Remove all indenting in buffer."
