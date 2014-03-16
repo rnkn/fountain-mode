@@ -234,7 +234,7 @@ dialogue.")
 
 ;;; Functions ==================================================================
 
-(defun fountain-get-thing-at-point (regexp)
+(defun fountain-looking-at (regexp)
   "Return match string if thing at point matches REGEXP."
   (when (thing-at-point-looking-at regexp)
     (match-string-no-properties 0)))
@@ -270,8 +270,8 @@ A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
   (cond ((fountain-blank-p))
         ((fountain-boneyard-p))
-        ((fountain-get-thing-at-point fountain-section-regexp))
-        ((fountain-get-thing-at-point fountain-synopsis-regexp))
+        ((fountain-looking-at fountain-section-regexp))
+        ((fountain-looking-at fountain-synopsis-regexp))
         ((fountain-note-p))))
 
 (defun fountain-get-scene-heading ()
@@ -532,7 +532,7 @@ is non-nil."
   (push-mark)
   (while (not (or (bobp)
                   (fountain-get-scene-heading)
-                  (fountain-get-thing-at-point fountain-section-regexp)))
+                  (fountain-looking-at fountain-section-regexp)))
     (forward-line -1))
   (if (bobp)
       (progn
