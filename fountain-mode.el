@@ -31,6 +31,7 @@
 ;;; Code:
 
 (require 's)
+(require 'thingatpt)
 
 ;;; Group ======================================================================
 
@@ -234,11 +235,6 @@ dialogue.")
 
 ;;; Functions ==================================================================
 
-(defun fountain-looking-at (regexp)
-  "Return match string if thing at point matches REGEXP."
-  (when (thing-at-point-looking-at regexp)
-    (match-string-no-properties 0)))
-
 (defun fountain-get-line ()
   "Return the line at point as a string."
   (buffer-substring-no-properties
@@ -270,9 +266,9 @@ A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
   (cond ((fountain-blank-p))
         ((fountain-boneyard-p))
-        ((fountain-looking-at fountain-section-regexp))
-        ((fountain-looking-at fountain-synopsis-regexp))
-        ((fountain-note-p))))
+        ((thing-at-point-looking-at fountain-section-regexp))
+        ((thing-at-point-looking-at fountain-synopsis-regexp))
+        ((thing-at-point-looking-at fountain-note-regexp))))
 
 (defun fountain-get-scene-heading ()
   "Return scene heading if matches line at point, nil otherwise."
@@ -391,30 +387,6 @@ is non-nil."
                (or (eobp)
                    (fountain-invisible-p))))))))
 
-(defun fountain-note-p ()
-  "Return non-nil if line at point is within a note."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (let* ((m (point))
-             (block-beginning
-              (car (fountain-get-block-bounds)))
-             (block-end
-              (cdr (fountain-get-block-bounds)))
-             (end
-              (search-forward "]]" block-end t))
-             (start
-              (search-backward "[[" block-beginning t)))
-        (and start end
-             (goto-char end)
-             (looking-at-p (rx (zero-or-more blank) line-end))
-             (goto-char start)
-             (forward-line 0)
-             (looking-at-p fountain-note-regexp)
-             (>= m start)
-             (<= m end))))))
-
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
@@ -532,7 +504,7 @@ is non-nil."
   (push-mark)
   (while (not (or (bobp)
                   (fountain-get-scene-heading)
-                  (fountain-looking-at fountain-section-regexp)))
+                  (thing-at-point-looking-at fountain-section-regexp)))
     (forward-line -1))
   (if (bobp)
       (progn
