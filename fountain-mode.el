@@ -30,6 +30,7 @@
 
 ;;; Code:
 
+(require 'rx)
 (require 's)
 (require 'thingatpt)
 
