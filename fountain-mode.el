@@ -30,7 +30,9 @@
 
 ;;; Code:
 
+(require 'rx)
 (require 's)
+(require 'thingatpt)
 
 ;;; Group ======================================================================
 
@@ -54,10 +56,9 @@ See `fountain-format-template'."
   :type 'string
   :group 'fountain)
 
-(eval-and-compile
-  (defcustom fountain-scene-heading-prefix-list
-    '("INT." "EXT." "I/E." "EST.")
-    "List of scene heading prefixes (case insensitive).
+(defcustom fountain-scene-heading-prefix-list
+  '("INT." "EXT." "I/E." "EST.")
+  "List of scene heading prefixes (case insensitive).
 The default list requires that each scene heading prefix be appended
 with a dot, like so:
 
@@ -65,8 +66,8 @@ INT. HOUSE - DAY
 
 If you prefer not to append a dot to your scene heading prefixes, you
 can add \"INT\", \"EXT\", etc. here."
-    :type '(repeat (string :tag "Prefix"))
-    :group 'fountain))
+  :type '(repeat (string :tag "Prefix"))
+  :group 'fountain)
 
 (defcustom fountain-trans-list
   '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
@@ -168,7 +169,7 @@ similar too:
                line-end)))
   "Regular expression for matching an empty line.")
 
-(defvar fountain-paren-regexp
+(defconst fountain-paren-regexp
   (rx line-start
       (zero-or-more blank)
       "(" (zero-or-more not-newline) ")"
@@ -256,29 +257,6 @@ dialogue.")
     (forward-line 0)
     (looking-at-p fountain-blank-regexp)))
 
-(defun fountain-section-p ()
-  "Return non-nil if line at point is a section heading."
-  (save-excursion
-    (forward-line 0)
-    (looking-at-p fountain-section-regexp)))
-
-(defun fountain-synopsis-p ()
-  "Return non-nil if line at point is a synopsis."
-  (save-excursion
-    (forward-line 0)
-    (looking-at-p fountain-synopsis-regexp)))
-
-(defun fountain-get-synopsis ()
-  "Return synopsis if matches line at point, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (let ((s (s-presence (fountain-get-line))))
-        (when (and s
-                   (s-matches? fountain-synopsis-regexp s))
-          s)))))
-
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
   (comment-only-p (line-beginning-position) (line-end-position)))
@@ -289,9 +267,9 @@ A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
   (cond ((fountain-blank-p))
         ((fountain-boneyard-p))
-        ((fountain-section-p))
-        ((fountain-synopsis-p))
-        ((fountain-note-p))))
+        ((thing-at-point-looking-at fountain-section-regexp))
+        ((thing-at-point-looking-at fountain-synopsis-regexp))
+        ((thing-at-point-looking-at fountain-note-regexp))))
 
 (defun fountain-get-scene-heading ()
   "Return scene heading if matches line at point, nil otherwise."
@@ -410,30 +388,6 @@ is non-nil."
                (or (eobp)
                    (fountain-invisible-p))))))))
 
-(defun fountain-note-p ()
-  "Return non-nil if line at point is within a note."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (let* ((m (point))
-             (block-beginning
-              (car (fountain-get-block-bounds)))
-             (block-end
-              (cdr (fountain-get-block-bounds)))
-             (end
-              (search-forward "]]" block-end t))
-             (start
-              (search-backward "[[" block-beginning t)))
-        (and start end
-             (goto-char end)
-             (looking-at-p (rx (zero-or-more blank) line-end))
-             (goto-char start)
-             (forward-line 0)
-             (looking-at-p fountain-note-regexp)
-             (>= m start)
-             (<= m end))))))
-
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
@@ -537,19 +491,14 @@ is non-nil."
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative)."
  (interactive "^p")
- (if (> n 0)
-     (dotimes (var n)
-       (when (fountain-get-scene-heading)
-         (forward-line 1))
-       (while (not (or (eobp)
-                       (fountain-get-scene-heading)))
-         (forward-line 1)))
-   (dotimes (var (* n -1))
+ (let ((p (if (< n 0) -1 1)))
+   (while (/= n 0)
      (when (fountain-get-scene-heading)
-       (forward-line -1))
-     (while (not (or (bobp)
+       (forward-line p))
+     (while (not (or (eq (point) (buffer-end p))
                      (fountain-get-scene-heading)))
-       (forward-line -1)))))
+       (forward-line p))
+     (setq n (- n p)))))
 
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
@@ -573,7 +522,7 @@ is non-nil."
   (push-mark)
   (while (not (or (bobp)
                   (fountain-get-scene-heading)
-                  (fountain-section-p)))
+                  (thing-at-point-looking-at fountain-section-regexp)))
     (forward-line -1))
   (if (bobp)
       (progn
