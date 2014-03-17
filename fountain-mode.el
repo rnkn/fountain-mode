@@ -56,10 +56,9 @@ See `fountain-format-template'."
   :type 'string
   :group 'fountain)
 
-(eval-and-compile
-  (defcustom fountain-scene-heading-prefix-list
-    '("INT." "EXT." "I/E." "EST.")
-    "List of scene heading prefixes (case insensitive).
+(defcustom fountain-scene-heading-prefix-list
+  '("INT." "EXT." "I/E." "EST.")
+  "List of scene heading prefixes (case insensitive).
 The default list requires that each scene heading prefix be appended
 with a dot, like so:
 
@@ -67,8 +66,8 @@ INT. HOUSE - DAY
 
 If you prefer not to append a dot to your scene heading prefixes, you
 can add \"INT\", \"EXT\", etc. here."
-    :type '(repeat (string :tag "Prefix"))
-    :group 'fountain))
+  :type '(repeat (string :tag "Prefix"))
+  :group 'fountain)
 
 (defcustom fountain-trans-list
   '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
@@ -169,7 +168,7 @@ similar too:
                line-end)))
   "Regular expression for matching an empty line.")
 
-(defvar fountain-paren-regexp
+(defconst fountain-paren-regexp
   (rx line-start
       (zero-or-more blank)
       "(" (zero-or-more not-newline) ")"
