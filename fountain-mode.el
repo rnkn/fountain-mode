@@ -81,10 +81,17 @@ DISSOLVE TO:"
   :type '(repeat (string :tag "Transition"))
   :group 'fountain)
 
-(defcustom fountain-continued-dialog-string "(CONT'D)"
-  "String to insert when same character speaks in succession.
-If nil, do not insert continuing dialog markers."
-  :type '(choice (const nil) string)
+(defcustom fountain-add-continued-dialog t
+  "If non-nil, mark continued dialog appropriately.
+When same character speaks in success, append `fountain-continued-dialog-str'."
+  :type 'boolean
+  :group 'fountain)
+
+(defcustom fountain-continued-dialog-str "(CONT'D)"
+  "String to append when same character speaks in succession.
+If `fountain-add-continued-dialog' is non-nil, append this string
+to character when speaking in succession."
+  :type 'string
   :group 'fountain)
 
 (defcustom fountain-align-column-character 20
@@ -401,30 +408,25 @@ is non-nil."
                           (bobp)))
             (forward-line -1)))))))
 
-(defun fountain-same-previous-character ()
-  "Return non-nil if character at point is identical to prior character."
-  (equal (fountain-get-character)
-         (fountain-get-previous-character 1)))
-
 (defun fountain-continued-dialog-refresh ()
   "Refresh continued dialog markers at point."
-  (let ((s (fountain-get-line)))
-    (if (fountain-same-previous-character)
-        (unless (s-ends-with? fountain-continued-dialog-string s)
-          (fountain-continued-dialog-add))
-      (fountain-continued-dialog-remove))))
+  (if (and (fountain-get-character)
+           (s-equals? (fountain-get-character)
+                      (fountain-get-previous-character 1)))
+      (fountain-continued-dialog-add)
+    (fountain-continued-dialog-remove)))
 
 (defun fountain-continued-dialog-add ()
-  "Add `fountain-continued-dialog-string' to character at point."
-  (forward-line 0)
-  (re-search-forward " *$" (line-end-position) t)
-  (replace-match (concat " " fountain-continued-dialog-string)))
+  "Add `fountain-continued-dialog-str' to character at point."
+  (let ((s (fountain-get-line)))
+    (unless (s-ends-with? fountain-continued-dialog-str s)
+      (string-match " *$" s)
+      (replace-match (concat " " fountain-continued-dialog-str)))))
 
 (defun fountain-continued-dialog-remove ()
-  "Remove `fountain-continued-dialog-string' from character at point."
-  (forward-line 0)
-  (while (re-search-forward  (concat " *" fountain-continued-dialog-string)
-                             (line-end-position) t)
+  "Remove `fountain-continued-dialog-str' if matched."
+  (while (re-search-forward (concat " *" fountain-continued-dialog-str)
+                            (line-end-position) t)
     (delete-region (match-beginning 0) (match-end 0))))
 
 (defun fountain-indent-add (column)
@@ -462,9 +464,9 @@ is non-nil."
       (if fountain-indent-elements
           (fountain-indent-refresh)
         (fountain-indent-add 0))
-      (when (and fountain-continued-dialog-string
-                 (fountain-get-character))
-        (fountain-continued-dialog-refresh))
+      (if fountain-add-continued-dialog
+          (fountain-continued-dialog-refresh)
+        (fountain-continued-dialog-remove))
       (forward-line 1))))
 
 (defun fountain-format-remove ()
