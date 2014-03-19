@@ -451,27 +451,24 @@ is non-nil."
 
 (defun fountain-format-refresh (start end &optional force)
   "Refresh format between START and END."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let ((start
-             (progn
-               (goto-char start)
-               (car (fountain-get-block-bounds))))
-            (end
-             (progn
-               (goto-char end)
-               (cdr (fountain-get-block-bounds)))))
-        (goto-char start)
-        (while (< (point) end)
-          (if fountain-indent-elements
-              (fountain-indent-refresh)
-            (fountain-indent-add 0))
-          (when force
-            (if fountain-add-continued-dialog
-                (fountain-continued-dialog-refresh)
-              (fountain-continued-dialog-remove)))
-          (forward-line 1))))))
+  (let ((start
+         (progn
+           (goto-char start)
+           (car (fountain-get-block-bounds))))
+        (end
+         (progn
+           (goto-char end)
+           (cdr (fountain-get-block-bounds)))))
+    (goto-char start)
+    (while (< (point) end)
+      (if fountain-indent-elements
+          (fountain-indent-refresh)
+        (fountain-indent-add 0))
+      (when force
+        (if fountain-add-continued-dialog
+            (fountain-continued-dialog-refresh)
+          (fountain-continued-dialog-remove)))
+      (forward-line 1))))
 
 (defun fountain-format-force-refresh (&optional arg)
   "Call `fountain-format-refresh' with destructive functionality.
@@ -484,9 +481,19 @@ destructive changed, e.g. add or remove text,
 If prefixed with \\[universal-argument], act on whole buffer,
 otherwise, acts on surrounding text block."
   (interactive "P")
-  (if arg
-      (fountain-format-refresh (point-min) (point-max) t)
-   (fountain-format-refresh (region-beginning) (region-end) t)))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let ((start
+             (cond (arg (point-min))
+                   ((use-region-p) (region-beginning))
+                   ((car (bounds-of-thing-at-point 'scene)))))
+            (end
+             (cond (arg (point-max))
+                   ((use-region-p) (region-end))
+                   ((cdr (bounds-of-thing-at-point 'scene)))))
+            (jit-lock-functions nil))
+        (fountain-format-refresh start end t)))))
 
 (defun fountain-format-remove ()
   "Remove all indenting in buffer."
