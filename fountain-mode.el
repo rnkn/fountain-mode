@@ -241,6 +241,10 @@ dialogue.")
   "Face for synopses."
   :group 'fountain-faces)
 
+;;; Thing Definitions ==========================================================
+
+(put 'scene 'forward-op 'fountain-forward-scene)
+
 ;;; Functions ==================================================================
 
 (defun fountain-get-line ()             ; replace w/ thing-at-point
