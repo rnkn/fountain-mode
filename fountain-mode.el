@@ -82,8 +82,16 @@ DISSOLVE TO:"
   :type '(repeat (string :tag "Transition"))
   :group 'fountain)
 
-(defcustom fountain-continued-dialog-marker "(CONT'D)"
-  "String to insert when same character speaks in succession."
+(defcustom fountain-add-continued-dialog t
+  "If non-nil, mark continued dialog appropriately.
+When same character speaks in success, append `fountain-continued-dialog-str'."
+  :type 'boolean
+  :group 'fountain)
+
+(defcustom fountain-continued-dialog-str "(CONT'D)"
+  "String to append when same character speaks in succession.
+If `fountain-add-continued-dialog' is non-nil, append this string
+to character when speaking in succession."
   :type 'string
   :group 'fountain)
 
@@ -234,9 +242,13 @@ dialogue.")
   "Face for synopses."
   :group 'fountain-faces)
 
+;;; Thing Definitions ==========================================================
+
+(put 'scene 'forward-op 'fountain-forward-scene)
+
 ;;; Functions ==================================================================
 
-(defun fountain-get-line ()
+(defun fountain-get-line ()             ; replace w/ thing-at-point
   "Return the line at point as a string."
   (buffer-substring-no-properties
    (line-beginning-position) (line-end-position)))
@@ -401,9 +413,26 @@ is non-nil."
                           (bobp)))
             (forward-line -1)))))))
 
-(defun fountain-same-previous-character ()
-  "Return non-nil if character at point is identical to prior character."
-  (equal (fountain-get-character) (fountain-get-previous-character 1)))
+(defun fountain-continued-dialog-refresh ()
+  "Refresh continued dialog markers at point."
+  (if (and (fountain-get-character)
+           (s-equals? (fountain-get-character)
+                      (fountain-get-previous-character 1)))
+      (fountain-continued-dialog-add)
+    (fountain-continued-dialog-remove)))
+
+(defun fountain-continued-dialog-add ()
+  "Add `fountain-continued-dialog-str' to character at point."
+  (let ((s (fountain-get-line)))
+    (unless (s-ends-with? fountain-continued-dialog-str s)
+      (re-search-forward " *$" (line-end-position) t)
+      (replace-match (concat " " fountain-continued-dialog-str)))))
+
+(defun fountain-continued-dialog-remove ()
+  "Remove `fountain-continued-dialog-str' if matched."
+  (while (re-search-forward (concat " *" fountain-continued-dialog-str)
+                            (line-end-position) t)
+    (delete-region (match-beginning 0) (match-end 0))))
 
 (defun fountain-indent-add (column)
   "Add indentation properties to line at point."
@@ -425,25 +454,52 @@ is non-nil."
          (fountain-indent-add fountain-align-column-trans))
         ((fountain-indent-add 0))))
 
-(defun fountain-format-refresh (start end)
+(defun fountain-format-refresh (start end &optional force)
   "Refresh format between START and END."
+  (let ((start
+         (progn
+           (goto-char start)
+           (car (fountain-get-block-bounds))))
+        (end
+         (progn
+           (goto-char end)
+           (cdr (fountain-get-block-bounds)))))
+    (goto-char start)
+    (while (< (point) end)
+      (if fountain-indent-elements
+          (fountain-indent-refresh)
+        (fountain-indent-add 0))
+      (when force
+        (if fountain-add-continued-dialog
+            (fountain-continued-dialog-refresh)
+          (fountain-continued-dialog-remove)))
+      (forward-line 1))))
+
+(defun fountain-format-force-refresh (&optional arg)
+  "Call `fountain-format-refresh' with destructive functionality.
+
+When called automatically `fountain-format-refresh' only
+performed cosmetic changes to the buffer. In order to perform
+destructive changed, e.g. add or remove text,
+`fountain-format-refresh' must be called via this function.
+
+If prefixed with \\[universal-argument], act on whole buffer, or
+if region is active, act on region, otherwise act on current
+scene."
+  (interactive "P")
   (save-excursion
     (save-restriction
       (widen)
       (let ((start
-             (progn
-               (goto-char start)
-               (car (fountain-get-block-bounds))))
+             (cond (arg (point-min))
+                   ((use-region-p) (region-beginning))
+                   ((car (bounds-of-thing-at-point 'scene)))))
             (end
-             (progn
-               (goto-char end)
-               (cdr (fountain-get-block-bounds)))))
-        (goto-char start)
-        (while (< (point) end)
-          (if fountain-indent-elements
-              (fountain-indent-refresh)
-            (fountain-indent-add 0))
-          (forward-line 1))))))
+             (cond (arg (point-max))
+                   ((use-region-p) (region-end))
+                   ((cdr (bounds-of-thing-at-point 'scene)))))
+            (jit-lock-functions nil))
+        (fountain-format-refresh start end t)))))
 
 (defun fountain-format-remove ()
   "Remove all indenting in buffer."
@@ -598,6 +654,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
+    (define-key map (kbd "C-c C-c") 'fountain-format-force-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
