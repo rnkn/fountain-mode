@@ -420,7 +420,7 @@ is non-nil."
   "Add `fountain-continued-dialog-str' to character at point."
   (let ((s (fountain-get-line)))
     (unless (s-ends-with? fountain-continued-dialog-str s)
-      (string-match " *$" s)
+      (re-search-forward " *$" (line-end-position) t)
       (replace-match (concat " " fountain-continued-dialog-str)))))
 
 (defun fountain-continued-dialog-remove ()
@@ -449,25 +449,44 @@ is non-nil."
          (fountain-indent-add fountain-align-column-trans))
         ((fountain-indent-add 0))))
 
-(defun fountain-format-refresh (start end)
+(defun fountain-format-refresh (start end &optional force)
   "Refresh format between START and END."
-  (let ((start
-         (progn
-           (goto-char start)
-           (car (fountain-get-block-bounds))))
-        (end
-         (progn
-           (goto-char end)
-           (cdr (fountain-get-block-bounds)))))
-    (goto-char start)
-    (while (< (point) end)
-      (if fountain-indent-elements
-          (fountain-indent-refresh)
-        (fountain-indent-add 0))
-      (if fountain-add-continued-dialog
-          (fountain-continued-dialog-refresh)
-        (fountain-continued-dialog-remove))
-      (forward-line 1))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let ((start
+             (progn
+               (goto-char start)
+               (car (fountain-get-block-bounds))))
+            (end
+             (progn
+               (goto-char end)
+               (cdr (fountain-get-block-bounds)))))
+        (goto-char start)
+        (while (< (point) end)
+          (if fountain-indent-elements
+              (fountain-indent-refresh)
+            (fountain-indent-add 0))
+          (when force
+            (if fountain-add-continued-dialog
+                (fountain-continued-dialog-refresh)
+              (fountain-continued-dialog-remove)))
+          (forward-line 1))))))
+
+(defun fountain-format-force-refresh (&optional arg)
+  "Call `fountain-format-refresh' with destructive functionality.
+
+When called automatically `fountain-format-refresh' only
+performed cosmetic changes to the buffer. In order to perform
+destructive changed, e.g. add or remove text,
+`fountain-format-refresh' must be called via this function.
+
+If prefixed with \\[universal-argument], act on whole buffer,
+otherwise, acts on surrounding text block."
+  (interactive "P")
+  (if arg
+      (fountain-format-refresh (point-min) (point-max) t)
+   (fountain-format-refresh (region-beginning) (region-end) t)))
 
 (defun fountain-format-remove ()
   "Remove all indenting in buffer."
@@ -622,6 +641,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
+    (define-key map (kbd "C-c C-c") 'fountain-format-force-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
