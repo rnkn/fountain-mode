@@ -482,8 +482,9 @@ performed cosmetic changes to the buffer. In order to perform
 destructive changed, e.g. add or remove text,
 `fountain-format-refresh' must be called via this function.
 
-If prefixed with \\[universal-argument], act on whole buffer,
-otherwise, acts on surrounding text block."
+If prefixed with \\[universal-argument], act on whole buffer, or
+if region is active, act on region, otherwise act on current
+scene."
   (interactive "P")
   (save-excursion
     (save-restriction
