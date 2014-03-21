@@ -6,6 +6,10 @@ Emacs major mode for editing Fountain-formatted text files.
 For more information on the Fountain markup format, visit
 <http://fountain.io>.
 
+![Fountain Mode screenshot][screenshot]
+
+[screenshot]: https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png
+
 Features
 --------
 
@@ -26,11 +30,11 @@ The following features are supported:
   e.g. `M-;`)
 - customizable indentation align-to columns, slugline prefixes,
   transition suffixes, and faces
-- see [Tips & Tricks][wiki-tips] for ways to extend Fountain Mode
+- see the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode
 
 The following features are not yet supported:
 
-- syntax highlighting for all other elements, including emphasis
+- syntax highlighting for other elements, including emphasis
 - menus
 - reading metadata
 - dual dialogue
@@ -48,7 +52,7 @@ For exporting, I recommend [Highland][] (OS X) or [Trelby][] (Linux,
 Windows). A full list of apps that support the Fountain format is
 available here: <http://fountain.io/apps>
 
-[wiki-tips]: https://github.com/rnkn/fountain-mode/wiki/Tips-%26-Tricks "Tips & Tricks"
+[wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
 [Highland]: http://www.quoteunquoteapps.com/highland/ "Highland"
 [Trelby]: http://www.trelby.org "Trelby"
 
