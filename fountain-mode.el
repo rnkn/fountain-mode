@@ -350,7 +350,7 @@ is non-nil."
                    (save-excursion
                      (forward-line 1)
                      (unless (eobp)
-                       (not (fountain-invisible-p)))))
+                       (null (fountain-invisible-p)))))
           s)))))
 
 (defun fountain-dialogue-p ()
@@ -405,21 +405,29 @@ is non-nil."
   (save-excursion
     (save-restriction
       (widen)
-      (dotimes (var n (fountain-get-character))
+      (while (> n 0)
         (unless (fountain-get-scene-heading)
-          (forward-line -1)
-          (while (not (or (fountain-get-character)
-                          (fountain-get-scene-heading)
-                          (bobp)))
-            (forward-line -1)))))))
+          (forward-line -1))
+        (while (null (or (fountain-get-character)
+                         (fountain-get-scene-heading)
+                         (bobp)))
+          (forward-line -1))
+        (setq n (- n 1)))
+      (fountain-get-character))))
 
-(defun fountain-continued-dialog-refresh ()
-  "Refresh continued dialog markers at point."
-  (if (and (fountain-get-character)
-           (s-equals? (fountain-get-character)
-                      (fountain-get-previous-character 1)))
-      (fountain-continued-dialog-add)
-    (fountain-continued-dialog-remove)))
+(defun fountain-continued-dialog-refresh (start end)
+  "Refresh continued dialog markers between START and END."
+  (while (re-search-forward
+          (concat " *" fountain-continued-dialog-str) end t)
+    (delete-region (match-beginning 0) (match-end 0)))
+  (when fountain-add-continued-dialog
+    (goto-char start)
+    (while (< (point) end)
+      (when (and (fountain-get-character)
+                 (s-equals? (fountain-get-character)
+                            (fountain-get-previous-character 1)))
+        (fountain-continued-dialog-add))
+      (forward-line 1))))
 
 (defun fountain-continued-dialog-add ()
   "Add `fountain-continued-dialog-str' to character at point."
@@ -427,20 +435,6 @@ is non-nil."
     (unless (s-ends-with? fountain-continued-dialog-str s)
       (re-search-forward " *$" (line-end-position) t)
       (replace-match (concat " " fountain-continued-dialog-str)))))
-
-(defun fountain-continued-dialog-remove ()
-  "Remove `fountain-continued-dialog-str' if matched."
-  (while (re-search-forward (concat " *" fountain-continued-dialog-str)
-                            (line-end-position) t)
-    (delete-region (match-beginning 0) (match-end 0))))
-
-(defun fountain-indent-add (column)
-  "Add indentation properties to line at point."
-  (with-silent-modifications
-    (put-text-property (line-beginning-position) (line-end-position)
-                       'line-prefix `(space :align-to ,column))
-    (put-text-property (line-beginning-position) (line-end-position)
-                       'wrap-prefix `(space :align-to ,column))))
 
 (defun fountain-indent-refresh ()
   "Refresh indentation properties at point."
@@ -454,26 +448,34 @@ is non-nil."
          (fountain-indent-add fountain-align-column-trans))
         ((fountain-indent-add 0))))
 
+(defun fountain-indent-add (column)
+  "Add indentation properties to line at point."
+  (with-silent-modifications
+    (put-text-property (line-beginning-position) (line-end-position)
+                       'line-prefix `(space :align-to ,column))
+    (put-text-property (line-beginning-position) (line-end-position)
+                       'wrap-prefix `(space :align-to ,column))))
+
 (defun fountain-format-refresh (start end &optional force)
   "Refresh format between START and END."
-  (let ((start
-         (progn
-           (goto-char start)
-           (car (fountain-get-block-bounds))))
-        (end
-         (progn
-           (goto-char end)
-           (cdr (fountain-get-block-bounds)))))
-    (goto-char start)
-    (while (< (point) end)
-      (if fountain-indent-elements
-          (fountain-indent-refresh)
-        (fountain-indent-add 0))
+  (delay-mode-hooks
+    (let ((start
+           (progn
+             (goto-char start)
+             (car (fountain-get-block-bounds))))
+          (end
+           (progn
+             (goto-char end)
+             (cdr (fountain-get-block-bounds)))))
+      (goto-char start)
+      (while (< (point) end)
+        (if fountain-indent-elements
+            (fountain-indent-refresh)
+          (fountain-indent-add 0))
+        (forward-line 1))
       (when force
-        (if fountain-add-continued-dialog
-            (fountain-continued-dialog-refresh)
-          (fountain-continued-dialog-remove)))
-      (forward-line 1))))
+        (goto-char start)
+        (fountain-continued-dialog-refresh start end)))))
 
 (defun fountain-format-force-refresh (&optional arg)
   "Call `fountain-format-refresh' with destructive functionality.
@@ -497,8 +499,7 @@ scene."
             (end
              (cond (arg (point-max))
                    ((use-region-p) (region-end))
-                   ((cdr (bounds-of-thing-at-point 'scene)))))
-            (jit-lock-functions nil))
+                   ((cdr (bounds-of-thing-at-point 'scene))))))
         (fountain-format-refresh start end t)))))
 
 (defun fountain-format-remove ()
@@ -529,8 +530,9 @@ scene."
    (while (/= n 0)
      (when (fountain-get-scene-heading)
        (forward-line p))
-     (while (not (or (eq (point) (buffer-end p))
-                     (fountain-get-scene-heading)))
+     (while (null (or (eq (point)
+                          (buffer-end p))
+                      (fountain-get-scene-heading)))
        (forward-line p))
      (setq n (- n p)))))
 
@@ -554,9 +556,9 @@ scene."
   (interactive)
   (widen)
   (push-mark)
-  (while (not (or (bobp)
-                  (fountain-get-scene-heading)
-                  (thing-at-point-looking-at fountain-section-regexp)))
+  (while (null (or (bobp)
+                   (fountain-get-scene-heading)
+                   (thing-at-point-looking-at fountain-section-regexp)))
     (forward-line -1))
   (if (bobp)
       (progn
