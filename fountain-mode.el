@@ -84,7 +84,8 @@ DISSOLVE TO:"
 
 (defcustom fountain-add-continued-dialog t
   "If non-nil, mark continued dialog appropriately.
-When same character speaks in success, append `fountain-continued-dialog-str'."
+When same character speaks in success, append
+`fountain-continued-dialog-str'."
   :type 'boolean
   :group 'fountain)
 
@@ -628,17 +629,15 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
 
 (defun fountain-match-line (func limit)
   "If FUNC matches within LIMIT set match data to line."
-  (let ((match))
+  (let (match)
     (while (and (null match)
                 (< (point) limit))
-      (if (funcall func)
-          (progn
-            (set-match-data
-             (list (set-marker (make-marker) (line-beginning-position))
-                   (set-marker (make-marker) (line-end-position))))
-            (forward-line 1)
-            (setq match t))
-        (forward-line 1)))
+      (when (funcall func)
+        (set-match-data
+         (list (set-marker (make-marker) (line-beginning-position))
+               (set-marker (make-marker) (line-end-position))))
+        (setq match t))
+      (forward-line 1))
     match))
 
 (defun fountain-match-scene-heading (limit)
