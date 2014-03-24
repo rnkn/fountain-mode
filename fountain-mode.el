@@ -215,6 +215,14 @@ dialogue.")
       (group (zero-or-more not-newline)))
   "Regular expression for matching synopses.")
 
+(defconst fountain-centered-regexp
+  (rx line-start
+      (zero-or-more blank)
+      ">" (zero-or-more not-newline) "<"
+      (zero-or-more blank)
+      line-end)
+  "Regular expression for matching centered text.")
+
 ;;; Faces ======================================================================
 
 (defgroup fountain-faces nil
@@ -455,6 +463,9 @@ speaking in succession."
          (fountain-indent-add fountain-align-column-dialogue))
         ((fountain-trans-p)
          (fountain-indent-add fountain-align-column-trans))
+        ((thing-at-point-looking-at fountain-centered-regexp)
+         (fountain-indent-add
+          (/ (- (window-body-width) (length (fountain-get-line))) 2)))
         ((fountain-indent-add 0))))
 
 (defun fountain-indent-add (column)
