@@ -17,8 +17,9 @@ The following features are supported:
 
 - syntax highlighting for sluglines, forced sluglines, section headings,
   synopses, notes and boneyard elements
-- auto-indentation for character, parenthetical, dialogue and transition
-  elements (display only, does not modify file contents)
+- auto-indentation for character, parenthetical, dialogue, transition
+  and centered text elements (display only, does not modify file
+  contents)
 - `S-RET` to upcase the line and insert a newline
 - `M-n` and `M-p` to navigate by scene heading
 - `C-c C-a` to insert a synopsis under the current scene or section
