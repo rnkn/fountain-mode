@@ -411,6 +411,23 @@ is non-nil."
                (or (eobp)
                    (fountain-invisible-p))))))))
 
+(defun fountain-format-template (template)
+  "Format TEMPLATE according to the following list.
+
+  ${longtime}   Long date format (defined in `fountain-long-time-format')
+  ${time}       Short date format (defined in `fountain-short-time-format')
+  ${fullname}   User full name (defined in `user-full-name')
+  ${nick}       User first name (defined in `user-login-name')
+  ${email}      User email (defined in `user-mail-address')
+  ${uuid}       Insert a UUID (defined in `fountain-uuid-function')"
+  (s-format template 'aget
+            `(("longtime" . ,(format-time-string fountain-long-time-format))
+              ("time" . ,(format-time-string fountain-short-time-format))
+              ("fullname" . ,user-full-name)
+              ("nick" . ,(capitalize user-login-name))
+              ("email" . ,user-mail-address)
+              ("uuid" . ,(fountain-uuid)))))
+
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
@@ -448,10 +465,9 @@ speaking in succession."
 
 (defun fountain-continued-dialog-add ()
   "Add `fountain-continued-dialog-string' to character at point."
-  (let ((s (fountain-get-line)))
-    (unless (s-ends-with? fountain-continued-dialog-string s)
-      (re-search-forward " *$" (line-end-position) t)
-      (replace-match (concat " " fountain-continued-dialog-string)))))
+  (unless (s-ends-with? fountain-continued-dialog-string (fountain-get-line))
+    (re-search-forward " *$" (line-end-position) t)
+    (replace-match (concat " " fountain-continued-dialog-string))))
 
 (defun fountain-indent-refresh ()
   "Refresh indentation properties at point."
@@ -476,15 +492,15 @@ speaking in succession."
     (put-text-property (line-beginning-position) (line-end-position)
                        'wrap-prefix `(space :align-to ,column))))
 
-(defun fountain-format-refresh (start end &optional force)
+(defun fountain-format-refresh (start end &optional force arg)
   "Refresh format between START and END.
 
 When optional argument FORCE is non-nil, e.g. when called via
-`fountain-format-force-refresh', perform destructive changes,
-including:
+`fountain-format-force-refresh', perform destructive changes.
 
-- When point is at scene heading, upcase scene heading
-- Run `fountain-continued-dialog-refresh'"
+If ARG is non-nil, signalling act on whole buffer, inhibit
+performing `fountain-indent-refresh' (this is too memory
+intensive and better performed by `jit-lock-mode')."
   (let ((start
          (save-excursion
            (goto-char start)
@@ -497,41 +513,13 @@ including:
       (when (fountain-get-scene-heading)
         (upcase-region (line-beginning-position) (line-end-position)))
       (fountain-continued-dialog-refresh start end))
-    (goto-char start)
-    (while (< (point) end)
-      (if fountain-indent-elements
-          (fountain-indent-refresh)
-        (fountain-indent-add 0))
-      (forward-line 1))))
-
-(defun fountain-format-force-refresh (&optional arg)
-  "Call `fountain-format-refresh' with destructive functionality.
-
-When called automatically `fountain-format-refresh' only performs
-cosmetic changes to the buffer. In order to perform destructive
-changes, `fountain-format-refresh' must be called via this
-function. This function will perform the following:
-
-- Refresh display indentation
-- When point is at scene heading, upcase scene heading
-- Add or remove `fountain-continued-dialog-string' appropriately
-
-If prefixed with \\[universal-argument], act on whole buffer, or
-if region is active, act on region, otherwise act on current
-scene."
-  (interactive "P")
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let ((start
-             (cond (arg (point-min))
-                   ((use-region-p) (region-beginning))
-                   ((car (bounds-of-thing-at-point 'scene)))))
-            (end
-             (cond (arg (point-max))
-                   ((use-region-p) (region-end))
-                   ((cdr (bounds-of-thing-at-point 'scene))))))
-        (fountain-format-refresh start end t)))))
+    (unless arg
+      (goto-char start)
+      (while (< (point) end)
+        (if fountain-indent-elements
+            (fountain-indent-refresh)
+          (fountain-indent-add 0))
+        (forward-line 1)))))
 
 (defun fountain-format-remove ()
   "Remove all indenting in buffer."
@@ -622,23 +610,6 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
         (comment-indent)
         (insert (fountain-format-template fountain-note-template))))))
 
-(defun fountain-format-template (template)
-  "Format TEMPLATE according to the following list.
-
-  ${longtime}   Long date format (defined in `fountain-long-time-format')
-  ${time}       Short date format (defined in `fountain-short-time-format')
-  ${fullname}   User full name (defined in `user-full-name')
-  ${nick}       User first name (defined in `user-login-name')
-  ${email}      User email (defined in `user-mail-address')
-  ${uuid}       Insert a UUID (defined in `fountain-uuid-function')"
-  (s-format template 'aget
-            `(("longtime" . ,(format-time-string fountain-long-time-format))
-              ("time" . ,(format-time-string fountain-short-time-format))
-              ("fullname" . ,user-full-name)
-              ("nick" . ,(capitalize user-login-name))
-              ("email" . ,user-mail-address)
-              ("uuid" . ,(fountain-uuid)))))
-
 (defun fountain-insert-metadata ()
   "Insert the metadata template at the beginning of file."
   (interactive)
@@ -646,6 +617,35 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (goto-char (point-min))
   (save-excursion
     (insert (fountain-format-template fountain-metadata-template) "\n")))
+
+(defun fountain-format-force-refresh (&optional arg)
+  "Call `fountain-format-refresh' with destructive functionality.
+
+When called automatically `fountain-format-refresh' only performs
+cosmetic changes to the buffer. In order to perform destructive
+changes, `fountain-format-refresh' must be called via this
+function. This function will perform the following:
+
+- Refresh display indentation
+- When point is at scene heading, upcase scene heading
+- Add or remove `fountain-continued-dialog-string' appropriately
+
+If prefixed with \\[universal-argument], act on whole
+buffer (warning: this can take a while), or if region is active,
+act on region, otherwise act on current scene."
+  (interactive "P")
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let ((start
+             (cond (arg (point-min))
+                   ((use-region-p) (region-beginning))
+                   ((car (bounds-of-thing-at-point 'scene)))))
+            (end
+             (cond (arg (point-max))
+                   ((use-region-p) (region-end))
+                   ((cdr (bounds-of-thing-at-point 'scene))))))
+        (fountain-format-refresh start end t arg)))))
 
 ;;; Font Lock ==================================================================
 
