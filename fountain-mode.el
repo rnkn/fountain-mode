@@ -84,12 +84,15 @@ DISSOLVE TO:"
 
 (defcustom fountain-add-continued-dialog t
   "If non-nil, mark continued dialog appropriately.
-When same character speaks in success, append `fountain-continued-dialog-str'."
+
+When same character speaks in succession, append
+`fountain-continued-dialog-string'."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-continued-dialog-str "(CONT'D)"
+(defcustom fountain-continued-dialog-string "(CONT'D)"
   "String to append when same character speaks in succession.
+
 If `fountain-add-continued-dialog' is non-nil, append this string
 to character when speaking in succession."
   :type 'string
@@ -416,9 +419,15 @@ is non-nil."
       (fountain-get-character))))
 
 (defun fountain-continued-dialog-refresh (start end)
-  "Refresh continued dialog markers between START and END."
+  "Refresh continued dialog markers between START and END.
+
+First, delete all matches of `fountain-continued-dialog-string'
+between START and END, then, if `fountain-add-continued-dialog'
+is non-nil, add `fountain-continued-dialog-string' on characters
+speaking in succession."
+  (goto-char start)
   (while (re-search-forward
-          (concat " *" fountain-continued-dialog-str) end t)
+          (concat " *" fountain-continued-dialog-string) end t)
     (delete-region (match-beginning 0) (match-end 0)))
   (when fountain-add-continued-dialog
     (goto-char start)
@@ -430,11 +439,11 @@ is non-nil."
       (forward-line 1))))
 
 (defun fountain-continued-dialog-add ()
-  "Add `fountain-continued-dialog-str' to character at point."
+  "Add `fountain-continued-dialog-string' to character at point."
   (let ((s (fountain-get-line)))
-    (unless (s-ends-with? fountain-continued-dialog-str s)
+    (unless (s-ends-with? fountain-continued-dialog-string s)
       (re-search-forward " *$" (line-end-position) t)
-      (replace-match (concat " " fountain-continued-dialog-str)))))
+      (replace-match (concat " " fountain-continued-dialog-string)))))
 
 (defun fountain-indent-refresh ()
   "Refresh indentation properties at point."
@@ -457,33 +466,44 @@ is non-nil."
                        'wrap-prefix `(space :align-to ,column))))
 
 (defun fountain-format-refresh (start end &optional force)
-  "Refresh format between START and END."
-  (delay-mode-hooks
-    (let ((start
-           (progn
-             (goto-char start)
-             (car (fountain-get-block-bounds))))
-          (end
-           (progn
-             (goto-char end)
-             (cdr (fountain-get-block-bounds)))))
-      (goto-char start)
-      (while (< (point) end)
-        (if fountain-indent-elements
-            (fountain-indent-refresh)
-          (fountain-indent-add 0))
-        (forward-line 1))
-      (when force
-        (goto-char start)
-        (fountain-continued-dialog-refresh start end)))))
+  "Refresh format between START and END.
+
+When optional argument FORCE is non-nil, e.g. when called via
+`fountain-format-force-refresh', perform destructive changes,
+including:
+
+- When point is at scene heading, upcase scene heading
+- Run `fountain-continued-dialog-refresh'"
+  (let ((start
+         (save-excursion
+           (goto-char start)
+           (car (fountain-get-block-bounds))))
+        (end
+         (save-excursion
+           (goto-char end)
+           (cdr (fountain-get-block-bounds)))))
+    (when force
+      (when (fountain-get-scene-heading)
+        (upcase-region (line-beginning-position) (line-end-position)))
+      (fountain-continued-dialog-refresh start end))
+    (goto-char start)
+    (while (< (point) end)
+      (if fountain-indent-elements
+          (fountain-indent-refresh)
+        (fountain-indent-add 0))
+      (forward-line 1))))
 
 (defun fountain-format-force-refresh (&optional arg)
   "Call `fountain-format-refresh' with destructive functionality.
 
-When called automatically `fountain-format-refresh' only
-performed cosmetic changes to the buffer. In order to perform
-destructive changed, e.g. add or remove text,
-`fountain-format-refresh' must be called via this function.
+When called automatically `fountain-format-refresh' only performs
+cosmetic changes to the buffer. In order to perform destructive
+changes, `fountain-format-refresh' must be called via this
+function. This function will perform the following:
+
+- Refresh display indentation
+- When point is at scene heading, upcase scene heading
+- Add or remove `fountain-continued-dialog-string' appropriately
 
 If prefixed with \\[universal-argument], act on whole buffer, or
 if region is active, act on region, otherwise act on current
