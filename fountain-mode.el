@@ -175,10 +175,10 @@ option to non-nil."
   "${time} - ${fullname}: "
   "Template for inserting notes. See `fountain-format-template'.
 
-The default (\"${time} - ${fullname}: \") will insert something
-similar too:
+The default \"${time} - ${fullname}: \" will insert something
+similar to:
 
-\[\[ 01/20/14 - Alan Smithee:  \]\]"
+\[\[01/20/14 - Alan Smithee: \]\]"
   :type 'string
   :group 'fountain)
 
