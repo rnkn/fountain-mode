@@ -5,7 +5,11 @@
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
 ;; Version: 0.10.1
+;; Package-Requires: ((s "1.9.0"))
+;; URL: http://github.com/rnkn/fountain-mode/
 
+;; This file is not part of GNU Emacs.
+ 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or (at
