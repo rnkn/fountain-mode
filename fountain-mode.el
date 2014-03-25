@@ -90,12 +90,20 @@ When same character speaks in succession, append
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-continued-dialog-string "(CONT'D)"
+(defcustom fountain-continued-dialog-string "CONT'D"
   "String to append when same character speaks in succession.
 
 If `fountain-add-continued-dialog' is non-nil, append this string
-to character when speaking in succession."
+to character when speaking in succession.
+
+Parentheses are added automatically, e.g. \"CONT'D\" becomes
+\"(CONT'D)\""
   :type 'string
+  :group 'fountain)
+
+(defcustom fountain-trim-whitespace nil
+  "If non-nil, trim whitespace around elements."
+  :type 'boolean
   :group 'fountain)
 
 (defcustom fountain-align-column-character 20
@@ -450,57 +458,40 @@ First, delete all matches of `fountain-continued-dialog-string'
 between START and END, then, if `fountain-add-continued-dialog'
 is non-nil, add `fountain-continued-dialog-string' on characters
 speaking in succession."
-  (goto-char start)
-  (while (re-search-forward
-          (concat " *" fountain-continued-dialog-string) end t)
-    (delete-region (match-beginning 0) (match-end 0)))
-  (when fountain-add-continued-dialog
+  (let ((s (concat "(" fountain-continued-dialog-string ")")))
     (goto-char start)
-    (while (< (point) end)
-      (when (and (fountain-get-character)
-                 (s-equals? (fountain-get-character)
-                            (fountain-get-previous-character 1)))
-        (fountain-continued-dialog-add))
-      (forward-line 1))))
+    (while (re-search-forward s end t)
+      (delete-region (match-beginning 0) (match-end 0)))
+    (when fountain-add-continued-dialog
+      (goto-char start)
+      (while (< (point) end)
+        (when (and (null (s-ends-with? s (fountain-get-line)))
+                   (fountain-get-character)
+                   (s-equals? (fountain-get-character)
+                              (fountain-get-previous-character 1)))
+          (re-search-forward " *$" (line-end-position) t)
+          (replace-match (concat " " s)))
+        (forward-line 1)))))
 
-(defun fountain-continued-dialog-add ()
-  "Add `fountain-continued-dialog-string' to character at point."
-  (unless (s-ends-with? fountain-continued-dialog-string (fountain-get-line))
-    (re-search-forward " *$" (line-end-position) t)
-    (replace-match (concat " " fountain-continued-dialog-string))))
-
-(defun fountain-indent-refresh ()
-  "Refresh indentation properties at point."
-  (cond ((fountain-get-character)
-         (fountain-indent-add fountain-align-column-character))
-        ((fountain-paren-p)
-         (fountain-indent-add fountain-align-column-paren))
-        ((fountain-dialogue-p)
-         (fountain-indent-add fountain-align-column-dialogue))
-        ((fountain-trans-p)
-         (fountain-indent-add fountain-align-column-trans))
-        ((thing-at-point-looking-at fountain-centered-regexp)
-         (fountain-indent-add
-          (/ (- (window-body-width) (length (fountain-get-line))) 2)))
-        ((fountain-indent-add 0))))
+(defun fountain-trim-whitespace ()
+  "Trim whitespace around line."
+  (let ((s (s-trim (fountain-get-line)))
+        (start (line-beginning-position))
+        (end (line-end-position)))
+    (insert-before-markers s)
+    (delete-region start end)))
 
 (defun fountain-indent-add (column)
-  "Add indentation properties to line at point."
+  "Add indentation properties to COLUMN at point."
   (with-silent-modifications
     (put-text-property (line-beginning-position) (line-end-position)
                        'line-prefix `(space :align-to ,column))
     (put-text-property (line-beginning-position) (line-end-position)
                        'wrap-prefix `(space :align-to ,column))))
 
-(defun fountain-format-refresh (start end &optional force arg)
-  "Refresh format between START and END.
-
-When optional argument FORCE is non-nil, e.g. when called via
-`fountain-format-force-refresh', perform destructive changes.
-
-If ARG is non-nil, signalling act on whole buffer, inhibit
-performing `fountain-indent-refresh' (this is too memory
-intensive and better performed by `jit-lock-mode')."
+(defun fountain-indent-refresh (start end)
+  "Refresh indentation properties between START and END.
+This function is called by `jit-lock-mode'."
   (let ((start
          (save-excursion
            (goto-char start)
@@ -509,25 +500,31 @@ intensive and better performed by `jit-lock-mode')."
          (save-excursion
            (goto-char end)
            (cdr (fountain-get-block-bounds)))))
-    (when force
-      (when (fountain-get-scene-heading)
-        (upcase-region (line-beginning-position) (line-end-position)))
-      (fountain-continued-dialog-refresh start end))
-    (unless arg
-      (goto-char start)
-      (while (< (point) end)
-        (if fountain-indent-elements
-            (fountain-indent-refresh)
-          (fountain-indent-add 0))
-        (forward-line 1)))))
+    (goto-char start)
+    (while (< (point) end)
+      (if fountain-indent-elements
+          (cond ((fountain-get-character)
+                 (fountain-indent-add fountain-align-column-character))
+                ((fountain-paren-p)
+                 (fountain-indent-add fountain-align-column-paren))
+                ((fountain-dialogue-p)
+                 (fountain-indent-add fountain-align-column-dialogue))
+                ((fountain-trans-p)
+                 (fountain-indent-add fountain-align-column-trans))
+                ((thing-at-point-looking-at fountain-centered-regexp)
+                 (fountain-indent-add
+                  (/ (- (window-body-width) (length (fountain-get-line))) 2)))
+                ((fountain-indent-add 0)))
+        (fountain-indent-add 0))
+      (forward-line 1))))
 
-(defun fountain-format-remove ()
+(defun fountain-indent-remove ()
   "Remove all indenting in buffer."
   (save-excursion
     (save-restriction
       (widen)
       (let (fountain-indent-elements)
-        (fountain-format-refresh (point-min) (point-max))))))
+        (fountain-indent-refresh (point-min) (point-max))))))
 
 ;;; Interaction ================================================================
 
@@ -618,21 +615,15 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (save-excursion
     (insert (fountain-format-template fountain-metadata-template) "\n")))
 
-(defun fountain-format-force-refresh (&optional arg)
-  "Call `fountain-format-refresh' with destructive functionality.
+(defun fountain-format-apply (&optional arg)
+  "Perform destructive formatting appropriately.
 
-When called automatically `fountain-format-refresh' only performs
-cosmetic changes to the buffer. In order to perform destructive
-changes, `fountain-format-refresh' must be called via this
-function. This function will perform the following:
+- When point is at scene heading, upcase scene heading.
+- Add or remove `fountain-continued-dialog-string' appropriately.
 
-- Refresh display indentation
-- When point is at scene heading, upcase scene heading
-- Add or remove `fountain-continued-dialog-string' appropriately
-
-If prefixed with \\[universal-argument], act on whole
-buffer (warning: this can take a while), or if region is active,
-act on region, otherwise act on current scene."
+If prefixed with \\[universal-argument], act on whole buffer, or
+if region is active, act on region, otherwise act on current
+scene."
   (interactive "P")
   (save-excursion
     (save-restriction
@@ -645,7 +636,9 @@ act on region, otherwise act on current scene."
              (cond (arg (point-max))
                    ((use-region-p) (region-end))
                    ((cdr (bounds-of-thing-at-point 'scene))))))
-        (fountain-format-refresh start end t arg)))))
+        (when (fountain-get-scene-heading)
+          (upcase-region (line-beginning-position) (line-end-position)))
+        (fountain-continued-dialog-refresh start end)))))
 
 ;;; Font Lock ==================================================================
 
@@ -687,7 +680,7 @@ act on region, otherwise act on current scene."
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
-    (define-key map (kbd "C-c C-c") 'fountain-format-force-refresh)
+    (define-key map (kbd "C-c C-c") 'fountain-format-apply)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
@@ -718,8 +711,8 @@ For more information on the Fountain markup format, visit
        (if fountain-switch-comment-syntax "" "/*"))
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
-  (jit-lock-register 'fountain-format-refresh)
-  (add-hook 'change-major-mode-hook 'fountain-format-remove nil t))
+  (jit-lock-register 'fountain-indent-refresh)
+  (add-hook 'change-major-mode-hook 'fountain-indent-remove nil t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
