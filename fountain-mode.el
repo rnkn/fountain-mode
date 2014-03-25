@@ -64,19 +64,21 @@ See `fountain-format-template'."
 (defcustom fountain-scene-heading-prefix-list
   '("INT." "EXT." "I/E." "EST.")
   "List of scene heading prefixes (case insensitive).
-The default list requires that each scene heading prefix be appended
-with a dot, like so:
+
+The default list requires that each scene heading prefix be
+appended with a dot, like so:
 
 INT. HOUSE - DAY
 
-If you prefer not to append a dot to your scene heading prefixes, you
-can add \"INT\", \"EXT\", etc. here."
+If you prefer not to append a dot to your scene heading prefixes,
+you can add \"INT\", \"EXT\", etc. here."
   :type '(repeat (string :tag "Prefix"))
   :group 'fountain)
 
 (defcustom fountain-trans-list
   '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
   "List of transition endings (case sensitive).
+
 This list is used to match the endings of transitions,
 e.g. \"TO:\" will match both the following:
 
@@ -138,6 +140,7 @@ This option does not affect file contents."
 
 (defcustom fountain-forced-scene-heading-equal nil
   "If non-nil, forced scene headings will be treated as equal.
+
 It is usually preferable to treat forced scene headings as
 constituents of the larger scene. If you prefer to treat forced
 scene headings as equal to regular scene headings, set this to
@@ -147,6 +150,7 @@ non-nil."
 
 (defcustom fountain-switch-comment-syntax nil
   "If non-nil, use \"//\" as default comment syntax.
+
 Fountain Mode supports two syntax for commenting (boneyard):
 
 /* this text is in a boneyard */
@@ -159,26 +163,28 @@ option to non-nil."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-short-time-format
-  "%x"
+(defcustom fountain-short-time-format "%x"
   "Format of date and time. See `format-time-string'."
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-long-time-format
-  "%B %-e, %Y"
+(defcustom fountain-long-time-format "%B %-e, %Y"
   "Format of date and time. See `format-time-string'."
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-note-template
-  "${time} - ${fullname}: "
+(defcustom fountain-note-template "${time} - ${fullname}: "
   "Template for inserting notes. See `fountain-format-template'.
 
 The default \"${time} - ${fullname}: \" will insert something
 similar to:
 
 \[\[01/20/14 - Alan Smithee: \]\]"
+  :type 'string
+  :group 'fountain)
+
+(defcustom fountain-uuid-command "uuidgen"
+  "Shell command for generating a UUID."
   :type 'string
   :group 'fountain)
 
@@ -431,7 +437,7 @@ is non-nil."
   ${fullname}   User full name (defined in `user-full-name')
   ${nick}       User first name (defined in `user-login-name')
   ${email}      User email (defined in `user-mail-address')
-  ${uuid}       Insert a UUID (defined in `fountain-uuid-function')"
+  ${uuid}       Insert a UUID (defined in `fountain-uuid-command')"
   (s-format template 'aget
             `(("longtime" . ,(format-time-string fountain-long-time-format))
               ("time" . ,(format-time-string fountain-short-time-format))
@@ -568,7 +574,7 @@ This function is called by `jit-lock-mode'."
 
 (defun fountain-uuid ()
   "Return a lowercase 8-digit UUID."
-  (let ((s (downcase (shell-command-to-string "uuidgen"))))
+  (let ((s (downcase (shell-command-to-string fountain-uuid-command))))
     (car (split-string s "-"))))
 
 (defun fountain-insert-synopsis ()
