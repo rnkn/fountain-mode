@@ -112,23 +112,23 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-align-column-character 20
-  "Column integer to which character should be aligned."
+(defcustom fountain-indent-character-col 20
+  "Column integer to which character should be indented."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-column-dialogue 10
-  "Column integer to which dialogue should be aligned."
+(defcustom fountain-indent-dialogue-col 10
+  "Column integer to which dialogue should be indented."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-column-paren 15
-  "Column integer to which parenthetical should be aligned."
+(defcustom fountain-indent-paren-col 15
+  "Column integer to which parenthetical should be indented."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-column-trans 45
-  "Column integer to which transitions should be aligned."
+(defcustom fountain-indent-trans-col 45
+  "Column integer to which transitions should be indented."
   :type 'integer
   :group 'fountain)
 
@@ -194,8 +194,8 @@ similar to:
   (rx (or buffer-start
           buffer-end
           (and line-start
-               (zero-or-one " ")
-               line-end)))
+               (zero-or-one "\s")
+               "\n")))
   "Regular expression for matching an empty line.")
 
 (defconst fountain-paren-regexp
@@ -210,27 +210,27 @@ dialogue.")
 
 (defconst fountain-page-break-regexp
   (rx line-start
-      (group (zero-or-more blank))
-      (group (>= 3 "="))
-      (group (zero-or-more not-newline)))
+      (zero-or-more blank)
+      (>= 3 "=")
+      (zero-or-more not-newline))
   "Regular expression for matching page breaks.")
 
 (defconst fountain-note-regexp
-  (rx (group "[[")
-      (group (zero-or-more not-newline (zero-or-one "\n")))
-      (group "]]"))
+  (rx "[["
+      (zero-or-more not-newline (zero-or-one "\n"))
+      "]]")
   "Regular expression for matching comments.")
 
 (defconst fountain-section-regexp
   (rx line-start
-      (group (repeat 1 5 "#") (not (any "#")))
-      (group (zero-or-more not-newline)))
+      (repeat 1 5 "#") (not (any "#"))
+      (zero-or-more not-newline))
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
   (rx line-start
-      (group "=" (not (any "=")))
-      (group (zero-or-more not-newline)))
+      "=" (not (any "="))
+      (zero-or-more not-newline))
   "Regular expression for matching synopses.")
 
 (defconst fountain-centered-regexp
@@ -479,8 +479,8 @@ speaking in succession."
                    (fountain-get-character)
                    (s-equals? (fountain-get-character)
                               (fountain-get-previous-character 1)))
-          (re-search-forward " *$" (line-end-position) t)
-          (replace-match (concat " " s)))
+          (re-search-forward "\s*$" (line-end-position) t)
+          (replace-match (concat "\s" s)))
         (forward-line 1)))))
 
 (defun fountain-trim-whitespace ()
@@ -514,13 +514,13 @@ This function is called by `jit-lock-mode'."
     (while (< (point) end)
       (if fountain-indent-elements
           (cond ((fountain-get-character)
-                 (fountain-indent-add fountain-align-column-character))
+                 (fountain-indent-add fountain-indent-character-col))
                 ((fountain-paren-p)
-                 (fountain-indent-add fountain-align-column-paren))
+                 (fountain-indent-add fountain-indent-paren-col))
                 ((fountain-dialogue-p)
-                 (fountain-indent-add fountain-align-column-dialogue))
+                 (fountain-indent-add fountain-indent-dialogue-col))
                 ((fountain-trans-p)
-                 (fountain-indent-add fountain-align-column-trans))
+                 (fountain-indent-add fountain-indent-trans-col))
                 ((thing-at-point-looking-at fountain-centered-regexp)
                  (fountain-indent-add
                   (/ (- (window-body-width) (length (fountain-get-line))) 2)))
@@ -535,6 +535,16 @@ This function is called by `jit-lock-mode'."
       (widen)
       (let (fountain-indent-elements)
         (fountain-indent-refresh (point-min) (point-max))))))
+
+(defun fountain-lock-extend-region ()
+  "Extend region for fontification to text block."
+  (eval-when-compile
+    (defvar font-lock-beg)
+    (defvar font-lock-end))
+  (goto-char font-lock-beg)
+  (setq font-lock-beg (car (fountain-get-block-bounds)))
+  (goto-char font-lock-end)
+  (setq font-lock-end (cdr (fountain-get-block-bounds))))
 
 ;;; Interaction ================================================================
 
@@ -720,6 +730,8 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (jit-lock-register 'fountain-indent-refresh)
+  (add-hook 'font-lock-extend-region-functions
+            'fountain-lock-extend-region)
   (add-hook 'change-major-mode-hook 'fountain-indent-remove nil t))
 
 (provide 'fountain-mode)
