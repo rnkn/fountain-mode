@@ -35,7 +35,6 @@
 
 ;;; Code:
 
-(require 'rx)
 (require 's)
 (require 'thingatpt)
 
@@ -62,22 +61,23 @@ See `fountain-format-template'."
   :group 'fountain)
 
 (defcustom fountain-scene-heading-prefix-list
-  '("INT." "EXT." "I/E." "EST.")
+  '("INT" "EXT" "I/E" "INT/EXT" "EST")
   "List of scene heading prefixes (case insensitive).
 
-The default list requires that each scene heading prefix be
-appended with a dot, like so:
+Any scene heading prefix can be followed by a dot and/or a space,
+so the following are equivalent:
+
+INT HOUSE - DAY
 
 INT. HOUSE - DAY
 
-If you prefer not to append a dot to your scene heading prefixes,
-you can add \"INT\", \"EXT\", etc. here."
+INT./EXT. HOUSE - DAY"
   :type '(repeat (string :tag "Prefix"))
   :group 'fountain)
 
 (defcustom fountain-trans-list
-  '("FADE IN:" "TO:" "FADE OUT" "TO BLACK")
-  "List of transition endings (case sensitive).
+  '("TO:" "WITH:" "FADE IN:" "FADE OUT" "TO BLACK")
+  "List of transition endings (case insensitive).
 
 This list is used to match the endings of transitions,
 e.g. \"TO:\" will match both the following:
@@ -191,68 +191,47 @@ similar to:
 ;;; Element Regular Expressions ================================================
 
 (defconst fountain-blank-regexp
-  (rx (or buffer-start
-          buffer-end
-          (and line-start
-               (zero-or-one "\s")
-               line-end)))
+  "\\`\\|^ ?$\\|\\'"
   "Regular expression for matching an empty line.")
 
 (defconst fountain-scene-heading-regexp
-  (concat "^"
+  (concat "^\\("
           (regexp-opt fountain-scene-heading-prefix-list)
-          "\s+\\(.\\)*")
+          "[\\.\s\t]+\\)\\(.*\\)")
   "Regular expression for matching scene headings.
 Requires `fountain-get-scene-heading' for preceding and succeeding
 blank lines.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\.\\<.*"
+  "^\\.\\<\\(.*\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-get-forced-scene-heading' for preceding and
 succeeding blank lines.")
 
 (defconst fountain-paren-regexp
-  (rx line-start
-      (zero-or-more blank)
-      "(" (zero-or-more not-newline) ")"
-      (zero-or-more blank)
-      line-end)
+  "^[\s\t]*([^)]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or
 dialogue.")
 
 (defconst fountain-page-break-regexp
-  (rx line-start
-      (zero-or-more blank)
-      (>= 3 "=")
-      (zero-or-more not-newline))
+  "^[\s\t]*=\\{3,\\}.*"
   "Regular expression for matching page breaks.")
 
 (defconst fountain-note-regexp
-  (rx "[["
-      (zero-or-more not-newline (zero-or-one "\n"))
-      "]]")
+  "\\[\\[\\(?:.\n?\\)*]]"
   "Regular expression for matching comments.")
 
 (defconst fountain-section-regexp
-  (rx line-start
-      (repeat 1 5 "#") (not (any "#"))
-      (zero-or-more not-newline))
+  "^#\\{1,5\\}[^#].*"
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  (rx line-start
-      "=" (not (any "="))
-      (zero-or-more not-newline))
+  "^:=[^=].*"
   "Regular expression for matching synopses.")
 
 (defconst fountain-centered-regexp
-  (rx line-start
-      (zero-or-more blank)
-      ">" (zero-or-more not-newline) "<"
-      (zero-or-more blank)
-      line-end)
+  "^[\s\t]*\\(>.*<\\)[\s\t]*$"
   "Regular expression for matching centered text.")
 
 ;;; Faces ======================================================================
@@ -370,9 +349,7 @@ is non-nil."
                      (save-excursion
                        (forward-line 1)
                        (unless (eobp)
-                         (re-search-forward "^\\<"
-                                            (cdr (fountain-get-block-bounds))
-                                            t))))
+                         (null (fountain-invisible-p)))))
             s))))))
 
 (defun fountain-dialogue-p ()
@@ -534,10 +511,22 @@ This function is called by `jit-lock-mode'."
   (eval-when-compile
     (defvar font-lock-beg)
     (defvar font-lock-end))
-  (goto-char font-lock-beg)
-  (setq font-lock-beg (car (fountain-get-block-bounds)))
-  (goto-char font-lock-end)
-  (setq font-lock-end (cdr (fountain-get-block-bounds))))
+  (let ((start
+         (car (fountain-get-block-bounds)))
+        (end
+         (cdr (fountain-get-block-bounds)))
+        changed)
+    (goto-char font-lock-beg)
+    (unless (or (bobp)
+                (eq font-lock-beg (car (fountain-get-block-bounds))))
+      (setq font-lock-beg (car (fountain-get-block-bounds))
+            changed t))
+    (goto-char font-lock-end)
+    (unless (or (eobp)
+                (eq font-lock-end (cdr (fountain-get-block-bounds))))
+      (setq font-lock-end (cdr (fountain-get-block-bounds))
+            changed t))
+    changed))
 
 ;;; Interaction ================================================================
 
@@ -723,8 +712,8 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (jit-lock-register 'fountain-indent-refresh)
-  (add-hook 'font-lock-extend-region-functions
-            'fountain-lock-extend-region)
+  ;; (add-hook 'font-lock-extend-region-functions
+  ;;           'fountain-lock-extend-region t t)
   (add-hook 'change-major-mode-hook 'fountain-indent-remove nil t))
 
 (provide 'fountain-mode)
