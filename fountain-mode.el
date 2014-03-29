@@ -195,8 +195,22 @@ similar to:
           buffer-end
           (and line-start
                (zero-or-one "\s")
-               "\n")))
+               line-end)))
   "Regular expression for matching an empty line.")
+
+(defconst fountain-scene-heading-regexp
+  (concat "^"
+          (regexp-opt fountain-scene-heading-prefix-list)
+          "\s+\\(.\\)*")
+  "Regular expression for matching scene headings.
+Requires `fountain-get-scene-heading' for preceding and succeeding
+blank lines.")
+
+(defconst fountain-forced-scene-heading-regexp
+  "^\\.\\<.*"
+  "Regular expression for matching forced scene headings.
+Requires `fountain-get-forced-scene-heading' for preceding and
+succeeding blank lines.")
 
 (defconst fountain-paren-regexp
   (rx line-start
@@ -313,52 +327,29 @@ section, synopsis or is within a boneyard."
         ((thing-at-point-looking-at fountain-note-regexp))))
 
 (defun fountain-get-scene-heading ()
-  "Return scene heading if matches line at point, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (let ((s (s-presence (fountain-get-line))))
-        (when (and s
-                   (or (s-matches?
-                        (concat "^"
-                                (regexp-opt fountain-scene-heading-prefix-list)
-                                " ") s)
-                       (when fountain-forced-scene-heading-equal
-                         (s-matches?
-                          "^\\.\\<" s)))
-                   (or (bobp)
-                       (save-excursion
-                         (forward-line -1)
-                         (fountain-invisible-p)))
-                   (save-excursion
-                     (forward-line 1)
-                     (or (eobp)
-                         (fountain-invisible-p))))
-          s)))))
+  "Return scene heading if matches point, nil otherwise."
+  (when (and (or (when fountain-forced-scene-heading-equal
+                   (thing-at-point-looking-at
+                    fountain-forced-scene-heading-regexp))
+                 (thing-at-point-looking-at fountain-scene-heading-regexp))
+             (save-excursion
+               (forward-line -1)
+               (fountain-invisible-p)))
+    (buffer-substring-no-properties
+     (match-beginning 0) (match-end 0))))
 
 (defun fountain-get-forced-scene-heading ()
-  "Return forced scene heading if matches line at point, nil otherwise.
+  "Return forced scene heading if matches point, nil otherwise.
 This function is ignored if `fountain-forced-scene-heading-equal'
 is non-nil."
-  (when (null fountain-forced-scene-heading-equal)
-    (save-excursion
-      (save-restriction
-        (widen)
-        (forward-line 0)
-        (let ((s (s-presence (fountain-get-line))))
-          (when (and s
-                     (s-matches?
-                      "^\\.\\<" s)
-                     (or (bobp)
-                         (save-excursion
-                           (forward-line -1)
-                           (fountain-invisible-p)))
-                     (save-excursion
-                       (forward-line 1)
-                       (or (eobp)
-                           (fountain-invisible-p))))
-            s))))))
+  (when (and (null fountain-forced-scene-heading-equal)
+             (thing-at-point-looking-at
+              fountain-forced-scene-heading-regexp)
+             (save-excursion
+               (forward-line -1)
+               (fountain-invisible-p)))
+    (buffer-substring-no-properties
+     (match-beginning 0) (match-end 0))))
 
 (defun fountain-get-character ()
   "Return character if matches line at point, nil otherwise."
@@ -369,23 +360,26 @@ is non-nil."
              (when (s-present? (fountain-get-line))
                (s-presence
                 (s-trim (car (s-slice-at "(" (fountain-get-line))))))))
-        (when (and s
-                   (or (s-uppercase? s)
-                       (s-starts-with? "@" s))
-                   (or (bobp)
-                       (save-excursion
-                         (forward-line -1)
-                         (fountain-blank-p)))
-                   (save-excursion
-                     (forward-line 1)
-                     (unless (eobp)
-                       (null (fountain-invisible-p)))))
-          s)))))
+        (unless (thing-at-point-looking-at fountain-scene-heading-regexp)
+          (when (and s
+                     (or (s-uppercase? s)
+                         (s-starts-with? "@" s))
+                     (save-excursion
+                       (forward-line -1)
+                       (fountain-invisible-p))
+                     (save-excursion
+                       (forward-line 1)
+                       (unless (eobp)
+                         (re-search-forward "^\\<"
+                                            (cdr (fountain-get-block-bounds))
+                                            t))))
+            s))))))
 
 (defun fountain-dialogue-p ()
   "Return non-nil if line at point is dialogue."
   (unless (or (fountain-blank-p)
-              (fountain-paren-p))
+              (fountain-paren-p)
+              (thing-at-point-looking-at fountain-note-regexp))
     (save-excursion
       (save-restriction
         (widen)
@@ -410,24 +404,23 @@ is non-nil."
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (when (s-present? (fountain-get-line))
-        (and (let ((s (s-trim (fountain-get-line))))
-               (or (unless (s-ends-with? "<" s)
-                     (s-starts-with? ">" s))
-                   (and (s-uppercase? s)
-                        (s-matches? (regexp-opt fountain-trans-list) s))))
-             (save-excursion
-               (forward-line -1)
-               (or (bobp)
-                   (fountain-invisible-p)))
-             (save-excursion
-               (forward-line 1)
-               (or (eobp)
-                   (fountain-invisible-p))))))))
+  (unless (thing-at-point-looking-at fountain-centered-regexp)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (forward-line 0)
+        (when (s-present? (fountain-get-line))
+          (and (let ((s (s-trim (fountain-get-line))))
+                 (or (s-starts-with? ">" s)
+                     (and (s-matches? (regexp-opt fountain-trans-list) s))))
+               (save-excursion
+                 (forward-line -1)
+                 (or (bobp)
+                     (fountain-invisible-p)))
+               (save-excursion
+                 (forward-line 1)
+                 (or (eobp)
+                     (fountain-invisible-p)))))))))
 
 (defun fountain-format-template (template)
   "Format TEMPLATE according to the following list.
