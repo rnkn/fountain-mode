@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.10.1
+;; Version: 0.10.2
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -493,7 +493,7 @@ speaking in succession."
 
 (defun fountain-indent-refresh (start end)
   "Refresh indentation properties between START and END.
-This function is called by `jit-lock-mode'."
+This function is called by `jit-lock-fontify-now'."
   (let ((start
          (save-excursion
            (goto-char start)
