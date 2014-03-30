@@ -132,6 +132,11 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'integer
   :group 'fountain)
 
+(defcustom fountain-indent-centered-col 20
+  "Column integer to which centered text should be indented."
+  :type 'integer
+  :group 'fountain)
+
 (defcustom fountain-indent-elements t
   "If non-nil, elements will be displayed indented.
 This option does not affect file contents."
@@ -270,7 +275,7 @@ dialogue.")
 
 ;;; Functions ==================================================================
 
-(defun fountain-get-line ()             ; replace w/ thing-at-point
+(defun fountain-get-line ()
   "Return the line at point as a string."
   (buffer-substring-no-properties
    (line-beginning-position) (line-end-position)))
@@ -279,10 +284,12 @@ dialogue.")
   "Return the beginning and end points of block at point."
   (let ((block-beginning
          (save-excursion
-           (re-search-backward fountain-blank-regexp)))
+           (re-search-backward fountain-blank-regexp
+                               (- (point) 10000) t)))
         (block-end
          (save-excursion
-           (re-search-forward fountain-blank-regexp))))
+           (re-search-forward fountain-blank-regexp
+                              (+ (point) 10000) t))))
     (cons block-beginning block-end)))
 
 (defun fountain-blank-p ()
@@ -299,47 +306,60 @@ dialogue.")
   "Return non-nil if line at point is invisible.
 A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
-  (cond ((fountain-blank-p))
-        ((fountain-boneyard-p))
-        ((thing-at-point-looking-at fountain-section-regexp))
-        ((thing-at-point-looking-at fountain-synopsis-regexp))
-        ((thing-at-point-looking-at fountain-note-regexp))))
+  (or (fountain-blank-p)
+      (fountain-boneyard-p)
+      (save-excursion
+        (forward-line 0)
+        (looking-at-p fountain-section-regexp))
+      (save-excursion
+        (forward-line 0)
+        (looking-at-p fountain-synopsis-regexp))
+      (thing-at-point-looking-at fountain-note-regexp)))
 
 (defun fountain-get-scene-heading ()
   "Return scene heading if matches point, nil otherwise."
-  (when (and (or (when fountain-forced-scene-heading-equal
-                   (thing-at-point-looking-at
-                    fountain-forced-scene-heading-regexp))
-                 (thing-at-point-looking-at fountain-scene-heading-regexp))
-             (save-excursion
-               (forward-line -1)
-               (fountain-invisible-p)))
-    (buffer-substring-no-properties
-     (match-beginning 0) (match-end 0))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (when (and (or (and fountain-forced-scene-heading-equal
+                          (looking-at
+                           fountain-forced-scene-heading-regexp))
+                     (looking-at fountain-scene-heading-regexp))
+                 (save-excursion
+                   (forward-line -1)
+                   (fountain-invisible-p)))
+        (buffer-substring-no-properties
+         (match-beginning 0) (match-end 0))))))
 
 (defun fountain-get-forced-scene-heading ()
   "Return forced scene heading if matches point, nil otherwise.
 This function is ignored if `fountain-forced-scene-heading-equal'
 is non-nil."
-  (when (and (null fountain-forced-scene-heading-equal)
-             (thing-at-point-looking-at
-              fountain-forced-scene-heading-regexp)
-             (save-excursion
-               (forward-line -1)
-               (fountain-invisible-p)))
-    (buffer-substring-no-properties
-     (match-beginning 0) (match-end 0))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (when (and (null fountain-forced-scene-heading-equal)
+                 (looking-at
+                  fountain-forced-scene-heading-regexp)
+                 (save-excursion
+                   (forward-line -1)
+                   (fountain-invisible-p)))
+        (buffer-substring-no-properties
+         (match-beginning 0) (match-end 0))))))
 
 (defun fountain-get-character ()
   "Return character if matches line at point, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
+      (forward-line 0)
       (let ((s
              (when (s-present? (fountain-get-line))
                (s-presence
                 (s-trim (car (s-slice-at "(" (fountain-get-line))))))))
-        (unless (thing-at-point-looking-at fountain-scene-heading-regexp)
+        (unless (looking-at-p fountain-scene-heading-regexp)
           (when (and s
                      (or (s-uppercase? s)
                          (s-starts-with? "@" s))
@@ -381,15 +401,17 @@ is non-nil."
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
-  (unless (thing-at-point-looking-at fountain-centered-regexp)
-    (save-excursion
-      (save-restriction
-        (widen)
-        (forward-line 0)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (unless (looking-at-p fountain-centered-regexp)
         (when (s-present? (fountain-get-line))
           (and (let ((s (s-trim (fountain-get-line))))
                  (or (s-starts-with? ">" s)
-                     (and (s-matches? (regexp-opt fountain-trans-list) s))))
+                     (s-matches?
+                      (concat (regexp-opt fountain-trans-list) "\\.?$")
+                      s)))
                (save-excursion
                  (forward-line -1)
                  (or (bobp)
@@ -475,11 +497,15 @@ This function is called by `jit-lock-mode'."
   (let ((start
          (save-excursion
            (goto-char start)
-           (car (fountain-get-block-bounds))))
+           (if (car (fountain-get-block-bounds))
+               (car (fountain-get-block-bounds))
+             (point))))
         (end
          (save-excursion
            (goto-char end)
-           (cdr (fountain-get-block-bounds)))))
+           (if (cdr (fountain-get-block-bounds))
+               (cdr (fountain-get-block-bounds))
+             (point)))))
     (goto-char start)
     (while (< (point) end)
       (if fountain-indent-elements
@@ -492,8 +518,7 @@ This function is called by `jit-lock-mode'."
                 ((fountain-trans-p)
                  (fountain-indent-add fountain-indent-trans-col))
                 ((thing-at-point-looking-at fountain-centered-regexp)
-                 (fountain-indent-add
-                  (/ (- (window-body-width) (length (fountain-get-line))) 2)))
+                 (fountain-indent-add fountain-indent-centered-col))
                 ((fountain-indent-add 0)))
         (fountain-indent-add 0))
       (forward-line 1))))
@@ -512,20 +537,24 @@ This function is called by `jit-lock-mode'."
     (defvar font-lock-beg)
     (defvar font-lock-end))
   (let ((start
-         (car (fountain-get-block-bounds)))
+         (save-excursion
+           (goto-char font-lock-beg)
+           (if (car (fountain-get-block-bounds))
+               (car (fountain-get-block-bounds)))))
         (end
-         (cdr (fountain-get-block-bounds)))
+         (save-excursion
+           (goto-char font-lock-end)
+           (if (cdr (fountain-get-block-bounds))
+               (cdr (fountain-get-block-bounds)))))
         changed)
     (goto-char font-lock-beg)
     (unless (or (bobp)
-                (eq font-lock-beg (car (fountain-get-block-bounds))))
-      (setq font-lock-beg (car (fountain-get-block-bounds))
-            changed t))
+                (eq start font-lock-beg))
+      (setq font-lock-beg start changed t))
     (goto-char font-lock-end)
     (unless (or (eobp)
-                (eq font-lock-end (cdr (fountain-get-block-bounds))))
-      (setq font-lock-end (cdr (fountain-get-block-bounds))
-            changed t))
+                (eq end font-lock-end))
+      (setq font-lock-end end changed t))
     changed))
 
 ;;; Interaction ================================================================
@@ -574,9 +603,10 @@ This function is called by `jit-lock-mode'."
   (interactive)
   (widen)
   (push-mark)
+  (forward-line 0)
   (while (null (or (bobp)
                    (fountain-get-scene-heading)
-                   (thing-at-point-looking-at fountain-section-regexp)))
+                   (looking-at fountain-section-regexp)))
     (forward-line -1))
   (if (bobp)
       (progn
@@ -712,8 +742,8 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (jit-lock-register 'fountain-indent-refresh)
-  ;; (add-hook 'font-lock-extend-region-functions
-  ;;           'fountain-lock-extend-region t t)
+  (add-hook 'font-lock-extend-region-functions
+            'fountain-lock-extend-region t t)
   (add-hook 'change-major-mode-hook 'fountain-indent-remove nil t))
 
 (provide 'fountain-mode)
