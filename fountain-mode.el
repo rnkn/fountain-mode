@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.10.2
+;; Version: 0.10.3
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -232,7 +232,7 @@ dialogue.")
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  "^:=[^=].*"
+  "^=[^=].*"
   "Regular expression for matching synopses.")
 
 (defconst fountain-centered-regexp
