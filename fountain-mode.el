@@ -143,6 +143,16 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-body-width 66
+  "Text body width in columns to which to adjust margin width.
+
+If an integer, Fountain Mode will adjust the width of margins to
+keep the window's text area to this size.
+
+If nil, no margin adjustment will be made."
+  :type '(choice integer (const :tag "Full-width" nil))
+  :group 'fountain)
+
 (defcustom fountain-forced-scene-heading-equal nil
   "If non-nil, forced scene headings will be treated as equal.
 
@@ -557,6 +567,13 @@ This function is called by `jit-lock-fontify-now'."
       (setq font-lock-end end changed t))
     changed))
 
+(defun fountain-set-clean-margins ()
+  "Set window-body-width to `fountain-body-width' with relative margins."
+  (when fountain-body-width
+    (let ((margin
+           (/ (- (window-total-width) fountain-body-width) 2)))
+      (set-window-margins (selected-window) margin margin))))
+
 ;;; Interaction ================================================================
 
 (defun fountain-upcase-line ()
@@ -744,6 +761,10 @@ For more information on the Fountain markup format, visit
   (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t)
+  (add-hook 'window-configuration-change-hook
+            'fountain-set-clean-margins nil t)
+  (when fountain-body-width
+    (fountain-set-clean-margins))
   (add-hook 'change-major-mode-hook
             'fountain-indent-remove nil t))
 
