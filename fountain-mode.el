@@ -525,11 +525,11 @@ This function is called by `jit-lock-fontify-now'."
 
 (defun fountain-indent-remove ()
   "Remove all indenting in buffer."
-  (save-excursion
+  (with-silent-modifications
     (save-restriction
       (widen)
-      (let (fountain-indent-elements)
-        (fountain-indent-refresh (point-min) (point-max))))))
+      (remove-text-properties (point-min) (point-max)
+                              '(line-prefix wrap-prefix)))))
 
 (defun fountain-lock-extend-region ()
   "Extend region for fontification to text block."
@@ -744,7 +744,8 @@ For more information on the Fountain markup format, visit
   (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t)
-  (add-hook 'change-major-mode-hook 'fountain-indent-remove nil t))
+  (add-hook 'change-major-mode-hook
+            'fountain-indent-remove nil t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
