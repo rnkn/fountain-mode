@@ -48,6 +48,12 @@
 
 ;;; Customizable Options =======================================================
 
+(defcustom fountain-mode-hook
+  '(turn-on-visual-line-mode)
+  "Mode hook for Fountain Mode, run after the mode is turned on."
+  :type 'hook
+  :group 'fountain)
+
 (defcustom fountain-metadata-template
   "title:
 credit: written by
