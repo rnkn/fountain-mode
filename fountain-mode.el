@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.10.3
+;; Version: 0.11.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -204,9 +204,15 @@ similar to:
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-uuid-command "uuidgen"
-  "Shell command for generating a UUID."
-  :type 'string
+(defcustom fountain-uuid-func
+  '(lambda () (shell-command-to-string "uuidgen"))
+  "Function for generating a UUID."
+  :tag "Fountain UUID Function"
+  :type '(radio (function
+                 :tag "Shell command"
+                 '(lambda () (shell-command-to-string "uuidgen")))
+                (function
+                 :tag "Custom"))
   :group 'fountain)
 
 ;;; Element Regular Expressions ================================================
@@ -445,7 +451,7 @@ is non-nil."
   ${fullname}   User full name (defined in `user-full-name')
   ${nick}       User first name (defined in `user-login-name')
   ${email}      User email (defined in `user-mail-address')
-  ${uuid}       Insert a UUID (defined in `fountain-uuid-command')"
+  ${uuid}       Insert a UUID (defined in `fountain-uuid-func')"
   (s-format template 'aget
             `(("longtime" . ,(format-time-string fountain-long-time-format))
               ("time" . ,(format-time-string fountain-short-time-format))
@@ -539,13 +545,14 @@ This function is called by `jit-lock-fontify-now'."
         (fountain-indent-add 0))
       (forward-line 1))))
 
-(defun fountain-indent-remove ()
+(defun fountain-clean-exit ()
   "Remove all indenting in buffer."
   (with-silent-modifications
     (save-restriction
       (widen)
       (remove-text-properties (point-min) (point-max)
-                              '(line-prefix wrap-prefix)))))
+                              '(line-prefix wrap-prefix))
+      (set-window-margins nil nil))))
 
 (defun fountain-lock-extend-region ()
   "Extend region for fontification to text block."
@@ -618,7 +625,7 @@ This function is called by `jit-lock-fontify-now'."
 
 (defun fountain-uuid ()
   "Return a lowercase 8-digit UUID."
-  (let ((s (downcase (shell-command-to-string fountain-uuid-command))))
+  (let ((s (downcase (funcall fountain-uuid-func))))
     (car (split-string s "-"))))
 
 (defun fountain-insert-synopsis ()
@@ -769,10 +776,9 @@ For more information on the Fountain markup format, visit
             'fountain-lock-extend-region t t)
   (add-hook 'window-configuration-change-hook
             'fountain-set-clean-margins nil t)
-  (when fountain-body-width
-    (fountain-set-clean-margins))
   (add-hook 'change-major-mode-hook
-            'fountain-indent-remove nil t))
+            'fountain-clean-exit nil t)
+  (fountain-set-clean-margins))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
