@@ -149,7 +149,7 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-body-width 66
+(defcustom fountain-body-width 70
   "Text body width in columns to which to adjust margin width.
 
 If an integer, Fountain Mode will adjust the width of margins to
@@ -777,8 +777,7 @@ For more information on the Fountain markup format, visit
   (add-hook 'window-configuration-change-hook
             'fountain-set-clean-margins nil t)
   (add-hook 'change-major-mode-hook
-            'fountain-clean-exit nil t)
-  (fountain-set-clean-margins))
+            'fountain-clean-exit nil t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
