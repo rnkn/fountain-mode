@@ -37,6 +37,7 @@
 
 (require 's)
 (require 'thingatpt)
+(require 'easymenu)
 
 ;;; Group ======================================================================
 
@@ -59,8 +60,7 @@
 credit: written by
 author: ${fullname}
 draft date: ${longtime}
-contact: ${email}
-"
+contact: ${email}"
   "Metadata template to be inserted at beginning of buffer.
 See `fountain-format-template'."
   :type 'string
@@ -123,8 +123,8 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-dialogue-col 10
-  "Column integer to which dialogue should be indented."
+(defcustom fountain-indent-dialog-col 10
+  "Column integer to which dialog should be indented."
   :type 'integer
   :group 'fountain)
 
@@ -239,7 +239,7 @@ succeeding blank lines.")
   "^[\s\t]*([^)]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or
-dialogue.")
+dialog.")
 
 (defconst fountain-page-break-regexp
   "^[\s\t]*=\\{3,\\}.*"
@@ -274,7 +274,9 @@ dialogue.")
 
 (defface fountain-forced-scene-heading-face
   '((t (:weight bold)))
-  "Face for forced scene headings."
+  "Face for forced scene headings.
+Only customize this if `fountain-forced-scene-heading-equal' is
+nil."
   :group 'fountain-faces)
 
 (defface fountain-note-face
@@ -394,8 +396,8 @@ is non-nil."
                          (null (fountain-invisible-p)))))
             s))))))
 
-(defun fountain-dialogue-p ()
-  "Return non-nil if line at point is dialogue."
+(defun fountain-dialog-p ()
+  "Return non-nil if line at point is dialog."
   (unless (or (fountain-blank-p)
               (fountain-paren-p)
               (thing-at-point-looking-at fountain-note-regexp))
@@ -407,7 +409,7 @@ is non-nil."
           (forward-line -1)
           (or (fountain-get-character)
               (fountain-paren-p)
-              (fountain-dialogue-p)))))))
+              (fountain-dialog-p)))))))
 
 (defun fountain-paren-p ()
   "Return non-nil if line at point is a paranthetical."
@@ -419,7 +421,7 @@ is non-nil."
            (unless (bobp)
              (forward-line -1)
              (or (fountain-get-character)
-                 (fountain-dialogue-p)))))))
+                 (fountain-dialog-p)))))))
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
@@ -478,28 +480,6 @@ syntax.
         (setq n (- n 1)))
       (fountain-get-character))))
 
-(defun fountain-continued-dialog-refresh (start end)
-  "Refresh continued dialog markers between START and END.
-
-First, delete all matches of `fountain-continued-dialog-string'
-between START and END, then, if `fountain-add-continued-dialog'
-is non-nil, add `fountain-continued-dialog-string' on characters
-speaking in succession."
-  (let ((s (concat "(" fountain-continued-dialog-string ")")))
-    (goto-char start)
-    (while (re-search-forward s end t)
-      (delete-region (match-beginning 0) (match-end 0)))
-    (when fountain-add-continued-dialog
-      (goto-char start)
-      (while (< (point) end)
-        (when (and (null (s-ends-with? s (fountain-get-line)))
-                   (fountain-get-character)
-                   (s-equals? (fountain-get-character)
-                              (fountain-get-previous-character 1)))
-          (re-search-forward "\s*$" (line-end-position) t)
-          (replace-match (concat "\s" s)))
-        (forward-line 1)))))
-
 (defun fountain-trim-whitespace ()
   "Trim whitespace around line."
   (let ((s (s-trim (fountain-get-line)))
@@ -520,13 +500,13 @@ speaking in succession."
   "Refresh indentation properties between START and END.
 This function is called by `jit-lock-fontify-now'."
   (let ((start
-         (save-excursion
+         (progn
            (goto-char start)
            (if (car (fountain-get-block-bounds))
                (car (fountain-get-block-bounds))
              (point))))
         (end
-         (save-excursion
+         (progn
            (goto-char end)
            (if (cdr (fountain-get-block-bounds))
                (cdr (fountain-get-block-bounds))
@@ -538,8 +518,8 @@ This function is called by `jit-lock-fontify-now'."
                  (fountain-indent-add fountain-indent-character-col))
                 ((fountain-paren-p)
                  (fountain-indent-add fountain-indent-paren-col))
-                ((fountain-dialogue-p)
-                 (fountain-indent-add fountain-indent-dialogue-col))
+                ((fountain-dialog-p)
+                 (fountain-indent-add fountain-indent-dialog-col))
                 ((fountain-trans-p)
                  (fountain-indent-add fountain-indent-trans-col))
                 ((thing-at-point-looking-at fountain-centered-regexp)
@@ -554,7 +534,7 @@ This function is called by `jit-lock-fontify-now'."
     (save-restriction
       (widen)
       (remove-text-properties (point-min) (point-max)
-                              '(line-prefix wrap-prefix))
+                              '(line-prefix nil wrap-prefix nil))
       (set-window-margins nil nil))))
 
 (defun fountain-lock-extend-region ()
@@ -678,13 +658,15 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (widen)
   (goto-char (point-min))
   (save-excursion
-    (insert (fountain-format-template fountain-metadata-template) "\n")))
+    (insert (fountain-format-template fountain-metadata-template) "\n\n")))
 
-(defun fountain-format-apply (&optional arg)
-  "Perform destructive formatting appropriately.
+(defun fountain-continued-dialog-refresh (&optional arg)
+  "Add or remove continued dialog on successively speaking characters.
 
-- When point is at scene heading, upcase scene heading.
-- Add or remove `fountain-continued-dialog-string' appropriately.
+First, delete all matches of `fountain-continued-dialog-string',
+then, if `fountain-add-continued-dialog' is non-nil, add
+`fountain-continued-dialog-string' on characters speaking in
+succession.
 
 If prefixed with \\[universal-argument], act on whole buffer, or
 if region is active, act on region, otherwise act on current
@@ -700,10 +682,65 @@ scene."
             (end
              (cond (arg (point-max))
                    ((use-region-p) (region-end))
-                   ((cdr (bounds-of-thing-at-point 'scene))))))
-        (when (fountain-get-scene-heading)
-          (upcase-region (line-beginning-position) (line-end-position)))
-        (fountain-continued-dialog-refresh start end)))))
+                   ((cdr (bounds-of-thing-at-point 'scene)))))
+            (s (concat "(" fountain-continued-dialog-string ")")))
+        (goto-char start)
+        (while (re-search-forward s end t)
+          (delete-region (match-beginning 0) (match-end 0)))
+        (when fountain-add-continued-dialog
+          (goto-char start)
+          (while (< (point) end)
+            (when (and (null (s-ends-with? s (fountain-get-line)))
+                       (fountain-get-character)
+                       (s-equals? (fountain-get-character)
+                                  (fountain-get-previous-character 1)))
+              (re-search-forward "\s*$" (line-end-position) t)
+              (replace-match (concat "\s" s)))
+            (forward-line 1)))))))
+
+(defun fountain-customize-faces ()
+  "Customize group \"fountain-faces\""
+  (interactive)
+  (customize-group 'fountain-faces))
+
+(defun fountain-toggle-forced-scene-heading-equal ()
+  "Toggle `fountain-forced-scene-heading-equal'"
+  (interactive)
+  (setq fountain-forced-scene-heading-equal
+        (null fountain-forced-scene-heading-equal))
+  (font-lock-fontify-buffer)
+  (message "Forced scene headings are now treated as %s"
+           (if fountain-forced-scene-heading-equal
+               "equal" "non-equal")))
+
+(defun fountain-toggle-comment-syntax ()
+  "Toggle `fountain-switch-comment-syntax'"
+  (interactive)
+  (setq fountain-switch-comment-syntax
+        (null fountain-switch-comment-syntax))
+  (message "Default comment syntax is now %s"
+           (if fountain-switch-comment-syntax
+               "// COMMENT" "/* COMMENT */")))
+
+(defun fountain-toggle-indent-elements ()
+  "Toggle `fountain-indent-elements'"
+  (interactive)
+  (setq fountain-indent-elements
+        (null fountain-indent-elements))
+  (jit-lock-refontify)
+  (message "Elements are now displayed %s"
+           (if fountain-indent-elements
+               "indended" "non-indented")))
+
+(defun fountain-toggle-add-continued-dialog ()
+  "Toggle `fountain-add-continued-dialog'"
+  (interactive)
+  (setq fountain-add-continued-dialog
+        (null fountain-add-continued-dialog))
+  (fountain-continued-dialog-refresh)
+  (message "Continued dialog is now %s"
+           (if fountain-indent-elements
+               "added" "removed")))
 
 ;;; Font Lock ==================================================================
 
@@ -743,12 +780,47 @@ scene."
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
-    (define-key map (kbd "C-c C-c") 'fountain-format-apply)
+    (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
+
+;;; Menu =======================================================================
+
+(easy-menu-define fountain-mode-menu fountain-mode-map
+  "Menu for Fountain Mode"
+  '("Fountain"
+    ["Insert Metadata" fountain-insert-metadata]
+    ["Insert Synopsis" fountain-insert-synopsis]
+    ["Insert Note" fountain-insert-note]
+    "---"
+    ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
+    "---"
+    ["Display Elements Indented"
+     fountain-toggle-indent-elements
+     :style toggle
+     :selected fountain-indent-elements]
+    ["Add Continued Dialog"
+     fountain-toggle-add-continued-dialog
+     :style toggle
+     :selected fountain-add-continued-dialog]
+    ["Treat Forced Scene Headings as Equal"
+     fountain-toggle-forced-scene-heading-equal
+     :style toggle
+     :selected fountain-forced-scene-heading-equal]
+    ["Switch Default Comment Syntax"
+     fountain-toggle-comment-syntax
+     :style toggle
+     :selected fountain-switch-comment-syntax]
+    "---"
+    ("Go To"
+     ["Next Scene Heading" fountain-forward-scene]
+     ["Previous Scene Heading" fountain-backward-scene])
+    "---"
+    ["Customize Mode" customize-mode]
+    ["Customize Faces" fountain-customize-faces]))
 
 ;;; Syntax Table ===============================================================
 
@@ -780,7 +852,8 @@ For more information on the Fountain markup format, visit
   (add-hook 'window-configuration-change-hook
             'fountain-set-clean-margins nil t)
   (add-hook 'change-major-mode-hook
-            'fountain-clean-exit nil t))
+            'fountain-clean-exit nil t)
+  (fountain-set-clean-margins))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
