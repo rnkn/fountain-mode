@@ -729,6 +729,16 @@ scene."
            (if fountain-indent-elements
                "indended" "non-indented")))
 
+(defun fountain-toggle-add-continued-dialog ()
+  "Toggle `fountain-add-continued-dialog'"
+  (interactive)
+  (setq fountain-add-continued-dialog
+        (null fountain-add-continued-dialog))
+  (fountain-continued-dialog-refresh)
+  (message "Continued dialog is now %s"
+           (if fountain-indent-elements
+               "added" "removed")))
+
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords
@@ -789,6 +799,10 @@ scene."
      fountain-toggle-indent-elements
      :style toggle
      :selected fountain-indent-elements]
+    ["Add Continued Dialog"
+     fountain-toggle-add-continued-dialog
+     :style toggle
+     :selected fountain-add-continued-dialog]
     ["Treat Forced Scene Headings as Equal"
      fountain-toggle-forced-scene-heading-equal
      :style toggle
