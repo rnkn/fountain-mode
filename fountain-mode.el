@@ -446,6 +446,9 @@ is non-nil."
 (defun fountain-format-template (template)
   "Format TEMPLATE according to the following list.
 
+To include an item in a template you must use the full \"${foo}\"
+syntax.
+
   ${longtime}   Long date format (defined in `fountain-long-time-format')
   ${time}       Short date format (defined in `fountain-short-time-format')
   ${fullname}   User full name (defined in `user-full-name')
