@@ -601,11 +601,6 @@ This function is called by `jit-lock-fontify-now'."
   (interactive "^p")
   (fountain-forward-scene (- n)))
 
-(defun fountain-next-comment ()
-  "Find the next comment."
-  (interactive)
-  (search-forward comment-start))
-
 (defun fountain-uuid ()
   "Return a lowercase 8-digit UUID."
   (let ((s (downcase (funcall fountain-uuid-func))))
