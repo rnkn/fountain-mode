@@ -123,8 +123,8 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-dialogue-col 10
-  "Column integer to which dialogue should be indented."
+(defcustom fountain-indent-dialog-col 10
+  "Column integer to which dialog should be indented."
   :type 'integer
   :group 'fountain)
 
@@ -239,7 +239,7 @@ succeeding blank lines.")
   "^[\s\t]*([^)]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or
-dialogue.")
+dialog.")
 
 (defconst fountain-page-break-regexp
   "^[\s\t]*=\\{3,\\}.*"
@@ -396,8 +396,8 @@ is non-nil."
                          (null (fountain-invisible-p)))))
             s))))))
 
-(defun fountain-dialogue-p ()
-  "Return non-nil if line at point is dialogue."
+(defun fountain-dialog-p ()
+  "Return non-nil if line at point is dialog."
   (unless (or (fountain-blank-p)
               (fountain-paren-p)
               (thing-at-point-looking-at fountain-note-regexp))
@@ -409,7 +409,7 @@ is non-nil."
           (forward-line -1)
           (or (fountain-get-character)
               (fountain-paren-p)
-              (fountain-dialogue-p)))))))
+              (fountain-dialog-p)))))))
 
 (defun fountain-paren-p ()
   "Return non-nil if line at point is a paranthetical."
@@ -421,7 +421,7 @@ is non-nil."
            (unless (bobp)
              (forward-line -1)
              (or (fountain-get-character)
-                 (fountain-dialogue-p)))))))
+                 (fountain-dialog-p)))))))
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
@@ -515,8 +515,8 @@ This function is called by `jit-lock-fontify-now'."
                  (fountain-indent-add fountain-indent-character-col))
                 ((fountain-paren-p)
                  (fountain-indent-add fountain-indent-paren-col))
-                ((fountain-dialogue-p)
-                 (fountain-indent-add fountain-indent-dialogue-col))
+                ((fountain-dialog-p)
+                 (fountain-indent-add fountain-indent-dialog-col))
                 ((fountain-trans-p)
                  (fountain-indent-add fountain-indent-trans-col))
                 ((thing-at-point-looking-at fountain-centered-regexp)
