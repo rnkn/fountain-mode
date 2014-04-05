@@ -230,6 +230,10 @@ similar to:
   "\\`\\|^ ?$\\|\\'"
   "Regular expression for matching an empty line.")
 
+(defconst fountain-comment-regexp
+  "//.*\\|/\\*[^*]*\\*/"
+  "Regular expression for matching comments.")
+
 (defconst fountain-scene-heading-regexp
   (concat "^\\("
           (regexp-opt fountain-scene-heading-prefix-list)
@@ -324,6 +328,30 @@ nil."
            (re-search-forward fountain-blank-regexp
                               (+ (point) 10000) t))))
     (cons block-beginning block-end)))
+
+(defun fountain-strip-comments (start end)
+  "Return string from START to END without comments."
+  (let ((start
+         (save-excursion
+           (goto-char start)
+           (if (and (search-forward "*/" end t)
+                    (null (search-backward "/*" start t))
+                    (search-backward "/*" nil t)
+                    (comment-only-p (point) start))
+               (point)
+             start)))
+        (end
+         (save-excursion
+           (goto-char end)
+           (if (and (search-backward "/*" start t)
+                    (null (search-forward "*/" end t))
+                    (search-forward "*/" nil t)
+                    (comment-only-p (point) end))
+               (point)
+             end))))
+    (replace-regexp-in-string
+     fountain-comment-regexp ""
+     (buffer-substring-no-properties start end))))
 
 (defun fountain-blank-p ()
   "Return non-nil if line at point is a newline or single space."
