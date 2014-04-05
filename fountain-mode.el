@@ -330,7 +330,7 @@ nil."
     (cons block-beginning block-end)))
 
 (defun fountain-strip-comments (start end)
-  "Return string from START to END without comments."
+  "Strip comments between START and END and return string."
   (let ((start
          (save-excursion
            (goto-char start)
