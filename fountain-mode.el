@@ -119,28 +119,35 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :group 'fountain)
 
 (defcustom fountain-indent-character-col 20
-  "Column integer to which character should be indented."
+  "Column integer to which character should be indented.
+This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
 (defcustom fountain-indent-dialog-col 10
-  "Column integer to which dialog should be indented."
+  "Column integer to which dialog should be indented.
+This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
 (defcustom fountain-indent-paren-col 15
-  "Column integer to which parenthetical should be indented."
+  "Column integer to which parenthetical should be indented.
+This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
 (defcustom fountain-indent-trans-col 45
-  "Column integer to which transitions should be indented."
+  "Column integer to which transitions should be indented.
+This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-centered-col 20
-  "Column integer to which centered text should be indented."
-  :type 'integer
+(defcustom fountain-indent-centered-col nil
+  "If integer, column to which centered text should be indented.
+If nil, indent to center of `window-body-width'.
+
+This option does not affect file contents."
+  :type '(choice (const :tag "Center" nil) integer)
   :group 'fountain)
 
 (defcustom fountain-indent-elements t
@@ -155,7 +162,9 @@ This option does not affect file contents."
 If an integer, Fountain Mode will adjust the width of margins to
 keep the window's text area to this size.
 
-If nil, no margin adjustment will be made."
+If nil, no margin adjustment will be made.
+
+This option does not affect file contents."
   :type '(choice integer (const :tag "Full-width" nil))
   :group 'fountain)
 
@@ -523,7 +532,11 @@ This function is called by `jit-lock-fontify-now'."
                 ((fountain-trans-p)
                  (fountain-indent-add fountain-indent-trans-col))
                 ((thing-at-point-looking-at fountain-centered-regexp)
-                 (fountain-indent-add fountain-indent-centered-col))
+                 (fountain-indent-add
+                  (if fountain-indent-centered-col
+                      fountain-indent-centered-col
+                    (/ (- (window-body-width)
+                          (length (fountain-get-line))) 2))))
                 ((fountain-indent-add 0)))
         (fountain-indent-add 0))
       (forward-line 1))))
