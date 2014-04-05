@@ -334,21 +334,27 @@ nil."
   (let ((start
          (save-excursion
            (goto-char start)
-           (if (and (search-forward "*/" end t)
-                    (null (search-backward "/*" start t))
-                    (search-backward "/*" nil t)
-                    (comment-only-p (point) start))
-               (point)
+           (if (thing-at-point-looking-at fountain-comment-regexp)
+               (match-beginning 0)
              start)))
+           ;; (if (and (search-forward "*/" end t)
+           ;;          (null (search-backward "/*" start t))
+           ;;          (search-backward "/*" nil t)
+           ;;          (comment-only-p (point) start))
+           ;;     (point)
+           ;;   start)))
         (end
          (save-excursion
            (goto-char end)
-           (if (and (search-backward "/*" start t)
-                    (null (search-forward "*/" end t))
-                    (search-forward "*/" nil t)
-                    (comment-only-p (point) end))
-               (point)
+           (if (thing-at-point-looking-at fountain-comment-regexp)
+               (match-end 0)
              end))))
+           ;; (if (and (search-backward "/*" start t)
+           ;;          (null (search-forward "*/" end t))
+           ;;          (search-forward "*/" nil t)
+           ;;          (comment-only-p (point) end))
+           ;;     (point)
+           ;;   end))))
     (replace-regexp-in-string
      fountain-comment-regexp ""
      (buffer-substring-no-properties start end))))
@@ -361,20 +367,21 @@ nil."
 
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
-  (comment-only-p (line-beginning-position) (line-end-position)))
+  ;; (comment-only-p (line-beginning-position) (line-end-position)))
+  (thing-at-point-looking-at fountain-comment-regexp))
 
 (defun fountain-invisible-p ()
   "Return non-nil if line at point is invisible.
 A line is invisible if it is blank, or consists of a comment,
 section, synopsis or is within a boneyard."
   (or (fountain-blank-p)
-      (fountain-boneyard-p)
       (save-excursion
         (forward-line 0)
         (looking-at-p fountain-section-regexp))
       (save-excursion
         (forward-line 0)
         (looking-at-p fountain-synopsis-regexp))
+      (thing-at-point-looking-at fountain-comment-regexp)
       (thing-at-point-looking-at fountain-note-regexp)))
 
 (defun fountain-get-scene-heading ()
@@ -415,23 +422,26 @@ is non-nil."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
-      (let ((s
-             (when (s-present? (fountain-get-line))
-               (s-presence
-                (s-trim (car (s-slice-at "(" (fountain-get-line))))))))
+      (when (s-present?
+             (fountain-strip-comments
+              (line-beginning-position) (line-end-position)))
+        (forward-line 0)
         (unless (looking-at-p fountain-scene-heading-regexp)
-          (when (and s
-                     (or (s-uppercase? s)
-                         (s-starts-with? "@" s))
-                     (save-excursion
-                       (forward-line -1)
-                       (fountain-invisible-p))
-                     (save-excursion
-                       (forward-line 1)
-                       (unless (eobp)
-                         (null (fountain-invisible-p)))))
-            s))))))
+          (let* ((s (fountain-strip-comments
+                     (line-beginning-position) (line-end-position)))
+                 (s (s-presence
+                     (s-trim (car (s-slice-at "(\\|\\^" s))))))
+            (when (and s
+                       (or (s-uppercase? s)
+                           (s-starts-with? "@" s))
+                       (save-excursion
+                         (forward-line -1)
+                         (fountain-invisible-p))
+                       (save-excursion
+                         (forward-line 1)
+                         (unless (eobp)
+                           (null (fountain-invisible-p)))))
+              s)))))))
 
 (defun fountain-dialog-p ()
   "Return non-nil if line at point is dialog."
@@ -754,6 +764,10 @@ scene."
   (interactive)
   (setq fountain-switch-comment-syntax
         (null fountain-switch-comment-syntax))
+  (setq comment-start
+        (if fountain-switch-comment-syntax "//" "/*")
+        comment-end
+        (if fountain-switch-comment-syntax "" "*/"))
   (message "Default comment syntax is now %s"
            (if fountain-switch-comment-syntax
                "// COMMENT" "/* COMMENT */")))
@@ -879,7 +893,7 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'comment-start)
        (if fountain-switch-comment-syntax "//" "/*"))
   (set (make-local-variable 'comment-end)
-       (if fountain-switch-comment-syntax "" "/*"))
+       (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
   (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
   (jit-lock-register 'fountain-indent-refresh)
