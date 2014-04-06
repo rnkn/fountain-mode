@@ -183,10 +183,10 @@ non-nil."
 
 Fountain Mode supports two syntax for commenting (boneyard):
 
-/* this text is in a boneyard */
+/* this text is a comment */
 
 // this text is
-// also in a boneyard
+// also a comment
 
 The default is the former; if you prefer the latter, set this
 option to non-nil."
@@ -239,7 +239,7 @@ similar to:
           (regexp-opt fountain-scene-heading-prefix-list)
           "[\\.\s\t]+\\)\\(.*\\)")
   "Regular expression for matching scene headings.
-Requires `fountain-get-scene-heading' for preceding and succeeding
+Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
 
 (defconst fountain-forced-scene-heading-regexp
@@ -363,67 +363,78 @@ nil."
      (buffer-substring-no-properties start end))))
 
 (defun fountain-blank-p ()
-  "Return non-nil if line at point is a newline or single space."
+  "Return non-nil if point is at a blank line or single space."
   (save-excursion
     (forward-line 0)
+    ;; Do not modify match-data
     (looking-at-p fountain-blank-regexp)))
 
-(defun fountain-boneyard-p ()
-  "Return non-nil if line at point is within boneyard."
-  ;; Problems with comment-only-p pickign up blank lines as comments.
+(defun fountain-section-p ()
+  "Return non-nil if point is at a section, nil otherwise."
+  (save-excursion
+    (forward-line 0)
+    (looking-at fountain-section-regexp)))
+
+(defun fountain-synopsis-p ()
+  "Return non-nil if point is at a synopsis, nil otherwise."
+  (save-excursion
+    (forward-line 0)
+    (looking-at fountain-synopsis-regexp)))
+
+(defun fountain-note-p ()
+  "Return non-nil if point is at a note, nil otherwise."
+  (thing-at-point-looking-at fountain-note-regexp))
+
+(defun fountain-comment-p ()
+  "Return non-nil if point is at a comment, nil otherwise."
+  ;; Problems with comment-only-p picking up blank lines as comments.
   ;;
   ;; (comment-only-p (line-beginning-position) (line-end-position)))
   (thing-at-point-looking-at fountain-comment-regexp))
 
-(defun fountain-invisible-p ()
-  "Return non-nil if line at point is invisible.
-A line is invisible if it is blank, or consists of a comment,
-section, synopsis or is within a boneyard."
-  (or (fountain-blank-p)
-      (save-excursion
-        (forward-line 0)
-        (looking-at-p fountain-section-regexp))
-      (save-excursion
-        (forward-line 0)
-        (looking-at-p fountain-synopsis-regexp))
-      (thing-at-point-looking-at fountain-comment-regexp)
-      (thing-at-point-looking-at fountain-note-regexp)))
+(defalias 'fountain-boneyard-p 'fountain-comment-p)
 
-(defun fountain-get-scene-heading ()
-  "Return scene heading if matches point, nil otherwise."
+(defun fountain-invisible-p ()
+  "Return non-nil if point is at an invisible element.
+A line is invisible if it is blank, or consists of a section,
+synopsis, note, or is within a comment."
+  (or (fountain-blank-p)
+      (fountain-section-p)
+      (fountain-synopsis-p)
+      (fountain-note-p)
+      (fountain-comment-p)))
+
+(defun fountain-scene-heading-p ()
+  "Return non-nil if point is at a scene heading, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (when (and (or (and fountain-forced-scene-heading-equal
-                          (looking-at
-                           fountain-forced-scene-heading-regexp))
-                     (looking-at fountain-scene-heading-regexp))
-                 (save-excursion
-                   (forward-line -1)
-                   (fountain-invisible-p)))
-        (buffer-substring-no-properties
-         (match-beginning 0) (match-end 0))))))
+      (and (or (and fountain-forced-scene-heading-equal
+                    (looking-at
+                     fountain-forced-scene-heading-regexp))
+               (looking-at fountain-scene-heading-regexp))
+           (save-excursion
+             (forward-line -1)
+             (fountain-invisible-p))))))
 
-(defun fountain-get-forced-scene-heading ()
-  "Return forced scene heading if matches point, nil otherwise.
+(defun fountain-forced-scene-heading-p ()
+  "Return non-nil if point is at a forced scene heading, nil otherwise.
 This function is ignored if `fountain-forced-scene-heading-equal'
 is non-nil."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (when (and (null fountain-forced-scene-heading-equal)
-                 (looking-at
-                  fountain-forced-scene-heading-regexp)
-                 (save-excursion
-                   (forward-line -1)
-                   (fountain-invisible-p)))
-        (buffer-substring-no-properties
-         (match-beginning 0) (match-end 0))))))
+      (and (null fountain-forced-scene-heading-equal)
+           (looking-at
+            fountain-forced-scene-heading-regexp)
+           (save-excursion
+             (forward-line -1)
+             (fountain-invisible-p))))))
 
 (defun fountain-get-character ()
-  "Return character if matches line at point, nil otherwise."
+  "Return character if point is at a character, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -452,7 +463,7 @@ is non-nil."
   "Return non-nil if line at point is dialog."
   (unless (or (fountain-blank-p)
               (fountain-paren-p)
-              (thing-at-point-looking-at fountain-note-regexp))
+              (fountain-note-p))
     (save-excursion
       (save-restriction
         (widen)
@@ -464,16 +475,17 @@ is non-nil."
               (fountain-dialog-p)))))))
 
 (defun fountain-paren-p ()
-  "Return non-nil if line at point is a paranthetical."
+  "Return non-nil if point is at a paranthetical."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (looking-at-p fountain-paren-regexp)
-           (unless (bobp)
-             (forward-line -1)
-             (or (fountain-get-character)
-                 (fountain-dialog-p)))))))
+      (and (looking-at fountain-paren-regexp)
+           (save-match-data
+             (unless (bobp)
+               (forward-line -1)
+               (or (fountain-get-character)
+                   (fountain-dialog-p))))))))
 
 (defun fountain-trans-p ()
   "Return non-nil if line at point is a transition."
@@ -528,10 +540,10 @@ syntax.
     (save-restriction
       (widen)
       (while (> n 0)
-        (unless (fountain-get-scene-heading)
+        (unless (fountain-scene-heading-p)
           (forward-line -1))
         (while (null (or (fountain-get-character)
-                         (fountain-get-scene-heading)
+                         (fountain-scene-heading-p)
                          (bobp)))
           (forward-line -1))
         (setq n (- n 1)))
@@ -646,16 +658,16 @@ This function is called by `jit-lock-fontify-now'."
 
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative)."
- (interactive "^p")
- (let ((p (if (< n 0) -1 1)))
-   (while (/= n 0)
-     (when (fountain-get-scene-heading)
-       (forward-line p))
-     (while (null (or (eq (point)
-                          (buffer-end p))
-                      (fountain-get-scene-heading)))
-       (forward-line p))
-     (setq n (- n p)))))
+  (interactive "^p")
+  (let ((p (if (< n 0) -1 1)))
+    (while (/= n 0)
+      (when (fountain-scene-heading-p)
+        (forward-line p))
+      (while (null (or (eq (point)
+                           (buffer-end p))
+                       (fountain-scene-heading-p)))
+        (forward-line p))
+      (setq n (- n p)))))
 
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
@@ -669,8 +681,8 @@ This function is called by `jit-lock-fontify-now'."
   (push-mark)
   (forward-line 0)
   (while (null (or (bobp)
-                   (fountain-get-scene-heading)
-                   (looking-at fountain-section-regexp)))
+                   (fountain-scene-heading-p)
+                   (fountain-section-p)))
     (forward-line -1))
   (if (bobp)
       (progn
@@ -808,26 +820,23 @@ scene."
     (,fountain-note-regexp . 'fountain-note-face))
   "Font lock highlighting keywords.")
 
-(defun fountain-match-line (func limit)
-  "If FUNC matches within LIMIT set match data to line."
+(defun fountain-match-element (func limit)
+  "If FUNC matching before LIMIT, return match data."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
       (when (funcall func)
-        (set-match-data
-         (list (set-marker (make-marker) (line-beginning-position))
-               (set-marker (make-marker) (line-end-position))))
         (setq match t))
       (forward-line 1))
     match))
 
 (defun fountain-match-scene-heading (limit)
-  "Call `fountain-match-line' with `fountain-get-scene-heading'."
-  (fountain-match-line 'fountain-get-scene-heading limit))
+  "Call `fountain-match-element' with `fountain-scene-heading-p'."
+  (fountain-match-element 'fountain-scene-heading-p limit))
 
 (defun fountain-match-forced-scene-heading (limit)
-  "Call `fountain-match-line' with `fountain-get-forced-scene-heading'."
-  (fountain-match-line 'fountain-get-forced-scene-heading limit))
+  "Call `fountain-match-element' with `fountain-forced-scene-heading-p'."
+  (fountain-match-element 'fountain-forced-scene-heading-p limit))
 
 ;;; Mode Map ===================================================================
 
