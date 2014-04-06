@@ -334,27 +334,30 @@ nil."
   (let ((start
          (save-excursion
            (goto-char start)
-           (if (thing-at-point-looking-at fountain-comment-regexp)
-               (match-beginning 0)
-             start)))
-           ;; (if (and (search-forward "*/" end t)
-           ;;          (null (search-backward "/*" start t))
-           ;;          (search-backward "/*" nil t)
-           ;;          (comment-only-p (point) start))
-           ;;     (point)
+           ;; Using thing-at-point-looking-at is very slow, better to
+           ;; use a simpler function.
+           ;;
+           ;; (if (thing-at-point-looking-at fountain-comment-regexp)
+           ;;     (match-beginning 0)
            ;;   start)))
+           (if (and (search-forward "*/" end t)
+                    (null (search-backward "/*" start t))
+                    (search-backward "/*" nil t)
+                    (comment-only-p (point) start))
+               (point)
+             start)))
         (end
          (save-excursion
            (goto-char end)
-           (if (thing-at-point-looking-at fountain-comment-regexp)
-               (match-end 0)
-             end))))
-           ;; (if (and (search-backward "/*" start t)
-           ;;          (null (search-forward "*/" end t))
-           ;;          (search-forward "*/" nil t)
-           ;;          (comment-only-p (point) end))
-           ;;     (point)
+           ;; (if (thing-at-point-looking-at fountain-comment-regexp)
+           ;;     (match-end 0)
            ;;   end))))
+           (if (and (search-backward "/*" start t)
+                    (null (search-forward "*/" end t))
+                    (search-forward "*/" nil t)
+                    (comment-only-p (point) end))
+               (point)
+             end))))
     (replace-regexp-in-string
      fountain-comment-regexp ""
      (buffer-substring-no-properties start end))))
@@ -367,6 +370,8 @@ nil."
 
 (defun fountain-boneyard-p ()
   "Return non-nil if line at point is within boneyard."
+  ;; Problems with comment-only-p pickign up blank lines as comments.
+  ;;
   ;; (comment-only-p (line-beginning-position) (line-end-position)))
   (thing-at-point-looking-at fountain-comment-regexp))
 
@@ -512,6 +517,11 @@ syntax.
               ("email" . ,user-mail-address)
               ("uuid" . ,(fountain-uuid)))))
 
+(defun fountain-uuid ()
+  "Return a lowercase 8-digit UUID."
+  (let ((s (downcase (funcall fountain-uuid-func))))
+    (car (split-string s "-"))))
+
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
   (save-excursion
@@ -652,11 +662,6 @@ This function is called by `jit-lock-fontify-now'."
   (interactive "^p")
   (fountain-forward-scene (- n)))
 
-(defun fountain-uuid ()
-  "Return a lowercase 8-digit UUID."
-  (let ((s (downcase (funcall fountain-uuid-func))))
-    (car (split-string s "-"))))
-
 (defun fountain-insert-synopsis ()
   "Open line below current scene heading and insert synopsis."
   (interactive)
@@ -709,10 +714,9 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on successively speaking characters.
 
-First, delete all matches of `fountain-continued-dialog-string',
-then, if `fountain-add-continued-dialog' is non-nil, add
+If `fountain-add-continued-dialog' is non-nil, add
 `fountain-continued-dialog-string' on characters speaking in
-succession.
+succession, otherwise remove all occurences.
 
 If prefixed with \\[universal-argument], act on whole buffer, or
 if region is active, act on region, otherwise act on current
@@ -721,6 +725,7 @@ scene."
   (save-excursion
     (save-restriction
       (widen)
+      ;; First expand the region.
       (let ((start
              (cond (arg (point-min))
                    ((use-region-p) (region-beginning))
@@ -730,9 +735,11 @@ scene."
                    ((use-region-p) (region-end))
                    ((cdr (bounds-of-thing-at-point 'scene)))))
             (s (concat "(" fountain-continued-dialog-string ")")))
+        ;; Delete all matches in region.
         (goto-char start)
         (while (re-search-forward s end t)
           (delete-region (match-beginning 0) (match-end 0)))
+        ;; Add string where appropriate.
         (when fountain-add-continued-dialog
           (goto-char start)
           (while (< (point) end)
