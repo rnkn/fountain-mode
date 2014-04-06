@@ -764,10 +764,9 @@ scene."
   (interactive)
   (setq fountain-switch-comment-syntax
         (null fountain-switch-comment-syntax))
-  (setq comment-start
-        (if fountain-switch-comment-syntax "//" "/*")
-        comment-end
-        (if fountain-switch-comment-syntax "" "*/"))
+  (if fountain-switch-comment-syntax
+      (setq comment-start "//" comment-end "")
+    (setq comment-start "/*" comment-end "*/"))
   (message "Default comment syntax is now %s"
            (if fountain-switch-comment-syntax
                "// COMMENT" "/* COMMENT */")))
