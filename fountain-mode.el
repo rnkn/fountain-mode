@@ -245,7 +245,7 @@ blank lines.")
 (defconst fountain-forced-scene-heading-regexp
   "^\\.\\<\\(.*\\)"
   "Regular expression for matching forced scene headings.
-Requires `fountain-get-forced-scene-heading' for preceding and
+Requires `fountain-forced-scene-heading-p' for preceding and
 succeeding blank lines.")
 
 (defconst fountain-paren-regexp
@@ -269,6 +269,12 @@ dialog.")
 (defconst fountain-synopsis-regexp
   "^=[^=].*"
   "Regular expression for matching synopses.")
+
+(defconst fountain-trans-regexp
+  (concat "^[\s\t]*>[^<\n]*$\\|^[[:upper:]\s]*"
+          (regexp-opt fountain-trans-list)
+          "\\.?$")
+  "Regular expression for matching transitions.")
 
 (defconst fountain-centered-regexp
   "^[\s\t]*\\(>.*<\\)[\s\t]*$"
@@ -304,6 +310,16 @@ nil."
 (defface fountain-synopsis-face
   '((t (:foreground "dark cyan")))
   "Face for synopses."
+  :group 'fountain-faces)
+
+(defface fountain-dialog-face
+  '((t (:foreground "red")))
+  "Face for dialog."
+  :group 'fountain-faces)
+
+(defface fountain-trans-face
+  '((t (:foreground "dark blue")))
+  "Face for transitions."
   :group 'fountain-faces)
 
 ;;; Thing Definitions ==========================================================
@@ -414,7 +430,7 @@ synopsis, note, or is within a comment."
                     (looking-at
                      fountain-forced-scene-heading-regexp))
                (looking-at fountain-scene-heading-regexp))
-           (save-excursion
+           (save-match-data
              (forward-line -1)
              (fountain-invisible-p))))))
 
@@ -429,7 +445,7 @@ is non-nil."
       (and (null fountain-forced-scene-heading-equal)
            (looking-at
             fountain-forced-scene-heading-regexp)
-           (save-excursion
+           (save-match-data
              (forward-line -1)
              (fountain-invisible-p))))))
 
@@ -468,11 +484,13 @@ is non-nil."
       (save-restriction
         (widen)
         (forward-line 0)
-        (unless (bobp)
-          (forward-line -1)
-          (or (fountain-get-character)
-              (fountain-paren-p)
-              (fountain-dialog-p)))))))
+        (looking-at ".*")
+        (save-match-data
+          (unless (bobp)
+            (forward-line -1)
+            (or (fountain-get-character)
+                (fountain-paren-p)
+                (fountain-dialog-p))))))))
 
 (defun fountain-paren-p ()
   "Return non-nil if point is at a paranthetical."
@@ -493,21 +511,17 @@ is non-nil."
     (save-restriction
       (widen)
       (forward-line 0)
-      (unless (looking-at-p fountain-centered-regexp)
-        (when (s-present? (fountain-get-line))
-          (and (let ((s (s-trim (fountain-get-line))))
-                 (or (s-starts-with? ">" s)
-                     (s-matches?
-                      (concat (regexp-opt fountain-trans-list) "\\.?$")
-                      s)))
-               (save-excursion
-                 (forward-line -1)
-                 (or (bobp)
-                     (fountain-invisible-p)))
-               (save-excursion
-                 (forward-line 1)
-                 (or (eobp)
-                     (fountain-invisible-p)))))))))
+      (and (let (case-fold-search)
+             (looking-at fountain-trans-regexp))
+           (save-match-data
+             (save-excursion
+               (forward-line -1)
+               (or (bobp)
+                   (fountain-invisible-p)))
+             (save-excursion
+               (forward-line 1)
+               (or (eobp)
+                   (fountain-invisible-p))))))))
 
 (defun fountain-format-template (template)
   "Format TEMPLATE according to the following list.
@@ -815,13 +829,15 @@ scene."
 (defvar fountain-font-lock-keywords
   `((fountain-match-scene-heading . 'fountain-scene-heading-face)
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face)
+    (fountain-match-dialog . 'fountain-dialog-face)
+    (fountain-match-trans . 'fountain-trans-face)
     (,fountain-section-regexp . 'fountain-section-face)
     (,fountain-synopsis-regexp . 'fountain-synopsis-face)
     (,fountain-note-regexp . 'fountain-note-face))
   "Font lock highlighting keywords.")
 
 (defun fountain-match-element (func limit)
-  "If FUNC matching before LIMIT, return match data."
+  "If FUNC returns non-nil before LIMIT, return match data."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
@@ -837,6 +853,14 @@ scene."
 (defun fountain-match-forced-scene-heading (limit)
   "Call `fountain-match-element' with `fountain-forced-scene-heading-p'."
   (fountain-match-element 'fountain-forced-scene-heading-p limit))
+
+(defun fountain-match-dialog (limit)
+  "Call `fountain-match-element' with `fountain-dialog-p'"
+  (fountain-match-element 'fountain-dialog-p limit))
+
+(defun fountain-match-trans (limit)
+  "Call `fountain-match-element' with `fountain-trans-p'"
+  (fountain-match-element 'fountain-trans-p limit))
 
 ;;; Mode Map ===================================================================
 
