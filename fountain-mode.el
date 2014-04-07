@@ -287,38 +287,40 @@ dialog.")
   :group 'fountain)
 
 (defface fountain-scene-heading-face
-  '((t (:weight bold :underline t)))
+  '((t (:weight bold :underline t
+                :inherit font-lock-function-name-face)))
   "Face for scene headings."
   :group 'fountain-faces)
 
 (defface fountain-forced-scene-heading-face
-  '((t (:weight bold)))
+  '((t (:weight bold
+                :inherit font-lock-function-name-face)))
   "Face for forced scene headings.
 Only customize this if `fountain-forced-scene-heading-equal' is
 nil."
   :group 'fountain-faces)
 
 (defface fountain-note-face
-  '((t (:foreground "forest green")))
+  '((t (:inherit font-lock-comment-face)))
   "Face for notes.")
 
 (defface fountain-section-face
-  '((t (:foreground "dark red")))
+  '((t (:inherit font-lock-builtin-face)))
   "Face for sections."
   :group 'fountain-faces)
 
 (defface fountain-synopsis-face
-  '((t (:foreground "dark cyan")))
+  '((t (:inherit font-lock-type-face)))
   "Face for synopses."
   :group 'fountain-faces)
 
 (defface fountain-dialog-face
-  '((t (:foreground "red")))
+  '((t (:inherit font-lock-string-face)))
   "Face for dialog."
   :group 'fountain-faces)
 
 (defface fountain-trans-face
-  '((t (:foreground "dark blue")))
+  '((t (:inherit font-lock-variable-name-face)))
   "Face for transitions."
   :group 'fountain-faces)
 
