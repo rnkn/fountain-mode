@@ -287,41 +287,62 @@ dialog.")
   :group 'fountain)
 
 (defface fountain-scene-heading-face
+  '((t (:weight bold :underline t)))
+  "Default face for scene headings."
+  :group 'fountain-faces)
+
+(defface fountain-scene-heading-face-hl
   '((t (:weight bold :underline t
                 :inherit font-lock-function-name-face)))
-  "Face for scene headings."
+  "Additional highlighting face for scene headings."
   :group 'fountain-faces)
 
 (defface fountain-forced-scene-heading-face
-  '((t (:weight bold
-                :inherit font-lock-function-name-face)))
-  "Face for forced scene headings.
+  '((t (:weight bold)))
+  "Default face for forced scene headings.
+Only customize this if `fountain-forced-scene-heading-equal' is
+nil."
+  :group 'fountain-faces)
+
+(defface fountain-forced-scene-heading-face-hl
+  '((t (:weight bold :inherit font-lock-function-name-face)))
+  "Additional highlighting face for forced scene headings.
 Only customize this if `fountain-forced-scene-heading-equal' is
 nil."
   :group 'fountain-faces)
 
 (defface fountain-note-face
   '((t (:inherit font-lock-comment-face)))
-  "Face for notes.")
+  "Default face for notes.")
 
 (defface fountain-section-face
   '((t (:inherit font-lock-builtin-face)))
-  "Face for sections."
+  "Default face for sections."
   :group 'fountain-faces)
 
 (defface fountain-synopsis-face
   '((t (:inherit font-lock-type-face)))
-  "Face for synopses."
+  "Default face for synopses."
   :group 'fountain-faces)
 
 (defface fountain-dialog-face
+  '((t (:inherit default)))
+  "Default face for dialog."
+  :group 'fountain-faces)
+
+(defface fountain-dialog-face-hl
   '((t (:inherit font-lock-string-face)))
-  "Face for dialog."
+  "Additional highlighting face for dialog."
   :group 'fountain-faces)
 
 (defface fountain-trans-face
+  '((t (:inherit default)))
+  "Default face for transitions."
+  :group 'fountain-faces)
+
+(defface fountain-trans-face-hl
   '((t (:inherit font-lock-variable-name-face)))
-  "Face for transitions."
+  "Additional highlighting face for transitions."
   :group 'fountain-faces)
 
 ;;; Thing Definitions ==========================================================
@@ -804,7 +825,7 @@ scene."
     (setq comment-start "/*" comment-end "*/"))
   (message "Default comment syntax is now %s"
            (if fountain-switch-comment-syntax
-               "// COMMENT" "/* COMMENT */")))
+               "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
 (defun fountain-toggle-indent-elements ()
   "Toggle `fountain-indent-elements'"
@@ -828,6 +849,9 @@ scene."
 
 ;;; Font Lock ==================================================================
 
+(defvar fountain-font-lock-none nil
+  "No Font Lock highlighting.")
+
 (defvar fountain-font-lock-keywords
   `((fountain-match-scene-heading . 'fountain-scene-heading-face)
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face)
@@ -836,7 +860,18 @@ scene."
     (,fountain-section-regexp . 'fountain-section-face)
     (,fountain-synopsis-regexp . 'fountain-synopsis-face)
     (,fountain-note-regexp . 'fountain-note-face))
-  "Font lock highlighting keywords.")
+  "Default Font Lock keywords.")
+
+(defvar fountain-font-lock-keywords-hl
+  `((fountain-match-scene-heading . 'fountain-scene-heading-face-hl)
+    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face-hl)
+    (fountain-match-dialog . 'fountain-dialog-face-hl)
+    (fountain-match-trans . 'fountain-trans-face-hl)
+    (,fountain-section-regexp . 'fountain-section-face)
+    (,fountain-synopsis-regexp . 'fountain-synopsis-face)
+    (,fountain-note-regexp . 'fountain-note-face))
+  "Additional highlighting Font Lock keywords.")
+
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
@@ -889,6 +924,49 @@ scene."
     "---"
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     "---"
+    ("Syntax Highlighting"              ; FIXME move to funs
+     ["None"
+      (progn
+        (if (assoc 'fountain-mode font-lock-maximum-decoration)
+            (setcdr
+             (assoc 'fountain-mode font-lock-maximum-decoration) 1)
+          (add-to-list 'font-lock-maximum-decoration
+                       '(fountain-mode . 1)))
+        (font-lock-refresh-defaults))
+      :style radio
+      :selected (or (eq (cdr (assoc 'fountain-mode
+                                    font-lock-maximum-decoration))
+                        1)
+                  (eq font-lock-maximum-decoration 1))]
+     ["Minimal"
+      (progn
+        (if (assoc 'fountain-mode font-lock-maximum-decoration)
+            (setcdr
+             (assoc 'fountain-mode font-lock-maximum-decoration) 2)
+          (add-to-list 'font-lock-maximum-decoration
+                       '(fountain-mode . 2)))
+        (font-lock-refresh-defaults))
+      :style radio
+      :selected (or (eq (cdr (assoc 'fountain-mode
+                                    font-lock-maximum-decoration))
+                        2)
+                    (eq font-lock-maximum-decoration 2)
+                    (eq font-lock-maximum-decoration nil))]
+     ["Maximum"
+      (progn
+        (if (assoc 'fountain-mode font-lock-maximum-decoration)
+            (setcdr
+             (assoc 'fountain-mode font-lock-maximum-decoration) 3)
+          (add-to-list 'font-lock-maximum-decoration
+                       '(fountain-mode . 3)))
+        (font-lock-refresh-defaults))
+      :style radio
+      :selected (or (eq (cdr (assoc 'fountain-mode
+                                    font-lock-maximum-decoration))
+                        3)
+                    (eq font-lock-maximum-decoration 3)
+                    (eq font-lock-maximum-decoration t))])
+    "---"
     ["Display Elements Indented"
      fountain-toggle-indent-elements
      :style toggle
@@ -936,7 +1014,10 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'comment-end)
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
-  (setq font-lock-defaults '(fountain-font-lock-keywords nil t))
+  (setq font-lock-defaults '((fountain-font-lock-keywords
+                              fountain-font-lock-none
+                              fountain-font-lock-keywords
+                              fountain-font-lock-keywords-hl)))
   (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t)
