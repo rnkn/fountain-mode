@@ -15,59 +15,47 @@ Features
 
 The following features are supported:
 
-- syntax highlighting for sluglines, forced sluglines, section headings,
+- syntax highlighting: sluglines, forced sluglines, section headings,
   synopses, notes and boneyard elements
-- auto-indentation for character, parenthetical, dialog, transition
-  and centered text elements (display only, does not modify file
-  contents)
+- auto-indentation: character, parenthetical, dialog, transition and
+  centered text elements (display only, does not modify file contents)
+- clean margins: the text body is displayed with relative margin widths,
+  hopefully creating a nicer writing environment (can be disabled)
+- `C-c C-c` to add/remove continued dialog to successively speaking
+  characters
+- `C-c C-a` to insert a synopsis
+- `C-c C-z` to insert a note
+- `C-c C-x i` to insert metadata
 - `S-RET` to upcase the line and insert a newline
 - `M-n` and `M-p` to navigate by scene heading
-- `C-c C-c` to apply automatic formatting, including: upcase the scene
-  heading at point and automatically add "(CONT'D)" to continuing
-  dialog (within scene or active region, preface with `C-u` to act on
-  whole buffer)
-- `C-c C-a` to insert a synopsis under the current scene or section
-  heading
-- `C-c C-z` to insert a note based on template under the current element
-- `C-c C-x i` to insert metadata based on template at the beginning of
-  buffer
-- both Fountain boneyard syntaxes (follows standard commenting behavior,
-  e.g. `M-;`)
-- customizable indentation align-to columns, slugline prefixes,
-  transition suffixes, and faces
+- both Fountain comment/boneyard syntaxes (follows standard commenting
+  behavior, e.g. `M-;`)
+- command menu
+- everything is customizable, of course
 - see the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode
 
 The following features are not yet supported:
 
 - syntax highlighting for other elements, including emphasis
-- menus
 - reading metadata
 - dual dialogue
 - exporting
 
 The feature-set is quite basic at the moment, with many features yet to
-be added. Feature requests are encouraged.
+be added. Feature requests are encouraged. Exporting is "coming soon."
 
-It may raise some eyebrows that there is no current support for
-exporting to other formats. This is partly because I already use
-[Highland][], which is an amazing app. Fountain Mode will be able to
-export to other formats one day, but not quite yet.
-
-For exporting, I recommend [Highland][] (OS X) or [Trelby][] (Linux,
-Windows). A full list of apps that support the Fountain format is
-available here: <http://fountain.io/apps>
+For exporting, check out the full list of apps that support the Fountain
+format here: <http://fountain.io/apps>
 
 [wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
-[Highland]: http://www.quoteunquoteapps.com/highland/ "Highland"
-[Trelby]: http://www.trelby.org "Trelby"
 
 Requirements
 ------------
 
 - Emacs 24 (not tested on earlier versions)
 - [s.el][] the long lost Emacs string manipulation library.
-- the CLT `uuidgen` is required to insert UUIDs (usually pre-installed
-  on OS X and Linux)
+- to insert UUIDs (useful for using notes as bookmarks) you'll need the
+  CLT `uuidgen` (usually pre-installed on OS X and Linux)
 
 [s.el]: https://github.com/magnars/s.el "s.el"
 
