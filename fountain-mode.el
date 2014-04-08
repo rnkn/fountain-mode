@@ -847,12 +847,21 @@ scene."
            (if fountain-indent-elements
                "added" "removed")))
 
+(defun fountain-get-font-lock-decoration ()
+  "Return the value of `font-lock-maximum-decoration'."
+  (cond ((null font-lock-maximum-decoration) 2)
+        ((eq font-lock-maximum-decoration t) 3)
+        ((integerp font-lock-maximum-decoration)
+         font-lock-maximum-decoration)
+        ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
+        ((cdr (assoc 't font-lock-maximum-decoration)))))
+
 ;;; Font Lock ==================================================================
 
-(defvar fountain-font-lock-none nil
-  "No Font Lock highlighting.")
+(defvar fountain-font-lock-keywords-1 nil
+  "Font Lock keywords for no highlighting.")
 
-(defvar fountain-font-lock-keywords
+(defvar fountain-font-lock-keywords-2
   `((fountain-match-scene-heading . 'fountain-scene-heading-face)
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face)
     (fountain-match-dialog . 'fountain-dialog-face)
@@ -860,9 +869,9 @@ scene."
     (,fountain-section-regexp . 'fountain-section-face)
     (,fountain-synopsis-regexp . 'fountain-synopsis-face)
     (,fountain-note-regexp . 'fountain-note-face))
-  "Default Font Lock keywords.")
+  "Font Lock keywords for minimal highlighting.")
 
-(defvar fountain-font-lock-keywords-hl
+(defvar fountain-font-lock-keywords-3
   `((fountain-match-scene-heading . 'fountain-scene-heading-face-hl)
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face-hl)
     (fountain-match-dialog . 'fountain-dialog-face-hl)
@@ -870,8 +879,10 @@ scene."
     (,fountain-section-regexp . 'fountain-section-face)
     (,fountain-synopsis-regexp . 'fountain-synopsis-face)
     (,fountain-note-regexp . 'fountain-note-face))
-  "Additional highlighting Font Lock keywords.")
+  "Font Lock keywords for maximum highlighting.")
 
+(defalias 'fountain-font-lock-keywords-default
+  'fountain-font-lock-keywords-2)
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
@@ -934,10 +945,7 @@ scene."
                        '(fountain-mode . 1)))
         (font-lock-refresh-defaults))
       :style radio
-      :selected (or (eq (cdr (assoc 'fountain-mode
-                                    font-lock-maximum-decoration))
-                        1)
-                  (eq font-lock-maximum-decoration 1))]
+      :selected (eq (fountain-get-font-lock-decoration) 1)]
      ["Minimal"
       (progn
         (if (assoc 'fountain-mode font-lock-maximum-decoration)
@@ -947,11 +955,7 @@ scene."
                        '(fountain-mode . 2)))
         (font-lock-refresh-defaults))
       :style radio
-      :selected (or (eq (cdr (assoc 'fountain-mode
-                                    font-lock-maximum-decoration))
-                        2)
-                    (eq font-lock-maximum-decoration 2)
-                    (eq font-lock-maximum-decoration nil))]
+      :selected (eq (fountain-get-font-lock-decoration) 2)]
      ["Maximum"
       (progn
         (if (assoc 'fountain-mode font-lock-maximum-decoration)
@@ -961,11 +965,7 @@ scene."
                        '(fountain-mode . 3)))
         (font-lock-refresh-defaults))
       :style radio
-      :selected (or (eq (cdr (assoc 'fountain-mode
-                                    font-lock-maximum-decoration))
-                        3)
-                    (eq font-lock-maximum-decoration 3)
-                    (eq font-lock-maximum-decoration t))])
+      :selected (eq (fountain-get-font-lock-decoration) 3)])
     "---"
     ["Display Elements Indented"
      fountain-toggle-indent-elements
@@ -1014,10 +1014,10 @@ For more information on the Fountain markup format, visit
   (set (make-local-variable 'comment-end)
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face) 'shadow)
-  (setq font-lock-defaults '((fountain-font-lock-keywords
-                              fountain-font-lock-none
-                              fountain-font-lock-keywords
-                              fountain-font-lock-keywords-hl)))
+  (setq font-lock-defaults '((fountain-font-lock-keywords-default
+                              fountain-font-lock-keywords-1
+                              fountain-font-lock-keywords-2
+                              fountain-font-lock-keywords-3)))
   (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t)
