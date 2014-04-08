@@ -847,14 +847,23 @@ scene."
            (if fountain-indent-elements
                "added" "removed")))
 
-(defun fountain-set-font-lock-decoration (level) ; FIXME retain default
+(defun fountain-set-font-lock-decoration (level)
   "Set `font-lock-maximum-decoration' for Fountain Mode to LEVEL."
   (interactive)
-  (if (assoc 'fountain-mode font-lock-maximum-decoration)
-      (setcdr (assoc 'fountain-mode font-lock-maximum-decoration)
-              level)
-    (add-to-list 'font-lock-maximum-decoration
-                 `(fountain-mode . ,level)))
+  (let ((n font-lock-maximum-decoration))
+    (cond ((or (booleanp n)
+               (integerp n))
+           (setq font-lock-maximum-decoration
+                (list (cons 'fountain-mode level)
+                      (cons 't n))))
+          ((listp n)
+           (if (assoc 'fountain-mode n)
+               (setcdr (assoc
+                        'fountain-mode font-lock-maximum-decoration)
+                       level)
+             (add-to-list font-lock-maximum-decoration
+                          `(fountain-mode . ,level))))
+          ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (font-lock-refresh-defaults))
 
 (defun fountain-get-font-lock-decoration ()
@@ -891,8 +900,9 @@ scene."
     (,fountain-note-regexp . 'fountain-note-face))
   "Font Lock keywords for maximum highlighting.")
 
-(defalias 'fountain-font-lock-keywords-default
-  'fountain-font-lock-keywords-2)
+(defvaralias 'fountain-font-lock-keywords-default
+  'fountain-font-lock-keywords-2
+  "Default Font Lock keywords.")
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
@@ -1006,7 +1016,7 @@ For more information on the Fountain markup format, visit
   (setq font-lock-defaults '((fountain-font-lock-keywords-default
                               fountain-font-lock-keywords-1
                               fountain-font-lock-keywords-2
-                              fountain-font-lock-keywords-3)))
+                              fountain-font-lock-keywords-3) nil t))
   (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t)
