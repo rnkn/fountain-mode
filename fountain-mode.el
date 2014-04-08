@@ -847,6 +847,16 @@ scene."
            (if fountain-indent-elements
                "added" "removed")))
 
+(defun fountain-set-font-lock-decoration (level) ; FIXME retain default
+  "Set `font-lock-maximum-decoration' for Fountain Mode to LEVEL."
+  (interactive)
+  (if (assoc 'fountain-mode font-lock-maximum-decoration)
+      (setcdr (assoc 'fountain-mode font-lock-maximum-decoration)
+              level)
+    (add-to-list 'font-lock-maximum-decoration
+                 `(fountain-mode . ,level)))
+  (font-lock-refresh-defaults))
+
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
   (cond ((null font-lock-maximum-decoration) 2)
@@ -935,35 +945,14 @@ scene."
     "---"
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     "---"
-    ("Syntax Highlighting"              ; FIXME move to funs
-     ["None"
-      (progn
-        (if (assoc 'fountain-mode font-lock-maximum-decoration)
-            (setcdr
-             (assoc 'fountain-mode font-lock-maximum-decoration) 1)
-          (add-to-list 'font-lock-maximum-decoration
-                       '(fountain-mode . 1)))
-        (font-lock-refresh-defaults))
+    ("Syntax Highlighting"
+     ["None" (fountain-set-font-lock-decoration 1)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 1)]
-     ["Minimal"
-      (progn
-        (if (assoc 'fountain-mode font-lock-maximum-decoration)
-            (setcdr
-             (assoc 'fountain-mode font-lock-maximum-decoration) 2)
-          (add-to-list 'font-lock-maximum-decoration
-                       '(fountain-mode . 2)))
-        (font-lock-refresh-defaults))
+     ["Minimal" (fountain-set-font-lock-decoration 2)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 2)]
-     ["Maximum"
-      (progn
-        (if (assoc 'fountain-mode font-lock-maximum-decoration)
-            (setcdr
-             (assoc 'fountain-mode font-lock-maximum-decoration) 3)
-          (add-to-list 'font-lock-maximum-decoration
-                       '(fountain-mode . 3)))
-        (font-lock-refresh-defaults))
+     ["Maximum" (fountain-set-font-lock-decoration 3)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 3)])
     "---"
