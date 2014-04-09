@@ -293,61 +293,75 @@ dialog.")
   "Faces used in Fountain Mode"
   :group 'fountain)
 
-(defface fountain-scene-heading-face
+(defface fountain-scene-heading
   '((t (:weight bold :underline t)))
   "Default face for scene headings."
   :group 'fountain-faces)
 
-(defface fountain-scene-heading-face-hl
+(defface fountain-scene-heading-highlight
   '((t (:weight bold :underline t
                 :inherit font-lock-function-name-face)))
   "Additional highlighting face for scene headings."
   :group 'fountain-faces)
 
-(defface fountain-forced-scene-heading-face
+(defface fountain-forced-scene-heading
   '((t (:weight bold)))
   "Default face for forced scene headings.
 Only customize this if `fountain-forced-scene-heading-equal' is
 nil."
   :group 'fountain-faces)
 
-(defface fountain-forced-scene-heading-face-hl
+(defface fountain-forced-scene-heading-highlight
   '((t (:weight bold :inherit font-lock-function-name-face)))
   "Additional highlighting face for forced scene headings.
 Only customize this if `fountain-forced-scene-heading-equal' is
 nil."
   :group 'fountain-faces)
 
-(defface fountain-note-face
-  '((t (:inherit font-lock-comment-face)))
+(defface fountain-note
+  '((t (:inherit fountain-note-highlight)))
   "Default face for notes.")
 
-(defface fountain-section-face
-  '((t (:inherit font-lock-builtin-face)))
+(defface fountain-note-highlight
+  '((t (:inherit font-lock-comment-face)))
+  "Additional highlighting face for notes.")
+
+(defface fountain-section
+  '((t (:inherit fountain-section-highlight)))
   "Default face for sections."
   :group 'fountain-faces)
 
-(defface fountain-synopsis-face
+(defface fountain-section-highlight
+  '((t (:inherit font-lock-builtin-face)))
+  "Additional highlighting face for sections."
+  :group 'fountain-faces)
+
+(defface fountain-synopsis
+  '((t (:inherit fountain-synopsis-highlight)))
+  "Default face for synopses."
+  :group 'fountain-faces)
+
+(defface fountain-synopsis-highlight
   '((t (:inherit font-lock-type-face)))
   "Default face for synopses."
   :group 'fountain-faces)
 
-(defface fountain-dialog-face
+(defface fountain-dialog
   '((t (:inherit default)))
   "Default face for dialog."
   :group 'fountain-faces)
 
-(defface fountain-dialog-face-hl
+(defface fountain-dialog-highlight
   '((t (:inherit font-lock-string-face)))
   "Additional highlighting face for dialog."
   :group 'fountain-faces)
 
-(defface fountain-trans-face
+(defface fountain-trans
   '((t (:inherit default)))
   "Default face for transitions."
   :group 'fountain-faces)
 
-(defface fountain-trans-face-hl
+(defface fountain-trans-highlight
   '((t (:inherit font-lock-variable-name-face)))
   "Additional highlighting face for transitions."
   :group 'fountain-faces)
@@ -898,23 +912,23 @@ scene."
   "Font Lock keywords for no highlighting.")
 
 (defvar fountain-font-lock-keywords-2
-  `((fountain-match-scene-heading . 'fountain-scene-heading-face)
-    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face)
-    (fountain-match-dialog . 'fountain-dialog-face)
-    (fountain-match-trans . 'fountain-trans-face)
-    (,fountain-section-regexp . 'fountain-section-face)
-    (,fountain-synopsis-regexp . 'fountain-synopsis-face)
-    (,fountain-note-regexp . 'fountain-note-face))
+  `((fountain-match-scene-heading . 'fountain-scene-heading)
+    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading)
+    (fountain-match-dialog . 'fountain-dialog)
+    (fountain-match-trans . 'fountain-trans)
+    (,fountain-section-regexp . 'fountain-section-highlight)
+    (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
+    (,fountain-note-regexp . 'fountain-note-highlight))
   "Font Lock keywords for minimal highlighting.")
 
 (defvar fountain-font-lock-keywords-3
-  `((fountain-match-scene-heading . 'fountain-scene-heading-face-hl)
-    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-face-hl)
-    (fountain-match-dialog . 'fountain-dialog-face-hl)
-    (fountain-match-trans . 'fountain-trans-face-hl)
-    (,fountain-section-regexp . 'fountain-section-face)
-    (,fountain-synopsis-regexp . 'fountain-synopsis-face)
-    (,fountain-note-regexp . 'fountain-note-face))
+  `((fountain-match-scene-heading . 'fountain-scene-heading-highlight)
+    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-highlight)
+    (fountain-match-dialog . 'fountain-dialog-highlight)
+    (fountain-match-trans . 'fountain-trans-highlight)
+    (,fountain-section-regexp . 'fountain-section-highlight)
+    (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
+    (,fountain-note-regexp . 'fountain-note-highlight))
   "Font Lock keywords for maximum highlighting.")
 
 (defvaralias 'fountain-font-lock-keywords-default
@@ -1006,7 +1020,7 @@ scene."
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene])
     "---"
-    ["Customize Mode" customize-mode]
+    ["Customize" customize-mode]
     ["Customize Faces" fountain-customize-faces]))
 
 ;;; Syntax Table ===============================================================
