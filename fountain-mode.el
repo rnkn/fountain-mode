@@ -1,10 +1,10 @@
-;;; fountain-mode.el --- Major mode for screenwriting in Fountain plaintext markup
+;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup
 
 ;; Copyright (C) 2014  Paul Rankin
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.11.0
+;; Version: 0.12.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
