@@ -873,6 +873,12 @@ scene."
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (font-lock-refresh-defaults))
 
+(defun fountain-save-font-lock-decoration ()
+  "Save `font-lock-maximum-decoration' in `custom-file'."
+  (interactive)
+  (customize-save-variable 'font-lock-maximum-decoration
+                           font-lock-maximum-decoration))
+
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
   (cond ((null font-lock-maximum-decoration) 2)
@@ -971,7 +977,9 @@ scene."
       :selected (eq (fountain-get-font-lock-decoration) 2)]
      ["Maximum" (fountain-set-font-lock-decoration 3)
       :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 3)])
+      :selected (eq (fountain-get-font-lock-decoration) 3)]
+     "---"
+     ["Save for Future Sessions" fountain-save-font-lock-decoration])
     "---"
     ["Display Elements Indented"
      fountain-toggle-indent-elements
