@@ -156,18 +156,6 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-body-width 70
-  "Text body width in columns to which to adjust margin width.
-
-If an integer, Fountain Mode will adjust the width of margins to
-keep the window's text area to this size.
-
-If nil, no margin adjustment will be made.
-
-This option does not affect file contents."
-  :type '(choice integer (const :tag "Full-width" nil))
-  :group 'fountain)
-
 (defcustom fountain-forced-scene-heading-equal nil
   "If non-nil, forced scene headings will be treated as equal.
 
@@ -665,8 +653,7 @@ This function is called by `jit-lock-fontify-now'."
     (save-restriction
       (widen)
       (remove-text-properties (point-min) (point-max)
-                              '(line-prefix nil wrap-prefix nil))
-      (set-window-margins nil nil))))
+                              '(line-prefix nil wrap-prefix nil)))))
 
 (defun fountain-lock-extend-region ()
   "Extend region for fontification to text block."
@@ -693,13 +680,6 @@ This function is called by `jit-lock-fontify-now'."
                 (eq end font-lock-end))
       (setq font-lock-end end changed t))
     changed))
-
-(defun fountain-set-clean-margins ()
-  "Set window-body-width to `fountain-body-width' with relative margins."
-  (when fountain-body-width
-    (let ((margin
-           (/ (- (window-total-width) fountain-body-width) 2)))
-      (set-window-margins (selected-window) margin margin))))
 
 ;;; Interaction ================================================================
 
@@ -821,11 +801,6 @@ scene."
               (replace-match (concat "\s" s)))
             (forward-line 1)))))))
 
-(defun fountain-customize-faces ()
-  "Customize group \"fountain-faces\""
-  (interactive)
-  (customize-group 'fountain-faces))
-
 (defun fountain-toggle-forced-scene-heading-equal ()
   "Toggle `fountain-forced-scene-heading-equal'"
   (interactive)
@@ -903,8 +878,8 @@ scene."
         ((eq font-lock-maximum-decoration t) 3)
         ((integerp font-lock-maximum-decoration)
          font-lock-maximum-decoration)
-        ((cdr (assoc 't font-lock-maximum-decoration)) 3)
-        ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))))
+        ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
+        ((cdr (assoc 't font-lock-maximum-decoration)) 3)))
 
 ;;; Font Lock ==================================================================
 
@@ -978,7 +953,7 @@ scene."
 ;;; Menu =======================================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
-  "Menu for Fountain Mode"
+  "Menu for Fountain Mode."
   '("Fountain"
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
@@ -1021,7 +996,7 @@ scene."
      ["Previous Scene Heading" fountain-backward-scene])
     "---"
     ["Customize" customize-mode]
-    ["Customize Faces" fountain-customize-faces]))
+    ["Customize Faces" (customize-group 'fountain-faces)]))
 
 ;;; Syntax Table ===============================================================
 
@@ -1053,11 +1028,8 @@ For more information on the Fountain markup format, visit
   (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t)
-  (add-hook 'window-configuration-change-hook
-            'fountain-set-clean-margins nil t)
   (add-hook 'change-major-mode-hook
-            'fountain-clean-exit nil t)
-  (fountain-set-clean-margins))
+            'fountain-clean-exit nil t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
