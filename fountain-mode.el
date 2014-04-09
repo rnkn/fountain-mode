@@ -871,6 +871,10 @@ scene."
              (add-to-list font-lock-maximum-decoration
                           `(fountain-mode . ,level))))
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
+  (message "Syntax highlighting is now set at %s"
+           (cond ((eq level 1) "none")
+                 ((eq level 2) "minimal")
+                 ((eq level 3) "maximum")))
   (font-lock-refresh-defaults))
 
 (defun fountain-save-font-lock-decoration ()
