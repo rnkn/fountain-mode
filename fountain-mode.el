@@ -215,11 +215,18 @@ similar to:
 
 (defcustom fountain-uuid-func
   '(lambda () (shell-command-to-string "uuidgen"))
-  "Function for generating a UUID."
+  "Function for generating a UUID.
+Each option has its own requirements:
+
+  uuidgen       command line tool \"uuidgen\"
+  uuid.el       Emacs package \"uuid.el\""
   :tag "Fountain UUID Function"
   :type '(radio (function
-                 :tag "Shell command"
+                 :tag "uuidgen"
                  '(lambda () (shell-command-to-string "uuidgen")))
+                (function
+                 :tag "uuid.el"
+                 uuid-string)
                 (function
                  :tag "Custom"))
   :group 'fountain)
