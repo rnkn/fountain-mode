@@ -281,6 +281,11 @@ dialog.")
   "Faces used in Fountain Mode"
   :group 'fountain)
 
+(defface fountain-comment
+  '((t (:inherit shadow)))
+  "Default face for comments (boneyard)."
+  :group 'fountain-faces)
+
 (defface fountain-scene-heading
   '((t (:weight bold :underline t)))
   "Default face for scene headings."
@@ -1020,7 +1025,8 @@ For more information on the Fountain markup format, visit
        (if fountain-switch-comment-syntax "//" "/*"))
   (set (make-local-variable 'comment-end)
        (if fountain-switch-comment-syntax "" "*/"))
-  (set (make-local-variable 'font-lock-comment-face) 'shadow)
+  (set (make-local-variable 'font-lock-comment-face)
+       'fountain-comment)
   (setq font-lock-defaults '((fountain-font-lock-keywords-default
                               fountain-font-lock-keywords-1
                               fountain-font-lock-keywords-2
