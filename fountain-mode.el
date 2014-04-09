@@ -882,8 +882,8 @@ scene."
                (setcdr (assoc
                         'fountain-mode font-lock-maximum-decoration)
                        level)
-             (add-to-list font-lock-maximum-decoration
-                          `(fountain-mode . ,level))))
+             (add-to-list 'font-lock-maximum-decoration
+                          (cons 'fountain-mode level))))
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (message "Syntax highlighting is now set at %s"
            (cond ((eq level 1) "none")
@@ -903,8 +903,8 @@ scene."
         ((eq font-lock-maximum-decoration t) 3)
         ((integerp font-lock-maximum-decoration)
          font-lock-maximum-decoration)
-        ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
-        ((cdr (assoc 't font-lock-maximum-decoration)))))
+        ((cdr (assoc 't font-lock-maximum-decoration)) 3)
+        ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))))
 
 ;;; Font Lock ==================================================================
 
