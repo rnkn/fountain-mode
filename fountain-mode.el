@@ -1017,9 +1017,7 @@ scene."
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
-  "Major mode for editing Fountain-formatted text files.
-For more information on the Fountain markup format, visit
-<http://fountain.io>."
+  "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (set (make-local-variable 'comment-start)
        (if fountain-switch-comment-syntax "//" "/*"))
