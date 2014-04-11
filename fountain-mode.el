@@ -532,8 +532,9 @@ is non-nil."
   ;;                          (null (fountain-invisible-p)))))
   ;;             s)))))))
   (when (fountain-character-p)
-    (s-trim (buffer-substring-no-properties
-             (match-beginning 0) (match-end 0)))))
+    (let ((s (buffer-substring-no-properties
+              (match-beginning 0) (match-end 0))))
+      (s-trim (car (s-slice-at "\\^\\|(" s))))))
 
 (defun fountain-character-p ()
   "Return non-nil if point is at character."
@@ -544,7 +545,7 @@ is non-nil."
       (save-restriction
         (widen)
         (forward-line 0)
-        (looking-at "[^^(\n]*")
+        (looking-at ".*")
         (save-match-data
           (let ((s (buffer-substring-no-properties
                     (match-beginning 0) (match-end 0))))
