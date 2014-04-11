@@ -118,31 +118,31 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-indent-character-col 20
+(defcustom fountain-indent-character 20
   "Column integer to which character should be indented.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-dialog-col 10
+(defcustom fountain-indent-dialog 10
   "Column integer to which dialog should be indented.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-paren-col 15
+(defcustom fountain-indent-paren 15
   "Column integer to which parenthetical should be indented.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-trans-col 45
+(defcustom fountain-indent-trans 45
   "Column integer to which transitions should be indented.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-centered-col nil
+(defcustom fountain-indent-centered nil
   "If integer, column to which centered text should be indented.
 If nil, indent to center of `window-body-width'.
 
@@ -666,6 +666,8 @@ syntax.
 (defun fountain-indent-refresh (start end)
   "Refresh indentation properties between START and END.
 This function is called by `jit-lock-fontify-now'."
+  ;; First, extend the region to the block bounds. If this fun is
+  ;; eventually covered by Font Lock, this won't be needed.
   (let ((start
          (progn
            (goto-char start)
@@ -681,21 +683,36 @@ This function is called by `jit-lock-fontify-now'."
     (goto-char start)
     (while (< (point) end)
       (if fountain-indent-elements
-          (cond ((fountain-get-character)
-                 (fountain-indent-add fountain-indent-character-col))
-                ((fountain-paren-p)
-                 (fountain-indent-add fountain-indent-paren-col))
-                ((fountain-dialog-p)
-                 (fountain-indent-add fountain-indent-dialog-col))
-                ((fountain-trans-p)
-                 (fountain-indent-add fountain-indent-trans-col))
-                ((thing-at-point-looking-at fountain-centered-regexp)
-                 (fountain-indent-add
-                  (if fountain-indent-centered-col
-                      fountain-indent-centered-col
-                    (/ (- (window-body-width)
-                          (length (fountain-get-line))) 2))))
-                ((fountain-indent-add 0)))
+          ;; If Font Lock decoration is none, use predicate funs.
+          (if (= (fountain-get-font-lock-decoration) 1)
+              (cond ((fountain-character-p)
+                     (fountain-indent-add fountain-indent-character))
+                    ((fountain-paren-p)
+                     (fountain-indent-add fountain-indent-paren))
+                    ((fountain-dialog-p)
+                     (fountain-indent-add fountain-indent-dialog))
+                    ((fountain-trans-p)
+                     (fountain-indent-add fountain-indent-trans))
+                    ((thing-at-point-looking-at
+                      fountain-centered-regexp)
+                     (fountain-indent-add
+                      (if fountain-indent-centered
+                          fountain-indent-centered
+                        (/ (- (window-body-width)
+                              (length (fountain-get-line))) 2))))
+                    ((fountain-indent-add 0)))
+            ;; If Font Lock keywords are enabled, use those instead.
+            ;; First, get the variable from the face property
+            (let* ((s (symbol-name (get-text-property (point)'face)))
+                   (s (s-chop-suffix "-highlight" s))
+                   (s (s-chop-prefix "fountain-" s))
+                   (s (concat "fountain-indent-" s))
+                   (var (intern s)))
+              ;; If the variable is bound, indent text.
+              (if (boundp var)
+                  (fountain-indent-add var)
+                (fountain-indent-add 0))))
+        ;; Otherwise, indent to zero.
         (fountain-indent-add 0))
       (forward-line 1))))
 
