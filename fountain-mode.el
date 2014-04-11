@@ -339,6 +339,16 @@ nil."
   "Default face for synopses."
   :group 'fountain-faces)
 
+(defface fountain-character
+  '((t (:inherit default)))
+  "Default face for characters."
+  :group 'fountain-faces)
+
+(defface fountain-character-highlight
+  '((t (:inherit font-lock-keyword-face)))
+  "Additional highlighting face for characters."
+  :group 'fountain-faces)
+
 (defface fountain-dialog
   '((t (:inherit default)))
   "Default face for dialog."
@@ -488,32 +498,58 @@ is non-nil."
 
 (defun fountain-get-character ()
   "Return character if point is at a character, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (when (s-present?
-             (fountain-strip-comments
-              (line-beginning-position) (line-end-position)))
+  ;; (save-excursion
+  ;;   (save-restriction
+  ;;     (widen)
+  ;;     (when (s-present?
+  ;;            (fountain-strip-comments
+  ;;             (line-beginning-position) (line-end-position)))
+  ;;       (forward-line 0)
+  ;;       (unless (looking-at-p fountain-scene-heading-regexp)
+  ;;         (let* ((s (fountain-strip-comments
+  ;;                    (line-beginning-position) (line-end-position)))
+  ;;                (s (s-trim (car (s-slice-at "(\\|\\^" s))))
+  ;;                (s (s-presence s)))
+  ;;           (when (and s
+  ;;                      (or (s-uppercase? s)
+  ;;                          (s-starts-with? "@" s))
+  ;;                      (save-excursion
+  ;;                        (forward-line -1)
+  ;;                        (fountain-invisible-p))
+  ;;                      (save-excursion
+  ;;                        (forward-line 1)
+  ;;                        (unless (eobp)
+  ;;                          (null (fountain-invisible-p)))))
+  ;;             s)))))))
+  (when (fountain-character-p)
+    (s-trim (buffer-substring-no-properties
+             (match-beginning 0) (match-end 0)))))
+
+(defun fountain-character-p ()
+  "Return non-nil if point is at character."
+  (unless (or (fountain-blank-p)
+              (fountain-scene-heading-p)
+              (fountain-forced-scene-heading-p))
+    (save-excursion
+      (save-restriction
+        (widen)
         (forward-line 0)
-        (unless (looking-at-p fountain-scene-heading-regexp)
-          (let* ((s (fountain-strip-comments
-                     (line-beginning-position) (line-end-position)))
-                 (s (s-presence
-                     (s-trim (car (s-slice-at "(\\|\\^" s))))))
-            (when (and s
-                       (or (s-uppercase? s)
-                           (s-starts-with? "@" s))
-                       (save-excursion
-                         (forward-line -1)
-                         (fountain-invisible-p))
-                       (save-excursion
-                         (forward-line 1)
-                         (unless (eobp)
-                           (null (fountain-invisible-p)))))
-              s)))))))
+        (looking-at "[^^(\n]*")
+        (save-match-data
+          (let ((s (buffer-substring-no-properties
+                    (match-beginning 0) (match-end 0))))
+            (and (or (s-uppercase? s)
+                     (s-starts-with? "@" s))
+                 (save-excursion
+                   (forward-line -1)
+                   (fountain-invisible-p))
+                 (save-excursion
+                   (forward-line 1)
+                   (unless (eobp)
+                     (null (fountain-invisible-p)))))))))))
 
 (defun fountain-dialog-p ()
-  "Return non-nil if line at point is dialog."
+  "Return non-nil if point is at dialog."
   (unless (or (fountain-blank-p)
               (fountain-paren-p)
               (fountain-note-p))
@@ -894,6 +930,7 @@ scene."
 (defvar fountain-font-lock-keywords-2
   `((fountain-match-scene-heading . 'fountain-scene-heading)
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading)
+    (fountain-match-character . 'fountain-character)
     (fountain-match-dialog . 'fountain-dialog)
     (fountain-match-trans . 'fountain-trans)
     (,fountain-section-regexp . 'fountain-section-highlight)
@@ -904,6 +941,7 @@ scene."
 (defvar fountain-font-lock-keywords-3
   `((fountain-match-scene-heading . 'fountain-scene-heading-highlight)
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-highlight)
+    (fountain-match-character . 'fountain-character-highlight)
     (fountain-match-dialog . 'fountain-dialog-highlight)
     (fountain-match-trans . 'fountain-trans-highlight)
     (,fountain-section-regexp . 'fountain-section-highlight)
@@ -932,6 +970,10 @@ scene."
 (defun fountain-match-forced-scene-heading (limit)
   "Call `fountain-match-element' with `fountain-forced-scene-heading-p'."
   (fountain-match-element 'fountain-forced-scene-heading-p limit))
+
+(defun fountain-match-character (limit)
+  "Call `fountain-match-element' with `fountain-character-p'"
+  (fountain-match-element 'fountain-character-p limit))
 
 (defun fountain-match-dialog (limit)
   "Call `fountain-match-element' with `fountain-dialog-p'"
