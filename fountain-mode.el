@@ -311,6 +311,16 @@ Only customize this if `fountain-forced-scene-heading-equal' is
 nil."
   :group 'fountain-faces)
 
+(defface fountain-paren
+  '((t (:inherit default)))
+  "Default face for parentheticals."
+  :group 'fountain-faces)
+
+(defface fountain-paren-highlight
+  '((t (:inherit font-lock-variable-name-face)))
+  "Additional highlighting face for parentheticals."
+  :group 'fountain-faces)
+
 (defface fountain-note
   '((t (:inherit fountain-note-highlight)))
   "Default face for notes.")
@@ -932,6 +942,7 @@ scene."
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading)
     (fountain-match-character . 'fountain-character)
     (fountain-match-dialog . 'fountain-dialog)
+    (fountain-match-paren . 'fountain-paren)
     (fountain-match-trans . 'fountain-trans)
     (,fountain-section-regexp . 'fountain-section-highlight)
     (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
@@ -943,6 +954,7 @@ scene."
     (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-highlight)
     (fountain-match-character . 'fountain-character-highlight)
     (fountain-match-dialog . 'fountain-dialog-highlight)
+    (fountain-match-paren . 'fountain-paren-highlight)
     (fountain-match-trans . 'fountain-trans-highlight)
     (,fountain-section-regexp . 'fountain-section-highlight)
     (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
@@ -974,6 +986,10 @@ scene."
 (defun fountain-match-character (limit)
   "Call `fountain-match-element' with `fountain-character-p'"
   (fountain-match-element 'fountain-character-p limit))
+
+(defun fountain-match-paren (limit)
+  "Call `fountain-match-element' with `fountain-paren-p'"
+  (fountain-match-element 'fountain-paren-p limit))
 
 (defun fountain-match-dialog (limit)
   "Call `fountain-match-element' with `fountain-dialog-p'"
