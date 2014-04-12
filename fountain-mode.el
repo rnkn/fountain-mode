@@ -684,6 +684,7 @@ This function is called by `jit-lock-fontify-now'."
     (while (< (point) end)
       (if fountain-indent-elements
           ;; If Font Lock decoration is none, use predicate funs.
+          ;; FIXME: swap these around, predicates should be ELSE
           (if (= (fountain-get-font-lock-decoration) 1)
               (cond ((fountain-character-p)
                      (fountain-indent-add fountain-indent-character))
@@ -710,7 +711,7 @@ This function is called by `jit-lock-fontify-now'."
                    (var (intern s)))
               ;; If the variable is bound, indent text.
               (if (boundp var)
-                  (fountain-indent-add var)
+                  (fountain-indent-add (symbol-value var))
                 (fountain-indent-add 0))))
         ;; Otherwise, indent to zero.
         (fountain-indent-add 0))
