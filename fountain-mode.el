@@ -572,7 +572,7 @@ is non-nil."
         (save-match-data
           (unless (bobp)
             (forward-line -1)
-            (or (fountain-get-character)
+            (or (fountain-character-p)
                 (fountain-paren-p)
                 (fountain-dialog-p))))))))
 
@@ -586,7 +586,7 @@ is non-nil."
            (save-match-data
              (unless (bobp)
                (forward-line -1)
-               (or (fountain-get-character)
+               (or (fountain-character-p)
                    (fountain-dialog-p))))))))
 
 (defun fountain-trans-p ()
@@ -640,7 +640,7 @@ syntax.
       (while (> n 0)
         (unless (fountain-scene-heading-p)
           (forward-line -1))
-        (while (null (or (fountain-get-character)
+        (while (null (or (fountain-character-p)
                          (fountain-scene-heading-p)
                          (bobp)))
           (forward-line -1))
@@ -855,6 +855,7 @@ scene."
              (cond (arg (point-max))
                    ((use-region-p) (region-end))
                    ((cdr (bounds-of-thing-at-point 'scene)))))
+            ;; create continued string
             (s (concat "(" fountain-continued-dialog-string ")")))
         ;; delete all matches in region
         (goto-char start)
@@ -865,7 +866,7 @@ scene."
           (goto-char start)
           (while (< (point) end)
             (when (and (null (s-ends-with? s (fountain-get-line)))
-                       (fountain-get-character)
+                       (fountain-character-p)
                        (s-equals? (fountain-get-character)
                                   (fountain-get-previous-character 1)))
               (re-search-forward "\s*$" (line-end-position) t)
