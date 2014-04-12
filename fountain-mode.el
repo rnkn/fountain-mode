@@ -538,13 +538,13 @@ is non-nil."
 
 (defun fountain-character-p ()
   "Return non-nil if point is at character."
-  (unless (or (fountain-blank-p)
-              (fountain-scene-heading-p)
-              (fountain-forced-scene-heading-p))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (forward-line 0)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (unless (or (fountain-blank-p)
+                  (looking-at fountain-scene-heading-regexp)
+                  (looking-at fountain-forced-scene-heading-regexp))
         (looking-at ".*")
         (save-match-data
           (let ((s (buffer-substring-no-properties
@@ -666,8 +666,9 @@ syntax.
 (defun fountain-indent-refresh (start end)
   "Refresh indentation properties between START and END.
 This function is called by `jit-lock-fontify-now'."
-  ;; First, extend the region to the block bounds. If this fun is
-  ;; eventually covered by Font Lock, this won't be needed.
+  ;; first, extend the region to the block bounds
+  ;;
+  ;; if this fun is covered by Font Lock, this won't be needed
   (let ((start
          (progn
            (goto-char start)
@@ -683,37 +684,37 @@ This function is called by `jit-lock-fontify-now'."
     (goto-char start)
     (while (< (point) end)
       (if fountain-indent-elements
-          ;; If Font Lock decoration is none, use predicate funs.
-          ;; FIXME: swap these around, predicates should be ELSE
-          (if (= (fountain-get-font-lock-decoration) 1)
-              (cond ((fountain-character-p)
-                     (fountain-indent-add fountain-indent-character))
-                    ((fountain-paren-p)
-                     (fountain-indent-add fountain-indent-paren))
-                    ((fountain-dialog-p)
-                     (fountain-indent-add fountain-indent-dialog))
-                    ((fountain-trans-p)
-                     (fountain-indent-add fountain-indent-trans))
-                    ((thing-at-point-looking-at
-                      fountain-centered-regexp)
-                     (fountain-indent-add
-                      (if fountain-indent-centered
-                          fountain-indent-centered
-                        (/ (- (window-body-width)
-                              (length (fountain-get-line))) 2))))
-                    ((fountain-indent-add 0)))
-            ;; If Font Lock keywords are enabled, use those instead.
-            ;; First, get the variable from the face property
-            (let* ((s (symbol-name (get-text-property (point)'face)))
-                   (s (s-chop-suffix "-highlight" s))
-                   (s (s-chop-prefix "fountain-" s))
-                   (s (concat "fountain-indent-" s))
-                   (var (intern s)))
-              ;; If the variable is bound, indent text.
-              (if (boundp var)
-                  (fountain-indent-add (symbol-value var))
-                (fountain-indent-add 0))))
-        ;; Otherwise, indent to zero.
+          ;; if Font Lock keywords are enabled, use those
+          (if (> (fountain-get-font-lock-decoration) 1)
+              ;; first, get the variable from the face property
+              (let* ((s (symbol-name (get-text-property (point)'face)))
+                     (s (s-chop-suffix "-highlight" s))
+                     (s (s-chop-prefix "fountain-" s))
+                     (s (concat "fountain-indent-" s))
+                     (var (intern s)))
+                ;; if the variable is bound, indent text to var value
+                ;; FIXME: no centered element face
+                (if (boundp var)
+                    (fountain-indent-add (symbol-value var))
+                  (fountain-indent-add 0)))
+            ;; otherwise, use predicate funs
+            (cond ((fountain-character-p)
+                   (fountain-indent-add fountain-indent-character))
+                  ((fountain-paren-p)
+                   (fountain-indent-add fountain-indent-paren))
+                  ((fountain-dialog-p)
+                   (fountain-indent-add fountain-indent-dialog))
+                  ((fountain-trans-p)
+                   (fountain-indent-add fountain-indent-trans))
+                  ((thing-at-point-looking-at
+                    fountain-centered-regexp)
+                   (fountain-indent-add
+                    (if fountain-indent-centered
+                        fountain-indent-centered
+                      (/ (- (window-body-width)
+                            (length (fountain-get-line))) 2))))
+                  ((fountain-indent-add 0))))
+        ;; otherwise, indent to zero
         (fountain-indent-add 0))
       (forward-line 1))))
 
@@ -845,7 +846,7 @@ scene."
   (save-excursion
     (save-restriction
       (widen)
-      ;; First expand the region.
+      ;; first expand the region
       (let ((start
              (cond (arg (point-min))
                    ((use-region-p) (region-beginning))
@@ -855,11 +856,11 @@ scene."
                    ((use-region-p) (region-end))
                    ((cdr (bounds-of-thing-at-point 'scene)))))
             (s (concat "(" fountain-continued-dialog-string ")")))
-        ;; Delete all matches in region.
+        ;; delete all matches in region
         (goto-char start)
         (while (re-search-forward s end t)
           (delete-region (match-beginning 0) (match-end 0)))
-        ;; Add string where appropriate.
+        ;; add string where appropriate
         (when fountain-add-continued-dialog
           (goto-char start)
           (while (< (point) end)
@@ -994,6 +995,7 @@ scene."
       (forward-line 1))
     match))
 
+;; these could probably be a single function?
 (defun fountain-match-scene-heading (limit)
   "Call `fountain-match-element' with `fountain-scene-heading-p'."
   (fountain-match-element 'fountain-scene-heading-p limit))
