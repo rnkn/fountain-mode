@@ -833,15 +833,17 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (insert (fountain-format-template fountain-metadata-template) "\n\n")))
 
 (defun fountain-continued-dialog-refresh (&optional arg)
-  "Add or remove continued dialog on successively speaking characters.
+  "Add or remove continued dialog on characters speaking in succession.
 
 If `fountain-add-continued-dialog' is non-nil, add
 `fountain-continued-dialog-string' on characters speaking in
 succession, otherwise remove all occurences.
 
-If prefixed with \\[universal-argument], act on whole buffer, or
-if region is active, act on region, otherwise act on current
-scene."
+If region is active, act on region, otherwise act on current
+scene.
+
+If prefixed with \\[universal-argument], act on whole
+buffer (WARNING: this can be very slow)."
   (interactive "P")
   (save-excursion
     (save-restriction
