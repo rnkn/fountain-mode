@@ -15,19 +15,16 @@ Features
 
 The following features are supported:
 
-- syntax highlighting: sluglines, forced sluglines, section headings,
-  synopses, notes and boneyard elements
+- multiple levels of syntax highlighting for all elements
 - auto-indentation: character, parenthetical, dialog, transition and
   centered text elements (display only, does not modify file contents)
-- clean margins: the text body is displayed with relative margin widths,
-  hopefully creating a nicer writing environment (can be disabled)
-- `C-c C-c` to add/remove continued dialog to successively speaking
-  characters
+- add/remove continued dialog to successively speaking characters
 - `C-c C-a` to insert a synopsis
 - `C-c C-z` to insert a note
 - `C-c C-x i` to insert metadata
+- synopses, notes and metadata are based on custom templates
 - `S-RET` to upcase the line and insert a newline
-- `M-n` and `M-p` to navigate by scene heading
+- `C-M-n` and `C-M-p` to navigate by scene heading
 - both Fountain comment/boneyard syntaxes (follows standard commenting
   behavior, e.g. `M-;`)
 - command menu
@@ -36,13 +33,12 @@ The following features are supported:
 
 The following features are not yet supported:
 
-- syntax highlighting for other elements, including emphasis
+- syntax highlighting for emphasis
 - reading metadata
 - dual dialogue
 - exporting
 
-The feature-set is quite basic at the moment, with many features yet to
-be added. Feature requests are encouraged. Exporting is "coming soon."
+Feature requests are encouraged. Exporting is "coming soon."
 
 For exporting, check out the full list of apps that support the Fountain
 format here: <http://fountain.io/apps>
@@ -54,10 +50,12 @@ Requirements
 
 - Emacs 24 (not tested on earlier versions)
 - [s.el][] the long lost Emacs string manipulation library.
-- to insert UUIDs (useful for using notes as bookmarks) you'll need the
-  CLT `uuidgen` (usually pre-installed on OS X and Linux)
+- to insert UUIDs (useful for using notes as bookmarks) you'll need
+  either `uuidgen` CLT (usually pre-installed on OS X and Linux) or
+  [uuid.el][] Emacs package
 
 [s.el]: https://github.com/magnars/s.el "s.el"
+[uuid.el]: https://github.com/nicferrier/emacs-uuid "uuid.el"
 
 Installation
 ------------
