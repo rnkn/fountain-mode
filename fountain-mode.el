@@ -39,15 +39,30 @@
 (require 'thingatpt)
 (require 'easymenu)
 
-;;; Group ======================================================================
-
 (defgroup fountain ()
-  "Major mode for editing Fountain-formatted text files."
+  "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
-;;; Customizable Options =======================================================
+;;; obsolete aliases ===========================================================
+
+(define-obsolete-variable-alias 'fountain-indent-character-col
+  'fountain-indent-character "0.12.0")
+
+(define-obsolete-variable-alias 'fountain-indent-dialog-col
+  'fountain-indent-dialog "0.12.0")
+
+(define-obsolete-variable-alias 'fountain-indent-paren-col
+  'fountain-indent-paren "0.12.0")
+
+(define-obsolete-variable-alias 'fountain-indent-trans-col
+  'fountain-indent-trans "0.12.0")
+
+(define-obsolete-variable-alias 'fountain-indent-centered-col
+  'fountain-indent-centered "0.12.0")
+
+;;; customizable options =======================================================
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
@@ -219,7 +234,7 @@ Each option has its own requirements:
                  :tag "Custom"))
   :group 'fountain)
 
-;;; Element Regular Expressions ================================================
+;;; element regular expressions ================================================
 
 (defconst fountain-blank-regexp
   "\\`\\|^ ?$\\|\\'"
@@ -275,7 +290,7 @@ dialog.")
   "^[\s\t]*\\(>.*<\\)[\s\t]*$"
   "Regular expression for matching centered text.")
 
-;;; Faces ======================================================================
+;;; faces ======================================================================
 
 (defgroup fountain-faces nil
   "Faces used in Fountain Mode"
@@ -379,11 +394,11 @@ nil."
   "Additional highlighting face for transitions."
   :group 'fountain-faces)
 
-;;; Thing Definitions ==========================================================
+;;; thing definitions ==========================================================
 
 (put 'scene 'forward-op 'fountain-forward-scene)
 
-;;; Functions ==================================================================
+;;; internal functions =========================================================
 
 (defun fountain-get-line ()
   "Return the line at point as a string."
@@ -693,7 +708,7 @@ This function is called by `jit-lock-fontify-now'."
                      (s (concat "fountain-indent-" s))
                      (var (intern s)))
                 ;; if the variable is bound, indent text to var value
-                ;; FIXME: no centered element face
+                ;; FIXME: centered element face bug
                 (if (boundp var)
                     (fountain-indent-add (symbol-value var))
                   (fountain-indent-add 0)))
@@ -752,7 +767,7 @@ This function is called by `jit-lock-fontify-now'."
       (setq font-lock-end end changed t))
     changed))
 
-;;; Interaction ================================================================
+;;; interactive funcations  ====================================================
 
 (defun fountain-upcase-line ()
   "Upcase the line."
@@ -768,20 +783,47 @@ This function is called by `jit-lock-fontify-now'."
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative)."
   (interactive "^p")
-  (let ((p (if (< n 0) -1 1)))
-    (while (/= n 0)
-      (when (fountain-scene-heading-p)
-        (forward-line p))
-      (while (null (or (eq (point)
-                           (buffer-end p))
-                       (fountain-scene-heading-p)))
-        (forward-line p))
-      (setq n (- n p)))))
+  (let* ((i (if n n 1))
+         (p (if (< i 0) -1 1)))
+    (if (= i 0)
+        (progn
+          (forward-line 0)
+          (while (null (or (eq (point) (buffer-end -1))
+                           (fountain-scene-heading-p)))
+            (forward-line -1)))
+      (while (/= i 0)
+        (when (fountain-scene-heading-p)
+          (forward-line p))
+        (while (null (or (eq (point) (buffer-end p))
+                         (fountain-scene-heading-p)))
+          (forward-line p))
+        (setq i (- i p))))))
 
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
-  (fountain-forward-scene (- n)))
+  (let ((i (if n n 1)))
+    (fountain-forward-scene (- i))))
+
+(defun fountain-mark-scene (&optional extend)
+  "Put mark at end of this scene, point at beginning."
+  (interactive "p")
+  ;; (if (or extend
+  ;;         (and (region-active-p)
+  ;;              (eq last-command this-command)))
+  ;;     (progn
+  ;;       (fountain-forward-scene 1)
+  ;;       (push-mark)
+  ;;       (exchange-point-and-mark))
+    (push-mark)
+    (fountain-forward-scene 0)
+    (if (null (fountain-scene-heading-p))
+        (progn
+          (goto-char (mark))
+          (error "Before first scene heading"))
+      (push-mark)
+      (fountain-forward-scene 1)
+      (exchange-point-and-mark)))
 
 (defun fountain-insert-synopsis ()
   "Open line below current scene heading and insert synopsis."
@@ -795,7 +837,7 @@ This function is called by `jit-lock-fontify-now'."
     (forward-line -1))
   (if (bobp)
       (progn
-        (pop-to-mark-command)
+        (goto-char (mark))
         (error "Before first scene or section heading"))
     (progn
       (forward-line 1)
@@ -874,6 +916,8 @@ buffer (WARNING: this can be very slow)."
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" s)))
             (forward-line 1)))))))
+
+;;; menu functions =============================================================
 
 (defun fountain-toggle-forced-scene-heading-equal ()
   "Toggle `fountain-forced-scene-heading-equal'"
@@ -955,7 +999,7 @@ buffer (WARNING: this can be very slow)."
         ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
         ((cdr (assoc 't font-lock-maximum-decoration)) 3)))
 
-;;; Font Lock ==================================================================
+;;; font lock ==================================================================
 
 (defvar fountain-font-lock-keywords-1 nil
   "Font Lock keywords for no highlighting.")
@@ -1023,13 +1067,16 @@ buffer (WARNING: this can be very slow)."
   "Call `fountain-match-element' with `fountain-trans-p'"
   (fountain-match-element 'fountain-trans-p limit))
 
-;;; Mode Map ===================================================================
+;;; mode map ===================================================================
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
+    (define-key map (kbd "C-M-n") 'fountain-forward-scene)
+    (define-key map (kbd "C-M-p") 'fountain-backward-scene)
+    (define-key map (kbd "C-M-h") 'fountain-mark-scene)
     (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
@@ -1037,7 +1084,7 @@ buffer (WARNING: this can be very slow)."
     map)
   "Mode map for `fountain-mode'.")
 
-;;; Menu =======================================================================
+;;; menu =======================================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for Fountain Mode."
@@ -1085,7 +1132,7 @@ buffer (WARNING: this can be very slow)."
     ["Customize" customize-mode]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
-;;; Syntax Table ===============================================================
+;;; syntax table ===============================================================
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
@@ -1095,7 +1142,7 @@ buffer (WARNING: this can be very slow)."
     syntax)
   "Syntax table for `fountain-mode'.")
 
-;;; Mode Definition ============================================================
+;;; mode definition ============================================================
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
