@@ -45,7 +45,7 @@
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
-;;; obsolete aliases ===========================================================
+;;; obsolete aliases ===================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
   'fountain-indent-character "0.12.0")
@@ -62,7 +62,7 @@
 (define-obsolete-variable-alias 'fountain-indent-centered-col
   'fountain-indent-centered "0.12.0")
 
-;;; customizable options =======================================================
+;;; customizable options ===============================================
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
@@ -234,7 +234,7 @@ Each option has its own requirements:
                  :tag "Custom"))
   :group 'fountain)
 
-;;; element regular expressions ================================================
+;;; element regular expressions ========================================
 
 (defconst fountain-blank-regexp
   "\\`\\|^ ?$\\|\\'"
@@ -290,7 +290,7 @@ dialog.")
   "^[\s\t]*\\(>.*<\\)[\s\t]*$"
   "Regular expression for matching centered text.")
 
-;;; faces ======================================================================
+;;; faces ==============================================================
 
 (defgroup fountain-faces nil
   "Faces used in Fountain Mode"
@@ -394,11 +394,11 @@ nil."
   "Additional highlighting face for transitions."
   :group 'fountain-faces)
 
-;;; thing definitions ==========================================================
+;;; thing definitions ==================================================
 
 (put 'scene 'forward-op 'fountain-forward-scene)
 
-;;; internal functions =========================================================
+;;; internal functions =================================================
 
 (defun fountain-get-line ()
   "Return the line at point as a string."
@@ -767,7 +767,7 @@ This function is called by `jit-lock-fontify-now'."
       (setq font-lock-end end changed t))
     changed))
 
-;;; interactive funcations  ====================================================
+;;; interactive functions  =============================================
 
 (defun fountain-upcase-line ()
   "Upcase the line."
@@ -917,7 +917,7 @@ buffer (WARNING: this can be very slow)."
               (replace-match (concat "\s" s)))
             (forward-line 1)))))))
 
-;;; menu functions =============================================================
+;;; menu functions =====================================================
 
 (defun fountain-toggle-forced-scene-heading-equal ()
   "Toggle `fountain-forced-scene-heading-equal'"
@@ -999,7 +999,7 @@ buffer (WARNING: this can be very slow)."
         ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
         ((cdr (assoc 't font-lock-maximum-decoration)) 3)))
 
-;;; font lock ==================================================================
+;;; font lock ==========================================================
 
 (defvar fountain-font-lock-keywords-1 nil
   "Font Lock keywords for no highlighting.")
@@ -1067,7 +1067,7 @@ buffer (WARNING: this can be very slow)."
   "Call `fountain-match-element' with `fountain-trans-p'"
   (fountain-match-element 'fountain-trans-p limit))
 
-;;; mode map ===================================================================
+;;; mode map ===========================================================
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
@@ -1084,7 +1084,7 @@ buffer (WARNING: this can be very slow)."
     map)
   "Mode map for `fountain-mode'.")
 
-;;; menu =======================================================================
+;;; menu ===============================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for Fountain Mode."
@@ -1132,7 +1132,7 @@ buffer (WARNING: this can be very slow)."
     ["Customize" customize-mode]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
-;;; syntax table ===============================================================
+;;; syntax table =======================================================
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
@@ -1142,7 +1142,7 @@ buffer (WARNING: this can be very slow)."
     syntax)
   "Syntax table for `fountain-mode'.")
 
-;;; mode definition ============================================================
+;;; mode definition ====================================================
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
