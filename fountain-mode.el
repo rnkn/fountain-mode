@@ -463,21 +463,27 @@ nil."
 (defun fountain-blank-p ()
   "Return non-nil if point is at a blank line or single space."
   (save-excursion
-    (forward-line 0)
-    ;; Do not modify match-data
-    (looking-at-p fountain-blank-regexp)))
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      ;; don't modify match-data
+      (looking-at-p fountain-blank-regexp))))
 
 (defun fountain-section-p ()
   "Return non-nil if point is at a section, nil otherwise."
   (save-excursion
-    (forward-line 0)
-    (looking-at fountain-section-regexp)))
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (looking-at fountain-section-regexp))))
 
 (defun fountain-synopsis-p ()
   "Return non-nil if point is at a synopsis, nil otherwise."
   (save-excursion
-    (forward-line 0)
-    (looking-at fountain-synopsis-regexp)))
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (looking-at fountain-synopsis-regexp))))
 
 (defun fountain-note-p ()
   "Return non-nil if point is at a note, nil otherwise."
@@ -485,7 +491,7 @@ nil."
 
 (defun fountain-comment-p ()
   "Return non-nil if point is at a comment, nil otherwise."
-  ;; Problems with comment-only-p picking up blank lines as comments.
+  ;; problems with comment-only-p picking up blank lines as comments
   ;;
   ;; (comment-only-p (line-beginning-position) (line-end-position)))
   (thing-at-point-looking-at fountain-comment-regexp))
@@ -563,13 +569,13 @@ is non-nil."
 
 (defun fountain-character-p ()
   "Return non-nil if point is at character."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (unless (or (fountain-blank-p)
-                  (looking-at fountain-scene-heading-regexp)
-                  (looking-at fountain-forced-scene-heading-regexp))
+  (unless (or (fountain-blank-p)
+              (fountain-scene-heading-p)
+              (fountain-forced-scene-heading-p))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (forward-line 0)
         (looking-at ".*")
         (save-match-data
           (let ((s (buffer-substring-no-properties
@@ -635,8 +641,10 @@ is non-nil."
 (defun fountain-centered-p ()
   "Return non-nil if point is at centered text."
   (save-excursion
-    (forward-line 0)
-    (looking-at fountain-centered-regexp)))
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (looking-at fountain-centered-regexp))))
 
 (defun fountain-format-template (template)
   "Format TEMPLATE according to the following list.
