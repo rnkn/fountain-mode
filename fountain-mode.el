@@ -336,6 +336,16 @@ nil."
   "Additional highlighting face for parentheticals."
   :group 'fountain-faces)
 
+(defface fountain-centered
+  '((t (:inherit default)))
+  "Default face for centered text."
+  :group 'fountain-faces)
+
+(defface fountain-centered-highlight
+  '((t (:inherit default)))
+  "Additional highlighting face for centered text."
+  :group 'fountain-faces)
+
 (defface fountain-note
   '((t (:inherit fountain-note-highlight)))
   "Default face for notes.")
@@ -605,7 +615,7 @@ is non-nil."
                    (fountain-dialog-p))))))))
 
 (defun fountain-trans-p ()
-  "Return non-nil if line at point is a transition."
+  "Return non-nil if point is at a transition."
   (save-excursion
     (save-restriction
       (widen)
@@ -621,6 +631,12 @@ is non-nil."
                (forward-line 1)
                (or (eobp)
                    (fountain-invisible-p))))))))
+
+(defun fountain-centered-p ()
+  "Return non-nil if point is at centered text."
+  (save-excursion
+    (forward-line 0)
+    (looking-at fountain-centered-regexp)))
 
 (defun fountain-format-template (template)
   "Format TEMPLATE according to the following list.
@@ -682,7 +698,6 @@ syntax.
   "Refresh indentation properties between START and END.
 This function is called by `jit-lock-fontify-now'."
   ;; first, extend the region to the block bounds
-  ;;
   ;; if this fun is covered by Font Lock, this won't be needed
   (let ((start
          (progn
@@ -695,40 +710,43 @@ This function is called by `jit-lock-fontify-now'."
            (goto-char end)
            (if (cdr (fountain-get-block-bounds))
                (cdr (fountain-get-block-bounds))
-             (point)))))
+             (point))))
+        (n (fountain-get-font-lock-decoration)))
     (goto-char start)
     (while (< (point) end)
+      ;; if we're indenting...
       (if fountain-indent-elements
-          ;; if Font Lock keywords are enabled, use those
-          (if (> (fountain-get-font-lock-decoration) 1)
-              ;; first, get the variable from the face property
-              (let* ((s (symbol-name (get-text-property (point)'face)))
-                     (s (s-chop-suffix "-highlight" s))
-                     (s (s-chop-prefix "fountain-" s))
-                     (s (concat "fountain-indent-" s))
-                     (var (intern s)))
-                ;; if the variable is bound, indent text to var value
-                ;; FIXME: centered element face bug
-                (if (boundp var)
-                    (fountain-indent-add (symbol-value var))
-                  (fountain-indent-add 0)))
-            ;; otherwise, use predicate funs
-            (cond ((fountain-character-p)
-                   (fountain-indent-add fountain-indent-character))
-                  ((fountain-paren-p)
-                   (fountain-indent-add fountain-indent-paren))
-                  ((fountain-dialog-p)
-                   (fountain-indent-add fountain-indent-dialog))
-                  ((fountain-trans-p)
-                   (fountain-indent-add fountain-indent-trans))
-                  ((thing-at-point-looking-at
-                    fountain-centered-regexp)
-                   (fountain-indent-add
-                    (if fountain-indent-centered
-                        fountain-indent-centered
-                      (/ (- (window-body-width)
-                            (length (fountain-get-line))) 2))))
-                  ((fountain-indent-add 0))))
+          ;; get the centered text indent
+          (let ((fountain-indent-centered
+                 (if fountain-indent-centered
+                     fountain-indent-centered
+                   (/ (- (window-body-width) (length (fountain-get-line)))
+                      2))))
+            ;; if Font Lock keywords are enabled, use those
+            (if (> n 1)
+                ;; first, get the variable from the face property
+                (let* ((s (symbol-name (get-text-property (point) 'face)))
+                       (s (s-chop-suffix "-highlight" s))
+                       (s (s-chop-prefix "fountain-" s))
+                       (s (concat "fountain-indent-" s))
+                       (var (intern s)))
+                  ;; if the variable is bound, indent text to var value
+                  ;; FIXME: centered text bug
+                  (if (boundp var)
+                      (fountain-indent-add (symbol-value var))
+                    (fountain-indent-add 0)))
+              ;; otherwise, use predicate funs
+              (cond ((fountain-character-p)
+                     (fountain-indent-add fountain-indent-character))
+                    ((fountain-paren-p)
+                     (fountain-indent-add fountain-indent-paren))
+                    ((fountain-dialog-p)
+                     (fountain-indent-add fountain-indent-dialog))
+                    ((fountain-trans-p)
+                     (fountain-indent-add fountain-indent-trans))
+                    ((fountain-centered-p)
+                     (fountain-indent-add fountain-indent-centered))
+                    ((fountain-indent-add 0)))))
         ;; otherwise, indent to zero
         (fountain-indent-add 0))
       (forward-line 1))))
@@ -1011,6 +1029,7 @@ buffer (WARNING: this can be very slow)."
     (fountain-match-dialog . 'fountain-dialog)
     (fountain-match-paren . 'fountain-paren)
     (fountain-match-trans . 'fountain-trans)
+    (,fountain-centered-regexp . 'fountain-centered)
     (,fountain-section-regexp . 'fountain-section-highlight)
     (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
     (,fountain-note-regexp . 'fountain-note-highlight))
@@ -1023,6 +1042,7 @@ buffer (WARNING: this can be very slow)."
     (fountain-match-dialog . 'fountain-dialog-highlight)
     (fountain-match-paren . 'fountain-paren-highlight)
     (fountain-match-trans . 'fountain-trans-highlight)
+    (,fountain-centered-regexp . 'fountain-centered-highlight)
     (,fountain-section-regexp . 'fountain-section-highlight)
     (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
     (,fountain-note-regexp . 'fountain-note-highlight))
