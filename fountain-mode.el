@@ -283,7 +283,19 @@ dialog.")
 ;;; faces ==============================================================
 
 (defgroup fountain-faces nil
-  "Faces used in Fountain Mode"
+  "Faces used in Fountain Mode.
+
+There are three levels of Font Lock decoration in
+`fountain-mode':
+
+  1 - none, uses no faces
+  2 - minimal, uses fountain-ELEMENT faces
+  3 - maximum, uses fountain-ELEMENT-highlight faces
+
+To switch between these levels of Font Lock decoration, customize
+the value of `font-lock-maximum-decoration'. This can be set
+indirectly with \\[fountain-set-font-lock-decoration] and saved
+with \\[fountain-save-font-lock-decoration]."
   :group 'fountain)
 
 (defface fountain-comment
@@ -341,7 +353,7 @@ nil."
   "Default face for notes.")
 
 (defface fountain-note-highlight
-  '((t (:slant italic :inherit font-lock-comment-face)))
+  '((t (:inherit font-lock-comment-face)))
   "Additional highlighting face for notes.")
 
 (defface fountain-section
@@ -979,7 +991,7 @@ buffer (WARNING: this can be very slow)."
 
 (defun fountain-set-font-lock-decoration (level)
   "Set `font-lock-maximum-decoration' for Fountain Mode to LEVEL."
-  (interactive)
+  (interactive "nMaximum Decoration (1-3): ")
   (let ((n font-lock-maximum-decoration))
     (cond ((or (booleanp n)
                (integerp n))
