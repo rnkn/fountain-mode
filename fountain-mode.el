@@ -564,10 +564,10 @@ is non-nil."
   ;;                        (unless (eobp)
   ;;                          (null (fountain-invisible-p)))))
   ;;             s)))))))
-  (when (fountain-character-p)
-    (let ((s (buffer-substring-no-properties
-              (match-beginning 0) (match-end 0))))
-      (s-trim (car (s-slice-at "\\^\\|(" s))))))
+  (if (fountain-character-p)
+      (let ((s (buffer-substring-no-properties
+                (match-beginning 0) (match-end 0))))
+        (s-trim (car (s-slice-at "\\^\\|(" s))))))
 
 (defun fountain-character-p ()
   "Return non-nil if point is at character, nil otherwise."
@@ -816,8 +816,8 @@ This function is called by `jit-lock-fontify-now'."
                            (fountain-scene-heading-p)))
             (forward-line -1)))
       (while (/= i 0)
-        (when (fountain-scene-heading-p)
-          (forward-line p))
+        (if (fountain-scene-heading-p)
+            (forward-line p))
         (while (null (or (eq (point) (buffer-end p))
                          (fountain-scene-heading-p)))
           (forward-line p))
@@ -1063,8 +1063,8 @@ buffer (WARNING: this can be very slow)."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
-      (when (funcall func)
-        (setq match t))
+      (if (funcall func)
+          (setq match t))
       (forward-line 1))
     match))
 
