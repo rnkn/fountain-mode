@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.12.0
+;; Version: 0.12.1
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
