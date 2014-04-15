@@ -81,3 +81,8 @@ To change the level of syntax highlighting, customize the value of
 `font-lock-maximum-decoration`. This can be set indirectly with the
 menu, or with `M-x fountain-set-font-lock-decoration` and saved with
 `M-x fountain-save-font-lock-decoration`.
+
+History
+-------
+
+See [Releases](https://github.com/rnkn/fountain-mode/releases).
