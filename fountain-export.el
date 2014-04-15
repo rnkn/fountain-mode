@@ -37,36 +37,43 @@
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-html-header-template
+(defcustom fountain-export-html-template
   "<!DOCTYPE html>
-<!-- Created by Fountain Mode version ${fountain-version} -->
+<!-- Created by Fountain Mode version ${fountain-version} for Emacs -->
 <html>
 <head>
-<meta charset=\"$ {charset}\">
-<title>$ {title}</title>
-<link rel=\"stylesheet\" href=\"${stylesheet}\">
+<link rel=\"stylesheet\" href=\"${cssfile}\">
 </head>
 <body>
 $ {content}
 </body>
 </html>
 "
-  "HTML header template inserted at beginning of export buffer.
+  "HTML template inserted into export buffer.
 See `fountain-export-format-template'."
   :type 'string
   :group 'fountain-export)
 
-;;; internal funcation =================================================
+;;; internal functions =================================================
 
 (defun fountain-export-fontify-buffer ()
   "Ensure the buffer is fontified."
   (save-excursion
     (save-restriction
       (widen)
-      (when font-lock-mode
+      (if font-lock-mode
         (let ((font-lock-maximum-decoration t)
-              fountain-indent-elements)
-          (jit-lock-fontify-now (point-min) (point-max)))))))
+              (fontjob (make-progress-reporter "Fontifying buffer..." 0 100))
+              (chunk (/ (buffer-size) 100))
+              (n 0))
+          (goto-char (point-min))
+          (while (< (point) (buffer-end 1))
+            (let ((end (+ (point) chunk)))
+              (jit-lock-fontify-now (point) end)
+              (goto-char end)
+              (progress-reporter-update fontjob n)
+              (setq n (+ n 1))))
+          (progress-reporter-done fontjob))))))
 
 (defun fountain-export-format-template (template)
   "Format TEMPLATE according to the following list.
@@ -75,28 +82,54 @@ Internal function, will not work outside of
 `fountain-export-html'."
   (s-format template 'aget
             `(("fountain-version" . ,fountain-version)
-              ("stylesheet" . ,(concat name ".css")))))
-  
+              ("htmlfile" . ,htmlfile)
+              ("cssfile" . ,(concat name ".css")))))
+
 (defun fountain-export-html ()
   "Convert current buffer to HTML, writing result to new buffer."
   (interactive)
   (save-excursion
     (save-restriction
       (widen)
-      (fountain-fontify-buffer)
-      (let* ((name (if (buffer-file-name)
-                       (file-name-base (buffer-file-name))
-                     fountain-export-buffer-name))
-             (htmlb (generate-new-buffer (concat name ".html")))
-             complete)
-        (with-current-buffer htmlb
-          (with-silent-modifications
-            (insert (fountain-export-format-template
-                     fountain-export-html-header-template))))
-        (switch-to-buffer-other-window htmlb)
-        (html-mode)
-        (indent-region (point-min) (point-max))
-))))
+      (let ((exportjob (make-progress-reporter "Exporting buffer..." 0 100)))
+        ;; fontify the entire buffer
+        (fountain-export-fontify-buffer)
+        ;; create the stylesheet
+        (let* ((sourcebuf (current-buffer))
+               (content "")
+               (name (if (buffer-file-name)
+                         (file-name-base (buffer-file-name))
+                       fountain-export-buffer-name))
+               (htmlfile (concat name ".html"))
+               (htmlbuf (generate-new-buffer htmlfile)))
+          (with-temp-buffer
+            (insert-buffer-substring sourcebuf)
+            (goto-char (point-min))
+            (while (re-search-forward fountain-comment-regexp nil t)
+              (delete-region (match-beginning 0) (match-end 0)))
+            (goto-char (point-min))
+            (while (next-property-change (point))
+              (let* ((end (next-property-change (point)))
+                     (s (buffer-substring-no-properties (point) end)))
+                (with-current-buffer htmlbuf
+                  (with-silent-modifications
+                    (insert (format "<div>%s</div>" s) "\n")))
+                (goto-char end)
+                (if (next-property-change (point))
+                    (goto-char (next-property-change (point)))))))
+          ;; replace single newlines in element string with "</br>"
+          ;; append element string to content string
+          ;; create the export buffer
+          ;; (with-current-buffer htmlbuf
+          ;;   (with-silent-modifications
+          ;;     (insert (fountain-export-format-template
+          ;;              fountain-export-html-template))))
+          ;; insert content string into htmlbuf
+          (switch-to-buffer-other-window htmlbuf)
+          ;; indent according to HTML mode
+          ;; (set-auto-mode)
+          ;; (indent-region (point-min) (point-max)))
+          (progress-reporter-done exportjob))))))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
