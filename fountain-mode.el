@@ -45,6 +45,9 @@
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
+(defconst fountain-version
+  "0.12.1")
+
 ;;; obsolete aliases ===================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
