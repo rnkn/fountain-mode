@@ -420,12 +420,10 @@ nil."
   "Return the beginning and end points of block at point."
   (let ((block-beginning
          (save-excursion
-           (re-search-backward fountain-blank-regexp
-                               (- (point) 10000) t)))
+           (re-search-backward fountain-blank-regexp nil t)))
         (block-end
          (save-excursion
-           (re-search-forward fountain-blank-regexp
-                              (+ (point) 10000) t))))
+           (re-search-forward fountain-blank-regexp nil t))))
     (cons block-beginning block-end)))
 
 (defun fountain-strip-comments (start end)
@@ -712,15 +710,11 @@ This function is called by `jit-lock-fontify-now'."
   (let ((start
          (progn
            (goto-char start)
-           (if (car (fountain-get-block-bounds))
-               (car (fountain-get-block-bounds))
-             (point))))
+           (car (fountain-get-block-bounds))))
         (end
          (progn
            (goto-char end)
-           (if (cdr (fountain-get-block-bounds))
-               (cdr (fountain-get-block-bounds))
-             (point))))
+           (cdr (fountain-get-block-bounds))))
         (n (fountain-get-font-lock-decoration)))
     (goto-char start)
     (while (< (point) end)
@@ -731,7 +725,7 @@ This function is called by `jit-lock-fontify-now'."
                  (if fountain-indent-centered
                      fountain-indent-centered
                    (/ (- (window-body-width) (length (fountain-get-line)))
-                      2))))
+                      2))))             ; FIXME: every line???
             ;; if Font Lock keywords are enabled, use those
             (if (> n 1)
                 ;; first, get the variable from the face property
@@ -777,13 +771,11 @@ This function is called by `jit-lock-fontify-now'."
   (let ((start
          (save-excursion
            (goto-char font-lock-beg)
-           (if (car (fountain-get-block-bounds))
-               (car (fountain-get-block-bounds)))))
+           (car (fountain-get-block-bounds))))
         (end
          (save-excursion
            (goto-char font-lock-end)
-           (if (cdr (fountain-get-block-bounds))
-               (cdr (fountain-get-block-bounds)))))
+           (cdr (fountain-get-block-bounds))))
         changed)
     (goto-char font-lock-beg)
     (unless (or (bobp)
