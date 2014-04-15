@@ -285,8 +285,7 @@ dialog.")
 (defgroup fountain-faces nil
   "Faces used in Fountain Mode.
 
-There are three levels of Font Lock decoration in
-`fountain-mode':
+There are three levels of Font Lock decoration:
 
   1 - none, uses no faces
   2 - minimal, uses fountain-ELEMENT faces
@@ -570,7 +569,7 @@ is non-nil."
       (s-trim (car (s-slice-at "\\^\\|(" s))))))
 
 (defun fountain-character-p ()
-  "Return non-nil if point is at character."
+  "Return non-nil if point is at character, nil otherwise."
   (unless (or (fountain-blank-p)
               (fountain-scene-heading-p)
               (fountain-forced-scene-heading-p))
@@ -675,6 +674,7 @@ syntax.
 
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
+  ;; combine with `fountain-get-character' as optional N?
   (save-excursion
     (save-restriction
       (widen)
@@ -799,6 +799,7 @@ This function is called by `jit-lock-fontify-now'."
 
 (defun fountain-upcase-line ()
   "Upcase the line."
+  ;; not in use, delete?
   (interactive)
   (upcase-region (line-beginning-position) (line-end-position)))
 
