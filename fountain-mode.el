@@ -341,7 +341,7 @@ nil."
   "Default face for notes.")
 
 (defface fountain-note-highlight
-  '((t (:inherit font-lock-comment-face)))
+  '((t (:slant italic :inherit font-lock-comment-face)))
   "Additional highlighting face for notes.")
 
 (defface fountain-section
