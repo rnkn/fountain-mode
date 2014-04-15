@@ -15,7 +15,7 @@ Features
 
 The following features are supported:
 
-- multiple levels of syntax highlighting for all elements
+- multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
   centered text elements (display only, does not modify file contents)
 - add/remove continued dialog to successively speaking characters
@@ -73,3 +73,11 @@ following:
     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
 [MELPA]: http://melpa.milkbox.net "MELPA"
+
+Syntax Highlighting
+-------------------
+
+To change the level of syntax highlighting, customize the value of
+`font-lock-maximum-decoration`. This can be set indirectly with the
+menu, or with `M-x fountain-set-font-lock-decoration` and saved with
+`M-x fountain-save-font-lock-decoration`.
