@@ -75,6 +75,28 @@ See `fountain-export-format-template'."
               (setq n (+ n 1))))
           (progress-reporter-done fontjob))))))
 
+(defun fountain-export-escape-chars (substring)
+  ""
+  (with-temp-buffer
+    (insert substring)
+    (format-replace-strings '(("\n" . "</br>"))
+                            nil (point-min) (point-max))
+    (substring-no-properties (buffer-string))))
+
+(defun fountain-export-create-element (substring)
+  "Return a HTML div element with face and substring of SUBSTRING.
+Stylesheet class is taken from face, while content is taken from
+of SUBSTRING."
+  (let ((class (if (get-text-property 0 'face substring)
+                   (let* ((s (symbol-name (get-text-property 0 'face substring)))
+                          (s (s-chop-suffix "-highlight" s))
+                          (s (s-chop-prefix "fountain-" s))) s)
+                 "action"))
+        (content (substring-no-properties substring)))
+    (unless (string= class "comment")
+      (format "<div class=\"%s\">%s</div>"
+              class content))))
+
 (defun fountain-export-format-template (template)
   "Format TEMPLATE according to the following list.
 
@@ -96,27 +118,28 @@ Internal function, will not work outside of
         (fountain-export-fontify-buffer)
         ;; create the stylesheet
         (let* ((sourcebuf (current-buffer))
-               (content "")
                (name (if (buffer-file-name)
                          (file-name-base (buffer-file-name))
                        fountain-export-buffer-name))
                (htmlfile (concat name ".html"))
                (htmlbuf (generate-new-buffer htmlfile)))
-          (with-temp-buffer
-            (insert-buffer-substring sourcebuf)
-            (goto-char (point-min))
-            (while (re-search-forward fountain-comment-regexp nil t)
-              (delete-region (match-beginning 0) (match-end 0)))
-            (goto-char (point-min))
-            (while (next-property-change (point))
-              (let* ((end (next-property-change (point)))
-                     (s (buffer-substring-no-properties (point) end)))
-                (with-current-buffer htmlbuf
-                  (with-silent-modifications
-                    (insert (format "<div>%s</div>" s) "\n")))
-                (goto-char end)
-                (if (next-property-change (point))
-                    (goto-char (next-property-change (point)))))))
+          (goto-char (point-min))
+          ;; FIXME: single line breaks
+          (while (null (eobp))
+            (let ((end (next-property-change (point))))
+              (when end
+                (let* ((s (buffer-substring (point) end))
+                       (s (s-presence (s-trim s))))
+                  (when s
+                    (setq element (fountain-export-create-element s))
+                    (with-current-buffer htmlbuf
+                      (with-silent-modifications
+                        (insert element "\n"))))
+                  (goto-char end)))
+              (unless (looking-at ".\\|\\'")
+                (forward-char 1))
+              (progress-reporter-update exportjob
+                                        (* (/ (point) (buffer-size)) 100))))
           ;; replace single newlines in element string with "</br>"
           ;; append element string to content string
           ;; create the export buffer
@@ -127,8 +150,8 @@ Internal function, will not work outside of
           ;; insert content string into htmlbuf
           (switch-to-buffer-other-window htmlbuf)
           ;; indent according to HTML mode
-          ;; (set-auto-mode)
-          ;; (indent-region (point-min) (point-max)))
+          (set-auto-mode)
+          (indent-region (point-min) (point-max))
           (progress-reporter-done exportjob))))))
 
 (provide 'fountain-export)
