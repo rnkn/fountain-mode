@@ -580,8 +580,9 @@ is non-nil."
         (forward-line 0)
         (looking-at ".*")
         (save-match-data
-          (let ((s (buffer-substring-no-properties
-                    (match-beginning 0) (match-end 0))))
+          (let* ((s (buffer-substring-no-properties
+                     (match-beginning 0) (match-end 0)))
+                 (s (s-trim (car (s-slice-at "\\^\\|(" s)))))
             (and (or (s-uppercase? s)
                      (s-starts-with? "@" s))
                  (save-excursion
