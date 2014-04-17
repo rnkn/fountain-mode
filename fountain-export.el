@@ -131,25 +131,29 @@ Internal function, will not work outside of
               ("cssfile" . ,(fountain-export-get-name
                              sourcebuf ".css")))))
 
-(defun fountain-export-parse-buffer (destbuf)
-  ""
+(defun fountain-export-parse-region (start end destbuf)
+  "Find face property changes from START to END and insert HTML elements into DESTBUF.
+First, find the next face property change from point, then pass
+substring between point and change to
+`fountain-export-create-html-element', then insert the newly
+created HTML element to DESTBUF."
   (let ((job (make-progress-reporter "Parsing... " 0 100)))
-    (goto-char (point-min))
-    (while (< (point) (point-max))
+    (goto-char start)
+    (while (< (point) end)
       (skip-chars-forward "\n\s\t")
-      (let* ((start (point))
+      (let* ((index (point))
              (limit (save-excursion
-                      (re-search-forward "\n\s?\n\\|\\'" nil t)
+                      (re-search-forward "\n\s?\n\\|\\'" end t)
                       (match-beginning 0)))
-             (end (next-single-property-change start 'face nil limit)))
-        (when end
-          (let* ((s (buffer-substring start end))
+             (change (next-single-property-change index 'face nil limit)))
+        (when change
+          (let* ((s (buffer-substring index change))
                  (element (fountain-export-create-html-element s)))
             (when element
               (with-current-buffer destbuf
                 (with-silent-modifications
                   (insert element)))))
-          (goto-char end)))
+          (goto-char change)))
       (unless (looking-at ".\\|\\'")
         (forward-char 1))
       (progress-reporter-update
@@ -206,7 +210,7 @@ Internal function, will not work outside of
                          fountain-export-html-head-template sourcebuf)
                         "<body>\n<div id=\"screenplay\">\n")))
             ;; parse the buffer
-            (fountain-export-parse-buffer htmlbuf)
+            (fountain-export-parse-region start end htmlbuf)
             ;; switch to destination buffer for final touches
             (switch-to-buffer-other-window htmlbuf)
             (insert "</div>\n</body>\n</html>")
