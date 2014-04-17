@@ -49,7 +49,7 @@
 
 (defcustom fountain-export-html-head-template
   "<!DOCTYPE html>
-<!-- Created by Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
+<!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
 <html>
 <head>
 <link rel=\"stylesheet\" href=\"${cssfile}\">
@@ -62,37 +62,29 @@ See `fountain-export-format-template'."
 
 ;;; internal functions =================================================
 
-(defun fountain-export-fontify-buffer ()
-  "Ensure the buffer is fontified."
+(defun fountain-export-fontify-region (start end)
+  "Fontify between START and END."
   (if font-lock-mode
       (let ((font-lock-maximum-decoration t)
-            (fontjob (make-progress-reporter "Fontifying..." 0 100))
-            (chunk (/ (point-max) 100))
+            (job (make-progress-reporter "Fontifying... " 0 100))
+            (chunk (/ end 100))
             (n 0))
-        (goto-char (point-min))
-        (while (< (point) (point-max))
-          (let ((end (+ (point) chunk)))
-            (jit-lock-fontify-now (point) end)
-            (goto-char end)
-            (progress-reporter-update fontjob n)
+        (goto-char start)
+        (while (< (point) end)
+          (let ((limit (+ (point) chunk)))
+            (jit-lock-fontify-now (point) limit)
+            (goto-char limit)
+            (progress-reporter-update job n)
             (setq n (+ n 1))))
-        (progress-reporter-done fontjob))))
+        (progress-reporter-done job))
+    (error "Font Lock is not active")))
 
-(defun fountain-export-get-name ()
-  ""
-  (if (buffer-file-name)
-      (file-name-base (buffer-file-name))
+(defun fountain-export-get-name (buffer ext)
+  "If BUFFER is visiting a file, concat file name base and EXT.
+Otherwise return `fountain-export-buffer-name'"
+  (if (buffer-file-name buffer)
+      (concat (file-name-base (buffer-file-name buffer)) ext)
     fountain-export-buffer-name))
-
-(defun fountain-export-get-element (start end dest)
-  ""
-  (let* ((start (point))
-         (limit (save-excursion
-                  (re-search-forward fountain-blank-regexp nil t)
-                  (match-beginning 0)))
-         (end (next-single-property-change start 'face nil limit)))
-    (when end
-      (buffer-substring start end))))
 
 (defun fountain-export-filter (s)
   "Replace newlines with line-breaks and escape HTML special characters."
@@ -102,23 +94,29 @@ See `fountain-export-format-template'."
                    ("\n" . "<br>")) s))
 
 (defun fountain-export-create-html-element (substring)
-  "Return a HTML div with face and substring of SUBSTRING.
+  "Return a HTML element with face and substring of SUBSTRING.
 Stylesheet class is taken from face, while content is taken from
 of SUBSTRING.
 
 If face is `fountain-comment', return nil."
-  (let ((class
-         (if (get-text-property 0 'face substring)
-             (let* ((s (symbol-name (get-text-property 0 'face substring)))
-                    (s (s-chop-suffix "-highlight" s))
-                    (s (s-chop-prefix "fountain-" s))) s)
-           "action"))
-        (content
-         (fountain-export-filter (substring-no-properties substring))))
+  (let* ((class
+          (if (get-text-property 0 'face substring)
+              (let* ((s (symbol-name (get-text-property 0 'face substring)))
+                     (s (s-chop-suffix "-highlight" s))
+                     (s (s-chop-prefix "fountain-" s))) s)
+            "action"))
+         (element (cond ((string= class "scene-heading")
+                         "h1")
+                        ((string= class "character")
+                         "h2")
+                        ("p")))
+         (content
+          (fountain-export-filter (substring-no-properties substring))))
     (unless (string= class "comment")
-      (format "<div class=\"%s\">%s</div>\n" class content))))
+      (format "<%s class=\"%s\">%s</%s>\n"
+              element class content element))))
 
-(defun fountain-export-format-template (template)
+(defun fountain-export-format-template (template sourcebuf)
   "Format TEMPLATE according to the following list.
 
 Internal function, will not work outside of
@@ -128,8 +126,47 @@ Internal function, will not work outside of
               ("emacs-version" . ,emacs-version)
               ;; title?
               ;; author?
-              ("htmlfile" . ,(concat (fountain-export-get-name) ".html"))
-              ("cssfile" . ,(concat (fountain-export-get-name) ".css")))))
+              ("htmlfile" . ,(fountain-export-get-name
+                              sourcebuf ".html"))
+              ("cssfile" . ,(fountain-export-get-name
+                             sourcebuf ".css")))))
+
+(defun fountain-export-parse-buffer (destbuf)
+  ""
+  (let ((job (make-progress-reporter "Parsing... " 0 100)))
+    (goto-char (point-min))
+    (while (< (point) (point-max))
+      (skip-chars-forward "\n\s\t")
+      (let* ((start (point))
+             (limit (save-excursion
+                      (re-search-forward "\n\s?\n\\|\\'" nil t)
+                      (match-beginning 0)))
+             (end (next-single-property-change start 'face nil limit)))
+        (when end
+          (let* ((s (buffer-substring start end))
+                 (element (fountain-export-create-html-element s)))
+            (when element
+              (with-current-buffer destbuf
+                (with-silent-modifications
+                  (insert element)))))
+          (goto-char end)))
+      (unless (looking-at ".\\|\\'")
+        (forward-char 1))
+      (progress-reporter-update
+       job (truncate (* (/ (float (point)) (buffer-size)) 100))))))
+
+(defun fountain-export-prepare-html ()
+  ""
+  (sgml-mode)
+  (let ((sgml-unclosed-tags '("link" "br"))
+        (job (make-progress-reporter "Preparing HTML... " 0 100)))
+    (goto-char (point-min))
+    (while (< (point) (point-max))
+      (indent-according-to-mode)
+      (forward-line 1)
+      (progress-reporter-update
+       job (truncate (* (/ (float (point)) (point-max)) 100))))
+    (progress-reporter-done job)))
 
 (defun fountain-export-pdf-buffer ()
   ""
@@ -149,58 +186,36 @@ Internal function, will not work outside of
       (fountain-export-html-region (point-min) (point-max)))))
 
 (defun fountain-export-html-region (start end)
-  "Convert current buffer to HTML, writing result to new buffer."
+  "Convert region to HTML, writing result to new buffer."
   (interactive "r")
   (save-excursion
-    (let ((exportjob (make-progress-reporter "Exporting..." 0 100)))
-      ;; fontify the entire buffer
-      (fountain-export-fontify-buffer)
-      ;; FIXME: create the stylesheet
-      (let* ((sourcebuf (current-buffer))
-             (name (if (buffer-file-name)
-                       (file-name-base (buffer-file-name))
-                     fountain-export-buffer-name))
-             (htmlfile (concat name ".html"))
-             (htmlbuf (generate-new-buffer htmlfile)))
-        (goto-char (point-min))
-        (with-current-buffer htmlbuf
-          (with-silent-modifications
-            (insert (fountain-export-format-template
-                     fountain-export-html-head-template)
-                    "<body>\n<div id=\"screenplay\">\n")))
-        (while (< (point) (point-max))
-          (skip-chars-forward "\n\s\t")
-          (let* ((start (point))
-                 (limit (save-excursion
-                          (re-search-forward "\n\s?\n\\|\\'" nil t)
-                          (match-beginning 0)))
-                 (end (next-single-property-change start 'face nil limit)))
-            (when end
-              (let* ((s (buffer-substring start end))
-                     (div (fountain-export-create-html-element s)))
-                (when div
-                  (with-current-buffer htmlbuf
-                    (with-silent-modifications
-                      (insert div)))))
-              (goto-char end)))
-          (unless (looking-at ".\\|\\'")
-            (forward-char 1))
-          (progress-reporter-update
-           exportjob
-           (truncate (* (/ (float (point)) (buffer-size)) 100))))
-        (switch-to-buffer-other-window htmlbuf)
-        (let ((htmljob (make-progress-reporter "Preparing HTML..." 0 100)))
-          (insert "</div>\n</body>\n<\html>")
-          (goto-char (point-min))
-          (html-mode)
-          (while (< (point) (point-max))
-            (indent-according-to-mode)
-            (forward-line 1)
-            (progress-reporter-update
-             htmljob
-             (truncate (* (/ (float (point)) (point-max)) 100))))
-          (progress-reporter-done htmljob))
-        (progress-reporter-done exportjob)))))
+    ;; FIXME: create the stylesheet
+    (let* ((job (make-progress-reporter "Exporting... " 0 100))
+           (sourcebuf (current-buffer))
+           (htmlbuf (generate-new-buffer
+                     (fountain-export-get-name sourcebuf ".html")))
+           complete)
+      (unwind-protect
+          (progn
+            ;; fontify the region
+            (fountain-export-fontify-region start end)
+            ;; insert HTML head
+            (with-current-buffer htmlbuf
+              (with-silent-modifications
+                (insert (fountain-export-format-template
+                         fountain-export-html-head-template sourcebuf)
+                        "<body>\n<div id=\"screenplay\">\n")))
+            ;; parse the buffer
+            (fountain-export-parse-buffer htmlbuf)
+            ;; switch to destination buffer for final touches
+            (switch-to-buffer-other-window htmlbuf)
+            (insert "</div>\n</body>\n</html>")
+            (fountain-export-prepare-html)
+            (progress-reporter-done job)
+            (setq complete t))
+        (unless complete
+          (kill-buffer htmlbuf))))))
+      
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
