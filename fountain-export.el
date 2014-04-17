@@ -181,7 +181,7 @@ Internal function, will not work outside of
                  (end (next-single-property-change start 'face nil limit)))
             (when end
               (let* ((s (buffer-substring start end))
-                     (div (fountain-export-create-div s)))
+                     (div (fountain-export-create-html-element s)))
                 (when div
                   (with-current-buffer htmlbuf
                     (with-silent-modifications
@@ -194,11 +194,9 @@ Internal function, will not work outside of
            (truncate (* (/ (float (point)) (buffer-size)) 100))))
         (switch-to-buffer-other-window htmlbuf)
         (let ((htmljob (make-progress-reporter "Preparing HTML..." 0 100)))
-          (html-mode)
-          (sgml-close-tag) (newline)
-          (sgml-close-tag) (newline)
-          (sgml-close-tag) (newline)
+          (insert "</div>\n</body>\n<\html>")
           (goto-char (point-min))
+          (html-mode)
           (while (< (point) (point-max))
             (indent-according-to-mode)
             (forward-line 1)
