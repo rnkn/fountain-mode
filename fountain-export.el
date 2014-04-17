@@ -94,16 +94,12 @@ See `fountain-export-format-template'."
     (when end
       (buffer-substring start end))))
 
-(defun fountain-export-filter (substring)
+(defun fountain-export-filter (s)
   "Replace newlines with line-breaks and escape HTML special characters."
-  (with-temp-buffer
-    (insert substring)
-    (format-replace-strings '(("&" . "&amp;")
-                              ("<" . "&lt;")
-                              (">" . "&gt;")
-                              ("\n" . "<br>"))
-                            nil (point-min) (point-max))
-    (substring-no-properties (buffer-string))))
+  (s-replace-all '(("&" . "&amp;")
+                   ("<" . "&lt;")
+                   (">" . "&gt;")
+                   ("\n" . "<br>")) s))
 
 (defun fountain-export-create-html-element (substring)
   "Return a HTML div with face and substring of SUBSTRING.
