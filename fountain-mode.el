@@ -830,6 +830,17 @@ This function is called by `jit-lock-fontify-now'."
   (let ((i (if n n 1)))
     (fountain-forward-scene (- i))))
 
+(defun fountain-beginning-of-scene ()
+  "Move point to beginning of current scene."
+  (interactive "^")
+  (fountain-forward-scene 0))
+
+(defun fountain-end-of-scene ()
+  "Move point to end of current scene."
+  (interactive "^")
+  (fountain-forward-scene 1)
+  (forward-char -1))
+
 (defun fountain-mark-scene (&optional extend)
   "Put mark at end of this scene, point at beginning."
   (interactive "p")
@@ -1098,11 +1109,15 @@ buffer (WARNING: this can be very slow)."
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-m") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
+    (define-key map (kbd "C-c C-u") 'fountain-upcase-line)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
     (define-key map (kbd "C-M-p") 'fountain-backward-scene)
+    (define-key map (kbd "C-M-a") 'fountain-beginning-of-scene)
+    (define-key map (kbd "C-M-e") 'fountain-end-of-scene)
     (define-key map (kbd "C-M-h") 'fountain-mark-scene)
     (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
