@@ -246,7 +246,7 @@ Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\.\\<\\(.*\\)"
+  "^\\(\\.\\)\\(\\<.*\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-forced-scene-heading-p' for preceding and
 succeeding blank lines.")
@@ -270,17 +270,17 @@ dialog.")
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  "^=[^=].*"
+  "^\\(=[\s\t]*\\)\\([^=\n]*\\)"
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
-  (concat "^[\s\t]*>[^<\n]*$\\|^[[:upper:]\s]*"
+  (concat "^\\([\s\t]*>\s*\\)\\([^<\n]*\\)$\\|^[[:upper:]\s]*"
           (regexp-opt fountain-trans-list)
           "\\.?$")
   "Regular expression for matching transitions.")
 
 (defconst fountain-centered-regexp
-  "^[\s\t]*\\(>.*<\\)[\s\t]*$"
+  "^\\([\s\t]*>[\s\t]*\\)\\(.*\\)\\(<[\s\t]*\\)$"
   "Regular expression for matching centered text.")
 
 ;;; faces ==============================================================
@@ -1041,29 +1041,49 @@ buffer (WARNING: this can be very slow)."
   "Font Lock keywords for no highlighting.")
 
 (defvar fountain-font-lock-keywords-2
-  `((fountain-match-scene-heading . 'fountain-scene-heading)
-    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading)
-    (fountain-match-character . 'fountain-character)
-    (fountain-match-dialog . 'fountain-dialog)
-    (fountain-match-paren . 'fountain-paren)
-    (fountain-match-trans . 'fountain-trans)
-    (,fountain-centered-regexp . 'fountain-centered)
-    (,fountain-section-regexp . 'fountain-section-highlight)
-    (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
-    (,fountain-note-regexp . 'fountain-note-highlight))
+  (list
+    (cons 'fountain-match-scene-heading
+          '((0 'fountain-scene-heading)))
+    (cons 'fountain-match-forced-scene-heading
+          '((1 'fountain-comment)
+            (2 'fountain-forced-scene-heading)))
+    (cons 'fountain-match-character
+          '((0 'fountain-character)))
+    (cons 'fountain-match-dialog '((0 'fountain-dialog)))
+    (cons 'fountain-match-paren '((0 'fountain-paren)))
+    (cons 'fountain-match-trans '((0 'fountain-trans)))
+    (cons fountain-centered-regexp
+          '((1 'fountain-comment)
+            (2 'fountain-centered)
+            (3 'fountain-comment)))
+    (cons fountain-section-regexp '((0 'fountain-section-highlight)))
+    (cons fountain-synopsis-regexp
+          '((1 'fountain-comment)
+            (2 'fountain-synopsis-highlight)))
+    (cons fountain-note-regexp '((0 'fountain-note-highlight))))
   "Font Lock keywords for minimal highlighting.")
 
 (defvar fountain-font-lock-keywords-3
-  `((fountain-match-scene-heading . 'fountain-scene-heading-highlight)
-    (fountain-match-forced-scene-heading . 'fountain-forced-scene-heading-highlight)
-    (fountain-match-character . 'fountain-character-highlight)
-    (fountain-match-dialog . 'fountain-dialog-highlight)
-    (fountain-match-paren . 'fountain-paren-highlight)
-    (fountain-match-trans . 'fountain-trans-highlight)
-    (,fountain-centered-regexp . 'fountain-centered-highlight)
-    (,fountain-section-regexp . 'fountain-section-highlight)
-    (,fountain-synopsis-regexp . 'fountain-synopsis-highlight)
-    (,fountain-note-regexp . 'fountain-note-highlight))
+  (list
+    (cons 'fountain-match-scene-heading
+          '((0 'fountain-scene-heading-highlight)))
+    (cons 'fountain-match-forced-scene-heading
+          '((1 'fountain-comment)
+            (2 'fountain-forced-scene-heading-highlight)))
+    (cons 'fountain-match-character
+          '((0 'fountain-character-highlight)))
+    (cons 'fountain-match-dialog '((0 'fountain-dialog-highlight)))
+    (cons 'fountain-match-paren '((0 'fountain-paren-highlight)))
+    (cons 'fountain-match-trans '((0 'fountain-trans-highlight)))
+    (cons fountain-centered-regexp
+          '((1 'fountain-comment)
+            (2 'fountain-centered-highlight)
+            (3 'fountain-comment)))
+    (cons fountain-section-regexp '((0 'fountain-section-highlight)))
+    (cons fountain-synopsis-regexp
+          '((1 'fountain-comment)
+            (2 'fountain-synopsis-highlight)))
+    (cons fountain-note-regexp '((0 'fountain-note-highlight))))
   "Font Lock keywords for maximum highlighting.")
 
 (defvaralias 'fountain-font-lock-keywords-default
