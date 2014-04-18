@@ -62,15 +62,15 @@ See `fountain-export-format-template'."
 
 ;;; internal functions =================================================
 
-(defun fountain-export-fontify-region (start end)
+(defun fountain-export-fontify-buffer ()
   "Fontify between START and END."
   (if font-lock-mode
       (let ((font-lock-maximum-decoration t)
             (job (make-progress-reporter "Fontifying... " 0 100))
-            (chunk (/ end 100))
+            (chunk (/ (buffer-size) 100))
             (n 0))
-        (goto-char start)
-        (while (< (point) end)
+        (goto-char (point-min))
+        (while (not (eobp))
           (let ((limit (+ (point) chunk)))
             (jit-lock-fontify-now (point) limit)
             (goto-char limit)
@@ -105,16 +105,16 @@ If face is `fountain-comment', return nil."
                      (s (s-chop-suffix "-highlight" s))
                      (s (s-chop-prefix "fountain-" s))) s)
             "action"))
-         (element (cond ((string= class "scene-heading")
-                         "h1")
-                        ((string= class "character")
-                         "h2")
-                        ("p")))
+         (tag (cond ((string= class "scene-heading")
+                     "h1")
+                    ((string= class "character")
+                     "h2")
+                    ("p")))
          (content
           (fountain-export-filter (substring-no-properties substring))))
     (unless (string= class "comment")
       (format "<%s class=\"%s\">%s</%s>\n"
-              element class content element))))
+              tag class content tag))))
 
 (defun fountain-export-format-template (template sourcebuf)
   "Format TEMPLATE according to the following list.
@@ -131,19 +131,19 @@ Internal function, will not work outside of
               ("cssfile" . ,(fountain-export-get-name
                              sourcebuf ".css")))))
 
-(defun fountain-export-parse-region (start end destbuf)
+(defun fountain-export-parse-buffer (destbuf)
   "Find face property changes from START to END and insert HTML elements into DESTBUF.
 First, find the next face property change from point, then pass
 substring between point and change to
 `fountain-export-create-html-element', then insert the newly
 created HTML element to DESTBUF."
   (let ((job (make-progress-reporter "Parsing... " 0 100)))
-    (goto-char start)
-    (while (< (point) end)
+    (goto-char (point-min))
+    (while (not (eobp))
       (skip-chars-forward "\n\s\t")
       (let* ((index (point))
              (limit (save-excursion
-                      (re-search-forward "\n\s?\n\\|\\'" end t)
+                      (re-search-forward "\n\s?\n\\|\\'" nil t)
                       (match-beginning 0)))
              (change (next-single-property-change index 'face nil limit)))
         (when change
@@ -160,66 +160,88 @@ created HTML element to DESTBUF."
        job (truncate (* (/ (float (point)) (buffer-size)) 100))))))
 
 (defun fountain-export-prepare-html ()
-  ""
+  ;; internal function, don't call externally
   (sgml-mode)
   (let ((sgml-unclosed-tags '("link" "br"))
         (job (make-progress-reporter "Preparing HTML... " 0 100)))
     (goto-char (point-min))
-    (while (< (point) (point-max))
+    (while (null (eobp))
       (indent-according-to-mode)
       (forward-line 1)
       (progress-reporter-update
        job (truncate (* (/ (float (point)) (point-max)) 100))))
     (progress-reporter-done job)))
 
-(defun fountain-export-pdf-buffer ()
-  ""
-  (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      ;; run `fountain-export-pdf-command'
-      )))
+(defun fountain-export-html-1 ()
+  ;; internal function, don't call externally
+  ;; use `fountain-export-buffer-to-html' instead
+  (let* ((job (make-progress-reporter "Exporting... "))
+         (sourcebuf (current-buffer))
+         (destbuf (get-buffer-create
+                   (fountain-export-get-name sourcebuf ".html")))
+         complete)
+    (unwind-protect
+        (progn
+          ;; fontify the buffer
+          (fountain-export-fontify-buffer)
+          ;; FIXME: create the stylesheet
+          ;; insert HTML head
+          (with-current-buffer destbuf
+            (with-silent-modifications
+              (erase-buffer)
+              (insert (fountain-export-format-template
+                       fountain-export-html-head-template sourcebuf)
+                      "<body>\n<div id=\"screenplay\">\n")))
+          ;; parse the buffer
+          (fountain-export-parse-buffer destbuf)
+          ;; close HTML tags
+          (with-current-buffer destbuf
+            (with-silent-modifications
+              (insert "</div>\n</body>\n</html>")
+              (fountain-export-prepare-html)))
+          ;; signal completion
+          (progress-reporter-done job)
+          (setq complete t)
+          destbuf)
+      ;; if errors occur, kill the unsaved buffer
+      (unless complete
+        (kill-buffer destbuf)))))
 
-(defun fountain-export-html-buffer ()
-  ""
+(defun fountain-export-buffer-to-html (&optional buffer)
+  "Export the buffer to HTML file, then switch to HTML buffer."
   (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (fountain-export-html-region (point-min) (point-max)))))
+  (with-current-buffer
+      (or buffer (current-buffer))
+    (let ((destbuf (fountain-export-html-1))
+          (outputdir (if (buffer-file-name buffer)
+                         (expand-file-name (file-name-directory
+                                            (buffer-file-name buffer))))))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (with-current-buffer destbuf
+          (if outputdir
+              (write-file outputdir t)))
+        (if (called-interactively-p 'interactive)
+            (switch-to-buffer-other-window destbuf))
+        destbuf)))))
 
-(defun fountain-export-html-region (start end)
-  "Convert region to HTML, writing result to new buffer."
+(defun fountain-export-region-to-html (start end)
+  "Export the region to HTML file, then switch to HTML buffer."
   (interactive "r")
   (save-excursion
-    ;; FIXME: create the stylesheet
-    (let* ((job (make-progress-reporter "Exporting... " 0 100))
-           (sourcebuf (current-buffer))
-           (htmlbuf (generate-new-buffer
-                     (fountain-export-get-name sourcebuf ".html")))
-           complete)
-      (unwind-protect
-          (progn
-            ;; fontify the region
-            (fountain-export-fontify-region start end)
-            ;; insert HTML head
-            (with-current-buffer htmlbuf
-              (with-silent-modifications
-                (insert (fountain-export-format-template
-                         fountain-export-html-head-template sourcebuf)
-                        "<body>\n<div id=\"screenplay\">\n")))
-            ;; parse the buffer
-            (fountain-export-parse-region start end htmlbuf)
-            ;; switch to destination buffer for final touches
-            (switch-to-buffer-other-window htmlbuf)
-            (insert "</div>\n</body>\n</html>")
-            (fountain-export-prepare-html)
-            (progress-reporter-done job)
-            (setq complete t))
-        (unless complete
-          (kill-buffer htmlbuf))))))
-      
+    (let ((destbuf (save-restriction
+                     (narrow-to-region start end)
+                     (fountain-export-html-1)))
+          (outputdir (if (buffer-file-name buffer)
+                         (expand-file-name (file-name-directory
+                                            (buffer-file-name buffer))))))
+      (with-current-buffer destbuf
+        (if outputdir
+            (write-file outputdir t)))
+      (if (called-interactively-p 'interactive)
+          (switch-to-buffer-other-window destbuf))
+      destbuf)))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
