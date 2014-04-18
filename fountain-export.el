@@ -233,9 +233,9 @@ created HTML element to DESTBUF."
     (let ((destbuf (save-restriction
                      (narrow-to-region start end)
                      (fountain-export-html-1)))
-          (outputdir (if (buffer-file-name buffer)
+          (outputdir (if (buffer-file-name)
                          (expand-file-name (file-name-directory
-                                            (buffer-file-name buffer))))))
+                                            (buffer-file-name))))))
       (with-current-buffer destbuf
         (if outputdir
             (write-file outputdir t)))
