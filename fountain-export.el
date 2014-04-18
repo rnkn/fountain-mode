@@ -47,6 +47,11 @@
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
 
+(defcustom fountain-export-prepare-html nil
+  "If non-nil, auto-indent HTML elements during export."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-html-head-template
   "<!DOCTYPE html>
 <!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
@@ -198,7 +203,8 @@ created HTML element to DESTBUF."
           (with-current-buffer destbuf
             (with-silent-modifications
               (insert "</div>\n</body>\n</html>")
-              (fountain-export-prepare-html)))
+              (if fountain-export-prepare-html
+                  (fountain-export-prepare-html))))
           ;; signal completion
           (progress-reporter-done job)
           (setq complete t)
