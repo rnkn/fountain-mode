@@ -54,7 +54,7 @@
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-replace-quotes nil
+(defcustom fountain-export-convert-quotes nil
   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
 
 \`\`foobar\'\'
@@ -129,7 +129,7 @@ Otherwise return `fountain-export-buffer-name'"
                              (">" . "&gt;")
                              ("\\\s" . "&nbsp;")
                              ("\n" . "<br>")) s))
-         (s (if fountain-export-replace-quotes
+         (s (if fountain-export-convert-quotes
                 (s-replace-all '(("\\`" . "&#96;")
                                  ("\\'" . "&apos;")
                                  ("``" . "&ldquo;")
