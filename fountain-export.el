@@ -52,6 +52,17 @@
   :type 'boolean
   :group 'fountain-export)
 
+(defcustom fountain-export-replace-quotes nil
+  "If non-nil, replace TeX-style quotes with \"smart-quotes\".
+
+\`\`foobar\'\'
+
+will be exported as
+
+&ldquo;foobar&rdquol;"
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-html-head-template
   "<!DOCTYPE html>
 <!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
@@ -91,12 +102,40 @@ Otherwise return `fountain-export-buffer-name'"
       (concat (file-name-base (buffer-file-name buffer)) ext)
     fountain-export-buffer-name))
 
+(defun fountain-export-underline (s)
+  "Replace underlined text in S with HTML underline span tags."
+  (replace-regexp-in-string "_\\(.+\\)_"
+                            "<span class=\"underline\">\\1</span>"
+                            s t))
+
+(defun fountain-export-bold (s)
+  "Replace bold text in S with HTML strong tags."
+  (replace-regexp-in-string "\\*\\*\\(.+\\)\\*\\*"
+                            "<strong>\\1</strong>"
+                            s t))
+
+(defun fountain-export-italic (s)
+  "Replace italic text in S with HTML italic tags."
+  (replace-regexp-in-string "\\*\\(.+\\)\\*"
+                            "<em>\\1</em>"
+                            s t))
+
 (defun fountain-export-filter (s)
   "Replace newlines with line-breaks and escape HTML special characters."
-  (s-replace-all '(("&" . "&amp;")
-                   ("<" . "&lt;")
-                   (">" . "&gt;")
-                   ("\n" . "<br>")) s))
+  (let* ((s (s-replace-all '(("&" . "&amp;")
+                             ("<" . "&lt;")
+                             (">" . "&gt;")
+                             ("\\\s" . "&nbsp;")
+                             ("\n" . "<br>")) s))
+         (s (if fountain-export-replace-quotes
+                (s-replace-all '(("\\`" . "&#96;")
+                                 ("\\'" . "&apos;")
+                                 ("``" . "&ldquo;")
+                                 ("''" . "&rdquo;")
+                                 ("`" . "&lsquo;")
+                                 ("'" . "&rsquo;")) s)
+              s)))
+    s))
 
 (defun fountain-export-create-html-element (substring)
   "Return a HTML element with face and substring of SUBSTRING.
@@ -116,7 +155,11 @@ If face is `fountain-comment', return nil."
                      "h2")
                     ("p")))
          (content
-          (fountain-export-filter (substring-no-properties substring))))
+          (let* ((s (fountain-export-filter substring))
+                 (s (fountain-export-bold s))
+                 (s (fountain-export-italic s))
+                 (s (fountain-export-underline s)))
+            s)))
     (unless (string= class "comment")
       (format "<%s class=\"%s\">%s</%s>\n"
               tag class content tag))))
@@ -137,7 +180,7 @@ Internal function, will not work outside of
                              sourcebuf ".css")))))
 
 (defun fountain-export-parse-buffer (destbuf)
-  "Find face property changes from START to END and insert HTML elements into DESTBUF.
+  "Find face changes from START to END then insert elements into DESTBUF.
 First, find the next face property change from point, then pass
 substring between point and change to
 `fountain-export-create-html-element', then insert the newly
