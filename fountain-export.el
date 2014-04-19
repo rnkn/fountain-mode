@@ -123,11 +123,13 @@ Otherwise return `fountain-export-buffer-name'"
                             s t))
 
 (defun fountain-export-filter (s)
-  "Replace newlines with line-breaks and escape HTML special characters."
+  "Escape special characters and replace newlines."
   (let* ((s (s-replace-all '(("&" . "&amp;")
                              ("<" . "&lt;")
                              (">" . "&gt;")
                              ("\\\s" . "&nbsp;")
+                             ("\\_" . "&#95;")
+                             ("\\*" . "&#42;")
                              ("\n" . "<br>")) s))
          (s (if fountain-export-convert-quotes
                 (s-replace-all '(("\\`" . "&#96;")
