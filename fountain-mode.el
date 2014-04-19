@@ -1111,7 +1111,6 @@ buffer (WARNING: this can be very slow)."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-m") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-c C-u") 'fountain-upcase-line)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
