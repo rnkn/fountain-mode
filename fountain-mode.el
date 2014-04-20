@@ -1056,7 +1056,9 @@ buffer (WARNING: this can be very slow)."
           '((1 'fountain-comment)
             (2 'fountain-centered)
             (3 'fountain-comment)))
-    (cons fountain-section-regexp '((0 'fountain-section-highlight)))
+    (cons fountain-section-regexp
+          '((1 'fountain-comment)
+            (2 'fountain-section-highlight)))
     (cons fountain-synopsis-regexp
           '((1 'fountain-comment)
             (2 'fountain-synopsis-highlight)))
@@ -1079,7 +1081,9 @@ buffer (WARNING: this can be very slow)."
           '((1 'fountain-comment)
             (2 'fountain-centered-highlight)
             (3 'fountain-comment)))
-    (cons fountain-section-regexp '((0 'fountain-section-highlight)))
+    (cons fountain-section-regexp
+          '((1 'fountain-comment)
+            (2 'fountain-section-highlight)))
     (cons fountain-synopsis-regexp
           '((1 'fountain-comment)
             (2 'fountain-synopsis-highlight)))
