@@ -283,6 +283,24 @@ dialog.")
   "^\\([\s\t]*>[\s\t]*\\)\\(.*\\)\\(<[\s\t]*\\)$"
   "Regular expression for matching centered text.")
 
+;;; emphasis regular expressions =======================================
+
+(defconst fountain-em-delim-regexp
+  "[^\\]\\([_*]+\\)"
+  "Regular expression for matching emphasis delimiters.")
+
+(defconst fountain-underline-regexp
+  "[^\\]_\\(.*?[^\\\n]\\)_"
+  "Regular expression for matching underlined text.")
+
+(defconst fountain-italic-regexp
+  "[^\\]\\*\\(.*?[^\\\n]\\)\\*"
+  "Regular expression for matching italic text.")
+
+(defconst fountain-bold-regexp
+  "[^\\]\\*\\{2\\}\\(.*?[^\\\n]\\)\\*\\{2\\}"
+  "Regular expression for matching bold text.")
+
 ;;; faces ==============================================================
 
 (defgroup fountain-faces nil
@@ -759,14 +777,6 @@ This function is called by `jit-lock-fontify-now'."
         (fountain-indent-add 0))
       (forward-line 1))))
 
-(defun fountain-clean-exit ()
-  "Remove all indenting in buffer."
-  (with-silent-modifications
-    (save-restriction
-      (widen)
-      (remove-text-properties (point-min) (point-max)
-                              '(line-prefix nil wrap-prefix nil)))))
-
 (defun fountain-lock-extend-region ()
   "Extend region for fontification to text block."
   (eval-when-compile
@@ -1062,7 +1072,10 @@ buffer (WARNING: this can be very slow)."
     (cons fountain-synopsis-regexp
           '((1 'fountain-comment)
             (2 'fountain-synopsis-highlight)))
-    (cons fountain-note-regexp '((0 'fountain-note-highlight))))
+    (cons fountain-note-regexp '((0 'fountain-note-highlight)))
+    (cons fountain-italic-regexp '((1 '(:slant italic))))
+    (cons fountain-bold-regexp '((1 '(:weight bold) t)))
+    (cons fountain-underline-regexp '((1 '(:underline t) t))))
   "Font Lock keywords for minimal highlighting.")
 
 (defvar fountain-font-lock-keywords-3
@@ -1073,10 +1086,29 @@ buffer (WARNING: this can be very slow)."
           '((1 'fountain-comment)
             (2 'fountain-forced-scene-heading-highlight)))
     (cons 'fountain-match-character
-          '((0 'fountain-character-highlight)))
-    (cons 'fountain-match-dialog '((0 'fountain-dialog-highlight)))
-    (cons 'fountain-match-paren '((0 'fountain-paren-highlight)))
-    (cons 'fountain-match-trans '((0 'fountain-trans-highlight)))
+          '((0 '(face fountain-character-highlight
+                      line-prefix (space :align-to
+                                         fountain-indent-character)
+                      wrap-prefix (space :align-to
+                                         fountain-indent-character)))))
+    (cons 'fountain-match-dialog
+          '((0 '(face fountain-dialog-highlight
+                      line-prefix (space :align-to
+                                         fountain-indent-dialog)
+                      wrap-prefix (space :align-to
+                                         fountain-indent-dialog)))))
+    (cons 'fountain-match-paren
+          '((0 '(face fountain-paren-highlight
+                      line-prefix (space :align-to
+                                         fountain-indent-paren)
+                      wrap-prefix (space :align-to
+                                         fountain-indent-paren)))))
+    (cons 'fountain-match-trans
+          '((0 '(face fountain-trans-highlight
+                      line-prefix (space :align-to
+                                         fountain-indent-trans)
+                      wrap-prefix (space :align-to
+                                         fountain-indent-trans)))))
     (cons fountain-centered-regexp
           '((1 'fountain-comment)
             (2 'fountain-centered-highlight)
@@ -1087,7 +1119,11 @@ buffer (WARNING: this can be very slow)."
     (cons fountain-synopsis-regexp
           '((1 'fountain-comment)
             (2 'fountain-synopsis-highlight)))
-    (cons fountain-note-regexp '((0 'fountain-note-highlight))))
+    (cons fountain-note-regexp '((0 'fountain-note-highlight)))
+    (cons fountain-italic-regexp '((1 '(:slant italic) t)))
+    (cons fountain-bold-regexp '((1 '(:weight bold) t)))
+    (cons fountain-underline-regexp '((1 '(:underline t) t)))
+    (cons fountain-em-delim-regexp '((1 'fountain-comment t))))
   "Font Lock keywords for maximum highlighting.")
 
 (defvaralias 'fountain-font-lock-keywords-default
@@ -1223,11 +1259,10 @@ buffer (WARNING: this can be very slow)."
                               fountain-font-lock-keywords-1
                               fountain-font-lock-keywords-2
                               fountain-font-lock-keywords-3) nil t))
-  (jit-lock-register 'fountain-indent-refresh)
+  (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
+  ;; (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
-            'fountain-lock-extend-region t t)
-  (add-hook 'change-major-mode-hook
-            'fountain-clean-exit nil t))
+            'fountain-lock-extend-region t t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
