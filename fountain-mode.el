@@ -280,7 +280,7 @@ dialog.")
   "Regular expression for matching transitions.")
 
 (defconst fountain-centered-regexp
-  "^\\([\s\t]*>[\s\t]*\\)\\(.*\\)\\(<[\s\t]*\\)$"
+  "^[\s\t]*>[\s\t]*\\(.*?\\)[\s\t]*<[\s\t]*$"
   "Regular expression for matching centered text.")
 
 ;;; emphasis regular expressions =======================================
@@ -1086,33 +1086,32 @@ buffer (WARNING: this can be very slow)."
           '((1 'fountain-comment)
             (2 'fountain-forced-scene-heading-highlight)))
     (cons 'fountain-match-character
-          '((0 '(face fountain-character-highlight
+          '((0 `(face fountain-character-highlight
                       line-prefix (space :align-to
-                                         fountain-indent-character)
+                                         ,fountain-indent-character)
                       wrap-prefix (space :align-to
-                                         fountain-indent-character)))))
+                                         ,fountain-indent-character)))))
     (cons 'fountain-match-dialog
-          '((0 '(face fountain-dialog-highlight
+          '((0 `(face fountain-dialog-highlight
                       line-prefix (space :align-to
-                                         fountain-indent-dialog)
+                                         ,fountain-indent-dialog)
                       wrap-prefix (space :align-to
-                                         fountain-indent-dialog)))))
+                                         ,fountain-indent-dialog)))))
     (cons 'fountain-match-paren
-          '((0 '(face fountain-paren-highlight
+          '((0 `(face fountain-paren-highlight
                       line-prefix (space :align-to
-                                         fountain-indent-paren)
+                                         ,fountain-indent-paren)
                       wrap-prefix (space :align-to
-                                         fountain-indent-paren)))))
+                                         ,fountain-indent-paren)))))
     (cons 'fountain-match-trans
-          '((0 '(face fountain-trans-highlight
+          '((0 `(face fountain-trans-highlight
                       line-prefix (space :align-to
-                                         fountain-indent-trans)
+                                         ,fountain-indent-trans)
                       wrap-prefix (space :align-to
-                                         fountain-indent-trans)))))
+                                         ,fountain-indent-trans)))))
     (cons fountain-centered-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-centered-highlight)
-            (3 'fountain-comment)))
+          '((0 'fountain-comment)
+            (1 'fountain-centered-highlight t)))
     (cons fountain-section-regexp
           '((1 'fountain-comment)
             (2 'fountain-section-highlight)))
@@ -1122,7 +1121,7 @@ buffer (WARNING: this can be very slow)."
     (cons fountain-note-regexp '((0 'fountain-note-highlight)))
     (cons fountain-italic-regexp '((1 '(:slant italic) t)))
     (cons fountain-bold-regexp '((1 '(:weight bold) t)))
-    (cons fountain-underline-regexp '((1 '(:underline t) t)))
+    (cons fountain-underline-regexp '((1 '(:underline t) 'append)))
     (cons fountain-em-delim-regexp '((1 'fountain-comment t))))
   "Font Lock keywords for maximum highlighting.")
 
