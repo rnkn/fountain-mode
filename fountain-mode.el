@@ -230,11 +230,11 @@ The default funcation requires the command line tool \"uuidgen\"."
 ;;; element regular expressions ========================================
 
 (defconst fountain-blank-regexp
-  "\\`\\|^ ?$\\|\\'"
+  "\\`\\|^\s?$\\|\\'"
   "Regular expression for matching an empty line.")
 
 (defconst fountain-comment-regexp
-  "//.*\\|/\\*[^*]*\\*/"
+  "//.*\\|/\\*[.\n]*\\*/"
   "Regular expression for matching comments.")
 
 (defconst fountain-scene-heading-regexp
@@ -252,7 +252,7 @@ Requires `fountain-forced-scene-heading-p' for preceding and
 succeeding blank lines.")
 
 (defconst fountain-paren-regexp
-  "^[\s\t]*([^)]*)[\s\t]*$"
+  "^[\s\t]*([^)\n]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or
 dialog.")
@@ -266,11 +266,11 @@ dialog.")
   "Regular expression for matching comments.")
 
 (defconst fountain-section-regexp
-  "^#\\{1,5\\}[^#].*"
+  "^\\(#\\{1,5\\}[\s\t]*\\)\\([^#\n].+\\)"
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  "^\\(=[\s\t]*\\)\\([^=\n]*\\)"
+  "^\\(=[\s\t]*\\)\\([^=\n].+\\)"
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
