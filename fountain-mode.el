@@ -38,6 +38,7 @@
 (require 's)
 (require 'thingatpt)
 (require 'easymenu)
+(require 'fountain-export)
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
