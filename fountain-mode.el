@@ -51,19 +51,19 @@
 ;;; obsolete aliases ===================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
-  'fountain-indent-character "0.12.0")
+  'fountain-align-character "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-dialog-col
-  'fountain-indent-dialog "0.12.0")
+  'fountain-align-dialog "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-paren-col
-  'fountain-indent-paren "0.12.0")
+  'fountain-align-paren "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-trans-col
-  'fountain-indent-trans "0.12.0")
+  'fountain-align-trans "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-centered-col
-  'fountain-indent-centered "0.12.0")
+  'fountain-align-centered "0.12.0")
 
 ;;; customizable options ===============================================
 
@@ -136,40 +136,40 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-indent-character 20
-  "Column integer to which character should be indented.
+(defcustom fountain-align-character 20
+  "Column integer to which character should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-dialog 10
-  "Column integer to which dialog should be indented.
+(defcustom fountain-align-dialog 10
+  "Column integer to which dialog should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-paren 15
-  "Column integer to which parenthetical should be indented.
+(defcustom fountain-align-paren 15
+  "Column integer to which parenthetical should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-trans 45
-  "Column integer to which transitions should be indented.
+(defcustom fountain-align-trans 45
+  "Column integer to which transitions should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-centered nil
-  "If integer, column to which centered text should be indented.
-If nil, indent to center of `window-body-width'.
+(defcustom fountain-align-centered nil
+  "If integer, column to which centered text should be aligned.
+If nil, align to center of `window-body-width'.
 
 This option does not affect file contents."
   :type '(choice (const :tag "Center" nil) integer)
   :group 'fountain)
 
-(defcustom fountain-indent-elements t
-  "If non-nil, elements will be displayed indented.
+(defcustom fountain-align-elements t
+  "If non-nil, elements will be displayed aligned.
 This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
@@ -246,7 +246,7 @@ Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\(\\.\\)\\(\\<.*\\)"
+  "^\\.\\(\\<.*\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-forced-scene-heading-p' for preceding and
 succeeding blank lines.")
@@ -266,11 +266,11 @@ dialog.")
   "Regular expression for matching comments.")
 
 (defconst fountain-section-regexp
-  "^\\(#\\{1,5\\}[\s\t]*\\)\\([^#\n].+\\)"
+  "^#\\{1,5\\}[\s\t]*\\([^#\n].+\\)"
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  "^\\(=[\s\t]*\\)\\([^=\n].+\\)"
+  "^=[\s\t]*\\([^=\n].+\\)"
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
@@ -285,7 +285,7 @@ dialog.")
 
 ;;; emphasis regular expressions =======================================
 
-(defconst fountain-em-delim-regexp
+(defconst fountain-emphasis-delim-regexp
   "[^\\]\\([_*]+\\)"
   "Regular expression for matching emphasis delimiters.")
 
@@ -987,15 +987,15 @@ buffer (WARNING: this can be very slow)."
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
-(defun fountain-toggle-indent-elements ()
-  "Toggle `fountain-indent-elements'"
+(defun fountain-toggle-align-elements ()
+  "Toggle `fountain-align-elements'"
   (interactive)
-  (setq fountain-indent-elements
-        (null fountain-indent-elements))
+  (setq fountain-align-elements
+        (null fountain-align-elements))
   (jit-lock-refontify)
   (message "Elements are now displayed %s"
-           (if fountain-indent-elements
-               "indended" "non-indented")))
+           (if fountain-align-elements
+               "aligned" "non-aligned")))
 
 (defun fountain-toggle-add-continued-dialog ()
   "Toggle `fountain-add-continued-dialog'"
@@ -1004,7 +1004,7 @@ buffer (WARNING: this can be very slow)."
         (null fountain-add-continued-dialog))
   (fountain-continued-dialog-refresh)
   (message "Continued dialog is now %s"
-           (if fountain-indent-elements
+           (if fountain-add-continued-dialog
                "added" "removed")))
 
 (defun fountain-set-font-lock-decoration (level)
@@ -1081,48 +1081,48 @@ buffer (WARNING: this can be very slow)."
 (defvar fountain-font-lock-keywords-3
   (list
     (cons 'fountain-match-scene-heading
-          '((0 'fountain-scene-heading-highlight)))
+          '((0 'fountain-scene-heading-highlight nil)))
     (cons 'fountain-match-forced-scene-heading
-          '((1 'fountain-comment)
-            (2 'fountain-forced-scene-heading-highlight)))
+          '((0 'fountain-comment)
+            (1 'fountain-forced-scene-heading-highlight t)))
     (cons 'fountain-match-character
-          '((0 `(face fountain-character-highlight
+          '((0 '(face fountain-character-highlight
                       line-prefix (space :align-to
-                                         ,fountain-indent-character)
+                                         fountain-align-character)
                       wrap-prefix (space :align-to
-                                         ,fountain-indent-character)))))
+                                         fountain-align-character)))))
     (cons 'fountain-match-dialog
-          '((0 `(face fountain-dialog-highlight
+          '((0 '(face fountain-dialog-highlight
                       line-prefix (space :align-to
-                                         ,fountain-indent-dialog)
+                                         fountain-align-dialog)
                       wrap-prefix (space :align-to
-                                         ,fountain-indent-dialog)))))
+                                         fountain-align-dialog)))))
     (cons 'fountain-match-paren
-          '((0 `(face fountain-paren-highlight
+          '((0 '(face fountain-paren-highlight
                       line-prefix (space :align-to
-                                         ,fountain-indent-paren)
+                                         fountain-align-paren)
                       wrap-prefix (space :align-to
-                                         ,fountain-indent-paren)))))
+                                         fountain-align-paren)))))
     (cons 'fountain-match-trans
-          '((0 `(face fountain-trans-highlight
+          '((0 '(face fountain-trans-highlight
                       line-prefix (space :align-to
-                                         ,fountain-indent-trans)
+                                         fountain-align-trans)
                       wrap-prefix (space :align-to
-                                         ,fountain-indent-trans)))))
+                                         fountain-align-trans)))))
     (cons fountain-centered-regexp
           '((0 'fountain-comment)
             (1 'fountain-centered-highlight t)))
     (cons fountain-section-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-section-highlight)))
+          '((0 'fountain-comment)
+            (1 'fountain-section-highlight t)))
     (cons fountain-synopsis-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-synopsis-highlight)))
+          '((0 'fountain-comment)
+            (1 'fountain-synopsis-highlight t)))
     (cons fountain-note-regexp '((0 'fountain-note-highlight)))
     (cons fountain-italic-regexp '((1 '(:slant italic) t)))
     (cons fountain-bold-regexp '((1 '(:weight bold) t)))
     (cons fountain-underline-regexp '((1 '(:underline t) 'append)))
-    (cons fountain-em-delim-regexp '((1 'fountain-comment t))))
+    (cons fountain-emphasis-delim-regexp '((1 'fountain-comment t))))
   "Font Lock keywords for maximum highlighting.")
 
 (defvaralias 'fountain-font-lock-keywords-default
