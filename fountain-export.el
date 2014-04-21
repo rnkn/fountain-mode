@@ -159,7 +159,8 @@ If face is `fountain-comment', return nil."
                      "h2")
                     ("p")))
          (content
-          (let* ((s (fountain-export-filter substring))
+          (let* ((s (substring-no-properties substring))
+                 (s (fountain-export-filter s))
                  (s (fountain-export-bold s))
                  (s (fountain-export-italic s))
                  (s (fountain-export-underline s)))
