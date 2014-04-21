@@ -39,6 +39,12 @@
   :type 'string
   :group 'fountain-export)
 
+(defcustom fountain-export-default-command
+  'fountain-export-buffer-to-html
+  "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
+  :type 'function
+  :group 'fountain-export)
+
 (defcustom fountain-export-fonts
   '("Courier Prime"
     "Courier Final Draft"
@@ -261,9 +267,14 @@ created HTML element to DESTBUF."
       (unless complete
         (kill-buffer destbuf)))))
 
+(defun fountain-export-default ()
+  "Call the function defined in `fountain-export-default-command'"
+  (interactive)
+  (funcall fountain-export-default-command))
+
 (defun fountain-export-buffer-to-html (&optional buffer)
   "Export the buffer to HTML file, then switch to HTML buffer."
-  (interactive)
+  (interactive)                         ; FIXME: add y-or-n-p
   (with-current-buffer
       (or buffer (current-buffer))
     (let ((destbuf (fountain-export-html-1))
@@ -276,13 +287,12 @@ created HTML element to DESTBUF."
         (with-current-buffer destbuf
           (if outputdir
               (write-file outputdir t)))
-        (if (called-interactively-p 'interactive)
-            (switch-to-buffer-other-window destbuf))
+        (switch-to-buffer-other-window destbuf)
         destbuf)))))
 
 (defun fountain-export-region-to-html (start end)
   "Export the region to HTML file, then switch to HTML buffer."
-  (interactive "r")
+  (interactive "r")                     ; FIXME: add y-or-n-p
   (save-excursion
     (let ((destbuf (save-restriction
                      (narrow-to-region start end)
@@ -293,8 +303,7 @@ created HTML element to DESTBUF."
       (with-current-buffer destbuf
         (if outputdir
             (write-file outputdir t)))
-      (if (called-interactively-p 'interactive)
-          (switch-to-buffer-other-window destbuf))
+      (switch-to-buffer-other-window destbuf)
       destbuf)))
 
 (provide 'fountain-export)

@@ -1100,6 +1100,7 @@ buffer (WARNING: this can be very slow)."
     (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
+    (define-key map (kbd "C-c C-e e") 'fountain-export-default)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
@@ -1112,8 +1113,12 @@ buffer (WARNING: this can be very slow)."
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    "---"
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
+    "---"
+    ("Export"
+     ["Default" fountain-export-default]
+     "---"
+     ["HTML" fountain-export-buffer-to-html])
     "---"
     ("Syntax Highlighting"
      ["None" (fountain-set-font-lock-decoration 1)
