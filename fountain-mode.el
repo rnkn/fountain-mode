@@ -716,67 +716,6 @@ syntax.
     (insert-before-markers s)
     (delete-region start end)))
 
-(defun fountain-indent-add (column)
-  "Add indentation properties to COLUMN at point."
-  (with-silent-modifications
-    (put-text-property (line-beginning-position) (line-end-position)
-                       'line-prefix `(space :align-to ,column))
-    (put-text-property (line-beginning-position) (line-end-position)
-                       'wrap-prefix `(space :align-to ,column))))
-
-(defun fountain-indent-refresh (start end)
-  "Refresh indentation properties between START and END.
-This function is called by `jit-lock-fontify-now'."
-  ;; first, extend the region to the block bounds
-  ;; if this fun is covered by Font Lock, this won't be needed
-  (let ((start
-         (progn
-           (goto-char start)
-           (car (fountain-get-block-bounds))))
-        (end
-         (progn
-           (goto-char end)
-           (cdr (fountain-get-block-bounds))))
-        (n (fountain-get-font-lock-decoration)))
-    (goto-char start)
-    (while (< (point) end)
-      ;; if we're indenting...
-      (if fountain-indent-elements
-          ;; get the centered text indent
-          (let ((fountain-indent-centered
-                 (if fountain-indent-centered
-                     fountain-indent-centered
-                   (/ (- (window-body-width) (length (fountain-get-line)))
-                      2))))             ; FIXME: every line???
-            ;; if Font Lock keywords are enabled, use those
-            (if (> n 1)
-                ;; first, get the variable from the face property
-                (let* ((s (symbol-name (get-text-property (point) 'face)))
-                       (s (s-chop-suffix "-highlight" s))
-                       (s (s-chop-prefix "fountain-" s))
-                       (s (concat "fountain-indent-" s))
-                       (var (intern s)))
-                  ;; if the variable is bound, indent text to var value
-                  ;; FIXME: centered text bug
-                  (if (boundp var)
-                      (fountain-indent-add (symbol-value var))
-                    (fountain-indent-add 0)))
-              ;; otherwise, use predicate funs
-              (cond ((fountain-character-p)
-                     (fountain-indent-add fountain-indent-character))
-                    ((fountain-paren-p)
-                     (fountain-indent-add fountain-indent-paren))
-                    ((fountain-dialog-p)
-                     (fountain-indent-add fountain-indent-dialog))
-                    ((fountain-trans-p)
-                     (fountain-indent-add fountain-indent-trans))
-                    ((fountain-centered-p)
-                     (fountain-indent-add fountain-indent-centered))
-                    ((fountain-indent-add 0)))))
-        ;; otherwise, indent to zero
-        (fountain-indent-add 0))
-      (forward-line 1))))
-
 (defun fountain-lock-extend-region ()
   "Extend region for fontification to text block."
   (eval-when-compile
@@ -1095,8 +1034,10 @@ buffer (WARNING: this can be very slow)."
         (while subexp
           (let* ((f (pop subexp))
                  (n (car f))
-                 (face (if (nth 1 f) (nth 1 f)
-                         (intern (concat "fountain-" element hl))))
+                 (face (cond ((= (fountain-get-font-lock-decoration) 1)
+                              'default)
+                             ((nth 1 f))
+                             ((intern (concat "fountain-" element hl)))))
                  (override (nth 2 f)))
             (setq face-props
                   (nconc face-props
@@ -1190,7 +1131,7 @@ buffer (WARNING: this can be very slow)."
      "---"
      ["Save for Future Sessions" fountain-save-font-lock-decoration])
     "---"
-    ["Display Elements Indented"
+    ["Display Elements Auto-Aligned"
      fountain-toggle-align-elements
      :style toggle
      :selected fountain-align-elements]
@@ -1239,7 +1180,6 @@ buffer (WARNING: this can be very slow)."
   (setq font-lock-defaults '((fountain-create-font-lock-keywords)
                              nil t))
   (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
-  ;; (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
             'fountain-lock-extend-region t t))
 
