@@ -991,7 +991,7 @@ buffer (WARNING: this can be very slow)."
   `(("scene-heading" fountain-match-scene-heading
      ((0 nil nil)))
     ("forced-scene-heading" fountain-match-forced-scene-heading
-     ((0 'fountain-comment nil)
+     ((0 fountain-comment nil)
       (1 nil t)))
     ("character" fountain-match-character
      ((0 nil nil)))
@@ -1002,13 +1002,13 @@ buffer (WARNING: this can be very slow)."
     ("trans" fountain-match-trans
      ((0 nil t)))
     ("centered" ,fountain-centered-regexp
-     ((0 'fountain-comment)
+     ((0 fountain-comment)
       (1 nil t)))
     ("section" ,fountain-section-regexp
      ((0 fountain-comment)
       (1 nil t)))
     ("synopsis" ,fountain-synopsis-regexp
-     ((0 'fountain-comment)
+     ((0 fountain-comment)
       (1 nil t)))
     ("note" ,fountain-note-regexp
      ((0 nil nil)))))
