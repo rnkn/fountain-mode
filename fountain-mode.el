@@ -1041,17 +1041,13 @@ buffer (WARNING: this can be very slow)."
                              ((intern (concat "fountain-" element hl)))))
                  (override (nth 2 f)))
             (setq face-props
-                  (nconc face-props
-                         (list `(,n '(face ,face ,@align-props)
-                                    ,override))))))
+                  (append face-props
+                          `((,n '(face ,face ,@align-props)
+                                ,override))))))
         (setq keywords
-              (nconc keywords
-                     (list (cons matcher face-props))))))
+              (append keywords
+                      (list (cons matcher face-props))))))
     keywords))
-
-(defvaralias 'fountain-font-lock-keywords-default
-  'fountain-font-lock-keywords-2
-  "Default Font Lock keywords.")
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
