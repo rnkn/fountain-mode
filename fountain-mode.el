@@ -52,19 +52,19 @@
 ;;; obsolete aliases ===================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
-  'fountain-indent-character "0.12.0")
+  'fountain-align-character "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-dialog-col
-  'fountain-indent-dialog "0.12.0")
+  'fountain-align-dialog "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-paren-col
-  'fountain-indent-paren "0.12.0")
+  'fountain-align-paren "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-trans-col
-  'fountain-indent-trans "0.12.0")
+  'fountain-align-trans "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-centered-col
-  'fountain-indent-centered "0.12.0")
+  'fountain-align-centered "0.12.0")
 
 ;;; customizable options ===============================================
 
@@ -137,40 +137,40 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-indent-character 20
-  "Column integer to which character should be indented.
+(defcustom fountain-align-character 20
+  "Column integer to which character should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-dialog 10
-  "Column integer to which dialog should be indented.
+(defcustom fountain-align-dialog 10
+  "Column integer to which dialog should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-paren 15
-  "Column integer to which parenthetical should be indented.
+(defcustom fountain-align-paren 15
+  "Column integer to which parenthetical should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-trans 45
-  "Column integer to which transitions should be indented.
+(defcustom fountain-align-trans 45
+  "Column integer to which transitions should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-indent-centered nil
-  "If integer, column to which centered text should be indented.
-If nil, indent to center of `window-body-width'.
+(defcustom fountain-align-centered nil
+  "If integer, column to which centered text should be aligned.
+If nil, align to center of `window-body-width'.
 
 This option does not affect file contents."
   :type '(choice (const :tag "Center" nil) integer)
   :group 'fountain)
 
-(defcustom fountain-indent-elements t
-  "If non-nil, elements will be displayed indented.
+(defcustom fountain-align-elements t
+  "If non-nil, elements will be displayed aligned.
 This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
@@ -231,11 +231,11 @@ The default funcation requires the command line tool \"uuidgen\"."
 ;;; element regular expressions ========================================
 
 (defconst fountain-blank-regexp
-  "\\`\\|^ ?$\\|\\'"
+  "\\`\\|^\s?$\\|\\'"
   "Regular expression for matching an empty line.")
 
 (defconst fountain-comment-regexp
-  "//.*\\|/\\*[^*]*\\*/"
+  "//.*\\|/\\*[.\n]*\\*/"
   "Regular expression for matching comments.")
 
 (defconst fountain-scene-heading-regexp
@@ -247,13 +247,13 @@ Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\(\\.\\)\\(\\<.*\\)"
+  "^\\.\\(\\<.*\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-forced-scene-heading-p' for preceding and
 succeeding blank lines.")
 
 (defconst fountain-paren-regexp
-  "^[\s\t]*([^)]*)[\s\t]*$"
+  "^[\s\t]*([^)\n]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or
 dialog.")
@@ -267,11 +267,11 @@ dialog.")
   "Regular expression for matching comments.")
 
 (defconst fountain-section-regexp
-  "^#\\{1,5\\}[^#].*"
+  "^#\\{1,5\\}[\s\t]*\\([^#\n].+\\)"
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  "^\\(=[\s\t]*\\)\\([^=\n]*\\)"
+  "^=[\s\t]*\\([^=\n].+\\)"
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
@@ -281,8 +281,26 @@ dialog.")
   "Regular expression for matching transitions.")
 
 (defconst fountain-centered-regexp
-  "^\\([\s\t]*>[\s\t]*\\)\\(.*\\)\\(<[\s\t]*\\)$"
+  "^[\s\t]*>[\s\t]*\\(.*?\\)[\s\t]*<[\s\t]*$"
   "Regular expression for matching centered text.")
+
+;;; emphasis regular expressions =======================================
+
+(defconst fountain-emphasis-delim-regexp
+  "[^\\]\\([_*]+\\)"
+  "Regular expression for matching emphasis delimiters.")
+
+(defconst fountain-underline-regexp
+  "[^\\]_\\(.*?[^\\\n]\\)_"
+  "Regular expression for matching underlined text.")
+
+(defconst fountain-italic-regexp
+  "[^\\]\\*\\(.*?[^\\\n]\\)\\*"
+  "Regular expression for matching italic text.")
+
+(defconst fountain-bold-regexp
+  "[^\\]\\*\\{2\\}\\(.*?[^\\\n]\\)\\*\\{2\\}"
+  "Regular expression for matching bold text.")
 
 ;;; faces ==============================================================
 
@@ -699,75 +717,6 @@ syntax.
     (insert-before-markers s)
     (delete-region start end)))
 
-(defun fountain-indent-add (column)
-  "Add indentation properties to COLUMN at point."
-  (with-silent-modifications
-    (put-text-property (line-beginning-position) (line-end-position)
-                       'line-prefix `(space :align-to ,column))
-    (put-text-property (line-beginning-position) (line-end-position)
-                       'wrap-prefix `(space :align-to ,column))))
-
-(defun fountain-indent-refresh (start end)
-  "Refresh indentation properties between START and END.
-This function is called by `jit-lock-fontify-now'."
-  ;; first, extend the region to the block bounds
-  ;; if this fun is covered by Font Lock, this won't be needed
-  (let ((start
-         (progn
-           (goto-char start)
-           (car (fountain-get-block-bounds))))
-        (end
-         (progn
-           (goto-char end)
-           (cdr (fountain-get-block-bounds))))
-        (n (fountain-get-font-lock-decoration)))
-    (goto-char start)
-    (while (< (point) end)
-      ;; if we're indenting...
-      (if fountain-indent-elements
-          ;; get the centered text indent
-          (let ((fountain-indent-centered
-                 (if fountain-indent-centered
-                     fountain-indent-centered
-                   (/ (- (window-body-width) (length (fountain-get-line)))
-                      2))))             ; FIXME: every line???
-            ;; if Font Lock keywords are enabled, use those
-            (if (> n 1)
-                ;; first, get the variable from the face property
-                (let* ((s (symbol-name (get-text-property (point) 'face)))
-                       (s (s-chop-suffix "-highlight" s))
-                       (s (s-chop-prefix "fountain-" s))
-                       (s (concat "fountain-indent-" s))
-                       (var (intern s)))
-                  ;; if the variable is bound, indent text to var value
-                  ;; FIXME: centered text bug
-                  (if (boundp var)
-                      (fountain-indent-add (symbol-value var))
-                    (fountain-indent-add 0)))
-              ;; otherwise, use predicate funs
-              (cond ((fountain-character-p)
-                     (fountain-indent-add fountain-indent-character))
-                    ((fountain-paren-p)
-                     (fountain-indent-add fountain-indent-paren))
-                    ((fountain-dialog-p)
-                     (fountain-indent-add fountain-indent-dialog))
-                    ((fountain-trans-p)
-                     (fountain-indent-add fountain-indent-trans))
-                    ((fountain-centered-p)
-                     (fountain-indent-add fountain-indent-centered))
-                    ((fountain-indent-add 0)))))
-        ;; otherwise, indent to zero
-        (fountain-indent-add 0))
-      (forward-line 1))))
-
-(defun fountain-clean-exit ()
-  "Remove all indenting in buffer."
-  (with-silent-modifications
-    (save-restriction
-      (widen)
-      (remove-text-properties (point-min) (point-max)
-                              '(line-prefix nil wrap-prefix nil)))))
-
 (defun fountain-lock-extend-region ()
   "Extend region for fontification to text block."
   (eval-when-compile
@@ -978,15 +927,15 @@ buffer (WARNING: this can be very slow)."
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
-(defun fountain-toggle-indent-elements ()
-  "Toggle `fountain-indent-elements'"
+(defun fountain-toggle-align-elements ()
+  "Toggle `fountain-align-elements'"
   (interactive)
-  (setq fountain-indent-elements
-        (null fountain-indent-elements))
-  (jit-lock-refontify)
+  (setq fountain-align-elements
+        (null fountain-align-elements))
+  (font-lock-refresh-defaults)
   (message "Elements are now displayed %s"
-           (if fountain-indent-elements
-               "indended" "non-indented")))
+           (if fountain-align-elements
+               "aligned" "non-aligned")))
 
 (defun fountain-toggle-add-continued-dialog ()
   "Toggle `fountain-add-continued-dialog'"
@@ -995,7 +944,7 @@ buffer (WARNING: this can be very slow)."
         (null fountain-add-continued-dialog))
   (fountain-continued-dialog-refresh)
   (message "Continued dialog is now %s"
-           (if fountain-indent-elements
+           (if fountain-add-continued-dialog
                "added" "removed")))
 
 (defun fountain-set-font-lock-decoration (level)
@@ -1038,54 +987,67 @@ buffer (WARNING: this can be very slow)."
 
 ;;; font lock ==========================================================
 
-(defvar fountain-font-lock-keywords-1 nil
-  "Font Lock keywords for no highlighting.")
+(defconst fountain-font-lock-keywords-plist
+  `(("scene-heading" fountain-match-scene-heading
+     ((0 nil nil)))
+    ("forced-scene-heading" fountain-match-forced-scene-heading
+     ((0 'fountain-comment nil)
+      (1 nil t)))
+    ("character" fountain-match-character
+     ((0 nil nil)))
+    ("dialog" fountain-match-dialog
+     ((0 nil nil)))
+    ("paren" fountain-match-paren
+     ((0 nil nil)))
+    ("trans" fountain-match-trans
+     ((0 nil t)))
+    ("centered" ,fountain-centered-regexp
+     ((0 'fountain-comment)
+      (1 nil t)))
+    ("section" ,fountain-section-regexp
+     ((0 fountain-comment)
+      (1 nil t)))
+    ("synopsis" ,fountain-synopsis-regexp
+     ((0 'fountain-comment)
+      (1 nil t)))
+    ("note" ,fountain-note-regexp
+     ((0 nil nil)))))
 
-(defvar fountain-font-lock-keywords-2
-  (list
-    (cons 'fountain-match-scene-heading
-          '((0 'fountain-scene-heading)))
-    (cons 'fountain-match-forced-scene-heading
-          '((1 'fountain-comment)
-            (2 'fountain-forced-scene-heading)))
-    (cons 'fountain-match-character
-          '((0 'fountain-character)))
-    (cons 'fountain-match-dialog '((0 'fountain-dialog)))
-    (cons 'fountain-match-paren '((0 'fountain-paren)))
-    (cons 'fountain-match-trans '((0 'fountain-trans)))
-    (cons fountain-centered-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-centered)
-            (3 'fountain-comment)))
-    (cons fountain-section-regexp '((0 'fountain-section-highlight)))
-    (cons fountain-synopsis-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-synopsis-highlight)))
-    (cons fountain-note-regexp '((0 'fountain-note-highlight))))
-  "Font Lock keywords for minimal highlighting.")
-
-(defvar fountain-font-lock-keywords-3
-  (list
-    (cons 'fountain-match-scene-heading
-          '((0 'fountain-scene-heading-highlight)))
-    (cons 'fountain-match-forced-scene-heading
-          '((1 'fountain-comment)
-            (2 'fountain-forced-scene-heading-highlight)))
-    (cons 'fountain-match-character
-          '((0 'fountain-character-highlight)))
-    (cons 'fountain-match-dialog '((0 'fountain-dialog-highlight)))
-    (cons 'fountain-match-paren '((0 'fountain-paren-highlight)))
-    (cons 'fountain-match-trans '((0 'fountain-trans-highlight)))
-    (cons fountain-centered-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-centered-highlight)
-            (3 'fountain-comment)))
-    (cons fountain-section-regexp '((0 'fountain-section-highlight)))
-    (cons fountain-synopsis-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-synopsis-highlight)))
-    (cons fountain-note-regexp '((0 'fountain-note-highlight))))
-  "Font Lock keywords for maximum highlighting.")
+(defun fountain-create-font-lock-keywords ()
+  ""
+  (let ((list fountain-font-lock-keywords-plist)
+        keywords)
+    (while list
+      (let* ((f (pop list))
+             (element (car f))
+             (matcher (nth 1 f))
+             (subexp (nth 2 f))
+             (hl (if (= (fountain-get-font-lock-decoration) 3)
+                     "-highlight"))
+             (align (intern (concat "fountain-align-" (car f))))
+             (align-props (if (and fountain-align-elements
+                                   (boundp align))
+                              `(line-prefix
+                                (space :align-to ,align)
+                                wrap-prefix
+                                (space :align-to ,align))))
+             face-props)
+        (while subexp
+          (let* ((f (pop subexp))
+                 (n (car f))
+                 (face (cond ((= (fountain-get-font-lock-decoration) 1)
+                              'default)
+                             ((nth 1 f))
+                             ((intern (concat "fountain-" element hl)))))
+                 (override (nth 2 f)))
+            (setq face-props
+                  (nconc face-props
+                         (list `(,n '(face ,face ,@align-props)
+                                    ,override))))))
+        (setq keywords
+              (nconc keywords
+                     (list (cons matcher face-props))))))
+    keywords))
 
 (defvaralias 'fountain-font-lock-keywords-default
   'fountain-font-lock-keywords-2
@@ -1132,7 +1094,6 @@ buffer (WARNING: this can be very slow)."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-m") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-c C-u") 'fountain-upcase-line)
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
@@ -1171,10 +1132,10 @@ buffer (WARNING: this can be very slow)."
      "---"
      ["Save for Future Sessions" fountain-save-font-lock-decoration])
     "---"
-    ["Display Elements Indented"
-     fountain-toggle-indent-elements
+    ["Display Elements Auto-Aligned"
+     fountain-toggle-align-elements
      :style toggle
-     :selected fountain-indent-elements]
+     :selected fountain-align-elements]
     ["Add Continued Dialog"
      fountain-toggle-add-continued-dialog
      :style toggle
@@ -1192,7 +1153,7 @@ buffer (WARNING: this can be very slow)."
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene])
     "---"
-    ["Customize" customize-mode]
+    ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
 ;;; syntax table =======================================================
@@ -1217,15 +1178,11 @@ buffer (WARNING: this can be very slow)."
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-comment)
-  (setq font-lock-defaults '((fountain-font-lock-keywords-default
-                              fountain-font-lock-keywords-1
-                              fountain-font-lock-keywords-2
-                              fountain-font-lock-keywords-3) nil t))
-  (jit-lock-register 'fountain-indent-refresh)
+  (setq font-lock-defaults '((fountain-create-font-lock-keywords)
+                             nil t))
+  (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
   (add-hook 'font-lock-extend-region-functions
-            'fountain-lock-extend-region t t)
-  (add-hook 'change-major-mode-hook
-            'fountain-clean-exit nil t))
+            'fountain-lock-extend-region t t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
