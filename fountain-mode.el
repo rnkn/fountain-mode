@@ -992,7 +992,7 @@ buffer (WARNING: this can be very slow)."
   (interactive)
   (setq fountain-align-elements
         (null fountain-align-elements))
-  (jit-lock-refontify)
+  (font-lock-refresh-defaults)
   (message "Elements are now displayed %s"
            (if fountain-align-elements
                "aligned" "non-aligned")))
@@ -1047,83 +1047,65 @@ buffer (WARNING: this can be very slow)."
 
 ;;; font lock ==========================================================
 
-(defvar fountain-font-lock-keywords-1 nil
-  "Font Lock keywords for no highlighting.")
+(defconst fountain-font-lock-keywords-plist
+  `(("scene-heading" fountain-match-scene-heading
+     ((0 nil nil)))
+    ("forced-scene-heading" fountain-match-forced-scene-heading
+     ((0 'fountain-comment nil)
+      (1 nil t)))
+    ("character" fountain-match-character
+     ((0 nil nil)))
+    ("dialog" fountain-match-dialog
+     ((0 nil nil)))
+    ("paren" fountain-match-paren
+     ((0 nil nil)))
+    ("trans" fountain-match-trans
+     ((0 nil t)))
+    ("centered" ,fountain-centered-regexp
+     ((0 'fountain-comment)
+      (1 nil t)))
+    ("section" ,fountain-section-regexp
+     ((0 fountain-comment)
+      (1 nil t)))
+    ("synopsis" ,fountain-synopsis-regexp
+     ((0 'fountain-comment)
+      (1 nil t)))
+    ("note" ,fountain-note-regexp
+     ((0 nil nil)))))
 
-(defvar fountain-font-lock-keywords-2
-  (list
-    (cons 'fountain-match-scene-heading
-          '((0 'fountain-scene-heading)))
-    (cons 'fountain-match-forced-scene-heading
-          '((1 'fountain-comment)
-            (2 'fountain-forced-scene-heading)))
-    (cons 'fountain-match-character
-          '((0 'fountain-character)))
-    (cons 'fountain-match-dialog '((0 'fountain-dialog)))
-    (cons 'fountain-match-paren '((0 'fountain-paren)))
-    (cons 'fountain-match-trans '((0 'fountain-trans)))
-    (cons fountain-centered-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-centered)
-            (3 'fountain-comment)))
-    (cons fountain-section-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-section-highlight)))
-    (cons fountain-synopsis-regexp
-          '((1 'fountain-comment)
-            (2 'fountain-synopsis-highlight)))
-    (cons fountain-note-regexp '((0 'fountain-note-highlight)))
-    (cons fountain-italic-regexp '((1 '(:slant italic))))
-    (cons fountain-bold-regexp '((1 '(:weight bold) t)))
-    (cons fountain-underline-regexp '((1 '(:underline t) t))))
-  "Font Lock keywords for minimal highlighting.")
-
-(defvar fountain-font-lock-keywords-3
-  (list
-    (cons 'fountain-match-scene-heading
-          '((0 'fountain-scene-heading-highlight nil)))
-    (cons 'fountain-match-forced-scene-heading
-          '((0 'fountain-comment)
-            (1 'fountain-forced-scene-heading-highlight t)))
-    (cons 'fountain-match-character
-          '((0 '(face fountain-character-highlight
-                      line-prefix (space :align-to
-                                         fountain-align-character)
-                      wrap-prefix (space :align-to
-                                         fountain-align-character)))))
-    (cons 'fountain-match-dialog
-          '((0 '(face fountain-dialog-highlight
-                      line-prefix (space :align-to
-                                         fountain-align-dialog)
-                      wrap-prefix (space :align-to
-                                         fountain-align-dialog)))))
-    (cons 'fountain-match-paren
-          '((0 '(face fountain-paren-highlight
-                      line-prefix (space :align-to
-                                         fountain-align-paren)
-                      wrap-prefix (space :align-to
-                                         fountain-align-paren)))))
-    (cons 'fountain-match-trans
-          '((0 '(face fountain-trans-highlight
-                      line-prefix (space :align-to
-                                         fountain-align-trans)
-                      wrap-prefix (space :align-to
-                                         fountain-align-trans)))))
-    (cons fountain-centered-regexp
-          '((0 'fountain-comment)
-            (1 'fountain-centered-highlight t)))
-    (cons fountain-section-regexp
-          '((0 'fountain-comment)
-            (1 'fountain-section-highlight t)))
-    (cons fountain-synopsis-regexp
-          '((0 'fountain-comment)
-            (1 'fountain-synopsis-highlight t)))
-    (cons fountain-note-regexp '((0 'fountain-note-highlight)))
-    (cons fountain-italic-regexp '((1 '(:slant italic) t)))
-    (cons fountain-bold-regexp '((1 '(:weight bold) t)))
-    (cons fountain-underline-regexp '((1 '(:underline t) 'append)))
-    (cons fountain-emphasis-delim-regexp '((1 'fountain-comment t))))
-  "Font Lock keywords for maximum highlighting.")
+(defun fountain-create-font-lock-keywords ()
+  ""
+  (let ((list fountain-font-lock-keywords-plist)
+        keywords)
+    (while list
+      (let* ((f (pop list))
+             (element (car f))
+             (matcher (nth 1 f))
+             (subexp (nth 2 f))
+             (hl (if (= (fountain-get-font-lock-decoration) 3)
+                     "-highlight"))
+             (align (intern (concat "fountain-align-" (car f))))
+             (align-props (if (and fountain-align-elements
+                                   (boundp align))
+                              `(line-prefix
+                                (space :align-to ,align)
+                                wrap-prefix
+                                (space :align-to ,align))))
+             face-props)
+        (while subexp
+          (let* ((f (pop subexp))
+                 (n (car f))
+                 (face (if (nth 1 f) (nth 1 f)
+                         (intern (concat "fountain-" element hl))))
+                 (override (nth 2 f)))
+            (setq face-props
+                  (nconc face-props
+                         (list `(,n '(face ,face ,@align-props)
+                                    ,override))))))
+        (setq keywords
+              (nconc keywords
+                     (list (cons matcher face-props))))))
+    keywords))
 
 (defvaralias 'fountain-font-lock-keywords-default
   'fountain-font-lock-keywords-2
@@ -1209,9 +1191,9 @@ buffer (WARNING: this can be very slow)."
      ["Save for Future Sessions" fountain-save-font-lock-decoration])
     "---"
     ["Display Elements Indented"
-     fountain-toggle-indent-elements
+     fountain-toggle-align-elements
      :style toggle
-     :selected fountain-indent-elements]
+     :selected fountain-align-elements]
     ["Add Continued Dialog"
      fountain-toggle-add-continued-dialog
      :style toggle
@@ -1229,7 +1211,7 @@ buffer (WARNING: this can be very slow)."
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene])
     "---"
-    ["Customize" customize-mode]
+    ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
 ;;; syntax table =======================================================
@@ -1254,10 +1236,8 @@ buffer (WARNING: this can be very slow)."
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-comment)
-  (setq font-lock-defaults '((fountain-font-lock-keywords-default
-                              fountain-font-lock-keywords-1
-                              fountain-font-lock-keywords-2
-                              fountain-font-lock-keywords-3) nil t))
+  (setq font-lock-defaults '((fountain-create-font-lock-keywords)
+                             nil t))
   (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
   ;; (jit-lock-register 'fountain-indent-refresh)
   (add-hook 'font-lock-extend-region-functions
