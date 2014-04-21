@@ -758,7 +758,7 @@ syntax.
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative)."
   (interactive "^p")
-  (let* ((i (if n n 1))
+  (let* ((i (or n 1))
          (p (if (< i 0) -1 1)))
     (if (= i 0)
         (progn
@@ -777,7 +777,7 @@ syntax.
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
-  (let ((i (if n n 1)))
+  (let ((i (or n 1)))
     (fountain-forward-scene (- i))))
 
 (defun fountain-beginning-of-scene ()
@@ -1016,13 +1016,14 @@ buffer (WARNING: this can be very slow)."
 (defun fountain-create-font-lock-keywords ()
   ""
   (let ((list fountain-font-lock-keywords-plist)
+        (decor (fountain-get-font-lock-decoration))
         keywords)
     (while list
       (let* ((f (pop list))
              (element (car f))
              (matcher (nth 1 f))
              (subexp (nth 2 f))
-             (hl (if (= (fountain-get-font-lock-decoration) 3)
+             (hl (if (= decor 3)
                      "-highlight"))
              (align (intern (concat "fountain-align-" (car f))))
              (align-props (if (and fountain-align-elements
@@ -1035,8 +1036,7 @@ buffer (WARNING: this can be very slow)."
         (while subexp
           (let* ((f (pop subexp))
                  (n (car f))
-                 (face (cond ((= (fountain-get-font-lock-decoration) 1)
-                              'default)
+                 (face (cond ((= decor 1) 'default)
                              ((nth 1 f))
                              ((intern (concat "fountain-" element hl)))))
                  (override (nth 2 f)))
