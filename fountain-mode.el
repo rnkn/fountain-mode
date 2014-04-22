@@ -69,12 +69,12 @@
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
-  "Mode hook for Fountain Mode, run after the mode is turned on."
+  "Mode hook for `fountain-mode', run after the mode is turned on."
   :type 'hook
   :group 'fountain)
 
 (defcustom fountain-metadata-template
-  "title:
+  "title: ${title}
 credit: written by
 author: ${fullname}
 draft date: ${longtime}
@@ -185,16 +185,19 @@ non-nil."
   :group 'fountain)
 
 (defcustom fountain-switch-comment-syntax nil
-  "If non-nil, use \"//\" as default comment syntax.
+  "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
 
-Fountain Mode supports two syntax for commenting (boneyard):
+Two syntaxes are supported:
 
 /* this text is a comment */
 
 // this text is
 // also a comment
 
-The default is the former; if you prefer the latter, set this
+Both syntax will be recognized as comments. This option changes
+the behaviour of the \\[comment-dwim] command.
+
+The default is the former but if you prefer the latter, set this
 option to non-nil."
   :type 'boolean
   :group 'fountain)
@@ -304,7 +307,7 @@ dialog.")
 ;;; faces ==============================================================
 
 (defgroup fountain-faces nil
-  "Faces used in Fountain Mode.
+  "Faces used in `fountain-mode'.
 
 There are three levels of Font Lock decoration:
 
@@ -673,6 +676,7 @@ is non-nil."
 To include an item in a template you must use the full \"${foo}\"
 syntax.
 
+  $[title}      Buffer name without extension
   ${longtime}   Long date format (defined in `fountain-long-time-format')
   ${time}       Short date format (defined in `fountain-short-time-format')
   ${fullname}   User full name (defined in `user-full-name')
@@ -680,7 +684,8 @@ syntax.
   ${email}      User email (defined in `user-mail-address')
   ${uuid}       Insert a UUID (defined in `fountain-uuid-func')"
   (s-format template 'aget
-            `(("longtime" . ,(format-time-string fountain-long-time-format))
+            `(("title" . ,(file-name-base (buffer-name)))
+              ("longtime" . ,(format-time-string fountain-long-time-format))
               ("time" . ,(format-time-string fountain-short-time-format))
               ("fullname" . ,user-full-name)
               ("nick" . ,(capitalize user-login-name))
@@ -947,7 +952,7 @@ buffer (WARNING: this can be very slow)."
                "added" "removed")))
 
 (defun fountain-set-font-lock-decoration (level)
-  "Set `font-lock-maximum-decoration' for Fountain Mode to LEVEL."
+  "Set `font-lock-maximum-decoration' for `fountain-mode' to LEVEL."
   (interactive "nMaximum Decoration (1-3): ")
   (let ((n font-lock-maximum-decoration))
     (cond ((or (booleanp n)
@@ -1110,7 +1115,7 @@ buffer (WARNING: this can be very slow)."
 ;;; menu ===============================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
-  "Menu for Fountain Mode."
+  "Menu for `fountain-mode'."
   '("Fountain"
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
