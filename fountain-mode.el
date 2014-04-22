@@ -1100,7 +1100,7 @@ buffer (WARNING: this can be very slow)."
     (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
-    (define-key map (kbd "C-c C-e e") 'fountain-export-default)
+    (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
