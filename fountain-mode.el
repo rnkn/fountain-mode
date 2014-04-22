@@ -160,12 +160,10 @@ This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-centered nil
-  "If integer, column to which centered text should be aligned.
-If nil, align to center of `window-body-width'.
-
+(defcustom fountain-align-centered 10
+  "Column integer to which centered text should be aligned.
 This option does not affect file contents."
-  :type '(choice (const :tag "Center" nil) integer)
+  :type 'integer
   :group 'fountain)
 
 (defcustom fountain-align-elements t
