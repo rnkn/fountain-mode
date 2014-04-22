@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.12.1
+;; Version: 0.13.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -46,7 +46,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "0.12.1")
+  "0.13.0")
 
 ;;; obsolete aliases ===================================================
 
@@ -721,7 +721,7 @@ syntax.
     (insert-before-markers s)
     (delete-region start end)))
 
-(defun fountain-lock-extend-region ()
+(defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
   (eval-when-compile
     (defvar font-lock-beg)
@@ -1186,7 +1186,7 @@ buffer (WARNING: this can be very slow)."
                              nil t))
   (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
   (add-hook 'font-lock-extend-region-functions
-            'fountain-lock-extend-region t t))
+            'fountain-font-lock-extend-region t t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
