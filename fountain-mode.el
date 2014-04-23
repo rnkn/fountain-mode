@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.12.1
+;; Version: 0.13.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -47,7 +47,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "0.12.1")
+  "0.13.0")
 
 ;;; obsolete aliases ===================================================
 
@@ -70,12 +70,12 @@
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
-  "Mode hook for Fountain Mode, run after the mode is turned on."
+  "Mode hook for `fountain-mode', run after the mode is turned on."
   :type 'hook
   :group 'fountain)
 
 (defcustom fountain-metadata-template
-  "title:
+  "title: ${title}
 credit: written by
 author: ${fullname}
 draft date: ${longtime}
@@ -161,12 +161,10 @@ This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-centered nil
-  "If integer, column to which centered text should be aligned.
-If nil, align to center of `window-body-width'.
-
+(defcustom fountain-align-centered 10
+  "Column integer to which centered text should be aligned.
 This option does not affect file contents."
-  :type '(choice (const :tag "Center" nil) integer)
+  :type 'integer
   :group 'fountain)
 
 (defcustom fountain-align-elements t
@@ -186,16 +184,19 @@ non-nil."
   :group 'fountain)
 
 (defcustom fountain-switch-comment-syntax nil
-  "If non-nil, use \"//\" as default comment syntax.
+  "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
 
-Fountain Mode supports two syntax for commenting (boneyard):
+Two syntaxes are supported:
 
 /* this text is a comment */
 
 // this text is
 // also a comment
 
-The default is the former; if you prefer the latter, set this
+Both syntax will be recognized as comments. This option changes
+the behaviour of the \\[comment-dwim] command.
+
+The default is the former but if you prefer the latter, set this
 option to non-nil."
   :type 'boolean
   :group 'fountain)
@@ -305,7 +306,7 @@ dialog.")
 ;;; faces ==============================================================
 
 (defgroup fountain-faces nil
-  "Faces used in Fountain Mode.
+  "Faces used in `fountain-mode'.
 
 There are three levels of Font Lock decoration:
 
@@ -674,6 +675,7 @@ is non-nil."
 To include an item in a template you must use the full \"${foo}\"
 syntax.
 
+  $[title}      Buffer name without extension
   ${longtime}   Long date format (defined in `fountain-long-time-format')
   ${time}       Short date format (defined in `fountain-short-time-format')
   ${fullname}   User full name (defined in `user-full-name')
@@ -681,7 +683,8 @@ syntax.
   ${email}      User email (defined in `user-mail-address')
   ${uuid}       Insert a UUID (defined in `fountain-uuid-func')"
   (s-format template 'aget
-            `(("longtime" . ,(format-time-string fountain-long-time-format))
+            `(("title" . ,(file-name-base (buffer-name)))
+              ("longtime" . ,(format-time-string fountain-long-time-format))
               ("time" . ,(format-time-string fountain-short-time-format))
               ("fullname" . ,user-full-name)
               ("nick" . ,(capitalize user-login-name))
@@ -717,7 +720,7 @@ syntax.
     (insert-before-markers s)
     (delete-region start end)))
 
-(defun fountain-lock-extend-region ()
+(defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
   (eval-when-compile
     (defvar font-lock-beg)
@@ -889,7 +892,7 @@ buffer (WARNING: this can be very slow)."
             (s (concat "(" fountain-continued-dialog-string ")")))
         ;; delete all matches in region
         (goto-char start)
-        (while (re-search-forward s end t)
+        (while (re-search-forward (concat "\s*" s) end t)
           (delete-region (match-beginning 0) (match-end 0)))
         ;; add string where appropriate
         (when fountain-add-continued-dialog
@@ -948,7 +951,7 @@ buffer (WARNING: this can be very slow)."
                "added" "removed")))
 
 (defun fountain-set-font-lock-decoration (level)
-  "Set `font-lock-maximum-decoration' for Fountain Mode to LEVEL."
+  "Set `font-lock-maximum-decoration' for `fountain-mode' to LEVEL."
   (interactive "nMaximum Decoration (1-3): ")
   (let ((n font-lock-maximum-decoration))
     (cond ((or (booleanp n)
@@ -1108,7 +1111,7 @@ buffer (WARNING: this can be very slow)."
 ;;; menu ===============================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
-  "Menu for Fountain Mode."
+  "Menu for `fountain-mode'."
   '("Fountain"
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
@@ -1183,7 +1186,7 @@ buffer (WARNING: this can be very slow)."
                              nil t))
   (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
   (add-hook 'font-lock-extend-region-functions
-            'fountain-lock-extend-region t t))
+            'fountain-font-lock-extend-region t t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here

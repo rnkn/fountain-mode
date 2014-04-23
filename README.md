@@ -23,11 +23,10 @@ The following features are supported:
 - `C-c C-z` to insert a note
 - `C-c C-x i` to insert metadata
 - synopses, notes and metadata are based on custom templates
-- `S-RET` to upcase the line and insert a newline
+- `S-RET` or `C-c RET` to upcase the line and insert a newline
 - `C-M-n` and `C-M-p` to navigate by scene heading
 - both Fountain comment/boneyard syntaxes (follows standard commenting
   behavior, e.g. `M-;`)
-- command menu
 - everything is customizable, of course
 - see the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode
 
@@ -81,3 +80,8 @@ To change the level of syntax highlighting, customize the value of
 `font-lock-maximum-decoration`. This can be set indirectly with the
 menu, or with `M-x fountain-set-font-lock-decoration` and saved with
 `M-x fountain-save-font-lock-decoration`.
+
+History
+-------
+
+See [Releases](https://github.com/rnkn/fountain-mode/releases).
