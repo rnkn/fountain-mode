@@ -899,7 +899,7 @@ buffer (WARNING: this can be very slow)."
         ;; delete all matches in region
         (goto-char start)
         (while (re-search-forward (concat "\s*" s) end t)
-          (delete-region (match-beginning 0) (match-end 0)))
+          (replace-match ""))
         ;; add string where appropriate
         (when fountain-add-continued-dialog
           (goto-char start)
