@@ -74,13 +74,9 @@
   :group 'fountain)
 
 (defcustom fountain-metadata-template
-  "title: ${title}
-credit: written by
-author: ${fullname}
-draft date: ${longtime}
-contact: ${email}"
+  "title: ${title}\ncredit: written by\nauthor: ${fullname}\ndraft date: ${longtime}\ncontact: ${email}\n"
   "Metadata template to be inserted at beginning of buffer.
-See `fountain-format-template'."
+See `fountain-insert-template'."
   :type 'string
   :group 'fountain)
 
@@ -211,7 +207,7 @@ option to non-nil."
   :group 'fountain)
 
 (defcustom fountain-note-template "${time} - ${fullname}: "
-  "Template for inserting notes. See `fountain-format-template'.
+  "Template for inserting notes. See `fountain-insert-template'.
 
 The default \"${time} - ${fullname}: \" will insert something
 similar to:
@@ -668,27 +664,40 @@ is non-nil."
       (forward-line 0)
       (looking-at fountain-centered-regexp))))
 
-(defun fountain-format-template (template)
+(defun fountain-insert-template (template)
   "Format TEMPLATE according to the following list.
 
 To include an item in a template you must use the full \"${foo}\"
 syntax.
 
-  $[title}      Buffer name without extension
-  ${longtime}   Long date format (defined in `fountain-long-time-format')
-  ${time}       Short date format (defined in `fountain-short-time-format')
-  ${fullname}   User full name (defined in `user-full-name')
-  ${nick}       User first name (defined in `user-login-name')
-  ${email}      User email (defined in `user-mail-address')
-  ${uuid}       Insert a UUID (defined in `fountain-uuid-func')"
-  (s-format template 'aget
-            `(("title" . ,(file-name-base (buffer-name)))
-              ("longtime" . ,(format-time-string fountain-long-time-format))
-              ("time" . ,(format-time-string fountain-short-time-format))
-              ("fullname" . ,user-full-name)
-              ("nick" . ,(capitalize user-login-name))
-              ("email" . ,user-mail-address)
-              ("uuid" . ,(fountain-uuid)))))
+    ${title}    Buffer name without extension
+    ${longtime} Long date format (defined in `fountain-long-time-format')
+    ${time}     Short date format (defined in `fountain-short-time-format')
+    ${fullname} User full name (defined in `user-full-name')
+    ${nick}     User first name (defined in `user-login-name')
+    ${email}    User email (defined in `user-mail-address')
+    ${uuid}     Insert a UUID (defined in `fountain-uuid-func')
+
+Use \"$m\" and \"$p\" to set the `mark' and `point',
+respectively, but only set one of each."
+  (let ((start (point)))
+    (insert (s-format template 'aget
+                      `(("title" . ,(file-name-base (buffer-name)))
+                        ("longtime" . ,(format-time-string fountain-long-time-format))
+                        ("time" . ,(format-time-string fountain-short-time-format))
+                        ("fullname" . ,user-full-name)
+                        ("nick" . ,(capitalize user-login-name))
+                        ("email" . ,user-mail-address)
+                        ("uuid" . ,(fountain-uuid)))))
+    (let ((end (point)))
+      (goto-char start)
+      (when (search-forward "$m" end t)
+        (replace-match "")
+        (push-mark (point) t t))
+      (goto-char start)
+      (if (search-forward "$p" end t)
+          (replace-match "")
+        (goto-char end)))))
 
 (defun fountain-uuid ()
   "Return a lowercase 8-digit UUID."
@@ -844,23 +853,21 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
         (comment-end "]]"))
     (if arg
         (comment-dwim nil)
-      (progn
-        (unless (fountain-blank-p)
-          (re-search-forward fountain-blank-regexp))
-        (unless (save-excursion
-                  (forward-line 1)
-                  (fountain-blank-p))
-          (open-line 1))
-        (comment-indent)
-        (insert (fountain-format-template fountain-note-template))))))
+      (unless (fountain-blank-p)
+        (re-search-forward fountain-blank-regexp))
+      (unless (save-excursion
+                (forward-line 1)
+                (fountain-blank-p))
+        (open-line 1))
+      (comment-indent)
+      (fountain-insert-template fountain-note-template))))
 
 (defun fountain-insert-metadata ()
   "Insert the metadata template at the beginning of file."
   (interactive)
   (widen)
   (goto-char (point-min))
-  (save-excursion
-    (insert (fountain-format-template fountain-metadata-template) "\n\n")))
+  (fountain-insert-template fountain-metadata-template))
 
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
