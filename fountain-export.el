@@ -155,8 +155,10 @@ If face is `fountain-comment', return nil."
             "action"))
          (tag (cond ((string= class "scene-heading")
                      "h1")
-                    ((string= class "character")
+                    ((string= class "forced-scene-heading")
                      "h2")
+                    ((string= class "character")
+                     "h3")
                     ("p")))
          (content
           (let* ((s (substring-no-properties substring))
