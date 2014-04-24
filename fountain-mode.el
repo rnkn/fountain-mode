@@ -38,6 +38,7 @@
 (require 's)
 (require 'thingatpt)
 (require 'easymenu)
+(require 'fountain-export)
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
@@ -579,10 +580,10 @@ is non-nil."
   ;;                        (unless (eobp)
   ;;                          (null (fountain-invisible-p)))))
   ;;             s)))))))
-  (when (fountain-character-p)
-    (let ((s (buffer-substring-no-properties
-              (match-beginning 0) (match-end 0))))
-      (s-trim (car (s-slice-at "\\^\\|(" s))))))
+  (if (fountain-character-p)
+      (let ((s (buffer-substring-no-properties
+                (match-beginning 0) (match-end 0))))
+        (s-trim (car (s-slice-at "\\^\\|(" s))))))
 
 (defun fountain-character-p ()
   "Return non-nil if point is at character, nil otherwise."
@@ -769,7 +770,7 @@ respectively, but only set one of each."
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative)."
   (interactive "^p")
-  (let* ((i (if n n 1))
+  (let* ((i (or n 1))
          (p (if (< i 0) -1 1)))
     (if (= i 0)
         (progn
@@ -778,8 +779,8 @@ respectively, but only set one of each."
                            (fountain-scene-heading-p)))
             (forward-line -1)))
       (while (/= i 0)
-        (when (fountain-scene-heading-p)
-          (forward-line p))
+        (if (fountain-scene-heading-p)
+            (forward-line p))
         (while (null (or (eq (point) (buffer-end p))
                          (fountain-scene-heading-p)))
           (forward-line p))
@@ -788,7 +789,7 @@ respectively, but only set one of each."
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
-  (let ((i (if n n 1)))
+  (let ((i (or n 1)))
     (fountain-forward-scene (- i))))
 
 (defun fountain-beginning-of-scene ()
@@ -1025,13 +1026,14 @@ buffer (WARNING: this can be very slow)."
 (defun fountain-create-font-lock-keywords ()
   ""
   (let ((list fountain-font-lock-keywords-plist)
+        (decor (fountain-get-font-lock-decoration))
         keywords)
     (while list
       (let* ((f (pop list))
              (element (car f))
              (matcher (nth 1 f))
              (subexp (nth 2 f))
-             (hl (if (= (fountain-get-font-lock-decoration) 3)
+             (hl (if (= decor 3)
                      "-highlight"))
              (align (intern (concat "fountain-align-" (car f))))
              (align-props (if (and fountain-align-elements
@@ -1044,31 +1046,26 @@ buffer (WARNING: this can be very slow)."
         (while subexp
           (let* ((f (pop subexp))
                  (n (car f))
-                 (face (cond ((= (fountain-get-font-lock-decoration) 1)
-                              'default)
+                 (face (cond ((= decor 1) 'default)
                              ((nth 1 f))
                              ((intern (concat "fountain-" element hl)))))
                  (override (nth 2 f)))
             (setq face-props
-                  (nconc face-props
-                         (list `(,n '(face ,face ,@align-props)
-                                    ,override))))))
+                  (append face-props
+                          `((,n '(face ,face ,@align-props)
+                                ,override))))))
         (setq keywords
-              (nconc keywords
-                     (list (cons matcher face-props))))))
+              (append keywords
+                      (list (cons matcher face-props))))))
     keywords))
-
-(defvaralias 'fountain-font-lock-keywords-default
-  'fountain-font-lock-keywords-2
-  "Default Font Lock keywords.")
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
-      (when (funcall func)
-        (setq match t))
+      (if (funcall func)
+          (setq match t))
       (forward-line 1))
     match))
 
@@ -1113,6 +1110,7 @@ buffer (WARNING: this can be very slow)."
     (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
+    (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
@@ -1125,8 +1123,12 @@ buffer (WARNING: this can be very slow)."
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    "---"
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
+    "---"
+    ("Export"
+     ["Default" fountain-export-default]
+     "---"
+     ["HTML" fountain-export-buffer-to-html])
     "---"
     ("Syntax Highlighting"
      ["None" (fountain-set-font-lock-decoration 1)
