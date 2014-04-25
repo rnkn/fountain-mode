@@ -12,10 +12,10 @@
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -45,7 +45,7 @@
   :type 'function
   :group 'fountain-export)
 
-(defcustom fountain-export-fonts
+(defcustom fountain-export-font
   '("Courier Prime"
     "Courier Final Draft"
     "Courier Screenplay"
@@ -56,7 +56,9 @@
   :group 'fountain-export)
 
 (defcustom fountain-export-prepare-html nil
-  "If non-nil, auto-indent HTML elements during export."
+  "If non-nil, auto-indent HTML elements during export.
+This if off by default to save time, since the HTML isn't meant
+to impress anyone."
   :type 'boolean
   :group 'fountain-export)
 
@@ -69,6 +71,207 @@ will be exported as
 
 &ldquo;foobar&rdquol;"
   :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-pdf-via-html-command
+  "prince ${source} --output=${output} --input=html --verbose"
+  "Shell command to convert HTML file to PDF."
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-stylesheet-template
+  "@page {
+    size: ${pagesize};
+    margin-top: 1in;
+    margin-right: 1in;
+    margin-bottom: 0.5in;
+    margin-left: 1.5in;
+}
+
+#title_page {
+    page: title;
+}
+
+/* This makes the page-counter start on the first page of the screenplay */
+#screenplay {
+    counter-reset: page 1;
+    page: screenplay;
+    prince-page-group: start;
+}
+
+@page screenplay {
+    /* Page Numbers */
+    @top-right-corner {
+        font-family: ${font};
+        font-size: 12pt;
+        content: counter(page)\".\";
+        vertical-align: bottom;
+        padding-bottom: 1em;
+    }
+
+    /* Define Header */
+    @top-left {
+        content: \"\";
+        font: italic 10pt Georgia;
+        color: #888;
+        vertical-align: bottom;
+        padding-bottom: 1.3em;
+    }
+
+    /* Define Footer */
+    @bottom-left {
+        content: \"\";
+        font: italic 10pt Georgia;
+        color: #888;
+        vertical-align: top;
+        padding-top: 0;
+    }
+}
+
+/* removes the header and page-numbers from the first page */
+@page screenplay: first {
+    @top-right-corner { content: normal; }
+    @top-left { content: normal; }
+}
+
+body {
+    font-family: ${font};
+    font-size: 12pt;
+    line-height: 1;
+}
+
+em {
+    font-style: italic;
+}
+
+strong {
+    font-weight: bold;
+}
+
+span.underline {
+    text-decoration: underline;
+}
+
+.strikethrough {
+    text-line-through-style: solid;
+}
+
+/* These control where page-breaks can and cannot happen */
+
+.page-break {
+    page-break-after: always;
+}
+
+/* by default Prince bookmarks all headings, no thanks */
+h3, h4, h5, h6 {
+    prince-bookmark-level: none;
+}
+
+/* -------- COMMON LAYOUT -------- */
+
+#screenplay {
+    width: 6in;
+    margin: 0 auto;
+}
+
+.centered {
+    text-align: center;
+    margin-left: 0;
+    width: 100%;
+}
+
+p {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0;
+    width: auto;
+    orphans: 2;
+    widows: 2;
+}
+
+/* Sluglines and Transitions */
+
+h1,h2,h3,h4,h5,h6 {
+    font-weight: normal;
+    font-size: 12pt;
+    /* margin-top: 1em; */
+    /* margin-bottom: 1em; */
+    text-transform: uppercase;
+}
+
+/* Full Sluglines */
+
+/* h2 { */
+/*     width: inherit; */
+/*     margin-top: ${scenespacing}em; */
+/*     margin-bottom: 12pt; */
+/*     margin-left: 0; */
+/*     text-decoration: ${sceneunderline}; */
+/*     font-weight: ${scenebold}; */
+/* } */
+
+.scene-heading {
+    font-weight: bold;
+    page-break-after: avoid;
+}
+
+.forced-scene-heading {
+    font-weight: bold;
+    page-break-after: avoid;
+}
+
+.action {
+    page-break-inside: avoid; */
+}
+
+.character {
+    margin-bottom: 0;
+    margin-left: 2in;
+    width: 4in;
+    page-break-after: avoid;
+}
+
+.paren {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1.6in;
+    text-indent: -0.6em;
+    width: 2in;
+    page-break-before: avoid;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+}
+
+.dialog {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1in;
+    width: 3.5in;
+    page-break-before: avoid;
+    page-break-inside: avoid;
+}
+
+.trans {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 4in;
+    width: 2in;
+    page-break-before: avoid;
+}
+
+.note {
+    display: none
+}
+
+.section {
+    display: none;
+}
+
+.synopsis {
+    display: none;
+}"
+  "Stylesheet template for exporting to HTML."
+  :type 'string
   :group 'fountain-export)
 
 (defcustom fountain-export-html-head-template
@@ -134,6 +337,7 @@ Otherwise return `fountain-export-buffer-name'"
                              ("<" . "&lt;")
                              (">" . "&gt;")
                              ("\\\s" . "&nbsp;")
+                             ("\\\-" . "&#8209;")
                              ("\\_" . "&#95;")
                              ("\\*" . "&#42;")
                              ("\n" . "<br>")) s))
@@ -269,13 +473,15 @@ created HTML element to DESTBUF."
       (unless complete
         (kill-buffer destbuf)))))
 
+;;; Interactive Functions ==============================================
+
 (defun fountain-export-default ()
   "Call the function defined in `fountain-export-default-command'"
   (interactive)
   (funcall fountain-export-default-command))
 
 (defun fountain-export-buffer-to-html (&optional buffer)
-  "Export the buffer to HTML file, then switch to HTML buffer."
+  "Export BUFFER to HTML file, then switch to HTML buffer."
   (interactive)                         ; FIXME: add y-or-n-p
   (with-current-buffer
       (or buffer (current-buffer))
@@ -289,7 +495,8 @@ created HTML element to DESTBUF."
         (with-current-buffer destbuf
           (if outputdir
               (write-file outputdir t)))
-        (switch-to-buffer-other-window destbuf)
+        (if (called-interactively-p 'interactive)
+            (switch-to-buffer-other-window destbuf))
         destbuf)))))
 
 (defun fountain-export-region-to-html (start end)
@@ -307,6 +514,20 @@ created HTML element to DESTBUF."
             (write-file outputdir t)))
       (switch-to-buffer-other-window destbuf)
       destbuf)))
+
+(defun fountain-export-buffer-to-pdf-via-html (&optional buffer)
+  "Export BUFFER to HTML file, then convert HTML to PDF."
+  (interactive)                         ; FIXME: add y-or-n-p
+  (let* ((buffer (or buffer (current-buffer)))
+         (sourcefile (buffer-file-name (fountain-export-buffer-to-html buffer)))
+         (filebase (shell-quote-argument (file-name-sans-extension sourcefile)))
+         (destfile (concat filebase ".pdf"))
+         (logfile (concat filebase ".log"))
+         (command
+          (s-format fountain-export-pdf-via-html-command 'aget
+                    `(("source" . ,(shell-quote-argument sourcefile))
+                      ("output" . ,destfile)))))
+    (shell-command (concat command " &"))))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
