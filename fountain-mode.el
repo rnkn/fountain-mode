@@ -49,7 +49,7 @@
 (defconst fountain-version
   "0.13.0")
 
-;;; obsolete aliases ===================================================
+;;; Obsolete Aliases ===================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
   'fountain-align-character "0.12.0")
@@ -66,7 +66,22 @@
 (define-obsolete-variable-alias 'fountain-indent-centered-col
   'fountain-align-centered "0.12.0")
 
-;;; customizable options ===============================================
+(define-obsolete-variable-alias 'fountain-indent-character
+  'fountain-align-character "1.0.0")
+
+(define-obsolete-variable-alias 'fountain-indent-dialog
+  'fountain-align-dialog "1.0.0")
+
+(define-obsolete-variable-alias 'fountain-indent-paren
+  'fountain-align-paren "1.0.0")
+
+(define-obsolete-variable-alias 'fountain-indent-trans
+  'fountain-align-trans "1.0.0")
+
+(define-obsolete-variable-alias 'fountain-indent-centered
+  'fountain-align-centered "1.0.0")
+
+;;; Customizable Options ===============================================
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
@@ -97,7 +112,7 @@ INT./EXT. HOUSE - DAY"
   :group 'fountain)
 
 (defcustom fountain-trans-list
-  '("TO:" "WITH:" "FADE IN:" "FADE OUT" "TO BLACK")
+  '("TO:" "WITH:" "FADE IN" "FADE OUT" "TO BLACK")
   "List of transition endings (case insensitive).
 
 This list is used to match the endings of transitions,
@@ -225,7 +240,7 @@ The default funcation requires the command line tool \"uuidgen\"."
   :type 'function
   :group 'fountain)
 
-;;; element regular expressions ========================================
+;;; Element Regular Expressions ========================================
 
 (defconst fountain-blank-regexp
   "\\`\\|^\s?$\\|\\'"
@@ -281,7 +296,7 @@ dialog.")
   "^[\s\t]*>[\s\t]*\\(.*?\\)[\s\t]*<[\s\t]*$"
   "Regular expression for matching centered text.")
 
-;;; emphasis regular expressions =======================================
+;;; Emphasis Regular Expressions =======================================
 
 (defconst fountain-emphasis-delim-regexp
   "[^\\]\\([_*]+\\)"
@@ -299,14 +314,14 @@ dialog.")
   "[^\\]\\*\\{2\\}\\(.*?[^\\\n]\\)\\*\\{2\\}"
   "Regular expression for matching bold text.")
 
-;;; faces ==============================================================
+;;; Faces ==============================================================
 
 (defgroup fountain-faces nil
   "Faces used in `fountain-mode'.
 
 There are three levels of Font Lock decoration:
 
-  1 - none, uses no faces
+  1 - none, uses default face
   2 - minimal, uses fountain-ELEMENT faces
   3 - maximum, uses fountain-ELEMENT-highlight faces
 
@@ -424,11 +439,11 @@ nil."
   "Additional highlighting face for transitions."
   :group 'fountain-faces)
 
-;;; thing definitions ==================================================
+;;; Thing Definitions ==================================================
 
 (put 'scene 'forward-op 'fountain-forward-scene)
 
-;;; internal functions =================================================
+;;; Internal Functions =================================================
 
 (defun fountain-get-line ()
   "Return the line at point as a string."
@@ -450,7 +465,7 @@ nil."
   (let ((start
          (save-excursion
            (goto-char start)
-           ;; Using thing-at-point-looking-at is very slow, better to
+           ;; using thing-at-point-looking-at is very slow, better to
            ;; use a simpler function.
            ;;
            ;; (if (thing-at-point-looking-at fountain-comment-regexp)
@@ -705,9 +720,9 @@ respectively, but only set one of each."
   (let ((s (downcase (funcall fountain-uuid-func))))
     (car (split-string s "-"))))
 
+;; could combine with `fountain-get-character' as optional N?
 (defun fountain-get-previous-character (n)
   "Return Nth previous character within scene, nil otherwise."
-  ;; combine with `fountain-get-character' as optional N?
   (save-excursion
     (save-restriction
       (widen)
@@ -753,7 +768,7 @@ respectively, but only set one of each."
       (setq font-lock-end end changed t))
     changed))
 
-;;; interactive functions  =============================================
+;;; Interactive Functions  =============================================
 
 (defun fountain-upcase-line ()
   "Upcase the line."
@@ -813,15 +828,15 @@ respectively, but only set one of each."
   ;;       (fountain-forward-scene 1)
   ;;       (push-mark)
   ;;       (exchange-point-and-mark))
+  (push-mark)
+  (fountain-forward-scene 0)
+  (if (null (fountain-scene-heading-p))
+      (progn
+        (goto-char (mark))
+        (error "Before first scene heading"))
     (push-mark)
-    (fountain-forward-scene 0)
-    (if (null (fountain-scene-heading-p))
-        (progn
-          (goto-char (mark))
-          (error "Before first scene heading"))
-      (push-mark)
-      (fountain-forward-scene 1)
-      (exchange-point-and-mark)))
+    (fountain-forward-scene 1)
+    (exchange-point-and-mark)))
 
 (defun fountain-insert-synopsis ()
   "Open line below current scene heading and insert synopsis."
@@ -913,7 +928,7 @@ buffer (WARNING: this can be very slow)."
               (replace-match (concat "\s" s)))
             (forward-line 1)))))))
 
-;;; menu functions =====================================================
+;;; Menu Functions =====================================================
 
 (defun fountain-toggle-forced-scene-heading-equal ()
   "Toggle `fountain-forced-scene-heading-equal'"
@@ -995,7 +1010,7 @@ buffer (WARNING: this can be very slow)."
         ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
         ((cdr (assoc 't font-lock-maximum-decoration)) 3)))
 
-;;; font lock ==========================================================
+;;; Font Lock ==========================================================
 
 (defconst fountain-font-lock-keywords-plist
   `(("scene-heading" fountain-match-scene-heading
@@ -1021,21 +1036,33 @@ buffer (WARNING: this can be very slow)."
      ((0 fountain-comment)
       (1 nil t)))
     ("note" ,fountain-note-regexp
-     ((0 nil nil)))))
+     ((0 nil nil))))
+  "List of face properties to use in creating Font Lock keywords.
+
+Has the format ELEMENT, a string name, MATCHER, a regular
+expression or search function, and SUBEXP, a list of: N, the
+subexpression to match, FACE, the face to apply, and OVERRIDE, if
+t, will allow overriding preexisting faces properties.")
 
 (defun fountain-create-font-lock-keywords ()
-  ""
+  "Create the Font Lock keywords list.
+Uses `fountain-font-lock-keywords-plist' to create a list of
+keywords suitable for Font Lock."
   (let ((list fountain-font-lock-keywords-plist)
-        (decor (fountain-get-font-lock-decoration))
+        (dec (fountain-get-font-lock-decoration))
         keywords)
     (while list
+      ;; pop the first face property list
       (let* ((f (pop list))
              (element (car f))
              (matcher (nth 1 f))
              (subexp (nth 2 f))
-             (hl (if (= decor 3)
+             ;; if we're using max decoration, use highlight faces
+             (hl (if (= dec 3)
                      "-highlight"))
              (align (intern (concat "fountain-align-" (car f))))
+             ;; if we're using auto-align and the align var is bound,
+             ;; set the align properties
              (align-props (if (and fountain-align-elements
                                    (boundp align))
                               `(line-prefix
@@ -1044,11 +1071,16 @@ buffer (WARNING: this can be very slow)."
                                 (space :align-to ,align))))
              face-props)
         (while subexp
+          ;; pop the first face property
           (let* ((f (pop subexp))
                  (n (car f))
-                 (face (cond ((= decor 1) 'default)
+                 ;; if we're using no decoration, use default face
+                 ;; if we're using minimal, use the element string
+                 ;; if we're using maximum, use the highlight face
+                 (face (cond ((= dec 1) 'default)
                              ((nth 1 f))
                              ((intern (concat "fountain-" element hl)))))
+                 ;; set the face override
                  (override (nth 2 f)))
             (setq face-props
                   (append face-props
@@ -1094,7 +1126,7 @@ buffer (WARNING: this can be very slow)."
   "Call `fountain-match-element' with `fountain-trans-p'"
   (fountain-match-element 'fountain-trans-p limit))
 
-;;; mode map ===========================================================
+;;; Mode Map ===========================================================
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
@@ -1111,11 +1143,12 @@ buffer (WARNING: this can be very slow)."
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
+    (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
 
-;;; menu ===============================================================
+;;; Menu ===============================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
@@ -1167,7 +1200,7 @@ buffer (WARNING: this can be very slow)."
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
-;;; syntax table =======================================================
+;;; Syntax Table =======================================================
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
@@ -1177,7 +1210,7 @@ buffer (WARNING: this can be very slow)."
     syntax)
   "Syntax table for `fountain-mode'.")
 
-;;; mode definition ====================================================
+;;; Mode Definition ====================================================
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
