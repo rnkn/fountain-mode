@@ -481,6 +481,35 @@ created HTML element to DESTBUF."
       (unless complete
         (kill-buffer destbuf)))))
 
+;;; Menu Functions =====================================================
+
+(defun fountain-toggle-export-bold-scene-headings ()
+  "Toggle `fountain-export-bold-scene-headings'"
+  (interactive)
+  (setq fountain-export-bold-scene-headings
+        (null fountain-export-bold-scene-headings))
+  (message "Scene headings will now export %s"
+           (if fountain-export-bold-scene-headings
+               "bold" "normal")))
+
+(defun fountain-toggle-export-underline-scene-headings ()
+  "Toggle `fountain-export-underline-scene-headings'"
+  (interactive)
+  (setq fountain-export-underline-scene-headings
+        (null fountain-export-underline-scene-headings))
+  (message "Scene headings will now export %s"
+           (if fountain-export-underline-scene-headings
+               "underlined" "normal")))
+
+(defun fountain-toggle-export-double-space-scene-headings ()
+  "Toggle `fountain-export-double-space-scene-headings'"
+  (interactive)
+  (setq fountain-export-double-space-scene-headings
+        (null fountain-export-double-space-scene-headings))
+  (message "Scene headings will now export %s"
+           (if fountain-export-double-space-scene-headings
+               "double-spaced" "single-spaced")))
+
 ;;; Interactive Functions ==============================================
 
 (defun fountain-export-default ()
