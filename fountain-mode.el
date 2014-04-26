@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 0.13.0
+;; Version: 1.0.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: http://github.com/rnkn/fountain-mode/
 
@@ -47,7 +47,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "0.13.0")
+  "1.0.0")
 
 ;;; Obsolete Aliases ===================================================
 
@@ -67,19 +67,19 @@
   'fountain-align-centered "0.12.0")
 
 (define-obsolete-variable-alias 'fountain-indent-character
-  'fountain-align-character "1.0.0")
+  'fountain-align-character "0.13.0")
 
 (define-obsolete-variable-alias 'fountain-indent-dialog
-  'fountain-align-dialog "1.0.0")
+  'fountain-align-dialog "0.13.0")
 
 (define-obsolete-variable-alias 'fountain-indent-paren
-  'fountain-align-paren "1.0.0")
+  'fountain-align-paren "0.13.0")
 
 (define-obsolete-variable-alias 'fountain-indent-trans
-  'fountain-align-trans "1.0.0")
+  'fountain-align-trans "0.13.0")
 
 (define-obsolete-variable-alias 'fountain-indent-centered
-  'fountain-align-centered "1.0.0")
+  'fountain-align-centered "0.13.0")
 
 ;;; Customizable Options ===============================================
 
@@ -90,7 +90,7 @@
   :group 'fountain)
 
 (defcustom fountain-metadata-template
-  "title: ${title}\ncredit: written by\nauthor: ${fullname}\ndraft date: ${longtime}\ncontact: ${email}\n"
+  "title: ${title}\ncredit: written by\nauthor: ${fullname}\ndraft: first\ndate: ${longtime}\ncontact: ${email}\n"
   "Metadata template to be inserted at beginning of buffer.
 See `fountain-insert-template'."
   :type 'string
@@ -657,8 +657,8 @@ syntax.
     ${email}    User email (defined in `user-mail-address')
     ${uuid}     Insert a UUID (defined in `fountain-uuid-func')
 
-Use \"$m\" and \"$p\" to set the `mark' and `point',
-respectively, but only set one of each."
+Optionally, use \"$m\" and \"$p\" to set the `mark' and `point',
+respectively, but only use one of each."
   (let ((start (point)))
     (insert (s-format template 'aget
                       `(("title" . ,(file-name-base (buffer-name)))
@@ -732,6 +732,11 @@ respectively, but only set one of each."
     changed))
 
 ;;; Interactive Functions  =============================================
+
+(defun fountain-version ()
+  "Return `fountain-mode' version."
+  (interactive)
+  (message "Fountain Mode %s" fountain-version))
 
 (defun fountain-upcase-line ()
   "Upcase the line."
