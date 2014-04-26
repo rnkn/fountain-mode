@@ -46,11 +46,39 @@
                 (function-item fountain-export-buffer-to-html))
   :group 'fountain-export)
 
+(defcustom fountain-export-inline-style nil
+  "If non-nil, use inline styles.
+Otherwise, use an external stylesheet file."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-page-size
+  "us-letter"
+  "Paper size to use on export."
+  :type '(radio (string :tag "US Letter" "us-letter")
+                (string :tag "A4" "a4"))
+  :group 'fountain-export)
+
 (defcustom fountain-export-font
   '("Courier"
     "Courier New")
   "List of font names to use when exporting, by priority."
   :type '(repeat (string :tag "Font"))
+  :group 'fountain-export)
+
+(defcustom fountain-export-bold-scene-headings nil
+  "If non-nil, bold scene headings on export."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-underline-scene-headings nil
+  "If non-nil, underline scene headings on export."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-double-space-scene-headings nil
+  "If non-nil, double space before scene headings on export."
+  :type 'boolean
   :group 'fountain-export)
 
 (defcustom fountain-export-prepare-html nil
@@ -77,9 +105,9 @@ will be exported as
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-stylesheet-template
+(defcustom fountain-export-style-template
   "@page {
-    size: ${pagesize};
+    size: ${page-size};
     margin-top: 1in;
     margin-right: 1in;
     margin-bottom: 0.5in;
@@ -90,7 +118,6 @@ will be exported as
     page: title;
 }
 
-/* This makes the page-counter start on the first page of the screenplay */
 #screenplay {
     counter-reset: page 1;
     page: screenplay;
@@ -98,7 +125,6 @@ will be exported as
 }
 
 @page screenplay {
-    /* Page Numbers */
     @top-right-corner {
         font-family: ${font};
         font-size: 12pt;
@@ -106,30 +132,20 @@ will be exported as
         vertical-align: bottom;
         padding-bottom: 1em;
     }
+}
 
-    /* Define Header */
-    @top-left {
-        content: \"\";
-        font: italic 10pt Georgia;
-        color: #888;
-        vertical-align: bottom;
-        padding-bottom: 1.3em;
+@page screenplay:first {
+    @top-right-corner {
+        content: normal;
     }
-
-    /* Define Footer */
-    @bottom-left {
-        content: \"\";
-        font: italic 10pt Georgia;
-        color: #888;
-        vertical-align: top;
-        padding-top: 0;
+    @top-left {
+        content: normal;
     }
 }
 
-/* removes the header and page-numbers from the first page */
-@page screenplay: first {
-    @top-right-corner { content: normal; }
-    @top-left { content: normal; }
+h1,h2,h3,h4,h5,h6 {
+    font-weight: normal;
+    font-size: 12pt;
 }
 
 body {
@@ -154,18 +170,13 @@ span.underline {
     text-line-through-style: solid;
 }
 
-/* These control where page-breaks can and cannot happen */
-
 .page-break {
     page-break-after: always;
 }
 
-/* by default Prince bookmarks all headings, no thanks */
-h3, h4, h5, h6 {
+h2, h3, h4, h5, h6 {
     prince-bookmark-level: none;
 }
-
-/* -------- COMMON LAYOUT -------- */
 
 #screenplay {
     width: 6in;
@@ -187,39 +198,15 @@ p {
     widows: 2;
 }
 
-/* Sluglines and Transitions */
-
-h1,h2,h3,h4,h5,h6 {
-    font-weight: normal;
-    font-size: 12pt;
-    /* margin-top: 1em; */
-    /* margin-bottom: 1em; */
-    text-transform: uppercase;
-}
-
-/* Full Sluglines */
-
-/* h2 { */
-/*     width: inherit; */
-/*     margin-top: ${scenespacing}em; */
-/*     margin-bottom: 12pt; */
-/*     margin-left: 0; */
-/*     text-decoration: ${sceneunderline}; */
-/*     font-weight: ${scenebold}; */
-/* } */
-
 .scene-heading {
-    font-weight: bold;
-    page-break-after: avoid;
-}
-
-.forced-scene-heading {
-    font-weight: bold;
+    font-weight: ${scene-bold};
+    text-decoration: ${scene-underline};
+    margin-top: ${scene-spacing};
     page-break-after: avoid;
 }
 
 .action {
-    page-break-inside: avoid; */
+    page-break-inside: avoid;
 }
 
 .character {
@@ -268,7 +255,7 @@ h1,h2,h3,h4,h5,h6 {
 .synopsis {
     display: none;
 }"
-  "Stylesheet template for exporting to HTML."
+  "Styles template for exporting to HTML, and PDF via HTML."
   :type 'string
   :group 'fountain-export)
 
@@ -277,8 +264,6 @@ h1,h2,h3,h4,h5,h6 {
 <!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
 <html>
 <head>
-<link rel=\"stylesheet\" href=\"${cssfile}\">
-</head>
 "
   "HTML template inserted into export buffer.
 See `fountain-export-format-template'."
@@ -385,15 +370,31 @@ If face is `fountain-comment', return nil."
 
 Internal function, will not work outside of
 `fountain-export-html'."
-  (s-format template 'aget
-            `(("fountain-version" . ,fountain-version)
-              ("emacs-version" . ,emacs-version)
-              ;; title?
-              ;; author?
-              ("htmlfile" . ,(fountain-export-get-name
-                              sourcebuf ".html"))
-              ("cssfile" . ,(fountain-export-get-name
-                             sourcebuf ".css")))))
+  (let ((htmlfile (fountain-export-get-name sourcebuf ".html"))
+        (cssfile (fountain-export-get-name sourcebuf ".css"))
+        (page-size fountain-export-page-size)
+        (font (let (list)
+                (dolist (font fountain-export-font
+                              (s-join "," list))
+                  (setq list
+                        (append list
+                                (list (concat "'" font "'")))))))
+        (scene-bold (if fountain-export-bold-scene-headings
+                        "bold" "normal"))
+        (scene-underline (if fountain-export-underline-scene-headings
+                             "underline" "none"))
+        (scene-spacing (if fountain-export-double-space-scene-headings
+                           "2em" "1em")))
+    (s-format template 'aget
+              `(("fountain-version" . ,fountain-version)
+                ("emacs-version" . ,emacs-version)
+                ("htmlfile" . ,htmlfile)
+                ("cssfile" . ,cssfile)
+                ("page-size" . ,page-size)
+                ("font" . ,font)
+                ("scene-bold" . ,scene-bold)
+                ("scene-underline" . ,scene-underline)
+                ("scene-spacing" . ,scene-spacing)))))
 
 (defun fountain-export-parse-buffer (destbuf)
   "Find face changes from START to END then insert elements into DESTBUF.
@@ -454,8 +455,15 @@ created HTML element to DESTBUF."
             (with-silent-modifications
               (erase-buffer)
               (insert (fountain-export-format-template
-                       fountain-export-html-head-template sourcebuf)
-                      "<body>\n<div id=\"screenplay\">\n")))
+                       fountain-export-html-head-template sourcebuf))
+              ;; (if fountain-export-inline-style
+              (insert "<style type=\"text/css\">"
+                      (fountain-export-format-template
+                       fountain-export-style-template sourcebuf)
+                      "</style>")
+              ;; close head and open body
+              (insert "</head>\n<body>\n")
+              (insert "<div id=\"screenplay\">\n")))
           ;; parse the buffer
           (fountain-export-parse-buffer destbuf)
           ;; close HTML tags
