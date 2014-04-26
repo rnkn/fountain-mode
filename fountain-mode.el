@@ -1002,16 +1002,14 @@ subexpression to match, FACE, the face to apply, and OVERRIDE, if
 t, will allow overriding preexisting faces properties.")
 
 (defun fountain-create-font-lock-keywords ()
-  "Create the Font Lock keywords list.
+  "Return a new list of `font-lock-mode' keywords.
 Uses `fountain-font-lock-keywords-plist' to create a list of
 keywords suitable for Font Lock."
   (let ((list fountain-font-lock-keywords-plist)
         (dec (fountain-get-font-lock-decoration))
         keywords)
-    (while list
-      ;; pop the first face property list
-      (let* ((f (pop list))
-             (element (car f))
+    (dolist (f list keywords)
+      (let* ((element (car f))
              (matcher (nth 1 f))
              (subexp (nth 2 f))
              ;; if we're using max decoration, use highlight faces
@@ -1026,10 +1024,8 @@ keywords suitable for Font Lock."
                                 wrap-prefix
                                 (space :align-to ,align))))
              face-props)
-        (while subexp
-          ;; pop the first face property
-          (let* ((f (pop subexp))
-                 (n (car f))
+        (dolist (f subexp)
+          (let* ((n (car f))
                  ;; if we're using no decoration, use nil
                  ;; if face is supplied, use that
                  ;; otherwise use the element string plus highlight
@@ -1044,8 +1040,7 @@ keywords suitable for Font Lock."
                                 ,override))))))
         (setq keywords
               (append keywords
-                      (list (cons matcher face-props))))))
-    keywords))
+                      (list (cons matcher face-props))))))))
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
