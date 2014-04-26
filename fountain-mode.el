@@ -1110,7 +1110,20 @@ keywords suitable for Font Lock."
      ["Default" fountain-export-default]
      "---"
      ["HTML" fountain-export-buffer-to-html]
-     ["PDF via HTML" fountain-export-buffer-to-pdf-via-html])
+     ["PDF via HTML" fountain-export-buffer-to-pdf-via-html]
+     "---"
+     ["Bold Scene Headings"
+      fountain-toggle-export-bold-scene-headings
+      :style toggle
+      :selected fountain-export-bold-scene-headings]
+     ["Underline Scene Headings"
+      fountain-toggle-export-underline-scene-headings
+      :style toggle
+      :selected fountain-export-underline-scene-headings]
+     ["Double-Space Scene Headings"
+      fountain-toggle-export-double-space-scene-headings
+      :style toggle
+      :selected fountain-export-double-space-scene-headings])
     "---"
     ("Syntax Highlighting"
      ["None" (fountain-set-font-lock-decoration 1)
