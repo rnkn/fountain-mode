@@ -944,7 +944,7 @@ buffer (WARNING: this can be very slow)."
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (message "Syntax highlighting is now set at %s"
            (cond ((eq level 1) "none")
-                 ((eq level 2) "minimal")
+                 ((eq level 2) "moderate")
                  ((eq level 3) "maximum")))
   (font-lock-refresh-defaults))
 
@@ -1010,8 +1010,7 @@ keywords suitable for Font Lock."
              (matcher (nth 1 f))
              (subexp (nth 2 f))
              ;; if we're using max decoration, use highlight faces
-             (hl (if (= dec 3)
-                     "-highlight"))
+             (hl (if (= dec 3) "-highlight"))
              (align (intern (concat "fountain-align-" (car f))))
              ;; if we're using auto-align and the align var is bound,
              ;; set the align properties
@@ -1026,10 +1025,10 @@ keywords suitable for Font Lock."
           ;; pop the first face property
           (let* ((f (pop subexp))
                  (n (car f))
-                 ;; if we're using no decoration, use default face
-                 ;; if we're using minimal, use the element string
-                 ;; if we're using maximum, use the highlight face
-                 (face (cond ((= dec 1) 'default)
+                 ;; if we're using no decoration, use nil
+                 ;; if face is supplied, use that
+                 ;; otherwise use the element string plus highlight
+                 (face (cond ((= dec 1) nil)
                              ((nth 1 f))
                              ((intern (concat "fountain-" element hl)))))
                  ;; set the face override
@@ -1117,7 +1116,7 @@ keywords suitable for Font Lock."
      ["None" (fountain-set-font-lock-decoration 1)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 1)]
-     ["Minimal" (fountain-set-font-lock-decoration 2)
+     ["Moderate" (fountain-set-font-lock-decoration 2)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 2)]
      ["Maximum" (fountain-set-font-lock-decoration 3)
