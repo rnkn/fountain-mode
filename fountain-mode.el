@@ -184,16 +184,6 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-forced-scene-heading-equal nil
-  "If non-nil, forced scene headings will be treated as equal.
-
-It is usually preferable to treat forced scene headings as
-constituents of the larger scene. If you prefer to treat forced
-scene headings as equal to regular scene headings, set this to
-non-nil."
-  :type 'boolean
-  :group 'fountain)
-
 (defcustom fountain-switch-comment-syntax nil
   "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
 
@@ -261,7 +251,7 @@ blank lines.")
 (defconst fountain-forced-scene-heading-regexp
   "^\\.\\(\\<.*\\)"
   "Regular expression for matching forced scene headings.
-Requires `fountain-forced-scene-heading-p' for preceding and
+Requires `fountain-scene-heading-p' for preceding and
 succeeding blank lines.")
 
 (defconst fountain-paren-regexp
@@ -349,20 +339,6 @@ with \\[fountain-save-font-lock-decoration]."
   '((t (:weight bold :underline t
                 :inherit font-lock-function-name-face)))
   "Additional highlighting face for scene headings."
-  :group 'fountain-faces)
-
-(defface fountain-forced-scene-heading
-  '((t (:weight bold)))
-  "Default face for forced scene headings.
-Only customize this if `fountain-forced-scene-heading-equal' is
-nil."
-  :group 'fountain-faces)
-
-(defface fountain-forced-scene-heading-highlight
-  '((t (:weight bold :inherit font-lock-function-name-face)))
-  "Additional highlighting face for forced scene headings.
-Only customize this if `fountain-forced-scene-heading-equal' is
-nil."
   :group 'fountain-faces)
 
 (defface fountain-paren
@@ -551,25 +527,8 @@ synopsis, note, or is within a comment."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (or (and fountain-forced-scene-heading-equal
-                    (looking-at
-                     fountain-forced-scene-heading-regexp))
+      (and (or (looking-at fountain-forced-scene-heading-regexp)
                (looking-at fountain-scene-heading-regexp))
-           (save-match-data
-             (forward-line -1)
-             (fountain-invisible-p))))))
-
-(defun fountain-forced-scene-heading-p ()
-  "Return non-nil if point is at a forced scene heading, nil otherwise.
-This function is ignored if `fountain-forced-scene-heading-equal'
-is non-nil."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (and (null fountain-forced-scene-heading-equal)
-           (looking-at
-            fountain-forced-scene-heading-regexp)
            (save-match-data
              (forward-line -1)
              (fountain-invisible-p))))))
@@ -607,8 +566,7 @@ is non-nil."
 (defun fountain-character-p ()
   "Return non-nil if point is at character, nil otherwise."
   (unless (or (fountain-blank-p)
-              (fountain-scene-heading-p)
-              (fountain-forced-scene-heading-p))
+              (fountain-scene-heading-p))
     (save-excursion
       (save-restriction
         (widen)
@@ -935,16 +893,6 @@ buffer (WARNING: this can be very slow)."
 
 ;;; Menu Functions =====================================================
 
-(defun fountain-toggle-forced-scene-heading-equal ()
-  "Toggle `fountain-forced-scene-heading-equal'"
-  (interactive)
-  (setq fountain-forced-scene-heading-equal
-        (null fountain-forced-scene-heading-equal))
-  (font-lock-fontify-buffer)
-  (message "Forced scene headings are now treated as %s"
-           (if fountain-forced-scene-heading-equal
-               "equal" "non-equal")))
-
 (defun fountain-toggle-comment-syntax ()
   "Toggle `fountain-switch-comment-syntax'"
   (interactive)
@@ -1019,9 +967,6 @@ buffer (WARNING: this can be very slow)."
 
 (defconst fountain-font-lock-keywords-plist
   `(("scene-heading" fountain-match-scene-heading
-     ((0 fountain-comment nil)
-      (1 nil t)))
-    ("forced-scene-heading" fountain-match-forced-scene-heading
      ((0 fountain-comment nil)
       (1 nil t)))
     ("character" fountain-match-character
@@ -1113,10 +1058,6 @@ keywords suitable for Font Lock."
   "Call `fountain-match-element' with `fountain-scene-heading-p'."
   (fountain-match-element 'fountain-scene-heading-p limit))
 
-(defun fountain-match-forced-scene-heading (limit)
-  "Call `fountain-match-element' with `fountain-forced-scene-heading-p'."
-  (fountain-match-element 'fountain-forced-scene-heading-p limit))
-
 (defun fountain-match-character (limit)
   "Call `fountain-match-element' with `fountain-character-p'"
   (fountain-match-element 'fountain-character-p limit))
@@ -1193,10 +1134,6 @@ keywords suitable for Font Lock."
      fountain-toggle-add-continued-dialog
      :style toggle
      :selected fountain-add-continued-dialog]
-    ["Treat Forced Scene Headings as Equal"
-     fountain-toggle-forced-scene-heading-equal
-     :style toggle
-     :selected fountain-forced-scene-heading-equal]
     ["Switch Default Comment Syntax"
      fountain-toggle-comment-syntax
      :style toggle
