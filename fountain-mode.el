@@ -253,7 +253,7 @@ The default funcation requires the command line tool \"uuidgen\"."
 (defconst fountain-scene-heading-regexp
   (concat "^\\("
           (regexp-opt fountain-scene-heading-prefix-list)
-          "[\\.\s\t]+\\)\\(.*\\)")
+          "[\\.\s\t]+.*\\)")
   "Regular expression for matching scene headings.
 Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
@@ -287,10 +287,14 @@ dialog.")
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
-  (concat "^\\([\s\t]*>\s*\\)\\([^<\n]*\\)$\\|^[[:upper:]\s]*"
+  (concat "^\\([[:upper:]\s]*"
           (regexp-opt fountain-trans-list)
-          "\\.?$")
+          "\\)$")
   "Regular expression for matching transitions.")
+
+(defconst fountain-forced-trans-regexp
+  "^[\s\t]*>\s*\\([^<\n]*\\)$"
+  "Regular expression for matching forced transitions.")
 
 (defconst fountain-centered-regexp
   "^[\s\t]*>[\s\t]*\\(.*?\\)[\s\t]*<[\s\t]*$"
@@ -661,7 +665,8 @@ is non-nil."
       (widen)
       (forward-line 0)
       (and (let (case-fold-search)
-             (looking-at fountain-trans-regexp))
+             (or (looking-at fountain-forced-trans-regexp)
+                 (looking-at fountain-trans-regexp)))
            (save-match-data
              (save-excursion
                (forward-line -1)
@@ -1014,7 +1019,8 @@ buffer (WARNING: this can be very slow)."
 
 (defconst fountain-font-lock-keywords-plist
   `(("scene-heading" fountain-match-scene-heading
-     ((0 nil nil)))
+     ((0 fountain-comment nil)
+      (1 nil t)))
     ("forced-scene-heading" fountain-match-forced-scene-heading
      ((0 fountain-comment nil)
       (1 nil t)))
@@ -1025,7 +1031,8 @@ buffer (WARNING: this can be very slow)."
     ("paren" fountain-match-paren
      ((0 nil nil)))
     ("trans" fountain-match-trans
-     ((0 nil t)))
+     ((0 fountain-comment nil)
+      (1 nil t)))
     ("centered" ,fountain-centered-regexp
      ((0 fountain-comment)
       (1 nil t)))
@@ -1144,6 +1151,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
+    (define-key map (kbd "C-c C-e p") 'fountain-export-buffer-to-pdf-via-html)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     map)
   "Mode map for `fountain-mode'.")
@@ -1161,7 +1169,8 @@ keywords suitable for Font Lock."
     ("Export"
      ["Default" fountain-export-default]
      "---"
-     ["HTML" fountain-export-buffer-to-html])
+     ["HTML" fountain-export-buffer-to-html]
+     ["PDF via HTML" fountain-export-buffer-to-pdf-via-html])
     "---"
     ("Syntax Highlighting"
      ["None" (fountain-set-font-lock-decoration 1)
