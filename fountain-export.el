@@ -291,7 +291,7 @@ See `fountain-export-format-template'."
   "Fontify between START and END."
   (if font-lock-mode
       (let ((font-lock-maximum-decoration t)
-            (job (make-progress-reporter "Fontifying... " 0 100))
+            (job (make-progress-reporter "Fontifying..." 0 100))
             (chunk (/ (buffer-size) 100))
             (n 0))
         (font-lock-refresh-defaults)
@@ -401,7 +401,7 @@ First, find the next face property change from point, then pass
 substring between point and change to
 `fountain-export-create-html-element', then insert the newly
 created HTML element to DESTBUF."
-  (let ((job (make-progress-reporter "Parsing... " 0 100)))
+  (let ((job (make-progress-reporter "Parsing..." 0 100)))
     (goto-char (point-min))
     (while (not (eobp))
       (skip-chars-forward "\n\s\t")
@@ -427,7 +427,7 @@ created HTML element to DESTBUF."
   ;; internal function, don't call externally
   (sgml-mode)
   (let ((sgml-unclosed-tags '("link" "br"))
-        (job (make-progress-reporter "Preparing HTML... " 0 100)))
+        (job (make-progress-reporter "Preparing HTML..." 0 100)))
     (goto-char (point-min))
     (while (null (eobp))
       (indent-according-to-mode)
@@ -439,7 +439,7 @@ created HTML element to DESTBUF."
 (defun fountain-export-html-1 ()
   ;; internal function, don't call externally
   ;; use `fountain-export-buffer-to-html' instead
-  (let* ((job (make-progress-reporter "Exporting... "))
+  (let* ((job (make-progress-reporter "Exporting..."))
          (sourcebuf (current-buffer))
          (destbuf (get-buffer-create
                    (fountain-export-get-name sourcebuf ".html")))
