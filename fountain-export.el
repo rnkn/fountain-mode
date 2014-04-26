@@ -40,25 +40,23 @@
   :group 'fountain-export)
 
 (defcustom fountain-export-default-command
-  'fountain-export-buffer-to-html
+  'fountain-export-buffer-to-pdf-via-html
   "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
-  :type 'function
+  :type '(radio (function-item fountain-export-buffer-to-pdf-via-html)
+                (function-item fountain-export-buffer-to-html))
   :group 'fountain-export)
 
 (defcustom fountain-export-font
-  '("Courier Prime"
-    "Courier Final Draft"
-    "Courier Screenplay"
-    "Courier"
+  '("Courier"
     "Courier New")
-  ""
+  "List of font names to use when exporting, by priority."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
 
 (defcustom fountain-export-prepare-html nil
   "If non-nil, auto-indent HTML elements during export.
-This if off by default to save time, since the HTML isn't meant
-to impress anyone."
+This if off by default because it can take a long time for a
+minimal benefit."
   :type 'boolean
   :group 'fountain-export)
 
@@ -74,8 +72,8 @@ will be exported as
   :group 'fountain-export)
 
 (defcustom fountain-export-pdf-via-html-command
-  "prince ${source} --output=${output} --input=html --verbose"
-  "Shell command to convert HTML file to PDF."
+  "prince %s --verbose"
+  "Shell command string to convert HTML file to PDF."
   :type 'string
   :group 'fountain-export)
 
@@ -296,6 +294,7 @@ See `fountain-export-format-template'."
             (job (make-progress-reporter "Fontifying... " 0 100))
             (chunk (/ (buffer-size) 100))
             (n 0))
+        (font-lock-refresh-defaults)
         (goto-char (point-min))
         (while (not (eobp))
           (let ((limit (+ (point) chunk)))
@@ -466,6 +465,7 @@ created HTML element to DESTBUF."
               (if fountain-export-prepare-html
                   (fountain-export-prepare-html))))
           ;; signal completion
+          (font-lock-refresh-defaults)
           (progress-reporter-done job)
           (setq complete t)
           destbuf)
@@ -482,26 +482,36 @@ created HTML element to DESTBUF."
 
 (defun fountain-export-buffer-to-html (&optional buffer)
   "Export BUFFER to HTML file, then switch to HTML buffer."
-  (interactive)                         ; FIXME: add y-or-n-p
+  (interactive)
   (with-current-buffer
       (or buffer (current-buffer))
-    (let ((destbuf (fountain-export-html-1))
-          (outputdir (if (buffer-file-name buffer)
-                         (expand-file-name (file-name-directory
-                                            (buffer-file-name buffer))))))
     (save-excursion
       (save-restriction
         (widen)
-        (with-current-buffer destbuf
-          (if outputdir
-              (write-file outputdir t)))
-        (if (called-interactively-p 'interactive)
-            (switch-to-buffer-other-window destbuf))
-        destbuf)))))
+        (let ((destbuf (fountain-export-html-1))
+              (outputdir (if (buffer-file-name buffer)
+                             (expand-file-name (file-name-directory
+                                                (buffer-file-name
+                                                 buffer))))))
+          (with-current-buffer destbuf
+            (if outputdir
+                (write-file outputdir t)))
+          (if (called-interactively-p 'interactive)
+              (switch-to-buffer-other-window destbuf))
+          destbuf)))))
+
+(defun fountain-export-buffer-to-pdf-via-html (&optional buffer)
+  "Export BUFFER to HTML file, then convert HTML to PDF."
+  (interactive)
+  (let* ((buffer (or buffer (current-buffer)))
+         (file (shell-quote-argument (buffer-file-name (fountain-export-buffer-to-html
+                                                        buffer))))
+         (command (format fountain-export-pdf-via-html-command file)))
+    (async-shell-command command "*Fountain PDF Process*")))
 
 (defun fountain-export-region-to-html (start end)
   "Export the region to HTML file, then switch to HTML buffer."
-  (interactive "r")                     ; FIXME: add y-or-n-p
+  (interactive "r")
   (save-excursion
     (let ((destbuf (save-restriction
                      (narrow-to-region start end)
@@ -514,20 +524,6 @@ created HTML element to DESTBUF."
             (write-file outputdir t)))
       (switch-to-buffer-other-window destbuf)
       destbuf)))
-
-(defun fountain-export-buffer-to-pdf-via-html (&optional buffer)
-  "Export BUFFER to HTML file, then convert HTML to PDF."
-  (interactive)                         ; FIXME: add y-or-n-p
-  (let* ((buffer (or buffer (current-buffer)))
-         (sourcefile (buffer-file-name (fountain-export-buffer-to-html buffer)))
-         (filebase (shell-quote-argument (file-name-sans-extension sourcefile)))
-         (destfile (concat filebase ".pdf"))
-         (logfile (concat filebase ".log"))
-         (command
-          (s-format fountain-export-pdf-via-html-command 'aget
-                    `(("source" . ,(shell-quote-argument sourcefile))
-                      ("output" . ,destfile)))))
-    (shell-command (concat command " &"))))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
