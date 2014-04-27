@@ -1125,19 +1125,6 @@ keywords suitable for Font Lock."
       :style toggle
       :selected fountain-export-double-space-scene-headings])
     "---"
-    ("Syntax Highlighting"
-     ["None" (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 1)]
-     ["Normal" (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 2)]
-     ["Maximum" (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 3)]
-     "---"
-     ["Save for Future Sessions" fountain-save-font-lock-decoration])
-    "---"
     ["Display Elements Auto-Aligned"
      fountain-toggle-align-elements
      :style toggle
@@ -1150,6 +1137,19 @@ keywords suitable for Font Lock."
      fountain-toggle-comment-syntax
      :style toggle
      :selected fountain-switch-comment-syntax]
+    "---"
+    ("Syntax Highlighting"
+     ["None" (fountain-set-font-lock-decoration 1)
+      :style radio
+      :selected (eq (fountain-get-font-lock-decoration) 1)]
+     ["Normal" (fountain-set-font-lock-decoration 2)
+      :style radio
+      :selected (eq (fountain-get-font-lock-decoration) 2)]
+     ["Maximum" (fountain-set-font-lock-decoration 3)
+      :style radio
+      :selected (eq (fountain-get-font-lock-decoration) 3)]
+     "---"
+     ["Save for Future Sessions" fountain-save-font-lock-decoration])
     "---"
     ("Go To"
      ["Next Scene Heading" fountain-forward-scene]
