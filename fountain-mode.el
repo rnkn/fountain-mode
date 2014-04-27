@@ -237,19 +237,27 @@ The default funcation requires the command line tool \"uuidgen\"."
   "Regular expression for matching an empty line.")
 
 (defconst fountain-comment-regexp
-  "//.*\\|/\\*[.\n]*\\*/"
+  "//.*\\|/\\*\\(.\\|\n\\)*?\\*/"
   "Regular expression for matching comments.")
 
+(defconst fountain-metadata-pair-regexp
+  "^\\(.+\\):\s*\\(.+\\)?"
+  "Regular expression for matching single-line metadata pairs.")
+
+(defconst fountain-metadata-value-regexp
+  "^\s+\\(?2:.+\\)"
+  "Regular expression for matching multi-line metadata values.")
+
 (defconst fountain-scene-heading-regexp
-  (concat "^\\("
+  (concat "^\\(?2:"
           (regexp-opt fountain-scene-heading-prefix-list)
-          "[\\.\s\t]+.*\\)")
+          "[.\s\t]+.*\\)")
   "Regular expression for matching scene headings.
 Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\.\\(\\<.*\\)"
+  "^\\(\\.\\)\\(\\<.*\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-scene-heading-p' for preceding and
 succeeding blank lines.")
@@ -269,25 +277,25 @@ dialog.")
   "Regular expression for matching comments.")
 
 (defconst fountain-section-regexp
-  "^#\\{1,5\\}[\s\t]*\\([^#\n].+\\)"
+  "^\\(#\\{1,5\\}[\s\t]*\\)\\([^#\n].*\\)"
   "Regular expression for matching sections.")
 
 (defconst fountain-synopsis-regexp
-  "^=[\s\t]*\\([^=\n].+\\)"
+  "^\\(=[\s\t]*\\)\\([^=\n].*\\)"
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
-  (concat "^[\s\t]*\\([[:upper:]\s]*"
+  (concat "^[\s\t]*\\(?2:[[:upper:]\s]*"
           (regexp-opt fountain-trans-list)
           "\\)$")
   "Regular expression for matching transitions.")
 
 (defconst fountain-forced-trans-regexp
-  "^[\s\t]*>\s*\\([^<\n]*\\)$"
+  "^\\([\s\t]*>\s*\\)\\([^<>\n]*\\)$"
   "Regular expression for matching forced transitions.")
 
 (defconst fountain-centered-regexp
-  "^[\s\t]*>[\s\t]*\\(.*?\\)[\s\t]*<[\s\t]*$"
+  "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
   "Regular expression for matching centered text.")
 
 ;;; Emphasis Regular Expressions =======================================
@@ -481,6 +489,19 @@ with \\[fountain-save-font-lock-decoration]."
       (forward-line 0)
       ;; don't modify match-data
       (looking-at-p fountain-blank-regexp))))
+
+(defun fountain-metadata-p ()
+  "Return non-nil if point is at metadata."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (and (or (looking-at fountain-metadata-pair-regexp)
+               (looking-at fountain-metadata-value-regexp))
+           (save-match-data
+             (forward-line -1)
+             (or (bobp)
+                 (fountain-metadata-p)))))))
 
 (defun fountain-section-p ()
   "Return non-nil if point is at a section, nil otherwise."
@@ -969,29 +990,32 @@ buffer (WARNING: this can be very slow)."
 ;;; Font Lock ==========================================================
 
 (defconst fountain-font-lock-keywords-plist
-  `(("scene-heading" fountain-match-scene-heading
-     ((0 fountain-comment nil)
-      (1 nil t)))
+  `(("note" ,fountain-note-regexp
+     ((0 nil)))
+    ("scene-heading" fountain-match-scene-heading
+     ((0 nil keep)
+      (1 fountain-comment t t)))
     ("character" fountain-match-character
-     ((0 nil nil)))
+     ((0 nil)))
     ("dialog" fountain-match-dialog
-     ((0 nil nil)))
+     ((0 nil keep)))
     ("paren" fountain-match-paren
-     ((0 nil nil)))
+     ((0 nil keep)))
     ("trans" fountain-match-trans
-     ((0 fountain-comment nil)
-      (1 nil t)))
+     ((0 nil keep)
+      (1 fountain-comment t t)))
     ("centered" ,fountain-centered-regexp
-     ((0 fountain-comment)
-      (1 nil t)))
+     ((0 nil)
+      (1 fountain-comment t)
+      (3 fountain-comment t)))
     ("section" ,fountain-section-regexp
-     ((0 fountain-comment)
-      (1 nil t)))
+     ((0 nil)
+      (1 fountain-comment t)))
     ("synopsis" ,fountain-synopsis-regexp
-     ((0 fountain-comment)
-      (1 nil t)))
-    ("note" ,fountain-note-regexp
-     ((0 nil nil))))
+     ((0 nil)
+      (1 fountain-comment t)))
+    ("metadata" fountain-match-metadata
+     ((0 fountain-comment))))
   "List of face properties to use in creating Font Lock keywords.
 
 Has the format ELEMENT, a string name, MATCHER, a regular
@@ -1031,11 +1055,12 @@ keywords suitable for Font Lock."
                              ((nth 1 f))
                              ((intern (concat "fountain-" element hl)))))
                  ;; set the face override
-                 (override (nth 2 f)))
+                 (override (nth 2 f))
+                 (lax (nth 3 f)))
             (setq face-props
                   (append face-props
                           `((,n '(face ,face ,@align-props)
-                                ,override))))))
+                                ,override ,lax))))))
         (setq keywords
               (append keywords
                       (list (cons matcher face-props))))))))
@@ -1070,6 +1095,10 @@ keywords suitable for Font Lock."
 (defun fountain-match-trans (limit)
   "Call `fountain-match-element' with `fountain-trans-p'"
   (fountain-match-element 'fountain-trans-p limit))
+
+(defun fountain-match-metadata (limit)
+  "Call `fountain-match-element' with `fountain-metadata-p'"
+  (fountain-match-element 'fountain-metadata-p limit))
 
 ;;; Mode Map ===========================================================
 
