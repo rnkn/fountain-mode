@@ -39,12 +39,6 @@
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-temp-buffer
-  "*Fountain Temp Buffer*"
-  "Buffer name to use for temporary export work."
-  :type 'string
-  :group 'fountain-export)
-
 (defcustom fountain-export-pdf-process-buffer
   "*Fountain PDF Process*"
   "Buffer name to use for PDF conversion messages."
@@ -467,8 +461,6 @@ created HTML element to DESTBUF."
   ;; internal function, don't call externally
   ;; use `fountain-export-buffer-to-html' instead
   (let* ((sourcebuf (current-buffer))
-         (tempbuf (get-buffer-create
-                   fountain-export-temp-buffer))
          (destbuf (get-buffer-create
                    (fountain-export-get-name sourcebuf ".html")))
          complete)
@@ -477,26 +469,25 @@ created HTML element to DESTBUF."
           ;; fontify the buffer
           (fountain-export-fontify-buffer)
           ;; create a temp buffer with source stripped comments
-          (with-current-buffer tempbuf
-            (erase-buffer)
+          (with-temp-buffer
             (insert-buffer-substring sourcebuf)
-            (fountain-export-strip-comments))
-          ;; insert HTML head
-          (with-current-buffer destbuf
-            (with-silent-modifications
-              (erase-buffer)
-              (insert (fountain-export-format-template
-                       fountain-export-html-head-template sourcebuf))
-              ;; (if fountain-export-inline-style
-              (insert "<style type=\"text/css\">"
-                      (fountain-export-format-template
-                       fountain-export-style-template sourcebuf)
-                      "</style>")
-              ;; close head and open body
-              (insert "</head>\n<body>\n")
-              (insert "<div id=\"screenplay\">\n")))
-          ;; parse the temp buffer
-          (fountain-export-parse-buffer destbuf tempbuf)
+            (fountain-export-strip-comments)
+            ;; insert HTML head
+            (with-current-buffer destbuf
+              (with-silent-modifications
+                (erase-buffer)
+                (insert (fountain-export-format-template
+                         fountain-export-html-head-template sourcebuf))
+                ;; (if fountain-export-inline-style
+                (insert "<style type=\"text/css\">"
+                        (fountain-export-format-template
+                         fountain-export-style-template sourcebuf)
+                        "</style>")
+                ;; close head and open body
+                (insert "</head>\n<body>\n")
+                (insert "<div id=\"screenplay\">\n")))
+            ;; parse the temp buffer
+            (fountain-export-parse-buffer destbuf))
           ;; close HTML tags
           (with-current-buffer destbuf
             (with-silent-modifications
@@ -505,7 +496,6 @@ created HTML element to DESTBUF."
                   (fountain-export-prepare-html))))
           ;; signal completion and kill buffers
           (font-lock-refresh-defaults)
-          (kill-buffer tempbuf)
           (setq complete t)
           destbuf)
       ;; if errors occur, kill the unsaved buffer
