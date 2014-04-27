@@ -230,6 +230,11 @@ The default funcation requires the command line tool \"uuidgen\"."
   :type 'function
   :group 'fountain)
 
+;;; Variables ==========================================================
+
+(defvar fountain-metadata nil
+  "Metadata alist in the form of (KEY . VALUE).")
+
 ;;; Element Regular Expressions ========================================
 
 (defconst fountain-blank-regexp
@@ -661,6 +666,32 @@ synopsis, note, or is within a comment."
       (widen)
       (forward-line 0)
       (looking-at fountain-centered-regexp))))
+
+(defun fountain-read-metadata ()
+  "Read and set `fountain-metadata' alist."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (setq fountain-metadata nil)
+      (while (fountain-metadata-p)
+        (let ((key (match-string-no-properties 1))
+              (value
+               (or (match-string-no-properties 2)
+                   (let (s)
+                     (forward-line 1)
+                     (while (and (fountain-metadata-p)
+                                 (null (match-string 1)))
+                       (setq s
+                             (append s
+                                     (list (match-string-no-properties 2))))
+                       (forward-line 1))
+                     s))))
+          (setq fountain-metadata
+                (append fountain-metadata
+                        (list (cons key value)))))
+        (forward-line 1))
+      fountain-metadata)))
 
 (defun fountain-insert-template (template)
   "Format TEMPLATE according to the following list.
@@ -1203,6 +1234,8 @@ keywords suitable for Font Lock."
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
+  (set (make-local-variable 'fountain-metadata)
+       (fountain-read-metadata))
   (set (make-local-variable 'comment-start)
        (if fountain-switch-comment-syntax "//" "/*"))
   (set (make-local-variable 'comment-end)
@@ -1213,7 +1246,9 @@ keywords suitable for Font Lock."
                              nil t))
   (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
   (add-hook 'font-lock-extend-region-functions
-            'fountain-font-lock-extend-region t t))
+            'fountain-font-lock-extend-region t t)
+  (add-hook 'after-save-hook
+            'fountain-read-metadata))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
