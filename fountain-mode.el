@@ -277,7 +277,7 @@ dialog.")
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
-  (concat "^\\([[:upper:]\s]*"
+  (concat "^[\s\t]*\\([[:upper:]\s]*"
           (regexp-opt fountain-trans-list)
           "\\)$")
   "Regular expression for matching transitions.")
@@ -559,8 +559,7 @@ synopsis, note, or is within a comment."
   ;;                          (null (fountain-invisible-p)))))
   ;;             s)))))))
   (if (fountain-character-p)
-      (let ((s (buffer-substring-no-properties
-                (match-beginning 0) (match-end 0))))
+      (let ((s (match-string-no-properties 0)))
         (s-trim (car (s-slice-at "\\^\\|(" s))))))
 
 (defun fountain-character-p ()
@@ -571,20 +570,19 @@ synopsis, note, or is within a comment."
       (save-restriction
         (widen)
         (forward-line 0)
-        (looking-at ".*")
-        (save-match-data
-          (let* ((s (buffer-substring-no-properties
-                     (match-beginning 0) (match-end 0)))
-                 (s (s-trim (car (s-slice-at "(" s)))))
-            (and (or (s-uppercase? s)
-                     (s-starts-with? "@" s))
-                 (save-excursion
-                   (forward-line -1)
-                   (fountain-invisible-p))
-                 (save-excursion
-                   (forward-line 1)
-                   (unless (eobp)
-                     (null (fountain-invisible-p)))))))))))
+        (and (looking-at "[^<>\n]+")
+             (save-match-data
+               (let* ((s (match-string-no-properties 0))
+                      (s (s-trim (car (s-slice-at "(" s)))))
+                 (and (or (s-uppercase? s)
+                          (s-starts-with? "@" s))
+                      (save-excursion
+                        (forward-line -1)
+                        (fountain-invisible-p))
+                      (save-excursion
+                        (forward-line 1)
+                        (unless (eobp)
+                          (null (fountain-invisible-p))))))))))))
 
 (defun fountain-dialog-p ()
   "Return non-nil if point is at dialog."
@@ -595,13 +593,13 @@ synopsis, note, or is within a comment."
       (save-restriction
         (widen)
         (forward-line 0)
-        (looking-at ".*")
-        (save-match-data
-          (unless (bobp)
-            (forward-line -1)
-            (or (fountain-character-p)
-                (fountain-paren-p)
-                (fountain-dialog-p))))))))
+        (and (looking-at "[^<>\n]+")
+             (save-match-data
+               (unless (bobp)
+                 (forward-line -1)
+                 (or (fountain-character-p)
+                     (fountain-paren-p)
+                     (fountain-dialog-p)))))))))
 
 (defun fountain-paren-p ()
   "Return non-nil if point is at a paranthetical."
