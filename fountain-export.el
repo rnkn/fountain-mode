@@ -348,8 +348,6 @@ If face is `fountain-comment', return nil."
                      (s (s-chop-prefix "fountain-" s))) s)
             "action"))
          (tag (cond ((string= class "scene-heading")
-                     "h1")
-                    ((string= class "forced-scene-heading")
                      "h2")
                     ((string= class "character")
                      "h3")
@@ -405,7 +403,7 @@ created HTML element to DESTBUF."
   (let ((job (make-progress-reporter "Parsing..." 0 100)))
     (goto-char (point-min))
     (while (not (eobp))
-      (skip-chars-forward "\n\s\t")
+      (skip-chars-forward "\n")
       (let* ((index (point))
              (limit (save-excursion
                       (re-search-forward "\n\s?\n\\|\\'" nil t)
@@ -532,7 +530,7 @@ created HTML element to DESTBUF."
                                                  buffer))))))
           (with-current-buffer destbuf
             (if outputdir
-                (write-file outputdir t)))
+                (write-file outputdir)))
           (if (called-interactively-p 'interactive)
               (switch-to-buffer-other-window destbuf))
           destbuf)))))
