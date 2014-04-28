@@ -339,6 +339,7 @@ Otherwise return `fountain-export-buffer'"
   (let* ((s (s-replace-all '(("&" . "&amp;")
                              ("<" . "&lt;")
                              (">" . "&gt;")
+                             ("\s\s" . "&nbsp; ")
                              ("\\\s" . "&nbsp;")
                              ("\\\-" . "&#8209;")
                              ("\\_" . "&#95;")
