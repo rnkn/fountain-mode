@@ -28,18 +28,18 @@
 
 (defgroup fountain-export ()
   "Options for exporting Fountain files."
-  :prefix 'fountain-export-
+  :prefix "fountain-export-"
   :group 'fountain)
 
 ;;; customizable variables =============================================
 
-(defcustom fountain-export-buffer
+(defcustom fountain-export-buffer-name
   "*Fountain Export*"
   "Buffer name to use when not exporting a file."
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-pdf-process-buffer
+(defcustom fountain-export-pdf-process-buffer-name
   "*Fountain PDF Process*"
   "Buffer name to use for PDF conversion messages."
   :type 'string
@@ -314,7 +314,7 @@ See `fountain-export-format-template'."
 Otherwise return `fountain-export-buffer'"
   (if (buffer-file-name buffer)
       (concat (file-name-base (buffer-file-name buffer)) ext)
-    fountain-export-buffer))
+    fountain-export-buffer-name))
 
 (defun fountain-export-underline (s)
   "Replace underlined text in S with HTML underline span tags."
@@ -566,7 +566,7 @@ created HTML element to DESTBUF."
          (file (shell-quote-argument (buffer-file-name (fountain-export-buffer-to-html
                                                         buffer))))
          (command (format fountain-export-pdf-via-html-command file)))
-    (async-shell-command command fountain-export-pdf-process-buffer)))
+    (async-shell-command command fountain-export-pdf-process-buffer-name)))
 
 (defun fountain-export-region-to-html (start end)
   "Export the region to HTML file, then switch to HTML buffer."
