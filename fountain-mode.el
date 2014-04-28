@@ -343,6 +343,16 @@ with \\[fountain-save-font-lock-decoration]."
   "Default face for comments (boneyard)."
   :group 'fountain-faces)
 
+(defface fountain-metadata-key
+  '((t (:inherit font-lock-constant-face)))
+  "Default face for metadata keys."
+  :group 'fountain-faces)
+
+(defface fountain-metadata-value
+  '((t (:inherit match)))
+  "Default face for metadata keys."
+  :group 'fountain-faces)
+
 (defface fountain-scene-heading
   '((t (:weight bold :underline t)))
   "Default face for scene headings."
@@ -692,6 +702,15 @@ synopsis, note, or is within a comment."
                         (list (cons key value)))))
         (forward-line 1))
       fountain-metadata)))
+
+(defun fountain-get-metadata-value (key)
+  "Return the value associated with KEY.
+If there are multiple values, join by concatenating with
+newlines."
+  (let ((value (cdr (assoc key fountain-metadata))))
+    (if (listp value)
+        (s-join "\n" value)
+      value)))
 
 (defun fountain-insert-template (template)
   "Format TEMPLATE according to the following list.
@@ -1046,7 +1065,9 @@ buffer (WARNING: this can be very slow)."
      ((0 nil)
       (1 fountain-comment t)))
     ("metadata" fountain-match-metadata
-     ((0 fountain-comment))))
+     ((1 fountain-metadata-key nil t)
+      (2 fountain-metadata-value nil t)
+      (0 fountain-comment keep))))
   "List of face properties to use in creating Font Lock keywords.
 
 Has the format ELEMENT, a string name, MATCHER, a regular
