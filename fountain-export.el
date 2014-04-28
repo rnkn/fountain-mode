@@ -52,7 +52,7 @@
                 (function-item fountain-export-buffer-to-html))
   :group 'fountain-export)
 
-(defcustom fountain-export-inline-style nil
+(defcustom fountain-export-inline-styles t
   "If non-nil, use inline styles.
 Otherwise, use an external stylesheet file."
   :type 'boolean
@@ -61,8 +61,8 @@ Otherwise, use an external stylesheet file."
 (defcustom fountain-export-page-size
   "us-letter"
   "Paper size to use on export."
-  :type '(radio (string :tag "US Letter" "us-letter")
-                (string :tag "A4" "a4"))
+  :type '(radio (const :tag "US Letter" "us-letter")
+                (const :tag "A4" "a4"))
   :group 'fountain-export)
 
 (defcustom fountain-export-font
@@ -111,7 +111,7 @@ will be exported as
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-style-template
+(defcustom fountain-export-styles-template
   "@page {
     size: ${page-size};
     margin-top: 1in;
@@ -270,7 +270,10 @@ p {
 <!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
 <html>
 <head>
-"
+<title>${title}</title>
+<meta name=\"author\" content=\"${author}\" />
+${styles}
+</head>"
   "HTML template inserted into export buffer.
 See `fountain-export-format-template'."
   :type 'string
@@ -296,46 +299,57 @@ See `fountain-export-format-template'."
         (progress-reporter-done job))
     (error "Font Lock is not active")))
 
-(defun fountain-export-strip-comments (&optional buffer)
-  "Strips BUFFER of all text with `fountain-comment' face."
-  (with-current-buffer (or buffer (current-buffer))
-    (goto-char (point-min))
-    (while (null (eobp))
-      (if (eq (face-at-point) 'fountain-comment)
-          (let ((m (point)))
-            (goto-char (next-single-property-change
-                        (point) 'face nil (point-max)))
-            (delete-region m (point)))
-        (goto-char (next-single-property-change
-                    (point) 'face nil (point-max)))))))
+(defun fountain-export-strip-comments ()
+  "Strips buffer of all comments and metadata.
+Matches and deletes any text with `fountain-comment',
+`fountain-metadata-key' or `fountain-metadata-value' face."
+  (goto-char (point-min))
+  (while (null (eobp))
+    (if (memq (face-at-point) '(fountain-comment
+                                fountain-metadata-key
+                                fountain-metadata-value))
+        (let ((m (point)))
+          (goto-char (next-single-property-change
+                      (point) 'face nil (point-max)))
+          (delete-region m (point)))
+      (goto-char (next-single-property-change
+                  (point) 'face nil (point-max))))))
 
-(defun fountain-export-get-name (buffer ext)
+(defun fountain-export-get-name (ext)
   "If BUFFER is visiting a file, concat file name base and EXT.
 Otherwise return `fountain-export-buffer'"
-  (if (buffer-file-name buffer)
-      (concat (file-name-base (buffer-file-name buffer)) ext)
+  (if (buffer-file-name)
+      (concat (file-name-base (buffer-file-name)) "." ext)
     fountain-export-buffer-name))
 
 (defun fountain-export-underline (s)
   "Replace underlined text in S with HTML underline span tags."
-  (replace-regexp-in-string "_\\(.+\\)_"
+  (replace-regexp-in-string "_\\(.+?\\)_"
                             "<span class=\"underline\">\\1</span>"
                             s t))
 
 (defun fountain-export-bold (s)
   "Replace bold text in S with HTML strong tags."
-  (replace-regexp-in-string "\\*\\*\\(.+\\)\\*\\*"
+  (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
                             "<strong>\\1</strong>"
                             s t))
 
-(defun fountain-export-italic (s)
-  "Replace italic text in S with HTML italic tags."
-  (replace-regexp-in-string "\\*\\(.+\\)\\*"
+(defun fountain-export-emphasis (s)
+  "Replace italic text in S with HTML emphasis tags."
+  (replace-regexp-in-string "\\*\\(.+?\\)\\*"
                             "<em>\\1</em>"
                             s t))
 
+(defun fountain-export-lyrics (s)
+  "Replace lyrics in S with HTML italic tags."
+  (replace-regexp-in-string "^~\s*\\(.+\\)"
+                            "<i>\\1</i>"
+                            s t))
+
 (defun fountain-export-filter (s)
-  "Escape special characters and replace newlines."
+  "Escape special characters and replace newlines.
+If `fountain-export-convert-quotes' is non-nil, convert quotes to
+\"smart quotes\"."
   (let* ((s (s-replace-all '(("&" . "&amp;")
                              ("<" . "&lt;")
                              (">" . "&gt;")
@@ -355,15 +369,13 @@ Otherwise return `fountain-export-buffer'"
               s)))
     s))
 
-(defun fountain-export-create-html-element (substring)
-  "Return a HTML element with face and substring of SUBSTRING.
+(defun fountain-export-create-html-element (sub-s)
+  "Return an HTML element with face and substring of SUB-S.
 Stylesheet class is taken from face, while content is taken from
-of SUBSTRING.
-
-If face is `fountain-comment', return nil."
+of SUB-S."
   (let* ((class
-          (if (get-text-property 0 'face substring)
-              (let* ((s (symbol-name (get-text-property 0 'face substring)))
+          (if (get-text-property 0 'face sub-s)
+              (let* ((s (symbol-name (get-text-property 0 'face sub-s)))
                      (s (s-chop-suffix "-highlight" s))
                      (s (s-chop-prefix "fountain-" s))) s)
             "action"))
@@ -373,77 +385,88 @@ If face is `fountain-comment', return nil."
                      "h3")
                     ("p")))
          (content
-          (let* ((s (substring-no-properties substring))
+          (let* ((s (substring-no-properties sub-s))
                  (s (fountain-export-filter s))
                  (s (fountain-export-bold s))
-                 (s (fountain-export-italic s))
+                 (s (fountain-export-emphasis s))
+                 (s (fountain-export-lyrics s))
                  (s (fountain-export-underline s)))
             s)))
     (format "<%s class=\"%s\">%s</%s>\n"
             tag class content tag)))
 
-(defun fountain-export-format-template (template sourcebuf)
-  "Format TEMPLATE according to the following list.
+(defun fountain-export-create-styles ()
+  "Create styles using `fountain-export-styles-template'."
+  (let* ((page-size fountain-export-page-size)
+         (font
+          (let (list)
+            (dolist (font fountain-export-font (s-join "," list))
+              (setq list
+                    (append list
+                            (list (concat "'" font "'")))))))
+         (scene-bold
+          (if fountain-export-bold-scene-headings
+              "bold" "normal"))
+         (scene-underline
+          (if fountain-export-underline-scene-headings
+              "underline" "none"))
+         (scene-spacing
+          (if fountain-export-double-space-scene-headings
+              "2em" "1em"))
+         (rules (s-format fountain-export-styles-template
+                          '(lambda (var)
+                             (symbol-value (intern var))))))
+    (if fountain-export-inline-styles
+        (concat "<style type=\"text/css\">\n"
+                rules
+                "\n</style>")
+      (let ((cssfile (get-buffer-create (fountain-export-get-name "css")))
+            (outputdir (expand-file-name
+                        (file-name-directory (buffer-file-name)))))
+        (with-current-buffer cssfile
+          (erase-buffer)
+          (insert rules)
+          (write-file outputdir))
+        (concat "<link rel=\"stylesheet\" href=\""
+                (buffer-name cssfile)
+                "\">")))))
 
-Internal function, will not work outside of
-`fountain-export-html'."
-  (let ((htmlfile (fountain-export-get-name sourcebuf ".html"))
-        (cssfile (fountain-export-get-name sourcebuf ".css"))
-        (page-size fountain-export-page-size)
-        (font
-         (let (list)
-           (dolist (font fountain-export-font (s-join "," list))
-             (setq list
-                   (append list
-                           (list (concat "'" font "'")))))))
-        (scene-bold
-         (if fountain-export-bold-scene-headings
-             "bold" "normal"))
-        (scene-underline
-         (if fountain-export-underline-scene-headings
-             "underline" "none"))
-        (scene-spacing
-         (if fountain-export-double-space-scene-headings
-             "2em" "1em")))
-    (s-format template 'aget
-              `(("fountain-version" . ,fountain-version)
-                ("emacs-version" . ,emacs-version)
-                ("htmlfile" . ,htmlfile)
-                ("cssfile" . ,cssfile)
-                ("page-size" . ,page-size)
-                ("font" . ,font)
-                ("scene-bold" . ,scene-bold)
-                ("scene-underline" . ,scene-underline)
-                ("scene-spacing" . ,scene-spacing)))))
+(defun fountain-export-create-html-head ()
+  "Create the HTML head using `fountain-export-html-head-template'."
+  (let ((styles (fountain-export-create-styles))
+        (title (fountain-get-metadata-value "title"))
+        (author (fountain-get-metadata-value "author")))
+    (s-format fountain-export-html-head-template
+              '(lambda (var)
+                 (symbol-value (intern var))))))
 
-(defun fountain-export-parse-buffer (destbuf &optional buffer)
-  "Find face changes in BUFFER then insert elements into DESTBUF.
+(defun fountain-export-parse-buffer (destbuf)
+  "Find face changes in current buffer then insert elements into DESTBUF.
 First, find the next face property change from point, then pass
 substring between point and change to
 `fountain-export-create-html-element', then insert the newly
 created HTML element to DESTBUF."
   (let ((job (make-progress-reporter "Parsing..." 0 100)))
-    (with-current-buffer (or buffer (current-buffer))
-      (goto-char (point-min))
-      (while (null (eobp))
-        (skip-chars-forward "\n")
-        (let* ((index (point))
-               (limit (save-excursion
-                        (re-search-forward "\n\s?\n\\|\\'" nil t)
-                        (match-beginning 0)))
-               (change (next-single-property-change index 'face nil limit)))
-          (when change
-            (let* ((s (buffer-substring index change))
-                   (element (fountain-export-create-html-element s)))
-              (when element
-                (with-current-buffer destbuf
-                  (with-silent-modifications
-                    (insert element)))))
-            (goto-char change)))
-        ;; (unless (looking-at ".\\|\\'")
-        ;;   (forward-char 1))
-        (progress-reporter-update
-         job (truncate (* (/ (float (point)) (buffer-size)) 100)))))))
+    (goto-char (point-min))
+    (while (null (eobp))
+      (skip-chars-forward "\n")
+      (let* ((index (point))
+             (limit (save-excursion
+                      (re-search-forward "\n\s?\n\\|\\'" nil t)
+                      (match-beginning 0)))
+             (change (next-single-property-change index 'face nil limit)))
+        (when change
+          (let* ((s (buffer-substring index change))
+                 (element (fountain-export-create-html-element s)))
+            (when element
+              (with-current-buffer destbuf
+                (with-silent-modifications
+                  (insert element)))))
+          (goto-char change)))
+      ;; (unless (looking-at ".\\|\\'")
+      ;;   (forward-char 1))
+      (progress-reporter-update
+       job (truncate (* (/ (float (point)) (buffer-size)) 100))))))
 
 (defun fountain-export-prepare-html ()
   ;; internal function, don't call externally
@@ -458,34 +481,30 @@ created HTML element to DESTBUF."
        job (truncate (* (/ (float (point)) (point-max)) 100))))
     (progress-reporter-done job)))
 
-(defun fountain-export-html-1 ()
+(defun fountain-export--html ()
   ;; internal function, don't call externally
   ;; use `fountain-export-buffer-to-html' instead
   (let* ((sourcebuf (current-buffer))
          (destbuf (get-buffer-create
-                   (fountain-export-get-name sourcebuf ".html")))
+                   (fountain-export-get-name "html")))
+         (head (fountain-export-create-html-head))
          complete)
     (unwind-protect
         (progn
-          ;; fontify the buffer
+          ;; fontify the accessible buffer
           (fountain-export-fontify-buffer)
-          ;; create a temp buffer with source stripped comments
+          ;; create a temp buffer with source
           (with-temp-buffer
             (insert-buffer-substring sourcebuf)
+            ;; strip comments
             (fountain-export-strip-comments)
             ;; insert HTML head
             (with-current-buffer destbuf
               (with-silent-modifications
                 (erase-buffer)
-                (insert (fountain-export-format-template
-                         fountain-export-html-head-template sourcebuf))
-                ;; (if fountain-export-inline-style
-                (insert "<style type=\"text/css\">"
-                        (fountain-export-format-template
-                         fountain-export-style-template sourcebuf)
-                        "</style>")
+                (insert head "\n")
                 ;; close head and open body
-                (insert "</head>\n<body>\n")
+                (insert "<body>\n")
                 (insert "<div id=\"screenplay\">\n")))
             ;; parse the temp buffer
             (fountain-export-parse-buffer destbuf))
@@ -540,18 +559,16 @@ created HTML element to DESTBUF."
   (funcall fountain-export-default-command))
 
 (defun fountain-export-buffer-to-html (&optional buffer)
-  "Export BUFFER to HTML file, then switch to HTML buffer."
+  "Export BUFFER to HTML file, then switch to HTML buffer.
+If ARG, narrow to region."
   (interactive)
-  (with-current-buffer
-      (or buffer (current-buffer))
+  (with-current-buffer (or buffer (current-buffer))
     (save-excursion
       (save-restriction
-        (widen)
-        (let ((destbuf (fountain-export-html-1))
+        (let ((destbuf (fountain-export--html))
               (outputdir (if (buffer-file-name buffer)
                              (expand-file-name (file-name-directory
-                                                (buffer-file-name
-                                                 buffer))))))
+                                                (buffer-file-name buffer))))))
           (with-current-buffer destbuf
             (if outputdir
                 (write-file outputdir)))
@@ -563,26 +580,11 @@ created HTML element to DESTBUF."
   "Export BUFFER to HTML file, then convert HTML to PDF."
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
-         (file (shell-quote-argument (buffer-file-name (fountain-export-buffer-to-html
-                                                        buffer))))
+         (file (shell-quote-argument (buffer-file-name
+                                      (fountain-export-buffer-to-html
+                                       buffer))))
          (command (format fountain-export-pdf-via-html-command file)))
     (async-shell-command command fountain-export-pdf-process-buffer-name)))
-
-(defun fountain-export-region-to-html (start end)
-  "Export the region to HTML file, then switch to HTML buffer."
-  (interactive "r")
-  (save-excursion
-    (let ((destbuf (save-restriction
-                     (narrow-to-region start end)
-                     (fountain-export-html-1)))
-          (outputdir (if (buffer-file-name)
-                         (expand-file-name (file-name-directory
-                                            (buffer-file-name))))))
-      (with-current-buffer destbuf
-        (if outputdir
-            (write-file outputdir t)))
-      (switch-to-buffer-other-window destbuf)
-      destbuf)))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
