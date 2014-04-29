@@ -52,8 +52,8 @@
                 (function-item fountain-export-buffer-to-html))
   :group 'fountain-export)
 
-(defcustom fountain-export-inline-styles t
-  "If non-nil, use inline styles.
+(defcustom fountain-export-inline-style t
+  "If non-nil, use inline stylesheet.
 Otherwise, use an external stylesheet file."
   :type 'boolean
   :group 'fountain-export)
@@ -66,8 +66,7 @@ Otherwise, use an external stylesheet file."
   :group 'fountain-export)
 
 (defcustom fountain-export-font
-  '("Courier"
-    "Courier New")
+  '("Courier Prime" "Courier" "Courier New")
   "List of font names to use when exporting, by priority."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
@@ -111,7 +110,7 @@ will be exported as
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-styles-template
+(defcustom fountain-export-style-template
   "@page {
     size: ${page-size};
     margin-top: 1in;
@@ -261,7 +260,7 @@ p {
 .synopsis {
     display: none;
 }"
-  "Styles template for exporting to HTML, and PDF via HTML."
+  "Style template for exporting to HTML, and PDF via HTML."
   :type 'string
   :group 'fountain-export)
 
@@ -270,12 +269,13 @@ p {
 <!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
 <html>
 <head>
-<title>${title}</title>
+<meta charset=\"${charset}\">
 <meta name=\"author\" content=\"${author}\" />
-${styles}
+<title>${title}</title>
+${insert-style}
 </head>"
   "HTML template inserted into export buffer.
-See `fountain-export-format-template'."
+Currently, ${charset} will default to UTF-8."
   :type 'string
   :group 'fountain-export)
 
@@ -395,8 +395,8 @@ of SUB-S."
     (format "<%s class=\"%s\">%s</%s>\n"
             tag class content tag)))
 
-(defun fountain-export-create-styles ()
-  "Create styles using `fountain-export-styles-template'."
+(defun fountain-export-create-style ()
+  "Create stylesheet using `fountain-export-styles-template'."
   (let* ((page-size fountain-export-page-size)
          (font
           (let (list)
@@ -413,19 +413,19 @@ of SUB-S."
          (scene-spacing
           (if fountain-export-double-space-scene-headings
               "2em" "1em"))
-         (rules (s-format fountain-export-styles-template
+         (style-rules (s-format fountain-export-style-template
                           '(lambda (var)
                              (symbol-value (intern var))))))
-    (if fountain-export-inline-styles
+    (if fountain-export-inline-style
         (concat "<style type=\"text/css\">\n"
-                rules
+                style-rules
                 "\n</style>")
       (let ((cssfile (get-buffer-create (fountain-export-get-name "css")))
             (outputdir (expand-file-name
                         (file-name-directory (buffer-file-name)))))
         (with-current-buffer cssfile
           (erase-buffer)
-          (insert rules)
+          (insert style-rules)
           (write-file outputdir))
         (concat "<link rel=\"stylesheet\" href=\""
                 (buffer-name cssfile)
@@ -433,7 +433,8 @@ of SUB-S."
 
 (defun fountain-export-create-html-head ()
   "Create the HTML head using `fountain-export-html-head-template'."
-  (let ((styles (fountain-export-create-styles))
+  (let ((insert-style (fountain-export-create-style))
+        (charset "utf-8")
         (title (fountain-get-metadata-value "title"))
         (author (fountain-get-metadata-value "author")))
     (s-format fountain-export-html-head-template
