@@ -113,6 +113,19 @@ will be exported as
   :type 'string
   :group 'fountain-export)
 
+(defcustom fountain-export-title-page-template
+  "<div class=\"title-block\">
+<h1>${title}</h1>
+<p>${contact}</p>
+<p>${author}</p>
+<p>${draft}</p>
+</div>
+<div class=\"contact\">${contact}</div>
+<div class=\"date\">${date}</div>"
+  "HTML template for created the title-page div."
+  :type 'string
+  :group 'fountain-export)
+
 (defcustom fountain-export-style-template
   "@page {
     size: ${page-size};
@@ -192,6 +205,12 @@ h2, h3, h4, h5, h6 {
 }
 
 .centered {
+    text-align: center;
+    margin-left: 0;
+    width: 100%;
+}
+
+.center {
     text-align: center;
     margin-left: 0;
     width: 100%;
@@ -398,6 +417,11 @@ of SUB-S."
     (format "<%s class=\"%s\">%s</%s>\n"
             tag class content tag)))
 
+(defun fountain-export-create-html-title-page ()
+  "Create the title page using `fountain-export-title-page-template'."
+  (s-format fountain-export-title-page-template
+            'fountain-get-metadata-value))
+
 (defun fountain-export-create-style ()
   "Create stylesheet using `fountain-export-styles-template'."
   (let* ((page-size fountain-export-page-size)
@@ -492,6 +516,7 @@ created HTML element to DESTBUF."
          (destbuf (get-buffer-create
                    (fountain-export-get-name "html")))
          (head (fountain-export-create-html-head))
+         (title-page (fountain-export-create-html-title-page))
          complete)
     (unwind-protect
         (progn
@@ -563,8 +588,7 @@ created HTML element to DESTBUF."
   (funcall fountain-export-default-command))
 
 (defun fountain-export-buffer-to-html (&optional buffer)
-  "Export BUFFER to HTML file, then switch to HTML buffer.
-If ARG, narrow to region."
+  "Export BUFFER to HTML file, then switch to HTML buffer."
   (interactive)
   (with-current-buffer (or buffer (current-buffer))
     (save-excursion
