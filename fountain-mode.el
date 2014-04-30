@@ -1018,7 +1018,7 @@ buffer (WARNING: this can be very slow)."
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (message "Syntax highlighting is now set at %s"
            (cond ((eq level 1) "none")
-                 ((eq level 2) "normal")
+                 ((eq level 2) "default")
                  ((eq level 3) "maximum")))
   (font-lock-refresh-defaults))
 
@@ -1189,7 +1189,7 @@ keywords suitable for Font Lock."
      ["None" (fountain-set-font-lock-decoration 1)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 1)]
-     ["Normal" (fountain-set-font-lock-decoration 2)
+     ["Default" (fountain-set-font-lock-decoration 2)
       :style radio
       :selected (eq (fountain-get-font-lock-decoration) 2)]
      ["Maximum" (fountain-set-font-lock-decoration 3)
@@ -1214,8 +1214,8 @@ keywords suitable for Font Lock."
     ("Export"
      ["Default" fountain-export-default]
      "---"
-     ["HTML" fountain-export-buffer-to-html]
-     ["PDF via HTML" fountain-export-buffer-to-pdf-via-html]
+     ["Buffer to HTML" fountain-export-buffer-to-html]
+     ["Buffer to PDF via HTML" fountain-export-buffer-to-pdf-via-html]
      "---"
      ["Bold Scene Headings"
       fountain-toggle-export-bold-scene-headings
