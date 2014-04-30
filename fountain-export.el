@@ -26,6 +26,9 @@
 
 ;;; Code:
 
+(require 's)
+(declare-function 'fountain-get-metadata-value "fountain-mode.el")
+
 (defgroup fountain-export ()
   "Options for exporting Fountain files."
   :prefix "fountain-export-"
@@ -33,13 +36,13 @@
 
 ;;; customizable variables =============================================
 
-(defcustom fountain-export-buffer-name
+(defcustom fountain-export-output-buffer
   "*Fountain Export*"
   "Buffer name to use when not exporting a file."
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-pdf-process-buffer-name
+(defcustom fountain-export-pdf-process-buffer
   "*Fountain PDF Process*"
   "Buffer name to use for PDF conversion messages."
   :type 'string
@@ -66,7 +69,7 @@ Otherwise, use an external stylesheet file."
   :group 'fountain-export)
 
 (defcustom fountain-export-font
-  '("Courier Prime" "Courier" "Courier New")
+  '("Courier" "Courier New")
   "List of font names to use when exporting, by priority."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
@@ -320,7 +323,7 @@ Matches and deletes any text with `fountain-comment',
 Otherwise return `fountain-export-buffer'"
   (if (buffer-file-name)
       (concat (file-name-base (buffer-file-name)) "." ext)
-    fountain-export-buffer-name))
+    fountain-export-output-buffer))
 
 (defun fountain-export-underline (s)
   "Replace underlined text in S with HTML underline span tags."
@@ -585,7 +588,7 @@ If ARG, narrow to region."
                                       (fountain-export-buffer-to-html
                                        buffer))))
          (command (format fountain-export-pdf-via-html-command file)))
-    (async-shell-command command fountain-export-pdf-process-buffer-name)))
+    (async-shell-command command fountain-export-pdf-process-buffer)))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
