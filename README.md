@@ -12,7 +12,7 @@ the Fountain markup format, visit <http://fountain.io>.
 Features
 --------
 
-- exporting to HTML and PDF (requires [Prince][prince])
+- exporting to HTML and PDF
 - multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
   centered text elements (display only, does not modify file contents)
@@ -33,18 +33,19 @@ The following features are not yet supported:
 Feature requests are encouraged.
 
 [wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
-[prince]: http://www.princexml.com/ "Prince"
 
 Requirements
 ------------
 
 - Emacs 24 (not tested on earlier versions)
-- [s.el][] the long lost Emacs string manipulation library.
+- [s.el][] the long lost Emacs string manipulation library
+- exporting to PDF requires [Prince][prince]
 - to insert UUIDs (useful for using notes as bookmarks) you'll need
   either `uuidgen` CLT (usually pre-installed on OS X and Linux) or
   [uuid.el][] Emacs package
 
 [s.el]: https://github.com/magnars/s.el "s.el"
+[prince]: http://www.princexml.com/ "Prince"
 [uuid.el]: https://github.com/nicferrier/emacs-uuid "uuid.el"
 
 Installation
