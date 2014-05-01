@@ -353,6 +353,11 @@ with \\[fountain-save-font-lock-decoration]."
   "Default face for metadata keys."
   :group 'fountain-faces)
 
+(defface fountain-page-break
+  '((t (:inherit fountain-comment)))
+  "Default face for page breaks."
+  :group 'fountain-faces)
+
 (defface fountain-scene-heading
   '((t (:weight bold :underline t)))
   "Default face for scene headings."
@@ -1064,6 +1069,8 @@ buffer (WARNING: this can be very slow)."
     ("synopsis" ,fountain-synopsis-regexp
      ((0 nil)
       (1 fountain-comment t)))
+    ("page-break" ,fountain-page-break-regexp
+     ((0 fountain-page-break)))
     ("metadata" fountain-match-metadata
      ((1 fountain-metadata-key nil t)
       (2 fountain-metadata-value nil t)
