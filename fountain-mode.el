@@ -513,9 +513,9 @@ with \\[fountain-save-font-lock-decoration]."
       (forward-line 0)
       (and (or (looking-at fountain-metadata-pair-regexp)
                (looking-at fountain-metadata-value-regexp))
-           (save-match-data
-             (forward-line -1)
-             (or (bobp)
+           (or (bobp)
+               (save-match-data
+                 (forward-line -1)
                  (fountain-metadata-p)))))))
 
 (defun fountain-section-p ()
@@ -685,22 +685,22 @@ synopsis, note, or is within a comment."
       (goto-char (point-min))
       (setq fountain-metadata nil)
       (while (fountain-metadata-p)
-        (let ((key (match-string-no-properties 1))
+        (let ((key (downcase (match-string-no-properties 1)))
               (value
-               (or (match-string-no-properties 2)
-                   (let (s)
-                     (forward-line 1)
-                     (while (and (fountain-metadata-p)
-                                 (null (match-string 1)))
-                       (setq s
-                             (append s
-                                     (list (match-string-no-properties 2))))
-                       (forward-line 1))
-                     s))))
+               (progn
+                 (forward-line 1)       ; FIXME: on line ahead
+                 (or (match-string-no-properties 2)
+                     (let (s)
+                       (while (and (fountain-metadata-p)
+                                   (null (match-string 1)))
+                         (setq s
+                               (append s
+                                       (list (match-string-no-properties 2))))
+                         (forward-line 1))
+                       s)))))
           (setq fountain-metadata
                 (append fountain-metadata
-                        (list (cons key value)))))
-        (forward-line 1))
+                        (list (cons key value))))))
       fountain-metadata)))
 
 (defun fountain-get-metadata-value (key)
