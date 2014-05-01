@@ -27,7 +27,6 @@
 ;;; Code:
 
 (require 's)
-(declare-function 'fountain-get-metadata-value "fountain-mode.el")
 
 (defgroup fountain-export ()
   "Options for exporting Fountain files."
@@ -447,11 +446,21 @@ of SUB-S."
     (format "<%s class=\"%s\">%s</%s>\n"
             tag class content tag)))
 
+(defun fountain-export-get-metadata-value (key)
+  "Like `fountain-get-metadata-value' but filters for HTML."
+  (eval-when-compile
+    (defvar fountain-metadata))
+  (let* ((value (cdr (assoc key fountain-metadata)))
+         (s (if (listp value)
+                (s-join "\n" value)
+              value)))
+    (fountain-export-filter s)))
+
 (defun fountain-export-create-html-title-page ()
   "Create the title page using `fountain-export-title-page-template'."
-  (s-format fountain-export-title-page-template
-            '(lambda (var)
-               (fountain-export-filter (fountain-get-metadata-value var)))))
+  (s-format fountain-export-title-page-template 'fountain-export-get-metadata-value))
+            ;; '(lambda (var)
+            ;;    (fountain-export-filter (fountain-get-metadata-value var)))))
 
 (defun fountain-export-create-style ()
   "Create stylesheet using `fountain-export-styles-template'."
@@ -493,8 +502,8 @@ of SUB-S."
   "Create the HTML head using `fountain-export-html-head-template'."
   (let ((insert-style (fountain-export-create-style))
         (charset "utf-8")
-        (title (fountain-get-metadata-value "title"))
-        (author (fountain-get-metadata-value "author")))
+        (title (fountain-export-get-metadata-value "title"))
+        (author (fountain-export-get-metadata-value "author")))
     (s-format fountain-export-html-head-template
               '(lambda (var)
                  (symbol-value (intern var))))))
