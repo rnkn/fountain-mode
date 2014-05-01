@@ -1,10 +1,9 @@
 Fountain Mode
 =============
 
-Emacs major mode for editing Fountain-formatted text files.
-
-For more information on the Fountain markup format, visit
-<http://fountain.io>.
+Fountain Mode aims to be a full-featured screenwriting environment for
+GNU Emacs, using the Fountain markup format. For more information on
+the Fountain markup format, visit <http://fountain.io>.
 
 ![Fountain Mode screenshot][screenshot]
 
@@ -13,36 +12,28 @@ For more information on the Fountain markup format, visit
 Features
 --------
 
-The following features are supported:
-
+- exporting to HTML and PDF (requires [Prince][prince])
 - multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
   centered text elements (display only, does not modify file contents)
 - add/remove continued dialog to successively speaking characters
-- `C-c C-a` to insert a synopsis
-- `C-c C-z` to insert a note
-- `C-c C-x i` to insert metadata
-- synopses, notes and metadata are based on custom templates
-- `S-RET` or `C-c RET` to upcase the line and insert a newline
-- `C-M-n` and `C-M-p` to navigate by scene heading
-- both Fountain comment/boneyard syntaxes (follows standard commenting
-  behavior, e.g. `M-;`)
+- templates for inserting synopses, notes and metadata
+- navigate by scene heading
+- standard commenting (boneyard) behaviour
 - everything is customizable, of course
-- see the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode
+
+For more information on key-bindings and functions, type `C-h m`. See
+the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode.
 
 The following features are not yet supported:
 
 - syntax highlighting for emphasis
-- reading metadata
 - dual dialogue
-- exporting
 
-Feature requests are encouraged. Exporting is "coming soon."
-
-For exporting, check out the full list of apps that support the Fountain
-format here: <http://fountain.io/apps>
+Feature requests are encouraged.
 
 [wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
+[prince]: http://www.princexml.com/ "Prince"
 
 Requirements
 ------------
