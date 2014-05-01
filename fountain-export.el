@@ -114,15 +114,19 @@ will be exported as
   :group 'fountain-export)
 
 (defcustom fountain-export-title-page-template
-  "<div class=\"title-block\">
+  "<div class=\"title\">
 <h1>${title}</h1>
-<p>${contact}</p>
+<p>${credit}</p>
 <p>${author}</p>
-<p>${draft}</p>
 </div>
-<div class=\"contact\">${contact}</div>
-<div class=\"date\">${date}</div>"
-  "HTML template for created the title-page div."
+<div class=\"contact\">
+<p>${contact}</p>
+</div>
+<div class=\"draft\">
+<p>${draft}</p>
+<p>${date}</p>
+</div>"
+  "HTML template for creating the title-page div."
   :type 'string
   :group 'fountain-export)
 
@@ -135,8 +139,34 @@ will be exported as
     margin-left: 1.5in;
 }
 
-#title_page {
+#title-page {
     page: title;
+    margin: 0 auto;
+    width: 6in;
+}
+
+@media print {
+    .title {
+        margin-top: 3.5in;
+        margin-bottom: 4in;
+    }
+}
+
+.title {
+    text-align: center;
+    width: 4in;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title img {
+    width: 100%;
+}
+
+h1 {
+    text-decoration: underline;
+    text-transform: uppercase;
+    font-weight: normal;
 }
 
 #screenplay {
@@ -195,7 +225,7 @@ span.underline {
     page-break-after: always;
 }
 
-h2, h3, h4, h5, h6 {
+h3,h4,h5,h6 {
     prince-bookmark-level: none;
 }
 
@@ -420,7 +450,8 @@ of SUB-S."
 (defun fountain-export-create-html-title-page ()
   "Create the title page using `fountain-export-title-page-template'."
   (s-format fountain-export-title-page-template
-            'fountain-get-metadata-value))
+            '(lambda (var)
+               (fountain-export-filter (fountain-get-metadata-value var)))))
 
 (defun fountain-export-create-style ()
   "Create stylesheet using `fountain-export-styles-template'."
@@ -534,6 +565,9 @@ created HTML element to DESTBUF."
                 (insert head "\n")
                 ;; close head and open body
                 (insert "<body>\n")
+                (insert "<div id=\"title-page\">\n"
+                        title-page
+                        "</div>")
                 (insert "<div id=\"screenplay\">\n")))
             ;; parse the temp buffer
             (fountain-export-parse-buffer destbuf))
