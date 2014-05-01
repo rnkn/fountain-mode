@@ -221,6 +221,7 @@ span.underline {
 }
 
 .page-break {
+    visibility: hidden;
     page-break-after: always;
 }
 
