@@ -1,8 +1,8 @@
 ;;; fountain-export.el --- Export engine for Fountain Mode
 
 ;; Copyright (C) 2014 Paul Rankin
-;; Copyright (C) 2014 Oliver Taylor -- stylesheet adapted from
-;; TextPlay <https://github.com/olivertaylor/Textplay>
+;; Copyright (C) 2014 Oliver Taylor -- stylesheet adapted from TextPlay
+;; <https://github.com/olivertaylor/Textplay>
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
