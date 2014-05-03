@@ -38,8 +38,9 @@
 ;;; customizable variables =============================================
 
 (defcustom fountain-export-output-buffer
-  "*Fountain Export*"
-  "Buffer name to use when not exporting a file."
+  "*Fountain %s Export*"
+  "Buffer name to use when not exporting a file.
+%s is the format being exported."
   :type 'string
   :group 'fountain-export)
 
@@ -97,6 +98,13 @@ minimal benefit."
   :type 'boolean
   :group 'fountain-export)
 
+(defcustom fountain-export-preserve-line-breaks t
+  "If non-nil, convert all breaking lines into line-breaks.
+Otherwise, only break paragraphs at explicit line-breaks (one or
+more blank lines)."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-convert-quotes nil
   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
 
@@ -136,7 +144,7 @@ will be exported as
     size: ${page-size};
     margin-top: 1in;
     margin-right: 1in;
-    margin-bottom: 0.5in;
+    margin-bottom: 0.75in;
     margin-left: 1.5in;
 }
 
@@ -144,6 +152,15 @@ will be exported as
     page: title;
     margin: 0 auto;
     width: 6in;
+    page-break-after: always;
+}
+
+#screenplay {
+    margin: 0 auto;
+    width: 6.3in;
+    counter-reset: page 1;
+    page: screenplay;
+    prince-page-group: start;
 }
 
 @media print {
@@ -168,12 +185,6 @@ h1 {
     text-decoration: underline;
     text-transform: uppercase;
     font-weight: normal;
-}
-
-#screenplay {
-    counter-reset: page 1;
-    page: screenplay;
-    prince-page-group: start;
 }
 
 @page screenplay {
@@ -206,6 +217,11 @@ body {
     line-height: 1;
 }
 
+hr {
+    visibility: hidden;
+    page-break-after: always;
+}
+
 em {
     font-style: italic;
 }
@@ -218,22 +234,13 @@ span.underline {
     text-decoration: underline;
 }
 
-.strikethrough {
+span.strikethrough {
     text-line-through-style: solid;
 }
 
 .page-break {
     visibility: hidden;
     page-break-after: always;
-}
-
-h3,h4,h5,h6 {
-    prince-bookmark-level: none;
-}
-
-#screenplay {
-    width: 6in;
-    margin: 0 auto;
 }
 
 .centered {
@@ -296,15 +303,13 @@ p {
 }
 
 .trans {
-    margin-top: 1em;
-    margin-bottom: 1em;
     margin-left: 4in;
     width: 2in;
     page-break-before: avoid;
 }
 
 .note {
-    display: none
+    display: none;
 }
 
 .section {
@@ -343,38 +348,40 @@ Currently, ${charset} will default to UTF-8."
             (chunk (/ (buffer-size) 100))
             (n 0))
         (font-lock-refresh-defaults)
-        (goto-char (point-min))
-        (while (not (eobp))
-          (let ((limit (+ (point) chunk)))
-            (jit-lock-fontify-now (point) limit)
-            (goto-char limit)
-            (progress-reporter-update job n)
-            (setq n (+ n 1))))
-        (progress-reporter-done job))
+        (save-excursion
+          (goto-char (point-min))
+          (while (not (eobp))
+            (let ((limit (+ (point) chunk)))
+              (jit-lock-fontify-now (point) limit)
+              (goto-char limit)
+              (progress-reporter-update job n)
+              (setq n (+ n 1))))
+          (progress-reporter-done job)))
     (error "Font Lock is not active")))
 
 (defun fountain-export-strip-comments ()
   "Strips buffer of all comments and metadata.
 Matches and deletes any text with `fountain-comment',
 `fountain-metadata-key' or `fountain-metadata-value' face."
-  (goto-char (point-min))
-  (while (null (eobp))
-    (if (memq (face-at-point) '(fountain-comment
-                                fountain-metadata-key
-                                fountain-metadata-value))
-        (let ((m (point)))
-          (goto-char (next-single-property-change
-                      (point) 'face nil (point-max)))
-          (delete-region m (point)))
-      (goto-char (next-single-property-change
-                  (point) 'face nil (point-max))))))
+  (save-excursion
+    (goto-char (point-min))
+    (while (null (eobp))
+      (if (memq (face-at-point) '(fountain-comment
+                                  fountain-metadata-key
+                                  fountain-metadata-value))
+          (let ((m (point)))
+            (goto-char (next-single-property-change
+                        (point) 'face nil (point-max)))
+            (delete-region m (point)))
+        (goto-char (next-single-property-change
+                    (point) 'face nil (point-max)))))))
 
 (defun fountain-export-get-name (ext)
   "If BUFFER is visiting a file, concat file name base and EXT.
 Otherwise return `fountain-export-buffer'"
   (if (buffer-file-name)
       (concat (file-name-base (buffer-file-name)) "." ext)
-    fountain-export-output-buffer))
+    (format fountain-export-output-buffer ext)))
 
 (defun fountain-export-underline (s)
   "Replace underlined text in S with HTML underline span tags."
@@ -409,10 +416,8 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
                              (">" . "&gt;")
                              ("\s\s" . "&nbsp; ")
                              ("\\\s" . "&nbsp;")
-                             ("\\\-" . "&#8209;")
                              ("\\_" . "&#95;")
-                             ("\\*" . "&#42;")
-                             ("\n" . "<br>")) s))
+                             ("\\*" . "&#42;")) s))
          (s (if fountain-export-convert-quotes
                 (s-replace-all '(("\\`" . "&#96;")
                                  ("\\'" . "&apos;")
@@ -420,13 +425,16 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
                                  ("''" . "&rdquo;")
                                  ("`" . "&lsquo;")
                                  ("'" . "&rsquo;")) s)
+              s))
+         (s (if fountain-export-preserve-line-breaks
+                (s-replace "\n" "<br>" s)
               s)))
     s))
 
 (defun fountain-export-create-html-element (sub-s)
   "Return an HTML element with face and substring of SUB-S.
-Stylesheet class is taken from face, while content is taken from
-of SUB-S."
+Stylesheet class is taken from face name, while content is taken
+from SUB-S."
   (let* ((class
           (if (get-text-property 0 'face sub-s)
               (let* ((s (symbol-name (get-text-property 0 'face sub-s)))
