@@ -668,7 +668,8 @@ synopsis, note, or is within a comment."
              (save-excursion
                (forward-line -1)
                (or (bobp)
-                   (fountain-invisible-p)))
+                   (fountain-invisible-p))))
+           (save-match-data
              (save-excursion
                (forward-line 1)
                (or (eobp)
