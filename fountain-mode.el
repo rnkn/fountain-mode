@@ -42,7 +42,7 @@
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
-  :prefix "fountain-"
+  :prefix "fountain"
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
@@ -112,7 +112,7 @@ INT./EXT. HOUSE - DAY"
   :group 'fountain)
 
 (defcustom fountain-trans-list
-  '("TO:" "WITH:" "FADE IN" "FADE OUT" "TO BLACK")
+  '("TO:" "WITH:" "FADE IN:" "FADE OUT" "TO BLACK")
   "List of transition endings (case insensitive).
 
 This list is used to match the endings of transitions,
@@ -944,20 +944,23 @@ buffer (WARNING: this can be very slow)."
     (save-restriction
       (widen)
       ;; first expand the region
-      (let ((start
-             (cond (arg (point-min))
-                   ((use-region-p) (region-beginning))
-                   ((car (bounds-of-thing-at-point 'scene)))))
-            (end
-             (cond (arg (point-max))
-                   ((use-region-p) (region-end))
-                   ((cdr (bounds-of-thing-at-point 'scene)))))
-            ;; create continued string
-            (s (concat "(" fountain-continued-dialog-string ")")))
+      (let* ((start
+              (cond (arg (point-min))
+                    ((use-region-p) (region-beginning))
+                    ((car (bounds-of-thing-at-point 'scene)))))
+             (end
+              (cond (arg (point-max))
+                    ((use-region-p) (region-end))
+                    ((cdr (bounds-of-thing-at-point 'scene)))))
+             ;; create continued string
+             (s (concat "(" fountain-continued-dialog-string ")"))
+             ;; create progress report
+             (job (make-progress-reporter "Refreshing continued dialog...")))
         ;; delete all matches in region
         (goto-char start)
         (while (re-search-forward (concat "\s*" s) end t)
-          (replace-match ""))
+          (replace-match "")
+          (progress-reporter-update job))
         ;; add string where appropriate
         (when fountain-add-continued-dialog
           (goto-char start)
@@ -968,7 +971,9 @@ buffer (WARNING: this can be very slow)."
                                   (fountain-get-previous-character 1)))
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" s)))
-            (forward-line 1)))))))
+            (forward-line 1)
+            (progress-reporter-update job)))
+        (progress-reporter-done job)))))
 
 ;;; Menu Functions =====================================================
 
