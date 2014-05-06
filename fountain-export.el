@@ -35,7 +35,12 @@
   :prefix "fountain-export-"
   :group 'fountain)
 
-;;; customizable variables =============================================
+;;; Obsolete Aliases ===================================================
+
+(define-obsolete-variable-alias 'fountain-export-title-page-template
+  'fountain-export-title-page-title-template "1.1.0")
+
+;;; Customizable Variables =============================================
 
 (defcustom fountain-export-output-buffer
   "*Fountain %s Export*"
@@ -86,6 +91,21 @@ Otherwise, use an external stylesheet file."
   :type 'boolean
   :group 'fountain-export)
 
+(defcustom fountain-export-bold-title nil
+  "If non-nil, bold title on export."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-underline-title t
+  "If non-nil, underline title on export."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-upcase-title t
+  "If non-nil, underline title on export."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-double-space-scene-headings nil
   "If non-nil, double space before scene headings on export."
   :type 'boolean
@@ -99,8 +119,8 @@ minimal benefit."
   :group 'fountain-export)
 
 (defcustom fountain-export-preserve-line-breaks t
-  "If non-nil, convert all breaking lines into line-breaks.
-Otherwise, only break paragraphs at explicit line-breaks (one or
+  "If non-nil, convert all newlines into line breaks.
+Otherwise, only break paragraphs at explicit line breaks (one or
 more blank lines)."
   :type 'boolean
   :group 'fountain-export)
@@ -122,20 +142,25 @@ will be exported as
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-title-page-template
-  "<div class=\"title\">
-<h1>${title}</h1>
-<p>${credit}</p>
-<p>${author}</p>
-</div>
-<div class=\"contact\">
-<p>${contact}</p>
-</div>
-<div class=\"draft\">
-<p>${draft}</p>
-<p>${date}</p>
-</div>"
-  "HTML template for creating the title-page div."
+(defcustom fountain-export-title-page-title-template
+  "${title}
+${credit}
+${authors}"
+  "Template for creating title page title block."
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-page-left-template
+  "${draft}
+${date}
+${notes}"
+  "Template for creating title page left block."
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-page-right-template
+  "${contact}"
+  "Template for creating title page right block."
   :type 'string
   :group 'fountain-export)
 
@@ -144,7 +169,7 @@ will be exported as
     size: ${page-size};
     margin-top: 1in;
     margin-right: 1in;
-    margin-bottom: 0.75in;
+    margin-bottom: 0.5in;
     margin-left: 1.5in;
 }
 
@@ -152,39 +177,50 @@ will be exported as
     page: title;
     margin: 0 auto;
     width: 6in;
+    clear: both;
     page-break-after: always;
 }
 
 #screenplay {
     margin: 0 auto;
-    width: 6.3in;
+    width: 6in;
+    clear: both;
     counter-reset: page 1;
     page: screenplay;
     prince-page-group: start;
 }
 
 @media print {
-    .title {
+    #title {
         margin-top: 3.5in;
         margin-bottom: 4in;
     }
 }
 
-.title {
+#title-page #title {
     text-align: center;
-    width: 4in;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-.title img {
+#title-page #title img {
     width: 100%;
 }
 
-h1 {
-    text-decoration: underline;
-    text-transform: uppercase;
-    font-weight: normal;
+#title-page #left {
+    width: 3in;
+    float: left;
+}
+
+#title-page #right {
+    width: 3in;
+    float: right;
+    text-align: right;
+}
+
+
+#title h1 {
+    text-decoration: ${title-underline};
+    text-transform: ${title-upcase};
+    font-weight: ${title-bold};
 }
 
 @page screenplay {
@@ -427,7 +463,7 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
                                  ("'" . "&rsquo;")) s)
               s))
          (s (if fountain-export-preserve-line-breaks
-                (s-replace "\n" "<br>" s)
+                (s-replace "\n" "<br>\n" s)
               s)))
     s))
 
@@ -464,14 +500,31 @@ from SUB-S."
   (let* ((value (cdr (assoc key fountain-metadata)))
          (s (if (listp value)
                 (s-join "\n" value)
-              value)))
-    (fountain-export-filter s)))
+              value))
+         (s (let ((fountain-export-preserve-line-breaks t))
+              (fountain-export-filter s))))
+    s))
+
+(defun fountain-export-create-title-page-element (key)
+  "Like `fountain-get-metadata-value' but creates HTML element."
+  (let ((content (fountain-export-get-metadata-value key)))
+    (if (string= key "title")
+        (format "<h1>%s</h1>" content)
+      (format "<p>%s</p>" content))))
 
 (defun fountain-export-create-html-title-page ()
   "Create the title page using `fountain-export-title-page-template'."
-  (s-format fountain-export-title-page-template 'fountain-export-get-metadata-value))
-            ;; '(lambda (var)
-            ;;    (fountain-export-filter (fountain-get-metadata-value var)))))
+  (concat
+   "<div id=\"title\">\n"
+   (s-format fountain-export-title-page-title-template
+             'fountain-export-create-title-page-element)
+   "\n</div>\n<div id=\"left\">\n"
+   (s-format fountain-export-title-page-left-template
+             'fountain-export-create-title-page-element)
+   "\n</div>\n<div id=\"right\">\n"
+   (s-format fountain-export-title-page-right-template
+             'fountain-export-create-title-page-element)
+   "\n</div>"))
 
 (defun fountain-export-create-style ()
   "Create stylesheet using `fountain-export-styles-template'."
@@ -491,6 +544,15 @@ from SUB-S."
          (scene-spacing
           (if fountain-export-double-space-scene-headings
               "2em" "1em"))
+         (title-bold
+          (if fountain-export-bold-title
+              "bold" "normal"))
+         (title-underline
+          (if fountain-export-underline-title
+              "underline" "none"))
+         (title-upcase
+          (if fountain-export-upcase-title
+              "uppercase" "none"))
          (style-rules (s-format fountain-export-style-template
                           '(lambda (var)
                              (symbol-value (intern var))))))
@@ -563,6 +625,8 @@ created HTML element to DESTBUF."
 (defun fountain-export--html ()
   ;; internal function, don't call externally
   ;; use `fountain-export-buffer-to-html' instead
+  ;; first read the metadata
+  (fountain-read-metadata)
   (let* ((sourcebuf (current-buffer))
          (destbuf (get-buffer-create
                    (fountain-export-get-name "html")))
