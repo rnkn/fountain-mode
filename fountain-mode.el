@@ -326,7 +326,7 @@ dialog.")
 There are three levels of Font Lock decoration:
 
   1 - none, uses default face
-  2 - minimal, uses fountain-ELEMENT faces
+  2 - default, uses fountain-ELEMENT faces
   3 - maximum, uses fountain-ELEMENT-highlight faces
 
 To switch between these levels of Font Lock decoration, customize
@@ -938,6 +938,11 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (interactive)
   (occur fountain-note-regexp))
 
+(defun fountain-occur-scene-headings ()
+  "Display `occur' buffer searching `fountain-scene-heading-regexp'."
+  (interactive)
+  (occur fountain-scene-heading-regexp))
+
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
 
@@ -1209,6 +1214,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "M-s 1") 'fountain-occur-sections)
     (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
     (define-key map (kbd "M-s 3") 'fountain-occur-notes)
+    (define-key map (kbd "M-s 4") 'fountain-occur-scene-headings)
     map)
   "Mode map for `fountain-mode'.")
 
