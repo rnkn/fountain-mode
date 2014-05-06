@@ -42,7 +42,7 @@
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
-  :prefix "fountain"
+  :prefix "fountain-"
   :group 'wp
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
@@ -928,6 +928,21 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (goto-char (point-min))
   (fountain-insert-template fountain-metadata-template))
 
+(defun fountain-occur-sections ()
+  "Display `occur' buffer searching `fountain-section-regexp'."
+  (interactive)
+  (occur fountain-section-regexp))
+
+(defun fountain-occur-synopses ()
+  "Display `occur' buffer searching `fountain-synopsis-regexp'."
+  (interactive)
+  (occur fountain-synopsis-regexp))
+
+(defun fountain-occur-notes ()
+  "Display `occur' buffer searching `fountain-note-regexp'."
+  (interactive)
+  (occur fountain-note-regexp))
+
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
 
@@ -1185,6 +1200,9 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e p") 'fountain-export-buffer-to-pdf-via-html)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
+    (define-key map (kbd "M-s 1") 'fountain-occur-sections)
+    (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
+    (define-key map (kbd "M-s 3") 'fountain-occur-notes)
     map)
   "Mode map for `fountain-mode'.")
 
