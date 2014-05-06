@@ -245,13 +245,11 @@ The default funcation requires the command line tool \"uuidgen\"."
   "//.*\\|/\\*\\(.\\|\n\\)*?\\*/"
   "Regular expression for matching comments.")
 
-(defconst fountain-metadata-pair-regexp
-  "^\\(.+\\):\s*\\(.+\\)?"
-  "Regular expression for matching single-line metadata pairs.")
-
-(defconst fountain-metadata-value-regexp
-  "^\s+\\(?2:.+\\)"
-  "Regular expression for matching multi-line metadata values.")
+(defconst fountain-metadata-regexp
+  (concat "^\\(.+\\):\s*\\(.+\\)?\\|"
+          "^\s+\\(?2:.+\\)")
+  "Regular expression for matching multi-line metadata values.
+Requires `fountain-metadata-p' for bobp.")
 
 (defconst fountain-scene-heading-regexp
   (concat "^\\(\\.\\)\\(\\<.*\\)\\|"
@@ -508,8 +506,7 @@ with \\[fountain-save-font-lock-decoration]."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (or (looking-at fountain-metadata-pair-regexp)
-               (looking-at fountain-metadata-value-regexp))
+      (and (looking-at fountain-metadata-regexp)
            (or (bobp)
                (save-match-data
                  (forward-line -1)
