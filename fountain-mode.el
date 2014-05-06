@@ -81,6 +81,9 @@
 (define-obsolete-variable-alias 'fountain-indent-centered
   'fountain-align-centered "0.13.0")
 
+(define-obsolete-variable-alias 'fountain-align-centered
+  'fountain-align-center "0.13.0")
+
 ;;; Customizable Options ===============================================
 
 (defcustom fountain-mode-hook
@@ -172,7 +175,7 @@ This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-centered 10
+(defcustom fountain-align-center 10
   "Column integer to which centered text should be aligned.
 This option does not affect file contents."
   :type 'integer
@@ -293,7 +296,7 @@ dialog.")
           "\\)$")
   "Regular expression for matching transitions.")
 
-(defconst fountain-centered-regexp
+(defconst fountain-center-regexp
   "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
   "Regular expression for matching centered text.")
 
@@ -373,12 +376,12 @@ with \\[fountain-save-font-lock-decoration]."
   "Additional highlighting face for parentheticals."
   :group 'fountain-faces)
 
-(defface fountain-centered
+(defface fountain-center
   '((t (:inherit default)))
   "Default face for centered text."
   :group 'fountain-faces)
 
-(defface fountain-centered-highlight
+(defface fountain-center-highlight
   '((t (:inherit default)))
   "Additional highlighting face for centered text."
   :group 'fountain-faces)
@@ -408,7 +411,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 (defface fountain-synopsis-highlight
   '((t (:inherit font-lock-type-face)))
-  "Default face for synopses."
+  "Additional highlighting face for synopses."
   :group 'fountain-faces)
 
 (defface fountain-character
@@ -667,13 +670,13 @@ synopsis, note, or is within a comment."
                (or (eobp)
                    (fountain-invisible-p))))))))
 
-(defun fountain-centered-p ()
+(defun fountain-center-p ()
   "Return non-nil if point is at centered text."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (looking-at fountain-centered-regexp))))
+      (looking-at fountain-center-regexp))))
 
 (defun fountain-read-metadata ()
   "Read and set `fountain-metadata' alist."
@@ -1083,7 +1086,7 @@ buffer (WARNING: this can be very slow)."
       (1 fountain-comment t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
      ((0 fountain-comment)))
-    ("centered" ,fountain-centered-regexp
+    ("center" ,fountain-center-regexp
      ((0 nil)
       (1 fountain-comment t)
       (3 fountain-comment t)))

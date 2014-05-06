@@ -284,12 +284,6 @@ span.strikethrough {
     page-break-after: always;
 }
 
-.centered {
-    text-align: center;
-    margin-left: 0;
-    width: 100%;
-}
-
 .center {
     text-align: center;
     margin-left: 0;
