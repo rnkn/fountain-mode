@@ -62,6 +62,11 @@
                 (function-item fountain-export-buffer-to-html))
   :group 'fountain-export)
 
+(defcustom fountain-export-include-title-page t
+  "Generate a title page on export."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-inline-style t
   "If non-nil, use inline stylesheet.
 Otherwise, use an external stylesheet file."
@@ -649,9 +654,10 @@ created HTML element to DESTBUF."
                 (insert head "\n")
                 ;; close head and open body
                 (insert "<body>\n")
-                (insert "<div id=\"title-page\">\n"
-                        title-page
-                        "</div>")
+                (if fountain-export-include-title-page
+                    (insert "<div id=\"title-page\">\n"
+                            title-page
+                            "</div>"))
                 (insert "<div id=\"screenplay\">\n")))
             ;; parse the temp buffer
             (fountain-export-parse-buffer destbuf))
