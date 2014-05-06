@@ -254,18 +254,13 @@ The default funcation requires the command line tool \"uuidgen\"."
   "Regular expression for matching multi-line metadata values.")
 
 (defconst fountain-scene-heading-regexp
-  (concat "^\\(?2:"
+  (concat "^\\(\\.\\)\\(\\<.*\\)\\|"
+          "^\\(?2:"
           (regexp-opt fountain-scene-heading-prefix-list)
           "[.\s\t]+.*\\)")
   "Regular expression for matching scene headings.
 Requires `fountain-scene-heading-p' for preceding and succeeding
 blank lines.")
-
-(defconst fountain-forced-scene-heading-regexp
-  "^\\(\\.\\)\\(\\<.*\\)"
-  "Regular expression for matching forced scene headings.
-Requires `fountain-scene-heading-p' for preceding and
-succeeding blank lines.")
 
 (defconst fountain-paren-regexp
   "^[\s\t]*([^)\n]*)[\s\t]*$"
@@ -290,14 +285,11 @@ dialog.")
   "Regular expression for matching synopses.")
 
 (defconst fountain-trans-regexp
-  (concat "^[\s\t]*\\(?2:[[:upper:]\s]*"
+  (concat "^\\([\s\t]*>\s*\\)\\([^<>\n]*\\)$\\|"
+          "^[\s\t]*\\(?2:[[:upper:]\s]*"
           (regexp-opt fountain-trans-list)
           "\\)$")
   "Regular expression for matching transitions.")
-
-(defconst fountain-forced-trans-regexp
-  "^\\([\s\t]*>\s*\\)\\([^<>\n]*\\)$"
-  "Regular expression for matching forced transitions.")
 
 (defconst fountain-centered-regexp
   "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
@@ -568,8 +560,7 @@ synopsis, note, or is within a comment."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (or (looking-at fountain-forced-scene-heading-regexp)
-               (looking-at fountain-scene-heading-regexp))
+      (and (looking-at fountain-scene-heading-regexp)
            (save-match-data
              (forward-line -1)
              (fountain-invisible-p))))))
@@ -662,8 +653,7 @@ synopsis, note, or is within a comment."
       (widen)
       (forward-line 0)
       (and (let (case-fold-search)
-             (or (looking-at fountain-forced-trans-regexp)
-                 (looking-at fountain-trans-regexp)))
+             (looking-at fountain-trans-regexp))
            (save-match-data
              (save-excursion
                (forward-line -1)
