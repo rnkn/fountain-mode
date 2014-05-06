@@ -1017,6 +1017,15 @@ buffer (WARNING: this can be very slow)."
            (if fountain-add-continued-dialog
                "added" "removed")))
 
+(defun fountain-toggle-export-include-title-page ()
+  "Toggle `fountain-export-include-title-page'"
+  (interactive)
+  (setq fountain-export-include-title-page
+        (null fountain-export-include-title-page))
+  (message "Title page is now %s on export"
+           (if fountain-export-include-title-page
+               "included" "omitted")))
+
 (defun fountain-set-font-lock-decoration (level)
   "Set `font-lock-maximum-decoration' for `fountain-mode' to LEVEL."
   (interactive "nMaximum Decoration (1-3): ")
@@ -1241,6 +1250,11 @@ keywords suitable for Font Lock."
      "---"
      ["Buffer to HTML" fountain-export-buffer-to-html]
      ["Buffer to PDF via HTML" fountain-export-buffer-to-pdf-via-html]
+     "---"
+     ["Include Title Page"
+      fountain-toggle-export-include-title-page
+      :style toggle
+      :selected fountain-export-include-title-page]
      "---"
      ["Bold Scene Headings"
       fountain-toggle-export-bold-scene-headings
