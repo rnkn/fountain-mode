@@ -241,6 +241,10 @@ The default funcation requires the command line tool \"uuidgen\"."
   "\\`\\|^\s?$\\|\\'"
   "Regular expression for matching an empty line.")
 
+(defconst fountain-forced-action-mark-regexp
+  "^!"
+  "Regular expression for forced action mark.")
+
 (defconst fountain-comment-regexp
   "//.*\\|/\\*\\(.\\|\n\\)*?\\*/"
   "Regular expression for matching comments.")
@@ -603,7 +607,8 @@ synopsis, note, or is within a comment."
              (save-match-data
                (let* ((s (match-string-no-properties 0))
                       (s (s-trim (car (s-slice-at "(" s)))))
-                 (and (or (s-uppercase? s)
+                 (and (null (s-starts-with? "!" s))
+                      (or (s-uppercase? s)
                           (s-starts-with? "@" s))
                       (save-excursion
                         (forward-line -1)
@@ -1067,6 +1072,8 @@ buffer (WARNING: this can be very slow)."
     ("trans" fountain-match-trans
      ((0 nil keep)
       (1 fountain-comment t t)))
+    ("forced-action-mark" ,fountain-forced-action-mark-regexp
+     ((0 fountain-comment)))
     ("centered" ,fountain-centered-regexp
      ((0 nil)
       (1 fountain-comment t)
