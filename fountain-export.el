@@ -373,7 +373,7 @@ Currently, ${charset} will default to UTF-8."
   :type 'string
   :group 'fountain-export)
 
-;;; internal functions =================================================
+;;; Internal Functions =================================================
 
 (defun fountain-export-fontify-buffer ()
   "If `font-lock-mode' is enables, fontify entire buffer."

@@ -1,15 +1,15 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup
 
-;; Copyright (C) 2014  Paul Rankin
+;; Copyright (C) 2014 Paul Rankin
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; Package-Requires: ((s "1.9.0"))
-;; URL: http://github.com/rnkn/fountain-mode/
+;; URL: https://github.com/rnkn/fountain-mode/
 
 ;; This file is not part of GNU Emacs.
- 
+
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or (at
@@ -47,7 +47,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "1.0.0")
+  "1.1.0")
 
 ;;; Obsolete Aliases ===================================================
 
@@ -82,7 +82,10 @@
   'fountain-align-centered "0.13.0")
 
 (define-obsolete-variable-alias 'fountain-align-centered
-  'fountain-align-center "0.13.0")
+  'fountain-align-center "1.1.0")
+
+(define-obsolete-face-alias 'fountain-centered
+  'fountain-center "1.1.0")
 
 ;;; Customizable Options ===============================================
 
