@@ -549,7 +549,11 @@ from SUB-S."
                         (file-name-directory (buffer-file-name)))))
         (with-current-buffer cssfile
           (erase-buffer)
-          (insert style-rules)
+          (insert
+           (format
+            "/* Created with Emacs %s running Fountain Mode %s */\n"
+            emacs-version fountain-version)
+           style-rules)
           (write-file outputdir))
         (concat "<link rel=\"stylesheet\" href=\""
                 (buffer-name cssfile)
