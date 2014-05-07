@@ -12,37 +12,48 @@ the Fountain markup format, visit <http://fountain.io>.
 Features
 --------
 
-- exporting to HTML and PDF
+- full support for the Fountain 1.1 specification
+- exporting to HTML and PDF (requires [Prince][prince]) with or
+  without a title page
 - multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
-  centered text elements (display only, does not modify file contents)
+  center text elements (display only, does not modify file contents)
 - add/remove continued dialog to successively speaking characters
+- `occur` navigator for sections, synopses, notes and scene headings
 - templates for inserting synopses, notes and metadata
 - navigate by scene heading
 - standard commenting (boneyard) behaviour
 - everything is customizable, of course
 
-For more information on key-bindings and functions, type `C-h m`. See
-the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode.
-
 The following features are not yet supported:
 
-- syntax highlighting for emphasis
-- dual dialogue
+- syntax highlighting for emphasis (but exporting works)
+- dual dialogue (probably won't be supported because it's stupid)
 
-Feature requests are encouraged.
+Most common features are accessible from the menu. For a full list of
+functions and key-bindings, type `C-h m`. Bugs and feature requests
+are encouraged on the [Issues][issues] page, or you can email me
+directly (email in the source code header).
 
+See the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode.
+
+[issues]: https://github.com/rnkn/fountain-mode/issues/ "Fountain Mode issues"
 [wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
 
 Requirements
 ------------
 
-- Emacs 24 (not tested on earlier versions)
-- [s.el][] the long lost Emacs string manipulation library
-- exporting to PDF requires [Prince][prince]
-- to insert UUIDs (useful for using notes as bookmarks) you'll need
-  either `uuidgen` CLT (usually pre-installed on OS X and Linux) or
-  [uuid.el][] Emacs package
+- Emacs 24 (not tested on earlier versions, only tested on Mac OS X
+  and Linux, not tested on Windows).
+- [s.el][] the long lost Emacs string manipulation library.
+- Exporting to PDF requires [Prince][prince], which is free for
+  personal use. Prince adds a removable PDF annotation on the first
+  page; if you don't like it, delete the annotation in a PDF
+  application that supports editing annotations, or open the PDF and
+  print to PDF, which will remove all annotations.
+- to insert UUIDs (useful for using notes as linked bookmarks) you'll
+  need either `uuidgen` CLT (usually pre-installed on OS X and Linux)
+  or [uuid.el][] Emacs package.
 
 [s.el]: https://github.com/magnars/s.el "s.el"
 [prince]: http://www.princexml.com/ "Prince"
