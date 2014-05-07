@@ -42,19 +42,6 @@
 
 ;;; Customizable Variables =============================================
 
-(defcustom fountain-export-output-buffer
-  "*Fountain %s Export*"
-  "Buffer name to use when not exporting a file.
-%s is the format being exported."
-  :type 'string
-  :group 'fountain-export)
-
-(defcustom fountain-export-pdf-process-buffer
-  "*Fountain PDF Process*"
-  "Buffer name to use for PDF conversion messages."
-  :type 'string
-  :group 'fountain-export)
-
 (defcustom fountain-export-default-command
   'fountain-export-buffer-to-pdf-via-html
   "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
@@ -416,7 +403,7 @@ Matches and deletes any text with `fountain-comment',
 Otherwise return `fountain-export-buffer'"
   (if (buffer-file-name)
       (concat (file-name-base (buffer-file-name)) "." ext)
-    (format fountain-export-output-buffer ext)))
+    (format "*Fountain %s Export*" ext)))
 
 (defun fountain-export-underline (s)
   "Replace underlined text in S with HTML underline span tags."
@@ -494,8 +481,6 @@ from SUB-S."
 
 (defun fountain-export-get-metadata-value (key)
   "Like `fountain-get-metadata-value' but filters for HTML."
-  (eval-when-compile
-    (defvar fountain-metadata))
   (let* ((value (cdr (assoc key fountain-metadata)))
          (s (if (listp value)
                 (s-join "\n" value)
@@ -730,7 +715,7 @@ created HTML element to DESTBUF."
                                       (fountain-export-buffer-to-html
                                        buffer))))
          (command (format fountain-export-pdf-via-html-command file)))
-    (async-shell-command command fountain-export-pdf-process-buffer)))
+    (async-shell-command command "*Fountain PDF Process*")))
 
 (provide 'fountain-export)
 ;;; fountain-export.el ends here
