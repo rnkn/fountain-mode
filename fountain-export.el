@@ -365,7 +365,8 @@ Currently, ${charset} will default to UTF-8."
 (defun fountain-export-fontify-buffer ()
   "If `font-lock-mode' is enables, fontify entire buffer."
   (if font-lock-mode
-      (let ((font-lock-maximum-decoration t)
+      (let ((jit-lock-functions '(font-lock-fontify-region))
+            (font-lock-maximum-decoration t)
             (job (make-progress-reporter "Fontifying..." 0 100))
             (chunk (/ (buffer-size) 100))
             (n 0))
