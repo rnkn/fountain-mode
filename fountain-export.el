@@ -137,7 +137,7 @@ will be exported as
 (defcustom fountain-export-title-page-title-template
   "${title}
 ${credit}
-${authors}"
+${author}"
   "Template for creating title page title block."
   :type 'string
   :group 'fountain-export)
@@ -463,11 +463,8 @@ from SUB-S."
                      (s (s-chop-suffix "-highlight" s))
                      (s (s-chop-prefix "fountain-" s))) s)
             "action"))
-         (tag (cond ((string= class "scene-heading")
-                     "h2")
-                    ((string= class "character")
-                     "h3")
-                    ("p")))
+         (tag (if (string= class "scene-heading")
+                  "h2" "p"))
          (content
           (let* ((s (substring-no-properties sub-s))
                  (s (fountain-export-filter s))
@@ -508,7 +505,7 @@ from SUB-S."
    "\n</div>\n<div id=\"right\">\n"
    (s-format fountain-export-title-page-right-template
              'fountain-export-create-title-page-element)
-   "\n</div>"))
+   "\n</div>\n"))
 
 (defun fountain-export-create-style ()
   "Create stylesheet using `fountain-export-styles-template'."
@@ -640,7 +637,7 @@ created HTML element to DESTBUF."
                 (if fountain-export-include-title-page
                     (insert "<div id=\"title-page\">\n"
                             title-page
-                            "</div>"))
+                            "</div>\n"))
                 (insert "<div id=\"screenplay\">\n")))
             ;; parse the temp buffer
             (fountain-export-parse-buffer destbuf))
