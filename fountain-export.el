@@ -512,11 +512,9 @@ from SUB-S."
   "Create stylesheet using `fountain-export-styles-template'."
   (let* ((page-size fountain-export-page-size)
          (font
-          (let (list)
-            (dolist (font fountain-export-font (s-join "," list))
-              (setq list
-                    (append list
-                            (list (concat "'" font "'")))))))
+          (mapconcat
+           (lambda (font) (concat "'" font "'"))
+           fountain-export-font ","))
          (scene-bold
           (if fountain-export-bold-scene-headings
               "bold" "normal"))
