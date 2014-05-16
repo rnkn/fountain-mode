@@ -827,13 +827,13 @@ respectively, but only use one of each."
   "Move forward N scene headings (backward if N is negative)."
   (interactive "^p")
   (let* ((i (or n 1))
-         (p (if (< i 0) -1 1)))
+         (p (if (<= i 0) -1 1)))
     (if (= i 0)
         (progn
           (forward-line 0)
-          (while (null (or (eq (point) (buffer-end -1))
+          (while (null (or (eq (point) (buffer-end p))
                            (fountain-scene-heading-p)))
-            (forward-line -1)))
+            (forward-line p)))
       (while (/= i 0)
         (if (fountain-scene-heading-p)
             (forward-line p))
