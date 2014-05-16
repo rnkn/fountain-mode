@@ -741,7 +741,7 @@ respectively, but only use one of each."
                         ("nick" . ,(capitalize user-login-name))
                         ("email" . ,user-mail-address)
                         ("uuid" . ,(fountain-uuid)))))
-    (let ((end (point)))
+    (let ((end (point-marker)))
       (goto-char start)
       (when (search-forward "$m" end t)
         (replace-match "")
