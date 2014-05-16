@@ -963,18 +963,21 @@ buffer (WARNING: this can be very slow)."
     (save-restriction
       (widen)
       ;; first expand the region
-      (let* ((start
-              (cond (arg (point-min))
-                    ((use-region-p) (region-beginning))
-                    ((car (bounds-of-thing-at-point 'scene)))))
-             (end
-              (cond (arg (point-max))
-                    ((use-region-p) (region-end))
-                    ((cdr (bounds-of-thing-at-point 'scene)))))
-             ;; create continued string
-             (s (concat "(" fountain-continued-dialog-string ")"))
-             ;; create progress report
-             (job (make-progress-reporter "Refreshing continued dialog...")))
+      (let ((start (make-marker))
+            (end (make-marker))
+            ;; create continued string
+            (s (concat "(" fountain-continued-dialog-string ")"))
+            ;; create progress report
+            (job (make-progress-reporter "Refreshing continued dialog...")))
+        ;; set START and END markers since buffer contents will change
+        (set-marker start
+                    (cond (arg (point-min))
+                          ((use-region-p) (region-beginning))
+                          ((car (bounds-of-thing-at-point 'scene)))))
+        (set-marker end
+                    (cond (arg (point-max))
+                          ((use-region-p) (region-end))
+                          ((cdr (bounds-of-thing-at-point 'scene)))))
         ;; delete all matches in region
         (goto-char start)
         (while (re-search-forward (concat "\s*" s) end t)
