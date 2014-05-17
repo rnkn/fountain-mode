@@ -824,7 +824,8 @@ respectively, but only use one of each."
   (newline))
 
 (defun fountain-forward-scene (&optional n)
-  "Move forward N scene headings (backward if N is negative)."
+  "Move forward N scene headings (backward if N is negative).
+If N is 0, move to beginning of scene."
   (interactive "^p")
   (let* ((i (or n 1))
          (p (if (<= i 0) -1 1)))
@@ -832,12 +833,15 @@ respectively, but only use one of each."
         (progn
           (forward-line 0)
           (while (null (or (eq (point) (buffer-end p))
+                           (fountain-section-p)
                            (fountain-scene-heading-p)))
             (forward-line p)))
       (while (/= i 0)
-        (if (fountain-scene-heading-p)
+        (if (or (fountain-scene-heading-p)
+                (fountain-section-p))
             (forward-line p))
         (while (null (or (eq (point) (buffer-end p))
+                         (fountain-section-p)
                          (fountain-scene-heading-p)))
           (forward-line p))
         (setq i (- i p))))))
@@ -857,7 +861,8 @@ respectively, but only use one of each."
   "Move point to end of current scene."
   (interactive "^")
   (fountain-forward-scene 1)
-  (forward-char -1))
+  (unless (eobp)
+    (forward-char -1)))
 
 (defun fountain-mark-scene (&optional extend)
   "Put mark at end of this scene, point at beginning."
@@ -871,7 +876,8 @@ respectively, but only use one of each."
   ;;       (exchange-point-and-mark))
   (push-mark)
   (fountain-forward-scene 0)
-  (if (null (fountain-scene-heading-p))
+  (if (null (or (fountain-section-p)
+                (fountain-scene-heading-p)))
       (progn
         (goto-char (mark))
         (error "Before first scene heading"))
