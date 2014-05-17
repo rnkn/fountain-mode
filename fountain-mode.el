@@ -1117,8 +1117,10 @@ buffer (WARNING: this can be very slow)."
 
 Has the format ELEMENT, a string name, MATCHER, a regular
 expression or search function, and SUBEXP, a list of: N, the
-subexpression to match, FACE, the face to apply, and OVERRIDE, if
-t, will allow overriding preexisting faces properties.")
+subexpression to match, FACE, the face to apply, if nil will
+apply fountain-ELEMENT or fountain-ELEMENT-highlight depending on
+the level of `font-lock-maximum-decoration', OVERRIDE and
+LAXMATCH, which follow `font-lock-keywords'.")
 
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
