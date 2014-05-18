@@ -1132,10 +1132,10 @@ LAXMATCH, which follow `font-lock-keywords'.")
   "Return a new list of `font-lock-mode' keywords.
 Uses `fountain-font-lock-keywords-plist' to create a list of
 keywords suitable for Font Lock."
-  (let ((list fountain-font-lock-keywords-plist)
+  (let ((plist fountain-font-lock-keywords-plist)
         (dec (fountain-get-font-lock-decoration))
         keywords)
-    (dolist (f list keywords)
+    (dolist (f plist keywords)
       (let* ((element (car f))
              (matcher (nth 1 f))
              (subexp (nth 2 f))
@@ -1155,7 +1155,7 @@ keywords suitable for Font Lock."
           (let* ((n (car f))
                  ;; if we're using no decoration, use nil
                  ;; if face is supplied, use that
-                 ;; otherwise use the element string plus highlight
+                 ;; otherwise use the element string plus maybe highlight
                  (face (cond ((= dec 1) nil)
                              ((nth 1 f))
                              ((intern (concat "fountain-" element hl)))))
@@ -1164,7 +1164,9 @@ keywords suitable for Font Lock."
                  (lax (nth 3 f)))
             (setq face-props
                   (append face-props
-                          `((,n '(face ,face ,@align-props)
+                          `((,n '(face ,face
+                                       ,@align-props
+                                       fountain-element ,element)
                                 ,override ,lax))))))
         (setq keywords
               (append keywords
@@ -1327,7 +1329,9 @@ keywords suitable for Font Lock."
        'fountain-comment)
   (setq font-lock-defaults '((fountain-create-font-lock-keywords)
                              nil t))
-  (setq font-lock-extra-managed-props '(line-prefix wrap-prefix))
+  (setq font-lock-extra-managed-props '(line-prefix
+                                        wrap-prefix
+                                        fountain-element))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
