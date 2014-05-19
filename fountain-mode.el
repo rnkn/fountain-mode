@@ -359,24 +359,13 @@ with \\[fountain-save-font-lock-decoration]."
   :group 'fountain-faces)
 
 (defface fountain-scene-heading
-  '((t (:weight bold :underline t)))
+  '((t (:inherit font-lock-function-name-face)))
   "Default face for scene headings."
   :group 'fountain-faces)
 
-(defface fountain-scene-heading-highlight
-  '((t (:weight bold :underline t
-                :inherit font-lock-function-name-face)))
-  "Additional highlighting face for scene headings."
-  :group 'fountain-faces)
-
 (defface fountain-paren
-  '((t (:inherit default)))
-  "Default face for parentheticals."
-  :group 'fountain-faces)
-
-(defface fountain-paren-highlight
   '((t (:inherit font-lock-variable-name-face)))
-  "Additional highlighting face for parentheticals."
+  "Default face for parentheticals."
   :group 'fountain-faces)
 
 (defface fountain-center
@@ -384,67 +373,33 @@ with \\[fountain-save-font-lock-decoration]."
   "Default face for centered text."
   :group 'fountain-faces)
 
-(defface fountain-center-highlight
-  '((t (:inherit default)))
-  "Additional highlighting face for centered text."
-  :group 'fountain-faces)
-
 (defface fountain-note
-  '((t (:inherit fountain-note-highlight)))
+  '((t (:inherit font-lock-comment-face)))
   "Default face for notes.")
 
-(defface fountain-note-highlight
-  '((t (:inherit font-lock-comment-face)))
-  "Additional highlighting face for notes.")
-
 (defface fountain-section
-  '((t (:inherit fountain-section-highlight)))
+  '((t (:inherit font-lock-builtin-face)))
   "Default face for sections."
   :group 'fountain-faces)
 
-(defface fountain-section-highlight
-  '((t (:inherit font-lock-builtin-face)))
-  "Additional highlighting face for sections."
-  :group 'fountain-faces)
-
 (defface fountain-synopsis
-  '((t (:inherit fountain-synopsis-highlight)))
+  '((t (:inherit font-lock-type-face)))
   "Default face for synopses."
   :group 'fountain-faces)
 
-(defface fountain-synopsis-highlight
-  '((t (:inherit font-lock-type-face)))
-  "Additional highlighting face for synopses."
-  :group 'fountain-faces)
-
 (defface fountain-character
-  '((t (:inherit default)))
+  '((t (:inherit font-lock-keyword-face)))
   "Default face for characters."
   :group 'fountain-faces)
 
-(defface fountain-character-highlight
-  '((t (:inherit font-lock-keyword-face)))
-  "Additional highlighting face for characters."
-  :group 'fountain-faces)
-
 (defface fountain-dialog
-  '((t (:inherit default)))
+  '((t (:inherit font-lock-string-face)))
   "Default face for dialog."
   :group 'fountain-faces)
 
-(defface fountain-dialog-highlight
-  '((t (:inherit font-lock-string-face)))
-  "Additional highlighting face for dialog."
-  :group 'fountain-faces)
-
 (defface fountain-trans
-  '((t (:inherit default)))
-  "Default face for transitions."
-  :group 'fountain-faces)
-
-(defface fountain-trans-highlight
   '((t (:inherit font-lock-variable-name-face)))
-  "Additional highlighting face for transitions."
+  "Default face for transitions."
   :group 'fountain-faces)
 
 ;;; Thing Definitions ==================================================
