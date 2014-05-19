@@ -645,11 +645,12 @@ created HTML element to DESTBUF."
               (insert "</div>\n</body>\n</html>")
               (if fountain-export-prepare-html
                   (fountain-export-prepare-html))))
-          ;; signal completion and kill buffers
-          (font-lock-refresh-defaults)
+          ;; signal completion and return DESTBUF
           (setq complete t)
           destbuf)
-      ;; if errors occur, kill the unsaved buffer
+      ;; always refresh defaults
+      (font-lock-refresh-defaults)
+      ;; if error occurs, kill the unsaved buffer
       (unless complete
         (kill-buffer destbuf)))))
 
