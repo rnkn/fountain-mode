@@ -316,6 +316,11 @@ option to non-nil."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-hide-emphasis-delim nil
+  "If non-nil, make emphasis delimeters invisible."
+  :type 'boolean
+  :group 'fountain)
+
 (defcustom fountain-short-time-format "%x"
   "Format of date and time. See `format-time-string'."
   :type 'string
@@ -1076,7 +1081,7 @@ buffer (WARNING: this can be very slow)."
 ;;; Menu Functions =====================================================
 
 (defun fountain-toggle-comment-syntax ()
-  "Toggle `fountain-switch-comment-syntax'"
+  "Toggle `fountain-switch-comment-syntax'."
   (interactive)
   (setq fountain-switch-comment-syntax
         (null fountain-switch-comment-syntax))
@@ -1087,8 +1092,20 @@ buffer (WARNING: this can be very slow)."
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
+(defun fountain-toggle-hide-emphasis-delim ()
+  "Toggle `fountain-hide-emphasis-delim'."
+  (interactive)
+  (setq fountain-hide-emphasis-delim
+        (null fountain-hide-emphasis-delim))
+  (if fountain-hide-emphasis-delim
+      (add-to-invisibility-spec 'fountain-emphasis-delim)
+    (remove-from-invisibility-spec 'fountain-emphasis-delim))
+  (message "Emphasis delimeters are now %s"
+           (if fountain-hide-emphasis-delim
+               "invisible" "visible")))
+
 (defun fountain-toggle-align-elements ()
-  "Toggle `fountain-align-elements'"
+  "Toggle `fountain-align-elements'."
   (interactive)
   (setq fountain-align-elements
         (null fountain-align-elements))
@@ -1108,7 +1125,7 @@ buffer (WARNING: this can be very slow)."
                "added" "removed")))
 
 (defun fountain-toggle-export-include-title-page ()
-  "Toggle `fountain-export-include-title-page'"
+  "Toggle `fountain-export-include-title-page'."
   (interactive)
   (setq fountain-export-include-title-page
         (null fountain-export-include-title-page))
@@ -1156,52 +1173,40 @@ buffer (WARNING: this can be very slow)."
 
 ;;; Font Lock ==========================================================
 
-(defvar fountain-font-lock-keywords-plist
+(defvar fountain-font-lock-element-keywords
   `(("note" ,fountain-note-regexp
      ((2 0 nil)))
     ("scene-heading" fountain-match-scene-heading
      ((2 0 nil keep)
-      (1 1 fountain-comment t t)))
+      (2 1 fountain-comment t t)))
     ("character" fountain-match-character
-     ((3 0 nil)))
+     ((3 0 nil keep)))
     ("dialog" fountain-match-dialog
      ((3 0 nil keep)))
     ("paren" fountain-match-paren
      ((3 0 nil keep)))
     ("trans" fountain-match-trans
      ((3 0 nil keep)
-      (1 1 fountain-comment t t)))
+      (2 1 fountain-comment t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
-     ((1 0 fountain-comment)))
+     ((2 0 fountain-comment)))
     ("center" ,fountain-center-regexp
      ((3 0 nil)
-      (1 1 fountain-comment t)
-      (1 3 fountain-comment t)))
+      (2 1 fountain-comment t)
+      (2 3 fountain-comment t)))
     ("section" ,fountain-section-regexp
      ((2 0 nil)
-      (1 1 fountain-comment t)))
+      (2 1 fountain-comment t)))
     ("synopsis" ,fountain-synopsis-regexp
      ((2 0 nil)
-      (1 1 fountain-comment t)))
+      (2 1 fountain-comment t)))
     ("page-break" ,fountain-page-break-regexp
-     ((1 0 fountain-page-break)))
+     ((2 0 fountain-page-break)))
     ("metadata" fountain-match-metadata
      ((3 1 fountain-metadata-key nil t)
       (3 2 fountain-metadata-value nil t)
-      (1 0 fountain-comment keep)))
-    ("underline" ,fountain-underline-regexp
-     ((2 2 fountain-emphasis-delim append)
-      (2 3 underline append)
-      (2 4 fountain-emphasis-delim append)))
-    ("italic" ,fountain-italic-regexp
-     ((2 2 fountain-emphasis-delim append)
-      (2 3 italic append)
-      (2 4 fountain-emphasis-delim append)))
-    ("bold" ,fountain-bold-regexp
-     ((2 2 fountain-emphasis-delim append)
-      (2 3 bold append)
-      (2 4 fountain-emphasis-delim append))))
-  "List of face properties to use in creating Font Lock keywords.
+      (2 0 fountain-comment keep))))
+  "List of face properties to create element Font Lock keywords.
 
 Has the format:
 
@@ -1219,14 +1224,39 @@ FACE is either a face name to apply, or nil, which will generate
 a face name as \"fountain-ELEMENT\". OVERRIDE and LAXMATCH follow
 `font-lock-keywords'.")
 
-(defun fountain-create-font-lock-keywords ()
-  "Return a new list of `font-lock-mode' keywords.
-Uses `fountain-font-lock-keywords-plist' to create a list of
-keywords suitable for Font Lock."
-  (let ((plist fountain-font-lock-keywords-plist)
-        (dec (fountain-get-font-lock-decoration))
+(defvar fountain-font-lock-emphasis-keywords
+  `((,fountain-underline-regexp
+     ((2 2 fountain-emphasis-delim t)
+      (2 3 underline)
+      (2 4 fountain-emphasis-delim t)))
+    (,fountain-italic-regexp
+     ((2 2 fountain-emphasis-delim t)
+      (2 3 italic)
+      (2 4 fountain-emphasis-delim t)))
+    (,fountain-bold-regexp
+     ((2 2 fountain-emphasis-delim t)
+      (2 3 bold)
+      (2 4 fountain-emphasis-delim t))))
+  "List of face properties to create emphasis Font Lock keywords.
+
+Has the format:
+
+    (MATCHER LIST)
+
+The first element, MATCHER, is a regular expression or search
+function. LIST is a list of lists, each with the format:
+
+    (LEVEL SUBEXP FACE INVISIBLE)
+
+LEVEL, SUBEXP and FACE follow
+`fountain-font-lock-element-keywords'. INVISIBLE, if t, adds FACE
+to the \"invisible\" text property.")
+
+(defun fountain-create-element-keywords ()
+  "Create keywords from `fountain-font-lock-element-keywords'."
+  (let ((dec (fountain-get-font-lock-decoration))
         keywords)
-    (dolist (f plist keywords)
+    (dolist (f fountain-font-lock-element-keywords keywords)
       (let* ((element (car f))
              (matcher (nth 1 f))
              (list (nth 2 f))
@@ -1250,21 +1280,49 @@ keywords suitable for Font Lock."
                            (or (nth 2 f)
                                (intern (concat "fountain-" element)))))
                  ;; set the face OVERRIDE and LAXMATCH
-                 (invisible-props
-                  (if (eq face 'fountain-emphasis-delim)
-                      `(invisible fountain-emphasis-delim)))
                  (override (nth 3 f))
                  (laxmatch (nth 4 f)))
             (setq face-props
                   (append face-props
-                          `((,subexp '(face ,face
-                                            ,@align-props
-                                            ,@invisible-props
-                                            fountain-element ,element)
-                                     ,override ,laxmatch))))))
+                          (list `(,subexp '(face ,face
+                                                 ,@align-props
+                                                 fountain-element ,element)
+                                          ,override ,laxmatch))))))
         (setq keywords
-              (append keywords
-                      (list (cons matcher face-props))))))))
+              (cons (cons matcher face-props) keywords))))))
+
+(defun fountain-create-emphasis-keywords ()
+  "Create keywords from `fountain-font-lock-emphasis-keywords'."
+  (let ((dec (fountain-get-font-lock-decoration))
+        keywords)
+    (dolist (f fountain-font-lock-emphasis-keywords keywords)
+      (let* ((matcher (car f))
+             (list (nth 1 f))
+             face-props)
+        (dolist (f list)
+          (let* ((level (car f))
+                 (subexp (nth 1 f))
+                 (face (if (<= level dec)
+                           (nth 2 f)))
+                 ;; if invisible flag is t, set face to INVISIBLE prop
+                 (invisible (if (nth 3 f)
+                                face)))
+            (setq face-props
+                  (append face-props
+                          (list `(,subexp '(face ,face
+                                                 invisible ,invisible)
+                                          append))))))
+        (setq keywords
+              (cons (cons matcher face-props)
+                    keywords))))))
+
+(defun fountain-create-font-lock-keywords ()
+  "Return a new list of `font-lock-mode' keywords.
+Calls `fountain-create-element-keywords' and
+`fountain-create-emphasis-keywords' to create a list of keywords
+suitable for Font Lock."
+  (append (fountain-create-element-keywords)
+          (fountain-create-emphasis-keywords)))
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
@@ -1421,12 +1479,14 @@ keywords suitable for Font Lock."
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-comment)
-  (setq font-lock-defaults '((fountain-create-font-lock-keywords)
+  (setq font-lock-defaults '(fountain-create-font-lock-keywords
                              nil t))
   (setq font-lock-extra-managed-props '(line-prefix
                                         wrap-prefix
                                         invisible
                                         fountain-element))
+  (if fountain-hide-emphasis-delim
+      (add-to-invisibility-spec 'fountain-emphasis-delim))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
