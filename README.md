@@ -2,19 +2,17 @@ Fountain Mode
 =============
 
 Fountain Mode aims to be a full-featured screenwriting environment for
-GNU Emacs, using the Fountain markup format. For more information on
+GNU Emacs using the Fountain markup format. For more information on
 the Fountain markup format, visit <http://fountain.io>.
 
-![Fountain Mode screenshot][screenshot]
-
-[screenshot]: https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png
+![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png)
 
 Features
 --------
 
 - full support for the Fountain 1.1 specification
-- exporting to HTML and PDF (requires [Prince][prince]) with or
-  without a title page
+- exporting to HTML and PDF (requires [Prince][]) with or without a
+  title page
 - multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
   center text elements (display only, does not modify file contents)
@@ -32,11 +30,12 @@ The following features are not yet supported:
 
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`. Bugs and feature requests
-are encouraged on the [Issues][issues] page, or you can email me
+are encouraged on the [Issues][] page, or you can email me
 directly (email in the source code header).
 
-See the [Fountain Mode wiki][wiki] for ways to extend Fountain Mode.
+See the [wiki][] for ways to extend Fountain Mode.
 
+[prince]: http://www.princexml.com/ "Prince"
 [issues]: https://github.com/rnkn/fountain-mode/issues/ "Fountain Mode issues"
 [wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
 
@@ -45,18 +44,17 @@ Requirements
 
 - Emacs 24 (not tested on earlier versions, only tested on Mac OS X
   and Linux, not tested on Windows).
-- [s.el][] the long lost Emacs string manipulation library.
-- Exporting to PDF requires [Prince][prince], which is free for
-  personal use. Prince adds a removable PDF annotation on the first
-  page; if you don't like it, delete the annotation in a PDF
-  application that supports editing annotations, or open the PDF and
-  print to PDF, which will remove all annotations.
+- [s.el][], the long lost Emacs string manipulation library.
+- Exporting to PDF requires [Prince][], which is free for personal
+  use. Prince adds a removable PDF annotation on the first page; if
+  you don't like it, delete the annotation in a PDF application that
+  supports editing annotations, or open the PDF and print to PDF,
+  which will remove all annotations.
 - to insert UUIDs (useful for using notes as linked bookmarks) you'll
   need either `uuidgen` CLT (usually pre-installed on OS X and Linux)
   or [uuid.el][] Emacs package.
 
 [s.el]: https://github.com/magnars/s.el "s.el"
-[prince]: http://www.princexml.com/ "Prince"
 [uuid.el]: https://github.com/nicferrier/emacs-uuid "uuid.el"
 
 Installation
