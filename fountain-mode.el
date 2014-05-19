@@ -257,10 +257,10 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-trim-whitespace nil
-  "If non-nil, trim whitespace around elements."
-  :type 'boolean
-  :group 'fountain)
+;; (defcustom fountain-trim-whitespace nil
+;;   "If non-nil, trim whitespace around elements."
+;;   :type 'boolean
+;;   :group 'fountain)
 
 (defcustom fountain-align-character 20
   "Column integer to which character should be aligned.
