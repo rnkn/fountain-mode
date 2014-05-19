@@ -1088,37 +1088,37 @@ buffer (WARNING: this can be very slow)."
 
 (defconst fountain-font-lock-keywords-plist
   `(("note" ,fountain-note-regexp
-     ((0 nil)))
+     ((2 0 nil)))
     ("scene-heading" fountain-match-scene-heading
-     ((0 nil keep)
-      (1 fountain-comment t t)))
+     ((2 0 nil keep)
+      (1 1 fountain-comment t t)))
     ("character" fountain-match-character
-     ((0 nil)))
+     ((3 0 nil)))
     ("dialog" fountain-match-dialog
-     ((0 nil keep)))
+     ((3 0 nil keep)))
     ("paren" fountain-match-paren
-     ((0 nil keep)))
+     ((3 0 nil keep)))
     ("trans" fountain-match-trans
-     ((0 nil keep)
-      (1 fountain-comment t t)))
+     ((3 0 nil keep)
+      (1 1 fountain-comment t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
-     ((0 fountain-comment)))
+     ((1 0 fountain-comment)))
     ("center" ,fountain-center-regexp
-     ((0 nil)
-      (1 fountain-comment t)
-      (3 fountain-comment t)))
+     ((3 0 nil)
+      (1 1 fountain-comment t)
+      (1 3 fountain-comment t)))
     ("section" ,fountain-section-regexp
-     ((0 nil)
-      (1 fountain-comment t)))
+     ((2 0 nil)
+      (1 1 fountain-comment t)))
     ("synopsis" ,fountain-synopsis-regexp
-     ((0 nil)
-      (1 fountain-comment t)))
+     ((2 0 nil)
+      (1 1 fountain-comment t)))
     ("page-break" ,fountain-page-break-regexp
-     ((0 fountain-page-break)))
+     ((1 0 fountain-page-break)))
     ("metadata" fountain-match-metadata
-     ((1 fountain-metadata-key nil t)
-      (2 fountain-metadata-value nil t)
-      (0 fountain-comment keep))))
+     ((3 1 fountain-metadata-key nil t)
+      (3 2 fountain-metadata-value nil t)
+      (1 0 fountain-comment keep))))
   "List of face properties to use in creating Font Lock keywords.
 
 Has the format ELEMENT, a string name, MATCHER, a regular
@@ -1141,7 +1141,7 @@ keywords suitable for Font Lock."
              (subexp (nth 2 f))
              ;; if we're using max decoration, use highlight faces
              (hl (if (= dec 3) "-highlight"))
-             (align (intern (concat "fountain-align-" (car f))))
+             (align (intern (concat "fountain-align-" element)))
              ;; if we're using auto-align and the align var is bound,
              ;; set the align properties
              (align-props (if (and fountain-align-elements
@@ -1152,16 +1152,17 @@ keywords suitable for Font Lock."
                                 (space :align-to ,align))))
              face-props)
         (dolist (f subexp)
-          (let* ((n (car f))
+          (let* ((level (car f))
+                 (n (nth 1 f))
                  ;; if we're using no decoration, use nil
                  ;; if face is supplied, use that
                  ;; otherwise use the element string plus maybe highlight
-                 (face (cond ((= dec 1) nil)
-                             ((nth 1 f))
-                             ((intern (concat "fountain-" element hl)))))
+                 (face (if (<= level dec)
+                           (or (nth 2 f)
+                               (intern (concat "fountain-" element)))))
                  ;; set the face override
-                 (override (nth 2 f))
-                 (lax (nth 3 f)))
+                 (override (nth 3 f))
+                 (lax (nth 4 f)))
             (setq face-props
                   (append face-props
                           `((,n '(face ,face
