@@ -328,9 +328,15 @@ dialog.")
 
 There are three levels of Font Lock decoration:
 
-  1 - none, uses default face
-  2 - default, uses fountain-ELEMENT faces
-  3 - maximum, uses fountain-ELEMENT-highlight faces
+  1. minimum: only highlights comments and non-exporting text
+
+  2. default: highlights comments, metadata, scene headings,
+     sections, synopses, notes and non-exporting text
+
+  3. maximum: highlights comments, metadata keys, metadata
+     values, scene headings, sections, synopses, notes,
+     characters, parentheticals, dialog, transitions, center text
+     and non-exporting text
 
 To switch between these levels of Font Lock decoration, customize
 the value of `font-lock-maximum-decoration'. This can be set
@@ -1019,7 +1025,7 @@ buffer (WARNING: this can be very slow)."
                           (cons 'fountain-mode level))))
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (message "Syntax highlighting is now set at %s"
-           (cond ((eq level 1) "none")
+           (cond ((eq level 1) "minimum")
                  ((eq level 2) "default")
                  ((eq level 3) "maximum")))
   (font-lock-refresh-defaults))
@@ -1041,7 +1047,7 @@ buffer (WARNING: this can be very slow)."
 
 ;;; Font Lock ==========================================================
 
-(defconst fountain-font-lock-keywords-plist
+(defvar fountain-font-lock-keywords-plist
   `(("note" ,fountain-note-regexp
      ((2 0 nil)))
     ("scene-heading" fountain-match-scene-heading
@@ -1076,12 +1082,21 @@ buffer (WARNING: this can be very slow)."
       (1 0 fountain-comment keep))))
   "List of face properties to use in creating Font Lock keywords.
 
-Has the format ELEMENT, a string name, MATCHER, a regular
-expression or search function, and SUBEXP, a list of: N, the
-subexpression to match, FACE, the face to apply, if nil will
-apply fountain-ELEMENT or fountain-ELEMENT-highlight depending on
-the level of `font-lock-maximum-decoration', OVERRIDE and
-LAXMATCH, which follow `font-lock-keywords'.")
+Has the format:
+
+    (ELEMENT MATCHER LIST)
+
+The first element, ELEMENT, is a string naming the element.
+MATCHER is a regular expression or search function. LIST is a
+list of lists, each with the format:
+
+    (LEVEL SUBEXP FACE OVERRIDE LAXMATCH)
+
+LEVEL is an integer representing the Font Lock decoration level
+at which the face is applied. SUBEXP is the subexpression to match.
+FACE is either a face name to apply, or nil, which will generate
+a face name as \"fountain-ELEMENT\". OVERRIDE and LAXMATCH follow
+`font-lock-keywords'.")
 
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
@@ -1093,9 +1108,7 @@ keywords suitable for Font Lock."
     (dolist (f plist keywords)
       (let* ((element (car f))
              (matcher (nth 1 f))
-             (subexp (nth 2 f))
-             ;; if we're using max decoration, use highlight faces
-             (hl (if (= dec 3) "-highlight"))
+             (list (nth 2 f))
              (align (intern (concat "fountain-align-" element)))
              ;; if we're using auto-align and the align var is bound,
              ;; set the align properties
@@ -1106,24 +1119,24 @@ keywords suitable for Font Lock."
                                 wrap-prefix
                                 (space :align-to ,align))))
              face-props)
-        (dolist (f subexp)
+        (dolist (f list)
           (let* ((level (car f))
-                 (n (nth 1 f))
-                 ;; if we're using no decoration, use nil
-                 ;; if face is supplied, use that
-                 ;; otherwise use the element string plus maybe highlight
+                 (subexp (nth 1 f))
+                 ;; if LEVEL is less or equal to DEC, use either face
+                 ;; supplied in PLIST or intern fountain-ELEMENT,
+                 ;; otherwise use nil
                  (face (if (<= level dec)
                            (or (nth 2 f)
                                (intern (concat "fountain-" element)))))
-                 ;; set the face override
+                 ;; set the face OVERRIDE and LAXMATCH
                  (override (nth 3 f))
-                 (lax (nth 4 f)))
+                 (laxmatch (nth 4 f)))
             (setq face-props
                   (append face-props
-                          `((,n '(face ,face
-                                       ,@align-props
-                                       fountain-element ,element)
-                                ,override ,lax))))))
+                          `((,subexp '(face ,face
+                                            ,@align-props
+                                            fountain-element ,element)
+                                     ,override ,laxmatch))))))
         (setq keywords
               (append keywords
                       (list (cons matcher face-props))))))))
@@ -1201,15 +1214,15 @@ keywords suitable for Font Lock."
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     "---"
     ("Syntax Highlighting"
-     ["None" (fountain-set-font-lock-decoration 1)
+     ["Minimum" (fountain-set-font-lock-decoration 1)
       :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 1)]
+      :selected (= (fountain-get-font-lock-decoration) 1)]
      ["Default" (fountain-set-font-lock-decoration 2)
       :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 2)]
+      :selected (= (fountain-get-font-lock-decoration) 2)]
      ["Maximum" (fountain-set-font-lock-decoration 3)
       :style radio
-      :selected (eq (fountain-get-font-lock-decoration) 3)]
+      :selected (= (fountain-get-font-lock-decoration) 3)]
      "---"
      ["Save for Future Sessions" fountain-save-font-lock-decoration])
     "---"
