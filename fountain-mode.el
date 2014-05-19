@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.1.1
+;; Version: 1.2.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode/
 
@@ -47,7 +47,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "1.1.1")
+  "1.2.0")
 
 ;;; Obsolete Aliases ===================================================
 
@@ -86,6 +86,33 @@
 
 (define-obsolete-face-alias 'fountain-centered
   'fountain-center "1.1.0")
+
+(define-obsolete-face-alias 'fountain-scene-heading-highlight
+  'fountain-scene-heading "1.2.0")
+
+(define-obsolete-face-alias 'fountain-note-highlight
+  'fountain-note "1.2.0")
+
+(define-obsolete-face-alias 'fountain-section-highlight
+  'fountain-section "1.2.0")
+
+(define-obsolete-face-alias 'fountain-synopsis-highlight
+  'fountain-synopsis "1.2.0")
+
+(define-obsolete-face-alias 'fountain-center-highlight
+  'fountain-center "1.2.0")
+
+(define-obsolete-face-alias 'fountain-character-highlight
+  'fountain-character "1.2.0")
+
+(define-obsolete-face-alias 'fountain-paren-highlight
+  'fountain-paren "1.2.0")
+
+(define-obsolete-face-alias 'fountain-dialog-highlight
+  'fountain-dialog "1.2.0")
+
+(define-obsolete-face-alias 'fountain-trans-highlight
+  'fountain-trans "1.2.0")
 
 ;;; Customizable Options ===============================================
 
