@@ -455,17 +455,13 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
     s))
 
 (defun fountain-export-create-html-element (sub-s)
-  "Return an HTML element with face and substring of SUB-S.
-Stylesheet class is taken from face name, while content is taken
-from SUB-S."
+  "Return HTML element where class is \"fountain-element\" of SUB-S.
+CSS class is taken from \"fountain-element\" text property of
+SUB-S, while content is taken from SUB-S."
   (let* ((class
-          (if (get-text-property 0 'face sub-s)
-              (let* ((s (symbol-name (get-text-property 0 'face sub-s)))
-                     (s (s-chop-suffix "-highlight" s))
-                     (s (s-chop-prefix "fountain-" s))) s)
-            "action"))
-         (tag (if (string= class "scene-heading")
-                  "h2" "p"))
+          (or (get-text-property 0 'fountain-element sub-s)
+              "action"))
+         (tag (if (string= class "scene-heading") "h2" "p"))
          (content
           (let* ((s (substring-no-properties sub-s))
                  (s (fountain-export-filter s))
@@ -566,20 +562,23 @@ from SUB-S."
                  (symbol-value (intern var))))))
 
 (defun fountain-export-parse-buffer (destbuf)
-  "Find face changes in current buffer then insert elements into DESTBUF.
-First, find the next face property change from point, then pass
-substring between point and change to
+  "Find and insert elements into DESTBUF.
+First, skip forward to next available text, mark point as index,
+then find the next \"fountain-element\" text property change from
+index, then pass substring from index to change to
 `fountain-export-create-html-element', then insert the newly
 created HTML element to DESTBUF."
   (let ((job (make-progress-reporter "Parsing..." 0 100)))
     (goto-char (point-min))
     (while (null (eobp))
-      (skip-chars-forward "\n")
+      (while (looking-at "\n\s?\n?")
+        (goto-char (match-end 0)))
       (let* ((index (point))
              (limit (save-excursion
                       (re-search-forward "\n\s?\n\\|\\'" nil t)
                       (match-beginning 0)))
-             (change (next-single-property-change index 'face nil limit)))
+             (change (next-single-property-change
+                      index 'fountain-element nil limit)))
         (when change
           (let* ((s (buffer-substring index change))
                  (element (fountain-export-create-html-element s)))
