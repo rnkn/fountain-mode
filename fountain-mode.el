@@ -413,20 +413,16 @@ dialog.")
 
 ;;; Emphasis Regular Expressions =======================================
 
-(defconst fountain-emphasis-delim-regexp
-  "[^\\]\\([_*]+\\)"
-  "Regular expression for matching emphasis delimiters.")
-
 (defconst fountain-underline-regexp
-  "[^\\]_\\(.*?[^\\\n]\\)_"
+  "\\(\\`\\|[^\\]\\)\\(_\\)\\(.*?[^\\\n]\\)\\(_\\)"
   "Regular expression for matching underlined text.")
 
 (defconst fountain-italic-regexp
-  "[^\\]\\*\\(.*?[^\\\n]\\)\\*"
+  "\\(\\`\\|[^\\]\\)\\(\\*\\)\\(.*?[^\\\n]\\)\\(\\*\\)"
   "Regular expression for matching italic text.")
 
 (defconst fountain-bold-regexp
-  "[^\\]\\*\\{2\\}\\(.*?[^\\\n]\\)\\*\\{2\\}"
+  "\\(\\`\\|[^\\]\\)\\(\\*\\*\\)\\(.*?[^\\\n]\\)\\(\\*\\*\\)"
   "Regular expression for matching bold text.")
 
 ;;; Faces ==============================================================
@@ -455,6 +451,11 @@ with \\[fountain-save-font-lock-decoration]."
 (defface fountain-comment
   '((t (:inherit shadow)))
   "Default face for comments (boneyard)."
+  :group 'fountain-faces)
+
+(defface fountain-emphasis-delim
+  '((t (:inherit fountain-comment)))
+  "Default face for emphasis delimeters."
   :group 'fountain-faces)
 
 (defface fountain-metadata-key
@@ -1187,7 +1188,19 @@ buffer (WARNING: this can be very slow)."
     ("metadata" fountain-match-metadata
      ((3 1 fountain-metadata-key nil t)
       (3 2 fountain-metadata-value nil t)
-      (1 0 fountain-comment keep))))
+      (1 0 fountain-comment keep)))
+    ("underline" ,fountain-underline-regexp
+     ((2 2 fountain-emphasis-delim append)
+      (2 3 underline append)
+      (2 4 fountain-emphasis-delim append)))
+    ("italic" ,fountain-italic-regexp
+     ((2 2 fountain-emphasis-delim append)
+      (2 3 italic append)
+      (2 4 fountain-emphasis-delim append)))
+    ("bold" ,fountain-bold-regexp
+     ((2 2 fountain-emphasis-delim append)
+      (2 3 bold append)
+      (2 4 fountain-emphasis-delim append))))
   "List of face properties to use in creating Font Lock keywords.
 
 Has the format:
@@ -1237,12 +1250,16 @@ keywords suitable for Font Lock."
                            (or (nth 2 f)
                                (intern (concat "fountain-" element)))))
                  ;; set the face OVERRIDE and LAXMATCH
+                 (invisible-props
+                  (if (eq face 'fountain-emphasis-delim)
+                      `(invisible fountain-emphasis-delim)))
                  (override (nth 3 f))
                  (laxmatch (nth 4 f)))
             (setq face-props
                   (append face-props
                           `((,subexp '(face ,face
                                             ,@align-props
+                                            ,@invisible-props
                                             fountain-element ,element)
                                      ,override ,laxmatch))))))
         (setq keywords
@@ -1408,6 +1425,7 @@ keywords suitable for Font Lock."
                              nil t))
   (setq font-lock-extra-managed-props '(line-prefix
                                         wrap-prefix
+                                        invisible
                                         fountain-element))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
