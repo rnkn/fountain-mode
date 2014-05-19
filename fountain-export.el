@@ -282,6 +282,7 @@ p {
     margin-bottom: 1em;
     margin-left: 0;
     width: auto;
+    white-space: pre-wrap;
     orphans: 2;
     widows: 2;
 }
@@ -346,12 +347,10 @@ p {
   :group 'fountain-export)
 
 (defcustom fountain-export-html-head-template
-  "<!DOCTYPE html>
-<!-- Created with Emacs ${emacs-version} running Fountain Mode ${fountain-version} -->
-<html>
-<head>
+  "<head>
 <meta charset=\"${charset}\">
 <meta name=\"author\" content=\"${author}\" />
+<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
 <title>${title}</title>
 ${insert-style}
 </head>"
@@ -437,7 +436,6 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
   (let* ((s (s-replace-all '(("&" . "&amp;")
                              ("<" . "&lt;")
                              (">" . "&gt;")
-                             ("\s\s" . "&nbsp; ")
                              ("\\\s" . "&nbsp;")
                              ("\\_" . "&#95;")
                              ("\\*" . "&#42;")) s))
@@ -448,10 +446,10 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
                                  ("''" . "&rdquo;")
                                  ("`" . "&lsquo;")
                                  ("'" . "&rsquo;")) s)
-              s))
-         (s (if fountain-export-preserve-line-breaks
-                (s-replace "\n" "<br>\n" s)
               s)))
+         ;; (s (if fountain-export-preserve-line-breaks
+         ;;        (s-replace "\n" "<br>\n" s)
+         ;;      s)))
     s))
 
 (defun fountain-export-create-html-element (sub-s)
@@ -555,8 +553,10 @@ SUB-S, while content is taken from SUB-S."
   "Create the HTML head using `fountain-export-html-head-template'."
   (let ((insert-style (fountain-export-create-style))
         (charset "utf-8")
-        (title (fountain-export-get-metadata-value "title"))
-        (author (fountain-export-get-metadata-value "author")))
+        (title (or (fountain-export-get-metadata-value "title")
+                   (file-name-base (buffer-name))))
+        (author (or (fountain-export-get-metadata-value "author")
+                    user-full-name)))
     (s-format fountain-export-html-head-template
               '(lambda (var)
                  (symbol-value (intern var))))))
@@ -629,7 +629,8 @@ created HTML element to DESTBUF."
             (with-current-buffer destbuf
               (with-silent-modifications
                 (erase-buffer)
-                (insert head "\n")
+                (insert "<!DOCTYPE html>\n<html>\n"
+                        head "\n")
                 ;; close head and open body
                 (insert "<body>\n")
                 (if fountain-export-include-title-page
