@@ -474,15 +474,15 @@ bold-italic delimiters together, e.g.
   "Faces used in `fountain-mode'.
 There are three levels of Font Lock decoration:
 
-  1. minimum: only highlights comments and non-exporting text
+  1. minimum: only highlights comments and escaping characters
 
   2. default: highlights comments, metadata, scene headings,
-     sections, synopses, notes and non-exporting text
+     sections, synopses, notes and escaping characters
 
   3. maximum: highlights comments, metadata keys, metadata
      values, scene headings, sections, synopses, notes,
      characters, parentheticals, dialog, transitions, center text
-     and non-exporting text
+     and escaping characters
 
 To switch between these levels of Font Lock decoration, customize
 the value of `font-lock-maximum-decoration'. This can be set
@@ -498,7 +498,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 (defface fountain-non-printing
   '((t (:inherit fountain-comment)))
-  "Default face for emphasis delimiters."
+  "Default face for emphasis delimiters and escaping characters."
   :group 'fountain-faces)
 
 (defface fountain-metadata-key
@@ -1145,7 +1145,7 @@ message of \"S are now invisible/visible\"."
 
 (defun fountain-set-font-lock-decoration (level)
   "Set `font-lock-maximum-decoration' for `fountain-mode' to LEVEL."
-  (interactive "nMaximum Decoration (1-3): ")
+  (interactive "NMaximum Decoration (1-3): ")
   (let ((n font-lock-maximum-decoration))
     (cond ((or (booleanp n)
                (integerp n))
@@ -1196,7 +1196,7 @@ message of \"S are now invisible/visible\"."
      ((2 0 nil t)))
     ("scene-heading" fountain-match-scene-heading
      ((2 0 nil nil keep)
-      (2 1 fountain-comment fountain-escapes t t)))
+      (1 1 fountain-comment fountain-escapes t t)))
     ("character" fountain-match-character
      ((3 0 nil nil keep)))
     ("dialog" fountain-match-dialog
@@ -1205,45 +1205,45 @@ message of \"S are now invisible/visible\"."
      ((3 0 nil nil keep)))
     ("trans" fountain-match-trans
      ((3 0 nil nil keep)
-      (2 1 fountain-comment fountain-escapes t t)))
+      (1 1 fountain-comment fountain-escapes t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
-     ((2 0 fountain-comment fountain-escapes)))
+     ((1 0 fountain-comment fountain-escapes)))
     ("center" ,fountain-center-regexp
-     ((2 1 fountain-comment fountain-escapes)
+     ((1 1 fountain-comment fountain-escapes)
       (3 2 nil)
-      (2 3 fountain-comment fountain-escapes)))
+      (1 3 fountain-comment fountain-escapes)))
     ("section" ,fountain-section-regexp
      ((2 0 nil t)
-      (2 1 fountain-comment fountain-escapes t)))
+      (1 1 fountain-comment fountain-escapes t)))
     ("synopsis" ,fountain-synopsis-regexp
      ((2 0 nil t)
-      (2 1 fountain-comment fountain-escapes t)))
+      (1 1 fountain-comment fountain-escapes t)))
     ("page-break" ,fountain-page-break-regexp
      ((2 0 fountain-page-break)))
     ("metadata" fountain-match-metadata
      ((3 1 fountain-metadata-key t nil t)
       (3 2 fountain-metadata-value t nil t)
-      (2 0 fountain-comment t keep)))
+      (1 0 fountain-comment t keep)))
     (nil ,fountain-nbsp-regexp
-         ((2 1 fountain-non-printing fountain-escapes)))
+         ((1 1 fountain-non-printing fountain-escapes)))
     (nil ,fountain-underline-regexp
-         ((2 2 fountain-non-printing fountain-emphasis-delim)
+         ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 underline)
-          (2 4 fountain-non-printing fountain-emphasis-delim)))
+          (1 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-italic-regexp
-         ((2 2 fountain-non-printing fountain-emphasis-delim)
+         ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 italic)
-          (2 4 fountain-non-printing fountain-emphasis-delim)))
+          (1 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-bold-regexp
-         ((2 2 fountain-non-printing fountain-emphasis-delim)
+         ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 bold)
-          (2 4 fountain-non-printing fountain-emphasis-delim)))
+          (1 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-bold-italic-regexp
-         ((2 2 fountain-non-printing fountain-emphasis-delim)
+         ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 bold-italic)
-          (2 4 fountain-non-printing fountain-emphasis-delim)))
+          (1 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-lyrics-regexp
-         ((2 2 fountain-non-printing fountain-emphasis-delim)
+         ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 italic))))
   "List of face properties to create element Font Lock keywords.
 Has the format:
