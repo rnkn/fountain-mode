@@ -520,7 +520,7 @@ with \\[fountain-save-font-lock-decoration]."
   :group 'fountain-faces)
 
 (defface fountain-center
-  '((t (:inherit default)))
+  '((t nil))
   "Default face for centered text."
   :group 'fountain-faces)
 
@@ -1237,9 +1237,9 @@ message of \"S are now invisible/visible\"."
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
      ((2 0 fountain-comment fountain-escapes)))
     ("center" ,fountain-center-regexp
-     ((3 0 nil)
-      (2 1 fountain-comment fountain-escapes t)
-      (2 3 fountain-comment fountain-escapes t)))
+     ((2 1 fountain-comment fountain-escapes)
+      (3 2 nil)
+      (2 3 fountain-comment fountain-escapes)))
     ("section" ,fountain-section-regexp
      ((2 0 nil t)
       (2 1 fountain-comment fountain-escapes t)))
