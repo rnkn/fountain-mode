@@ -419,16 +419,37 @@ dialog.")
 ;;; Emphasis Regular Expressions =======================================
 
 (defconst fountain-underline-regexp
-  "\\(\\`\\|[^\\]\\)\\(_\\)\\(.*?[^\\\n]\\)\\(_\\)"
+  (concat "\\(^\\|[^\\]\\)"
+          "\\(_\\)"
+          "\\([^\s\t\n_]+?[^\n_]*?\\)"
+          "\\(\\2\\)")
   "Regular expression for matching underlined text.")
 
 (defconst fountain-italic-regexp
-  "\\(\\`\\|[^\\]\\)\\(\\*\\)\\(.*?[^\\\n]\\)\\(\\*\\)"
+  (concat "\\(^\\|[^\\\\*]\\)"
+          "\\(\\*\\)"
+          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\(\\2\\)")
   "Regular expression for matching italic text.")
 
 (defconst fountain-bold-regexp
-  "\\(\\`\\|[^\\]\\)\\(\\*\\*\\)\\(.*?[^\\\n]\\)\\(\\*\\*\\)"
+  (concat "\\(^\\|[^\\]\\)"
+          "\\(\\*\\{2\\}\\)"
+          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\(\\2\\)")
   "Regular expression for matching bold text.")
+
+(defconst fountain-bold-italic-regexp
+  (concat "\\(^\\|[^\\\\*]\\)"
+          "\\(\\*\\{3\\}\\)"
+          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\(\\2\\)")
+  "Regular expression for matching bold-italic text.")
+
+(defconst fountain-lyrics-regexp
+  (concat "^\\(?2:~\s*\\)"
+          "\\(?3:.+\\)")
+  "Regular expression for matching lyrics.")
 
 ;;; Faces ==============================================================
 
@@ -1217,7 +1238,14 @@ buffer (WARNING: this can be very slow)."
     (nil ,fountain-bold-regexp
          ((2 2 fountain-emphasis-delim t)
           (2 3 bold)
-          (2 4 fountain-emphasis-delim t))))
+          (2 4 fountain-emphasis-delim t)))
+    (nil ,fountain-bold-italic-regexp
+         ((2 2 fountain-emphasis-delim t)
+          (2 3 bold-italic)
+          (2 4 fountain-emphasis-delim t)))
+    (nil ,fountain-lyrics-regexp
+         ((2 2 fountain-emphasis-delim t)
+          (2 3 italic))))
   "List of face properties to create element Font Lock keywords.
 
 Has the format:
@@ -1267,8 +1295,8 @@ keywords suitable for Font Lock."
                  (face (if (<= level dec)
                            (or (nth 2 f)
                                (intern (concat "fountain-" element)))))
-                 (invisible (if (nth 3 f)
-                                face))
+                 (invisible-props (if (nth 3 f)
+                                      `(invisible ,face)))
                  ;; set the face OVERRIDE and LAXMATCH
                  (override (nth 4 f))
                  (laxmatch (nth 5 f)))
@@ -1280,10 +1308,11 @@ keywords suitable for Font Lock."
                                                      fountain-element ,element)
                                               ,override ,laxmatch))
                             (list `(,subexp '(face ,face
-                                                   invisible ,invisible)
+                                                   ,@invisible-props)
                                             append)))))))
         (setq keywords
-              (cons (cons matcher face-props) keywords))))))
+              (append keywords
+                      (list (cons matcher face-props))))))))
 
 (defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
