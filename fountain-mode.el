@@ -205,7 +205,7 @@
 
 (defcustom fountain-metadata-template
   "title: ${title}\ncredit: written by\nauthor: ${fullname}\ndraft: first\ndate: ${longtime}\ncontact: ${email}\n"
-  "Metadata template to be inserted at beginning of buffer.
+  "\\<fountain-mode-map>Template inserted at beginning of buffer with \\[fountain-insert-metadata].
 See `fountain-insert-template'."
   :type 'string
   :group 'fountain)
@@ -213,47 +213,50 @@ See `fountain-insert-template'."
 (defcustom fountain-scene-heading-prefix-list
   '("INT" "EXT" "I/E" "INT/EXT" "EST")
   "List of scene heading prefixes (case insensitive).
-
 Any scene heading prefix can be followed by a dot and/or a space,
 so the following are equivalent:
 
-INT HOUSE - DAY
+    INT HOUSE - DAY
 
-INT. HOUSE - DAY
+    INT. HOUSE - DAY
 
-INT./EXT. HOUSE - DAY"
+    INT./EXT. HOUSE - DAY"
   :type '(repeat (string :tag "Prefix"))
   :group 'fountain)
 
 (defcustom fountain-trans-list
   '("TO:" "WITH:" "FADE IN:" "FADE OUT" "TO BLACK")
   "List of transition endings (case insensitive).
-
 This list is used to match the endings of transitions,
 e.g. \"TO:\" will match both the following:
 
-CUT TO:
+    CUT TO:
 
-DISSOLVE TO:"
+    DISSOLVE TO:"
   :type '(repeat (string :tag "Transition"))
   :group 'fountain)
 
 (defcustom fountain-add-continued-dialog t
-  "If non-nil, mark continued dialog appropriately.
-
+  "\\<fountain-mode-map>If non-nil, add continued dialog appropriately with \\[fountain-continued-dialog-refresh].
 When same character speaks in succession, append
 `fountain-continued-dialog-string'."
   :type 'boolean
   :group 'fountain)
 
 (defcustom fountain-continued-dialog-string "CONT'D"
-  "String to append when same character speaks in succession.
-
+  "String to append to character name speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, append this string
 to character when speaking in succession.
 
 Parentheses are added automatically, e.g. \"CONT'D\" becomes
-\"(CONT'D)\""
+\"(CONT'D)\".
+
+WARNING: if you change this variable then call
+`fountain-continued-dialog-refresh', strings matching the
+previous value will not be recognized. Before changing this
+variable, first make sure to set `fountain-add-continued-dialog'
+to nil and run `fountain-continued-dialog-refresh', then make the
+changes desired."
   :type 'string
   :group 'fountain)
 
@@ -263,7 +266,7 @@ Parentheses are added automatically, e.g. \"CONT'D\" becomes
 ;;   :group 'fountain)
 
 (defcustom fountain-align-character 20
-  "Column integer to which character should be aligned.
+  "Column integer to which characters names should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
@@ -275,7 +278,7 @@ This option does not affect file contents."
   :group 'fountain)
 
 (defcustom fountain-align-paren 15
-  "Column integer to which parenthetical should be aligned.
+  "Column integer to which parentheticals should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
@@ -293,26 +296,23 @@ This option does not affect file contents."
   :group 'fountain)
 
 (defcustom fountain-align-elements t
-  "If non-nil, elements will be displayed aligned.
+  "If non-nil, elements will be displayed auto-aligned.
 This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
 (defcustom fountain-switch-comment-syntax nil
   "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
-
 Two syntaxes are supported:
 
-/* this text is a comment */
+    /* this text is a comment */
 
-// this text is
-// also a comment
+    // this text is
+    // also a comment
 
 Both syntax will be recognized as comments. This option changes
-the behaviour of the \\[comment-dwim] command.
-
-The default is the former but if you prefer the latter, set this
-option to non-nil."
+the behaviour of the \\[comment-dwim] command. The default is the
+former but if you prefer the latter, set this option to non-nil."
   :type 'boolean
   :group 'fountain)
 
@@ -337,7 +337,8 @@ option to non-nil."
   :group 'fountain)
 
 (defcustom fountain-note-template "${time} - ${fullname}: "
-  "Template for inserting notes. See `fountain-insert-template'.
+  "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
+See `fountain-insert-template'.
 
 The default \"${time} - ${fullname}: \" will insert something
 similar to:
@@ -349,7 +350,7 @@ similar to:
 (defcustom fountain-uuid-func
   '(lambda () (shell-command-to-string "uuidgen"))
   "Function for generating a UUID.
-The default funcation requires the command line tool \"uuidgen\"."
+The default function requires the command line tool \"uuidgen\"."
   :tag "Fountain UUID Function"
   :type 'function
   :group 'fountain)
@@ -357,7 +358,9 @@ The default funcation requires the command line tool \"uuidgen\"."
 ;;; Variables ==========================================================
 
 (defvar fountain-metadata nil
-  "Metadata alist in the form of (KEY . VALUE).")
+  "Metadata alist in the form of (KEY . VALUE).
+This buffer-local variable is set with `fountain-read-metadata'
+upon calling `fountain-mode' or saving a file.")
 
 ;;; Element Regular Expressions ========================================
 
@@ -389,14 +392,12 @@ Requires `fountain-metadata-p' for bobp.")
           (regexp-opt fountain-scene-heading-prefix-list)
           "[.\s\t]+.*\\)")
   "Regular expression for matching scene headings.
-Requires `fountain-scene-heading-p' for preceding and succeeding
-blank lines.")
+Requires `fountain-scene-heading-p' for preceding blank line.")
 
 (defconst fountain-paren-regexp
   "^[\s\t]*([^)\n]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
-Requires `fountain-paren-p' for preceding character or
-dialog.")
+Requires `fountain-paren-p' for preceding character or dialog.")
 
 (defconst fountain-page-break-regexp
   "^[\s\t]*=\\{3,\\}.*"
@@ -404,11 +405,11 @@ dialog.")
 
 (defconst fountain-note-regexp
   "\\[\\[\\(?:.\n?\\)*]]"
-  "Regular expression for matching comments.")
+  "Regular expression for matching notes.")
 
 (defconst fountain-section-regexp
   "^\\(#\\{1,5\\}[\s\t]*\\)\\([^#\n].*\\)"
-  "Regular expression for matching sections.")
+  "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
   "^\\(=[\s\t]*\\)\\([^=\n].*\\)"
@@ -419,7 +420,9 @@ dialog.")
           "^[\s\t]*\\(?2:[[:upper:]\s]*"
           (regexp-opt fountain-trans-list)
           "\\)$")
-  "Regular expression for matching transitions.")
+  "Regular expression for matching transitions.
+Requires `fountain-trans-p' for preceding and succeeding blank
+lines.")
 
 (defconst fountain-center-regexp
   "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
@@ -453,7 +456,12 @@ dialog.")
           "\\(\\*\\{3\\}\\)"
           "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
-  "Regular expression for matching bold-italic text.")
+  "Regular expression for matching bold-italic text.
+Due to the problematic nature of the syntax,
+bold-italic-underlined text must be specified with the
+bold-italic delimiters together, e.g.
+
+    This text is _***ridiculously important***_.")
 
 (defconst fountain-lyrics-regexp
   (concat "^\\(?2:~\s*\\)"
@@ -464,7 +472,6 @@ dialog.")
 
 (defgroup fountain-faces nil
   "Faces used in `fountain-mode'.
-
 There are three levels of Font Lock decoration:
 
   1. minimum: only highlights comments and non-exporting text
@@ -491,7 +498,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 (defface fountain-non-printing
   '((t (:inherit fountain-comment)))
-  "Default face for emphasis delimeters."
+  "Default face for emphasis delimiters."
   :group 'fountain-faces)
 
 (defface fountain-metadata-key
@@ -501,7 +508,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 (defface fountain-metadata-value
   '((t (:inherit match)))
-  "Default face for metadata keys."
+  "Default face for metadata values."
   :group 'fountain-faces)
 
 (defface fountain-page-break
@@ -530,7 +537,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 (defface fountain-section
   '((t (:inherit font-lock-builtin-face)))
-  "Default face for sections."
+  "Default face for section headings."
   :group 'fountain-faces)
 
 (defface fountain-synopsis
@@ -559,11 +566,6 @@ with \\[fountain-save-font-lock-decoration]."
 
 ;;; Internal Functions =================================================
 
-(defun fountain-get-line ()
-  "Return the line at point as a string."
-  (buffer-substring-no-properties
-   (line-beginning-position) (line-end-position)))
-
 (defun fountain-get-block-bounds ()
   "Return the beginning and end points of block at point."
   (let ((block-beginning
@@ -574,6 +576,7 @@ with \\[fountain-save-font-lock-decoration]."
            (re-search-forward fountain-blank-regexp nil t))))
     (cons block-beginning block-end)))
 
+;; currently unused
 (defun fountain-strip-comments (start end)
   "Strip comments between START and END and return string."
   (let ((start
@@ -617,7 +620,7 @@ with \\[fountain-save-font-lock-decoration]."
       (looking-at-p fountain-blank-regexp))))
 
 (defun fountain-metadata-p ()
-  "Return non-nil if point is at metadata."
+  "Match metadata if point is at metadata, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -629,7 +632,7 @@ with \\[fountain-save-font-lock-decoration]."
                  (fountain-metadata-p)))))))
 
 (defun fountain-section-p ()
-  "Return non-nil if point is at a section, nil otherwise."
+  "Match section heading if point is at section heading, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -637,7 +640,7 @@ with \\[fountain-save-font-lock-decoration]."
       (looking-at fountain-section-regexp))))
 
 (defun fountain-synopsis-p ()
-  "Return non-nil if point is at a synopsis, nil otherwise."
+  "Match synopsis if point is at synopsis, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -645,22 +648,21 @@ with \\[fountain-save-font-lock-decoration]."
       (looking-at fountain-synopsis-regexp))))
 
 (defun fountain-note-p ()
-  "Return non-nil if point is at a note, nil otherwise."
+  "Match note if point is at a note, nil otherwise."
   (thing-at-point-looking-at fountain-note-regexp))
 
 (defun fountain-comment-p ()
-  "Return non-nil if point is at a comment, nil otherwise."
+  "Match comment if point is at a comment, nil otherwise."
   ;; problems with comment-only-p picking up blank lines as comments
   ;;
   ;; (comment-only-p (line-beginning-position) (line-end-position)))
   (thing-at-point-looking-at fountain-comment-regexp))
-
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
 (defun fountain-invisible-p ()
   "Return non-nil if point is at an invisible element.
-A line is invisible if it is blank, or consists of a section,
-synopsis, note, or is within a comment."
+A line is invisible if it is blank, or consists of a section
+heading, synopsis, note, or is within a comment."
   (or (fountain-blank-p)
       (fountain-section-p)
       (fountain-synopsis-p)
@@ -668,7 +670,7 @@ synopsis, note, or is within a comment."
       (fountain-comment-p)))
 
 (defun fountain-scene-heading-p ()
-  "Return non-nil if point is at a scene heading, nil otherwise."
+  "Match scene heading if point is at a scene heading, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -678,37 +680,8 @@ synopsis, note, or is within a comment."
              (forward-line -1)
              (fountain-invisible-p))))))
 
-(defun fountain-get-character ()
-  "Return character if point is at a character, nil otherwise."
-  ;; (save-excursion
-  ;;   (save-restriction
-  ;;     (widen)
-  ;;     (when (s-present?
-  ;;            (fountain-strip-comments
-  ;;             (line-beginning-position) (line-end-position)))
-  ;;       (forward-line 0)
-  ;;       (unless (looking-at-p fountain-scene-heading-regexp)
-  ;;         (let* ((s (fountain-strip-comments
-  ;;                    (line-beginning-position) (line-end-position)))
-  ;;                (s (s-trim (car (s-slice-at "(\\|\\^" s))))
-  ;;                (s (s-presence s)))
-  ;;           (when (and s
-  ;;                      (or (s-uppercase? s)
-  ;;                          (s-starts-with? "@" s))
-  ;;                      (save-excursion
-  ;;                        (forward-line -1)
-  ;;                        (fountain-invisible-p))
-  ;;                      (save-excursion
-  ;;                        (forward-line 1)
-  ;;                        (unless (eobp)
-  ;;                          (null (fountain-invisible-p)))))
-  ;;             s)))))))
-  (if (fountain-character-p)
-      (let ((s (match-string-no-properties 0)))
-        (s-trim (car (s-slice-at "\\^\\|(" s))))))
-
 (defun fountain-character-p ()
-  "Return non-nil if point is at character, nil otherwise."
+  "Match character if point is at character, nil otherwise."
   (unless (or (fountain-blank-p)
               (fountain-scene-heading-p))
     (save-excursion
@@ -731,7 +704,7 @@ synopsis, note, or is within a comment."
                           (null (fountain-invisible-p))))))))))))
 
 (defun fountain-dialog-p ()
-  "Return non-nil if point is at dialog."
+  "Match dialog if point is at dialog, nil otherwise."
   (unless (or (fountain-blank-p)
               (fountain-paren-p)
               (fountain-note-p))
@@ -748,7 +721,7 @@ synopsis, note, or is within a comment."
                      (fountain-dialog-p)))))))))
 
 (defun fountain-paren-p ()
-  "Return non-nil if point is at a paranthetical."
+  "Match parenthetical if point is at a paranthetical, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -761,7 +734,7 @@ synopsis, note, or is within a comment."
                    (fountain-dialog-p))))))))
 
 (defun fountain-trans-p ()
-  "Return non-nil if point is at a transition."
+  "Match transition if point is at a transition, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -780,7 +753,7 @@ synopsis, note, or is within a comment."
                    (fountain-invisible-p))))))))
 
 (defun fountain-center-p ()
-  "Return non-nil if point is at centered text."
+  "Match centered text if point is at centered text, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -788,12 +761,12 @@ synopsis, note, or is within a comment."
       (looking-at fountain-center-regexp))))
 
 (defun fountain-read-metadata ()
-  "Read and set `fountain-metadata' alist."
+  "Read buffer metadata, set and return `fountain-metadata'."
+  (setq fountain-metadata nil)
   (save-excursion
     (save-restriction
       (widen)
       (goto-char (point-min))
-      (setq fountain-metadata nil)
       (while (fountain-metadata-p)
         (let ((key (downcase (match-string-no-properties 1)))
               (value
@@ -814,7 +787,7 @@ synopsis, note, or is within a comment."
       fountain-metadata)))
 
 (defun fountain-get-metadata-value (key)
-  "Return the value associated with KEY.
+  "Return the value associated with KEY in `fountain-metadata'.
 If there are multiple values, join by concatenating with
 newlines."
   (let ((value (cdr (assoc key fountain-metadata))))
@@ -824,7 +797,6 @@ newlines."
 
 (defun fountain-insert-template (template)
   "Format TEMPLATE according to the following list.
-
 To include an item in a template you must use the full \"${foo}\"
 syntax.
 
@@ -836,7 +808,7 @@ syntax.
     ${email}    User email (defined in `user-mail-address')
     ${uuid}     Insert a UUID (defined in `fountain-uuid-func')
 
-Optionally, use \"$m\" and \"$p\" to set the `mark' and `point',
+Optionally, use \"$m\" and \"$p\" to set the `mark' and `point'
 respectively, but only use one of each."
   (let ((start (point)))
     (insert (s-format template 'aget
@@ -858,33 +830,30 @@ respectively, but only use one of each."
         (goto-char end)))))
 
 (defun fountain-uuid ()
-  "Return a lowercase 8-digit UUID."
+  "Return a lowercase 8-digit UUID by calling `fountain-uuid-func'."
   (let ((s (downcase (funcall fountain-uuid-func))))
     (car (split-string s "-"))))
 
-;; could combine with `fountain-get-character' as optional N?
-(defun fountain-get-previous-character (n)
-  "Return Nth previous character within scene, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (while (> n 0)
-        (unless (fountain-scene-heading-p)
-          (forward-line -1))
-        (while (null (or (fountain-character-p)
-                         (fountain-scene-heading-p)
-                         (bobp)))
-          (forward-line -1))
-        (setq n (- n 1)))
-      (fountain-get-character))))
-
-(defun fountain-trim-whitespace ()
-  "Trim whitespace around line."
-  (let ((s (s-trim (fountain-get-line)))
-        (start (line-beginning-position))
-        (end (line-end-position)))
-    (insert-before-markers s)
-    (delete-region start end)))
+;; make N positive or negative...?
+(defun fountain-get-character (&optional n)
+  "Return character at point or Nth previous character.
+If N is non-nil, return Nth character previous to point. If N is
+nil or 0, return character at point, otherwise return nil."
+  (let ((i (or n 0)))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (while (> i 0)
+          (unless (fountain-scene-heading-p)
+            (forward-line -1))
+          (while (null (or (fountain-character-p)
+                           (fountain-scene-heading-p)
+                           (bobp)))
+            (forward-line -1))
+          (setq i (- i 1)))
+        (if (fountain-character-p)
+            (let ((s (match-string-no-properties 0)))
+              (s-trim (car (s-slice-at "\\^\\|(" s)))))))))
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
@@ -917,9 +886,9 @@ respectively, but only use one of each."
   (interactive)
   (message "Fountain Mode %s" fountain-version))
 
+;; not in use, delete?
 (defun fountain-upcase-line ()
   "Upcase the line."
-  ;; not in use, delete?
   (interactive)
   (upcase-region (line-beginning-position) (line-end-position)))
 
@@ -970,7 +939,7 @@ If N is 0, move to beginning of scene."
   (unless (eobp)
     (forward-char -1)))
 
-(defun fountain-mark-scene (&optional extend)
+(defun fountain-mark-scene ()
   "Put mark at end of this scene, point at beginning."
   (interactive "p")
   ;; (if (or extend
@@ -992,7 +961,7 @@ If N is 0, move to beginning of scene."
     (exchange-point-and-mark)))
 
 (defun fountain-insert-synopsis ()
-  "Open line below current scene heading and insert synopsis."
+  "Insert synopsis below scene heading of current scene."
   (interactive)
   (widen)
   (push-mark)
@@ -1015,7 +984,7 @@ If N is 0, move to beginning of scene."
       (insert "= "))))
 
 (defun fountain-insert-note (&optional arg)
-  "Insert a note as per `fountain-note-template'.
+  "Insert a note based on `fountain-note-template' underneath current element.
 If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]]\")."
   (interactive "P")
   (let ((comment-start "[[")
@@ -1032,7 +1001,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
       (fountain-insert-template fountain-note-template))))
 
 (defun fountain-insert-metadata ()
-  "Insert the metadata template at the beginning of file."
+  "Insert metadata based on `fountain-metadata-template' at the beginning of buffer."
   (interactive)
   (widen)
   (goto-char (point-min))
@@ -1060,16 +1029,19 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
 
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
-
 If `fountain-add-continued-dialog' is non-nil, add
 `fountain-continued-dialog-string' on characters speaking in
 succession, otherwise remove all occurences.
 
 If region is active, act on region, otherwise act on current
-scene.
+scene. If prefixed with \\[universal-argument], act on whole
+buffer (this can take a while).
 
-If prefixed with \\[universal-argument], act on whole
-buffer (WARNING: this can be very slow)."
+WARNING: if you change `fountain-continued-dialog-string' then
+call this function, strings matching the previous value will not
+be recognized. Before changing that variable, first make sure to
+set `fountain-add-continued-dialog' to nil and run this function,
+then make the changes desired."
   (interactive "P")
   (save-excursion
     (save-restriction
@@ -1099,10 +1071,10 @@ buffer (WARNING: this can be very slow)."
         (when fountain-add-continued-dialog
           (goto-char start)
           (while (< (point) end)
-            (when (and (null (s-ends-with? s (fountain-get-line)))
+            (when (and (null (looking-at-p (concat ".*" s "$")))
                        (fountain-character-p)
-                       (s-equals? (fountain-get-character)
-                                  (fountain-get-previous-character 1)))
+                       (s-equals? (fountain-get-character 0)
+                                  (fountain-get-character 1)))
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" s)))
             (forward-line 1)
@@ -1274,7 +1246,6 @@ message of \"S are now invisible/visible\"."
          ((2 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 italic))))
   "List of face properties to create element Font Lock keywords.
-
 Has the format:
 
     (ELEMENT MATCHER LIST)
@@ -1295,8 +1266,7 @@ LAXMATCH follow `font-lock-keywords'.")
 
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
-Uses `fountain-font-lock-element-keywords' and
-`fountain-font-lock-emphasis-keywords' to create a list of
+Uses `fountain-font-lock-keywords-plist' to create a list of
 keywords suitable for Font Lock."
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
