@@ -317,7 +317,7 @@ option to non-nil."
   :group 'fountain)
 
 (defcustom fountain-hide-emphasis-delim nil
-  "If non-nil, make emphasis delimeters invisible."
+  "If non-nil, make emphasis delimiters invisible."
   :type 'boolean
   :group 'fountain)
 
@@ -481,6 +481,7 @@ To switch between these levels of Font Lock decoration, customize
 the value of `font-lock-maximum-decoration'. This can be set
 indirectly with \\[fountain-set-font-lock-decoration] and saved
 with \\[fountain-save-font-lock-decoration]."
+  :prefix "fountain-"
   :group 'fountain)
 
 (defface fountain-comment
@@ -797,7 +798,7 @@ synopsis, note, or is within a comment."
         (let ((key (downcase (match-string-no-properties 1)))
               (value
                (progn
-                 (forward-line 1)       ; FIXME: on line ahead
+                 (forward-line 1)       ;FIXME: on line ahead
                  (or (match-string-no-properties 2)
                      (let (s)
                        (while (and (fountain-metadata-p)
@@ -1122,23 +1123,24 @@ buffer (WARNING: this can be very slow)."
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
-(defun fountain-toggle-hide-element (element s)
+(defun fountain-toggle-hide-element (element &optional s)
   "Toggle visibility of fountain-ELEMENT, using S for feedback.
 Toggles the value of fountain-hide-ELEMENT, then, if
 fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 `buffer-invisibility-spec', otherwise removes it. Returns a
 message of \"S are now invisible/visible\"."
-  (interactive)
-  (let ((option (intern (concat "fountain-hide-" element)))
-        (symbol (intern (concat "fountain-" element))))
+  (interactive "sElement: ")            ;FIXME: use autocomplete
+  (let* ((option (intern (concat "fountain-hide-" element)))
+         (symbol (intern (concat "fountain-" element))))
     (set option
          (null (symbol-value option)))
     (if (symbol-value option)
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
-    (message "%s are now %s"
-             s (if (symbol-value option)
-                   "invisible" "visible"))))
+    (if s
+        (message "%s are now %s"
+                 s (if (symbol-value option)
+                       "invisible" "visible")))))
 
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
@@ -1155,7 +1157,7 @@ message of \"S are now invisible/visible\"."
   (interactive)
   (setq fountain-add-continued-dialog
         (null fountain-add-continued-dialog))
-  (fountain-continued-dialog-refresh)
+  ;; (fountain-continued-dialog-refresh)
   (message "Continued dialog is now %s"
            (if fountain-add-continued-dialog
                "added" "removed")))
@@ -1197,6 +1199,14 @@ message of \"S are now invisible/visible\"."
   (interactive)
   (customize-save-variable 'font-lock-maximum-decoration
                            font-lock-maximum-decoration))
+
+(defun fountain-save-hidden-elements ()
+  "Save hidden element options in `custom-file'."
+  (interactive)
+  (customize-save-variable 'fountain-hide-emphasis-delim
+                           fountain-hide-emphasis-delim)
+  (customize-save-variable 'fountain-hide-escapes
+                           fountain-hide-escapes))
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
@@ -1411,32 +1421,6 @@ keywords suitable for Font Lock."
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     "---"
-    ("Syntax Highlighting"
-     ["Minimum" (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 1)]
-     ["Default" (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 2)]
-     ["Maximum" (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)]
-     "---"
-     ["Save for Future Sessions" fountain-save-font-lock-decoration])
-    "---"
-    ["Display Elements Auto-Aligned"
-     fountain-toggle-align-elements
-     :style toggle
-     :selected fountain-align-elements]
-    ["Add Continued Dialog"
-     fountain-toggle-add-continued-dialog
-     :style toggle
-     :selected fountain-add-continued-dialog]
-    ["Switch Default Comment Syntax"
-     fountain-toggle-comment-syntax
-     :style toggle
-     :selected fountain-switch-comment-syntax]
-    "---"
     ("Export"
      ["Default" fountain-export-default]
      "---"
@@ -1461,21 +1445,48 @@ keywords suitable for Font Lock."
       :style toggle
       :selected fountain-export-double-space-scene-headings]
      "---"
-     ["Customize Export Group" (customize-group 'fountain-export)])
+     ["Customize Exporting" (customize-group 'fountain-export)])
+    "---"
+    ["Display Elements Auto-Aligned"
+     fountain-toggle-align-elements
+     :style toggle
+     :selected fountain-align-elements]
+    ["Add Continued Dialog"
+     fountain-toggle-add-continued-dialog
+     :style toggle
+     :selected fountain-add-continued-dialog]
+    ["Switch Default Comment Syntax"
+     fountain-toggle-comment-syntax
+     :style toggle
+     :selected fountain-switch-comment-syntax]
+    "---"
+    ("Syntax Highlighting"
+     ["Minimum" (fountain-set-font-lock-decoration 1)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 1)]
+     ["Default" (fountain-set-font-lock-decoration 2)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 2)]
+     ["Maximum" (fountain-set-font-lock-decoration 3)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 3)]
+     "---"
+     ["Save for Future Sessions" fountain-save-font-lock-decoration])
+    ("Show/Hide"
+     ["Hide Emphasis Delimiters"
+      (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")
+      :style toggle
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Escaping Characters"
+      (fountain-toggle-hide-element "escapes" "Escaping characters")
+      :style toggle
+      :selected fountain-hide-escapes]
+     "---"
+     ["Save for Future Sessions" fountain-save-hidden-elements])
     "---"
     ("Go To"
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene])
-    "---"
-    ("Show/Hide"
-     ["Emphasis Delimiters"
-      (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")
-      :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Escaping Characters"
-      (fountain-toggle-hide-element "escapes" "Escaping characters")
-      :style toggle
-      :selected fountain-hide-escapes])
     "---"
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
@@ -1510,6 +1521,8 @@ keywords suitable for Font Lock."
         '(line-prefix wrap-prefix invisible fountain-element))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
+  (if fountain-hide-escapes
+      (add-to-invisibility-spec 'fountain-escapes))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
