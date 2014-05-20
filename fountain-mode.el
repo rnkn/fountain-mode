@@ -1484,9 +1484,14 @@ keywords suitable for Font Lock."
      "---"
      ["Save for Future Sessions" fountain-save-hidden-elements])
     "---"
-    ("Go To"
+    ("Navigate"
      ["Next Scene Heading" fountain-forward-scene]
-     ["Previous Scene Heading" fountain-backward-scene])
+     ["Previous Scene Heading" fountain-backward-scene]
+     "---"
+     ["Section Navigator" fountain-occur-sections]
+     ["Synopsis Navigator" fountain-occur-synopses]
+     ["Notes Navigator" fountain-occur-notes]
+     ["Scene Navigator" fountain-occur-scene-headings])
     "---"
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
