@@ -321,6 +321,11 @@ option to non-nil."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-hide-escapes nil
+  "If non-nil, make escaping characters invisible."
+  :type 'boolean
+  :group 'fountain)
+
 (defcustom fountain-short-time-format "%x"
   "Format of date and time. See `format-time-string'."
   :type 'string
@@ -363,6 +368,10 @@ The default funcation requires the command line tool \"uuidgen\"."
 (defconst fountain-forced-action-mark-regexp
   "^!"
   "Regular expression for forced action mark.")
+
+(defconst fountain-nbsp-regexp
+  "\\(\\\\\\)\s"
+  "Regular expression for non-breaking space.")
 
 (defconst fountain-comment-regexp
   "//.*\\|/\\*\\(.\\|\n\\)*?\\*/"
@@ -479,7 +488,7 @@ with \\[fountain-save-font-lock-decoration]."
   "Default face for comments (boneyard)."
   :group 'fountain-faces)
 
-(defface fountain-emphasis-delim
+(defface fountain-non-printing
   '((t (:inherit fountain-comment)))
   "Default face for emphasis delimeters."
   :group 'fountain-faces)
@@ -1125,6 +1134,18 @@ buffer (WARNING: this can be very slow)."
            (if fountain-hide-emphasis-delim
                "invisible" "visible")))
 
+(defun fountain-toggle-hide-escapes ()
+  "Toggle `fountain-hide-escapes'."
+  (interactive)
+  (setq fountain-hide-escapes
+        (null fountain-hide-escapes))
+  (if fountain-hide-escapes
+      (add-to-invisibility-spec 'fountain-escapes)
+    (remove-from-invisibility-spec 'fountain-escapes))
+  (message "Escapes are now %s"
+           (if fountain-hide-escapes
+               "invisible" "visible")))
+
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
   (interactive)
@@ -1196,10 +1217,10 @@ buffer (WARNING: this can be very slow)."
 
 (defvar fountain-font-lock-keywords-plist
   `(("note" ,fountain-note-regexp
-     ((2 0 nil)))
+     ((2 0 nil t)))
     ("scene-heading" fountain-match-scene-heading
      ((2 0 nil nil keep)
-      (2 1 fountain-comment nil t t)))
+      (2 1 fountain-comment fountain-escapes t t)))
     ("character" fountain-match-character
      ((3 0 nil nil keep)))
     ("dialog" fountain-match-dialog
@@ -1208,43 +1229,45 @@ buffer (WARNING: this can be very slow)."
      ((3 0 nil nil keep)))
     ("trans" fountain-match-trans
      ((3 0 nil nil keep)
-      (2 1 fountain-comment nil t t)))
+      (2 1 fountain-comment fountain-escapes t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
-     ((2 0 fountain-comment nil)))
+     ((2 0 fountain-comment fountain-escapes)))
     ("center" ,fountain-center-regexp
      ((3 0 nil)
-      (2 1 fountain-comment nil t)
-      (2 3 fountain-comment nil t)))
+      (2 1 fountain-comment fountain-escapes t)
+      (2 3 fountain-comment fountain-escapes t)))
     ("section" ,fountain-section-regexp
-     ((2 0 nil)
-      (2 1 fountain-comment nil t)))
+     ((2 0 nil t)
+      (2 1 fountain-comment fountain-escapes t)))
     ("synopsis" ,fountain-synopsis-regexp
-     ((2 0 nil)
-      (2 1 fountain-comment nil t)))
+     ((2 0 nil t)
+      (2 1 fountain-comment fountain-escapes t)))
     ("page-break" ,fountain-page-break-regexp
      ((2 0 fountain-page-break)))
     ("metadata" fountain-match-metadata
-     ((3 1 fountain-metadata-key nil nil t)
-      (3 2 fountain-metadata-value nil nil t)
-      (2 0 fountain-comment nil keep)))
+     ((3 1 fountain-metadata-key t nil t)
+      (3 2 fountain-metadata-value t nil t)
+      (2 0 fountain-comment t keep)))
+    (nil ,fountain-nbsp-regexp
+         ((2 1 fountain-non-printing fountain-escapes)))
     (nil ,fountain-underline-regexp
-         ((2 2 fountain-emphasis-delim t)
+         ((2 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 underline)
-          (2 4 fountain-emphasis-delim t)))
+          (2 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-italic-regexp
-         ((2 2 fountain-emphasis-delim t)
+         ((2 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 italic)
-          (2 4 fountain-emphasis-delim t)))
+          (2 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-bold-regexp
-         ((2 2 fountain-emphasis-delim t)
+         ((2 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 bold)
-          (2 4 fountain-emphasis-delim t)))
+          (2 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-bold-italic-regexp
-         ((2 2 fountain-emphasis-delim t)
+         ((2 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 bold-italic)
-          (2 4 fountain-emphasis-delim t)))
+          (2 4 fountain-non-printing fountain-emphasis-delim)))
     (nil ,fountain-lyrics-regexp
-         ((2 2 fountain-emphasis-delim t)
+         ((2 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 italic))))
   "List of face properties to create element Font Lock keywords.
 
@@ -1295,8 +1318,13 @@ keywords suitable for Font Lock."
                  (face (if (<= level dec)
                            (or (nth 2 f)
                                (intern (concat "fountain-" element)))))
-                 (invisible-props (if (nth 3 f)
-                                      `(invisible ,face)))
+                 ;; if INVISIBLE is non-nil, add to INVISIBLE-PROPS
+                 (invisible (nth 3 f))
+                 (invisible-props
+                  (cond ((eq invisible t)
+                         `(invisible ,(intern (concat "fountain-" element))))
+                        (invisible
+                         `(invisible ,invisible))))
                  ;; set the face OVERRIDE and LAXMATCH
                  (override (nth 4 f))
                  (laxmatch (nth 5 f)))
@@ -1305,6 +1333,7 @@ keywords suitable for Font Lock."
                           (if element
                               (list `(,subexp '(face ,face
                                                      ,@align-props
+                                                     ,@invisible-props
                                                      fountain-element ,element)
                                               ,override ,laxmatch))
                             (list `(,subexp '(face ,face
@@ -1446,7 +1475,10 @@ keywords suitable for Font Lock."
     ("Show/Hide"
      ["Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
       :style toggle
-      :selected fountain-hide-emphasis-delim])
+      :selected fountain-hide-emphasis-delim]
+     ["Escaping Characters" fountain-toggle-hide-escapes
+      :style toggle
+      :selected fountain-hide-escapes])
     "---"
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
