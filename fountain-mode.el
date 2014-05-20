@@ -1414,6 +1414,11 @@ keywords suitable for Font Lock."
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene])
     "---"
+    ("Show/Hide"
+     ["Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+      :style toggle
+      :selected fountain-hide-emphasis-delim])
+    "---"
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
