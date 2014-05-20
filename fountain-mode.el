@@ -1122,29 +1122,23 @@ buffer (WARNING: this can be very slow)."
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
-(defun fountain-toggle-hide-emphasis-delim ()
-  "Toggle `fountain-hide-emphasis-delim'."
+(defun fountain-toggle-hide-element (element s)
+  "Toggle visibility of fountain-ELEMENT, using S for feedback.
+Toggles the value of fountain-hide-ELEMENT, then, if
+fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
+`buffer-invisibility-spec', otherwise removes it. Returns a
+message of \"S are now invisible/visible\"."
   (interactive)
-  (setq fountain-hide-emphasis-delim
-        (null fountain-hide-emphasis-delim))
-  (if fountain-hide-emphasis-delim
-      (add-to-invisibility-spec 'fountain-emphasis-delim)
-    (remove-from-invisibility-spec 'fountain-emphasis-delim))
-  (message "Emphasis delimeters are now %s"
-           (if fountain-hide-emphasis-delim
-               "invisible" "visible")))
-
-(defun fountain-toggle-hide-escapes ()
-  "Toggle `fountain-hide-escapes'."
-  (interactive)
-  (setq fountain-hide-escapes
-        (null fountain-hide-escapes))
-  (if fountain-hide-escapes
-      (add-to-invisibility-spec 'fountain-escapes)
-    (remove-from-invisibility-spec 'fountain-escapes))
-  (message "Escapes are now %s"
-           (if fountain-hide-escapes
-               "invisible" "visible")))
+  (let ((option (intern (concat "fountain-hide-" element)))
+        (symbol (intern (concat "fountain-" element))))
+    (set option
+         (null (symbol-value option)))
+    (if (symbol-value option)
+        (add-to-invisibility-spec symbol)
+      (remove-from-invisibility-spec symbol))
+    (message "%s are now %s"
+             s (if (symbol-value option)
+                   "invisible" "visible"))))
 
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
@@ -1275,9 +1269,10 @@ Has the format:
 
     (ELEMENT MATCHER LIST)
 
-The first element, ELEMENT, is a string naming the element.
-MATCHER is a regular expression or search function. LIST is a
-list of lists, each with the format:
+The first element, ELEMENT, is a string naming the element; if
+nil, this face is not considered an element. MATCHER is a regular
+expression or search function. LIST is a list of lists, each with
+the format:
 
     (LEVEL SUBEXP FACE INVISIBLE OVERRIDE LAXMATCH)
 
@@ -1473,10 +1468,12 @@ keywords suitable for Font Lock."
      ["Previous Scene Heading" fountain-backward-scene])
     "---"
     ("Show/Hide"
-     ["Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+     ["Emphasis Delimiters"
+      (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")
       :style toggle
       :selected fountain-hide-emphasis-delim]
-     ["Escaping Characters" fountain-toggle-hide-escapes
+     ["Escaping Characters"
+      (fountain-toggle-hide-element "escapes" "Escaping characters")
       :style toggle
       :selected fountain-hide-escapes])
     "---"
