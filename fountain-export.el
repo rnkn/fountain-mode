@@ -105,26 +105,26 @@ Otherwise, use an external stylesheet file."
 
 (defcustom fountain-export-prepare-html nil
   "If non-nil, auto-indent HTML elements during export.
-This if off by default because it can take a long time for a
-minimal benefit."
+Off by default because it can take a long time for minimal
+benefit."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-preserve-line-breaks t
-  "If non-nil, convert all newlines into line breaks.
-Otherwise, only break paragraphs at explicit line breaks (one or
-more blank lines)."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-preserve-line-breaks t
+;;   "If non-nil, convert all newlines into line breaks.
+;; Otherwise, only break paragraphs at explicit line breaks (one or
+;; more blank lines)."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
 (defcustom fountain-export-convert-quotes nil
   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
 
-\`\`foobar\'\'
+    \`\`foobar\'\'
 
 will be exported as
 
-&ldquo;foobar&rdquol;"
+    &ldquo;foobar&rdquol;"
   :type 'boolean
   :group 'fountain-export)
 
@@ -354,7 +354,7 @@ p {
 <title>${title}</title>
 ${insert-style}
 </head>"
-  "HTML template inserted into export buffer.
+  "HTML head template inserted into export buffer.
 Currently, ${charset} will default to UTF-8."
   :type 'string
   :group 'fountain-export)
@@ -364,12 +364,9 @@ Currently, ${charset} will default to UTF-8."
 (defun fountain-export-fontify-buffer ()
   "If `font-lock-mode' is enables, fontify entire buffer."
   (if font-lock-mode
-      (let ((jit-lock-functions '(font-lock-fontify-region))
-            (font-lock-maximum-decoration t)
-            (job (make-progress-reporter "Fontifying..." 0 100))
+      (let ((job (make-progress-reporter "Fontifying..." 0 100))
             (chunk (/ (buffer-size) 100))
             (n 0))
-        (font-lock-refresh-defaults)
         (save-excursion
           (goto-char (point-min))
           (while (not (eobp))
@@ -477,19 +474,20 @@ SUB-S, while content is taken from SUB-S."
          (s (if (listp value)
                 (s-join "\n" value)
               value))
+         ;; lexical value no longer has any effect
          (s (let ((fountain-export-preserve-line-breaks t))
               (fountain-export-filter s))))
     s))
 
 (defun fountain-export-create-title-page-element (key)
-  "Like `fountain-get-metadata-value' but creates HTML element."
+  "Gets metadata value associated with KEY and creates HTML element."
   (let ((content (fountain-export-get-metadata-value key)))
     (if (string= key "title")
         (format "<h1>%s</h1>" content)
       (format "<p>%s</p>" content))))
 
 (defun fountain-export-create-html-title-page ()
-  "Create the title page using `fountain-export-title-page-template'."
+  "Create title page based on `fountain-export-title-page-template'."
   (concat
    "<div id=\"title\">\n"
    (s-format fountain-export-title-page-title-template
@@ -503,7 +501,7 @@ SUB-S, while content is taken from SUB-S."
    "\n</div>\n"))
 
 (defun fountain-export-create-style ()
-  "Create stylesheet using `fountain-export-styles-template'."
+  "Create stylesheet using `fountain-export-style-template'."
   (let* ((page-size fountain-export-page-size)
          (font
           (mapconcat
@@ -550,7 +548,7 @@ SUB-S, while content is taken from SUB-S."
                 "\">")))))
 
 (defun fountain-export-create-html-head ()
-  "Create the HTML head using `fountain-export-html-head-template'."
+  "Create HTML head using `fountain-export-html-head-template'."
   (let ((insert-style (fountain-export-create-style))
         (charset "utf-8")
         (title (or (fountain-export-get-metadata-value "title")
@@ -649,8 +647,6 @@ created HTML element to DESTBUF."
           ;; signal completion and return DESTBUF
           (setq complete t)
           destbuf)
-      ;; always refresh defaults
-      (font-lock-refresh-defaults)
       ;; if error occurs, kill the unsaved buffer
       (unless complete
         (kill-buffer destbuf)))))
@@ -687,7 +683,7 @@ created HTML element to DESTBUF."
 ;;; Interactive Functions ==============================================
 
 (defun fountain-export-default ()
-  "Call the function defined in `fountain-export-default-command'"
+  "Call function defined in `fountain-export-default-command'"
   (interactive)
   (funcall fountain-export-default-command))
 
