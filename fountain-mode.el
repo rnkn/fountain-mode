@@ -1195,18 +1195,26 @@ message of \"S are now invisible/visible\"."
 (defvar fountain-font-lock-keywords-plist
   `(("note" ,fountain-note-regexp
      ((2 0 nil t)))
-    ("scene-heading" fountain-match-scene-heading
-     ;; how to use sinlge match-element fn?
-     ;; (lambda (limit) (fountain-match-element fountain-scene-heading-p limit))
+    ("scene-heading"
+     (lambda (limit)
+       (fountain-match-element 'fountain-scene-heading-p limit))
      ((2 0 nil nil keep)
       (1 1 fountain-comment fountain-escapes t t)))
-    ("character" fountain-match-character
+    ("character"
+     (lambda (limit)
+       (fountain-match-element 'fountain-character-p limit))
      ((3 0 nil nil keep)))
-    ("dialog" fountain-match-dialog
+    ("dialog"
+     (lambda (limit)
+       (fountain-match-element 'fountain-dialog-p limit))
      ((3 0 nil nil keep)))
-    ("paren" fountain-match-paren
+    ("paren"
+     (lambda (limit)
+       (fountain-match-element 'fountain-paren-p limit))
      ((3 0 nil nil keep)))
-    ("trans" fountain-match-trans
+    ("trans"
+     (lambda (limit)
+       (fountain-match-element 'fountain-trans-p limit))
      ((3 0 nil nil keep)
       (1 1 fountain-comment fountain-escapes t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
@@ -1223,7 +1231,9 @@ message of \"S are now invisible/visible\"."
       (1 1 fountain-comment fountain-escapes t)))
     ("page-break" ,fountain-page-break-regexp
      ((2 0 fountain-page-break)))
-    ("metadata" fountain-match-metadata
+    ("metadata"
+     (lambda (limit)
+       (fountain-match-element 'fountain-metadata-p limit))
      ((3 1 fountain-metadata-key t nil t)
       (3 2 fountain-metadata-value t nil t)
       (1 0 fountain-comment t keep)))
@@ -1330,31 +1340,6 @@ keywords suitable for Font Lock."
           (setq match t))
       (forward-line 1))
     match))
-
-;; these could probably be a single function?
-(defun fountain-match-scene-heading (limit)
-  "Call `fountain-match-element' with `fountain-scene-heading-p'."
-  (fountain-match-element 'fountain-scene-heading-p limit))
-
-(defun fountain-match-character (limit)
-  "Call `fountain-match-element' with `fountain-character-p'"
-  (fountain-match-element 'fountain-character-p limit))
-
-(defun fountain-match-paren (limit)
-  "Call `fountain-match-element' with `fountain-paren-p'"
-  (fountain-match-element 'fountain-paren-p limit))
-
-(defun fountain-match-dialog (limit)
-  "Call `fountain-match-element' with `fountain-dialog-p'"
-  (fountain-match-element 'fountain-dialog-p limit))
-
-(defun fountain-match-trans (limit)
-  "Call `fountain-match-element' with `fountain-trans-p'"
-  (fountain-match-element 'fountain-trans-p limit))
-
-(defun fountain-match-metadata (limit)
-  "Call `fountain-match-element' with `fountain-metadata-p'"
-  (fountain-match-element 'fountain-metadata-p limit))
 
 ;;; Mode Map ===========================================================
 
