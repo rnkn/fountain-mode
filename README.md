@@ -10,22 +10,24 @@ the Fountain markup format, visit <http://fountain.io>.
 Features
 --------
 
-- full support for the Fountain 1.1 specification
-- exporting to HTML and PDF (requires [Prince][]) with or without a
-  title page
+- support for the Fountain 1.1 specification
+- exporting to HTML and PDF (requires [Prince][])
+- include or omit a title page
 - multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
   center text elements (display only, does not modify file contents)
 - add/remove continued dialog to successively speaking characters
-- `occur` navigator for sections, synopses, notes and scene headings
+- `occur` navigator for section headings, synopses, notes and scene
+  headings
 - templates for inserting synopses, notes and metadata
 - navigate by scene heading
+- suppoort for emphasis (bold, italic, underlined text)
+- toggle visibility of emphasis delimiters and escaping characters
 - standard commenting (boneyard) behaviour
 - everything is customizable, of course
 
 The following features are not yet supported:
 
-- syntax highlighting for emphasis (but exporting works)
 - dual dialogue (probably won't be supported because it's stupid)
 
 Most common features are accessible from the menu. For a full list of
