@@ -1001,7 +1001,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
       (fountain-insert-template fountain-note-template))))
 
 (defun fountain-insert-metadata ()
-  "Insert metadata based on `fountain-metadata-template' at the beginning of buffer."
+  "Insert metadata based on `fountain-metadata-template' at bobp."
   (interactive)
   (widen)
   (goto-char (point-min))
