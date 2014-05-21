@@ -1109,6 +1109,7 @@ message of \"S are now invisible/visible\"."
     (if (symbol-value option)
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
+    (jit-lock-refontify)
     (if s
         (message "%s are now %s"
                  s (if (symbol-value option)
@@ -1195,6 +1196,8 @@ message of \"S are now invisible/visible\"."
   `(("note" ,fountain-note-regexp
      ((2 0 nil t)))
     ("scene-heading" fountain-match-scene-heading
+     ;; how to use sinlge match-element fn?
+     ;; (lambda (limit) (fountain-match-element fountain-scene-heading-p limit))
      ((2 0 nil nil keep)
       (1 1 fountain-comment fountain-escapes t t)))
     ("character" fountain-match-character
@@ -1357,8 +1360,15 @@ keywords suitable for Font Lock."
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
+    ;; editing commands
     (define-key map (kbd "C-c C-m") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") 'fountain-upcase-line-and-newline)
+    (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
+    (define-key map (kbd "C-c C-z") 'fountain-insert-note)
+    (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
+    (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
+    (define-key map (kbd "C-c C-x f") 'fountain-set-font-lock-decoration)
+    ;; navigation commands
     (define-key map (kbd "M-n") 'fountain-forward-scene)
     (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
@@ -1366,14 +1376,19 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-M-a") 'fountain-beginning-of-scene)
     (define-key map (kbd "C-M-e") 'fountain-end-of-scene)
     (define-key map (kbd "C-M-h") 'fountain-mark-scene)
-    (define-key map (kbd "C-c C-c") 'fountain-continued-dialog-refresh)
-    (define-key map (kbd "C-c C-z") 'fountain-insert-note)
-    (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
+    ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e p") 'fountain-export-buffer-to-pdf-via-html)
-    (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
-    (define-key map (kbd "C-c C-x f") 'fountain-set-font-lock-decoration)
+    ;; view commands
+    (define-key map (kbd "C-c C-x \\")
+      (lambda ()
+        (interactive)
+        (fountain-toggle-hide-element "escapes" "Escaping characters")))
+    (define-key map (kbd "C-c C-x *")
+      (lambda ()
+        (interactive)
+        (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")))
     (define-key map (kbd "M-s 1") 'fountain-occur-sections)
     (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
     (define-key map (kbd "M-s 3") 'fountain-occur-notes)
@@ -1446,11 +1461,13 @@ keywords suitable for Font Lock."
      ["Hide Emphasis Delimiters"
       (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")
       :style toggle
-      :selected fountain-hide-emphasis-delim]
+      :selected fountain-hide-emphasis-delim
+      :keys "C-c C-x *"]
      ["Hide Escaping Characters"
       (fountain-toggle-hide-element "escapes" "Escaping characters")
       :style toggle
-      :selected fountain-hide-escapes]
+      :selected fountain-hide-escapes
+      :keys "C-c C-x \\"]
      "---"
      ["Save for Future Sessions" fountain-save-hidden-elements])
     "---"
@@ -1458,10 +1475,10 @@ keywords suitable for Font Lock."
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene]
      "---"
-     ["Section Navigator" fountain-occur-sections]
+     ["Section Heading Navigator" fountain-occur-sections]
      ["Synopsis Navigator" fountain-occur-synopses]
      ["Notes Navigator" fountain-occur-notes]
-     ["Scene Navigator" fountain-occur-scene-headings])
+     ["Scene Heading Navigator" fountain-occur-scene-headings])
     "---"
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
