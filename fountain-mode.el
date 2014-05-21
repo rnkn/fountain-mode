@@ -1500,6 +1500,8 @@ keywords suitable for Font Lock."
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-escapes
       (add-to-invisibility-spec 'fountain-escapes))
+  (if (eq buffer-invisibility-spec t)
+      (setq buffer-invisibility-spec nil))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
