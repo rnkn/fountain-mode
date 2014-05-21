@@ -32,8 +32,6 @@
 ;; GNU Emacs using the Fountain markup format. For more information on
 ;; the Fountain markup format, visit <http://fountain.io>.
 
-;; ![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png)
-
 ;; Features
 ;; --------
 
@@ -48,7 +46,7 @@
 ;;   headings
 ;; - templates for inserting synopses, notes and metadata
 ;; - navigate by scene heading
-;; - suppoort for emphasis (bold, italic, underlined text)
+;; - support for emphasis (bold, italic, underlined text)
 ;; - toggle visibility of emphasis delimiters and escaping characters
 ;; - standard commenting (boneyard) behaviour
 ;; - everything is customizable, of course
@@ -91,8 +89,9 @@
 
 ;; Fountain Mode is available through [MELPA][]
 
-;; Alternately, put `fountain-mode.el` and `s.el` in your `load-path` and
-;; add the following line to your `.emacs` or `init.el` file:
+;; Alternately, put `fountain-mode.el`, `fountain-export` and `s.el` in
+;; your `load-path` and add the following line to your `.emacs` or
+;; `init.el` file:
 
 ;;     (require 'fountain-mode)
 
@@ -114,7 +113,9 @@
 ;; History
 ;; -------
 
-;; See [Releases](https://github.com/rnkn/fountain-mode/releases).
+;; See [Releases][].
+
+;; [releases]: https://github.com/rnkn/fountain-mode/releases/ "Fountain Mode releases"
 
 ;;; Code:
 
