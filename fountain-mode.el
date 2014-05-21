@@ -373,7 +373,8 @@ upon calling `fountain-mode' or saving a file.")
   "Regular expression for forced action mark.")
 
 (defconst fountain-nbsp-regexp
-  "\\(\\\\\\)\s"
+  (concat "\\(^\\|[^\\]\\)"
+          "\\(\\\\\\)\s")
   "Regular expression for non-breaking space.")
 
 (defconst fountain-comment-regexp
@@ -1238,7 +1239,7 @@ message of \"S are now invisible/visible\"."
       (3 2 fountain-metadata-value t nil t)
       (1 0 fountain-comment t keep)))
     (nil ,fountain-nbsp-regexp
-         ((1 1 fountain-non-printing fountain-escapes)))
+         ((1 2 fountain-non-printing fountain-escapes)))
     (nil ,fountain-underline-regexp
          ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 underline)
