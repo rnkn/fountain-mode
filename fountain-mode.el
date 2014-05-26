@@ -1098,13 +1098,12 @@ then make the changes desired."
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
-(defun fountain-toggle-hide-element (element &optional s)
+(defun fountain-toggle-hide-element (element s)
   "Toggle visibility of fountain-ELEMENT, using S for feedback.
 Toggles the value of fountain-hide-ELEMENT, then, if
 fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 `buffer-invisibility-spec', otherwise removes it. Returns a
 message of \"S are now invisible/visible\"."
-  (interactive "sElement: ")            ;FIXME: use autocomplete
   (let* ((option (intern (concat "fountain-hide-" element)))
          (symbol (intern (concat "fountain-" element))))
     (set option
@@ -1113,10 +1112,19 @@ message of \"S are now invisible/visible\"."
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
     (jit-lock-refontify)
-    (if s
-        (message "%s are now %s"
-                 s (if (symbol-value option)
-                       "invisible" "visible")))))
+    (message "%s are now %s"
+             s (if (symbol-value option)
+                   "invisible" "visible"))))
+
+(defun fountain-toggle-hide-emphasis-delim ()
+  "Toggle `fountain-hide-emphasis-delim'."
+  (interactive)
+  (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters"))
+
+(defun fountain-toggle-hide-escapes ()
+  "Toggle `fountain-hide-escapes'."
+  (interactive)
+  (fountain-toggle-hide-element "escapes" "Escaping characters"))
 
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
@@ -1369,14 +1377,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e p") 'fountain-export-buffer-to-pdf-via-html)
     ;; view commands
-    (define-key map (kbd "C-c C-x \\")
-      (lambda ()
-        (interactive)
-        (fountain-toggle-hide-element "escapes" "Escaping characters")))
-    (define-key map (kbd "C-c C-x *")
-      (lambda ()
-        (interactive)
-        (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")))
+    (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-escapes)
+    (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim)
     (define-key map (kbd "M-s 1") 'fountain-occur-sections)
     (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
     (define-key map (kbd "M-s 3") 'fountain-occur-notes)
@@ -1446,16 +1448,12 @@ keywords suitable for Font Lock."
      "---"
      ["Save for Future Sessions" fountain-save-font-lock-decoration])
     ("Show/Hide"
-     ["Hide Emphasis Delimiters"
-      (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters")
+     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
       :style toggle
-      :selected fountain-hide-emphasis-delim
-      :keys "C-c C-x *"]
-     ["Hide Escaping Characters"
-      (fountain-toggle-hide-element "escapes" "Escaping characters")
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Syntactic Characters" fountain-toggle-hide-escapes
       :style toggle
-      :selected fountain-hide-escapes
-      :keys "C-c C-x \\"]
+      :selected fountain-hide-escapes]
      "---"
      ["Save for Future Sessions" fountain-save-hidden-elements])
     "---"
