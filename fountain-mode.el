@@ -363,6 +363,7 @@ The default function requires the command line tool \"uuidgen\"."
   "Metadata alist in the form of (KEY . VALUE).
 This buffer-local variable is set with `fountain-read-metadata'
 upon calling `fountain-mode' or saving a file.")
+(make-variable-buffer-local 'fountain-metadata)
 
 ;;; Element Regular Expressions ========================================
 
@@ -1485,8 +1486,6 @@ keywords suitable for Font Lock."
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
-  (set (make-local-variable 'fountain-metadata)
-       (fountain-read-metadata))
   (set (make-local-variable 'comment-start)
        (if fountain-switch-comment-syntax "//" "/*"))
   (set (make-local-variable 'comment-end)
@@ -1506,7 +1505,8 @@ keywords suitable for Font Lock."
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
-            'fountain-read-metadata))
+            'fountain-read-metadata)
+  (fountain-read-metadata))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
