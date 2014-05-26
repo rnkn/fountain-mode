@@ -262,6 +262,24 @@ span.strikethrough {
     text-line-through-style: solid;
 }
 
+mark {
+    background-color: inherit;
+}
+
+mark:before {
+    content: '*';
+    width: 0.5in;
+    position: absolute;
+    right: 0in;
+}
+
+del:before {
+    content: '*';
+    width: 0.5in;
+    position: absolute;
+    right: 0in;
+}
+
 .page-break {
     visibility: hidden;
     page-break-after: always;
