@@ -945,7 +945,7 @@ If N is 0, move to beginning of scene."
 
 (defun fountain-mark-scene ()
   "Put mark at end of this scene, point at beginning."
-  (interactive "p")
+  (interactive)
   ;; (if (or extend
   ;;         (and (region-active-p)
   ;;              (eq last-command this-command)))
