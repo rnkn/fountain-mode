@@ -502,17 +502,18 @@ SUB-S, while content is taken from SUB-S."
 
 (defun fountain-export-create-html-title-page ()
   "Create title page based on `fountain-export-title-page-template'."
-  (concat
-   "<div id=\"title\">\n"
-   (s-format fountain-export-title-page-title-template
-             'fountain-export-create-title-page-element)
-   "\n</div>\n<div id=\"left\">\n"
-   (s-format fountain-export-title-page-left-template
-             'fountain-export-create-title-page-element)
-   "\n</div>\n<div id=\"right\">\n"
-   (s-format fountain-export-title-page-right-template
-             'fountain-export-create-title-page-element)
-   "\n</div>\n"))
+  (if (cdr (assoc "title" fountain-metadata))
+      (concat
+       "<div id=\"title\">\n"
+       (s-format fountain-export-title-page-title-template
+                 'fountain-export-create-title-page-element)
+       "\n</div>\n<div id=\"left\">\n"
+       (s-format fountain-export-title-page-left-template
+                 'fountain-export-create-title-page-element)
+       "\n</div>\n<div id=\"right\">\n"
+       (s-format fountain-export-title-page-right-template
+                 'fountain-export-create-title-page-element)
+       "\n</div>\n")))
 
 (defun fountain-export-create-style ()
   "Create stylesheet using `fountain-export-style-template'."
@@ -645,7 +646,8 @@ created HTML element to DESTBUF."
                         head "\n")
                 ;; close head and open body
                 (insert "<body>\n")
-                (if fountain-export-include-title-page
+                (if (and title-page
+                         fountain-export-include-title-page)
                     (insert "<div id=\"title-page\">\n"
                             title-page
                             "</div>\n"))
