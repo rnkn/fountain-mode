@@ -99,6 +99,35 @@ Otherwise, use an external stylesheet file."
   :type 'boolean
   :group 'fountain-export)
 
+(defcustom fountain-export-action-orphans 2
+  "Number of allowable action orphan lines.
+When breaking action across pages, this integer is the minimum
+number of lines on the previous page."
+  :type 'integer
+  :group 'fountain-export)
+
+(defcustom fountain-export-action-widows 2
+  "Number of allowable action widow lines.
+When breaking action across pages, this integer is the minimum
+number of lines on the following page."
+  :type 'integer
+  :group 'fountain-export)
+
+(defcustom fountain-export-dialog-orphans 2
+  "Number of allowable dialog orphan lines.
+When breaking dialog across pages, this integer is the minimum
+number of lines on the previous page."
+  :type 'integer
+  :group 'fountain-export)
+
+(defcustom fountain-export-dialog-widows 2
+  "Number of allowable dialog widow lines.
+When breaking dialog across pages, this integer is the minimum
+number of lines on the following page."
+  :type 'integer
+  :group 'fountain-export)
+
+
 (defcustom fountain-export-prepare-html nil
   "If non-nil, auto-indent HTML elements during export.
 Off by default because it can take a long time for minimal
@@ -304,14 +333,15 @@ h2.scene-heading {
 
 p.action {
     white-space: pre-wrap;
-    orphans: 2;
-    widows: 2;
+    orphans: ${action-orphans};
+    widows: ${action-widows};
 }    
 
 p.center {
     text-align: center;
     margin-left: 0;
     width: 100%;
+    white-space: pre-wrap;
 }
 
 p.trans {
@@ -365,11 +395,13 @@ tr.character {
 }
 
 tr.dialog {
-    orphans: 2;
-    widows: 2;
+    orphans: ${dialog-orphans};
+    widows: ${dialog-widows};
 }
 
 tr.paren {
+    orphans: ${dialog-orphans};
+    widows: ${dialog-widows};
     page-break-inside: avoid;
     page-break-after: avoid;
 }
@@ -515,6 +547,10 @@ Otherwise return `fountain-export-buffer'"
          (title-upcase
           (if fountain-export-upcase-title
               "uppercase" "none"))
+         (action-orphans (int-to-string fountain-export-action-orphans))
+         (action-widows (int-to-string fountain-export-action-widows))
+         (dialog-orphans (int-to-string fountain-export-dialog-orphans))
+         (dialog-widows (int-to-string fountain-export-dialog-widows))
          (style-rules (s-format fountain-export-style-template
                           '(lambda (var)
                              (symbol-value (intern var))))))
@@ -593,9 +629,9 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
                                  ("`" . "&lsquo;")
                                  ("'" . "&rsquo;")) s)
               s))
-         (s (if fountain-export-preserve-line-breaks
-                (s-replace "\n" "<br>\n" s)
-              s))
+         ;; (s (if fountain-export-preserve-line-breaks
+         ;;        (s-replace "\n" "<br>\n" s)
+         ;;      s))
          (s (fountain-export-underline s))
          (s (fountain-export-bold s))
          (s (fountain-export-italic s))
