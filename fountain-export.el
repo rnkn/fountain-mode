@@ -106,12 +106,12 @@ benefit."
   :type 'boolean
   :group 'fountain-export)
 
-;; (defcustom fountain-export-preserve-line-breaks t
-;;   "If non-nil, convert all newlines into line breaks.
-;; Otherwise, only break paragraphs at explicit line breaks (one or
-;; more blank lines)."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-preserve-line-breaks t
+  "If non-nil, convert all newlines into line breaks.
+Otherwise, only break paragraphs at explicit line breaks (one or
+more blank lines)."
+  :type 'boolean
+  :group 'fountain-export)
 
 (defcustom fountain-export-convert-quotes nil
   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
@@ -153,7 +153,7 @@ ${notes}"
   :group 'fountain-export)
 
 (defcustom fountain-export-style-template
-  "@page {
+"@page {
     size: ${page-size};
     margin-top: 1in;
     margin-right: 1in;
@@ -175,7 +175,12 @@ ${notes}"
     clear: both;
     counter-reset: page 1;
     page: screenplay;
-    prince-page-group: start;
+}
+
+@media screen {
+    table.dialog caption {
+        display: none;
+    }
 }
 
 @media print {
@@ -194,16 +199,15 @@ ${notes}"
 }
 
 #title-page #left {
-    width: 3in;
+    width: 50%;
     float: left;
 }
 
 #title-page #right {
-    width: 3in;
+    width: 50%;
     float: right;
     text-align: right;
 }
-
 
 #title h1 {
     text-decoration: ${title-underline};
@@ -219,13 +223,17 @@ ${notes}"
         vertical-align: bottom;
         padding-bottom: 1em;
     }
+    @bottom-left {
+        font-family: ${font};
+        font-size: 12pt;
+        content: string(more-dialog, last);
+        margin-left: 2in;
+        vertical-align: top;
+    }
 }
 
 @page screenplay:first {
     @top-right-corner {
-        content: normal;
-    }
-    @top-left {
         content: normal;
     }
 }
@@ -236,7 +244,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 body {
-    font-family: ${font};
+    font-family: 'Courier','Courier New';
     font-size: 12pt;
     line-height: 1;
 }
@@ -280,83 +288,116 @@ del:before {
     right: 0in;
 }
 
-.page-break {
-    visibility: hidden;
-    page-break-after: always;
-}
-
-.center {
-    text-align: center;
-    margin-left: 0;
-    width: 100%;
-}
-
 p {
     margin-top: 1em;
     margin-bottom: 1em;
-    margin-left: 0;
+    margin-left: 0in;
     width: auto;
-    white-space: pre-wrap;
-    orphans: 2;
-    widows: 2;
 }
 
-.scene-heading {
+h2.scene-heading {
     font-weight: ${scene-bold};
     text-decoration: ${scene-underline};
     margin-top: ${scene-spacing};
     page-break-after: avoid;
 }
 
-.action {
-    page-break-inside: avoid;
+p.action {
+    white-space: pre-wrap;
+    orphans: 2;
+    widows: 2;
+}    
+
+p.center {
+    text-align: center;
+    margin-left: 0;
+    width: 100%;
 }
 
-.character {
-    margin-bottom: 0;
-    margin-left: 2in;
-    width: 4in;
-    page-break-after: avoid;
-}
-
-.paren {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: 1.6in;
-    text-indent: -0.6em;
-    width: 2in;
-    page-break-before: avoid;
-    page-break-inside: avoid;
-    page-break-after: avoid;
-}
-
-.dialog {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: 1in;
-    width: 3.5in;
-    page-break-before: avoid;
-    page-break-inside: avoid;
-}
-
-.trans {
+p.trans {
     margin-left: 4in;
     width: 2in;
     page-break-before: avoid;
 }
 
-.note {
+p.note {
     display: none;
 }
 
-.section {
+p.section {
     display: none;
 }
 
-.synopsis {
+p.synopsis {
     display: none;
+}
+
+p.page-break {
+    visibility: hidden;
+    page-break-after: always;
+}
+
+table.dialog {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 1in;
+    border-spacing: 0px;
+    width: 4in;
+    caption-side: top;
+    caption-page: following;
+    string-set: character attr(character);
+}
+
+tr.character:after {
+    display: table-cell;
+    content: \"\";
+    string-set: more-dialog \"(MORE)\";
+}
+
+table.dialog:after {
+    display: table-row;
+    content: \"\";
+    string-set: more-dialog \"\";
+}
+
+tr.character {
+    page-break-after: avoid;
+}
+
+tr.dialog {
+    orphans: 2;
+    widows: 2;
+}
+
+tr.paren {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+}
+
+td {
+    display: block;
+}
+
+td.character {
+    margin-left: 1in;
+}
+
+td.dialog {
+    width: 3.5in;
+}
+
+td.paren {
+    margin-left: 0.6in;
+    text-indent: -0.6em;
+    width: 2in;
+}
+
+table.dialog caption {
+    margin-left: 1in;
+    text-align: left;
+    content: string(character, last)\" (CONT'D)\";
 }"
-  "Style template for exporting to HTML, and PDF via HTML."
+"Style template for exporting to HTML, and PDF via HTML."
   :type 'string
   :group 'fountain-export)
 
@@ -415,72 +456,6 @@ Otherwise return `fountain-export-buffer'"
   (if (buffer-file-name)
       (concat (file-name-base (buffer-file-name)) "." ext)
     (format "*Fountain %s Export*" ext)))
-
-(defun fountain-export-underline (s)
-  "Replace underlined text in S with HTML underline span tags."
-  (replace-regexp-in-string "_\\(.+?\\)_"
-                            "<span class=\"underline\">\\1</span>"
-                            s t))
-
-(defun fountain-export-bold (s)
-  "Replace bold text in S with HTML strong tags."
-  (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
-                            "<strong>\\1</strong>"
-                            s t))
-
-(defun fountain-export-emphasis (s)
-  "Replace italic text in S with HTML emphasis tags."
-  (replace-regexp-in-string "\\*\\(.+?\\)\\*"
-                            "<em>\\1</em>"
-                            s t))
-
-(defun fountain-export-lyrics (s)
-  "Replace lyrics in S with HTML italic tags."
-  (replace-regexp-in-string "^~\s*\\(.+\\)"
-                            "<i>\\1</i>"
-                            s t))
-
-(defun fountain-export-filter (s)
-  "Escape special characters and replace newlines.
-If `fountain-export-convert-quotes' is non-nil, convert quotes to
-\"smart quotes\"."
-  (let* ((s (s-replace-all '(("&" . "&amp;")
-                             ("<" . "&lt;")
-                             (">" . "&gt;")
-                             ("\\\s" . "&nbsp;")
-                             ("\\_" . "&#95;")
-                             ("\\*" . "&#42;")) s))
-         (s (if fountain-export-convert-quotes
-                (s-replace-all '(("\\`" . "&#96;")
-                                 ("\\'" . "&apos;")
-                                 ("``" . "&ldquo;")
-                                 ("''" . "&rdquo;")
-                                 ("`" . "&lsquo;")
-                                 ("'" . "&rsquo;")) s)
-              s)))
-         ;; (s (if fountain-export-preserve-line-breaks
-         ;;        (s-replace "\n" "<br>\n" s)
-         ;;      s)))
-    s))
-
-(defun fountain-export-create-html-element (sub-s)
-  "Return HTML element where class is \"fountain-element\" of SUB-S.
-CSS class is taken from \"fountain-element\" text property of
-SUB-S, while content is taken from SUB-S."
-  (let* ((class
-          (or (get-text-property 0 'fountain-element sub-s)
-              "action"))
-         (tag (if (string= class "scene-heading") "h2" "p"))
-         (content
-          (let* ((s (substring-no-properties sub-s))
-                 (s (fountain-export-filter s))
-                 (s (fountain-export-bold s))
-                 (s (fountain-export-emphasis s))
-                 (s (fountain-export-lyrics s))
-                 (s (fountain-export-underline s)))
-            s)))
-    (format "<%s class=\"%s\">%s</%s>\n"
-            tag class content tag)))
 
 (defun fountain-export-get-metadata-value (key)
   "Like `fountain-get-metadata-value' but filters for HTML."
@@ -574,6 +549,105 @@ SUB-S, while content is taken from SUB-S."
               '(lambda (var)
                  (symbol-value (intern var))))))
 
+(defun fountain-export-underline (s)
+  "Replace underlined text in S with HTML underline span tags."
+  (replace-regexp-in-string "_\\(.+?\\)_"
+                            "<span class=\"underline\">\\1</span>"
+                            s t))
+
+(defun fountain-export-bold (s)
+  "Replace bold text in S with HTML strong tags."
+  (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
+                            "<strong>\\1</strong>"
+                            s t))
+
+(defun fountain-export-italic (s)
+  "Replace italic text in S with HTML emphasis tags."
+  (replace-regexp-in-string "\\*\\(.+?\\)\\*"
+                            "<em>\\1</em>"
+                            s t))
+
+(defun fountain-export-lyrics (s)
+  "Replace lyrics in S with HTML italic tags."
+  (replace-regexp-in-string "^~\s*\\(.+\\)"
+                            "<i>\\1</i>"
+                            s t))
+
+(defun fountain-export-filter (sub-s)   ;FIXME update doc
+  "Escape special characters and replace newlines.
+If `fountain-export-convert-quotes' is non-nil, convert quotes to
+\"smart quotes\"."
+  (let* ((s (substring-no-properties sub-s))
+         (s (s-replace-all '(("&" . "&amp;")
+                             ("<" . "&lt;")
+                             (">" . "&gt;")
+                             ("\\\s" . "&nbsp;")
+                             ("^\\\\$" . "<br>\n")
+                             ("\\_" . "&#95;")
+                             ("\\*" . "&#42;")) s))
+         (s (if fountain-export-convert-quotes
+                (s-replace-all '(("\\`" . "&#96;")
+                                 ("\\'" . "&apos;")
+                                 ("``" . "&ldquo;")
+                                 ("''" . "&rdquo;")
+                                 ("`" . "&lsquo;")
+                                 ("'" . "&rsquo;")) s)
+              s))
+         (s (if fountain-export-preserve-line-breaks
+                (s-replace "\n" "<br>\n" s)
+              s))
+         (s (fountain-export-underline s))
+         (s (fountain-export-bold s))
+         (s (fountain-export-italic s))
+         (s (fountain-export-lyrics s)))
+    s))
+
+(defun fountain-export-create-html-dialog-table (content limit)
+  ""
+  (let* ((character (fountain-export-filter
+                     (s-trim (car (s-slice-at "\\^\\|(" content)))))
+         (table-start
+          (format (concat "<table class=\"dialog\" character=\"%s\">\n"
+                          "<caption />\n"
+                          "<tr class=\"character\"><td class=\"character\">%s</td></tr>\n")
+                  character content))
+         (table-body "")
+         (table-end "</table>\n"))
+    (goto-char (next-single-property-change
+                (point) 'fountain-element nil limit))
+    (while (< (point) limit)
+      (skip-chars-forward "\n")
+      (setq table-body
+            (concat table-body
+                    (fountain-export-create-html-element limit))))
+    (concat table-start table-body table-end)))
+
+(defun fountain-export-create-html-element (limit)
+  ""
+  (let* ((index (point))
+         (class (or (get-text-property index 'fountain-element)
+                    "action"))
+         (change (next-single-property-change
+                  index 'fountain-element nil limit)))
+    (when change
+      (let* ((sub-s (buffer-substring index change))
+             (content (fountain-export-filter sub-s))
+             (element
+              (cond ((string= class "character")
+                     (fountain-export-create-html-dialog-table content limit))
+                    ((member class '("dialog" "paren"))
+                     (format "<tr class=\"%s\"><td class=\"%s\">%s</td></tr>\n"
+                             class class content))
+                    ((string= class "scene-heading")
+                     (format "<h2 class=\"%s\">%s</h2>\n"
+                             class content))
+                    ((format "<p class=\"%s\">%s</p>\n"
+                             class content)))))
+        (if (string= class "character")
+            (goto-char limit)
+          (goto-char change))
+        element))))
+
 (defun fountain-export-parse-buffer (destbuf)
   "Find and insert elements into DESTBUF.
 First, skip forward to next available text, mark point as index,
@@ -584,24 +658,16 @@ created HTML element to DESTBUF."
   (let ((job (make-progress-reporter "Parsing..." 0 100)))
     (goto-char (point-min))
     (while (null (eobp))
-      (while (looking-at "\n\s?\n?")
+      (while (looking-at "\n*\s*\n")
         (goto-char (match-end 0)))
-      (let* ((index (point))
-             (limit (save-excursion
-                      (re-search-forward "\n\s?\n\\|\\'" nil t)
-                      (match-beginning 0)))
-             (change (next-single-property-change
-                      index 'fountain-element nil limit)))
-        (when change
-          (let* ((s (buffer-substring index change))
-                 (element (fountain-export-create-html-element s)))
-            (when element
-              (with-current-buffer destbuf
-                (with-silent-modifications
-                  (insert element)))))
-          (goto-char change)))
-      ;; (unless (looking-at ".\\|\\'")
-      ;;   (forward-char 1))
+      (let* ((limit (save-excursion
+                     (re-search-forward "\n\s*\n\\|\\'" nil t)
+                     (match-beginning 0)))
+             (element (fountain-export-create-html-element limit)))
+        (when element
+          (with-current-buffer destbuf
+            (with-silent-modifications
+              (insert element)))))
       (progress-reporter-update
        job (truncate (* (/ (float (point)) (buffer-size)) 100))))))
 
@@ -646,6 +712,7 @@ created HTML element to DESTBUF."
                         head "\n")
                 ;; close head and open body
                 (insert "<body>\n")
+                ;; add the title page maybe
                 (if (and title-page
                          fountain-export-include-title-page)
                     (insert "<div id=\"title-page\">\n"
