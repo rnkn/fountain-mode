@@ -373,15 +373,7 @@ table.dialog {
     margin-left: 1in;
     border-spacing: 0px;
     width: 4in;
-    caption-side: top;
-    caption-page: following;
-    string-set: character attr(character);
-}
-
-tr.character:after {
-    display: table-cell;
-    content: \"\";
-    string-set: more-dialog \"(MORE)\";
+    string-set: character attr(character) more-dialog \"(MORE)\";
 }
 
 table.dialog:after {
@@ -424,9 +416,11 @@ td.paren {
     width: 2in;
 }
 
-table.dialog caption {
+table.dialog caption.character {
     margin-left: 1in;
     text-align: left;
+    caption-side: top;
+    caption-page: following;
     content: string(character, last)\" (CONT'D)\";
 }"
 "Style template for exporting to HTML, and PDF via HTML."
@@ -644,7 +638,7 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
                      (s-trim (car (s-slice-at "\\^\\|(" content)))))
          (table-start
           (format (concat "<table class=\"dialog\" character=\"%s\">\n"
-                          "<caption />\n"
+                          "<caption class=\"character\">\n"
                           "<tr class=\"character\"><td class=\"character\">%s</td></tr>\n")
                   character content))
          (table-body "")
