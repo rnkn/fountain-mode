@@ -206,12 +206,6 @@ ${notes}"
     page: screenplay;
 }
 
-@media screen {
-    table.dialog caption {
-        display: none;
-    }
-}
-
 @media print {
     #title {
         margin-top: 3.5in;
@@ -745,16 +739,16 @@ created HTML element to DESTBUF."
                 ;; add the title page maybe
                 (if (and title-page
                          fountain-export-include-title-page)
-                    (insert "<div id=\"title-page\">\n"
+                    (insert "<section id=\"title-page\">\n"
                             title-page
-                            "</div>\n"))
-                (insert "<div id=\"screenplay\">\n")))
+                            "</section>\n"))
+                (insert "<section id=\"screenplay\">\n")))
             ;; parse the temp buffer
             (fountain-export-parse-buffer destbuf))
           ;; close HTML tags
           (with-current-buffer destbuf
             (with-silent-modifications
-              (insert "</div>\n</body>\n</html>")
+              (insert "</section>\n</body>\n</html>")
               (if fountain-export-prepare-html
                   (fountain-export-prepare-html))))
           ;; signal completion and return DESTBUF
