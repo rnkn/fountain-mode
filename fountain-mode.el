@@ -574,10 +574,12 @@ with \\[fountain-save-font-lock-decoration]."
   "Return the beginning and end points of block at point."
   (let ((block-beginning
          (save-excursion
-           (re-search-backward fountain-blank-regexp nil t)))
+           (re-search-backward fountain-blank-regexp
+                               (- (point) 1000) t)))
         (block-end
          (save-excursion
-           (re-search-forward fountain-blank-regexp nil t))))
+           (re-search-forward fountain-blank-regexp
+                              (+ (point) 1000) t))))
     (cons block-beginning block-end)))
 
 ;; currently unused
@@ -873,15 +875,17 @@ nil or 0, return character at point, otherwise return nil."
            (goto-char font-lock-end)
            (cdr (fountain-get-block-bounds))))
         changed)
-    (goto-char font-lock-beg)
-    (unless (or (bobp)
-                (eq start font-lock-beg))
-      (setq font-lock-beg start changed t))
-    (goto-char font-lock-end)
-    (unless (or (eobp)
-                (eq end font-lock-end))
-      (setq font-lock-end end changed t))
-    changed))
+    (if (null (and start end))
+        (error "Region bounds overflow")
+      (goto-char font-lock-beg)
+      (unless (or (bobp)
+                  (eq start font-lock-beg))
+        (setq font-lock-beg start changed t))
+      (goto-char font-lock-end)
+      (unless (or (eobp)
+                  (eq end font-lock-end))
+        (setq font-lock-end end changed t))
+      changed)))
 
 ;;; Interactive Functions  =============================================
 
