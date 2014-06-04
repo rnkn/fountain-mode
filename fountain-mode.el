@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.2.0
+;; Version: 1.2.1
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode/
 
@@ -131,7 +131,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "1.2.0")
+  "1.2.1")
 
 ;;; Obsolete Aliases ===================================================
 
