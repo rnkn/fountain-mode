@@ -62,11 +62,12 @@ Requirements
 Installation
 ------------
 
-Fountain Mode is available through [MELPA][]
+Fountain Mode is available through [MELPA][]. There is usually no
+difference between the MELPA and MELPA-stable versions of the package.
 
-Alternately, put `fountain-mode.el`, `fountain-export` and `s.el` in
-your `load-path` and add the following line to your `.emacs` or
-`init.el` file:
+Alternately, download the [latest release][], move the files into your
+`load-path` and add the following line to your `.emacs` or `init.el`
+file:
 
     (require 'fountain-mode)
 
@@ -75,7 +76,8 @@ following:
 
     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
-[MELPA]: http://melpa.milkbox.net "MELPA"
+[melpa]: http://melpa.milkbox.net "MELPA"
+[latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
 Syntax Highlighting
 -------------------
