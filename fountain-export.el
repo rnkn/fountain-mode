@@ -149,7 +149,7 @@ more blank lines)."
 
 will be exported as
 
-    &ldquo;foobar&rdquol;"
+    &ldquo;foobar&rdquo;"
   :type 'boolean
   :group 'fountain-export)
 
