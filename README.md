@@ -21,7 +21,7 @@ Features
   headings
 - templates for inserting synopses, notes and metadata
 - navigate by scene heading
-- suppoort for emphasis (bold, italic, underlined text)
+- support for emphasis (bold, italic, underlined text)
 - toggle visibility of emphasis delimiters and escaping characters
 - standard commenting (boneyard) behaviour
 - everything is customizable, of course
@@ -90,4 +90,6 @@ menu, or with `M-x fountain-set-font-lock-decoration` and saved with
 History
 -------
 
-See [Releases](https://github.com/rnkn/fountain-mode/releases).
+See [Releases][].
+
+[releases]: https://github.com/rnkn/fountain-mode/releases/ "Fountain Mode releases"
