@@ -267,7 +267,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 body {
-    font-family: 'Courier','Courier New';
+    font-family: ${font};
     font-size: 12pt;
     line-height: 1;
 }
