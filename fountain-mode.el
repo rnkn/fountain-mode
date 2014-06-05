@@ -230,7 +230,7 @@ so the following are equivalent:
   :group 'fountain)
 
 (defcustom fountain-trans-list
-  '("TO:" "WITH:" "FADE IN:" "FADE OUT" "TO BLACK")
+  '("TO:" "WITH:" "FADE OUT" "TO BLACK")
   "List of transition endings (case insensitive).
 This list is used to match the endings of transitions,
 e.g. \"TO:\" will match both the following:
