@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.2.0
+;; Version: 1.2.1
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode/
 
@@ -32,8 +32,6 @@
 ;; GNU Emacs using the Fountain markup format. For more information on
 ;; the Fountain markup format, visit <http://fountain.io>.
 
-;; ![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png)
-
 ;; Features
 ;; --------
 
@@ -48,7 +46,7 @@
 ;;   headings
 ;; - templates for inserting synopses, notes and metadata
 ;; - navigate by scene heading
-;; - suppoort for emphasis (bold, italic, underlined text)
+;; - support for emphasis (bold, italic, underlined text)
 ;; - toggle visibility of emphasis delimiters and escaping characters
 ;; - standard commenting (boneyard) behaviour
 ;; - everything is customizable, of course
@@ -89,10 +87,12 @@
 ;; Installation
 ;; ------------
 
-;; Fountain Mode is available through [MELPA][]
+;; Fountain Mode is available through [MELPA][]. There is usually no
+;; difference between the MELPA and MELPA-stable versions of the package.
 
-;; Alternately, put `fountain-mode.el` and `s.el` in your `load-path` and
-;; add the following line to your `.emacs` or `init.el` file:
+;; Alternately, download the [latest release][], move the files into your
+;; `load-path` and add the following line to your `.emacs` or `init.el`
+;; file:
 
 ;;     (require 'fountain-mode)
 
@@ -101,7 +101,8 @@
 
 ;;     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
-;; [MELPA]: http://melpa.milkbox.net "MELPA"
+;; [melpa]: http://melpa.milkbox.net "MELPA"
+;; [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
 ;; Syntax Highlighting
 ;; -------------------
@@ -114,7 +115,9 @@
 ;; History
 ;; -------
 
-;; See [Releases](https://github.com/rnkn/fountain-mode/releases).
+;; See [Releases][].
+
+;; [releases]: https://github.com/rnkn/fountain-mode/releases/ "Fountain Mode releases"
 
 ;;; Code:
 
@@ -130,7 +133,7 @@
   :link '(url-link "http://github.com/rnkn/fountain-mode/"))
 
 (defconst fountain-version
-  "1.2.0")
+  "1.2.1")
 
 ;;; Obsolete Aliases ===================================================
 
@@ -574,10 +577,12 @@ with \\[fountain-save-font-lock-decoration]."
   "Return the beginning and end points of block at point."
   (let ((block-beginning
          (save-excursion
-           (re-search-backward fountain-blank-regexp nil t)))
+           (re-search-backward fountain-blank-regexp
+                               (- (point) 1000) t)))
         (block-end
          (save-excursion
-           (re-search-forward fountain-blank-regexp nil t))))
+           (re-search-forward fountain-blank-regexp
+                              (+ (point) 1000) t))))
     (cons block-beginning block-end)))
 
 ;; currently unused
@@ -873,15 +878,17 @@ nil or 0, return character at point, otherwise return nil."
            (goto-char font-lock-end)
            (cdr (fountain-get-block-bounds))))
         changed)
-    (goto-char font-lock-beg)
-    (unless (or (bobp)
-                (eq start font-lock-beg))
-      (setq font-lock-beg start changed t))
-    (goto-char font-lock-end)
-    (unless (or (eobp)
-                (eq end font-lock-end))
-      (setq font-lock-end end changed t))
-    changed))
+    (if (null (and start end))
+        (error "Region bounds overflow")
+      (goto-char font-lock-beg)
+      (unless (or (bobp)
+                  (eq start font-lock-beg))
+        (setq font-lock-beg start changed t))
+      (goto-char font-lock-end)
+      (unless (or (eobp)
+                  (eq end font-lock-end))
+        (setq font-lock-end end changed t))
+      changed)))
 
 ;;; Interactive Functions  =============================================
 
