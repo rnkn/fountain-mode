@@ -628,8 +628,9 @@ If `fountain-export-convert-quotes' is non-nil, convert quotes to
 
 (defun fountain-export-create-html-dialog-table (content limit)
   ""
-  (let* ((character (fountain-export-filter
-                     (s-trim (car (s-slice-at "\\^\\|(" content)))))
+  (let* ((contd (concat "(" fountain-continued-dialog-string ")"))
+         (character (fountain-export-filter
+                     (s-trim (car (s-slice-at contd content)))))
          (table-start
           (format (concat "<table class=\"dialog\" character=\"%s\">\n"
                           "<caption class=\"character\">\n"
