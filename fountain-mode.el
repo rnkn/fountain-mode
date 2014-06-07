@@ -843,23 +843,24 @@ respectively, but only use one of each."
   (let ((s (downcase (funcall fountain-uuid-func))))
     (car (split-string s "-"))))
 
-;; make N positive or negative...?
 (defun fountain-get-character (&optional n)
   "Return character at point or Nth previous character.
-If N is non-nil, return Nth character previous to point. If N is
+If N is non-nil, return Nth following (or Nth previous if N is
+negative) character within scene, otherwise return nil. If N is
 nil or 0, return character at point, otherwise return nil."
-  (let ((i (or n 0)))
+  (let* ((i (or n 0))
+         (p (if (<= i 0) -1 1)))
     (save-excursion
       (save-restriction
         (widen)
-        (while (> i 0)
+        (while (/= i 0)
           (unless (fountain-scene-heading-p)
-            (forward-line -1))
+            (forward-line p))
           (while (null (or (fountain-character-p)
                            (fountain-scene-heading-p)
                            (bobp)))
-            (forward-line -1))
-          (setq i (- i 1)))
+            (forward-line p))
+          (setq i (- i p)))
         (if (fountain-character-p)
             (let ((s (match-string-no-properties 0)))
               (s-trim (car (s-slice-at "\\^\\|(" s)))))))))
@@ -1085,7 +1086,7 @@ then make the changes desired."
             (when (and (null (looking-at-p (concat ".*" s "$")))
                        (fountain-character-p)
                        (s-equals? (fountain-get-character 0)
-                                  (fountain-get-character 1)))
+                                  (fountain-get-character -1)))
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" s)))
             (forward-line 1)
