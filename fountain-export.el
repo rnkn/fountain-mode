@@ -597,29 +597,40 @@ Otherwise return `fountain-export-buffer'"
                             "<i>\\1</i>"
                             s t))
 
+(defun fountain-export-line-breaks (s)
+  "Replace newlines in S with HTML line breaks."
+  (replace-regexp-in-string "\n"
+                            "<br>\n"
+                            s))
+
+(defun fountain-export-tex-quotes (s)
+  "Replace TeX-style quotes in S with \"smart\" quotes."
+  (s-replace-all '(("\\`" . "&#96;")
+                   ("\\'" . "&apos;")
+                   ("``" . "&ldquo;")
+                   ("''" . "&rdquo;")
+                   ("`" . "&lsquo;")
+                   ("'" . "&rsquo;")) s))
+
+(defun fountain-export-sanitize (s)
+  "Escape HTML characters in S."
+  (s-replace-all '(("&" . "&amp;")
+                   ("<" . "&lt;")
+                   (">" . "&gt;")) s))
+
 (defun fountain-export-filter (sub-s)   ;FIXME update doc
-  "Escape special characters and replace newlines.
-If `fountain-export-convert-quotes' is non-nil, convert quotes to
-\"smart quotes\"."
   (let* ((s (substring-no-properties sub-s))
-         (s (s-replace-all '(("&" . "&amp;")
-                             ("<" . "&lt;")
-                             (">" . "&gt;")
-                             ("\\\s" . "&nbsp;")
+         (s (fountain-export-sanitize s))
+         (s (s-replace-all '(("\\\s" . "&nbsp;")
                              ("^\\\\$" . "<br>\n")
                              ("\\_" . "&#95;")
                              ("\\*" . "&#42;")) s))
-         (s (if fountain-export-convert-quotes
-                (s-replace-all '(("\\`" . "&#96;")
-                                 ("\\'" . "&apos;")
-                                 ("``" . "&ldquo;")
-                                 ("''" . "&rdquo;")
-                                 ("`" . "&lsquo;")
-                                 ("'" . "&rsquo;")) s)
-              s))
          ;; (s (if fountain-export-preserve-line-breaks
-         ;;        (s-replace "\n" "<br>\n" s)
+         ;;        (fountain-export-line-breaks s)
          ;;      s))
+         (s (if fountain-export-convert-quotes
+                (fountain-export-tex-quotes s)
+              s))
          (s (fountain-export-underline s))
          (s (fountain-export-bold s))
          (s (fountain-export-italic s))
