@@ -127,6 +127,11 @@ number of lines on the following page."
   :type 'integer
   :group 'fountain-export)
 
+(defcustom fountain-export-more-dialog-string "(MORE)"
+  "String to append to dialog when breaking across pages.
+Parentheses are not automatically added."
+  :type 'string
+  :group 'fountain-export)
 
 (defcustom fountain-export-prepare-html nil
   "If non-nil, auto-indent HTML elements during export.
@@ -249,7 +254,7 @@ ${notes}"
     @bottom-left {
         font-family: ${font};
         font-size: 12pt;
-        content: string(more-dialog, last);
+        content: string(dialog-more, last);
         margin-left: 2in;
         vertical-align: top;
     }
@@ -367,13 +372,13 @@ table.dialog {
     margin-left: 1in;
     border-spacing: 0px;
     width: 4in;
-    string-set: character attr(character) more-dialog \"(MORE)\";
+    string-set: character attr(character) dialog-more \"${dialog-more}\";
 }
 
 table.dialog:after {
     display: table-row;
     content: \"\";
-    string-set: more-dialog \"\";
+    string-set: dialog-more \"\";
 }
 
 tr.character {
@@ -415,7 +420,7 @@ table.dialog caption.character {
     text-align: left;
     caption-side: top;
     caption-page: following;
-    content: string(character, last)\" (CONT'D)\";
+    content: string(character, last)\" ${dialog-contd}\";
 }"
 "Style template for exporting to HTML, and PDF via HTML."
   :type 'string
@@ -535,6 +540,8 @@ Otherwise return `fountain-export-buffer'"
          (title-upcase
           (if fountain-export-upcase-title
               "uppercase" "none"))
+         (dialog-contd (concat "(" fountain-continued-dialog-string ")"))
+         (dialog-more fountain-export-more-dialog-string)
          (action-orphans (int-to-string fountain-export-action-orphans))
          (action-widows (int-to-string fountain-export-action-widows))
          (dialog-orphans (int-to-string fountain-export-dialog-orphans))
@@ -639,9 +646,9 @@ Otherwise return `fountain-export-buffer'"
 
 (defun fountain-export-create-html-dialog-table (content limit)
   ""
-  (let* ((contd (concat "(" fountain-continued-dialog-string ")"))
+  (let* ((dialog-contd (concat "(" fountain-continued-dialog-string ")"))
          (character (fountain-export-filter
-                     (s-trim (car (s-slice-at contd content)))))
+                     (s-trim (car (s-slice-at dialog-contd content)))))
          (table-start
           (format (concat "<table class=\"dialog\" character=\"%s\">\n"
                           "<caption class=\"character\">\n"
