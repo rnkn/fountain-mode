@@ -800,7 +800,7 @@ upon calling `fountain-mode' or saving a file.")
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(.+\\):\s*\\(.+\\)?\\|"
+  (concat "^\\<\\([^:\n]+\\):\s*\\(.+\\)?\\|"
           "^\s+\\(?2:.+\\)")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-metadata-p' for bobp.")
