@@ -47,7 +47,7 @@
 ;; - templates for inserting synopses, notes and metadata
 ;; - navigate by scene heading
 ;; - support for emphasis (bold, italic, underlined text)
-;; - toggle visibility of emphasis delimiters and escaping characters
+;; - toggle visibility of emphasis delimiters and syntax characters
 ;; - standard commenting (boneyard) behaviour
 ;; - everything is customizable, of course
 
@@ -178,6 +178,12 @@
 
 (define-obsolete-variable-alias 'fountain-export-title-page-template
   'fountain-export-title-page-title-template "1.1.0")
+
+(define-obsolete-variable-alias 'fountain-hide-escapes
+  'fountain-hide-syntax-chars "1.3.0")
+
+(define-obsolete-function-alias 'fountain-toggle-hide-escapes
+  'fountain-toggle-hide-syntax-chars "1.3.0")
 
 (define-obsolete-face-alias 'fountain-centered
   'fountain-center "1.1.0")
@@ -335,8 +341,8 @@ former but if you prefer the latter, set this option to non-nil."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-hide-escapes nil
-  "If non-nil, make escaping characters invisible."
+(defcustom fountain-hide-syntax-chars nil
+  "If non-nil, make syntax characters invisible."
   :type 'boolean
   :group 'fountain)
 
@@ -893,15 +899,15 @@ bold-italic delimiters together, e.g.
   "Faces used in `fountain-mode'.
 There are three levels of Font Lock decoration:
 
-  1. minimum: only highlights comments and escaping characters
+  1. minimum: only highlights comments and syntax characters
 
   2. default: highlights comments, metadata, scene headings,
-     sections, synopses, notes and escaping characters
+     sections, synopses, notes and syntax characters
 
   3. maximum: highlights comments, metadata keys, metadata
-     values, scene headings, sections, synopses, notes,
-     characters, parentheticals, dialog, transitions, center text
-     and escaping characters
+     values, scene headings, sections, synopses, notes, character
+     names, parentheticals, dialog, transitions, center text and
+     syntax characters
 
 To switch between these levels of Font Lock decoration, customize
 the value of `font-lock-maximum-decoration'. This can be set
@@ -917,7 +923,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 (defface fountain-non-printing
   '((t (:inherit fountain-comment)))
-  "Default face for emphasis delimiters and escaping characters."
+  "Default face for emphasis delimiters and syntax characters."
   :group 'fountain-faces)
 
 (defface fountain-metadata-key
@@ -1910,10 +1916,10 @@ message of \"S are now invisible/visible\"."
   (interactive)
   (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters"))
 
-(defun fountain-toggle-hide-escapes ()
-  "Toggle `fountain-hide-escapes'."
+(defun fountain-toggle-hide-syntax-chars ()
+  "Toggle `fountain-hide-syntax-chars'."
   (interactive)
-  (fountain-toggle-hide-element "escapes" "Escaping characters"))
+  (fountain-toggle-hide-element "syntax-chars" "Syntax characters"))
 
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
@@ -1978,8 +1984,8 @@ message of \"S are now invisible/visible\"."
   (interactive)
   (customize-save-variable 'fountain-hide-emphasis-delim
                            fountain-hide-emphasis-delim)
-  (customize-save-variable 'fountain-hide-escapes
-                           fountain-hide-escapes))
+  (customize-save-variable 'fountain-hide-syntax-chars
+                           fountain-hide-syntax-chars))
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
@@ -2026,7 +2032,7 @@ message of \"S are now invisible/visible\"."
      (lambda (limit)
        (fountain-match-element 'fountain-scene-heading-p limit))
      ((2 0 nil nil keep)
-      (1 1 fountain-comment fountain-escapes t t)))
+      (1 1 fountain-comment fountain-syntax-chars t t)))
     ("character"
      (lambda (limit)
        (fountain-match-element 'fountain-character-p limit))
@@ -2043,19 +2049,19 @@ message of \"S are now invisible/visible\"."
      (lambda (limit)
        (fountain-match-element 'fountain-trans-p limit))
      ((3 0 nil nil keep)
-      (1 1 fountain-comment fountain-escapes t t)))
+      (1 1 fountain-comment fountain-syntax-chars t t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
-     ((1 0 fountain-comment fountain-escapes)))
+     ((1 0 fountain-comment fountain-syntax-chars)))
     ("center" ,fountain-center-regexp
-     ((1 1 fountain-comment fountain-escapes)
+     ((1 1 fountain-comment fountain-syntax-chars)
       (3 2 nil)
-      (1 3 fountain-comment fountain-escapes)))
+      (1 3 fountain-comment fountain-syntax-chars)))
     ("section" ,fountain-section-regexp
      ((2 0 nil t)
-      (1 1 fountain-comment fountain-escapes t)))
+      (1 1 fountain-comment fountain-syntax-chars t)))
     ("synopsis" ,fountain-synopsis-regexp
      ((2 0 nil t)
-      (1 1 fountain-comment fountain-escapes t)))
+      (1 1 fountain-comment fountain-syntax-chars t)))
     ("page-break" ,fountain-page-break-regexp
      ((2 0 fountain-page-break)))
     ("metadata"
@@ -2065,7 +2071,7 @@ message of \"S are now invisible/visible\"."
       (3 2 fountain-metadata-value t nil t)
       (1 0 fountain-comment t keep)))
     (nil ,fountain-nbsp-regexp
-         ((1 2 fountain-non-printing fountain-escapes)))
+         ((1 2 fountain-non-printing fountain-syntax-chars)))
     (nil ,fountain-underline-regexp
          ((1 2 fountain-non-printing fountain-emphasis-delim)
           (2 3 underline)
@@ -2193,7 +2199,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e p") 'fountain-export-buffer-to-pdf-via-html)
     ;; view commands
-    (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-escapes)
+    (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars)
     (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim)
     (define-key map (kbd "M-s 1") 'fountain-occur-sections)
     (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
@@ -2267,9 +2273,9 @@ keywords suitable for Font Lock."
      ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
       :style toggle
       :selected fountain-hide-emphasis-delim]
-     ["Hide Syntactic Characters" fountain-toggle-hide-escapes
+     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
       :style toggle
-      :selected fountain-hide-escapes]
+      :selected fountain-hide-syntax-chars]
      "---"
      ["Save for Future Sessions" fountain-save-hidden-elements])
     "---"
@@ -2313,8 +2319,8 @@ keywords suitable for Font Lock."
         '(line-prefix wrap-prefix invisible fountain-element))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
-  (if fountain-hide-escapes
-      (add-to-invisibility-spec 'fountain-escapes))
+  (if fountain-hide-syntax-chars
+      (add-to-invisibility-spec 'fountain-syntax))
   (if (eq buffer-invisibility-spec t)
       (setq buffer-invisibility-spec nil))
   (add-hook 'font-lock-extend-region-functions
