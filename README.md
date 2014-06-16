@@ -22,7 +22,7 @@ Features
 - templates for inserting synopses, notes and metadata
 - navigate by scene heading
 - support for emphasis (bold, italic, underlined text)
-- toggle visibility of emphasis delimiters and escaping characters
+- toggle visibility of emphasis delimiters and syntax characters
 - standard commenting (boneyard) behaviour
 - everything is customizable, of course
 
