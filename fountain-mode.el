@@ -990,11 +990,11 @@ with \\[fountain-save-font-lock-decoration]."
   (let ((block-beginning
          (save-excursion
            (re-search-backward fountain-blank-regexp
-                               (- (point) 1000) t)))
+                               (- (point) 10000) t)))
         (block-end
          (save-excursion
            (re-search-forward fountain-blank-regexp
-                              (+ (point) 1000) t))))
+                              (+ (point) 10000) t))))
     (cons block-beginning block-end)))
 
 ;; currently unused
