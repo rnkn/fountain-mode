@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.2.1
+;; Version: 1.3.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode/
 
@@ -123,7 +123,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.2.1")
+  "1.3.0")
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
