@@ -1352,9 +1352,7 @@ Otherwise return `fountain-export-buffer'"
          (s (if (listp value)
                 (s-join "\n" value)
               value))
-         ;; lexical value no longer has any effect
-         (s (let ((fountain-export-preserve-line-breaks t))
-              (fountain-export-filter s))))
+         (s (fountain-export-line-breaks s)))
     s))
 
 (defun fountain-export-create-title-page-element (key)
