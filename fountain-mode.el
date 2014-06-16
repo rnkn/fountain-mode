@@ -42,6 +42,7 @@
 ;; - auto-indentation: character, parenthetical, dialog, transition and
 ;;   center text elements (display only, does not modify file contents)
 ;; - add/remove continued dialog to successively speaking characters
+;; - automatic (MORE) and (CONT'D) when breaking dialog across pages
 ;; - `occur` navigator for section headings, synopses, notes and scene
 ;;   headings
 ;; - templates for inserting synopses, notes and metadata
