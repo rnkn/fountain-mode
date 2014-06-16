@@ -1358,12 +1358,13 @@ Otherwise return `fountain-export-buffer'"
          (s (if (listp value)
                 (s-join "\n" value)
               value))
-         (s (fountain-export-line-breaks s)))
+         (s (fountain-export-filter s)))
     s))
 
 (defun fountain-export-create-title-page-element (key)
   "Gets metadata value associated with KEY and creates HTML element."
-  (let ((content (fountain-export-get-metadata-value key)))
+  (let* ((s (fountain-export-get-metadata-value key))
+         (content (fountain-export-line-breaks s)))
     (if (string= key "title")
         (format "<h1>%s</h1>" content)
       (format "<p>%s</p>" content))))
