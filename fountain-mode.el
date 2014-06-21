@@ -136,13 +136,13 @@
   :prefix "fountain-export-"
   :group 'fountain)
 
-;;; Requires ===========================================================
+;;; Requires ===================================================================
 
 (require 's)
 (require 'thingatpt)
 (require 'easymenu)
 
-;;; Obsolete Aliases ===================================================
+;;; Obsolete Aliases ===========================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
   'fountain-align-character "0.12.0")
@@ -216,7 +216,7 @@
 (define-obsolete-face-alias 'fountain-trans-highlight
   'fountain-trans "1.2.0")
 
-;;; Customization ======================================================
+;;; Customization ==============================================================
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
@@ -376,7 +376,7 @@ The default function requires the command line tool \"uuidgen\"."
   :type 'function
   :group 'fountain)
 
-;;; Export Customization ===============================================
+;;; Export Customization =======================================================
 
 (defcustom fountain-export-default-command
   'fountain-export-buffer-to-pdf-via-html
@@ -779,7 +779,7 @@ Currently, ${charset} will default to UTF-8."
   :type 'string
   :group 'fountain-export)
 
-;;; Variables ==========================================================
+;;; Variables ==================================================================
 
 (defvar fountain-metadata nil
   "Metadata alist in the form of (KEY . VALUE).
@@ -787,7 +787,7 @@ This buffer-local variable is set with `fountain-read-metadata'
 upon calling `fountain-mode' or saving a file.")
 (make-variable-buffer-local 'fountain-metadata)
 
-;;; Element Regular Expressions ========================================
+;;; Element Regular Expressions ================================================
 
 (defconst fountain-blank-regexp
   "\\`\\|^\s?$\\|\\'"
@@ -854,7 +854,7 @@ lines.")
   "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
   "Regular expression for matching centered text.")
 
-;;; Emphasis Regular Expressions =======================================
+;;; Emphasis Regular Expressions ===============================================
 
 (defconst fountain-underline-regexp
   (concat "\\(^\\|[^\\]\\)"
@@ -894,7 +894,7 @@ bold-italic delimiters together, e.g.
           "\\(?3:.+\\)")
   "Regular expression for matching lyrics.")
 
-;;; Faces ==============================================================
+;;; Faces ======================================================================
 
 (defgroup fountain-faces nil
   "Faces used in `fountain-mode'.
@@ -986,11 +986,11 @@ with \\[fountain-save-font-lock-decoration]."
   "Default face for transitions."
   :group 'fountain-faces)
 
-;;; Thing Definitions ==================================================
+;;; Thing Definitions ==========================================================
 
 (put 'scene 'forward-op 'fountain-forward-scene)
 
-;;; Internal Functions =================================================
+;;; Internal Functions =========================================================
 
 (defun fountain-get-block-bounds ()
   "Return the beginning and end points of block at point."
@@ -1310,7 +1310,7 @@ nil or 0, return character at point, otherwise return nil."
         (setq font-lock-end end changed t))
       changed)))
 
-;;; Export Internal Functions ==========================================
+;;; Export Internal Functions ==================================================
 
 (defun fountain-export-fontify-buffer ()
   "If `font-lock-mode' is enables, fontify entire buffer."
@@ -1647,7 +1647,7 @@ created HTML element to DESTBUF."
       (unless complete
         (kill-buffer destbuf)))))
 
-;;; Interactive Functions  =============================================
+;;; Interactive Functions  =====================================================
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
@@ -1881,7 +1881,7 @@ then make the changes desired."
          (command (format fountain-export-pdf-via-html-command file)))
     (async-shell-command command "*Fountain PDF Process*")))
 
-;;; Menu Functions =====================================================
+;;; Menu Functions =============================================================
 
 (defun fountain-toggle-comment-syntax ()
   "Toggle `fountain-switch-comment-syntax'."
@@ -2025,7 +2025,7 @@ message of \"S are now invisible/visible\"."
            (if fountain-export-double-space-scene-headings
                "double-spaced" "single-spaced")))
 
-;;; Font Lock ==========================================================
+;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords-plist
   `(("note" ,fountain-note-regexp
@@ -2176,7 +2176,7 @@ keywords suitable for Font Lock."
       (forward-line 1))
     match))
 
-;;; Mode Map ===========================================================
+;;; Mode Map ===================================================================
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
@@ -2210,7 +2210,7 @@ keywords suitable for Font Lock."
     map)
   "Mode map for `fountain-mode'.")
 
-;;; Menu ===============================================================
+;;; Menu =======================================================================
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
@@ -2293,7 +2293,7 @@ keywords suitable for Font Lock."
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
-;;; Syntax Table =======================================================
+;;; Syntax Table ===============================================================
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
@@ -2303,7 +2303,7 @@ keywords suitable for Font Lock."
     syntax)
   "Syntax table for `fountain-mode'.")
 
-;;; Mode Definition ====================================================
+;;; Mode Definition ============================================================
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
