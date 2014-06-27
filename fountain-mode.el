@@ -404,7 +404,7 @@ Otherwise, use an external stylesheet file."
   :group 'fountain-export)
 
 (defcustom fountain-export-font
-  '("Courier" "Courier New")
+  '("Courier" "Courier New" "monospace")
   "List of font names to use when exporting, by priority."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
@@ -933,7 +933,7 @@ with \\[fountain-save-font-lock-decoration]."
   :group 'fountain-faces)
 
 (defface fountain-metadata-value
-  '((t (:inherit match)))
+  '((t (:inherit font-lock-comment-face)))
   "Default face for metadata values."
   :group 'fountain-faces)
 
