@@ -789,6 +789,16 @@ upon calling `fountain-mode' or saving a file.")
 
 ;;; Element Regular Expressions ================================================
 
+(defvar fountain-scene-heading-regexp nil
+  "Regular expression for matching scene headings.
+Set with `fountain-initialize-regexp'. Requires
+`fountain-scene-heading-p' for preceding blank line.")
+
+(defvar fountain-trans-regexp nil
+  "Regular expression for matching transitions.
+Set with `fountain-initialize-regexp'. Requires
+`fountain-trans-p' for preceding and succeeding blank lines.")
+
 (defconst fountain-blank-regexp
   "\\`\\|^\s?$\\|\\'"
   "Regular expression for matching an empty line.")
@@ -812,14 +822,6 @@ upon calling `fountain-mode' or saving a file.")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-metadata-p' for bobp.")
 
-(defconst fountain-scene-heading-regexp
-  (concat "^\\(\\.\\)\\(\\<.*\\)\\|"
-          "^\\(?2:"
-          (regexp-opt fountain-scene-heading-prefix-list)
-          "[.\s\t]+.*\\)")
-  "Regular expression for matching scene headings.
-Requires `fountain-scene-heading-p' for preceding blank line.")
-
 (defconst fountain-paren-regexp
   "^[\s\t]*([^)\n]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
@@ -840,15 +842,6 @@ Requires `fountain-paren-p' for preceding character or dialog.")
 (defconst fountain-synopsis-regexp
   "^\\(=[\s\t]*\\)\\([^=\n].*\\)"
   "Regular expression for matching synopses.")
-
-(defconst fountain-trans-regexp
-  (concat "^\\([\s\t]*>\s*\\)\\([^<>\n]*\\)$\\|"
-          "^[\s\t]*\\(?2:[[:upper:]\s]*"
-          (regexp-opt fountain-trans-list)
-          "\\)$")
-  "Regular expression for matching transitions.
-Requires `fountain-trans-p' for preceding and succeeding blank
-lines.")
 
 (defconst fountain-center-regexp
   "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
@@ -991,6 +984,21 @@ with \\[fountain-save-font-lock-decoration]."
 (put 'scene 'forward-op 'fountain-forward-scene)
 
 ;;; Internal Functions =========================================================
+
+(defun fountain-initialize-regexp ()
+  "Set variable regular expression values.
+Sets `fountain-trans-regexp' and
+`fountain-scene-heading-prefix-list'."
+  (setq fountain-trans-regexp
+        (concat "^\\([\s\t]*>\s*\\)\\([^<>\n]*\\)$\\|"
+                "^[\s\t]*\\(?2:[[:upper:]\s]*"
+                (regexp-opt fountain-trans-list)
+                "\\)$")
+        fountain-scene-heading-prefix-list
+        (concat "^\\(\\.\\)\\(\\<.*\\)\\|"
+                "^\\(?2:"
+                (regexp-opt fountain-scene-heading-prefix-list)
+                "[.\s\t]+.*\\)")))
 
 (defun fountain-get-block-bounds ()
   "Return the beginning and end points of block at point."
@@ -2315,8 +2323,8 @@ keywords suitable for Font Lock."
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-comment)
-  (setq font-lock-defaults '(fountain-create-font-lock-keywords
-                             nil t))
+  (setq font-lock-defaults
+        '(fountain-create-font-lock-keywords nil t))
   (setq font-lock-extra-managed-props
         '(line-prefix wrap-prefix invisible fountain-element))
   (if fountain-hide-emphasis-delim
@@ -2329,6 +2337,7 @@ keywords suitable for Font Lock."
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             'fountain-read-metadata)
+  (fountain-initialize-regexp)
   (fountain-read-metadata))
 
 (provide 'fountain-mode)
