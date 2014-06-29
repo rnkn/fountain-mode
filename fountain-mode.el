@@ -994,7 +994,7 @@ Sets `fountain-trans-regexp' and
                 "^[\s\t]*\\(?2:[[:upper:]\s]*"
                 (regexp-opt fountain-trans-list)
                 "\\)$")
-        fountain-scene-heading-prefix-list
+        fountain-scene-heading-regexp
         (concat "^\\(\\.\\)\\(\\<.*\\)\\|"
                 "^\\(?2:"
                 (regexp-opt fountain-scene-heading-prefix-list)
