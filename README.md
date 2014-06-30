@@ -7,29 +7,33 @@ the Fountain markup format, visit <http://fountain.io>.
 
 ![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png)
 
+*Pictured: Big Fish by John August in Fountain Mode*
+
 Features
 --------
 
-- support for the Fountain 1.1 specification
+- support for the Fountain 1.1 specification (except dual dialog)
 - exporting to HTML and PDF (requires [Prince][])
 - include or omit a title page
 - multiple levels of syntax highlighting for all elements (see below)
 - auto-indentation: character, parenthetical, dialog, transition and
   center text elements (display only, does not modify file contents)
-- add/remove continued dialog to successively speaking characters
-- automatic (MORE) and (CONT'D) when breaking dialog across pages
+- add/remove automatic continued dialog string "(CONT'D)" to
+  successively speaking characters
+- automatic (MORE) and (CONT'D) when breaking dialog across pages in
+  PDF output
 - `occur` navigator for section headings, synopses, notes and scene
   headings
 - templates for inserting synopses, notes and metadata
 - navigate by scene heading
 - support for emphasis (bold, italic, underlined text)
 - toggle visibility of emphasis delimiters and syntax characters
-- standard commenting (boneyard) behaviour
+- standard commenting (boneyard) behavior
 - everything is customizable, of course
 
 The following features are not yet supported:
 
-- dual dialogue (probably won't be supported because it's stupid)
+- dual dialog (will be supported when someone asks for it)
 
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`. Bugs and feature requests
@@ -38,14 +42,14 @@ directly (email in the source code header).
 
 See the [wiki][] for ways to extend Fountain Mode.
 
-[prince]: http://www.princexml.com/ "Prince"
-[issues]: https://github.com/rnkn/fountain-mode/issues/ "Fountain Mode issues"
-[wiki]: https://github.com/rnkn/fountain-mode/wiki/ "Fountain Mode wiki"
+[prince]: http://www.princexml.com "Prince"
+[issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
+[wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
 
 Requirements
 ------------
 
-- Emacs 24 (not tested on earlier versions, only tested on Mac OS X
+- Emacs 24.1 (not tested on earlier versions, only tested on Mac OS X
   and Linux, not tested on Windows).
 - [s.el][], the long lost Emacs string manipulation library.
 - Exporting to PDF requires [Prince][], which is free for personal
@@ -53,8 +57,8 @@ Requirements
   you don't like it, delete the annotation in a PDF application that
   supports editing annotations, or open the PDF and print to PDF,
   which will remove all annotations.
-- to insert UUIDs (useful for using notes as linked bookmarks) you'll
-  need either `uuidgen` CLT (usually pre-installed on OS X and Linux)
+- To insert UUIDs (useful for using notes as linked bookmarks) you'll
+  need either `uuidgen` CLT (usually preinstalled on OS X and Linux)
   or [uuid.el][] Emacs package.
 
 [s.el]: https://github.com/magnars/s.el "s.el"
@@ -93,4 +97,4 @@ History
 
 See [Releases][].
 
-[releases]: https://github.com/rnkn/fountain-mode/releases/ "Fountain Mode releases"
+[releases]: https://github.com/rnkn/fountain-mode/releases "Fountain Mode releases"
