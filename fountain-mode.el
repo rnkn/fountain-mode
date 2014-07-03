@@ -243,7 +243,9 @@ so the following are equivalent:
 
     INT. HOUSE - DAY
 
-    INT./EXT. HOUSE - DAY"
+    INT./EXT. HOUSE - DAY
+
+Call `fountain-mode' again for changes to take effect."
   :type '(repeat (string :tag "Prefix"))
   :group 'fountain)
 
@@ -255,7 +257,9 @@ e.g. \"TO:\" will match both the following:
 
     CUT TO:
 
-    DISSOLVE TO:"
+    DISSOLVE TO:
+
+Call `fountain-mode' again for changes to take effect."
   :type '(repeat (string :tag "Transition"))
   :group 'fountain)
 
@@ -764,7 +768,8 @@ table.dialog caption.character {
     caption-page: following;
     content: string(character, last)\" ${dialog-contd}\";
 }"
-"Style template for exporting to HTML, and PDF via HTML."
+"Style template for exporting to HTML, and PDF via HTML.
+Only customize this if you really know what you're doing."
   :type 'string
   :group 'fountain-export)
 
@@ -777,6 +782,7 @@ table.dialog caption.character {
 ${insert-style}
 </head>"
   "HTML head template inserted into export buffer.
+Only customize this if you really know what you're dong.
 Currently, ${charset} will default to UTF-8."
   :type 'string
   :group 'fountain-export)
@@ -910,6 +916,7 @@ the value of `font-lock-maximum-decoration'. This can be set
 indirectly with \\[fountain-set-font-lock-decoration] and saved
 with \\[fountain-save-font-lock-decoration]."
   :prefix "fountain-"
+  :link '(info-link "(emacs)Font Lock")
   :group 'fountain)
 
 (defface fountain-comment
