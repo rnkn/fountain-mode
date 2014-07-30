@@ -35,12 +35,15 @@ The following features are not yet supported:
 
 - dual dialog (will be supported when someone asks for it)
 
+The overlap of Emacs users and screenwriters is rather small, so any
+feature request or bug fix will usually be implemented soon.
+
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`. Bugs and feature requests
-are encouraged on the [Issues][] page, or you can email me
-directly (email in the source code header).
+are encouraged on the [Issues][] page, or you can email me directly
+(email in the source code header).
 
-See the [wiki][] for ways to extend Fountain Mode.
+See the [Wiki][] for ways to extend Fountain Mode.
 
 [prince]: http://www.princexml.com "Prince"
 [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
