@@ -5,9 +5,12 @@ Fountain Mode aims to be a full-featured screenwriting environment for
 GNU Emacs using the Fountain markup format. For more information on the
 Fountain markup format, visit <http://fountain.io>.
 
-![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode-cdn/screenshot.png)
+![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode/screenshot.png)
 
-*Pictured: Big Fish by John August in Fountain Mode*
+*Pictured: The Abductors by Paul W. Rankin in Fountain Mode (also
+running [Olivetti][] minor mode)*
+
+[olivetti]: https://github.com/rnkn/olivetti "Olivetti"
 
 Features
 --------
