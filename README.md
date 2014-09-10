@@ -74,7 +74,7 @@ Installation
 ------------
 
 *For users on OS X with no experience with Emacs, see the
-[Absolute Beginner's Guide (OS X)][].*
+[Absolute Beginner's Guide (OS X)][beginners guide].*
 
 Fountain Mode is available through [MELPA][] and [MELPA-stable][]. I
 encourage installing the stable version.
