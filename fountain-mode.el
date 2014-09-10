@@ -803,6 +803,10 @@ This buffer-local variable is set with `fountain-read-metadata'
 upon calling `fountain-mode' or saving a file.")
 (make-variable-buffer-local 'fountain-metadata)
 
+(defvar fountain-block-limit 10000
+  "Integer to limit fontification block in characters.
+Used by `fountain-get-block-bounds'.")
+
 ;;; Element Regular Expressions ================================================
 
 (defvar fountain-scene-heading-regexp nil
@@ -1022,11 +1026,11 @@ Sets `fountain-trans-regexp' and
   (let ((block-beginning
          (save-excursion
            (re-search-backward fountain-blank-regexp
-                               (- (point) 10000) t)))
+                               (- (point) fountain-block-limit) t)))
         (block-end
          (save-excursion
            (re-search-forward fountain-blank-regexp
-                              (+ (point) 10000) t))))
+                              (+ (point) fountain-block-limit) t))))
     (cons block-beginning block-end)))
 
 ;; currently unused
