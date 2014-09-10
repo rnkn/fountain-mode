@@ -85,6 +85,12 @@ file:
 
     (require 'fountain-mode)
 
+If you want to use the `develop` branch (not recommended) to stay on
+the bleeding-edge, clone the repository in your `load-path` and
+require as above:
+
+    git clone https://github.com/rnkn/fountain-mode.git
+
 To load Fountain Mode whenever you open a `.fountain` file, also add the
 following:
 
