@@ -7,8 +7,8 @@ Fountain markup format, visit <http://fountain.io>.
 
 ![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode/screenshot.png)
 
-*Pictured: The Abductors by Paul W. Rankin in Fountain Mode (also
-running [Olivetti][] minor mode)*
+Pictured: *The Abductors* by Paul W. Rankin in Fountain Mode (using
+`tsdh-dark` theme, also running [Olivetti][] minor mode)
 
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
 
