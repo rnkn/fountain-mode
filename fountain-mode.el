@@ -1265,8 +1265,8 @@ syntax.
     ${email}    User email (defined in `user-mail-address')
     ${uuid}     Insert a UUID (defined in `fountain-uuid-func')
 
-Optionally, use \"$m\" and \"$p\" to set the `mark' and `point'
-respectively, but only use one of each."
+Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
+`point', but only use one of each."
   (let ((start (point)))
     (insert (s-format template 'aget
                       `(("title" . ,(file-name-base (buffer-name)))
@@ -1278,11 +1278,11 @@ respectively, but only use one of each."
                         ("uuid" . ,(fountain-uuid)))))
     (let ((end (point-marker)))
       (goto-char start)
-      (when (search-forward "$m" end t)
+      (when (search-forward "$@" end t)
         (replace-match "")
         (push-mark (point) t t))
       (goto-char start)
-      (if (search-forward "$p" end t)
+      (if (search-forward "$?" end t)
           (replace-match "")
         (goto-char end)))))
 
