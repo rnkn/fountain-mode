@@ -4,9 +4,9 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.3.2
+;; Version: 1.3.3
 ;; Package-Requires: ((s "1.9.0"))
-;; URL: https://github.com/rnkn/fountain-mode/
+;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
 
@@ -133,13 +133,13 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.3.2")
+  "1.3.3")
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
   :group 'wp
-  :link '(url-link "http://github.com/rnkn/fountain-mode/"))
+  :link '(url-link "https://github.com/rnkn/fountain-mode"))
 
 (defgroup fountain-export ()
   "Options for exporting Fountain files."
@@ -1137,7 +1137,7 @@ heading, synopsis, note, or is within a comment."
              (forward-line -1)
              (fountain-invisible-p))))))
 
-(defun fountain-character-p ()
+(defun fountain-character-p ()          ; OPTIMIZE
   "Match character if point is at character, nil otherwise."
   (unless (or (fountain-blank-p)
               (fountain-scene-heading-p))
