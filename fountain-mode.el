@@ -842,6 +842,15 @@ Set with `fountain-initialize-regexp'. Requires
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-metadata-p' for bobp.")
 
+(defconst fountain-character-regexp
+  (concat "^[\s\t]*"
+          "\\(@[^<>()\n]*?\\|[^!<>()[:lower:]\s\t\n][^<>[:lower:]\n]*?\\)"
+          "[\s\t]*"
+          "\\((.*\\)?$")
+  "Regular expression for matching character names.
+Requires `fountain-character-p' for preceding invisible and
+succeeding non-invisibles.")
+
 (defconst fountain-paren-regexp
   "^[\s\t]*([^)\n]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
