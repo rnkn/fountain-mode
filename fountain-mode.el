@@ -1146,28 +1146,22 @@ heading, synopsis, note, or is within a comment."
              (forward-line -1)
              (fountain-invisible-p))))))
 
-(defun fountain-character-p ()          ; OPTIMIZE
+(defun fountain-character-p ()
   "Match character if point is at character, nil otherwise."
-  (unless (or (fountain-blank-p)
-              (fountain-scene-heading-p))
     (save-excursion
-      (save-restriction
-        (widen)
-        (forward-line 0)
-        (and (looking-at "[^<>\n]+")
-             (save-match-data
-               (let* ((s (match-string-no-properties 0))
-                      (s (s-trim (car (s-slice-at "(" s)))))
-                 (and (null (s-starts-with? "!" s))
-                      (or (s-uppercase? s)
-                          (s-starts-with? "@" s))
-                      (save-excursion
-                        (forward-line -1)
-                        (fountain-invisible-p))
-                      (save-excursion
-                        (forward-line 1)
-                        (unless (eobp)
-                          (null (fountain-invisible-p))))))))))))
+      (forward-line 0)
+      (and (let ((case-fold-search nil))
+             (looking-at fountain-character-regexp))
+           (save-match-data
+             (save-restriction
+               (widen)
+               (and (save-excursion
+                      (forward-line -1)
+                      (fountain-invisible-p))
+                    (save-excursion
+                      (forward-line 1)
+                      (unless (eobp)
+                        (not (fountain-invisible-p))))))))))
 
 (defun fountain-dialog-p ()
   "Match dialog if point is at dialog, nil otherwise."
