@@ -2061,88 +2061,116 @@ message of \"S are now invisible/visible\"."
 
 (defvar fountain-font-lock-keywords-plist
   `(("note" ,fountain-note-regexp
-     ((2 0 nil t)))
+     ((:level 2 :subexp 0 :invisible t)))
     ("scene-heading"
      (lambda (limit)
        (fountain-match-element 'fountain-scene-heading-p limit))
-     ((2 0 nil nil keep)
-      (1 1 fountain-comment fountain-syntax-chars t t)))
+     ((:level 2 :subexp 0 :override keep)
+      (:level 1 :subexp 1 :face fountain-comment
+              :invisible fountain-syntax-chars
+              :override t
+              :laxmatch t)))
     ("character"
      (lambda (limit)
        (fountain-match-element 'fountain-character-p limit))
-     ((3 0 nil nil keep)))
+     ((:level 3 :subexp 0 :override keep)))
     ("dialog"
      (lambda (limit)
        (fountain-match-element 'fountain-dialog-p limit))
-     ((3 0 nil nil keep)))
+     ((:level 3 :subexp 0 :override keep)))
     ("paren"
      (lambda (limit)
        (fountain-match-element 'fountain-paren-p limit))
-     ((3 0 nil nil keep)))
+     ((:level 3 :subexp 0 :override keep)))
     ("trans"
      (lambda (limit)
        (fountain-match-element 'fountain-trans-p limit))
-     ((3 0 nil nil keep)
-      (1 1 fountain-comment fountain-syntax-chars t t)))
+     ((:level 3 :subexp 0 :override keep)
+      (:level 1 :subexp 1 :face fountain-comment
+              :invisible fountain-syntax-chars
+              :override t
+              :laxmatch t)))
     ("forced-action-mark" ,fountain-forced-action-mark-regexp
-     ((1 0 fountain-comment fountain-syntax-chars)))
+     ((:level 1 :subexp 0 :face fountain-comment
+              :invisible fountain-syntax-chars)))
     ("center" ,fountain-center-regexp
-     ((1 1 fountain-comment fountain-syntax-chars)
-      (3 2 nil)
-      (1 3 fountain-comment fountain-syntax-chars)))
+     ((:level 1 :subexp 1 :face fountain-comment
+              :invisible fountain-syntax-chars)
+      (:level 3 :subexp 2)
+      (:level 1 :subexp 3 :face fountain-comment
+              :invisible fountain-syntax-chars)))
     ("section" ,fountain-section-regexp
-     ((2 0 nil t)
-      (1 1 fountain-comment fountain-syntax-chars t)))
+     ((:level 2 :subexp 0 :invisible t)
+      (:level 1 :subexp 1 :face fountain-comment
+              :invisible fountain-syntax-chars
+              :override t)))
     ("synopsis" ,fountain-synopsis-regexp
-     ((2 0 nil t)
-      (1 1 fountain-comment fountain-syntax-chars t)))
+     ((:level 2 :subexp 0 :invisible t)
+      (:level 1 :subexp 1 :face fountain-comment
+              :invisible fountain-syntax-chars
+              :override t)))
     ("page-break" ,fountain-page-break-regexp
-     ((2 0 fountain-page-break)))
+     ((:level 2 :subexp 0 :face fountain-page-break)))
     ("metadata"
      (lambda (limit)
        (fountain-match-element 'fountain-metadata-p limit))
-     ((3 1 fountain-metadata-key t nil t)
-      (3 2 fountain-metadata-value t nil t)
-      (1 0 fountain-comment t keep)))
+     ((:level 3 :subexp 1 :face fountain-metadata-key
+              :invisible t
+              :laxmatch t)
+      (:level 3 :subexp 2 :face fountain-metadata-value
+              :invisible t
+              :laxmatch t)
+      (:level 1 :subexp 0 :face fountain-comment
+              :invisible t
+              :override keep)))
     (nil ,fountain-nbsp-regexp
-         ((1 2 fountain-non-printing fountain-syntax-chars)))
+         ((:level 1 :subexp 2 :face fountain-non-printing
+                  :invisible fountain-syntax-chars)))
     (nil ,fountain-underline-regexp
-         ((1 2 fountain-non-printing fountain-emphasis-delim)
-          (2 3 underline)
-          (1 4 fountain-non-printing fountain-emphasis-delim)))
+         ((:level 1 :subexp 2 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)
+          (:level 2 :subexp 3 :face underline)
+          (:level 1 :subexp 4 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)))
     (nil ,fountain-italic-regexp
-         ((1 2 fountain-non-printing fountain-emphasis-delim)
-          (2 3 italic)
-          (1 4 fountain-non-printing fountain-emphasis-delim)))
+         ((:level 1 :subexp 2 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)
+          (:level 2 :subexp 3 :face italic)
+          (:level 1 :subexp 4 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)))
     (nil ,fountain-bold-regexp
-         ((1 2 fountain-non-printing fountain-emphasis-delim)
-          (2 3 bold)
-          (1 4 fountain-non-printing fountain-emphasis-delim)))
+         ((:level 1 :subexp 2 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)
+          (:level 2 :subexp 3 :face bold)
+          (:level 1 :subexp 4 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)))
     (nil ,fountain-bold-italic-regexp
-         ((1 2 fountain-non-printing fountain-emphasis-delim)
-          (2 3 bold-italic)
-          (1 4 fountain-non-printing fountain-emphasis-delim)))
+         ((:level 1 :subexp 2 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)
+          (:level 2 :subexp 3 :face bold-italic)
+          (:level 1 :subexp 4 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)))
     (nil ,fountain-lyrics-regexp
-         ((1 2 fountain-non-printing fountain-emphasis-delim)
-          (2 3 italic))))
+         ((:level 1 :subexp 2 :face fountain-non-printing
+                  :invisible fountain-emphasis-delim)
+          (:level 2 :subexp 3 :face italic))))
   "List of face properties to create element Font Lock keywords.
 Has the format:
 
-    (ELEMENT MATCHER LIST)
+    (ELEMENT MATCHER PLIST-LIST)
 
 The first element, ELEMENT, is a string naming the element; if
 nil, this face is not considered an element. MATCHER is a regular
-expression or search function. LIST is a list of lists, each with
-the format:
+expression or search function. PLIST-LIST is a list of plists,
+assigning the following keywords:
 
-    (LEVEL SUBEXP FACE INVISIBLE OVERRIDE LAXMATCH)
-
-LEVEL is an integer representing the Font Lock decoration level
-at which the face is applied. SUBEXP is the subexpression to
-match. FACE is either a face name to apply, or nil, which will
-generate a face name as \"fountain-ELEMENT\". INVISIBLE, if t,
-adds FACE to the \"invisible\" text property. OVERRIDE and
-LAXMATCH follow `font-lock-keywords'.")
+    :level - integer representing level of `font-lock-maximum-decoration'
+        at which face is applied
+    :subexp - subexpression to match
+    :face - face name to apply
+    :invisible - if t, adds :face property to invisible text property
+    :override - as per `font-lock-keywords'
+    :laxmatch - as per `font-lock-keywords'")
 
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
@@ -2150,10 +2178,10 @@ Uses `fountain-font-lock-keywords-plist' to create a list of
 keywords suitable for Font Lock."
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
-    (dolist (f fountain-font-lock-keywords-plist keywords)
-      (let* ((element (car f))
-             (matcher (nth 1 f))
-             (list (nth 2 f))
+    (dolist (var fountain-font-lock-keywords-plist keywords)
+      (let* ((element (car var))
+             (matcher (nth 1 var))
+             (plist-list (nth 2 var))
              (align (intern (concat "fountain-align-" element)))
              ;; if we're using auto-align and the align var is bound,
              ;; set the align properties
@@ -2163,47 +2191,44 @@ keywords suitable for Font Lock."
                                 (space :align-to ,align)
                                 wrap-prefix
                                 (space :align-to ,align))))
-             face-props)
-        (dolist (f list)
-          (let* ((level (car f))
-                 (subexp (nth 1 f))
+             facespec)
+        (dolist (plist plist-list)
+          (let* ((subexp (plist-get plist :subexp))
                  ;; if LEVEL is less or equal to DEC, use either face
                  ;; supplied in PLIST or intern fountain-ELEMENT,
                  ;; otherwise use nil
-                 (face (if (<= level dec)
-                           (or (nth 2 f)
+                 (face (if (<= (plist-get plist :level) dec)
+                           (or (plist-get plist :face)
                                (intern (concat "fountain-" element)))))
                  ;; if INVISIBLE is non-nil, add to INVISIBLE-PROPS
-                 (invisible (nth 3 f))
+                 (invisible (plist-get plist :invisible))
                  (invisible-props
                   (cond ((eq invisible t)
                          `(invisible ,(intern (concat "fountain-" element))))
                         (invisible
-                         `(invisible ,invisible))))
-                 ;; set the face OVERRIDE and LAXMATCH
-                 (override (nth 4 f))
-                 (laxmatch (nth 5 f)))
-            (setq face-props
-                  (append face-props
+                         `(invisible ,invisible)))))
+            (setq facespec
+                  (append facespec
                           (if element
                               (list `(,subexp '(face ,face
                                                      ,@align-props
                                                      ,@invisible-props
                                                      fountain-element ,element)
-                                              ,override ,laxmatch))
+                                              ,(plist-get plist :override)
+                                              ,(plist-get plist :laxmatch)))
                             (list `(,subexp '(face ,face
                                                    ,@invisible-props)
                                             append)))))))
         (setq keywords
               (append keywords
-                      (list (cons matcher face-props))))))))
+                      (list (cons matcher facespec))))))))
 
-(defun fountain-match-element (func limit)
+(defun fountain-match-element (fun limit)
   "If FUNC returns non-nil before LIMIT, return match data."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
-      (if (funcall func)
+      (if (funcall fun)
           (setq match t))
       (forward-line 1))
     match))
