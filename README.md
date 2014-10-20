@@ -42,7 +42,7 @@ The following features are not *yet* supported:
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`.
 
-See the [Wiki][] for ways to extend Fountain Mode.
+See the [Wiki][] on GitHub for ways to extend Fountain Mode.
 
 [prince]: http://www.princexml.com "Prince"
 [wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
@@ -99,7 +99,7 @@ following:
 Bugs and Feature Requests
 -------------------------
 
-Post bugs and features requests to the [Issues][] page, or simply email
+Raise an issue on the [Issues][] page on GitHub, or simply send an email
 to the mailing list: <emacs.fountain@librelist.com>.
 
 [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
@@ -107,6 +107,6 @@ to the mailing list: <emacs.fountain@librelist.com>.
 History
 -------
 
-See [Releases][].
+See [Releases][] on GitHub.
 
 [releases]: https://github.com/rnkn/fountain-mode/releases "Fountain Mode releases"
