@@ -40,16 +40,11 @@ The following features are not *yet* supported:
 - dual dialog
 
 Most common features are accessible from the menu. For a full list of
-functions and key-bindings, type `C-h m`. Bugs and feature requests are
-encouraged on the [Issues][] page, or you can email me directly (email
-in the source code header). The overlap of Emacs users and screenwriters
-is rather small, so any feature request or bug fix will usually be
-implemented quickly.
+functions and key-bindings, type `C-h m`.
 
 See the [Wiki][] for ways to extend Fountain Mode.
 
 [prince]: http://www.princexml.com "Prince"
-[issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 [wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
 
 Requirements
@@ -101,13 +96,13 @@ following:
 [melpa-stable]: http://melpa-stable.milkbox.net "MELPA"
 [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
-Syntax Highlighting
--------------------
+Bugs and Feature Requests
+-------------------------
 
-To change the level of syntax highlighting, customize the value of
-`font-lock-maximum-decoration`. This can be set indirectly with the
-menu, or with `M-x fountain-set-font-lock-decoration` and saved with
-`M-x fountain-save-font-lock-decoration`.
+Post bugs and features requests to the [Issues][] page, or simply email
+to the mailing list: <emacs.fountain@librelist.com>.
+
+[issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 
 History
 -------
