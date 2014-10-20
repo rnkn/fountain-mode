@@ -5,7 +5,7 @@ Fountain Mode aims to be a full-featured screenwriting environment for
 GNU Emacs using the Fountain markup format. For more information on the
 Fountain markup format, visit <http://fountain.io>.
 
-![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode/screenshot.png)
+![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
 
 Pictured: *The Abductors* by Paul W. Rankin in Fountain Mode (using
 `tsdh-dark` theme, also running [Olivetti][] minor mode)
