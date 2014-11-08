@@ -798,6 +798,7 @@ tr.paren {
 
 td {
     display: block;
+    padding: 0;
 }
 
 td.character {
