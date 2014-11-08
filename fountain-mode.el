@@ -537,14 +537,8 @@ Parentheses are not automatically added."
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-prepare-html nil
-  "If non-nil, auto-indent HTML elements during export.
-Off by default because it can take a long time for minimal
-benefit."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-preserve-line-breaks t
+(defcustom fountain-export-preserve-line-breaks
+  t
   "If non-nil, convert all newlines into line breaks.
 Otherwise, only break paragraphs at explicit line breaks (one or
 more blank lines)."
@@ -1650,19 +1644,6 @@ created HTML element to DESTBUF."
       (progress-reporter-update
        job (truncate (* (/ (float (point)) (buffer-size)) 100))))))
 
-(defun fountain-export-prepare-html ()
-  ;; internal function, don't call externally
-  (sgml-mode)
-  (let ((sgml-unclosed-tags '("link" "br"))
-        (job (make-progress-reporter "Preparing HTML..." 0 100)))
-    (goto-char (point-min))
-    (while (null (eobp))
-      (indent-according-to-mode)
-      (forward-line 1)
-      (progress-reporter-update
-       job (truncate (* (/ (float (point)) (point-max)) 100))))
-    (progress-reporter-done job)))
-
 (defun fountain-export--html ()
   ;; internal function, don't call externally
   ;; use `fountain-export-buffer-to-html' instead
@@ -1703,9 +1684,7 @@ created HTML element to DESTBUF."
           ;; close HTML tags
           (with-current-buffer destbuf
             (with-silent-modifications
-              (insert "</section>\n</body>\n</html>")
-              (if fountain-export-prepare-html
-                  (fountain-export-prepare-html))))
+              (insert "</section>\n</body>\n</html>")))
           ;; signal completion and return DESTBUF
           (setq complete t)
           destbuf)
