@@ -135,6 +135,14 @@
 (defconst fountain-version
   "1.3.3")
 
+;;; Required ===================================================================
+
+(require 's)
+(require 'thingatpt)
+(require 'easymenu)
+
+;; Groups ======================================================================
+
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
@@ -146,11 +154,27 @@
   :prefix "fountain-export-"
   :group 'fountain)
 
-;;; Requires ===================================================================
+(defgroup fountain-faces ()
+  "Faces used in `fountain-mode'.
+There are three levels of Font Lock decoration:
 
-(require 's)
-(require 'thingatpt)
-(require 'easymenu)
+    1. minimum: only highlights comments and syntax characters
+
+    2. default: highlights comments, metadata, scene headings,
+       sections, synopses, notes and syntax characters
+
+    3. maximum: highlights comments, metadata keys, metadata
+       values, scene headings, sections, synopses, notes,
+       character names, parentheticals, dialog, transitions,
+       center text and syntax characters
+
+To switch between these levels of Font Lock decoration, customize
+the value of `font-lock-maximum-decoration'. This can be set
+indirectly with \\[fountain-set-font-lock-decoration] and saved
+with \\[fountain-save-font-lock-decoration]."
+  :prefix "fountain-"
+  :link '(info-link "(emacs)Font Lock")
+  :group 'fountain)
 
 ;;; Obsolete Aliases ===========================================================
 
@@ -271,14 +295,16 @@ Call `fountain-mode' again for changes to take effect."
   :type '(repeat (string :tag "Transition"))
   :group 'fountain)
 
-(defcustom fountain-add-continued-dialog t
+(defcustom fountain-add-continued-dialog
+  t
   "\\<fountain-mode-map>If non-nil, add continued dialog appropriately with \\[fountain-continued-dialog-refresh].
 When same character speaks in succession, append
 `fountain-continued-dialog-string'."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-continued-dialog-string "CONT'D"
+(defcustom fountain-continued-dialog-string
+  "CONT'D"
   "String to append to character name speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, append this string
 to character when speaking in succession.
@@ -300,31 +326,36 @@ changes desired."
 ;;   :type 'boolean
 ;;   :group 'fountain)
 
-(defcustom fountain-align-character 20
+(defcustom fountain-align-character
+  20
   "Column integer to which characters names should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-dialog 10
+(defcustom fountain-align-dialog
+  10
   "Column integer to which dialog should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-paren 15
+(defcustom fountain-align-paren
+  15
   "Column integer to which parentheticals should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-trans 45
+(defcustom fountain-align-trans
+  45
   "Column integer to which transitions should be aligned.
 This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-center 10
+(defcustom fountain-align-center
+  10
   "Column integer to which centered text should be aligned.
 This option does not affect file contents."
   :type 'integer
@@ -336,7 +367,8 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-switch-comment-syntax nil
+(defcustom fountain-switch-comment-syntax
+  nil
   "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
 Two syntaxes are supported:
 
@@ -351,27 +383,32 @@ former but if you prefer the latter, set this option to non-nil."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-hide-emphasis-delim nil
+(defcustom fountain-hide-emphasis-delim
+  nil
   "If non-nil, make emphasis delimiters invisible."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-hide-syntax-chars nil
+(defcustom fountain-hide-syntax-chars
+  nil
   "If non-nil, make syntax characters invisible."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-short-time-format "%x"
+(defcustom fountain-short-time-format
+  "%x"
   "Format of date and time. See `format-time-string'."
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-long-time-format "%B %-e, %Y"
+(defcustom fountain-long-time-format
+  "%B %-e, %Y"
   "Format of date and time. See `format-time-string'."
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-note-template "${time} - ${fullname}: "
+(defcustom fountain-note-template
+  "${time} - ${fullname}: "
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 See `fountain-insert-template'.
 
@@ -399,12 +436,14 @@ The default function requires the command line tool \"uuidgen\"."
                 (function-item fountain-export-buffer-to-html))
   :group 'fountain-export)
 
-(defcustom fountain-export-include-title-page t
+(defcustom fountain-export-include-title-page
+  t
   "Generate a title page on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-inline-style t
+(defcustom fountain-export-inline-style
+  t
   "If non-nil, use inline stylesheet.
 Otherwise, use an external stylesheet file."
   :type 'boolean
@@ -423,65 +462,76 @@ Otherwise, use an external stylesheet file."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
 
-(defcustom fountain-export-bold-scene-headings nil
+(defcustom fountain-export-bold-scene-headings
+  nil
   "If non-nil, bold scene headings on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-underline-scene-headings nil
+(defcustom fountain-export-underline-scene-headings
+  nil
   "If non-nil, underline scene headings on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-bold-title nil
+(defcustom fountain-export-bold-title
+  nil
   "If non-nil, bold title on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-underline-title t
+(defcustom fountain-export-underline-title
+  t
   "If non-nil, underline title on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-upcase-title t
+(defcustom fountain-export-upcase-title
+  t
   "If non-nil, underline title on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-double-space-scene-headings nil
+(defcustom fountain-export-double-space-scene-headings
+  nil
   "If non-nil, double space before scene headings on export."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-action-orphans 2
+(defcustom fountain-export-action-orphans
+  2
   "Number of allowable action orphan lines.
 When breaking action across pages, this integer is the minimum
 number of lines on the previous page."
   :type 'integer
   :group 'fountain-export)
 
-(defcustom fountain-export-action-widows 2
+(defcustom fountain-export-action-widows
+  2
   "Number of allowable action widow lines.
 When breaking action across pages, this integer is the minimum
 number of lines on the following page."
   :type 'integer
   :group 'fountain-export)
 
-(defcustom fountain-export-dialog-orphans 2
+(defcustom fountain-export-dialog-orphans
+  2
   "Number of allowable dialog orphan lines.
 When breaking dialog across pages, this integer is the minimum
 number of lines on the previous page."
   :type 'integer
   :group 'fountain-export)
 
-(defcustom fountain-export-dialog-widows 2
+(defcustom fountain-export-dialog-widows
+  2
   "Number of allowable dialog widow lines.
 When breaking dialog across pages, this integer is the minimum
 number of lines on the following page."
   :type 'integer
   :group 'fountain-export)
 
-(defcustom fountain-export-more-dialog-string "(MORE)"
+(defcustom fountain-export-more-dialog-string
+  "(MORE)"
   "String to append to dialog when breaking across pages.
 Parentheses are not automatically added."
   :type 'string
@@ -501,7 +551,8 @@ more blank lines)."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-convert-quotes nil
+(defcustom fountain-export-convert-quotes
+  nil
   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
 
     \`\`foobar\'\'
@@ -797,24 +848,28 @@ Currently, ${charset} will default to UTF-8."
 
 ;;; Variables ==================================================================
 
-(defvar fountain-metadata nil
+(defvar fountain-metadata
+  nil
   "Metadata alist in the form of (KEY . VALUE).
 This buffer-local variable is set with `fountain-read-metadata'
 upon calling `fountain-mode' or saving a file.")
 (make-variable-buffer-local 'fountain-metadata)
 
-(defvar fountain-block-limit 10000
+(defvar fountain-block-limit
+  10000
   "Integer to limit fontification block in characters.
 Used by `fountain-get-block-bounds'.")
 
 ;;; Element Regular Expressions ================================================
 
-(defvar fountain-scene-heading-regexp nil
+(defvar fountain-scene-heading-regexp
+  nil
   "Regular expression for matching scene headings.
 Set with `fountain-initialize-regexp'. Requires
 `fountain-scene-heading-p' for preceding blank line.")
 
-(defvar fountain-trans-regexp nil
+(defvar fountain-trans-regexp
+  nil
   "Regular expression for matching transitions.
 Set with `fountain-initialize-regexp'. Requires
 `fountain-trans-p' for preceding and succeeding blank lines.")
@@ -918,28 +973,6 @@ bold-italic delimiters together, e.g.
 
 ;;; Faces ======================================================================
 
-(defgroup fountain-faces nil
-  "Faces used in `fountain-mode'.
-There are three levels of Font Lock decoration:
-
-  1. minimum: only highlights comments and syntax characters
-
-  2. default: highlights comments, metadata, scene headings,
-     sections, synopses, notes and syntax characters
-
-  3. maximum: highlights comments, metadata keys, metadata
-     values, scene headings, sections, synopses, notes, character
-     names, parentheticals, dialog, transitions, center text and
-     syntax characters
-
-To switch between these levels of Font Lock decoration, customize
-the value of `font-lock-maximum-decoration'. This can be set
-indirectly with \\[fountain-set-font-lock-decoration] and saved
-with \\[fountain-save-font-lock-decoration]."
-  :prefix "fountain-"
-  :link '(info-link "(emacs)Font Lock")
-  :group 'fountain)
-
 (defface fountain-comment
   '((t (:inherit shadow)))
   "Default face for comments (boneyard)."
@@ -1015,7 +1048,7 @@ with \\[fountain-save-font-lock-decoration]."
 
 ;;; Internal Functions =========================================================
 
-(defun fountain-initialize-regexp ()
+(defun fountain-initialize-regexp ()    ; WTF break these into separate funs
   "Set variable regular expression values.
 Sets `fountain-trans-regexp' and
 `fountain-scene-heading-prefix-list'."
