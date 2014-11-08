@@ -1125,10 +1125,10 @@ Sets `fountain-trans-regexp' and
   (thing-at-point-looking-at fountain-comment-regexp))
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
-(defun fountain-invisible-p ()
-  "Return non-nil if point is at an invisible element.
-A line is invisible if it is blank, or consists of a section
-heading, synopsis, note, or is within a comment."
+(defun fountain-tachyon-p ()
+  "Return non-nil if point is at a non-interfering element.
+These include blank lines, section headings, synopses, notes, and
+comments."
   (or (fountain-blank-p)
       (fountain-section-p)
       (fountain-synopsis-p)
@@ -1144,10 +1144,11 @@ heading, synopsis, note, or is within a comment."
       (and (looking-at fountain-scene-heading-regexp)
            (save-match-data
              (forward-line -1)
-             (fountain-invisible-p))))))
+             (fountain-tachyon-p))))))
 
 (defun fountain-character-p ()
   "Match character if point is at character, nil otherwise."
+  (unless (fountain-scene-heading-p)
     (save-excursion
       (forward-line 0)
       (and (let ((case-fold-search nil))
@@ -1157,11 +1158,11 @@ heading, synopsis, note, or is within a comment."
                (widen)
                (and (save-excursion
                       (forward-line -1)
-                      (fountain-invisible-p))
+                      (fountain-tachyon-p))
                     (save-excursion
                       (forward-line 1)
                       (unless (eobp)
-                        (not (fountain-invisible-p))))))))))
+                        (not (fountain-tachyon-p)))))))))))
 
 (defun fountain-dialog-p ()
   "Match dialog if point is at dialog, nil otherwise."
@@ -1205,12 +1206,12 @@ heading, synopsis, note, or is within a comment."
              (save-excursion
                (forward-line -1)
                (or (bobp)
-                   (fountain-invisible-p))))
+                   (fountain-tachyon-p))))
            (save-match-data
              (save-excursion
                (forward-line 1)
                (or (eobp)
-                   (fountain-invisible-p))))))))
+                   (fountain-tachyon-p))))))))
 
 (defun fountain-center-p ()
   "Match centered text if point is at centered text, nil otherwise."
