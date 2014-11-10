@@ -911,7 +911,7 @@ Requires `fountain-metadata-p' for bobp.")
 Requires `fountain-character-p'.")
 
 (defconst fountain-paren-regexp
-  "^[\s\t]*([^)\n]*)[\s\t]*$"
+  "^[\s\t]*\\(\\(([^)\n]*)\\)\\)[\s\t]*$"
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or dialog.")
 
