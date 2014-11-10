@@ -896,13 +896,19 @@ Set with `fountain-initialize-regexp'. Requires
 Requires `fountain-metadata-p' for bobp.")
 
 (defconst fountain-character-regexp
-  (concat "^[\s\t]*"
-          "\\(@[^<>()\n]*?\\|[^!<>()[:lower:]\s\t\n][^<>[:lower:]\n]*?\\)"
-          "[\s\t]*"
-          "\\((.*\\)?$")
+  (concat "^[\s\t]*\\(\\(?:"
+          "\\(?:@\\)\\(?2:\\(?3:[^<>\n]+?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
+          "\\|"
+          "\\(?2:\\(?3:[A-Z][^<>a-z\n]*?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
+          "\\)[\s\t]*\\(\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
-Requires `fountain-character-p' for preceding invisible and
-succeeding non-invisibles.")
+
+    Group 1: trim whitespace
+    Group 2: trim @ and ^ (for export)
+    Group 3: character name only
+    Group 4: trailing ^ for dual dialog
+
+Requires `fountain-character-p'.")
 
 (defconst fountain-paren-regexp
   "^[\s\t]*([^)\n]*)[\s\t]*$"
