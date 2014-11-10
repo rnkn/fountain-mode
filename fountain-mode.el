@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.3.3
+;; Version: 1.3.4
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -133,7 +133,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.3.3")
+  "1.3.4")
 
 ;;; Required ===================================================================
 
@@ -2388,8 +2388,8 @@ keywords suitable for Font Lock."
        'fountain-comment)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
-  (setq font-lock-extra-managed-props
-        '(line-prefix wrap-prefix invisible fountain-element))
+  (set (make-local-variable 'font-lock-extra-managed-props)
+       '(line-prefix wrap-prefix invisible fountain-element))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
