@@ -8,11 +8,9 @@ Fountain markup format, visit <http://fountain.io>.
 ![screenshot](https://dl.dropboxusercontent.com/u/94472468/fountain-mode/screenshot.png)
 
 Pictured: *The Abductors* by Paul W. Rankin in Fountain Mode (using
-`tsdh-dark` theme, also running [Olivetti][] minor mode). If you're a
-Black List member, you can [read the final writer's draft][blcklst].
+`tsdh-dark` theme, also running [Olivetti][] minor mode)
 
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
-[blcklst]: https://blcklst.com/members/scripts/view/22867 "The Abductors"
 
 Features
 --------
