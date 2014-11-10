@@ -2346,8 +2346,8 @@ keywords suitable for Font Lock."
        'fountain-comment)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
-  (setq font-lock-extra-managed-props
-        '(line-prefix wrap-prefix invisible fountain-element))
+  (set (make-local-variable 'font-lock-extra-managed-props)
+       '(line-prefix wrap-prefix invisible fountain-element))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
