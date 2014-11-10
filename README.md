@@ -92,8 +92,8 @@ following:
     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
 [beginners guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(OS-X) "Absolute Beginner's Guide (OS X)"
-[melpa]: http://melpa.milkbox.net "MELPA"
-[melpa-stable]: http://melpa-stable.milkbox.net "MELPA"
+[melpa]: http://melpa.org "MELPA"
+[melpa-stable]: http://stable.melpa.org "MELPA-stable"
 [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
 Bugs and Feature Requests
