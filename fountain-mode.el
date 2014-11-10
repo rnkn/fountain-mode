@@ -889,8 +889,9 @@ Set with `fountain-initialize-regexp'. Requires
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\<\\([^:\n]+\\):\s*\\(.+\\)?\\|"
-          "^\s+\\(?2:.+\\)")
+  (concat "^\\(\\(\\<[^:\n]+\\):\s*\\(.+\\)?\\)"
+          "\\|"
+          "^\s+\\(?1:\\(?3:.+\\)\\)")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-metadata-p' for bobp.")
 
@@ -1115,7 +1116,7 @@ Sets `fountain-trans-regexp' and
       ;; don't modify match-data
       (looking-at-p fountain-blank-regexp))))
 
-(defun fountain-metadata-p ()
+(defun fountain-metadata-p ()           ; OPTIMIZE
   "Match metadata if point is at metadata, nil otherwise."
   (save-excursion
     (save-restriction
@@ -1259,17 +1260,17 @@ comments."
       (widen)
       (goto-char (point-min))
       (while (fountain-metadata-p)
-        (let ((key (downcase (match-string-no-properties 1)))
-              (value
+        (let ((key (downcase (match-string-no-properties 2)))
+              (value                    ; FIXME make a list
                (progn
-                 (forward-line 1)       ;FIXME: on line ahead
-                 (or (match-string-no-properties 2)
+                 (forward-line 1)       ; FIXME: on line ahead
+                 (or (match-string-no-properties 3)
                      (let (s)
                        (while (and (fountain-metadata-p)
-                                   (null (match-string 1)))
+                                   (null (match-string 2)))
                          (setq s
                                (append s
-                                       (list (match-string-no-properties 2))))
+                                       (list (match-string-no-properties 3))))
                          (forward-line 1))
                        s)))))
           (setq fountain-metadata
