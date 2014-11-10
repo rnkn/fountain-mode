@@ -879,8 +879,7 @@ Set with `fountain-initialize-regexp'. Requires
   "Regular expression for forced action mark.")
 
 (defconst fountain-nbsp-regexp
-  (concat "\\(^\\|[^\\]\\)"
-          "\\(\\\\\\)\s")
+  "\\(?:^\\|[^\\]\\)\\(\\(\\\\\\)\s\\)"
   "Regular expression for non-breaking space.")
 
 (defconst fountain-comment-regexp
