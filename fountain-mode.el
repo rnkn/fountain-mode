@@ -140,6 +140,7 @@
 (require 's)
 (require 'thingatpt)
 (require 'easymenu)
+(require 'outline)
 
 ;; Groups ======================================================================
 
@@ -915,7 +916,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching notes.")
 
 (defconst fountain-section-regexp
-  "^\\(#\\{1,5\\}[\s\t]*\\)\\([^#\n].*\\)"
+  "^\\(#\\{1,5\\}\\)[\s\t]*\\([^#\n].*\\)"
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
@@ -1519,6 +1520,14 @@ Otherwise return `fountain-export-buffer'"
 
 (defun fountain-export-bold (s)
   "Replace bold text in S with HTML strong tags."
+;;; Outline ====================================================================
+
+(defun fountain-outline-level ()
+  "Return the depth to which a heading is nested in outline."
+  (if (string-prefix-p "#" (match-string 0))
+      (string-width (match-string 1))
+    6))
+
   (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
                             "<strong>\\1</strong>"
                             s t))
@@ -2380,16 +2389,23 @@ keywords suitable for Font Lock."
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
+  (fountain-init-regexp)
   (set (make-local-variable 'comment-start)
        (if fountain-switch-comment-syntax "//" "/*"))
   (set (make-local-variable 'comment-end)
        (if fountain-switch-comment-syntax "" "*/"))
   (set (make-local-variable 'font-lock-comment-face)
        'fountain-comment)
-  (setq font-lock-defaults
-        '(fountain-create-font-lock-keywords nil t))
+  (set 'font-lock-defaults
+       '(fountain-create-font-lock-keywords nil t))
   (set (make-local-variable 'font-lock-extra-managed-props)
        '(line-prefix wrap-prefix invisible fountain-element))
+  (set (make-local-variable 'outline-regexp)
+       (concat fountain-section-regexp
+               "\\|"
+               fountain-scene-heading-regexp))
+  (set (make-local-variable 'outline-level)
+       'fountain-outline-level)
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
@@ -2400,7 +2416,6 @@ keywords suitable for Font Lock."
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             'fountain-read-metadata)
-  (fountain-initialize-regexp)
   (fountain-read-metadata))
 
 (provide 'fountain-mode)
