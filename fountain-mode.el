@@ -932,7 +932,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching synopses.")
 
 (defconst fountain-center-regexp
-  "\\(^[\s\t]*>[\s\t]*\\)\\(.*?\\)\\([\s\t]*<[\s\t]*$\\)"
+  "^[\s\t]*\\(\\(?3:>[\s\t]*\\)\\(?2:.*?\\)\\([\s\t]*<\\)\\)[\s\t]*$"
   "Regular expression for matching centered text.")
 
 ;;; Emphasis Regular Expressions ===============================================
