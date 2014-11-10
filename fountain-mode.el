@@ -928,7 +928,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
-  "^\\(=[\s\t]*\\)\\([^=\n].*\\)"
+  "^\\(\\(?3:=[\s\t]*\\)\\(?2:[^=\n].*\\)\\)[\s\t]*"
   "Regular expression for matching synopses.")
 
 (defconst fountain-center-regexp
