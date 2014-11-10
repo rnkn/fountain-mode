@@ -920,7 +920,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching page breaks.")
 
 (defconst fountain-note-regexp
-  "\\[\\[\\(?:.\n?\\)*]]"
+  "\\(\\[\\[\\(\\(?:.\n?\\)*?\\)]]\\)"
   "Regular expression for matching notes.")
 
 (defconst fountain-section-regexp
