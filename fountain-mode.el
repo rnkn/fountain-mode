@@ -2370,28 +2370,32 @@ message of \"S are now invisible/visible\"."
     ("scene-heading"
      (lambda (limit)
        (fountain-match-element 'fountain-scene-heading-p limit))
-     ((:level 2 :subexp 0 :override keep)
-      (:level 1 :subexp 1 :face fountain-comment
+     ((:level 2 :subexp 0)
+      (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)))
     ("character"
      (lambda (limit)
        (fountain-match-element 'fountain-character-p limit))
-     ((:level 3 :subexp 0 :override keep)))
+     ((:level 3 :subexp 0)
+      (:level 2 :subexp 2 :face fountain-comment ; FIXME maybe
+              :invisible fountain-syntax-chars
+              :override t
+              :laxmatch t)))
     ("dialog"
      (lambda (limit)
        (fountain-match-element 'fountain-dialog-p limit))
-     ((:level 3 :subexp 0 :override keep)))
+     ((:level 3 :subexp 0)))
     ("paren"
      (lambda (limit)
        (fountain-match-element 'fountain-paren-p limit))
-     ((:level 3 :subexp 0 :override keep)))
+     ((:level 3 :subexp 0)))
     ("trans"
      (lambda (limit)
        (fountain-match-element 'fountain-trans-p limit))
-     ((:level 3 :subexp 0 :override keep)
-      (:level 1 :subexp 1 :face fountain-comment
+     ((:level 3 :subexp 0)
+      (:level 1 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)))
@@ -2399,19 +2403,19 @@ message of \"S are now invisible/visible\"."
      ((:level 1 :subexp 0 :face fountain-comment
               :invisible fountain-syntax-chars)))
     ("center" ,fountain-center-regexp
-     ((:level 1 :subexp 1 :face fountain-comment
-              :invisible fountain-syntax-chars)
-      (:level 3 :subexp 2)
-      (:level 1 :subexp 3 :face fountain-comment
-              :invisible fountain-syntax-chars)))
-    ("section" ,fountain-section-regexp
-     ((:level 2 :subexp 0 :invisible t)
-      (:level 1 :subexp 1 :face fountain-comment
+     ((:level 2 :subexp 2 :face fountain-comment
+              :invisible fountain-syntax-chars
+              :override t)
+      (:level 3 :subexp 3)
+      (:level 2 :subexp 4 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)))
+    ("section" ,fountain-section-regexp
+     ((:level 2 :subexp 3)
+      (:level 2 :subexp 2 :face fountain-comment)))
     ("synopsis" ,fountain-synopsis-regexp
      ((:level 2 :subexp 0 :invisible t)
-      (:level 1 :subexp 1 :face fountain-comment
+      (:level 2 :subexp 3 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)))
     ("page-break" ,fountain-page-break-regexp
@@ -2419,13 +2423,13 @@ message of \"S are now invisible/visible\"."
     ("metadata"
      (lambda (limit)
        (fountain-match-element 'fountain-metadata-p limit))
-     ((:level 3 :subexp 1 :face fountain-metadata-key
+     ((:level 2 :subexp 2 :face fountain-metadata-key
               :invisible t
               :laxmatch t)
-      (:level 3 :subexp 2 :face fountain-metadata-value
+      (:level 2 :subexp 3 :face fountain-metadata-value
               :invisible t
               :laxmatch t)
-      (:level 1 :subexp 0 :face fountain-comment
+      (:level 2 :subexp 0 :face fountain-comment
               :invisible t
               :override keep)))
     (nil ,fountain-nbsp-regexp
@@ -2434,31 +2438,31 @@ message of \"S are now invisible/visible\"."
     (nil ,fountain-underline-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
-          (:level 2 :subexp 3 :face underline)
+          (:level 1 :subexp 3 :face underline)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
     (nil ,fountain-italic-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
-          (:level 2 :subexp 3 :face italic)
+          (:level 1 :subexp 3 :face italic)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
     (nil ,fountain-bold-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
-          (:level 2 :subexp 3 :face bold)
+          (:level 1 :subexp 3 :face bold)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
     (nil ,fountain-bold-italic-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
-          (:level 2 :subexp 3 :face bold-italic)
+          (:level 1 :subexp 3 :face bold-italic)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
     (nil ,fountain-lyrics-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
-          (:level 2 :subexp 3 :face italic))))
+          (:level 1 :subexp 3 :face italic))))
   "List of face properties to create element Font Lock keywords.
 Has the format:
 
@@ -2475,7 +2479,14 @@ assigning the following keywords:
     :face - face name to apply
     :invisible - if t, adds :face property to invisible text property
     :override - as per `font-lock-keywords'
-    :laxmatch - as per `font-lock-keywords'")
+    :laxmatch - as per `font-lock-keywords'
+
+Regular expression should take the form:
+
+    Group 1: whole string with trimmed whitespace
+    Group 2: string intended for export
+    Group 3: special
+    Group 9: invisible characters")
 
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
