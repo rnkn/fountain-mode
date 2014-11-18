@@ -1070,20 +1070,36 @@ bold-italic delimiters together, e.g.
 
 ;;; Internal Functions =========================================================
 
-(defun fountain-initialize-regexp ()    ; WTF break these into separate funs
-  "Set variable regular expression values.
-Sets `fountain-trans-regexp' and
-`fountain-scene-heading-prefix-list'."
-  (setq fountain-trans-regexp
-        (concat "^\\([\s\t]*>\s*\\)\\([^<>\n]*\\)$\\|"
-                "^[\s\t]*\\(?2:[[:upper:]\s]*"
-                (regexp-opt fountain-trans-list)
-                "\\)$")
-        fountain-scene-heading-regexp
-        (concat "^\\(\\.\\)\\(\\<.*\\)\\|"
-                "^\\(?2:"
+(defun fountain-init-scene-heading-regexp ()
+  "Initializes `fountain-scene-heading-regexp'."
+  (setq fountain-scene-heading-regexp
+        (concat "^\\(?1:\\(?2:\\(?4:\\.\\)\\)\\(?3:\\<.*?\\)\\)[\s\t]*$"
+                "\\|"
+                "^\\(?1:\\(?3:\\(?4:"
                 (regexp-opt fountain-scene-heading-prefix-list)
-                "[.\s\t]+.*\\)")))
+                "\\)[.\s\t]+.*?\\)\\)[\s\t]*$")))
+
+(defun fountain-init-trans-regexp ()
+  "Initializes `fountain-trans-regexp'."
+  (setq fountain-trans-regexp
+        (concat "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:[^<>\n]*?\\)\\)[\s\t]*$"
+                "\\|"
+                "^[\s\t]*\\(?1:\\(?3:[[:upper:]\s\t]*"
+                (regexp-opt fountain-trans-list)
+                "\\)\\)[\s\t]*$")))
+
+(defun fountain-init-outline-regexp ()
+  "Initializes `outline-regexp'."
+  (setq-local outline-regexp
+              (concat fountain-section-regexp
+                      "\\|"
+                      fountain-scene-heading-regexp)))
+
+(defun fountain-init-regexp ()
+  "Set variable regular expression values."
+  (fountain-init-scene-heading-regexp)
+  (fountain-init-outline-regexp)
+  (fountain-init-trans-regexp))
 
 (defun fountain-get-block-bounds ()
   "Return the beginning and end points of block at point."
