@@ -1376,27 +1376,122 @@ Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
   (let ((s (downcase (funcall fountain-uuid-func))))
     (car (split-string s "-"))))
 
-(defun fountain-get-character (&optional n)
-  "Return character at point or Nth previous character.
-If N is non-nil, return Nth following (or Nth previous if N is
-negative) character within scene, otherwise return nil. If N is
-nil or 0, return character at point, otherwise return nil."
-  (let* ((i (or n 0))
-         (p (if (<= i 0) -1 1)))
+(defun fountain-forward-character (&optional n limit)
+  "Goto Nth next character (or Nth previous is N is negative).
+If LIMIT is 'scene, halt at next scene heading. If LIMIT is
+'dialog, halt at next non-dialog element."
+  (interactive "^p")
+  (let* ((i (or n 1))
+         (p (if (< i 1) -1 1)))
+    (while (/= i 0)
+      (if (fountain-character-p)
+          (forward-line p))
+      (while (cond ((eq limit 'scene)
+                    (not (or (fountain-character-p)
+                             (fountain-scene-heading-p)
+                             (eq (point) (buffer-end p)))))
+                   ((eq limit 'dialog)
+                    (or (fountain-dialog-p)
+                        (fountain-paren-p)
+                        (fountain-tachyon-p))) ; FIXME infinite loop if b/eobp?
+                   ((not (or (fountain-character-p)
+                             (eq (point) (buffer-end p))))))
+        (forward-line p))
+      (setq i (- i p)))))
+
+(defun fountain-backward-character (&optional n)
+  "Move backward N character (foward if N is negative)."
+  (interactive "^p")
+  (let ((i (or n 1)))
+    (fountain-forward-character (- i))))
+
+(defun fountain-get-character (&optional n limit)
+  "Return Nth next character (or Nth previous if N is negative).
+If N is non-nil, return Nth next character or Nth previous
+character if N is negative, otherwise return nil. If N is nil or
+0, return character at point, otherwise return nil.
+
+If LIMIT is 'scene, halt at next scene heading. If LIMIT is
+'dialog, halt at next non-dialog element."
+  (let ((n (or n 0)))
     (save-excursion
       (save-restriction
         (widen)
-        (while (/= i 0)
-          (unless (fountain-scene-heading-p)
-            (forward-line p))
-          (while (null (or (fountain-character-p)
-                           (fountain-scene-heading-p)
-                           (bobp)))
-            (forward-line p))
-          (setq i (- i p)))
+        (fountain-forward-character n limit)
         (if (fountain-character-p)
-            (let ((s (match-string-no-properties 0)))
-              (s-trim (car (s-slice-at "\\^\\|(" s)))))))))
+            (match-string-no-properties 4))))))
+
+(defun fountain-get-scene-num ()
+  "Return the scene number of current scene."
+  (if (looking-at fountain-scene-num-regexp)
+      (s-chop-prefix "#" (match-string-no-properties 3))))
+
+(defun fountain-add-scene-num (n)
+  "Add scene number N to current scene heading.
+Assumes line matched `fountain-scene-heading-p'."
+  (end-of-line)
+  (insert "#" n)
+  (beginning-of-line)
+  (fountain-align-scene-num))
+
+(defun fountain-add-scene-nums (&optional arg)
+  "Add scene numbers to all scene headings lacking.
+If prefaced with ARG, overwrite existing scene numbers."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (unless (fountain-scene-heading-p)
+      (fountain-forward-scene 1))
+    (let ((prev-scene-num "0"))
+      (while (not (eobp))
+        (let ((current-scene-num (fountain-get-scene-num)))
+          (if current-scene-num
+              ;; (fountain-align-scene-num)
+              (setq prev-scene-num current-scene-num)
+            (let* ((prev-scene-int (string-to-number prev-scene-num))
+                   (prev-scene-alpha
+                    (if (string-match "[a-z]+" prev-scene-num)
+                        (match-string 0 prev-scene-num)))
+                   (next-scene-num
+                    (save-excursion
+                      (while (not (or (eobp)
+                                      (fountain-get-scene-num)))
+                        (fountain-forward-scene 1))
+                      (fountain-get-scene-num)))
+                   (next-scene-int (if next-scene-num
+                                       (string-to-number next-scene-num)))
+                   (current-scene-num
+                    (if (or (not next-scene-int)
+                            (< (1+ prev-scene-int) next-scene-int))
+                        (int-to-string (1+ prev-scene-int))
+                      (concat (int-to-string prev-scene-int)
+                              (if prev-scene-alpha
+                                  (string (1+ (string-to-char prev-scene-alpha)))
+                                "A")))))
+              (fountain-add-scene-num current-scene-num)
+              (setq prev-scene-num current-scene-num))))
+        (fountain-forward-scene 1)))))
+
+(defun fountain-align-scene-num ()
+  "Align scene number to `fountain-align-scene-num'."
+  (if (fountain-scene-heading-p)
+      (let ((pos (point)))
+        (forward-line 0)
+        (if (and (looking-at fountain-scene-num-regexp)
+                 (< pos (match-beginning 3)))
+            (let* ((scene-heading-length
+                    (string-width (match-string 1)))
+                   (num-length
+                    (string-width (match-string 3)))
+                   (space-length
+                    (- fountain-align-scene-num
+                       scene-heading-length
+                       num-length)))
+              (if (< 1 space-length)
+                  (replace-match (make-string space-length ?\s)
+                                 nil nil nil 2)
+                (replace-match " " nil nil nil 2))))
+        (goto-char pos))))
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
