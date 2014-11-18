@@ -267,7 +267,7 @@ See `fountain-insert-template'."
   :group 'fountain)
 
 (defcustom fountain-scene-heading-prefix-list
-  '("INT" "EXT" "I/E" "INT/EXT" "EST")
+  '("INT" "EXT" "I/E" "EST")
   "List of scene heading prefixes (case insensitive).
 Any scene heading prefix can be followed by a dot and/or a space,
 so the following are equivalent:
@@ -275,8 +275,6 @@ so the following are equivalent:
     INT HOUSE - DAY
 
     INT. HOUSE - DAY
-
-    INT./EXT. HOUSE - DAY
 
 Call `fountain-mode' again for changes to take effect."
   :type '(repeat (string :tag "Prefix"))
@@ -1342,7 +1340,7 @@ comments."
         (let ((key (downcase (match-string-no-properties 2)))
               (value                    ; FIXME make a list
                (progn
-                 (forward-line 1)       ; FIXME: on line ahead
+                 (forward-line 1)       ; FIXME on line ahead
                  (or (match-string-no-properties 3)
                      (let (s)
                        (while (and (fountain-metadata-p)
@@ -1698,7 +1696,7 @@ outline visibility through the following states:
               (jit-lock-fontify-now (point) limit)
               (goto-char limit)
               (progress-reporter-update job n)
-              (setq n (+ n 1))))
+              (setq n (1+ n))))
           (progress-reporter-done job)))
     (error "Font Lock is not active")))
 
@@ -1726,7 +1724,7 @@ Otherwise return `fountain-export-buffer'"
       (concat (file-name-base (buffer-file-name)) "." ext)
     (format "*Fountain %s Export*" ext)))
 
-(defun fountain-export-get-metadata-value (key) ;FIXME combine with other
+(defun fountain-export-get-metadata-value (key) ; FIXME combine with other
   "Like `fountain-get-metadata-value' but filters for HTML."
   (let* ((value (cdr (assoc key fountain-metadata)))
          (s (if (listp value)
@@ -1868,7 +1866,7 @@ Otherwise return `fountain-export-buffer'"
                    ("<" . "&lt;")
                    (">" . "&gt;")) s))
 
-(defun fountain-export-filter (sub-s)   ;FIXME update doc
+(defun fountain-export-filter (sub-s)   ; FIXME update doc
   (let* ((s (substring-no-properties sub-s))
          (s (fountain-export-sanitize s))
          (s (s-replace-all '(("\\\s" . "&nbsp;")
@@ -2005,7 +2003,7 @@ created HTML element to DESTBUF."
       (unless complete
         (kill-buffer destbuf)))))
 
-;;; Interactive Functions  =====================================================
+;;; Commands ===================================================================
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
@@ -2033,17 +2031,14 @@ If N is 0, move to beginning of scene."
     (if (= i 0)
         (progn
           (forward-line 0)
-          (while (null (or (eq (point) (buffer-end p))
-                           (fountain-section-p)
-                           (fountain-scene-heading-p)))
+          (while (not (or (eq (point) (buffer-end p))
+                          (fountain-scene-heading-p)))
             (forward-line p)))
       (while (/= i 0)
-        (if (or (fountain-scene-heading-p)
-                (fountain-section-p))
+        (if (fountain-scene-heading-p)
             (forward-line p))
-        (while (null (or (eq (point) (buffer-end p))
-                         (fountain-section-p)
-                         (fountain-scene-heading-p)))
+        (while (not (or (eq (point) (buffer-end p))
+                        (fountain-scene-heading-p)))
           (forward-line p))
         (setq i (- i p))))))
 
@@ -2176,7 +2171,7 @@ then make the changes desired."
       (let ((start (make-marker))
             (end (make-marker))
             ;; create continued string
-            (s (concat "(" fountain-continued-dialog-string ")"))
+            (s (concat "(" fountain-continued-dialog-string ")")) ; FIXME do not add "(" ")"
             ;; create progress report
             (job (make-progress-reporter "Refreshing continued dialog...")))
         ;; set START and END markers since buffer contents will change
@@ -2200,7 +2195,7 @@ then make the changes desired."
             (when (and (null (looking-at-p (concat ".*" s "$")))
                        (fountain-character-p)
                        (s-equals? (fountain-get-character 0)
-                                  (fountain-get-character -1)))
+                                  (fountain-get-character -1 'scene)))
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" s)))
             (forward-line 1)
@@ -2262,11 +2257,12 @@ message of \"S are now invisible/visible\"."
   (let* ((option (intern (concat "fountain-hide-" element)))
          (symbol (intern (concat "fountain-" element))))
     (set option
-         (null (symbol-value option)))
+         (not (symbol-value option)))
     (if (symbol-value option)
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
     (jit-lock-refontify)
+    ;; (font-lock-fontify-block)
     (message "%s are now %s"
              s (if (symbol-value option)
                    "invisible" "visible"))))
@@ -2328,9 +2324,9 @@ message of \"S are now invisible/visible\"."
                           (cons 'fountain-mode level))))
           ((error "Malformed variable `font-lock-maximum-decoration'"))))
   (message "Syntax highlighting is now set at %s"
-           (cond ((eq level 1) "minimum")
-                 ((eq level 2) "default")
-                 ((eq level 3) "maximum")))
+           (cond ((= level 1) "minimum")
+                 ((= level 2) "default")
+                 ((= level 3) "maximum")))
   (font-lock-refresh-defaults))
 
 (defun fountain-save-font-lock-decoration ()
@@ -2581,6 +2577,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
+    (define-key map (kbd "C-c C-x #") 'fountain-add-scene-nums)
     (define-key map (kbd "C-c C-x f") 'fountain-set-font-lock-decoration)
     ;; navigation commands
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
@@ -2588,6 +2585,19 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-M-a") 'fountain-beginning-of-scene)
     (define-key map (kbd "C-M-e") 'fountain-end-of-scene)
     (define-key map (kbd "C-M-h") 'fountain-mark-scene)
+    (define-key map (kbd "M-n") 'fountain-forward-character)
+    (define-key map (kbd "M-p") 'fountain-backward-character)
+    ;; outline commands
+    (define-key map (kbd "C-c C-n") 'outline-next-visible-heading)
+    (define-key map (kbd "C-c C-p") 'outline-previous-visible-heading)
+    (define-key map (kbd "C-c C-f") 'outline-forward-same-level)
+    (define-key map (kbd "C-c C-b") 'outline-backward-same-level)
+    (define-key map (kbd "C-c C-u") 'outline-up-heading)
+    (define-key map (kbd "C-c C-^") 'outline-move-subtree-up)
+    (define-key map (kbd "C-c C-v") 'outline-move-subtree-down)
+    (define-key map (kbd "C-c C-SPC") 'outline-mark-subtree)
+    (define-key map (kbd "TAB") 'fountain-outline-cycle)
+    (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
@@ -2611,6 +2621,7 @@ keywords suitable for Font Lock."
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
+    ["Add Scene Numbers" fountain-add-scene-nums]
     "---"
     ("Export"
      ["Default" fountain-export-default]
@@ -2651,7 +2662,7 @@ keywords suitable for Font Lock."
      :style toggle
      :selected fountain-switch-comment-syntax]
     "---"
-    ("Syntax Highlighting"
+    ("Syntax Highlighting"              ; FIXME make these customize commands
      ["Minimum" (fountain-set-font-lock-decoration 1)
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 1)]
@@ -2663,7 +2674,7 @@ keywords suitable for Font Lock."
       :selected (= (fountain-get-font-lock-decoration) 3)]
      "---"
      ["Save for Future Sessions" fountain-save-font-lock-decoration])
-    ("Show/Hide"
+    ("Show/Hide"                        ; FIXME make these customize commands
      ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
       :style toggle
       :selected fountain-hide-emphasis-delim]
@@ -2702,46 +2713,28 @@ keywords suitable for Font Lock."
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (fountain-init-regexp)
-  (set (make-local-variable 'comment-start)
-       (if fountain-switch-comment-syntax "//" "/*"))
-  (set (make-local-variable 'comment-end)
-       (if fountain-switch-comment-syntax "" "*/"))
-  (set (make-local-variable 'font-lock-comment-face)
-       'fountain-comment)
-  (set 'font-lock-defaults
-       '(fountain-create-font-lock-keywords nil t))
-  (set (make-local-variable 'font-lock-extra-managed-props)
-       '(line-prefix wrap-prefix invisible fountain-element))
-  (set (make-local-variable 'outline-regexp)
-       (concat fountain-section-regexp
-               "\\|"
-               fountain-scene-heading-regexp))
-  (set (make-local-variable 'outline-level)
-       'fountain-outline-level)
+  (setq-local comment-start
+              (if fountain-switch-comment-syntax "//" "/*"))
+  (setq-local comment-end
+              (if fountain-switch-comment-syntax "" "*/"))
+  (setq-local font-lock-comment-face 'fountain-comment)
+  (setq-local outline-level 'fountain-outline-level)
+  (setq-local font-lock-extra-managed-props
+              '(line-prefix wrap-prefix invisible fountain-element))
+  (setq font-lock-defaults
+        '(fountain-create-font-lock-keywords nil t))
+  (add-to-invisibility-spec '(outline . t))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
-  (if (eq buffer-invisibility-spec t)
-      (setq buffer-invisibility-spec nil))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
-  (add-hook 'after-save-hook
-            'fountain-read-metadata)
+  (add-hook 'post-self-insert-hook
+            'fountain-align-scene-num t t)
+  ;; (add-hook 'after-save-hook
+  ;;           'fountain-read-metadata)
   (fountain-read-metadata))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
-    (define-key map (kbd "M-n") 'fountain-forward-character)
-    (define-key map (kbd "M-p") 'fountain-backward-character)
-    ;; outline commands
-    (define-key map (kbd "C-c C-n") 'outline-next-visible-heading)
-    (define-key map (kbd "C-c C-p") 'outline-previous-visible-heading)
-    (define-key map (kbd "C-c C-f") 'outline-forward-same-level)
-    (define-key map (kbd "C-c C-b") 'outline-backward-same-level)
-    (define-key map (kbd "C-c C-u") 'outline-up-heading)
-    (define-key map (kbd "C-c C-^") 'outline-move-subtree-up)
-    (define-key map (kbd "C-c C-v") 'outline-move-subtree-down)
-    (define-key map (kbd "C-c C-SPC") 'outline-mark-subtree)
-    (define-key map (kbd "TAB") 'fountain-outline-cycle)
-    (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
