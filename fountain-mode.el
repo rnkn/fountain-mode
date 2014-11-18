@@ -889,6 +889,15 @@ Set with `fountain-initialize-regexp'. Requires
 Set with `fountain-initialize-regexp'. Requires
 `fountain-trans-p' for preceding and succeeding blank lines.")
 
+(defconst fountain-scene-num-regexp
+  "\\(.*?\\)\\([\s\t]*\\)\\(#[0-9]+[a-z]?\\)[\s\t]*$"
+  "Regular expression for matching scene numbers.
+Assumes line matches `fountain-scene-heading-p'.
+
+    Group 1: scene heading
+    Group 2: whitespace
+    Group 3: scene number (including leading #)")
+
 (defconst fountain-blank-regexp
   "\\`\\|^\s?$\\|\\'"
   "Regular expression for matching an empty line.")
@@ -898,28 +907,28 @@ Set with `fountain-initialize-regexp'. Requires
   "Regular expression for forced action mark.")
 
 (defconst fountain-nbsp-regexp
-  "\\(?:^\\|[^\\]\\)\\(\\(\\\\\\)\s\\)"
+  "\\(?:^\\|[^\\]\\)\\(?1:\\(?2:\\\\\\)\s\\)"
   "Regular expression for non-breaking space.")
 
 (defconst fountain-comment-regexp
   (concat "\\(//[\s\t]*\\(.*\\)\\)"
           "\\|"
-          "\\(?1:/\\*[\s\t]*\\(?2:\\(.\\|\n\\)*?\\)[\s\t]*\\*/\\)")
+          "\\(?1:\\(?2:/\\*\\)[\s\t]*\\(?3:\\(.\\|\n\\)*?\\)[\s\t]*\\*/\\)")
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(\\(\\<[^:\n]+\\):\s*\\(.+\\)?\\)"
+  (concat "^\\(?1:\\(?2:\\<[^:\n]+\\):\s*\\(?3:.+\\)?\\)"
           "\\|"
           "^\s+\\(?1:\\(?3:.+\\)\\)")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-metadata-p' for bobp.")
 
 (defconst fountain-character-regexp
-  (concat "^[\s\t]*\\(\\(?:"
-          "\\(?:@\\)\\(?2:\\(?3:[^<>\n]+?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
+  (concat "^[\s\t]*\\(?1:\\(?:"
+          "\\(?2:@\\)\\(?3:\\(?4:[^<>\n]+?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
           "\\|"
-          "\\(?2:\\(?3:[A-Z][^<>a-z\n]*?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
-          "\\)[\s\t]*\\(\\^\\)?\\)[\s\t]*$")
+          "\\(?3:\\(?4:[A-Z][^<>a-z\n]*?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
+          "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
     Group 1: trim whitespace
@@ -943,7 +952,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching notes.")
 
 (defconst fountain-section-regexp
-  "^\\(#\\{1,5\\}\\)[\s\t]*\\([^#\n].*\\)"
+  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
@@ -951,7 +960,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching synopses.")
 
 (defconst fountain-center-regexp
-  "^[\s\t]*\\(\\(?3:>[\s\t]*\\)\\(?2:.*?\\)\\([\s\t]*<\\)\\)[\s\t]*$"
+  "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:.*?\\)\\(?4:[\s\t]*<\\)\\)[\s\t]*$"
   "Regular expression for matching centered text.")
 
 ;;; Emphasis Regular Expressions ===============================================
