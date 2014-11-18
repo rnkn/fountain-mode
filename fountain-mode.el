@@ -2426,8 +2426,6 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
     (define-key map (kbd "C-c C-x f") 'fountain-set-font-lock-decoration)
     ;; navigation commands
-    (define-key map (kbd "M-n") 'fountain-forward-scene)
-    (define-key map (kbd "M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
     (define-key map (kbd "C-M-p") 'fountain-backward-scene)
     (define-key map (kbd "C-M-a") 'fountain-beginning-of-scene)
@@ -2577,3 +2575,16 @@ keywords suitable for Font Lock."
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
+    (define-key map (kbd "M-n") 'fountain-forward-character)
+    (define-key map (kbd "M-p") 'fountain-backward-character)
+    ;; outline commands
+    (define-key map (kbd "C-c C-n") 'outline-next-visible-heading)
+    (define-key map (kbd "C-c C-p") 'outline-previous-visible-heading)
+    (define-key map (kbd "C-c C-f") 'outline-forward-same-level)
+    (define-key map (kbd "C-c C-b") 'outline-backward-same-level)
+    (define-key map (kbd "C-c C-u") 'outline-up-heading)
+    (define-key map (kbd "C-c C-^") 'outline-move-subtree-up)
+    (define-key map (kbd "C-c C-v") 'outline-move-subtree-down)
+    (define-key map (kbd "C-c C-SPC") 'outline-mark-subtree)
+    (define-key map (kbd "TAB") 'fountain-outline-cycle)
+    (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
