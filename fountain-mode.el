@@ -448,6 +448,27 @@ The default function requires the command line tool \"uuidgen\"."
 
 ;;; Export Customization =======================================================
 
+;; (defcustom fountain-export-element-set
+;;   '("scene-heading" "action" "character" "paren" "dialog" "trans")
+;;   "List of elements to include when exporting.
+;; You would usually keep this at its default, but changing becomes
+;; useful if, for example, you want to include your script notes, or
+;; only want to export your synopses.
+
+;; This set does not apply to metadata."
+;;   :type '(set
+;;           (const :tag "Scene Headings" "scene-heading")
+;;           (const :tag "Action" "action")
+;;           (const :tag "Character Names" "character")
+;;           (const :tag "Parentheticals" "paren")
+;;           (const :tag "Dialog" "dialog")
+;;           (const :tag "Transitions" "trans")
+;;           (const :tag "Section Headings" "section")
+;;           (const :tag "Synopses" "synopsis")
+;;           (const :tag "Notes" "note")
+;;           (const :tag "Comments" "comment"))
+;;   :group 'fountain-export)
+
 (defcustom fountain-export-default-command
   'fountain-export-buffer-to-pdf-via-html
   "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
