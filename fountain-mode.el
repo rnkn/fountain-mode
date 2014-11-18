@@ -854,20 +854,21 @@ Currently, ${charset} will default to UTF-8."
 
 ;;; Variables ==================================================================
 
-(defvar fountain-metadata
+(defvar-local fountain-metadata
   nil
   "Metadata alist in the form of (KEY . VALUE).
 This buffer-local variable is set with `fountain-read-metadata'
 upon calling `fountain-mode' or saving a file.")
-(make-variable-buffer-local 'fountain-metadata)
 
-(defvar fountain-outline-cycle-status
-  nil)
-(make-variable-buffer-local 'fountain-outline-cycle-status)
+(defvar-local fountain-outline-cycle
+  0
+  "Integer representing global outline cycling status.
+Used by `fountain-outline-cycle'.")
 
-(defvar fountain-outline-cycle-subtree-status
-  nil)
-(make-variable-buffer-local 'fountain-outline-cycle-subtree-status)
+(defvar-local fountain-outline-cycle-subtree
+  0
+  "Integer representing subtree outline cycling status.
+Used by `fountain-outline-cycle'.")
 
 (defvar fountain-block-limit
   10000
