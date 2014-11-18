@@ -1527,7 +1527,142 @@ If prefaced with ARG, overwrite existing scene numbers."
         (setq font-lock-end end changed t))
       changed)))
 
+;;; Outline ====================================================================
+
+(defun fountain-outline-hide-level (n)
+  (cond ((= n 0)
+         (show-all)
+         (message "Showing all"))
+        ((= n 6)
+         (hide-sublevels n)
+         (message "Showing scene headings"))
+        (t
+         (hide-sublevels n)
+         (message "Showing level %s headings" n)))
+  (setq fountain-outline-cycle n))
+
+(defun fountain-outline-cycle (&optional arg)
+  "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
+
+\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
+\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
+\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
+\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-cycle-custom-level'"
+  (interactive "p")
+  (let* ((custom-level (save-excursion
+                         (goto-char (point-min))
+                         (let (found)
+                           (while (and (outline-next-heading)
+                                       (not found))
+                             (if (= (funcall outline-level)
+                                    fountain-outline-cycle-custom-level)
+                                 (setq found t)))
+                           (if found fountain-outline-cycle-custom-level))))
+         (highest-level (save-excursion
+                          (goto-char (point-max))
+                          (outline-back-to-heading t)
+                          (let ((level (funcall outline-level)))
+                            (while (and (not (bobp))
+                                        (< 1 level))
+                              (outline-up-heading 1 t)
+                              (unless (bobp)
+                                (setq level (funcall outline-level))))
+                            level))))
+    (cond ((eq arg 4)
+           (cond
+            ((and custom-level
+                  (= fountain-outline-cycle 1))
+             (fountain-outline-hide-level custom-level))
+            ((= fountain-outline-cycle 1)
+             (fountain-outline-hide-level 0))
+            ((< 1 fountain-outline-cycle 6)
+             (fountain-outline-hide-level 6))
+            ((= fountain-outline-cycle 6)
+             (fountain-outline-hide-level 0))
+            ((= highest-level 6)
+             (fountain-outline-hide-level 6))
+            (t
+             (fountain-outline-hide-level highest-level))))
+          ((eq arg 16)
+           (show-all)
+           (message "Showing all")
+           (setq fountain-outline-cycle 0))
+          ((and custom-level
+                (eq arg 64))
+           (fountain-outline-hide-level custom-level))
+          (t
+           (save-excursion
+             (outline-back-to-heading)
+             (let ((eoh
+                    (save-excursion
+                      (outline-end-of-heading)
+                      (point)))
+                   (eos
+                    (save-excursion
+                      (outline-end-of-subtree)
+                      (point)))
+                   (eol
+                    (save-excursion
+                      (forward-line 1)
+                      (while (and (not (eobp))
+                                  (get-char-property (1- (point)) 'invisible))
+                        (forward-line 1))
+                      (point)))
+                   (children
+                    (save-excursion
+                      (let ((level (funcall outline-level)))
+                        (outline-next-heading)
+                        (and (outline-on-heading-p t)
+                             (< level (funcall outline-level)))))))
+               (cond
+                ((= eos eoh)
+                 (message "Empty heading")
+                 (setq fountain-outline-cycle-subtree 0))
+                ((and (<= eos eol)
+                      children)
+                 (show-entry)
+                 (show-children)
+                 (message "Showing headings")
+                 (setq fountain-outline-cycle-subtree 2))
+                ((or (<= eos eol)
+                     (= fountain-outline-cycle-subtree 2))
+                 (show-subtree)
+                 (message "Showing contents")
+                 (setq fountain-outline-cycle-subtree 3))
+                (t
+                 (hide-subtree)
+                 (message "Hiding contents")
+                 (setq fountain-outline-cycle-subtree 1)))))))))
+
+(defun fountain-outline-cycle-global ()
+  "Globally cycle outline visibility.
+
+Calls `fountain-outline-cycle' with argument 4 wot cycle buffer
+outline visibility through the following states:
+
+    1. top-level section headins
+    2. custom set with `fountain-outline-cycle-custom-level'
+    3. all sections and scene headings
+    4. everything"
+  (interactive)
+  (fountain-outline-cycle 4))
+
+(defun fountain-outline-level ()
+  "Return the depth to which a heading is nested in outline."
+  (if (string-prefix-p "#" (match-string 0))
+      (string-width (match-string 2))
+    6))                                 ; FIXME bobp? text outside outline?
+
 ;;; Export Internal Functions ==================================================
+
+;; (defun fountain-export-parse-buffer ()
+;;   ;; is the element fontified?
+;;   (if (get-text-property (point) 'fontified)
+;;       (let ((element (get-text-property (point) 'fountain-element)))
+;;         (if element
+;;             ;; is the element what font lock says it is?
+;;             (unless (funcall (intern (concat "fountain-" element "-p")))
+;;               (font-lock-fontify-region index limit))
 
 (defun fountain-export-fontify-buffer ()
   "If `font-lock-mode' is enables, fontify entire buffer."
@@ -1668,137 +1803,6 @@ Otherwise return `fountain-export-buffer'"
                  (symbol-value (intern var))))))
 
 (defun fountain-export-underline (s)
-;;; Outline ====================================================================
-
-(defun fountain-outline-show-top-level (n)
-  (hide-sublevels n)
-  (message "Showing top-level headings")
-  (setq fountain-outline-cycle-status 'top-level))
-
-(defun fountain-outline-show-custom-level ()
-  (hide-sublevels fountain-outline-cycle-custom-level)
-  (message "Showing level %s headings"
-           fountain-outline-cycle-custom-level)
-  (setq fountain-outline-cycle-status 'custom))
-
-(defun fountain-outline-show-scene-headings ()
-  (hide-sublevels 6)
-  (message "Showing all scene headings")
-  (setq fountain-outline-cycle-status 'scene-headings))
-
-(defun fountain-outline-show-all ()
-  (show-all)
-  (message "Showing all")
-  (setq fountain-outline-cycle-status 'all))
-
-(defun fountain-outline-cycle (&optional arg)
-  "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
-
-\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
-\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
-\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
-\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-cycle-custom-level'"
-  (interactive "p")
-  (let ((highest-level
-         (save-excursion
-           (goto-char (point-max))
-           (outline-back-to-heading t)
-           (let ((level (funcall outline-level)))
-             (while (and (not (bobp))
-                         (> level 1))
-               (outline-up-heading 1 t)
-               (unless (bobp)
-                 (setq level (funcall outline-level))))
-             level))))
-    (cond ((eq arg 4)
-           (cond
-            ((eq fountain-outline-cycle-status 'top-level)
-             ;; if fountain-outline-cycle-custom-level, cycle to that
-             (if (and fountain-outline-cycle-custom-level
-                      (>= fountain-outline-cycle-custom-level highest-level))
-                 (fountain-outline-show-custom-level)
-               (fountain-outline-show-all)))
-            ((eq fountain-outline-cycle-status 'custom)
-             (fountain-outline-show-scene-headings))
-            ((eq fountain-outline-cycle-status 'scene-headings)
-             (fountain-outline-show-all))
-            ((= highest-level 6)
-             (fountain-outline-show-scene-headings))
-            (t
-             (fountain-outline-show-top-level highest-level))))
-          ((eq arg 16)
-           (show-all)
-           (message "Showing all")
-           (setq fountain-outline-cycle-status 'all))
-          ((and (eq arg 64)
-                fountain-outline-cycle-custom-level)
-           (hide-sublevels fountain-outline-cycle-custom-level)
-           (message "Showing level %s headings"
-                    fountain-outline-cycle-custom-level)
-           (setq fountain-outline-cycle-status 'custom))
-          (t
-           (save-excursion
-             (outline-back-to-heading)
-             (let ((eoh
-                    (save-excursion
-                      (outline-end-of-heading)
-                      (point)))
-                   (eos
-                    (save-excursion
-                      (outline-end-of-subtree)
-                      (point)))
-                   (eol
-                    (save-excursion
-                      (forward-line 1)
-                      (while (and (not (eobp))
-                                  (get-char-property (1- (point)) 'invisible))
-                        (forward-line 1))
-                      (point)))
-                   (children
-                    (save-excursion
-                      (let ((level (funcall outline-level)))
-                        (outline-next-heading)
-                        (and (outline-on-heading-p t)
-                             (> (funcall outline-level) level))))))
-               (cond
-                ((= eos eoh)
-                 (message "Empty heading")
-                 (setq fountain-outline-cycle-subtree-status nil))
-                ((and (>= eol eos)
-                      children)
-                 (show-entry)
-                 (show-children)
-                 (message "Showing children")
-                 (setq fountain-outline-cycle-subtree-status 'children))
-                ((or (>= eol eos)
-                     (eq fountain-outline-cycle-subtree-status 'children))
-                 (show-subtree)
-                 (message "Showing subtree")
-                 (setq fountain-outline-cycle-subtree-status 'subtree))
-                (t
-                 (hide-subtree)
-                 (message "Subtree hidden")
-                 (setq fountain-outline-cycle-subtree-status 'folded)))))))))
-
-(defun fountain-outline-cycle-global ()
-  "Globally cycle outline visibility.
-
-Calls `fountain-outline-cycle' with argument 4 wot cycle buffer
-outline visibility through the following states:
-
-    1. top-level section headins
-    2. custom set with `fountain-outline-cycle-custom-level'
-    3. all sections and scene headings
-    4. everything"
-  (interactive)
-  (fountain-outline-cycle 4))
-
-(defun fountain-outline-level ()
-  "Return the depth to which a heading is nested in outline."
-  (if (string-prefix-p "#" (match-string 0))
-      (string-width (match-string 2))
-    6))                                 ; FIXME bobp? text outside outline?
-
   "Replace underlined text in S with HTML underline span tags."
   (replace-regexp-in-string "_\\(.+?\\)_"
                             "<span class=\"underline\">\\1</span>"
@@ -1806,14 +1810,6 @@ outline visibility through the following states:
 
 (defun fountain-export-bold (s)
   "Replace bold text in S with HTML strong tags."
-;;; Outline ====================================================================
-
-(defun fountain-outline-level ()
-  "Return the depth to which a heading is nested in outline."
-  (if (string-prefix-p "#" (match-string 0))
-      (string-width (match-string 1))
-    6))
-
   (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
                             "<strong>\\1</strong>"
                             s t))
