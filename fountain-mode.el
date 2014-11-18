@@ -1115,38 +1115,38 @@ bold-italic delimiters together, e.g.
     (cons block-beginning block-end)))
 
 ;; currently unused
-(defun fountain-strip-comments (start end)
-  "Strip comments between START and END and return string."
-  (let ((start
-         (save-excursion
-           (goto-char start)
-           ;; using thing-at-point-looking-at is very slow, better to
-           ;; use a simpler function.
-           ;;
-           ;; (if (thing-at-point-looking-at fountain-comment-regexp)
-           ;;     (match-beginning 0)
-           ;;   start)))
-           (if (and (search-forward "*/" end t)
-                    (null (search-backward "/*" start t))
-                    (search-backward "/*" nil t)
-                    (comment-only-p (point) start))
-               (point)
-             start)))
-        (end
-         (save-excursion
-           (goto-char end)
-           ;; (if (thing-at-point-looking-at fountain-comment-regexp)
-           ;;     (match-end 0)
-           ;;   end))))
-           (if (and (search-backward "/*" start t)
-                    (null (search-forward "*/" end t))
-                    (search-forward "*/" nil t)
-                    (comment-only-p (point) end))
-               (point)
-             end))))
-    (replace-regexp-in-string
-     fountain-comment-regexp ""
-     (buffer-substring-no-properties start end))))
+;; (defun fountain-strip-comments (start end)
+;;   "Strip comments between START and END and return string."
+;;   (let ((start
+;;          (save-excursion
+;;            (goto-char start)
+;;            ;; using thing-at-point-looking-at is very slow, better to
+;;            ;; use a simpler function.
+;;            ;;
+;;            ;; (if (thing-at-point-looking-at fountain-comment-regexp)
+;;            ;;     (match-beginning 0)
+;;            ;;   start)))
+;;            (if (and (search-forward "*/" end t)
+;;                     (null (search-backward "/*" start t))
+;;                     (search-backward "/*" nil t)
+;;                     (comment-only-p (point) start))
+;;                (point)
+;;              start)))
+;;         (end
+;;          (save-excursion
+;;            (goto-char end)
+;;            ;; (if (thing-at-point-looking-at fountain-comment-regexp)
+;;            ;;     (match-end 0)
+;;            ;;   end))))
+;;            (if (and (search-backward "/*" start t)
+;;                     (null (search-forward "*/" end t))
+;;                     (search-forward "*/" nil t)
+;;                     (comment-only-p (point) end))
+;;                (point)
+;;              end))))
+;;     (replace-regexp-in-string
+;;      fountain-comment-regexp ""
+;;      (buffer-substring-no-properties start end))))
 
 (defun fountain-blank-p ()
   "Return non-nil if point is at a blank line or single space."
