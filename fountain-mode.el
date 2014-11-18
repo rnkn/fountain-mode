@@ -362,7 +362,15 @@ This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-elements t
+(defcustom fountain-align-scene-num
+  65
+  "Column integer to which scene numbers should be aligned.
+This option affects file contents"
+  :type 'integer
+  :group 'fountain)
+
+(defcustom fountain-align-elements
+  t
   "If non-nil, elements will be displayed auto-aligned.
 This option does not affect file contents."
   :type 'boolean
