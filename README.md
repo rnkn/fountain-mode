@@ -1,6 +1,9 @@
 Fountain Mode
 =============
 
+[![MELPA Stable](http://stable.melpa.org/packages/fountain-mode-badge.svg)](http://stable.melpa.org/#/fountain-mode)
+[![MELPA](http://melpa.org/packages/fountain-mode-badge.svg)](http://melpa.org/#/fountain-mode)
+
 Fountain Mode aims to be a full-featured screenwriting environment for
 GNU Emacs using the Fountain markup format. For more information on the
 Fountain markup format, visit <http://fountain.io>.
