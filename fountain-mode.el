@@ -979,7 +979,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching notes.")
 
 (defconst fountain-section-regexp
-  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
+  "^\\(?1:\\(?2:#\\{1,5\\}[\s\t]*\\)\\(?3:[^#\n].*\\)\\)[\s\t]*$"
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
