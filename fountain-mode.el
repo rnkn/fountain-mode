@@ -1708,7 +1708,7 @@ outline visibility through the following states:
 (defun fountain-outline-level ()
   "Return the depth to which a heading is nested in outline."
   (if (string-prefix-p "#" (match-string 0))
-      (string-width (match-string 2))
+      (string-width (s-trim (match-string 2))) ; FIXME unneeded after export rewrite
     6))                                 ; FIXME bobp? text outside outline?
 
 ;;; Export Internal Functions ==================================================
