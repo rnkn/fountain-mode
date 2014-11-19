@@ -1668,6 +1668,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
                       (point)))
                    (children
                     (save-excursion
+                      (outline-back-to-heading)
                       (let ((level (funcall outline-level)))
                         (outline-next-heading)
                         (and (outline-on-heading-p t)
