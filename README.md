@@ -15,23 +15,25 @@ Pictured: *The Abductors* by Paul W. Rankin in Fountain Mode (using
 Features
 --------
 
-- support for the Fountain 1.1 specification (except scene numbers and
-  dual dialog)
-- export to HTML and PDF (requires [Prince][])
-- include or omit a title page
-- multiple levels of syntax highlighting for all elements (see below)
-- auto-indentation for a kind of WYSIWYG (display only, does not modify
-  file contents)
-- add/remove automatic (CONT'D) to successively speaking characters
-- automatic (MORE) and (CONT'D) when breaking dialog across pages in PDF
-  output
-- `occur` navigator for section headings, synopses, notes and scene
-  headings
-- templates for inserting synopses, notes and metadata
-- navigate by scene heading
-- support for emphasis (bold, italic, underlined text)
-- toggle visibility of emphasis delimiters and syntax characters
-- support for both official and legacy commenting (boneyard) syntax
+- Support for most of the Fountain 1.1 specification (scene numbers and
+  dual dialog are forthcoming)
+- Auto-align elements for a kind of WYSIWYG (display only, does not
+  modify file contents)
+- Integration with `outline.el` to toggle visibility of sections and
+  scenes (beta, see below)
+- Export to HTML and PDF (PDF export requires [Prince][])
+- Include or omit a title page
+- Navigate by scene heading
+- Emphasis (bold, italic, underlined text)
+- Toggle visibility of emphasis delimiters and syntax characters
+- Multiple levels of syntax highlighting for all elements (see below)
+- Add/remove automatic "(CONT'D)" to successively speaking characters
+- Automatic "(MORE)" and "(CONT'D)" when breaking dialog across pages in
+  PDF output
+- Templates for inserting synopses, notes and metadata
+- Support for both official and legacy commenting (boneyard) syntax
+- Navigator (using `occur`) for section headings, synopses, notes and
+  scene headings
 - everything is customizable, of course
 
 The following features are not *yet* supported:
