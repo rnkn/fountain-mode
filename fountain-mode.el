@@ -360,12 +360,12 @@ This option does not affect file contents."
   :type 'integer
   :group 'fountain)
 
-(defcustom fountain-align-scene-num
-  65
-  "Column integer to which scene numbers should be aligned.
-This option affects file contents"
-  :type 'integer
-  :group 'fountain)
+;; (defcustom fountain-align-scene-num
+;;   65
+;;   "Column integer to which scene numbers should be aligned.
+;; This option affects file contents"
+;;   :type 'integer
+;;   :group 'fountain)
 
 (defcustom fountain-align-elements
   t
@@ -916,14 +916,14 @@ Set with `fountain-initialize-regexp'. Requires
 Set with `fountain-initialize-regexp'. Requires
 `fountain-trans-p' for preceding and succeeding blank lines.")
 
-(defconst fountain-scene-num-regexp
-  "\\(.*?\\)\\([\s\t]*\\)\\(#[0-9]+[a-z]?\\)[\s\t]*$"
-  "Regular expression for matching scene numbers.
-Assumes line matches `fountain-scene-heading-p'.
+;; (defconst fountain-scene-num-regexp
+;;   "\\(.*?\\)\\([\s\t]*\\)\\(#[0-9]+[a-z]?\\)[\s\t]*$"
+;;   "Regular expression for matching scene numbers.
+;; Assumes line matches `fountain-scene-heading-p'.
 
-    Group 1: scene heading
-    Group 2: whitespace
-    Group 3: scene number (including leading #)")
+;;     Group 1: scene heading
+;;     Group 2: whitespace
+;;     Group 3: scene number (including leading #)")
 
 (defconst fountain-blank-regexp
   "\\`\\|^\s?$\\|\\'"
@@ -1448,77 +1448,77 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
         (if (fountain-character-p)
             (match-string-no-properties 4))))))
 
-(defun fountain-get-scene-num ()
-  "Return the scene number of current scene."
-  (if (looking-at fountain-scene-num-regexp)
-      (s-chop-prefix "#" (match-string-no-properties 3))))
+;; (defun fountain-get-scene-num ()
+;;   "Return the scene number of current scene."
+;;   (if (looking-at fountain-scene-num-regexp)
+;;       (s-chop-prefix "#" (match-string-no-properties 3))))
 
-(defun fountain-add-scene-num (n)
-  "Add scene number N to current scene heading.
-Assumes line matched `fountain-scene-heading-p'."
-  (end-of-line)
-  (insert "#" n)
-  (beginning-of-line)
-  (fountain-align-scene-num))
+;; (defun fountain-add-scene-num (n)
+;;   "Add scene number N to current scene heading.
+;; Assumes line matched `fountain-scene-heading-p'."
+;;   (end-of-line)
+;;   (insert "#" n)
+;;   (beginning-of-line)
+;;   (fountain-align-scene-num))
 
-(defun fountain-add-scene-nums (&optional arg)
-  "Add scene numbers to all scene headings lacking.
-If prefaced with ARG, overwrite existing scene numbers."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (unless (fountain-scene-heading-p)
-      (fountain-forward-scene 1))
-    (let ((prev-scene-num "0"))
-      (while (not (eobp))
-        (let ((current-scene-num (fountain-get-scene-num)))
-          (if current-scene-num
-              ;; (fountain-align-scene-num)
-              (setq prev-scene-num current-scene-num)
-            (let* ((prev-scene-int (string-to-number prev-scene-num))
-                   (prev-scene-alpha
-                    (if (string-match "[a-z]+" prev-scene-num)
-                        (match-string 0 prev-scene-num)))
-                   (next-scene-num
-                    (save-excursion
-                      (while (not (or (eobp)
-                                      (fountain-get-scene-num)))
-                        (fountain-forward-scene 1))
-                      (fountain-get-scene-num)))
-                   (next-scene-int (if next-scene-num
-                                       (string-to-number next-scene-num)))
-                   (current-scene-num
-                    (if (or (not next-scene-int)
-                            (< (1+ prev-scene-int) next-scene-int))
-                        (int-to-string (1+ prev-scene-int))
-                      (concat (int-to-string prev-scene-int)
-                              (if prev-scene-alpha
-                                  (string (1+ (string-to-char prev-scene-alpha)))
-                                "A")))))
-              (fountain-add-scene-num current-scene-num)
-              (setq prev-scene-num current-scene-num))))
-        (fountain-forward-scene 1)))))
+;; (defun fountain-add-scene-nums (&optional arg)
+;;   "Add scene numbers to all scene headings lacking.
+;; If prefaced with ARG, overwrite existing scene numbers."
+;;   (interactive)
+;;   (save-excursion
+;;     (goto-char (point-min))
+;;     (unless (fountain-scene-heading-p)
+;;       (fountain-forward-scene 1))
+;;     (let ((prev-scene-num "0"))
+;;       (while (not (eobp))
+;;         (let ((current-scene-num (fountain-get-scene-num)))
+;;           (if current-scene-num
+;;               ;; (fountain-align-scene-num)
+;;               (setq prev-scene-num current-scene-num)
+;;             (let* ((prev-scene-int (string-to-number prev-scene-num))
+;;                    (prev-scene-alpha
+;;                     (if (string-match "[a-z]+" prev-scene-num)
+;;                         (match-string 0 prev-scene-num)))
+;;                    (next-scene-num
+;;                     (save-excursion
+;;                       (while (not (or (eobp)
+;;                                       (fountain-get-scene-num)))
+;;                         (fountain-forward-scene 1))
+;;                       (fountain-get-scene-num)))
+;;                    (next-scene-int (if next-scene-num
+;;                                        (string-to-number next-scene-num)))
+;;                    (current-scene-num
+;;                     (if (or (not next-scene-int)
+;;                             (< (1+ prev-scene-int) next-scene-int))
+;;                         (int-to-string (1+ prev-scene-int))
+;;                       (concat (int-to-string prev-scene-int)
+;;                               (if prev-scene-alpha
+;;                                   (string (1+ (string-to-char prev-scene-alpha)))
+;;                                 "A")))))
+;;               (fountain-add-scene-num current-scene-num)
+;;               (setq prev-scene-num current-scene-num))))
+;;         (fountain-forward-scene 1)))))
 
-(defun fountain-align-scene-num ()
-  "Align scene number to `fountain-align-scene-num'."
-  (if (fountain-scene-heading-p)
-      (let ((pos (point)))
-        (forward-line 0)
-        (if (and (looking-at fountain-scene-num-regexp)
-                 (< pos (match-beginning 3)))
-            (let* ((scene-heading-length
-                    (string-width (match-string 1)))
-                   (num-length
-                    (string-width (match-string 3)))
-                   (space-length
-                    (- fountain-align-scene-num
-                       scene-heading-length
-                       num-length)))
-              (if (< 1 space-length)
-                  (replace-match (make-string space-length ?\s)
-                                 nil nil nil 2)
-                (replace-match " " nil nil nil 2))))
-        (goto-char pos))))
+;; (defun fountain-align-scene-num ()
+;;   "Align scene number to `fountain-align-scene-num'."
+;;   (if (fountain-scene-heading-p)
+;;       (let ((pos (point)))
+;;         (forward-line 0)
+;;         (if (and (looking-at fountain-scene-num-regexp)
+;;                  (< pos (match-beginning 3)))
+;;             (let* ((scene-heading-length
+;;                     (string-width (match-string 1)))
+;;                    (num-length
+;;                     (string-width (match-string 3)))
+;;                    (space-length
+;;                     (- fountain-align-scene-num
+;;                        scene-heading-length
+;;                        num-length)))
+;;               (if (< 1 space-length)
+;;                   (replace-match (make-string space-length ?\s)
+;;                                  nil nil nil 2)
+;;                 (replace-match " " nil nil nil 2))))
+;;         (goto-char pos))))
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
@@ -2577,7 +2577,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
     (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
-    (define-key map (kbd "C-c C-x #") 'fountain-add-scene-nums)
+    ;; (define-key map (kbd "C-c C-x #") 'fountain-add-scene-nums)
     (define-key map (kbd "C-c C-x f") 'fountain-set-font-lock-decoration)
     ;; navigation commands
     (define-key map (kbd "C-M-n") 'fountain-forward-scene)
@@ -2621,7 +2621,7 @@ keywords suitable for Font Lock."
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
-    ["Add Scene Numbers" fountain-add-scene-nums]
+    ;; ["Add Scene Numbers" fountain-add-scene-nums]
     "---"
     ("Export"
      ["Default" fountain-export-default]
@@ -2730,8 +2730,8 @@ keywords suitable for Font Lock."
       (add-to-invisibility-spec 'fountain-syntax))
   (add-hook 'font-lock-extend-region-functions
             'fountain-font-lock-extend-region t t)
-  (add-hook 'post-self-insert-hook
-            'fountain-align-scene-num t t)
+  ;; (add-hook 'post-self-insert-hook
+  ;;           'fountain-align-scene-num t t)
   ;; (add-hook 'after-save-hook
   ;;           'fountain-read-metadata)
   (fountain-read-metadata))
