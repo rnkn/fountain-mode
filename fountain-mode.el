@@ -1886,7 +1886,6 @@ Otherwise return `fountain-export-buffer'"
     s))
 
 (defun fountain-export-create-html-dialog-table (content limit)
-  ""
   (let* ((dialog-contd (concat "(" fountain-continued-dialog-string ")"))
          (character (fountain-export-filter
                      (s-trim (car (s-slice-at dialog-contd content)))))
@@ -1907,7 +1906,6 @@ Otherwise return `fountain-export-buffer'"
     (concat table-start table-body table-end)))
 
 (defun fountain-export-create-html-element (limit)
-  ""
   (let* ((index (point))
          (class (or (get-text-property index 'fountain-element)
                     "action"))
