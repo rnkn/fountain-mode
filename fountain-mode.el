@@ -2215,12 +2215,18 @@ then make the changes desired."
         ;; set START and END markers since buffer contents will change
         (set-marker start
                     (cond (arg (point-min))
-                          ((use-region-p) (region-beginning))
-                          ((car (bounds-of-thing-at-point 'scene)))))
+                          ((use-region-p)
+                           (region-beginning))
+                          (t
+                           (fountain-beginning-of-scene)
+                           (point))))
         (set-marker end
                     (cond (arg (point-max))
-                          ((use-region-p) (region-end))
-                          ((cdr (bounds-of-thing-at-point 'scene)))))
+                          ((use-region-p)
+                           (region-end))
+                          (t
+                           (fountain-end-of-scene)
+                           (point))))
         ;; delete all matches in region
         (goto-char start)
         (while (re-search-forward (concat "\s*" s) end t)
@@ -2238,6 +2244,8 @@ then make the changes desired."
               (replace-match (concat "\s" s)))
             (forward-line 1)
             (progress-reporter-update job)))
+        (set-marker start nil)
+        (set-marker end nil)
         (progress-reporter-done job)))))
 
 (defun fountain-export-default ()
