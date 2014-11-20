@@ -1018,7 +1018,7 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching notes.")
 
 (defconst fountain-section-regexp
-  "^\\(?1:\\(?2:#\\{1,5\\}[\s\t]*\\)\\(?3:[^#\n].*\\)\\)[\s\t]*$"
+  "^\\(?1:\\(?2:\\(?4:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:[^#\n].*\\)\\)[\s\t]*$"
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
@@ -1709,8 +1709,8 @@ outline visibility through the following states:
 (defun fountain-outline-level ()
   "Return the depth to which a heading is nested in outline."
   (if (string-prefix-p "#" (match-string 0))
-      (string-width (s-trim (match-string 2))) ; FIXME unneeded after export rewrite
-    6))                                 ; FIXME bobp? text outside outline?
+      (string-width (match-string 4)) ; FIXME use group 2 after export rewrite
+    6))                              ; FIXME bobp? text outside outline?
 
 ;;; Export Internal Functions ==================================================
 
