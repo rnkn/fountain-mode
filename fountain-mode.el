@@ -1594,23 +1594,23 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
-(defun fountain-outline-shift-down (&optional arg)
+(defun fountain-outline-shift-down (&optional n)
   (interactive "p")
   (outline-back-to-heading)
   (let* ((move-func
-          (if (< 0 arg)
+          (if (< 0 n)
               'outline-get-next-sibling
             'outline-get-last-sibling))
          (end-point-func
-          '(lambda ()
-             (outline-end-of-subtree)
-             (if (and (eobp)
-                      (eolp)
-                      (not (bolp)))
-                 (open-line 1))
-             (unless (eobp)
-               (forward-char 1))
-             (point)))
+          (lambda ()
+            (outline-end-of-subtree)
+            (if (and (eobp)
+                     (eolp)
+                     (not (bolp)))
+                (insert-char ?\n))
+            (unless (eobp)
+              (forward-char 1))
+            (point)))
          (beg (point))
          (folded
           (save-match-data
@@ -1620,14 +1620,14 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
           (save-match-data
             (funcall end-point-func)))
          (insert-point (make-marker))
-         (i (abs arg)))
+         (i (abs n)))
     (goto-char beg)
     (while (< 0 i)
       (or (funcall move-func)
           (progn (goto-char beg)
                  (message "Cannot shift past higher level")))
       (setq i (1- i)))
-    (if (< 0 arg)                       ; how does this work?
+    (if (< 0 n)
         (funcall end-point-func))
     (move-marker insert-point (point))
     (insert (delete-and-extract-region beg end))
@@ -1636,7 +1636,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
         (hide-subtree))
     (set-marker insert-point nil)))
 
-(defun fountain-outline-shift-up (&optional arg)
+(defun fountain-outline-shift-up (&optional n)
   (interactive "p")
   (fountain-outline-shift-down (- arg)))
 
