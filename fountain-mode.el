@@ -1435,7 +1435,8 @@ Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
       (goto-char start)
       (if (search-forward "$?" end t)
           (replace-match "")
-        (goto-char end)))))
+        (goto-char end))
+      (set-marker end nil))))
 
 (defun fountain-uuid ()
   "Return a lowercase 8-digit UUID by calling `fountain-uuid-func'."
