@@ -1587,6 +1587,59 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 
 ;;; Outline ====================================================================
 
+(defalias 'fountain-outline-next 'outline-next-visible-heading)
+(defalias 'fountain-outline-previous 'outline-previous-visible-heading)
+(defalias 'fountain-outline-forward 'outline-forward-same-level)
+(defalias 'fountain-outline-backward 'outline-backward-same-level)
+(defalias 'fountain-outline-up 'outline-up-heading)
+(defalias 'fountain-outline-mark 'outline-mark-subtree)
+
+(defun fountain-outline-shift-down (&optional arg)
+  (interactive "p")
+  (outline-back-to-heading)
+  (let* ((move-func
+          (if (< 0 arg)
+              'outline-get-next-sibling
+            'outline-get-last-sibling))
+         (end-point-func
+          '(lambda ()
+             (outline-end-of-subtree)
+             (if (and (eobp)
+                      (eolp)
+                      (not (bolp)))
+                 (open-line 1))
+             (unless (eobp)
+               (forward-char 1))
+             (point)))
+         (beg (point))
+         (folded
+          (save-match-data
+            (outline-end-of-heading)
+            (outline-invisible-p)))
+         (end
+          (save-match-data
+            (funcall end-point-func)))
+         (insert-point (make-marker))
+         (i (abs arg)))
+    (goto-char beg)
+    (while (< 0 i)
+      (or (funcall move-func)
+          (progn (goto-char beg)
+                 (message "Cannot shift past higher level")))
+      (setq i (1- i)))
+    (if (< 0 arg)                       ; how does this work?
+        (funcall end-point-func))
+    (move-marker insert-point (point))
+    (insert (delete-and-extract-region beg end))
+    (goto-char insert-point)
+    (if folded
+        (hide-subtree))
+    (set-marker insert-point nil)))
+
+(defun fountain-outline-shift-up (&optional arg)
+  (interactive "p")
+  (fountain-outline-shift-down (- arg)))
+
 (defun fountain-outline-hide-level (n)
   (cond ((= n 0)
          (show-all)
@@ -2634,14 +2687,14 @@ keywords suitable for Font Lock."
     (define-key map (kbd "M-n") 'fountain-forward-character)
     (define-key map (kbd "M-p") 'fountain-backward-character)
     ;; outline commands
-    (define-key map (kbd "C-c C-n") 'outline-next-visible-heading)
-    (define-key map (kbd "C-c C-p") 'outline-previous-visible-heading)
-    (define-key map (kbd "C-c C-f") 'outline-forward-same-level)
-    (define-key map (kbd "C-c C-b") 'outline-backward-same-level)
-    (define-key map (kbd "C-c C-u") 'outline-up-heading)
-    (define-key map (kbd "C-c C-^") 'outline-move-subtree-up)
-    (define-key map (kbd "C-c C-v") 'outline-move-subtree-down)
-    (define-key map (kbd "C-c C-SPC") 'outline-mark-subtree)
+    (define-key map (kbd "C-c C-n") 'fountain-outline-next)
+    (define-key map (kbd "C-c C-p") 'fountain-outline-previous)
+    (define-key map (kbd "C-c C-f") 'fountain-outline-forward)
+    (define-key map (kbd "C-c C-b") 'fountain-outline-backward)
+    (define-key map (kbd "C-c C-u") 'fountain-outline-up)
+    (define-key map (kbd "C-c C-^") 'fountain-outline-shift-up)
+    (define-key map (kbd "C-c C-v") 'fountain-outline-shift-down)
+    (define-key map (kbd "C-c C-SPC") 'fountain-outline-mark)
     (define-key map (kbd "TAB") 'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
     ;; exporting commands
