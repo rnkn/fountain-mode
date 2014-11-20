@@ -810,7 +810,7 @@ p.action {
     white-space: pre-wrap;
     orphans: ${action-orphans};
     widows: ${action-widows};
-}    
+}
 
 p.center {
     text-align: center;
@@ -2655,12 +2655,12 @@ keywords suitable for Font Lock."
               (append keywords
                       (list (cons matcher facespec))))))))
 
-(defun fountain-match-element (fun limit)
+(defun fountain-match-element (func limit)
   "If FUNC returns non-nil before LIMIT, return match data."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
-      (if (funcall fun)
+      (if (funcall func)
           (setq match t))
       (forward-line 1))
     match))
