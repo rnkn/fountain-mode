@@ -10,7 +10,7 @@ Fountain markup format, visit <http://fountain.io>.
 
 ![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
 
-Pictured: *The Abductors* by Paul W. Rankin in Fountain Mode (using
+Pictured: *Big Fish* by John August in Fountain Mode (using
 `tsdh-dark` theme, also running [Olivetti][] minor mode)
 
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
@@ -22,8 +22,8 @@ Features
   dual dialog are forthcoming)
 - Auto-align elements for a kind of WYSIWYG (display only, does not
   modify file contents)
-- Integration with `outline.el` to toggle visibility of sections and
-  scenes (beta, see below)
+- Integration with `outline` to toggle visibility of sections and
+  scenes (not yet available in stable release, see below)
 - Export to HTML and PDF (PDF export requires [Prince][])
 - Include or omit a title page
 - Navigate by scene heading
@@ -63,7 +63,7 @@ Requirements
   like it, delete the annotation in a PDF application that supports
   editing annotations, or open the PDF and print to PDF, which will
   remove all annotations.
-- To insert UUIDs (useful for using notes as linked bookmarks) you'll
+- If you want to use UUIDs (useful for using notes as linked bookmarks) you'll
   need either `uuidgen` CLT (usually preinstalled on OS X and Linux) or
   [uuid.el][] Emacs package.
 
@@ -109,17 +109,11 @@ count as the first five levels and scene headings count as the sixth
 level, e.g.:
 
     # section level 1
-
     ## section level 2
-
     ### section level 3
-
     #### section level 4
-
     ##### section level 5
-
-    ###### not recognized as section level
-
+    ###### invalid section level
     INT. LEVEL 6 - DAY
 
     An obese man (40s) with a large mustard stain on his shirt exits the
@@ -129,13 +123,14 @@ Cycle subtree visibility with `TAB`. Cycle global outline visibility
 with `<backtab>` (shift-TAB) or `C-u TAB`. More navigation and structure
 editing commands are:
 
-- `C-c C-f outline-forward-same-level`
-- `C-c C-n outline-next-visible-heading`
-- `C-c C-p outline-previous-visible-heading`
-- `C-c C-u outline-up-heading`
-- `C-c C-v outline-move-subtree-down`
-- `C-c C-^ outline-move-subtree-up`
-- `C-c C-SPC outline-mark-subtree`
+- `C-c C-f fountain-outline-forward`
+- `C-c C-b fountain-outline-backward`
+- `C-c C-n fountain-outline-next`
+- `C-c C-p fountain-outline-previous`
+- `C-c C-u fountain-outline-up`
+- `C-c C-v fountain-outline-shift-down`
+- `C-c C-^ fountain-outline-shift-up`
+- `C-c C-SPC fountain-outline-mark`
 
 Bugs and Feature Requests
 -------------------------
