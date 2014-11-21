@@ -1639,7 +1639,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 
 (defun fountain-outline-shift-up (&optional n)
   (interactive "p")
-  (fountain-outline-shift-down (- arg)))
+  (fountain-outline-shift-down (- n)))
 
 (defun fountain-outline-hide-level (n)
   (cond ((= n 0)
