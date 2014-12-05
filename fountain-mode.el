@@ -1604,17 +1604,27 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-outline-shift-down (&optional n)
   (interactive "p")
   (outline-back-to-heading)
-  (let* ((move-func
+  (let* (hanging-line
+         (move-fun
           (if (< 0 n)
               'outline-get-next-sibling
             'outline-get-last-sibling))
-         (end-point-func
+         (end-point-fun
           (lambda ()
             (outline-end-of-subtree)
+            ;; newline if none at eof
             (if (and (eobp)
                      (eolp)
                      (not (bolp)))
                 (insert-char ?\n))
+            ;; temp newline if only 1 at eof
+            (when (and (eobp)
+                       (save-excursion
+                         (forward-line -1)
+                         (not (fountain-blank-p))))
+              (insert-char ?\n)
+              (setq hanging-line t))
+            ;; avoid eobp signal
             (unless (eobp)
               (forward-char 1))
             (point)))
@@ -1625,22 +1635,27 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
             (outline-invisible-p)))
          (end
           (save-match-data
-            (funcall end-point-func)))
+            (funcall end-point-fun)))
          (insert-point (make-marker))
          (i (abs n)))
     (goto-char beg)
     (while (< 0 i)
-      (or (funcall move-func)
+      (or (funcall move-fun)
           (progn (goto-char beg)
                  (message "Cannot shift past higher level")))
       (setq i (1- i)))
     (if (< 0 n)
-        (funcall end-point-func))
+        (funcall end-point-fun))
     (move-marker insert-point (point))
     (insert (delete-and-extract-region beg end))
     (goto-char insert-point)
     (if folded
         (hide-subtree))
+    ;; remove temp newline
+    (if hanging-line
+        (save-excursion
+          (goto-char (point-max))
+          (delete-char -1)))
     (set-marker insert-point nil)))
 
 (defun fountain-outline-shift-up (&optional n)
@@ -2385,7 +2400,7 @@ message of \"S are now invisible/visible\"."
   "Toggle `fountain-align-elements'."
   (interactive)
   (setq fountain-align-elements
-        (null fountain-align-elements))
+        (not fountain-align-elements))
   (font-lock-refresh-defaults)
   (message "Elements are now displayed %s"
            (if fountain-align-elements
@@ -2395,8 +2410,7 @@ message of \"S are now invisible/visible\"."
   "Toggle `fountain-add-continued-dialog'"
   (interactive)
   (setq fountain-add-continued-dialog
-        (null fountain-add-continued-dialog))
-  ;; (fountain-continued-dialog-refresh)
+        (not fountain-add-continued-dialog))
   (message "Continued dialog is now %s"
            (if fountain-add-continued-dialog
                "added" "removed")))
@@ -2405,7 +2419,7 @@ message of \"S are now invisible/visible\"."
   "Toggle `fountain-export-include-title-page'."
   (interactive)
   (setq fountain-export-include-title-page
-        (null fountain-export-include-title-page))
+        (not fountain-export-include-title-page))
   (message "Title page is now %s on export"
            (if fountain-export-include-title-page
                "included" "omitted")))
@@ -2491,7 +2505,8 @@ message of \"S are now invisible/visible\"."
     ("scene-heading"
      (lambda (limit)
        (fountain-match-element 'fountain-scene-heading-p limit))
-     ((:level 2 :subexp 0)
+     ((:level 2 :subexp 0
+              :override keep)
       (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t
