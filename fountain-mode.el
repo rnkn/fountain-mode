@@ -965,7 +965,7 @@ Set with `fountain-initialize-regexp'. Requires
 ;;     Group 3: scene number (including leading #)")
 
 (defconst fountain-blank-regexp
-  "\\`\\|^\s?$\\|\\'"
+  "^\s?$"
   "Regular expression for matching an empty line.")
 
 (defconst fountain-forced-action-mark-regexp
@@ -1186,15 +1186,14 @@ bold-italic delimiters together, e.g.
 
 (defun fountain-get-block-bounds ()
   "Return the beginning and end points of block at point."
-  (let ((block-beginning
-         (save-excursion
-           (re-search-backward fountain-blank-regexp
-                               (- (point) fountain-block-limit) t)))
-        (block-end
-         (save-excursion
-           (re-search-forward fountain-blank-regexp
-                              (+ (point) fountain-block-limit) t))))
-    (cons block-beginning block-end)))
+  (let* ((r (concat fountain-blank-regexp "\\|\\`\\|\\'"))
+         (beg (save-excursion
+                (re-search-backward r
+                                    (- (point) fountain-block-limit) t)))
+         (end (save-excursion
+                (re-search-forward r
+                                   (+ (point) fountain-block-limit) t))))
+    (cons beg end)))
 
 ;; currently unused
 ;; (defun fountain-strip-comments (start end)
@@ -1467,7 +1466,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
                    ((eq limit 'dialog)
                     (or (fountain-dialog-p)
                         (fountain-paren-p)
-                        (fountain-tachyon-p))) ; FIXME infinite loop if b/eobp?
+                        (fountain-tachyon-p)))
                    ((not (or (fountain-character-p)
                              (eq (point) (buffer-end p))))))
         (forward-line p))
