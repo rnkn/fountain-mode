@@ -424,8 +424,8 @@ Two syntaxes are supported:
     // also a comment
 
 Both syntax will be recognized as comments. This option changes
-the behaviour of the \\[comment-dwim] command. The default is the
-former but if you prefer the latter, set this option to non-nil."
+the behavior of \\[comment-dwim]. The default is the former but
+if you prefer the latter, set this option to non-nil."
   :type 'boolean
   :group 'fountain)
 
@@ -1176,6 +1176,13 @@ bold-italic delimiters together, e.g.
   (fountain-init-scene-heading-regexp)
   (fountain-init-outline-regexp)
   (fountain-init-trans-regexp))
+
+(defun fountain-init-comment-syntax ()
+  "Set comment syntax according to `fountain-switch-comment-syntax'."
+  (setq-local comment-start
+              (if fountain-switch-comment-syntax "//" "/*"))
+  (setq-local comment-end
+              (if fountain-switch-comment-syntax "" "*/")))
 
 (defun fountain-get-block-bounds ()
   "Return the beginning and end points of block at point."
@@ -2340,10 +2347,8 @@ then make the changes desired."
   "Toggle `fountain-switch-comment-syntax'."
   (interactive)
   (setq fountain-switch-comment-syntax
-        (null fountain-switch-comment-syntax))
-  (if fountain-switch-comment-syntax
-      (setq comment-start "//" comment-end "")
-    (setq comment-start "/*" comment-end "*/"))
+        (not fountain-switch-comment-syntax))
+  (fountain-init-comment-syntax)
   (message "Default comment syntax is now %s"
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
@@ -2813,10 +2818,7 @@ keywords suitable for Font Lock."
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (fountain-init-regexp)
-  (setq-local comment-start
-              (if fountain-switch-comment-syntax "//" "/*"))
-  (setq-local comment-end
-              (if fountain-switch-comment-syntax "" "*/"))
+  (fountain-init-comment-syntax)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level 'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
