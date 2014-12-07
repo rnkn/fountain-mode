@@ -290,6 +290,9 @@ with \\[fountain-save-font-lock-decoration]."
 (define-obsolete-face-alias 'fountain-trans-highlight
   'fountain-trans "1.2.0")
 
+(define-obsolete-face-alias 'fountain-section
+  'fountain-section-heading "1.4.1")
+
 ;;; Customization ==============================================================
 
 (defcustom fountain-mode-hook
@@ -1017,8 +1020,8 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "\\(\\[\\[\\(\\(?:.\n?\\)*?\\)]]\\)"
   "Regular expression for matching notes.")
 
-(defconst fountain-section-regexp
-  "^\\(?1:\\(?2:\\(?4:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:[^#\n].*\\)\\)[\s\t]*$"
+(defconst fountain-section-heading-regexp
+  "^\\(?1:\\(?2:\\(?4:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
@@ -1115,7 +1118,7 @@ bold-italic delimiters together, e.g.
   '((t (:inherit font-lock-comment-face)))
   "Default face for notes.")
 
-(defface fountain-section
+(defface fountain-section-heading
   '((t (:inherit font-lock-builtin-face)))
   "Default face for section headings."
   :group 'fountain-faces)
@@ -1167,7 +1170,7 @@ bold-italic delimiters together, e.g.
 (defun fountain-init-outline-regexp ()
   "Initializes `outline-regexp'."
   (setq-local outline-regexp
-              (concat fountain-section-regexp
+              (concat fountain-section-heading-regexp
                       "\\|"
                       fountain-scene-heading-regexp)))
 
@@ -1250,13 +1253,13 @@ bold-italic delimiters together, e.g.
                  (forward-line -1)
                  (fountain-metadata-p)))))))
 
-(defun fountain-section-p ()
+(defun fountain-section-heading-p ()
   "Match section heading if point is at section heading, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (looking-at fountain-section-regexp))))
+      (looking-at fountain-section-heading-regexp))))
 
 (defun fountain-synopsis-p ()
   "Match synopsis if point is at synopsis, nil otherwise."
@@ -1283,7 +1286,7 @@ bold-italic delimiters together, e.g.
 These include blank lines, section headings, synopses, notes, and
 comments."
   (or (fountain-blank-p)
-      (fountain-section-p)
+      (fountain-section-heading-p)
       (fountain-synopsis-p)
       (fountain-note-p)
       (fountain-comment-p)))
@@ -2185,7 +2188,7 @@ If N is 0, move to beginning of scene."
   ;;       (exchange-point-and-mark))
   (push-mark)
   (fountain-forward-scene 0)
-  (if (null (or (fountain-section-p)
+  (if (null (or (fountain-section-heading-p)
                 (fountain-scene-heading-p)))
       (progn
         (goto-char (mark))
@@ -2202,7 +2205,7 @@ If N is 0, move to beginning of scene."
   (forward-line 0)
   (while (null (or (bobp)
                    (fountain-scene-heading-p)
-                   (fountain-section-p)))
+                   (fountain-section-heading-p)))
     (forward-line -1))
   (if (bobp)
       (progn
@@ -2241,10 +2244,10 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (goto-char (point-min))
   (fountain-insert-template fountain-metadata-template))
 
-(defun fountain-occur-sections ()
-  "Display `occur' buffer searching `fountain-section-regexp'."
+(defun fountain-occur-section-headings ()
+  "Display `occur' buffer searching `fountain-section-heading-regexp'."
   (interactive)
-  (occur fountain-section-regexp))
+  (occur fountain-section-heading-regexp))
 
 (defun fountain-occur-synopses ()
   "Display `occur' buffer searching `fountain-synopsis-regexp'."
@@ -2546,12 +2549,12 @@ message of \"S are now invisible/visible\"."
       (:level 2 :subexp 4 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)))
-    ("section" ,fountain-section-regexp
+    ("section-heading" ,fountain-section-heading-regexp
      ((:level 2 :subexp 3)
       (:level 2 :subexp 2 :face fountain-comment)))
     ("synopsis" ,fountain-synopsis-regexp
      ((:level 2 :subexp 0 :invisible t)
-      (:level 2 :subexp 3 :face fountain-comment
+      (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)))
     ("page-break" ,fountain-page-break-regexp
@@ -2724,7 +2727,7 @@ keywords suitable for Font Lock."
     ;; view commands
     (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars)
     (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim)
-    (define-key map (kbd "M-s 1") 'fountain-occur-sections)
+    (define-key map (kbd "M-s 1") 'fountain-occur-section-headings)
     (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
     (define-key map (kbd "M-s 3") 'fountain-occur-notes)
     (define-key map (kbd "M-s 4") 'fountain-occur-scene-headings)
