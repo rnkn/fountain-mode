@@ -859,7 +859,7 @@ table.dialog {
     margin-left: 1in;
     border-spacing: 0px;
     width: 4in;
-    string-set: character attr(character) dialog-more \"${dialog-more}\";
+    string-set: character attr(data-character) dialog-more \"${dialog-more}\";
 }
 
 table.dialog:after {
@@ -971,13 +971,13 @@ Used by `fountain-get-block-bounds'.")
 (defvar fountain-scene-heading-regexp
   nil
   "Regular expression for matching scene headings.
-Set with `fountain-initialize-regexp'. Requires
+Set with `fountain-init-scene-heading-regexp'. Requires
 `fountain-scene-heading-p' for preceding blank line.")
 
 (defvar fountain-trans-regexp
   nil
   "Regular expression for matching transitions.
-Set with `fountain-initialize-regexp'. Requires
+Set with `fountain-init-trans-regexp'. Requires
 `fountain-trans-p' for preceding and succeeding blank lines.")
 
 ;; (defconst fountain-scene-num-regexp
@@ -1217,11 +1217,11 @@ bold-italic delimiters together, e.g.
   "Return the beginning and end points of block at point."
   (let* ((r (concat fountain-blank-regexp "\\|\\`\\|\\'"))
          (beg (save-excursion
-                (re-search-backward r
-                                    (- (point) fountain-block-limit) t)))
+                (re-search-backward
+                 r (- (point) fountain-block-limit) t)))
          (end (save-excursion
-                (re-search-forward r
-                                   (+ (point) fountain-block-limit) t))))
+                (re-search-forward
+                 r (+ (point) fountain-block-limit) t))))
     (cons beg end)))
 
 ;; currently unused
@@ -1601,17 +1601,17 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
   (eval-when-compile
-    (defvar font-lock-beg)
-    (defvar font-lock-end))
-  (let ((start
+    (defvar font-lock-beg nil)
+    (defvar font-lock-end nil))
+  (let (changed
+        (start
          (save-excursion
            (goto-char font-lock-beg)
            (car (fountain-get-block-bounds))))
         (end
          (save-excursion
            (goto-char font-lock-end)
-           (cdr (fountain-get-block-bounds))))
-        changed)
+           (cdr (fountain-get-block-bounds)))))
     (if (null (and start end))
         (error "Region bounds overflow")
       (goto-char font-lock-beg)
@@ -1806,12 +1806,13 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-outline-cycle-global ()
   "Globally cycle outline visibility.
 
-Calls `fountain-outline-cycle' with argument 4 wot cycle buffer
+Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
     1. top-level section headins
-    2. custom set with `fountain-outline-cycle-custom-level'
-    3. all sections and scene headings
+    2. startup level, if non-nil
+       (set with `fountain-outline-cycle-startup-level' or in metadata)
+    3. all section and scene headings
     4. everything"
   (interactive)
   (fountain-outline-cycle 4))
@@ -1898,12 +1899,12 @@ Matches and deletes any text with `fountain-comment',
         (goto-char (next-single-property-change
                     (point) 'face nil (point-max)))))))
 
-(defun fountain-export-get-name (ext)
-  "If BUFFER is visiting a file, concat file name base and EXT.
+(defun fountain-export-get-filename (format)
+  "If BUFFER is visiting a file, concat file name base and FORMAT.
 Otherwise return `fountain-export-buffer'"
   (if (buffer-file-name)
-      (concat (file-name-base (buffer-file-name)) "." ext)
-    (format "*Fountain %s Export*" ext)))
+      (concat (file-name-base (buffer-file-name)) "." format)
+    (format fountain-export-buffer format)))
 
 (defun fountain-export-get-metadata-value (key) ; FIXME combine with other
   "Like `fountain-get-metadata-value' but filters for HTML."
@@ -1975,7 +1976,7 @@ Otherwise return `fountain-export-buffer'"
         (concat "<style type=\"text/css\">\n"
                 style-rules
                 "\n</style>")
-      (let ((cssfile (get-buffer-create (fountain-export-get-name "css")))
+      (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
             (outputdir (expand-file-name
                         (file-name-directory (buffer-file-name)))))
         (with-current-buffer cssfile
@@ -2241,7 +2242,7 @@ Otherwise return `fountain-export-buffer'"
   (fountain-read-metadata)
   (let* ((sourcebuf (current-buffer))
          (destbuf (get-buffer-create
-                   (fountain-export-get-name "html")))
+                   (fountain-export-get-filename "html")))
          (head (fountain-export-create-html-head))
          (title-page (fountain-export-create-html-title-page))
          complete)
@@ -2270,7 +2271,7 @@ Otherwise return `fountain-export-buffer'"
                             "</section>\n"))
                 (insert "<section id=\"screenplay\">\n")))
             ;; parse the temp buffer
-            (fountain-export-parse-buffer destbuf))
+            (fountain-export-parse-buffer))
           ;; close HTML tags
           (with-current-buffer destbuf
             (with-silent-modifications
