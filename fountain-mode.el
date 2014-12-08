@@ -465,9 +465,9 @@ similar to:
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-outline-cycle-custom-level
+(defcustom fountain-outline-startup-level
   nil
-  "Integer section heading level to include in global outline cycling."
+  "Section headings to include at startup and in outline cycling."
   :type '(choice (const :tag "Only top-level" nil)
                  (const :tag "Include level 2" 2)
                  (const :tag "Include level 3" 3)
@@ -1679,35 +1679,36 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 \\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
 \\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
 \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
-\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-cycle-custom-level'"
+\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-startup-level'"
   (interactive "p")
-  (let* ((custom-level (save-excursion
-                         (goto-char (point-min))
-                         (let (found)
-                           (while (and (outline-next-heading)
-                                       (not found))
-                             (if (= (funcall outline-level)
-                                    fountain-outline-cycle-custom-level)
-                                 (setq found t)))
-                           (if found fountain-outline-cycle-custom-level))))
-         (highest-level (save-excursion
-                          (goto-char (point-max))
-                          (outline-back-to-heading t)
-                          (let ((level (funcall outline-level)))
-                            (while (and (not (bobp))
-                                        (< 1 level))
-                              (outline-up-heading 1 t)
-                              (unless (bobp)
-                                (setq level (funcall outline-level))))
-                            level))))
+  (let* ((startup-level
+          (if fountain-outline-startup-level
+              (save-excursion
+                (goto-char (point-min))
+                (let (found)
+                  (while (and (not found)
+                              (outline-next-heading))
+                    (if (= (funcall outline-level)
+                           fountain-outline-startup-level)
+                        (setq found t)))
+                  (if found fountain-outline-startup-level)))))
+         (highest-level
+          (save-excursion
+            (goto-char (point-max))
+            (outline-back-to-heading t)
+            (let ((level (funcall outline-level)))
+              (while (and (not (bobp))
+                          (< 1 level))
+                (outline-up-heading 1 t)
+                (unless (bobp)
+                  (setq level (funcall outline-level))))
+              level))))
     (cond ((eq arg 4)
            (cond
-            ((and custom-level
+            ((and startup-level
                   (= fountain-outline-cycle 1))
-             (fountain-outline-hide-level custom-level))
-            ((= fountain-outline-cycle 1)
-             (fountain-outline-hide-level 0))
-            ((< 1 fountain-outline-cycle 6)
+             (fountain-outline-hide-level startup-level))
+            ((< 0 fountain-outline-cycle 6)
              (fountain-outline-hide-level 6))
             ((= fountain-outline-cycle 6)
              (fountain-outline-hide-level 0))
@@ -1719,9 +1720,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
            (show-all)
            (message "Showing all")
            (setq fountain-outline-cycle 0))
-          ((and custom-level
+          ((and startup-level
                 (eq arg 64))
-           (fountain-outline-hide-level custom-level))
+           (fountain-outline-hide-level startup-level))
           (t
            (save-excursion
              (outline-back-to-heading)
@@ -1774,7 +1775,7 @@ Calls `fountain-outline-cycle' with argument 4 wot cycle buffer
 outline visibility through the following states:
 
     1. top-level section headins
-    2. custom set with `fountain-outline-cycle-custom-level'
+    2. custom set with `fountain-outline-startup-level'
     3. all sections and scene headings
     4. everything"
   (interactive)
