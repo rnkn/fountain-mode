@@ -1614,8 +1614,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
             (outline-end-of-subtree)
             ;; newline if none at eof
             (if (and (eobp)
-                     (eolp)
-                     (not (bolp)))
+                     (/= (char-before) ?\n))
                 (insert-char ?\n))
             ;; temp newline if only 1 at eof
             (when (and (eobp)
@@ -2833,6 +2832,7 @@ keywords suitable for Font Lock."
   :group 'fountain
   (fountain-init-regexp)
   (fountain-init-comment-syntax)
+  (setq-local require-final-newline 'visit-save)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level 'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
