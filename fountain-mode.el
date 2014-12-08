@@ -2213,7 +2213,7 @@ Otherwise return `fountain-export-buffer'"
                (postfix (cdr template)))
           (concat prefix content postfix)))))
 
-(defun fountain-export (format)
+(defun fountain-export (format &optional force)
   (let* (complete
          (source-buf (current-buffer))
          (dest-buf (get-buffer-create
@@ -2223,8 +2223,9 @@ Otherwise return `fountain-export-buffer'"
           (with-current-buffer dest-buf
             (with-silent-modifications
               (erase-buffer)))
-          (unless (eq fountain-export-tick (buffer-modified-tick))
-            (fountain-export-parse-buffer))
+          (if (or force
+                  (/= fountain-export-tick (buffer-modified-tick)))
+            (fountain-export-parse-buffer source-buf))
           ;; (let* ((element (pop fountain-export-content))
           ;;        (type (car element))
           ;;        (content (nth 1 element))
