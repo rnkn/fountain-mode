@@ -1297,14 +1297,14 @@ bold-italic delimiters together, e.g.
 
 (defun fountain-note-p ()
   "Match note if point is at a note, nil otherwise."
-  (thing-at-point-looking-at fountain-note-regexp))
+  (thing-at-point-looking-at fountain-note-regexp)) ; OPTIMIZE
 
 (defun fountain-comment-p ()
   "Match comment if point is at a comment, nil otherwise."
   ;; problems with comment-only-p picking up blank lines as comments
   ;;
   ;; (comment-only-p (line-beginning-position) (line-end-position)))
-  (thing-at-point-looking-at fountain-comment-regexp))
+  (thing-at-point-looking-at fountain-comment-regexp)) ; OPTIMIZE
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
 (defun fountain-tachyon-p ()
@@ -1355,7 +1355,7 @@ comments."
       (save-restriction
         (widen)
         (forward-line 0)
-        (and (looking-at "[\s\t]*\\(?3:[^<>\n]+\\)[\s\t]*")
+        (and (looking-at "[\s\t]*\\(?3:[^<>\n]+?\\)[\s\t]*$")
              (save-match-data
                (unless (bobp)
                  (forward-line -1)
@@ -2184,21 +2184,21 @@ Otherwise return `fountain-export-buffer'"
     (list 'action (s-trim-right (buffer-substring-no-properties
                                  (point) (cdr (fountain-get-block-bounds))))))))
 
-(defun fountain-export-parse-buffer ()
+(defun fountain-export-parse-buffer (buf)
   (let ((job (make-progress-reporter "Parsing buffer..." 0 100)))
-    (save-excursion
+    (with-temp-buffer
+      (insert-buffer-substring buf)
       (fountain-read-metadata t)
       (setq fountain-export-content nil)
       (while (not (eobp))
         (while (looking-at "\n*\s*\n")
           (goto-char (match-end 0)))
         (let ((element (fountain-export-get-element)))
-          (if element (setq fountain-export-content
-                            (nconc fountain-export-content element))))
+          (if element (push element fountain-export-content)))
         (forward-line 1)
         (progress-reporter-update
-         job (truncate (* (/ (float (point)) (buffer-size)) 100))))
-      (progress-reporter-done job)))
+         job (truncate (* (/ (float (point)) (buffer-size)) 100)))))
+    (progress-reporter-done job))
   (setq fountain-export-tick (buffer-modified-tick))
   fountain-export-content)
 
