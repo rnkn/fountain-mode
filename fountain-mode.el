@@ -1297,25 +1297,34 @@ bold-italic delimiters together, e.g.
 
 (defun fountain-note-p ()
   "Match note if point is at a note, nil otherwise."
-  (thing-at-point-looking-at fountain-note-regexp)) ; OPTIMIZE
+  (save-excursion
+    (save-restriction
+      (widen)
+      (if (and (= (char-after) ?\[)
+               (= (char-before) ?\[))
+          (forward-char -1))
+      (or (looking-at fountain-note-regexp)
+          (let ((a (point))
+                (beg (car (fountain-get-block-bounds))))
+            (re-search-backward "\\[\\[" beg t)
+            (goto-char (match-beginning 0))
+            (and (looking-at fountain-note-regexp)
+                 (< a (match-end 0))))))))
 
 (defun fountain-comment-p ()
-  "Match comment if point is at a comment, nil otherwise."
-  ;; problems with comment-only-p picking up blank lines as comments
-  ;;
-  ;; (comment-only-p (line-beginning-position) (line-end-position)))
-  (thing-at-point-looking-at fountain-comment-regexp)) ; OPTIMIZE
+  "Return non-nil if point is at comment or blank line."
+  (comment-only-p (line-beginning-position) (line-end-position)))
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
 (defun fountain-tachyon-p ()
   "Return non-nil if point is at a non-interfering element.
 These include blank lines, section headings, synopses, notes, and
 comments."
-  (or (fountain-blank-p)
+  (or (fountain-comment-p)
+      ;; (fountain-blank-p)
       (fountain-section-heading-p)
       (fountain-synopsis-p)
-      (fountain-note-p)
-      (fountain-comment-p)))
+      (fountain-note-p)))
 
 (defun fountain-scene-heading-p ()
   "Match scene heading if point is at a scene heading, nil otherwise."
