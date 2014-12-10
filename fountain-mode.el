@@ -1837,42 +1837,53 @@ outline visibility through the following states:
 (defconst fountain-export-format-plist
   '(;; block elements
     (scene-heading
-     html ("<h2 class=\"scene-heading\">" . "</h2>"))
+     html  ("<h2 class=\"scene-heading\">" . "</h2>")
+     latex ("\sceneheading{" . "}")
+     fdx   ("<Paragraph Type=\"Scene Heading\">\n<Text>" . "</Text>\n</Paragraph>"))
     (action
-     html ("<p class=\"action\">" . "</p>"))
+     html  ("<p class=\"action\">" . "</p>")
+     latex ("" . "")
+     fdx   ("<Paragraph Type=\"Action\">\n<Text>" . "</Text>\n</Paragraph>"))
     (character
-     html ("<tr class=\"character\"><td class=\"character\">" . "</td></tr>"))
+     html  ("<tr class=\"character\"><td class=\"character\">" . "</td></tr>")
+     latex ("\begin{dialog}{" . "}")
+     fdx   ("<Paragraph Type=\"Character\">\n<Text>" . "</Text>\n</Paragraph>"))
     (paren
-     html ("<tr class=\"paren\"><td class=\"paren\">" . "</td></tr>"))
+     html  ("<tr class=\"paren\"><td class=\"paren\">" . "</td></tr>")
+     latex ("\paren{" . "}"))
     (dialog
-     html ("<tr class=\"dialog\"><td class=\"dialog\">" . "</td></tr>"))
+     html  ("<tr class=\"dialog\"><td class=\"dialog\">" . "</td></tr>")
+     latex ("" . "")
+     fdx   ("<Paragraph Type=\"Dialogue\">\n<Text>" . "</Text>\n</Paragraph>"))
     (trans
-     html ("<p class=\"trans\">" . "</p>"))
+     html  ("<p class=\"trans\">" . "</p>")
+     latex ("\trans{" . "}")
+     fdx   ("<Paragraph Type=\"Transition\">\n<Text>" . "</Text>\n</Paragraph>"))
     (section-heading
-     html ("<p class=\"section-heading\">" . "</p>"))
+     html  ("<p class=\"section-heading\">" . "</p>"))
     (synopsis
-     html ("<p class=\"synopsis\">" . "</p>"))
+     html  ("<p class=\"synopsis\">" . "</p>"))
     (note
-     html ("<p class=\"note\">" . "</p>"))
+     html  ("<p class=\"note\">" . "</p>"))
     (comment
-     html ("<p class=\"comment\">" . "</p>"))
+     html  ("<p class=\"comment\">" . "</p>"))
     ;; span elements
     (underline
-     html ("_\\(.+?\\)_" . "<span class=\"underline\">\\1</span>"))
+     html  ("_\\(.+?\\)_" . "<span class=\"underline\">\\1</span>"))
     (bold
-     html ("\\*\\*\\(.+?\\)\\*\\*" . "<strong>\\1</strong>"))
+     html  ("\\*\\*\\(.+?\\)\\*\\*" . "<strong>\\1</strong>"))
     (italic
-     html ("\\*\\(.+?\\)\\*" . "<em>\\1</em>"))
+     html  ("\\*\\(.+?\\)\\*" . "<em>\\1</em>"))
     (lyric
-     html ("^~\s*\\(.+\\)" . "<i>\\1</i>"))
+     html  ("^~\s*\\(.+\\)" . "<i>\\1</i>"))
     ;; division elements
     (scene
-     html ("<div class=\"scene\" id=\"%s\">\n" . "\n</div>"))
+     html  ("<div class=\"scene\" id=\"%s\">\n" . "\n</div>"))
     (dialog
-     html ("<table class=\"dialog\" data-character=\"%s\">\n<caption class=\"character\">" . "</table>")))
+     html  ("<table class=\"dialog\" data-character=\"%s\">\n<caption class=\"character\">" . "</table>")))
   "List of strings to format exported elements")
 
-;; (plist-get (cdr (assoc 'scene-heading fountain-export-format-list)) :html)
+;; (plist-get (cdr (assoc 'scene-heading fountain-export-format-list)) 'html)
 
 (defun fountain-export-fontify-buffer ()
   "If `font-lock-mode' is enables, fontify entire buffer."
@@ -2161,8 +2172,9 @@ Otherwise return `fountain-export-buffer'"
          (content (nth 1 element))
          (plist (nth 2 element)))
     (if (memq type fountain-export-element-set)
-        (let* ((template (plist-get (cdr (assoc type fountain-export-format-plist))
-                                  format))
+        (let* ((template
+                (plist-get (cdr (assoc type fountain-export-format-plist))
+                           format))
                (prefix (car template))
                (postfix (cdr template)))
           (concat prefix content postfix)))))
