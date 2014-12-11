@@ -803,6 +803,7 @@ h2.scene-heading {
     font-weight: ${scene-bold};
     text-decoration: ${scene-underline};
     margin-top: ${scene-spacing};
+    margin-bottom: 1em;
     page-break-after: avoid;
 }
 
