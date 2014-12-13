@@ -2233,11 +2233,12 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (if arg
         (comment-dwim nil)
       (unless (fountain-blank-p)
-        (re-search-forward fountain-blank-regexp))
+        (re-search-forward "^[\s\t]*$" nil 1))
       (unless (save-excursion
                 (forward-line 1)
                 (fountain-blank-p))
-        (open-line 1))
+        (save-excursion
+          (insert-char ?\n)))
       (comment-indent)
       (fountain-insert-template fountain-note-template))))
 
