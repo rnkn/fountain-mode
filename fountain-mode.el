@@ -2762,11 +2762,63 @@ keywords suitable for Font Lock."
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
+    ("Navigate"
+     ["Next Scene Heading" fountain-forward-scene]
+     ["Previous Scene Heading" fountain-backward-scene]
+     "---"
+     ["Next Character" fountain-forward-character]
+     ["Previous Character" fountain-backward-character])
+    "---"
+    ("Outline"
+     ["Cycle Scene/Section Visibility" fountain-outline-cycle]
+     ["Cycle Global Visibility" fountain-outline-cycle-global]
+     "---"
+     ["Up Heading" fountain-outline-up]
+     ["Next Heading" fountain-outline-next]
+     ["Previous Heading" fountain-outline-previous]
+     ["Forward Heading" fountain-outline-forward]
+     ["Backward Heading" fountain-outline-backward]
+     "---"
+     ["Mark Section/Scene" fountain-outline-mark]
+     ["Shift Section/Scene Up" fountain-outline-shift-up]
+     ["Shift Section/Scene Down" fountain-outline-shift-down])
+    "---"
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     ;; ["Add Scene Numbers" fountain-add-scene-nums]
+    "---"
+    ["Display Elements Auto-Aligned"
+     fountain-toggle-align-elements
+     :style toggle
+     :selected fountain-align-elements]
+    ["Add Continued Dialog"
+     fountain-toggle-add-continued-dialog
+     :style toggle
+     :selected fountain-add-continued-dialog]
+    ["Switch Default Comment Syntax"
+     fountain-toggle-comment-syntax
+     :style toggle
+     :selected fountain-switch-comment-syntax]
+    "---"
+    ("Syntax Highlighting"
+     ["Minimum" (fountain-set-font-lock-decoration 1)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 1)]
+     ["Default" (fountain-set-font-lock-decoration 2)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 2)]
+     ["Maximum" (fountain-set-font-lock-decoration 3)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 3)])
+    ("Show/Hide"
+     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+      :style toggle
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
+      :style toggle
+      :selected fountain-hide-syntax-chars])
     "---"
     ("Export"
      ["Default" fountain-export-default]
@@ -2792,52 +2844,9 @@ keywords suitable for Font Lock."
       :style toggle
       :selected fountain-export-double-space-scene-headings]
      "---"
-     ["Customize Exporting" (customize-group 'fountain-export)])
+     ["Customize Export" (customize-group 'fountain-export)])
     "---"
-    ["Display Elements Auto-Aligned"
-     fountain-toggle-align-elements
-     :style toggle
-     :selected fountain-align-elements]
-    ["Add Continued Dialog"
-     fountain-toggle-add-continued-dialog
-     :style toggle
-     :selected fountain-add-continued-dialog]
-    ["Switch Default Comment Syntax"
-     fountain-toggle-comment-syntax
-     :style toggle
-     :selected fountain-switch-comment-syntax]
-    "---"
-    ("Syntax Highlighting"              ; FIXME make these customize commands
-     ["Minimum" (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 1)]
-     ["Default" (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 2)]
-     ["Maximum" (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)]
-     "---"
-     ["Save for Future Sessions" fountain-save-font-lock-decoration])
-    ("Show/Hide"                        ; FIXME make these customize commands
-     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
-      :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
-      :style toggle
-      :selected fountain-hide-syntax-chars]
-     "---"
-     ["Save for Future Sessions" fountain-save-hidden-elements])
-    "---"
-    ("Navigate"
-     ["Next Scene Heading" fountain-forward-scene]
-     ["Previous Scene Heading" fountain-backward-scene]
-     "---"
-     ["Section Heading Navigator" fountain-occur-sections]
-     ["Synopsis Navigator" fountain-occur-synopses]
-     ["Notes Navigator" fountain-occur-notes]
-     ["Scene Heading Navigator" fountain-occur-scene-headings])
-    "---"
+    ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
