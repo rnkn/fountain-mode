@@ -466,8 +466,18 @@ similar to:
   :group 'fountain)
 
 (defcustom fountain-outline-startup-level
+  0
+  "Outline level to show when visiting a file."
+  :type '(choice (const :tag "Show all" 0)
+                 (const :tag "Show top-level" 1)
+                 (const :tag "Show scene headings" 6)
+                 (integer :tag "Custom level"))
+  :group 'fountain)
+
+
+(defcustom fountain-outline-custom-level
   nil
-  "Section headings to include at startup and in outline cycling."
+  "Additional section headings to include in outline cycling."
   :type '(choice (const :tag "Only top-level" nil)
                  (const :tag "Include level 2" 2)
                  (const :tag "Include level 3" 3)
@@ -1677,22 +1687,22 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
 
-\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
-\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
-\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
-\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-startup-level'"
+\t\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
+\t\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
+\t\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
+\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-custom-level'"
   (interactive "p")
-  (let* ((startup-level
-          (if fountain-outline-startup-level
+  (let* ((custom-level
+          (if fountain-outline-custom-level
               (save-excursion
                 (goto-char (point-min))
                 (let (found)
                   (while (and (not found)
                               (outline-next-heading))
                     (if (= (funcall outline-level)
-                           fountain-outline-startup-level)
+                           fountain-outline-custom-level)
                         (setq found t)))
-                  (if found fountain-outline-startup-level)))))
+                  (if found fountain-outline-custom-level)))))
          (highest-level
           (save-excursion
             (goto-char (point-max))
@@ -1706,9 +1716,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
               level))))
     (cond ((eq arg 4)
            (cond
-            ((and startup-level
+            ((and custom-level
                   (= fountain-outline-cycle 1))
-             (fountain-outline-hide-level startup-level))
+             (fountain-outline-hide-level custom-level))
             ((< 0 fountain-outline-cycle 6)
              (fountain-outline-hide-level 6))
             ((= fountain-outline-cycle 6)
@@ -1721,9 +1731,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
            (show-all)
            (message "Showing all")
            (setq fountain-outline-cycle 0))
-          ((and startup-level
+          ((and custom-level
                 (eq arg 64))
-           (fountain-outline-hide-level startup-level))
+           (fountain-outline-hide-level custom-level))
           (t
            (save-excursion
              (outline-back-to-heading)
@@ -1775,10 +1785,10 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 Calls `fountain-outline-cycle' with argument 4 wot cycle buffer
 outline visibility through the following states:
 
-    1. top-level section headins
-    2. custom set with `fountain-outline-startup-level'
-    3. all sections and scene headings
-    4. everything"
+\t1. top-level section headins
+\t2. custom set with `fountain-outline-custom-level'
+\t3. all sections and scene headings
+\t4. everything"
   (interactive)
   (fountain-outline-cycle 4))
 
@@ -2720,6 +2730,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-SPC") 'fountain-outline-mark)
     (define-key map (kbd "TAB") 'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
+    (define-key map (kbd "S-TAB") 'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
@@ -2836,25 +2847,32 @@ keywords suitable for Font Lock."
   :group 'fountain
   (fountain-init-regexp)
   (fountain-init-comment-syntax)
-  (setq-local require-final-newline 'visit-save)
-  (setq-local font-lock-comment-face 'fountain-comment)
-  (setq-local outline-level 'fountain-outline-level)
-  (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible fountain-element))
+  (setq comment-use-syntax t)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
+  (add-hook 'font-lock-extend-region-functions
+            'fountain-font-lock-extend-region t t)
   (add-to-invisibility-spec '(outline . t))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
-  (add-hook 'font-lock-extend-region-functions
-            'fountain-font-lock-extend-region t t)
+  (fountain-read-metadata)
+  (setq-local require-final-newline mode-require-final-newline)
+  (setq-local font-lock-comment-face 'fountain-comment)
+  (setq-local outline-level 'fountain-outline-level)
+  (setq-local fountain-outline-startup-level
+              (let ((n (fountain-get-metadata-value "startup-level")))
+                (if (s-present? n)
+                    (string-to-number n)
+                  fountain-outline-startup-level)))
+  (setq-local font-lock-extra-managed-props
+              '(line-prefix wrap-prefix invisible fountain-element))
   ;; (add-hook 'post-self-insert-hook
   ;;           'fountain-align-scene-num t t)
   ;; (add-hook 'after-save-hook
   ;;           'fountain-read-metadata)
-  (fountain-read-metadata))
+  (fountain-outline-hide-level fountain-outline-startup-level))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
