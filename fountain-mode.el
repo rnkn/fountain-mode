@@ -2438,52 +2438,44 @@ message of \"S are now invisible/visible\"."
            (if fountain-export-include-title-page
                "included" "omitted")))
 
-(defun fountain-set-font-lock-decoration (level)
-  "Set `font-lock-maximum-decoration' for `fountain-mode' to LEVEL."
-  (interactive "NMaximum Decoration (1-3): ")
-  (let ((n font-lock-maximum-decoration))
-    (cond ((or (booleanp n)
-               (integerp n))
-           (setq font-lock-maximum-decoration
-                (list (cons 'fountain-mode level)
-                      (cons 't n))))
-          ((listp n)
-           (if (assoc 'fountain-mode n)
-               (setcdr (assoc
-                        'fountain-mode font-lock-maximum-decoration)
-                       level)
-             (add-to-list 'font-lock-maximum-decoration
-                          (cons 'fountain-mode level))))
-          ((error "Malformed variable `font-lock-maximum-decoration'"))))
-  (message "Syntax highlighting is now set at %s"
-           (cond ((= level 1) "minimum")
-                 ((= level 2) "default")
-                 ((= level 3) "maximum")))
-  (font-lock-refresh-defaults))
-
-(defun fountain-save-font-lock-decoration ()
-  "Save `font-lock-maximum-decoration' in `custom-file'."
-  (interactive)
-  (customize-save-variable 'font-lock-maximum-decoration
-                           font-lock-maximum-decoration))
-
-(defun fountain-save-hidden-elements ()
-  "Save hidden element options in `custom-file'."
-  (interactive)
-  (customize-save-variable 'fountain-hide-emphasis-delim
-                           fountain-hide-emphasis-delim)
-  (customize-save-variable 'fountain-hide-syntax-chars
-                           fountain-hide-syntax-chars))
+(defun fountain-set-font-lock-decoration (n)
+  "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
+  (interactive "NMaximum decoration (1-3): ")
+  (if (and (integerp n)
+           (<= 1 n 3))
+      (let ((level (cond ((= n 1) 1)
+                         ((= n 2) nil)
+                         ((= n 3) t)))
+            (dec font-lock-maximum-decoration))
+        (cond ((listp dec)
+               (setq dec (assq-delete-all 'fountain-mode dec))
+               (customize-set-variable 'font-lock-maximum-decoration
+                                       (cons (cons 'fountain-mode level)
+                                             dec)))
+              ((or (booleanp dec)
+                   (integerp dec))
+               (customize-set-variable 'font-lock-maximum-decoration
+                                       (list (cons 'fountain-mode level)
+                                             (cons 't dec))))
+              ((error "Malformed variable `font-lock-maximum-decoration'")))
+        (message "Syntax highlighting is now set at %s"
+                 (cond ((= n 1) "minimum")
+                       ((= n 2) "default")
+                       ((= n 3) "maximum")))
+        (font-lock-refresh-defaults))
+    (user-error "Decoration must be an integer 1-3")))
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
-  (let ((dec (if (listp font-lock-maximum-decoration)
-                 (or (cdr (assoc 'fountain-mode font-lock-maximum-decoration))
-                     (cdr (assoc 't font-lock-maximum-decoration)))
-               font-lock-maximum-decoration)))
-    (cond ((null dec) 2)
-          ((eq dec t) 3)
-          ((integerp dec) dec)
+  (let* ((dec font-lock-maximum-decoration)
+         (n (if (listp dec)
+                (if (assoc 'fountain-mode dec)
+                    (cdr (assoc 'fountain-mode dec))
+                  (cdr (assoc 't dec)))
+              dec)))
+    (cond ((null n) 2)
+          ((eq n t) 3)
+          ((integerp n) n)
           (t 2))))
 
 (defun fountain-toggle-export-bold-scene-headings ()
