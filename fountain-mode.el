@@ -1579,29 +1579,32 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
-  (eval-when-compile
-    (defvar font-lock-beg)
-    (defvar font-lock-end))
-  (let ((start
+  (defvar font-lock-beg nil)
+  (defvar font-lock-end nil)
+  (let ((beg
          (save-excursion
            (goto-char font-lock-beg)
-           (car (fountain-get-block-bounds))))
+           (re-search-backward
+            "^[\s\t]*$"
+            (- (point) fountain-block-limit) 1)
+           (point)))
         (end
          (save-excursion
            (goto-char font-lock-end)
-           (cdr (fountain-get-block-bounds))))
+           (re-search-forward
+            "^[\s\t]*$"
+            (+ (point) fountain-block-limit) 1)
+           (point)))
         changed)
-    (if (null (and start end))
-        (error "Region bounds overflow")
-      (goto-char font-lock-beg)
-      (unless (or (bobp)
-                  (eq start font-lock-beg))
-        (setq font-lock-beg start changed t))
-      (goto-char font-lock-end)
-      (unless (or (eobp)
-                  (eq end font-lock-end))
-        (setq font-lock-end end changed t))
-      changed)))
+    (goto-char font-lock-beg)
+    (unless (or (bobp)
+                (eq beg font-lock-beg))
+      (setq font-lock-beg beg changed t))
+    (goto-char font-lock-end)
+    (unless (or (eobp)
+                (eq end font-lock-end))
+      (setq font-lock-end end changed t))
+    changed))
 
 ;;; Outline ====================================================================
 
