@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <paul@tilk.co>
 ;; Keywords: wp
-;; Version: 1.4.2
+;; Version: 1.4.3
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -39,14 +39,14 @@
 ;;   dual dialog are forthcoming)
 ;; - Auto-align elements for a kind of WYSIWYG (display only, does not
 ;;   modify file contents)
-;; - Integration with `outline.el` to toggle visibility of sections and
-;;   scenes (beta, see below)
+;; - Integration with `outline` to toggle visibility of sections and
+;;   scenes
 ;; - Export to HTML and PDF (PDF export requires [Prince][])
 ;; - Include or omit a title page
 ;; - Navigate by scene heading
 ;; - Emphasis (bold, italic, underlined text)
 ;; - Toggle visibility of emphasis delimiters and syntax characters
-;; - Multiple levels of syntax highlighting for all elements (see below)
+;; - Multiple levels of syntax highlighting for all elements
 ;; - Add/remove automatic "(CONT'D)" to successively speaking characters
 ;; - Automatic "(MORE)" and "(CONT'D)" when breaking dialog across pages in
 ;;   PDF output
@@ -80,7 +80,7 @@
 ;;   like it, delete the annotation in a PDF application that supports
 ;;   editing annotations, or open the PDF and print to PDF, which will
 ;;   remove all annotations.
-;; - To insert UUIDs (useful for using notes as linked bookmarks) you'll
+;; - If you want to use UUIDs (useful for using notes as linked bookmarks) you'll
 ;;   need either `uuidgen` CLT (usually preinstalled on OS X and Linux) or
 ;;   [uuid.el][] Emacs package.
 
@@ -126,19 +126,13 @@
 ;; level, e.g.:
 
 ;;     # section level 1
-
 ;;     ## section level 2
-
 ;;     ### section level 3
-
 ;;     #### section level 4
-
 ;;     ##### section level 5
-
-;;     ###### not recognized as section level
-
+;;     ###### invalid section level
 ;;     INT. LEVEL 6 - DAY
-
+;;
 ;;     An obese man (40s) with a large mustard stain on his shirt exits the
 ;;     elevator. He holds a hotdog.
 
@@ -146,13 +140,14 @@
 ;; with `<backtab>` (shift-TAB) or `C-u TAB`. More navigation and structure
 ;; editing commands are:
 
-;; - `C-c C-f outline-forward-same-level`
-;; - `C-c C-n outline-next-visible-heading`
-;; - `C-c C-p outline-previous-visible-heading`
-;; - `C-c C-u outline-up-heading`
-;; - `C-c C-v outline-move-subtree-down`
-;; - `C-c C-^ outline-move-subtree-up`
-;; - `C-c C-SPC outline-mark-subtree`
+;; - `C-c C-f fountain-outline-forward`
+;; - `C-c C-b fountain-outline-backward`
+;; - `C-c C-n fountain-outline-next`
+;; - `C-c C-p fountain-outline-previous`
+;; - `C-c C-u fountain-outline-up`
+;; - `C-c C-v fountain-outline-shift-down`
+;; - `C-c C-^ fountain-outline-shift-up`
+;; - `C-c C-SPC fountain-outline-mark`
 
 ;; Bugs and Feature Requests
 ;; -------------------------
@@ -172,7 +167,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.4.2")
+  "1.4.3")
 
 ;;; Required ===================================================================
 
@@ -466,8 +461,18 @@ similar to:
   :group 'fountain)
 
 (defcustom fountain-outline-startup-level
+  0
+  "Outline level to show when visiting a file."
+  :type '(choice (const :tag "Show all" 0)
+                 (const :tag "Show top-level" 1)
+                 (const :tag "Show scene headings" 6)
+                 (integer :tag "Custom level"))
+  :group 'fountain)
+
+
+(defcustom fountain-outline-custom-level
   nil
-  "Section headings to include at startup and in outline cycling."
+  "Additional section headings to include in outline cycling."
   :type '(choice (const :tag "Only top-level" nil)
                  (const :tag "Include level 2" 2)
                  (const :tag "Include level 3" 3)
@@ -803,6 +808,7 @@ h2.scene-heading {
     font-weight: ${scene-bold};
     text-decoration: ${scene-underline};
     margin-top: ${scene-spacing};
+    margin-bottom: 1em;
     page-break-after: avoid;
 }
 
@@ -1271,11 +1277,16 @@ bold-italic delimiters together, e.g.
   (thing-at-point-looking-at fountain-note-regexp))
 
 (defun fountain-comment-p ()
-  "Match comment if point is at a comment, nil otherwise."
-  ;; problems with comment-only-p picking up blank lines as comments
-  ;;
-  ;; (comment-only-p (line-beginning-position) (line-end-position)))
-  (thing-at-point-looking-at fountain-comment-regexp))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (if (eq (char-after) ?\*) (forward-char -1))
+      (or (forward-comment 1)
+          (let ((x (point)))
+            (search-backward "/*" nil t)
+            (and (forward-comment 1)
+                 (<= x (point))))))))
+
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
 (defun fountain-tachyon-p ()
@@ -1297,7 +1308,8 @@ comments."
       (and (looking-at fountain-scene-heading-regexp)
            (save-match-data
              (forward-line -1)
-             (fountain-tachyon-p))))))
+             (or (bobp)
+                 (fountain-tachyon-p)))))))
 
 (defun fountain-character-p ()
   "Match character if point is at character, nil otherwise."
@@ -1568,29 +1580,32 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
-  (eval-when-compile
-    (defvar font-lock-beg)
-    (defvar font-lock-end))
-  (let ((start
+  (defvar font-lock-beg nil)
+  (defvar font-lock-end nil)
+  (let ((beg
          (save-excursion
            (goto-char font-lock-beg)
-           (car (fountain-get-block-bounds))))
+           (re-search-backward
+            "^[\s\t]*$"
+            (- (point) fountain-block-limit) 1)
+           (point)))
         (end
          (save-excursion
            (goto-char font-lock-end)
-           (cdr (fountain-get-block-bounds))))
+           (re-search-forward
+            "^[\s\t]*$"
+            (+ (point) fountain-block-limit) 1)
+           (point)))
         changed)
-    (if (null (and start end))
-        (error "Region bounds overflow")
-      (goto-char font-lock-beg)
-      (unless (or (bobp)
-                  (eq start font-lock-beg))
-        (setq font-lock-beg start changed t))
-      (goto-char font-lock-end)
-      (unless (or (eobp)
-                  (eq end font-lock-end))
-        (setq font-lock-end end changed t))
-      changed)))
+    (goto-char font-lock-beg)
+    (unless (or (bobp)
+                (eq beg font-lock-beg))
+      (setq font-lock-beg beg changed t))
+    (goto-char font-lock-end)
+    (unless (or (eobp)
+                (eq end font-lock-end))
+      (setq font-lock-end end changed t))
+    changed))
 
 ;;; Outline ====================================================================
 
@@ -1676,22 +1691,22 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
 
-\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
-\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
-\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
-\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-startup-level'"
+\t\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
+\t\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
+\t\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
+\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-custom-level'"
   (interactive "p")
-  (let* ((startup-level
-          (if fountain-outline-startup-level
+  (let* ((custom-level
+          (if fountain-outline-custom-level
               (save-excursion
                 (goto-char (point-min))
                 (let (found)
                   (while (and (not found)
                               (outline-next-heading))
                     (if (= (funcall outline-level)
-                           fountain-outline-startup-level)
+                           fountain-outline-custom-level)
                         (setq found t)))
-                  (if found fountain-outline-startup-level)))))
+                  (if found fountain-outline-custom-level)))))
          (highest-level
           (save-excursion
             (goto-char (point-max))
@@ -1705,9 +1720,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
               level))))
     (cond ((eq arg 4)
            (cond
-            ((and startup-level
+            ((and custom-level
                   (= fountain-outline-cycle 1))
-             (fountain-outline-hide-level startup-level))
+             (fountain-outline-hide-level custom-level))
             ((< 0 fountain-outline-cycle 6)
              (fountain-outline-hide-level 6))
             ((= fountain-outline-cycle 6)
@@ -1720,9 +1735,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
            (show-all)
            (message "Showing all")
            (setq fountain-outline-cycle 0))
-          ((and startup-level
+          ((and custom-level
                 (eq arg 64))
-           (fountain-outline-hide-level startup-level))
+           (fountain-outline-hide-level custom-level))
           (t
            (save-excursion
              (outline-back-to-heading)
@@ -1774,10 +1789,10 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 Calls `fountain-outline-cycle' with argument 4 wot cycle buffer
 outline visibility through the following states:
 
-    1. top-level section headins
-    2. custom set with `fountain-outline-startup-level'
-    3. all sections and scene headings
-    4. everything"
+\t1. top-level section headins
+\t2. custom set with `fountain-outline-custom-level'
+\t3. all sections and scene headings
+\t4. everything"
   (interactive)
   (fountain-outline-cycle 4))
 
@@ -2198,24 +2213,17 @@ If N is 0, move to beginning of scene."
   "Insert synopsis below scene heading of current scene."
   (interactive)
   (widen)
-  (push-mark)
-  (forward-line 0)
-  (while (null (or (bobp)
-                   (fountain-scene-heading-p)
-                   (fountain-section-p)))
-    (forward-line -1))
-  (if (bobp)
-      (progn
-        (goto-char (mark))
-        (error "Before first scene or section heading"))
-    (progn
-      (forward-line 1)
-      (unless (and (fountain-blank-p)
-                   (save-excursion
-                     (forward-line 1)
-                     (fountain-blank-p)))
-        (open-line 1))
-      (insert "= "))))
+  (when (outline-back-to-heading)
+    (forward-line 1)
+    (unless (bolp) (insert-char ?\n))
+    (unless (and (fountain-blank-p)
+                 (save-excursion
+                   (forward-line 1)
+                   (fountain-blank-p)))
+      (save-excursion
+        (insert-char ?\n)))
+    (insert "= ")
+    (if (outline-invisible-p) (fountain-outline-cycle))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note based on `fountain-note-template' underneath current element.
@@ -2226,11 +2234,12 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (if arg
         (comment-dwim nil)
       (unless (fountain-blank-p)
-        (re-search-forward fountain-blank-regexp))
+        (re-search-forward "^[\s\t]*$" nil 1))
       (unless (save-excursion
                 (forward-line 1)
                 (fountain-blank-p))
-        (open-line 1))
+        (save-excursion
+          (insert-char ?\n)))
       (comment-indent)
       (fountain-insert-template fountain-note-template))))
 
@@ -2360,8 +2369,8 @@ then make the changes desired."
 (defun fountain-toggle-comment-syntax ()
   "Toggle `fountain-switch-comment-syntax'."
   (interactive)
-  (setq fountain-switch-comment-syntax
-        (not fountain-switch-comment-syntax))
+  (customize-set-variable 'fountain-switch-comment-syntax
+                          (not fountain-switch-comment-syntax))
   (fountain-init-comment-syntax)
   (message "Default comment syntax is now %s"
            (if fountain-switch-comment-syntax
@@ -2375,8 +2384,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 message of \"S are now invisible/visible\"."
   (let* ((option (intern (concat "fountain-hide-" element)))
          (symbol (intern (concat "fountain-" element))))
-    (set option
-         (not (symbol-value option)))
+    (customize-set-variable option
+                            (not (symbol-value option)))
     (if (symbol-value option)
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
@@ -2399,8 +2408,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
   (interactive)
-  (setq fountain-align-elements
-        (not fountain-align-elements))
+  (customize-set-variable 'fountain-align-elements
+                          (not fountain-align-elements))
   (font-lock-refresh-defaults)
   (message "Elements are now displayed %s"
            (if fountain-align-elements
@@ -2409,8 +2418,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-add-continued-dialog ()
   "Toggle `fountain-add-continued-dialog'"
   (interactive)
-  (setq fountain-add-continued-dialog
-        (not fountain-add-continued-dialog))
+  (customize-set-variable 'fountain-add-continued-dialog
+                          (not fountain-add-continued-dialog))
   (message "Continued dialog is now %s"
            (if fountain-add-continued-dialog
                "added" "removed")))
@@ -2418,63 +2427,57 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-include-title-page ()
   "Toggle `fountain-export-include-title-page'."
   (interactive)
-  (setq fountain-export-include-title-page
-        (not fountain-export-include-title-page))
+  (customize-set-variable 'fountain-export-include-title-page
+                          (not fountain-export-include-title-page))
   (message "Title page is now %s on export"
            (if fountain-export-include-title-page
                "included" "omitted")))
 
-(defun fountain-set-font-lock-decoration (level)
-  "Set `font-lock-maximum-decoration' for `fountain-mode' to LEVEL."
-  (interactive "NMaximum Decoration (1-3): ")
-  (let ((n font-lock-maximum-decoration))
-    (cond ((or (booleanp n)
-               (integerp n))
-           (setq font-lock-maximum-decoration
-                (list (cons 'fountain-mode level)
-                      (cons 't n))))
-          ((listp n)
-           (if (assoc 'fountain-mode n)
-               (setcdr (assoc
-                        'fountain-mode font-lock-maximum-decoration)
-                       level)
-             (add-to-list 'font-lock-maximum-decoration
-                          (cons 'fountain-mode level))))
-          ((error "Malformed variable `font-lock-maximum-decoration'"))))
-  (message "Syntax highlighting is now set at %s"
-           (cond ((= level 1) "minimum")
-                 ((= level 2) "default")
-                 ((= level 3) "maximum")))
-  (font-lock-refresh-defaults))
-
-(defun fountain-save-font-lock-decoration ()
-  "Save `font-lock-maximum-decoration' in `custom-file'."
-  (interactive)
-  (customize-save-variable 'font-lock-maximum-decoration
-                           font-lock-maximum-decoration))
-
-(defun fountain-save-hidden-elements ()
-  "Save hidden element options in `custom-file'."
-  (interactive)
-  (customize-save-variable 'fountain-hide-emphasis-delim
-                           fountain-hide-emphasis-delim)
-  (customize-save-variable 'fountain-hide-syntax-chars
-                           fountain-hide-syntax-chars))
+(defun fountain-set-font-lock-decoration (n)
+  "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
+  (interactive "NMaximum decoration (1-3): ")
+  (if (and (integerp n)
+           (<= 1 n 3))
+      (let ((level (cond ((= n 1) 1)
+                         ((= n 2) nil)
+                         ((= n 3) t)))
+            (dec font-lock-maximum-decoration))
+        (cond ((listp dec)
+               (setq dec (assq-delete-all 'fountain-mode dec))
+               (customize-set-variable 'font-lock-maximum-decoration
+                                       (cons (cons 'fountain-mode level)
+                                             dec)))
+              ((or (booleanp dec)
+                   (integerp dec))
+               (customize-set-variable 'font-lock-maximum-decoration
+                                       (list (cons 'fountain-mode level)
+                                             (cons 't dec))))
+              ((error "Malformed variable `font-lock-maximum-decoration'")))
+        (message "Syntax highlighting is now set at %s"
+                 (cond ((= n 1) "minimum")
+                       ((= n 2) "default")
+                       ((= n 3) "maximum")))
+        (font-lock-refresh-defaults))
+    (user-error "Decoration must be an integer 1-3")))
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
-  (cond ((null font-lock-maximum-decoration) 2)
-        ((eq font-lock-maximum-decoration t) 3)
-        ((integerp font-lock-maximum-decoration)
-         font-lock-maximum-decoration)
-        ((cdr (assoc 'fountain-mode font-lock-maximum-decoration)))
-        ((cdr (assoc 't font-lock-maximum-decoration)) 3)))
+  (let* ((dec font-lock-maximum-decoration)
+         (n (if (listp dec)
+                (if (assoc 'fountain-mode dec)
+                    (cdr (assoc 'fountain-mode dec))
+                  (cdr (assoc 't dec)))
+              dec)))
+    (cond ((null n) 2)
+          ((eq n t) 3)
+          ((integerp n) n)
+          (t 2))))
 
 (defun fountain-toggle-export-bold-scene-headings ()
   "Toggle `fountain-export-bold-scene-headings'"
   (interactive)
-  (setq fountain-export-bold-scene-headings
-        (null fountain-export-bold-scene-headings))
+  (customize-set-variable 'fountain-export-bold-scene-headings
+                          (not fountain-export-bold-scene-headings))
   (message "Scene headings will now export %s"
            (if fountain-export-bold-scene-headings
                "bold" "normal")))
@@ -2482,8 +2485,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-underline-scene-headings ()
   "Toggle `fountain-export-underline-scene-headings'"
   (interactive)
-  (setq fountain-export-underline-scene-headings
-        (null fountain-export-underline-scene-headings))
+  (customize-set-variable 'fountain-export-underline-scene-headings
+                          (not fountain-export-underline-scene-headings))
   (message "Scene headings will now export %s"
            (if fountain-export-underline-scene-headings
                "underlined" "normal")))
@@ -2491,11 +2494,28 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-double-space-scene-headings ()
   "Toggle `fountain-export-double-space-scene-headings'"
   (interactive)
-  (setq fountain-export-double-space-scene-headings
-        (null fountain-export-double-space-scene-headings))
+  (customize-set-variable fountain-export-double-space-scene-headings
+                          (not fountain-export-double-space-scene-headings))
   (message "Scene headings will now export %s"
            (if fountain-export-double-space-scene-headings
                "double-spaced" "single-spaced")))
+
+(defun fountain-save-options ()
+  (interactive)
+  (let (unsaved)
+    (dolist (opt '(fountain-switch-comment-syntax
+                   fountain-hide-emphasis-delim
+                   fountain-hide-syntax-chars
+                   fountain-align-elements
+                   fountain-add-continued-dialog
+                   fountain-export-include-title-page
+                   fountain-export-bold-scene-headings
+                   fountain-export-underline-scene-headings
+                   fountain-export-double-space-scene-headings
+                   font-lock-maximum-decoration))
+      (if (customize-mark-to-save opt)
+          (setq unsaved t)))
+    (if unsaved (custom-save-all))))
 
 ;;; Font Lock ==================================================================
 
@@ -2717,6 +2737,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-SPC") 'fountain-outline-mark)
     (define-key map (kbd "TAB") 'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
+    (define-key map (kbd "S-TAB") 'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
@@ -2736,11 +2757,63 @@ keywords suitable for Font Lock."
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
+    ("Navigate"
+     ["Next Scene Heading" fountain-forward-scene]
+     ["Previous Scene Heading" fountain-backward-scene]
+     "---"
+     ["Next Character" fountain-forward-character]
+     ["Previous Character" fountain-backward-character])
+    "---"
+    ("Outline"
+     ["Cycle Scene/Section Visibility" fountain-outline-cycle]
+     ["Cycle Global Visibility" fountain-outline-cycle-global]
+     "---"
+     ["Up Heading" fountain-outline-up]
+     ["Next Heading" fountain-outline-next]
+     ["Previous Heading" fountain-outline-previous]
+     ["Forward Heading" fountain-outline-forward]
+     ["Backward Heading" fountain-outline-backward]
+     "---"
+     ["Mark Section/Scene" fountain-outline-mark]
+     ["Shift Section/Scene Up" fountain-outline-shift-up]
+     ["Shift Section/Scene Down" fountain-outline-shift-down])
+    "---"
     ["Insert Metadata" fountain-insert-metadata]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     ;; ["Add Scene Numbers" fountain-add-scene-nums]
+    "---"
+    ["Display Elements Auto-Aligned"
+     fountain-toggle-align-elements
+     :style toggle
+     :selected fountain-align-elements]
+    ["Add Continued Dialog"
+     fountain-toggle-add-continued-dialog
+     :style toggle
+     :selected fountain-add-continued-dialog]
+    ["Switch Default Comment Syntax"
+     fountain-toggle-comment-syntax
+     :style toggle
+     :selected fountain-switch-comment-syntax]
+    "---"
+    ("Syntax Highlighting"
+     ["Minimum" (fountain-set-font-lock-decoration 1)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 1)]
+     ["Default" (fountain-set-font-lock-decoration 2)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 2)]
+     ["Maximum" (fountain-set-font-lock-decoration 3)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 3)])
+    ("Show/Hide"
+     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+      :style toggle
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
+      :style toggle
+      :selected fountain-hide-syntax-chars])
     "---"
     ("Export"
      ["Default" fountain-export-default]
@@ -2766,52 +2839,9 @@ keywords suitable for Font Lock."
       :style toggle
       :selected fountain-export-double-space-scene-headings]
      "---"
-     ["Customize Exporting" (customize-group 'fountain-export)])
+     ["Customize Export" (customize-group 'fountain-export)])
     "---"
-    ["Display Elements Auto-Aligned"
-     fountain-toggle-align-elements
-     :style toggle
-     :selected fountain-align-elements]
-    ["Add Continued Dialog"
-     fountain-toggle-add-continued-dialog
-     :style toggle
-     :selected fountain-add-continued-dialog]
-    ["Switch Default Comment Syntax"
-     fountain-toggle-comment-syntax
-     :style toggle
-     :selected fountain-switch-comment-syntax]
-    "---"
-    ("Syntax Highlighting"              ; FIXME make these customize commands
-     ["Minimum" (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 1)]
-     ["Default" (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 2)]
-     ["Maximum" (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)]
-     "---"
-     ["Save for Future Sessions" fountain-save-font-lock-decoration])
-    ("Show/Hide"                        ; FIXME make these customize commands
-     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
-      :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
-      :style toggle
-      :selected fountain-hide-syntax-chars]
-     "---"
-     ["Save for Future Sessions" fountain-save-hidden-elements])
-    "---"
-    ("Navigate"
-     ["Next Scene Heading" fountain-forward-scene]
-     ["Previous Scene Heading" fountain-backward-scene]
-     "---"
-     ["Section Heading Navigator" fountain-occur-sections]
-     ["Synopsis Navigator" fountain-occur-synopses]
-     ["Notes Navigator" fountain-occur-notes]
-     ["Scene Heading Navigator" fountain-occur-scene-headings])
-    "---"
+    ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
@@ -2833,25 +2863,32 @@ keywords suitable for Font Lock."
   :group 'fountain
   (fountain-init-regexp)
   (fountain-init-comment-syntax)
-  (setq-local require-final-newline 'visit-save)
-  (setq-local font-lock-comment-face 'fountain-comment)
-  (setq-local outline-level 'fountain-outline-level)
-  (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible fountain-element))
+  (setq comment-use-syntax t)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
+  (add-hook 'font-lock-extend-region-functions
+            'fountain-font-lock-extend-region t t)
   (add-to-invisibility-spec '(outline . t))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
-  (add-hook 'font-lock-extend-region-functions
-            'fountain-font-lock-extend-region t t)
+  (fountain-read-metadata)
+  (setq-local require-final-newline mode-require-final-newline)
+  (setq-local font-lock-comment-face 'fountain-comment)
+  (setq-local outline-level 'fountain-outline-level)
+  (setq-local fountain-outline-startup-level
+              (let ((n (fountain-get-metadata-value "startup-level")))
+                (if (s-present? n)
+                    (string-to-number n)
+                  fountain-outline-startup-level)))
+  (setq-local font-lock-extra-managed-props
+              '(line-prefix wrap-prefix invisible fountain-element))
   ;; (add-hook 'post-self-insert-hook
   ;;           'fountain-align-scene-num t t)
   ;; (add-hook 'after-save-hook
   ;;           'fountain-read-metadata)
-  (fountain-read-metadata))
+  (fountain-outline-hide-level fountain-outline-startup-level))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
