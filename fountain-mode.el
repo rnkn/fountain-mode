@@ -2212,24 +2212,17 @@ If N is 0, move to beginning of scene."
   "Insert synopsis below scene heading of current scene."
   (interactive)
   (widen)
-  (push-mark)
-  (forward-line 0)
-  (while (null (or (bobp)
-                   (fountain-scene-heading-p)
-                   (fountain-section-p)))
-    (forward-line -1))
-  (if (bobp)
-      (progn
-        (goto-char (mark))
-        (error "Before first scene or section heading"))
-    (progn
-      (forward-line 1)
-      (unless (and (fountain-blank-p)
-                   (save-excursion
-                     (forward-line 1)
-                     (fountain-blank-p)))
-        (open-line 1))
-      (insert "= "))))
+  (when (outline-back-to-heading)
+    (forward-line 1)
+    (unless (bolp) (insert-char ?\n))
+    (unless (and (fountain-blank-p)
+                 (save-excursion
+                   (forward-line 1)
+                   (fountain-blank-p)))
+      (save-excursion
+        (insert-char ?\n)))
+    (insert "= ")
+    (if (outline-invisible-p) (fountain-outline-cycle))))
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note based on `fountain-note-template' underneath current element.
