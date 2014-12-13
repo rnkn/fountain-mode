@@ -2374,8 +2374,8 @@ then make the changes desired."
 (defun fountain-toggle-comment-syntax ()
   "Toggle `fountain-switch-comment-syntax'."
   (interactive)
-  (setq fountain-switch-comment-syntax
-        (not fountain-switch-comment-syntax))
+  (customize-set-variable 'fountain-switch-comment-syntax
+                          (not fountain-switch-comment-syntax))
   (fountain-init-comment-syntax)
   (message "Default comment syntax is now %s"
            (if fountain-switch-comment-syntax
@@ -2389,8 +2389,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 message of \"S are now invisible/visible\"."
   (let* ((option (intern (concat "fountain-hide-" element)))
          (symbol (intern (concat "fountain-" element))))
-    (set option
-         (not (symbol-value option)))
+    (customize-set-variable option
+                            (not (symbol-value option)))
     (if (symbol-value option)
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
@@ -2413,8 +2413,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-align-elements ()
   "Toggle `fountain-align-elements'."
   (interactive)
-  (setq fountain-align-elements
-        (not fountain-align-elements))
+  (customize-set-variable 'fountain-align-elements
+                          (not fountain-align-elements))
   (font-lock-refresh-defaults)
   (message "Elements are now displayed %s"
            (if fountain-align-elements
@@ -2423,8 +2423,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-add-continued-dialog ()
   "Toggle `fountain-add-continued-dialog'"
   (interactive)
-  (setq fountain-add-continued-dialog
-        (not fountain-add-continued-dialog))
+  (customize-set-variable 'fountain-add-continued-dialog
+                          (not fountain-add-continued-dialog))
   (message "Continued dialog is now %s"
            (if fountain-add-continued-dialog
                "added" "removed")))
@@ -2432,8 +2432,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-include-title-page ()
   "Toggle `fountain-export-include-title-page'."
   (interactive)
-  (setq fountain-export-include-title-page
-        (not fountain-export-include-title-page))
+  (customize-set-variable 'fountain-export-include-title-page
+                          (not fountain-export-include-title-page))
   (message "Title page is now %s on export"
            (if fountain-export-include-title-page
                "included" "omitted")))
@@ -2481,8 +2481,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-bold-scene-headings ()
   "Toggle `fountain-export-bold-scene-headings'"
   (interactive)
-  (setq fountain-export-bold-scene-headings
-        (null fountain-export-bold-scene-headings))
+  (customize-set-variable 'fountain-export-bold-scene-headings
+                          (not fountain-export-bold-scene-headings))
   (message "Scene headings will now export %s"
            (if fountain-export-bold-scene-headings
                "bold" "normal")))
@@ -2490,8 +2490,8 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-underline-scene-headings ()
   "Toggle `fountain-export-underline-scene-headings'"
   (interactive)
-  (setq fountain-export-underline-scene-headings
-        (null fountain-export-underline-scene-headings))
+  (customize-set-variable 'fountain-export-underline-scene-headings
+                          (not fountain-export-underline-scene-headings))
   (message "Scene headings will now export %s"
            (if fountain-export-underline-scene-headings
                "underlined" "normal")))
@@ -2499,11 +2499,28 @@ message of \"S are now invisible/visible\"."
 (defun fountain-toggle-export-double-space-scene-headings ()
   "Toggle `fountain-export-double-space-scene-headings'"
   (interactive)
-  (setq fountain-export-double-space-scene-headings
-        (null fountain-export-double-space-scene-headings))
+  (customize-set-variable fountain-export-double-space-scene-headings
+                          (not fountain-export-double-space-scene-headings))
   (message "Scene headings will now export %s"
            (if fountain-export-double-space-scene-headings
                "double-spaced" "single-spaced")))
+
+(defun fountain-save-options ()
+  (interactive)
+  (let (unsaved)
+    (dolist (opt '(fountain-switch-comment-syntax
+                   fountain-hide-emphasis-delim
+                   fountain-hide-syntax-chars
+                   fountain-align-elements
+                   fountain-add-continued-dialog
+                   fountain-export-include-title-page
+                   fountain-export-bold-scene-headings
+                   fountain-export-underline-scene-headings
+                   fountain-export-double-space-scene-headings
+                   font-lock-maximum-decoration))
+      (if (customize-mark-to-save opt)
+          (setq unsaved t)))
+    (if unsaved (custom-save-all))))
 
 ;;; Font Lock ==================================================================
 
