@@ -1282,11 +1282,16 @@ bold-italic delimiters together, e.g.
   (thing-at-point-looking-at fountain-note-regexp))
 
 (defun fountain-comment-p ()
-  "Match comment if point is at a comment, nil otherwise."
-  ;; problems with comment-only-p picking up blank lines as comments
-  ;;
-  ;; (comment-only-p (line-beginning-position) (line-end-position)))
-  (thing-at-point-looking-at fountain-comment-regexp))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (if (eq (char-after) ?\*) (forward-char -1))
+      (or (forward-comment 1)
+          (let ((x (point)))
+            (search-backward "/*" nil t)
+            (and (forward-comment 1)
+                 (<= x (point))))))))
+
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
 (defun fountain-tachyon-p ()
@@ -1308,7 +1313,8 @@ comments."
       (and (looking-at fountain-scene-heading-regexp)
            (save-match-data
              (forward-line -1)
-             (fountain-tachyon-p))))))
+             (or (bobp)
+                 (fountain-tachyon-p)))))))
 
 (defun fountain-character-p ()
   "Match character if point is at character, nil otherwise."
