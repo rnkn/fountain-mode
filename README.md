@@ -23,13 +23,13 @@ Features
 - Auto-align elements for a kind of WYSIWYG (display only, does not
   modify file contents)
 - Integration with `outline` to toggle visibility of sections and
-  scenes (not yet available in stable release, see below)
+  scenes
 - Export to HTML and PDF (PDF export requires [Prince][])
 - Include or omit a title page
 - Navigate by scene heading
 - Emphasis (bold, italic, underlined text)
 - Toggle visibility of emphasis delimiters and syntax characters
-- Multiple levels of syntax highlighting for all elements (see below)
+- Multiple levels of syntax highlighting for all elements
 - Add/remove automatic "(CONT'D)" to successively speaking characters
 - Automatic "(MORE)" and "(CONT'D)" when breaking dialog across pages in
   PDF output
