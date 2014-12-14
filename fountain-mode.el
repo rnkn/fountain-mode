@@ -1273,8 +1273,16 @@ bold-italic delimiters together, e.g.
       (looking-at fountain-synopsis-regexp))))
 
 (defun fountain-note-p ()
-  "Match note if point is at a note, nil otherwise."
-  (thing-at-point-looking-at fountain-note-regexp))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (or (looking-at (concat fountain-note-regexp "[\s\t]*$"))
+          (let ((a (point)))
+            (if (re-search-backward "^[\s\t]*\n" nil 'move)
+                (goto-char (match-end 0)))
+            (and (looking-at (concat fountain-note-regexp "[\s\t]*$"))
+                 (< a (match-end 0))))))))
 
 (defun fountain-comment-p ()
   (save-excursion
