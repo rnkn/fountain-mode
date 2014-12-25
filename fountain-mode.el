@@ -172,9 +172,10 @@
 ;;; Required ===================================================================
 
 (require 's)
-(require 'thingatpt)
 (require 'easymenu)
 (require 'outline)
+(require 'fountain-data)
+(require 'fountain-export)
 
 ;; Groups ======================================================================
 
@@ -1175,10 +1176,6 @@ bold-italic delimiters together, e.g.
   "Default face for transitions."
   :group 'fountain-faces)
 
-;;; Thing Definitions ==========================================================
-
-(put 'scene 'forward-op 'fountain-forward-scene)
-
 ;;; Internal Functions =========================================================
 
 (defun fountain-init-scene-heading-regexp ()
@@ -1333,8 +1330,8 @@ bold-italic delimiters together, e.g.
   "Return non-nil if point is at a non-interfering element.
 These include blank lines, section headings, synopses, notes, and
 comments."
-  (or (fountain-comment-p)
-      ;; (fountain-blank-p)
+  (or (fountain-blank-p)
+      (fountain-comment-p)
       (fountain-section-heading-p)
       (fountain-synopsis-p)
       (fountain-note-p)))
