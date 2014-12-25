@@ -1,4 +1,4 @@
-;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t -*-
+;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup
 
 ;; Copyright (C) 2014 Paul Rankin
 
@@ -1270,7 +1270,7 @@ bold-italic delimiters together, e.g.
       ;; don't modify match-data
       (looking-at-p fountain-blank-regexp))))
 
-(defun fountain-metadata-p ()           ; OPTIMIZE
+(defun fountain-metadata-p ()
   "Match metadata if point is at metadata, nil otherwise."
   (save-excursion
     (save-restriction
@@ -1303,13 +1303,13 @@ bold-italic delimiters together, e.g.
   (save-excursion
     (save-restriction
       (widen)
-      (if (and (= (char-after) ?\[)
-               (= (char-before) ?\[))
+      (if (and (= (following-char) ?\[)
+               (= (preceding-char) ?\[))
           (forward-char -1))
       (or (looking-at fountain-note-regexp)
           (let ((a (point))
                 (beg (car (fountain-get-block-bounds))))
-            (re-search-backward "\\[\\[" beg t)
+            (search-backward "[[" beg t)
             (goto-char (match-beginning 0))
             (and (looking-at fountain-note-regexp)
                  (< a (match-end 0))))))))
@@ -1734,19 +1734,19 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 \t\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
 \t\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
 \t\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
-\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-custom-level'"
+\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-startup-level'"
   (interactive "p")
-  (let* ((custom-level
-          (if fountain-outline-custom-level
+  (let* ((startup-level
+          (if fountain-outline-startup-level
               (save-excursion
                 (goto-char (point-min))
                 (let (found)
                   (while (and (not found)
                               (outline-next-heading))
                     (if (= (funcall outline-level)
-                           fountain-outline-custom-level)
+                           fountain-outline-startup-level)
                         (setq found t)))
-                  (if found fountain-outline-custom-level)))))
+                  (if found fountain-outline-startup-level)))))
          (highest-level
           (save-excursion
             (goto-char (point-max))
@@ -1762,7 +1762,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
            (cond
             ((and startup-level
                   (= fountain-outline-cycle 1))
-             (fountain-outline-hide-level custom-level))
+             (fountain-outline-hide-level startup-level))
             ((< 0 fountain-outline-cycle 6)
              (fountain-outline-hide-level 6))
             ((= fountain-outline-cycle 6)
