@@ -2536,7 +2536,7 @@ message of \"S are now invisible/visible\"."
      ((:level 2 :subexp 0
               :override keep)
       (:level 2 :subexp 2 :face fountain-comment
-              :invisible fountain-syntax-chars
+              ;; :invisible fountain-syntax-chars
               :override t
               :laxmatch t)))
     ("character"
