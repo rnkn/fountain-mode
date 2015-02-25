@@ -55,8 +55,7 @@ See the [Wiki][] on GitHub for ways to extend Fountain Mode.
 Requirements
 ------------
 
-- Emacs 24.1 (not tested on earlier versions, only tested on Mac OS X
-  and Linux, not tested on Windows).
+- Emacs 24.4
 - [s.el][], the long lost Emacs string manipulation library.
 - Exporting to PDF requires [Prince][], which is free for personal use.
   Prince adds a removable PDF annotation on the first page; if you don't
