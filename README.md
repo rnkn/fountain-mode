@@ -139,6 +139,13 @@ to the mailing list: <emacs.fountain@librelist.com>.
 
 [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 
+Roadmap
+-------
+
+See [Milestones][] on GitHub.
+
+[milestones]: https://github.com/rnkn/fountain-mode/milestones "Fountain Mode milestones"
+
 History
 -------
 
