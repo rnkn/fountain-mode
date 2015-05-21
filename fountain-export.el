@@ -1,8 +1,8 @@
 ;;; fountain-export.el --- Export engine for Fountain Mode
 
-;; Copyright (C) 2014  Paul Rankin
+;; Copyright (C) 2014 Paul Rankin
 
-;; Author: Paul Rankin <paul@tilk.co>
+;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, outlines
 
 ;; This program is free software; you can redistribute it and/or modify
