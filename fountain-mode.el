@@ -1029,10 +1029,11 @@ Requires `fountain-metadata-p' for bobp.")
           "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
-    Group 1: trim whitespace
-    Group 2: trim @ and ^ (for export)
-    Group 3: character name only
-    Group 4: trailing ^ for dual dialog
+    Group 1: match trimmed whitespace
+    Group 2: match leading @
+    Group 3: (export group) match trimmed @ and ^
+    Group 4: match character name only
+    Group 5: match trailing ^ for dual dialog
 
 Requires `fountain-character-p'.")
 
