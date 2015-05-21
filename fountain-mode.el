@@ -1118,12 +1118,12 @@ bold-italic delimiters together, e.g.
   :group 'fountain-faces)
 
 (defface fountain-metadata-key
-  '((t (:inherit font-lock-constant-face)))
+  '((t (:inherit font-lock-type-face)))
   "Default face for metadata keys."
   :group 'fountain-faces)
 
 (defface fountain-metadata-value
-  '((t (:inherit font-lock-comment-face)))
+  '((t (:inherit font-lock-constant-face)))
   "Default face for metadata values."
   :group 'fountain-faces)
 
@@ -1133,12 +1133,12 @@ bold-italic delimiters together, e.g.
   :group 'fountain-faces)
 
 (defface fountain-scene-heading
-  '((t (:inherit font-lock-function-name-face)))
+  '((t (:inherit font-lock-keyword-face)))
   "Default face for scene headings."
   :group 'fountain-faces)
 
 (defface fountain-paren
-  '((t (:inherit font-lock-variable-name-face)))
+  '((t (:inherit font-lock-builtin-face)))
   "Default face for parentheticals."
   :group 'fountain-faces)
 
@@ -1152,17 +1152,17 @@ bold-italic delimiters together, e.g.
   "Default face for notes.")
 
 (defface fountain-section-heading
-  '((t (:inherit font-lock-builtin-face)))
+  '((t (:inherit font-lock-function-name-face)))
   "Default face for section headings."
   :group 'fountain-faces)
 
 (defface fountain-synopsis
-  '((t (:inherit font-lock-type-face)))
+  '((t (:inherit font-lock-preprocessor-face)))
   "Default face for synopses."
   :group 'fountain-faces)
 
 (defface fountain-character
-  '((t (:inherit font-lock-keyword-face)))
+  '((t (:inherit font-lock-variable-name-face)))
   "Default face for characters."
   :group 'fountain-faces)
 
@@ -1172,7 +1172,7 @@ bold-italic delimiters together, e.g.
   :group 'fountain-faces)
 
 (defface fountain-trans
-  '((t (:inherit font-lock-variable-name-face)))
+  '((t (:inherit font-lock-builtin-face)))
   "Default face for transitions."
   :group 'fountain-faces)
 
