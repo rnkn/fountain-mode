@@ -51,10 +51,10 @@
                   :end end)
             (list key value))))
    ((fountain-section-heading-p)
-    (let ((data (list 'section-heading
-                      (list :beg (match-beginning 0)
-                            :end (match-end 0))
-                      (match-string-no-properties 3)))
+    (let ((top (list 'section-heading
+                     (list :beg (match-beginning 0)
+                           :end (match-end 0))
+                     (match-string-no-properties 3)))
           (level (funcall outline-level))
           (beg (point))
           (end (save-excursion
@@ -62,36 +62,38 @@
                  (unless (eobp)
                    (forward-char 1))
                  (point))))
-      (goto-char (plist-get (nth 1 data)
+      (goto-char (plist-get (nth 1 top)
                             :end))
       (list 'section
             (list :begin beg
                   :end end
                   :level level)
-            (fountain-data-parse (point) end (list data)))))
+            (list top)
+            (fountain-parse-region (point) end))))
    ((fountain-scene-heading-p)
-    (let ((data (list 'scene-heading
-                      (list :beg (match-beginning 0)
-                            :end (match-end 0))
-                      (match-string-no-properties 3)))
+    (let ((top (list 'scene-heading
+                     (list :beg (match-beginning 0)
+                           :end (match-end 0))
+                     (match-string-no-properties 3)))
           (beg (point))
           (end (save-excursion
                  (outline-end-of-subtree)
                  (unless (eobp)
                    (forward-char 1))
                  (point))))
-      (goto-char (plist-get (nth 1 data)
+      (goto-char (plist-get (nth 1 top)
                             :end))
       (list 'scene
             (list :begin beg
                   :end end
                   :num (ignore))
-            (fountain-data-parse (point) end (list data)))))
+            (list top)
+            (fountain-parse-region (point) end))))
    ((fountain-character-p)
-    (let ((data (list 'character
-                      (list :beg (match-beginning 0)
-                            :end (match-end 0))
-                      (match-string-no-properties 3)))
+    (let ((top (list 'character
+                     (list :beg (match-beginning 0)
+                           :end (match-end 0))
+                     (match-string-no-properties 3)))
           (name (match-string-no-properties 4))
           (dual (cond ((stringp (match-string 5))
                        'right)
@@ -105,14 +107,15 @@
                  (if (re-search-forward "^[\s\t]*$" nil 'move)
                      (match-beginning 0)
                    (point)))))
-      (goto-char (plist-get (nth 1 data)
+      (goto-char (plist-get (nth 1 top)
                             :end))
       (list 'dialog
             (list :begin beg
                   :end end
                   :character name
                   :dual dual)
-            (fountain-data-parse (point) end (list data)))))
+            (list top)
+            (fountain-parse-region (point) end))))
    ((fountain-dialog-p)
     (list 'lines
           (list :begin (match-beginning 0)
@@ -153,17 +156,19 @@
             (s-trim-right (buffer-substring-no-properties
                            (point) end)))))))
 
-(defun fountain-parse-region (beg end &optional data)
-  (goto-char beg)
-  (while (< (point) end)
-    (while (looking-at "\n*\s*\n")
-      (goto-char (match-end 0)))
-    (if (< (point) end)
-        (let ((element (fountain-data-element)))
-          (when element
-            (push element data)
-            (goto-char (plist-get (nth 1 element) :end))))))
-  (reverse data))
+(defun fountain-parse-region (beg end)
+  (let (list)
+    (goto-char beg)
+    (while (< (point) end)
+      (while (looking-at "\n*\s*\n")
+        (goto-char (match-end 0)))
+      (if (< (point) end)
+          (let ((element (fountain-parse-element)))
+            (when element
+              (push element list)
+              (goto-char (plist-get (nth 1 element)
+                                    :end))))))
+    (reverse list)))
 
 (provide 'fountain-parse)
-;;; fountain-data.el ends here
+;;; fountain-parse.el ends here
