@@ -24,13 +24,6 @@
 
 ;;; Code:
 
-
-;;; Variables ==================================================================
-
-(defvar-local fountain-data
-  nil
-  "Buffer contents parsed to lisp elements.")
-
 ;;; Funcation ==================================================================
 
 (defun fountain-parse-element ()
