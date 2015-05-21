@@ -1,6 +1,6 @@
 ;;; fountain-parse.el --- Element parsing engine for Fountain Mode
 
-;; Copyright (C) 2014  Paul Rankin
+;; Copyright (C) 2014 Paul Rankin
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, data

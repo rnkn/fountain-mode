@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2014 Paul Rankin
 
-;; Author: Paul Rankin <paul@tilk.co>
+;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
 ;; Version: 1.4.3
 ;; Package-Requires: ((s "1.9.0"))
