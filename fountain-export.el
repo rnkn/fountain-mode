@@ -368,84 +368,8 @@ Otherwise return `fountain-export-buffer'"
                (postfix (cdr template)))
           (concat prefix content postfix)))))
 
-(defun fountain-export-get-element ()
-  (cond
-   ((fountain-section-heading-p)
-    (let ((level (funcall outline-level))
-          (data (list 'section-heading
-                      (list :beg (match-beginning 0)
-                            :end (match-end 0))
-                      (match-string-no-properties 3)))
-          (limit (save-excursion
-                   (outline-end-of-subtree)
-                   (point))))
-      (goto-char (plist-get (nth 1 data)
-                            :end))
-      (list 'section
-            (list :level level)
-            (fountain-export-parse limit (list data)))))
-   ((fountain-scene-heading-p)
-    (let ((data (list 'scene-heading
-                      (list :beg (match-beginning 0)
-                            :end (match-end 0))
-                      (match-string-no-properties 3)))
-          (limit (save-excursion
-                   (outline-end-of-subtree)
-                   (point))))
-      (goto-char (plist-get (nth 1 data)
-                            :end))
-      (list 'scene
-            (list :num (ignore))
-            (fountain-export-parse limit (list data)))))
-   ((fountain-character-p)
-    (list 'character
-          (list :beg (match-beginning 0)
-                :end (match-end 0)
-                :name (match-string-no-properties 4)
-                :dual (stringp (match-string 5)))
-          (match-string-no-properties 3)))
-   ((fountain-dialog-p)
-    (list 'dialog
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
-   ((fountain-paren-p)
-    (list 'paren
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
-   ((fountain-trans-p)
-    (list 'trans
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
-   ((fountain-center-p)
-    (list 'center
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
-   ((fountain-synopsis-p)
-    (list 'synopsis
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
-   ((fountain-note-p)
-    (list 'note
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
-   (t
-    (let ((beg (car (fountain-get-block-bounds)))
-          (end (cdr (fountain-get-block-bounds))))
-      (list 'action
-            (list :begin beg
-                  :end end)
-            (s-trim-right (buffer-substring-no-properties
-                           (point) end)))))))
-
-
-  ;; (setq fountain-export-tick (buffer-modified-tick))
-  ;; fountain-export-content)
+;; (setq fountain-export-tick (buffer-modified-tick))
+;; fountain-export-content)
 
 (defun fountain-export (format &optional force)
   (let* (complete
