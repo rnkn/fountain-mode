@@ -1,8 +1,8 @@
-;;; fountain-data.el --- Data parsing engine for Fountain Mode
+;;; fountain-parse.el --- Element parsing engine for Fountain Mode
 
 ;; Copyright (C) 2014  Paul Rankin
 
-;; Author: Paul Rankin <paul@tilk.co>
+;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, data
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@
 
 ;;; Funcation ==================================================================
 
-(defun fountain-data-element ()
+(defun fountain-parse-element ()
   (cond
    ((fountain-metadata-p)
     (let ((beg (match-beginning 0))
@@ -153,7 +153,7 @@
             (s-trim-right (buffer-substring-no-properties
                            (point) end)))))))
 
-(defun fountain-data-parse (beg end &optional data)
+(defun fountain-parse-region (beg end &optional data)
   (goto-char beg)
   (while (< (point) end)
     (while (looking-at "\n*\s*\n")
@@ -165,5 +165,5 @@
             (goto-char (plist-get (nth 1 element) :end))))))
   (reverse data))
 
-(provide 'fountain-data)
+(provide 'fountain-parse)
 ;;; fountain-data.el ends here
