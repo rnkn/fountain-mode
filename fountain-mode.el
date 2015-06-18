@@ -947,6 +947,12 @@ Used by `fountain-outline-cycle'.")
   "Integer to limit fontification block in characters.
 Used by `fountain-get-block-bounds'.")
 
+(defvar fountain-imenu-generic-expression
+  `(("Notes" ,fountain-note-regexp 2)
+    ("Scenes" ,fountain-scene-heading-regexp 1)
+    ("Sections" ,fountain-section-regexp 3))
+  "List of regular expressions allowing `imenu' functionality")
+
 ;;; Element Regular Expressions ================================================
 
 (defvar fountain-scene-heading-regexp
@@ -2872,6 +2878,7 @@ keywords suitable for Font Lock."
   (fountain-init-regexp)
   (fountain-init-comment-syntax)
   (setq comment-use-syntax t)
+  (setq imenu-generic-expression fountain-imenu-generic-expression)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
   (add-hook 'font-lock-extend-region-functions
