@@ -1188,7 +1188,11 @@ bold-italic delimiters together, e.g.
   "Set variable regular expression values."
   (fountain-init-scene-heading-regexp)
   (fountain-init-outline-regexp)
-  (fountain-init-trans-regexp))
+  (fountain-init-trans-regexp)
+  (setq imenu-generic-expression
+        `(("Notes" ,fountain-note-regexp 2)
+          ("Scene Headings" ,fountain-scene-heading-regexp 1)
+          ("Sections" ,fountain-section-regexp 3))))
 
 (defun fountain-init-comment-syntax ()
   "Set comment syntax according to `fountain-switch-comment-syntax'."
@@ -2860,14 +2864,6 @@ keywords suitable for Font Lock."
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
-;;; iMenu ======================================================================
-
-(defvar fountain-imenu-generic-expression
-  `(("Notes" ,fountain-note-regexp 2)
-    ("Scene Headings" ,fountain-scene-heading-regexp 1)
-    ("Sections" ,fountain-section-regexp 3))
-  "List of regular expressions allowing `imenu' functionality")
-
 ;;; Syntax Table ===============================================================
 
 (defvar fountain-mode-syntax-table
@@ -2887,7 +2883,6 @@ keywords suitable for Font Lock."
   (fountain-init-regexp)
   (fountain-init-comment-syntax)
   (setq comment-use-syntax t)
-  (setq imenu-generic-expression fountain-imenu-generic-expression)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
   (add-hook 'font-lock-extend-region-functions
