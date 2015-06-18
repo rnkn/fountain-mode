@@ -35,6 +35,7 @@ Features
   PDF output
 - Templates for inserting synopses, notes and metadata
 - Support for both official and legacy commenting (boneyard) syntax
+- Integration with `imenu` (Sections, Scene Headings, Notes)
 - Navigator (using `occur`) for section headings, synopses, notes and
   scene headings
 - everything is customizable, of course

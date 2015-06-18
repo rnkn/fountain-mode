@@ -2,9 +2,9 @@
 
 ;; Copyright (C) 2014 Paul Rankin
 
-;; Author: Paul Rankin <paul@tilk.co>
+;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 1.4.5
+;; Version: 1.5.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -52,6 +52,7 @@
 ;;   PDF output
 ;; - Templates for inserting synopses, notes and metadata
 ;; - Support for both official and legacy commenting (boneyard) syntax
+;; - Integration with `imenu` (Sections, Scene Headings, Notes)
 ;; - Navigator (using `occur`) for section headings, synopses, notes and
 ;;   scene headings
 ;; - everything is customizable, of course
@@ -72,8 +73,7 @@
 ;; Requirements
 ;; ------------
 
-;; - Emacs 24.1 (not tested on earlier versions, only tested on Mac OS X
-;;   and Linux, not tested on Windows).
+;; - Emacs 24.4
 ;; - [s.el][], the long lost Emacs string manipulation library.
 ;; - Exporting to PDF requires [Prince][], which is free for personal use.
 ;;   Prince adds a removable PDF annotation on the first page; if you don't
@@ -132,7 +132,7 @@
 ;;     ##### section level 5
 ;;     ###### invalid section level
 ;;     INT. LEVEL 6 - DAY
-;;
+
 ;;     An obese man (40s) with a large mustard stain on his shirt exits the
 ;;     elevator. He holds a hotdog.
 
@@ -157,6 +157,13 @@
 
 ;; [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 
+;; Roadmap
+;; -------
+
+;; See [Milestones][] on GitHub.
+
+;; [milestones]: https://github.com/rnkn/fountain-mode/milestones "Fountain Mode milestones"
+
 ;; History
 ;; -------
 
@@ -167,7 +174,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.4.5")
+  "1.5.0")
 
 ;;; Required ===================================================================
 
