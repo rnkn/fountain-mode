@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 1.4.3
+;; Version: 1.5.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -52,6 +52,7 @@
 ;;   PDF output
 ;; - Templates for inserting synopses, notes and metadata
 ;; - Support for both official and legacy commenting (boneyard) syntax
+;; - Integration with `imenu` (Sections, Scene Headings, Notes)
 ;; - Navigator (using `occur`) for section headings, synopses, notes and
 ;;   scene headings
 ;; - everything is customizable, of course
@@ -72,8 +73,7 @@
 ;; Requirements
 ;; ------------
 
-;; - Emacs 24.1 (not tested on earlier versions, only tested on Mac OS X
-;;   and Linux, not tested on Windows).
+;; - Emacs 24.4
 ;; - [s.el][], the long lost Emacs string manipulation library.
 ;; - Exporting to PDF requires [Prince][], which is free for personal use.
 ;;   Prince adds a removable PDF annotation on the first page; if you don't
@@ -132,7 +132,7 @@
 ;;     ##### section level 5
 ;;     ###### invalid section level
 ;;     INT. LEVEL 6 - DAY
-;;
+
 ;;     An obese man (40s) with a large mustard stain on his shirt exits the
 ;;     elevator. He holds a hotdog.
 
@@ -157,6 +157,13 @@
 
 ;; [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 
+;; Roadmap
+;; -------
+
+;; See [Milestones][] on GitHub.
+
+;; [milestones]: https://github.com/rnkn/fountain-mode/milestones "Fountain Mode milestones"
+
 ;; History
 ;; -------
 
@@ -167,7 +174,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.4.3")
+  "1.5.0")
 
 ;;; Required ===================================================================
 
@@ -1208,7 +1215,11 @@ bold-italic delimiters together, e.g.
   "Set variable regular expression values."
   (fountain-init-scene-heading-regexp)
   (fountain-init-outline-regexp)
-  (fountain-init-trans-regexp))
+  (fountain-init-trans-regexp)
+  (setq imenu-generic-expression
+        `(("Notes" ,fountain-note-regexp 2)
+          ("Scene Headings" ,fountain-scene-heading-regexp 1)
+          ("Sections" ,fountain-section-regexp 3))))
 
 (defun fountain-init-comment-syntax ()
   "Set comment syntax according to `fountain-switch-comment-syntax'."
@@ -1304,15 +1315,12 @@ bold-italic delimiters together, e.g.
   (save-excursion
     (save-restriction
       (widen)
-      (if (and (= (following-char) ?\[)
-               (= (preceding-char) ?\[))
-          (forward-char -1))
-      (or (looking-at fountain-note-regexp)
-          (let ((a (point))
-                (beg (car (fountain-get-block-bounds))))
-            (search-backward "[[" beg t)
-            (goto-char (match-beginning 0))
-            (and (looking-at fountain-note-regexp)
+      (forward-line 0)
+      (or (looking-at (concat fountain-note-regexp "[\s\t]*$"))
+          (let ((a (point)))
+            (if (re-search-backward "^[\s\t]*\n" nil 'move)
+                (goto-char (match-end 0)))
+            (and (looking-at (concat fountain-note-regexp "[\s\t]*$"))
                  (< a (match-end 0))))))))
 
 (defun fountain-comment-p ()
@@ -2209,7 +2217,7 @@ message of \"S are now invisible/visible\"."
      ((:level 2 :subexp 0
               :override keep)
       (:level 2 :subexp 2 :face fountain-comment
-              :invisible fountain-syntax-chars
+              ;; :invisible fountain-syntax-chars
               :override t
               :laxmatch t)))
     ("character"
