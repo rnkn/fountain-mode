@@ -11,8 +11,9 @@ Fountain markup format, visit <http://fountain.io>.
 ![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
 
 Pictured: *Big Fish* by John August in Fountain Mode (using
-`tsdh-dark` theme, also running [Olivetti][] minor mode)
+`wombat` theme and running [Imenu-list][] and [Olivetti][] minor modes)
 
+[imenu-list]: https://github.com/bmag/imenu-list "imenu-list"
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
 
 Features
@@ -35,6 +36,7 @@ Features
   PDF output
 - Templates for inserting synopses, notes and metadata
 - Support for both official and legacy commenting (boneyard) syntax
+- Integration with `imenu` (Sections, Scene Headings, Notes)
 - Navigator (using `occur`) for section headings, synopses, notes and
   scene headings
 - everything is customizable, of course
@@ -55,8 +57,7 @@ See the [Wiki][] on GitHub for ways to extend Fountain Mode.
 Requirements
 ------------
 
-- Emacs 24.1 (not tested on earlier versions, only tested on Mac OS X
-  and Linux, not tested on Windows).
+- Emacs 24.4
 - [s.el][], the long lost Emacs string manipulation library.
 - Exporting to PDF requires [Prince][], which is free for personal use.
   Prince adds a removable PDF annotation on the first page; if you don't
@@ -139,6 +140,13 @@ Raise an issue on the [Issues][] page on GitHub, or simply send an email
 to the mailing list: <emacs.fountain@librelist.com>.
 
 [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
+
+Roadmap
+-------
+
+See [Milestones][] on GitHub.
+
+[milestones]: https://github.com/rnkn/fountain-mode/milestones "Fountain Mode milestones"
 
 History
 -------
