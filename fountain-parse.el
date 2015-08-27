@@ -24,130 +24,164 @@
 
 ;;; Code:
 
-;;; Funcation ==================================================================
+;;; Functions ==================================================================
+
+(defun fountain-parse-metadata ()
+  (let ((beg (match-beginning 0))
+        (end (match-end 0))
+        (key (downcase (match-string-no-properties 2)))
+        (value (match-string-no-properties 3)))
+    (forward-line 1)
+    (while (and (fountain-metadata-p)
+                (null (match-string 2)))
+      (setq value (concat value (if value "\n")
+                          (match-string-no-properties 3))
+            end (match-end 0))
+      (forward-line 1))
+    (list 'metadata
+          (list :begin beg
+                :end end)
+          (list key value))))
+
+(defun fountain-parse-section-heading ()
+  (let ((top (list 'section-heading
+                   (list :beg (match-beginning 0)
+                         :end (match-end 0))
+                   (match-string-no-properties 3)))
+        (level (funcall outline-level))
+        (beg (point))
+        (end (save-excursion
+               (outline-end-of-subtree)
+               (unless (eobp)
+                 (forward-char 1))
+               (point))))
+    (goto-char (plist-get (nth 1 top)
+                          :end))
+    (list 'section
+          (list :begin beg
+                :end end
+                :level level)
+          (list top)
+          (fountain-parse-region (point) end))))
+
+(defun fountain-parse-scene-heading ()
+  (let ((top (list 'scene-heading
+                   (list :beg (match-beginning 0)
+                         :end (match-end 0))
+                   (match-string-no-properties 3)))
+        (beg (point))
+        (end (save-excursion
+               (outline-end-of-subtree)
+               (unless (eobp)
+                 (forward-char 1))
+               (point))))
+    (goto-char (plist-get (nth 1 top)
+                          :end))
+    (list 'scene
+          (list :begin beg
+                :end end
+                :num (ignore))
+          (list top)
+          (fountain-parse-region (point) end))))
+
+(defun fountain-parse-character ()
+  (let ((top (list 'character
+                   (list :beg (match-beginning 0)
+                         :end (match-end 0))
+                   (match-string-no-properties 3)))
+        (name (match-string-no-properties 4))
+        (dual (cond ((stringp (match-string 5))
+                     'right)
+                    ((save-excursion
+                       (fountain-forward-character 1 'dialog)
+                       (and (fountain-character-p)
+                            (stringp (match-string 5))))
+                     'left)))
+        (beg (point))
+        (end (save-excursion
+               (if (re-search-forward "^[\s\t]*$" nil 'move)
+                   (match-beginning 0)
+                 (point)))))
+    (goto-char (plist-get (nth 1 top)
+                          :end))
+    (list 'dialog
+          (list :begin beg
+                :end end
+                :character name
+                :dual dual)
+          (list top)
+          (fountain-parse-region (point) end))))
+
+(defun fountain-parse-dialog ()
+  (list 'lines
+        (list :begin (match-beginning 0)
+              :end (match-end 0))
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-paren ()
+  (list 'paren
+        (list :begin (match-beginning 0)
+              :end (match-end 0))
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-trans ()
+  (list 'trans
+        (list :begin (match-beginning 0)
+              :end (match-end 0))
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-center ()
+  (list 'center
+        (list :begin (match-beginning 0)
+              :end (match-end 0))
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-synopsis ()
+  (list 'synopsis
+        (list :begin (match-beginning 0)
+              :end (match-end 0))
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-note ()
+  (list 'note
+        (list :begin (match-beginning 0)
+              :end (match-end 0))
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-action ()
+  (let ((beg (car (fountain-get-block-bounds)))
+        (end (cdr (fountain-get-block-bounds))))
+    (forward-line 0)
+    (list 'action
+          (list :begin beg
+                :end end)
+          (s-trim-right (buffer-substring-no-properties
+                         (point) end)))))
 
 (defun fountain-parse-element ()
   (cond
    ((fountain-metadata-p)
-    (let ((beg (match-beginning 0))
-          (end (match-end 0))
-          (key (downcase (match-string-no-properties 2)))
-          (value (match-string-no-properties 3)))
-      (forward-line 1)
-      (while (and (fountain-metadata-p)
-                  (null (match-string 2)))
-        (setq value (concat value (if value "\n") (match-string-no-properties 3))
-              end (match-end 0))
-        (forward-line 1))
-      (list 'metadata
-            (list :begin beg
-                  :end end)
-            (list key value))))
+    (fountain-parse-metadata))
    ((fountain-section-heading-p)
-    (let ((top (list 'section-heading
-                     (list :beg (match-beginning 0)
-                           :end (match-end 0))
-                     (match-string-no-properties 3)))
-          (level (funcall outline-level))
-          (beg (point))
-          (end (save-excursion
-                 (outline-end-of-subtree)
-                 (unless (eobp)
-                   (forward-char 1))
-                 (point))))
-      (goto-char (plist-get (nth 1 top)
-                            :end))
-      (list 'section
-            (list :begin beg
-                  :end end
-                  :level level)
-            (list top)
-            (fountain-parse-region (point) end))))
+    (fountain-parse-section-heading))
    ((fountain-scene-heading-p)
-    (let ((top (list 'scene-heading
-                     (list :beg (match-beginning 0)
-                           :end (match-end 0))
-                     (match-string-no-properties 3)))
-          (beg (point))
-          (end (save-excursion
-                 (outline-end-of-subtree)
-                 (unless (eobp)
-                   (forward-char 1))
-                 (point))))
-      (goto-char (plist-get (nth 1 top)
-                            :end))
-      (list 'scene
-            (list :begin beg
-                  :end end
-                  :num (ignore))
-            (list top)
-            (fountain-parse-region (point) end))))
+    (fountain-parse-scene-heading))
    ((fountain-character-p)
-    (let ((top (list 'character
-                     (list :beg (match-beginning 0)
-                           :end (match-end 0))
-                     (match-string-no-properties 3)))
-          (name (match-string-no-properties 4))
-          (dual (cond ((stringp (match-string 5))
-                       'right)
-                      ((save-excursion
-                         (fountain-forward-character 1 'dialog)
-                         (and (fountain-character-p)
-                              (stringp (match-string 5))))
-                       'left)))
-          (beg (point))
-          (end (save-excursion
-                 (if (re-search-forward "^[\s\t]*$" nil 'move)
-                     (match-beginning 0)
-                   (point)))))
-      (goto-char (plist-get (nth 1 top)
-                            :end))
-      (list 'dialog
-            (list :begin beg
-                  :end end
-                  :character name
-                  :dual dual)
-            (list top)
-            (fountain-parse-region (point) end))))
+    (fountain-parse-character))
    ((fountain-dialog-p)
-    (list 'lines
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
+    (fountain-parse-dialog))
    ((fountain-paren-p)
-    (list 'paren
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
+    (fountain-parse-paren))
    ((fountain-trans-p)
-    (list 'trans
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
+    (fountain-parse-trans))
    ((fountain-center-p)
-    (list 'center
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
+    (fountain-parse-center))
    ((fountain-synopsis-p)
-    (list 'synopsis
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
+    (fountain-parse-synopsis))
    ((fountain-note-p)
-    (list 'note
-          (list :begin (match-beginning 0)
-                :end (match-end 0))
-          (match-string-no-properties 3)))
+    (fountain-parse-note))
    (t
-    (let ((beg (car (fountain-get-block-bounds)))
-          (end (cdr (fountain-get-block-bounds))))
-      (forward-line 0)
-      (list 'action
-            (list :begin beg
-                  :end end)
-            (s-trim-right (buffer-substring-no-properties
-                           (point) end)))))))
+    (fountain-parse-action))))
 
 (defun fountain-parse-region (beg end)
   (let (list)
@@ -159,8 +193,7 @@
           (let ((element (fountain-parse-element)))
             (when element
               (push element list)
-              (goto-char (plist-get (nth 1 element)
-                                    :end))))))
+              (goto-char (plist-get (nth 1 element) :end))))))
     (reverse list)))
 
 (provide 'fountain-parse)
