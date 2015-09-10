@@ -984,26 +984,28 @@ Used by `fountain-outline-cycle'.")
 Used by `fountain-outline-cycle'.")
 
 ;;;; Regular Expressions Variables =============================================
+
 (defvar fountain-scene-heading-regexp
   nil
   "Regular expression for matching scene headings.
 Set with `fountain-init-scene-heading-regexp'. Requires
 `fountain-scene-heading-p' for preceding blank line.")
 
+(defconst fountain-forced-scene-heading-regexp
+  "^\\(?1:\\(?2:\\.\\)\\(?3:\\<.*?\\)\\)[\s\t]*$"
+  "Regular expression for matching forced scene headings.
+Requires `fountain-scene-heading-p' for preceding blank line.")
+
+(defconst fountain-scene-number-regexp
+  "#\\(?5:[a-z]?[0-9]+[a-z]?\\)"
+  "Regular expression for matching scene numbers.
+Assumes line matches `fountain-scene-heading-p'.")
+
 (defvar fountain-trans-regexp
   nil
   "Regular expression for matching transitions.
 Set with `fountain-init-trans-regexp'. Requires
 `fountain-trans-p' for preceding and succeeding blank lines.")
-
-;; (defconst fountain-scene-num-regexp
-;;   "\\(.*?\\)\\([\s\t]*\\)\\(#[0-9]+[a-z]?\\)[\s\t]*$"
-;;   "Regular expression for matching scene numbers.
-;; Assumes line matches `fountain-scene-heading-p'.
-
-;;     Group 1: scene heading
-;;     Group 2: whitespace
-;;     Group 3: scene number (including leading #)")
 
 (defconst fountain-blank-regexp
   "^\s?$"
@@ -1256,11 +1258,16 @@ not changed.")
 (defun fountain-init-scene-heading-regexp ()
   "Initializes `fountain-scene-heading-regexp'."
   (setq fountain-scene-heading-regexp
-        (concat "^\\(?1:\\(?2:\\(?4:\\.\\)\\)\\(?3:\\<.*?\\)\\)[\s\t]*$"
+        (concat fountain-forced-scene-heading-regexp
+                "[\s\t]*\\(?4:"
+                fountain-scene-number-regexp
+                "\\)?[\s\t]*$"
                 "\\|"
-                "^\\(?1:\\(?3:\\(?4:"
+                "^\\(?1:\\(?3:"
                 (regexp-opt fountain-scene-heading-prefix-list)
-                "\\)[.\s\t]+.*?\\)\\)[\s\t]*$")))
+                "[.\s\t].*?\\)[\s\t]*\\(?4:"
+                fountain-scene-number-regexp
+                "\\)?\\)[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
   "Initializes `fountain-trans-regexp'."
