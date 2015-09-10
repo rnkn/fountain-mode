@@ -3007,12 +3007,12 @@ keywords suitable for Font Lock."
               (append keywords
                       (list (cons matcher facespec))))))))
 
-(defun fountain-match-element (func limit)
-  "If FUNC returns non-nil before LIMIT, return match data."
+(defun fountain-match-element (fun limit)
+  "If FUN returns non-nil before LIMIT, return match data."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
-      (if (funcall func)
+      (if (funcall fun)
           (setq match t))
       (forward-line 1))
     match))
