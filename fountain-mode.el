@@ -1504,42 +1504,29 @@ comments."
       (looking-at fountain-center-regexp))))
 
 (defun fountain-read-metadata (&optional reposition)
-  "Read buffer metadata, set and return `fountain-metadata'."
-  (let (limit)
+  "Read and parse buffer metadata."
+  (let (list)
     (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (setq fountain-metadata nil)
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
         (while (fountain-metadata-p)
-          (let ((key (downcase (match-string-no-properties 2)))
-                (value                    ; FIXME make a list
-                 (progn
-                   (forward-line 1)       ; FIXME on line ahead
-                   (or (match-string-no-properties 3)
-                       (let (s)
-                         (while (and (fountain-metadata-p)
-                                     (null (match-string 2)))
-                           (setq s
-                                 (append s
-                                         (list (match-string-no-properties 3))))
-                           (forward-line 1))
-                         s)))))
-            (setq fountain-metadata
-                  (append fountain-metadata
-                          (list (cons key value))))))
-        (setq limit (point))))
-    (if reposition (goto-char limit)))
-  fountain-metadata)
+          (let ((element (fountain-parse-metadata)))
+            (goto-char (plist-get (nth 1 element) :end))
+            (forward-line 1)
+            (push element list)))
+        (reverse list)))))
 
 (defun fountain-get-metadata-value (key)
-  "Return the value associated with KEY in `fountain-metadata'.
-If there are multiple values, join by concatenating with
-newlines."
-  (let ((value (cdr (assoc key fountain-metadata))))
-    (if (listp value)
-        (s-join "\n" value)
-      value)))
+  "Return the buffer metadata value associated with KEY."
+  (let ((list (fountain-read-metadata))
+        value)
+    (while list
+      (let ((element (pop list)))
+        (if (string= (plist-get (nth 1 element) :key) key)
+            (setq value (nth 2 element)
+                  list nil))))
+    value))
 
 (defun fountain-insert-template (template)
   "Format TEMPLATE according to the following list.
@@ -3198,7 +3185,6 @@ keywords suitable for Font Lock."
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
-  (fountain-read-metadata)
   (setq-local require-final-newline mode-require-final-newline)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level 'fountain-outline-level)
