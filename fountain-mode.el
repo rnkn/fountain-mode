@@ -2574,26 +2574,6 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (goto-char (point-min))
   (fountain-insert-template fountain-metadata-template))
 
-(defun fountain-occur-section-headings ()
-  "Display `occur' buffer searching `fountain-section-heading-regexp'."
-  (interactive)
-  (occur fountain-section-heading-regexp))
-
-(defun fountain-occur-synopses ()
-  "Display `occur' buffer searching `fountain-synopsis-regexp'."
-  (interactive)
-  (occur fountain-synopsis-regexp))
-
-(defun fountain-occur-notes ()
-  "Display `occur' buffer searching `fountain-note-regexp'."
-  (interactive)
-  (occur fountain-note-regexp))
-
-(defun fountain-occur-scene-headings ()
-  "Display `occur' buffer searching `fountain-scene-heading-regexp'."
-  (interactive)
-  (occur fountain-scene-heading-regexp))
-
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, add
@@ -3064,10 +3044,6 @@ keywords suitable for Font Lock."
     ;; view commands
     (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars)
     (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim)
-    (define-key map (kbd "M-s 1") 'fountain-occur-section-headings)
-    (define-key map (kbd "M-s 2") 'fountain-occur-synopses)
-    (define-key map (kbd "M-s 3") 'fountain-occur-notes)
-    (define-key map (kbd "M-s 4") 'fountain-occur-scene-headings)
     map)
   "Mode map for `fountain-mode'.")
 
