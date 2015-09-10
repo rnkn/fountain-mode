@@ -489,7 +489,6 @@ similar to:
                  (integer :tag "Custom level"))
   :group 'fountain)
 
-
 (defcustom fountain-outline-custom-level
   nil
   "Additional section headings to include in outline cycling."
@@ -659,11 +658,11 @@ more blank lines)."
   nil
   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
 
-    \`\`foobar\'\'
+    \`\`HAL\'\'
 
 will be exported as
 
-    &ldquo;foobar&rdquo;"
+     HAL "
   :type 'boolean
   :group 'fountain-export)
 
@@ -984,8 +983,7 @@ Used by `fountain-outline-cycle'.")
   "Integer representing subtree outline cycling status.
 Used by `fountain-outline-cycle'.")
 
-;;; Element Regular Expressions ================================================
-
+;;;; Regular Expressions Variables =============================================
 (defvar fountain-scene-heading-regexp
   nil
   "Regular expression for matching scene headings.
@@ -1040,11 +1038,11 @@ Requires `fountain-metadata-p' for bobp.")
           "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
-    Group 1: match trimmed whitespace
-    Group 2: match leading @
-    Group 3: (export group) match trimmed @ and ^
-    Group 4: match character name only
-    Group 5: match trailing ^ for dual dialog
+    Group 1     match trimmed whitespace
+    Group 2     match leading @
+    Group 3     (export group) match character name and parenthetical
+    Group 4     match character name only
+    Group 5     match trailing ^ for dual dialog
 
 Requires `fountain-character-p'.")
 
@@ -1076,8 +1074,6 @@ Requires `fountain-paren-p' for preceding character or dialog.")
 (defconst fountain-center-regexp
   "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:.*?\\)\\(?4:[\s\t]*<\\)\\)[\s\t]*$"
   "Regular expression for matching centered text.")
-
-;;; Emphasis Regular Expressions ===============================================
 
 (defconst fountain-underline-regexp
   (concat "\\(^\\|[^\\]\\)"
@@ -1255,7 +1251,7 @@ not changed.")
   "Default face for transitions."
   :group 'fountain-faces)
 
-;;; Internal Functions =========================================================
+;;; Functions ==================================================================
 
 (defun fountain-init-scene-heading-regexp ()
   "Initializes `fountain-scene-heading-regexp'."
@@ -1282,15 +1278,20 @@ not changed.")
                       "\\|"
                       fountain-scene-heading-regexp)))
 
+(defun fountain-init-imenu-generic-expression ()
+  "Initializes `imenu-generic-expression'."
+  (setq imenu-generic-expression
+        (list
+         (list "Notes" fountain-note-regexp 2)
+         (list "Scene Headings" fountain-scene-heading-regexp 1)
+         (list "Sections" fountain-section-heading-regexp 3))))
+
 (defun fountain-init-regexp ()
   "Set variable regular expression values."
   (fountain-init-scene-heading-regexp)
   (fountain-init-outline-regexp)
   (fountain-init-trans-regexp)
-  (setq imenu-generic-expression
-        `(("Notes" ,fountain-note-regexp 2)
-          ("Scene Headings" ,fountain-scene-heading-regexp 1)
-          ("Sections" ,fountain-section-regexp 3))))
+  (fountain-init-imenu-generic-expression))
 
 (defun fountain-init-comment-syntax ()
   "Set comment syntax according to `fountain-switch-comment-syntax'."
@@ -1345,7 +1346,7 @@ not changed.")
 ;;      (buffer-substring-no-properties start end))))
 
 (defun fountain-blank-p ()
-  "Return non-nil if point is at a blank line or single space."
+  "Return non-nil if point is at a blank line."
   (save-excursion
     (save-restriction
       (widen)
@@ -1714,8 +1715,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
       (setq font-lock-end end changed t))
     changed))
 
-;;; Outline ====================================================================
-
+;;;; Outline Functions =========================================================
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
 (defalias 'fountain-outline-forward 'outline-forward-same-level)
@@ -2702,7 +2702,6 @@ message of \"S are now invisible/visible\"."
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
     (jit-lock-refontify)
-    ;; (font-lock-fontify-block)
     (message "%s are now %s"
              s (if (symbol-value option)
                    "invisible" "visible"))))
@@ -2941,20 +2940,20 @@ nil, this face is not considered an element. MATCHER is a regular
 expression or search function. PLIST-LIST is a list of plists,
 assigning the following keywords:
 
-    :level - integer representing level of `font-lock-maximum-decoration'
-        at which face is applied
-    :subexp - subexpression to match
-    :face - face name to apply
-    :invisible - if t, adds :face property to invisible text property
-    :override - as per `font-lock-keywords'
-    :laxmatch - as per `font-lock-keywords'
+    :level      integer representing level of `font-lock-maximum-decoration'
+                at which face is applied
+    :subexp     subexpression to match
+    :face       face name to apply
+    :invisible  if t, adds :face property to invisible text property
+    :override   as per `font-lock-keywords'
+    :laxmatch   as per `font-lock-keywords'
 
 Regular expression should take the form:
 
-    Group 1: whole string with trimmed whitespace
-    Group 2: string intended for export
-    Group 3: special
-    Group 9: invisible characters")
+    Group 1     match whole string with trimmed whitespace
+    Group 2     syntax characters
+    Group 3     export group
+    Group 4     syntax characters")
 
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
