@@ -1693,6 +1693,19 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 ;;                 (replace-match " " nil nil nil 2))))
 ;;         (goto-char pos))))
 
+(defun fountain-get-font-lock-decoration ()
+  "Return the value of `font-lock-maximum-decoration'."
+  (let* ((dec font-lock-maximum-decoration)
+         (n (if (listp dec)
+                (if (assoc 'fountain-mode dec)
+                    (cdr (assoc 'fountain-mode dec))
+                  (cdr (assoc 't dec)))
+              dec)))
+    (cond ((null n) 2)
+          ((eq n t) 3)
+          ((integerp n) n)
+          (t 2))))
+
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
   (defvar font-lock-beg nil)
@@ -2777,19 +2790,6 @@ message of \"S are now invisible/visible\"."
                        ((= n 3) "maximum")))
         (font-lock-refresh-defaults))
     (user-error "Decoration must be an integer 1-3")))
-
-(defun fountain-get-font-lock-decoration ()
-  "Return the value of `font-lock-maximum-decoration'."
-  (let* ((dec font-lock-maximum-decoration)
-         (n (if (listp dec)
-                (if (assoc 'fountain-mode dec)
-                    (cdr (assoc 'fountain-mode dec))
-                  (cdr (assoc 't dec)))
-              dec)))
-    (cond ((null n) 2)
-          ((eq n t) 3)
-          ((integerp n) n)
-          (t 2))))
 
 (defun fountain-toggle-export-bold-scene-headings ()
   "Toggle `fountain-export-bold-scene-headings'"
