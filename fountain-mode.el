@@ -417,6 +417,17 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-block-limit
+  10000
+  "Integer to limit fontification block in characters.
+Used by `fountain-get-block-bounds'.
+
+Sometimes `fountain-mode' can hang if asked for fontify a very
+large block of unbroken text. If you experience performance
+issues, consider reducing this integer."
+  :type 'integer
+  :group 'fountain)
+
 (defcustom fountain-switch-comment-syntax
   nil
   "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
@@ -972,11 +983,6 @@ Used by `fountain-outline-cycle'.")
   0
   "Integer representing subtree outline cycling status.
 Used by `fountain-outline-cycle'.")
-
-(defvar fountain-block-limit
-  10000
-  "Integer to limit fontification block in characters.
-Used by `fountain-get-block-bounds'.")
 
 ;;; Element Regular Expressions ================================================
 
