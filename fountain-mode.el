@@ -1026,7 +1026,7 @@ Set with `fountain-init-trans-regexp'. Requires
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(?1:\\(?2:\\<[^:\n]+\\):\s*\\(?3:.+\\)?\\)"
+  (concat "^\\(?1:\\(?2:\\<[^:\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
           "\\|"
           "^\s+\\(?1:\\(?3:.+\\)\\)")
   "Regular expression for matching multi-line metadata values.
@@ -1062,11 +1062,11 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "Regular expression for matching page breaks.")
 
 (defconst fountain-note-regexp
-  "\\(\\[\\[\\(?3:\\(?:.\n?\\)*?\\)]]\\)"
+  "\\(\\[\\[[\s\t]*\\(?3:\\(?:.\n?\\)*?\\)[\s\t]*]]\\)"
   "Regular expression for matching notes.")
 
 (defconst fountain-section-heading-regexp
-  "^\\(?1:\\(?2:\\(?4:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
+  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
   "Regular expression for matching section headings.")
 
 (defconst fountain-synopsis-regexp
