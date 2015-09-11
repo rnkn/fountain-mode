@@ -1672,26 +1672,32 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 ;;               (setq prev-scene-num current-scene-num))))
 ;;         (fountain-forward-scene 1)))))
 
-;; (defun fountain-align-scene-num ()
-;;   "Align scene number to `fountain-align-scene-num'."
-;;   (if (fountain-scene-heading-p)
-;;       (let ((pos (point)))
-;;         (forward-line 0)
-;;         (if (and (looking-at fountain-scene-num-regexp)
-;;                  (< pos (match-beginning 3)))
-;;             (let* ((scene-heading-length
-;;                     (string-width (match-string 1)))
-;;                    (num-length
-;;                     (string-width (match-string 3)))
-;;                    (space-length
-;;                     (- fountain-align-scene-num
-;;                        scene-heading-length
-;;                        num-length)))
-;;               (if (< 1 space-length)
-;;                   (replace-match (make-string space-length ?\s)
-;;                                  nil nil nil 2)
-;;                 (replace-match " " nil nil nil 2))))
-;;         (goto-char pos))))
+(defun fountain-align-scene-number ()
+  "Align scene number to `fountain-align-scene-num'."
+  (if (and (fountain-scene-heading-p)
+           (match-string 4)
+           (< (point) (match-beginning 4)))
+      (let* ((pos (point))
+             (scene-heading-length
+              (string-width (match-string 3)))
+             (num-length
+              (string-width (match-string 4)))
+             (space-length
+              (- fountain-align-scene-num
+                 scene-heading-length
+                 num-length)))
+        (goto-char (match-end 3))
+        (delete-region (point) (match-beginning 4))
+        (insert-char ?\s space-length)
+        (goto-char pos))))
+
+(defun fountain-align-all-scene-numbers ()
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (fountain-align-scene-number)
+      (fountain-forward-scene 1))))
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
@@ -3173,15 +3179,13 @@ keywords suitable for Font Lock."
   (setq-local outline-level 'fountain-outline-level)
   (setq-local fountain-outline-startup-level
               (let ((n (fountain-get-metadata-value "startup-level")))
-                (if (s-present? n)
-                    (string-to-number n)
+                (if (stringp n)
+                    (min (string-to-number n) 6)
                   fountain-outline-startup-level)))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible fountain-element))
-  ;; (add-hook 'post-self-insert-hook
-  ;;           'fountain-align-scene-num t t)
-  ;; (add-hook 'after-save-hook
-  ;;           'fountain-read-metadata)
+  (add-hook 'post-self-insert-hook
+            'fountain-align-scene-number t t)
   (fountain-outline-hide-level fountain-outline-startup-level))
 
 (provide 'fountain-mode)
