@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 1.5.0
+;; Version: 2.0.0
 ;; Package-Requires: ((s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -174,7 +174,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "1.5.0")
+  "2.0.0")
 
 ;;; Required ===================================================================
 
