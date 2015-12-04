@@ -217,6 +217,11 @@ with \\[fountain-save-font-lock-decoration]."
   :prefix "fountain-export-"
   :group 'fountain)
 
+(defgroup fountain-align ()
+  "Option for element alignment."
+  :prefix "fountain-align-"
+  :group 'fountain)
+
 ;;; Obsolete Aliases ===========================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
@@ -368,55 +373,6 @@ changes desired."
 ;;   :type 'boolean
 ;;   :group 'fountain)
 
-(defcustom fountain-align-character
-  20
-  "Column integer to which characters names should be aligned.
-This option does not affect file contents."
-  :type 'integer
-  :group 'fountain)
-
-(defcustom fountain-align-dialog
-  10
-  "Column integer to which dialog should be aligned.
-This option does not affect file contents."
-  :type 'integer
-  :group 'fountain)
-
-(defcustom fountain-align-paren
-  15
-  "Column integer to which parentheticals should be aligned.
-This option does not affect file contents."
-  :type 'integer
-  :group 'fountain)
-
-(defcustom fountain-align-trans
-  45
-  "Column integer to which transitions should be aligned.
-This option does not affect file contents."
-  :type 'integer
-  :group 'fountain)
-
-(defcustom fountain-align-center
-  10
-  "Column integer to which centered text should be aligned.
-This option does not affect file contents."
-  :type 'integer
-  :group 'fountain)
-
-;; (defcustom fountain-align-scene-num
-;;   65
-;;   "Column integer to which scene numbers should be aligned.
-;; This option affects file contents"
-;;   :type 'integer
-;;   :group 'fountain)
-
-(defcustom fountain-align-elements
-  t
-  "If non-nil, elements will be displayed auto-aligned.
-This option does not affect file contents."
-  :type 'boolean
-  :group 'fountain)
-
 (defcustom fountain-block-limit
   10000
   "Integer to limit fontification block in characters.
@@ -506,6 +462,65 @@ The default function requires the command line tool \"uuidgen\"."
   :tag "Fountain UUID Function"
   :type 'function
   :group 'fountain)
+
+;;;; Alignment Customization ===================================================
+
+(defcustom fountain-align-elements
+  t
+  "If non-nil, elements will be displayed auto-aligned.
+This option does not affect file contents."
+  :type 'boolean
+  :group 'fountain-align)
+
+(defcustom fountain-align-action
+  0
+  "Column integer to which action should be aligned.
+This option does not affect file contents."
+  :type 'integer
+  :group 'fountain-align)
+
+(defcustom fountain-align-character
+  20
+  "Column integer to which characters names should be aligned.
+This option does not affect file contents."
+  :type 'integer
+  :group 'fountain-align)
+
+(defcustom fountain-align-dialog
+  10
+  "Column integer to which dialog should be aligned.
+This option does not affect file contents."
+  :type 'integer
+  :group 'fountain-align)
+
+(defcustom fountain-align-paren
+  15
+  "Column integer to which parentheticals should be aligned.
+This option does not affect file contents."
+  :type 'integer
+  :group 'fountain-align)
+
+(defcustom fountain-align-trans
+  45
+  "Column integer to which transitions should be aligned.
+This option does not affect file contents."
+  :type 'integer
+  :group 'fountain-align)
+
+(defcustom fountain-align-center
+  20
+  "Column integer to which centered text should be aligned.
+This option does not affect file contents."
+  :type 'integer
+  :group 'fountain-align)
+
+(defcustom fountain-align-scene-num
+  60
+  "Column integer to which scene numbers should be aligned.
+This option does affect file contents."
+  :type '(choice (const :tag "Do not align scene numbers" nil)
+                 (integer 60))
+  :group 'fountain-align)
 
 ;;;; Export Customization ======================================================
 
