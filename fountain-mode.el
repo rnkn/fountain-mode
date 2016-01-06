@@ -1,6 +1,6 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup
 
-;; Copyright (C) 2014 Paul Rankin
+;; Copyright (C) 2014-2016 Paul Rankin
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
