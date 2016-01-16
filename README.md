@@ -90,37 +90,6 @@ following:
 [melpa-stable]: http://stable.melpa.org "MELPA-stable"
 [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
-Outlining
----------
-
-There are six possible levels of outline subtrees. Section headings
-count as the first five levels and scene headings count as the sixth
-level, e.g.:
-
-    # section level 1
-    ## section level 2
-    ### section level 3
-    #### section level 4
-    ##### section level 5
-    ###### invalid section level
-    INT. LEVEL 6 - DAY
-
-    An obese man (40s) with a large mustard stain on his shirt exits the
-    elevator. He holds a hotdog.
-
-Cycle subtree visibility with <kbd>TAB</kbd>. Cycle global outline visibility
-with <kbd>S-TAB</kbd> or <kbd>C-u TAB</kbd>. More navigation and structure
-editing commands are:
-
-- <kbd>C-c C-f</kbd> `fountain-outline-forward`
-- <kbd>C-c C-b</kbd> `fountain-outline-backward`
-- <kbd>C-c C-n</kbd> `fountain-outline-next`
-- <kbd>C-c C-p</kbd> `fountain-outline-previous`
-- <kbd>C-c C-u</kbd> `fountain-outline-up`
-- <kbd>C-c C-v</kbd> `fountain-outline-shift-down`
-- <kbd>C-c C-^</kbd> `fountain-outline-shift-up`
-- <kbd>C-c C-SPC</kbd> `fountain-outline-mark`
-
 Bugs and Feature Requests
 -------------------------
 
