@@ -1199,6 +1199,11 @@ not changed.")
 
 ;;; Faces ======================================================================
 
+(defface fountain-action
+  '((t nil))
+  "Default face for action."
+  :group 'fountain-faces)
+
 (defface fountain-comment
   '((t (:inherit shadow)))
   "Default face for comments (boneyard)."
