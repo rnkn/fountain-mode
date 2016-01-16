@@ -554,10 +554,10 @@ Passed the format being exported as a variable by `format'."
   :group 'fountain-export)
 
 (defcustom fountain-export-default-command
-  'fountain-export-buffer-to-pdf-via-html
+  'fountain-export-shell-script
   "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
-  :type '(radio (function-item fountain-export-buffer-to-pdf-via-html)
-                (function-item fountain-export-buffer-to-html))
+  :type '(radio (function-item fountain-export-buffer-to-html)
+                (function-item fountain-export-shell-script))
   :group 'fountain-export)
 
 (defcustom fountain-export-include-title-page
@@ -681,9 +681,10 @@ will be exported as
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-pdf-via-html-command
-  "prince %s --verbose"
-  "Shell command string to convert HTML file to PDF."
+(defcustom fountain-export-shell-script
+  "afterwriting --source %s --pdf --overwrite"
+  "Shell command string to convert Fountain source to ouput.
+\"%s\" will be substituted with `buffer-file-name'"
   :type 'string
   :group 'fountain-export)
 
@@ -972,21 +973,6 @@ Currently, ${charset} will default to UTF-8."
   nil
   "Metadata alist in the form of (KEY . VALUE).
 Set with `fountain-read-metadata' upon calling `fountain-mode'.")
-
-(defvar-local fountain-export-content
-  nil
-  "Local buffer content converted to list of `fountain-mode' elements.
-
-An element takes the form (TYPE CONTENT [PROPERTIES]) where TYPE
-is a symbol, CONTENT is a string, and PROPERTIES is an optional
-plist.")
-
-(defvar-local fountain-export-tick
-  nil
-  "Value of `buffer-modified-tick' after `fountain-export-parse-buffer'.
-
-Checked when exporting to avoid parsing again if the buffer has
-not changed.")
 
 (defvar-local fountain-outline-cycle
   0
@@ -2708,12 +2694,12 @@ then make the changes desired."
   (interactive)
   (funcall fountain-export-default-command))
 
-(defun fountain-export-script (&optional buffer)
-  "Call shell script defined in `fountain-export-script'."
+(defun fountain-export-shell-script (&optional buffer)
+  "Call shell script defined in `fountain-export-shell-script'."
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
          (file (shell-quote-argument (buffer-file-name buffer)))
-         (command (format fountain-export-script file)))
+         (command (format fountain-export-shell-script file)))
     (async-shell-command command "*Fountain Export Process*")))
 
 (defun fountain-export-buffer-to-html (&optional buffer)
@@ -2732,16 +2718,6 @@ then make the changes desired."
           (if (called-interactively-p 'interactive)
               (switch-to-buffer-other-window destbuf))
           destbuf)))))
-
-(defun fountain-export-buffer-to-pdf-via-html (&optional buffer)
-  "Export BUFFER to HTML file, then convert HTML to PDF."
-  (interactive)
-  (let* ((buffer (or buffer (current-buffer)))
-         (file (shell-quote-argument (buffer-file-name
-                                      (fountain-export-buffer-to-html
-                                       buffer))))
-         (command (format fountain-export-pdf-via-html-command file)))
-    (async-shell-command command "*Fountain PDF Process*")))
 
 ;;;; Menu Commands =============================================================
 
@@ -3104,7 +3080,6 @@ keywords suitable for Font Lock."
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
-    (define-key map (kbd "C-c C-e p") 'fountain-export-buffer-to-pdf-via-html)
     ;; view commands
     (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars)
     (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim)
@@ -3176,9 +3151,9 @@ keywords suitable for Font Lock."
     "---"
     ("Export"
      ["Default" fountain-export-default]
-     "---"
-     ["Buffer to HTML" fountain-export-buffer-to-html]
-     ["Buffer to PDF via HTML" fountain-export-buffer-to-pdf-via-html]
+     ["Buffer to HTML" (fountain-export 'html)]
+     ["Buffer to LaTeX" (fountain-export 'latex)]
+     ["Buffer to FDX" (fountain-export 'fdx)]
      "---"
      ["Include Title Page"
       fountain-toggle-export-include-title-page
