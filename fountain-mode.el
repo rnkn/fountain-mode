@@ -2520,7 +2520,7 @@ If N is 0, move to beginning of scene."
         (goto-char (mark))
         (user-error "Before first scene heading"))
     (push-mark)
-    (fountain-forward-scene 1)
+    (fountain-outline-next 1)
     (exchange-point-and-mark)))
 
 (defun fountain-goto-scene (n)
