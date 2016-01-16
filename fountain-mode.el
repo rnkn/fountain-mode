@@ -176,13 +176,13 @@
 (defconst fountain-version
   "2.0.0")
 
-;;; Required ===================================================================
+;;; Requirements ===============================================================
 
 (require 's)
 (require 'easymenu)
 (require 'outline)
 
-;;; Groups =====================================================================
+;;; Group Definitions ==========================================================
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
@@ -222,7 +222,7 @@ with \\[fountain-save-font-lock-decoration]."
   :prefix "fountain-align-"
   :group 'fountain)
 
-;;; Obsolete Aliases ===========================================================
+;;; Obsolete Warnings ==========================================================
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
   'fountain-align-character "0.12.0")
@@ -472,7 +472,7 @@ The default function requires the command line tool \"uuidgen\"."
   :type 'function
   :group 'fountain)
 
-;;;; Alignment Customization ===================================================
+;;;; Align Group Customization =================================================
 
 (defcustom fountain-align-elements
   t
@@ -531,7 +531,7 @@ This option does affect file contents."
                  (integer 60))
   :group 'fountain-align)
 
-;;;; Export Customization ======================================================
+;;;; Export Group Customization ================================================
 
 (defcustom fountain-export-element-set
   '(scene-heading action character paren dialog trans)
@@ -977,7 +977,7 @@ Currently, ${charset} will default to UTF-8."
   :group 'fountain-export)
 
 ;;; Variables ==================================================================
-
+;;;; Buffer Local Variables ====================================================
 (defvar-local fountain-metadata
   nil
   "Metadata alist in the form of (KEY . VALUE).
@@ -1269,6 +1269,7 @@ not changed.")
   :group 'fountain-faces)
 
 ;;; Functions ==================================================================
+;;;; Initializing Functions ====================================================
 
 (defun fountain-init-scene-heading-regexp ()
   "Initializes `fountain-scene-heading-regexp'."
@@ -1319,50 +1320,7 @@ not changed.")
   (setq-local comment-end
               (if fountain-switch-comment-syntax "" "*/")))
 
-(defun fountain-get-block-bounds ()
-  "Return the beginning and end points of block at point."
-  (let* ((r (concat fountain-blank-regexp "\\|\\`\\|\\'"))
-         (beg (save-excursion
-                (re-search-backward
-                 r (- (point) fountain-block-limit) t)))
-         (end (save-excursion
-                (re-search-forward
-                 r (+ (point) fountain-block-limit) t))))
-    (cons beg end)))
-
-;; currently unused
-;; (defun fountain-strip-comments (start end)
-;;   "Strip comments between START and END and return string."
-;;   (let ((start
-;;          (save-excursion
-;;            (goto-char start)
-;;            ;; using thing-at-point-looking-at is very slow, better to
-;;            ;; use a simpler function.
-;;            ;;
-;;            ;; (if (thing-at-point-looking-at fountain-comment-regexp)
-;;            ;;     (match-beginning 0)
-;;            ;;   start)))
-;;            (if (and (search-forward "*/" end t)
-;;                     (null (search-backward "/*" start t))
-;;                     (search-backward "/*" nil t)
-;;                     (comment-only-p (point) start))
-;;                (point)
-;;              start)))
-;;         (end
-;;          (save-excursion
-;;            (goto-char end)
-;;            ;; (if (thing-at-point-looking-at fountain-comment-regexp)
-;;            ;;     (match-end 0)
-;;            ;;   end))))
-;;            (if (and (search-backward "/*" start t)
-;;                     (null (search-forward "*/" end t))
-;;                     (search-forward "*/" nil t)
-;;                     (comment-only-p (point) end))
-;;                (point)
-;;              end))))
-;;     (replace-regexp-in-string
-;;      fountain-comment-regexp ""
-;;      (buffer-substring-no-properties start end))))
+;;;; Element Functions =========================================================
 
 (defun fountain-blank-p ()
   "Return non-nil if point is at a blank line."
@@ -1542,6 +1500,19 @@ comments."
         (forward-line 0)
         (looking-at ".*")))))
 
+;;;; Reading Functions =========================================================
+
+(defun fountain-get-block-bounds ()
+  "Return the beginning and end points of block at point."
+  (let* ((r (concat fountain-blank-regexp "\\|\\`\\|\\'"))
+         (beg (save-excursion
+                (re-search-backward
+                 r (- (point) fountain-block-limit) t)))
+         (end (save-excursion
+                (re-search-forward
+                 r (+ (point) fountain-block-limit) t))))
+    (cons beg end)))
+
 (defun fountain-read-metadata ()
   "Read and parse buffer metadata."
   (let (list)
@@ -1606,35 +1577,6 @@ Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
   "Return a lowercase 8-digit UUID by calling `fountain-uuid-func'."
   (let ((s (downcase (funcall fountain-uuid-func))))
     (car (split-string s "-"))))
-
-(defun fountain-forward-character (&optional n limit)
-  "Goto Nth next character (or Nth previous is N is negative).
-If LIMIT is 'scene, halt at next scene heading. If LIMIT is
-'dialog, halt at next non-dialog element."
-  (interactive "^p")
-  (let* ((i (or n 1))
-         (p (if (< i 1) -1 1)))
-    (while (/= i 0)
-      (if (fountain-character-p)
-          (forward-line p))
-      (while (cond ((eq limit 'scene)
-                    (not (or (fountain-character-p)
-                             (fountain-scene-heading-p)
-                             (eq (point) (buffer-end p)))))
-                   ((eq limit 'dialog)
-                    (or (fountain-dialog-p)
-                        (fountain-paren-p)
-                        (fountain-tachyon-p)))
-                   ((not (or (fountain-character-p)
-                             (eq (point) (buffer-end p))))))
-        (forward-line p))
-      (setq i (- i p)))))
-
-(defun fountain-backward-character (&optional n)
-  "Move backward N character (foward if N is negative)."
-  (interactive "^p")
-  (let ((i (or n 1)))
-    (fountain-forward-character (- i))))
 
 (defun fountain-get-character (&optional n limit)
   "Return Nth next character (or Nth previous if N is negative).
@@ -1775,6 +1717,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
     changed))
 
 ;;;; Outline Functions =========================================================
+
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
 (defalias 'fountain-outline-forward 'outline-forward-same-level)
@@ -1783,6 +1726,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
 (defun fountain-outline-shift-down (&optional n)
+  "Move the current subtree down past N headings of same level."
   (interactive "p")
   (outline-back-to-heading)
   (let* (hanging-line
@@ -1839,6 +1783,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
     (set-marker insert-point nil)))
 
 (defun fountain-outline-shift-up (&optional n)
+  "Move the current subtree up past N headings of same level."
   (interactive "p")
   (fountain-outline-shift-down (- n)))
 
@@ -2484,7 +2429,7 @@ Otherwise return `fountain-export-buffer'"
 ;;       (unless complete
 ;;         (kill-buffer destbuf)))))
 
-;;; Commands ===================================================================
+;;;; Commands ==================================================================
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
@@ -2589,6 +2534,35 @@ If N is 0, move to beginning of scene."
       (setq scene (if (match-string 5)
                       (string-to-number (match-string-no-properties 5))
                     (1+ scene))))))
+
+(defun fountain-forward-character (&optional n limit)
+  "Goto Nth next character (or Nth previous is N is negative).
+If LIMIT is 'scene, halt at next scene heading. If LIMIT is
+'dialog, halt at next non-dialog element."
+  (interactive "^p")
+  (let* ((i (or n 1))
+         (p (if (< i 1) -1 1)))
+    (while (/= i 0)
+      (if (fountain-character-p)
+          (forward-line p))
+      (while (cond ((eq limit 'scene)
+                    (not (or (fountain-character-p)
+                             (fountain-scene-heading-p)
+                             (eq (point) (buffer-end p)))))
+                   ((eq limit 'dialog)
+                    (or (fountain-dialog-p)
+                        (fountain-paren-p)
+                        (fountain-tachyon-p)))
+                   ((not (or (fountain-character-p)
+                             (eq (point) (buffer-end p))))))
+        (forward-line p))
+      (setq i (- i p)))))
+
+(defun fountain-backward-character (&optional n)
+  "Move backward N character (foward if N is negative)."
+  (interactive "^p")
+  (let ((i (or n 1)))
+    (fountain-forward-character (- i))))
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
@@ -2728,28 +2702,12 @@ then make the changes desired."
   "Call shell script defined in `fountain-export-shell-script'."
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
-         (file (shell-quote-argument (buffer-file-name buffer)))
-         (command (format fountain-export-shell-script file)))
-    (async-shell-command command "*Fountain Export Process*")))
-
-(defun fountain-export-buffer-to-html (&optional buffer)
-  "Export BUFFER to HTML file, then switch to HTML buffer."
-  (interactive)
-  (with-current-buffer (or buffer (current-buffer))
-    (save-excursion
-      (save-restriction
-        (let ((destbuf (fountain-export--html))
-              (outputdir (if (buffer-file-name buffer)
-                             (expand-file-name (file-name-directory
-                                                (buffer-file-name buffer))))))
-          (with-current-buffer destbuf
-            (if outputdir
-                (write-file outputdir)))
-          (if (called-interactively-p 'interactive)
-              (switch-to-buffer-other-window destbuf))
-          destbuf)))))
-
-;;;; Menu Commands =============================================================
+         (file (buffer-file-name buffer)))
+    (if file
+        (async-shell-command
+         (format fountain-export-shell-script (shell-quote-argument file))
+         "*Fountain Export Process*")
+      (user-error "Buffer `%s' is not visiting a file" buffer))))
 
 (defun fountain-toggle-comment-syntax ()
   "Toggle `fountain-switch-comment-syntax'."
@@ -3074,7 +3032,7 @@ keywords suitable for Font Lock."
       (forward-line 1))
     match))
 
-;;; Mode Map ===================================================================
+;;; Keys =======================================================================
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
