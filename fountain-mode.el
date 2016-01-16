@@ -3192,11 +3192,10 @@ keywords suitable for Font Lock."
   (setq-local require-final-newline mode-require-final-newline)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level 'fountain-outline-level)
-  (setq-local fountain-outline-startup-level
-              (let ((n (fountain-get-metadata-value "startup-level")))
-                (if (stringp n)
-                    (min (string-to-number n) 6)
-                  fountain-outline-startup-level)))
+  (let ((n (fountain-get-metadata-value 'startup-level)))
+    (if (stringp n)
+        (setq-local fountain-outline-startup-level
+                    (min (string-to-number n) 6))))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible fountain-element))
   (add-hook 'post-self-insert-hook
