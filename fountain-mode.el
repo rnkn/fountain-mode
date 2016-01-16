@@ -1007,7 +1007,7 @@ Set with `fountain-init-scene-heading-regexp'. Requires
 `fountain-scene-heading-p' for preceding blank line.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\(?1:\\(?2:\\.\\)\\(?3:\\<.*?\\)\\)[\s\t]*$"
+  "^\\(?1:\\(?2:\\.\\)\\(?3:\\<.*?\\)\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-scene-heading-p' for preceding blank line.")
 
@@ -1279,15 +1279,12 @@ not changed.")
   "Initializes `fountain-scene-heading-regexp'."
   (setq fountain-scene-heading-regexp
         (concat fountain-forced-scene-heading-regexp
-                "[\s\t]*\\(?4:"
-                fountain-scene-number-regexp
-                "\\)?[\s\t]*$"
+                "[\s\t]*?\\(?4:#\\(?5:[a-z]?[0-9]+[a-z]?\\)\\)?[\s\t]*$"
                 "\\|"
                 "^\\(?1:\\(?3:"
                 (regexp-opt fountain-scene-heading-prefix-list)
-                "[.\s\t].*?\\)[\s\t]*\\(?4:"
-                fountain-scene-number-regexp
-                "\\)?\\)[\s\t]*$")))
+                "[.\s\t].*?\\)"
+                "[\s\t]*?\\(?4:#\\(?5:[a-z]?[0-9]+[a-z]?\\)\\)?\\)[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
   "Initializes `fountain-trans-regexp'."
@@ -1309,7 +1306,7 @@ not changed.")
   "Initializes `imenu-generic-expression'."
   (setq imenu-generic-expression
         (list
-         (list "Notes" fountain-note-regexp 2)
+         (list "Notes" fountain-note-regexp 3)
          (list "Scene Headings" fountain-scene-heading-regexp 1)
          (list "Sections" fountain-section-heading-regexp 3))))
 
@@ -1531,19 +1528,38 @@ comments."
       (forward-line 0)
       (looking-at fountain-center-regexp))))
 
-(defun fountain-read-metadata (&optional reposition)
+(defun fountain-action-p ()
+  "Match action text if point is at action, nil otherwise."
+  (unless (or (fountain-tachyon-p)
+              (fountain-metadata-p)
+              (fountain-section-heading-p)
+              (fountain-scene-heading-p)
+              (fountain-character-p)
+              (fountain-dialog-p)
+              (fountain-paren-p)
+              (fountain-trans-p)
+              (fountain-center-p)
+              (fountain-synopsis-p)
+              (fountain-note-p))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (forward-line 0)
+        (looking-at ".*")))))
+
+(defun fountain-read-metadata ()
   "Read and parse buffer metadata."
   (let (list)
     (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
         (while (fountain-metadata-p)
           (let ((element (fountain-parse-metadata)))
             (goto-char (plist-get (nth 1 element) :end))
             (forward-line 1)
-            (push element list)))
-        (reverse list)))))
+            (setq list (append list (list element)))))
+        list))))
 
 (defun fountain-get-metadata-value (key)
   "Return the buffer metadata value associated with KEY."
@@ -2661,6 +2677,32 @@ then make the changes desired."
         (set-marker end nil)
         (progress-reporter-done job)))))
 
+(defun fountain-set-font-lock-decoration (n)
+  "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
+  (interactive "NMaximum decoration (1-3): ")
+  (if (and (integerp n)
+           (<= 1 n 3))
+      (let ((level (cond ((= n 1) 1)
+                         ((= n 2) nil)
+                         ((= n 3) t)))
+            (dec font-lock-maximum-decoration))
+        (cond ((listp dec)
+               (setq dec (assq-delete-all 'fountain-mode dec))
+               (customize-set-variable 'font-lock-maximum-decoration
+                                       (cons (cons 'fountain-mode level)
+                                             dec)))
+              ((or (booleanp dec)
+                   (integerp dec))
+               (customize-set-variable 'font-lock-maximum-decoration
+                                       (list (cons 'fountain-mode level)
+                                             (cons 't dec)))))
+        (message "Syntax highlighting is now set at %s"
+                 (cond ((= n 1) "minimum")
+                       ((= n 2) "default")
+                       ((= n 3) "maximum")))
+        (font-lock-refresh-defaults))
+    (user-error "Decoration must be an integer 1-3")))
+
 (defun fountain-export-default ()
   "Call function defined in `fountain-export-default-command'"
   (interactive)
@@ -2769,33 +2811,6 @@ message of \"S are now invisible/visible\"."
            (if fountain-export-include-title-page
                "included" "omitted")))
 
-(defun fountain-set-font-lock-decoration (n)
-  "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
-  (interactive "NMaximum decoration (1-3): ")
-  (if (and (integerp n)
-           (<= 1 n 3))
-      (let ((level (cond ((= n 1) 1)
-                         ((= n 2) nil)
-                         ((= n 3) t)))
-            (dec font-lock-maximum-decoration))
-        (cond ((listp dec)
-               (setq dec (assq-delete-all 'fountain-mode dec))
-               (customize-set-variable 'font-lock-maximum-decoration
-                                       (cons (cons 'fountain-mode level)
-                                             dec)))
-              ((or (booleanp dec)
-                   (integerp dec))
-               (customize-set-variable 'font-lock-maximum-decoration
-                                       (list (cons 'fountain-mode level)
-                                             (cons 't dec))))
-              ((error "Malformed variable `font-lock-maximum-decoration'")))
-        (message "Syntax highlighting is now set at %s"
-                 (cond ((= n 1) "minimum")
-                       ((= n 2) "default")
-                       ((= n 3) "maximum")))
-        (font-lock-refresh-defaults))
-    (user-error "Decoration must be an integer 1-3")))
-
 (defun fountain-toggle-export-bold-scene-headings ()
   "Toggle `fountain-export-bold-scene-headings'"
   (interactive)
@@ -2843,8 +2858,10 @@ message of \"S are now invisible/visible\"."
 ;;; Font Lock ==================================================================
 
 (defvar fountain-font-lock-keywords-plist
-  `(("note" ,fountain-note-regexp
-     ((:level 2 :subexp 0 :invisible t)))
+  `(("note"
+     ,fountain-note-regexp
+     ((:level 2 :subexp 0
+              :invisible t)))
     ("scene-heading"
      (lambda (limit)
        (fountain-match-element 'fountain-scene-heading-p limit))
@@ -2858,9 +2875,12 @@ message of \"S are now invisible/visible\"."
      (lambda (limit)
        (fountain-match-element 'fountain-character-p limit))
      ((:level 3 :subexp 0)
-      (:level 2 :subexp 2 :face fountain-comment ; FIXME maybe
+      (:level 3 :subexp 2
               :invisible fountain-syntax-chars
-              :override t
+              :override append
+              :laxmatch t)
+      (:level 3 :subexp 5 :face highlight
+              :override append
               :laxmatch t)))
     ("dialog"
      (lambda (limit)
@@ -2874,14 +2894,16 @@ message of \"S are now invisible/visible\"."
      (lambda (limit)
        (fountain-match-element 'fountain-trans-p limit))
      ((:level 3 :subexp 0)
-      (:level 1 :subexp 2 :face fountain-comment
+      (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)))
-    ("forced-action-mark" ,fountain-forced-action-mark-regexp
+    ("forced-action-mark"
+     ,fountain-forced-action-mark-regexp
      ((:level 1 :subexp 0 :face fountain-comment
               :invisible fountain-syntax-chars)))
-    ("center" ,fountain-center-regexp
+    ("center"
+     ,fountain-center-regexp
      ((:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)
@@ -2889,56 +2911,67 @@ message of \"S are now invisible/visible\"."
       (:level 2 :subexp 4 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)))
-    ("section-heading" ,fountain-section-heading-regexp
+    ("section-heading"
+     ,fountain-section-heading-regexp
      ((:level 2 :subexp 3)
       (:level 2 :subexp 2 :face fountain-comment)))
-    ("synopsis" ,fountain-synopsis-regexp
+    ("synopsis"
+     ,fountain-synopsis-regexp
      ((:level 2 :subexp 0 :invisible t)
       (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)))
-    ("page-break" ,fountain-page-break-regexp
+    ("page-break"
+     ,fountain-page-break-regexp
      ((:level 2 :subexp 0 :face fountain-page-break)))
     ("metadata"
      (lambda (limit)
        (fountain-match-element 'fountain-metadata-p limit))
-     ((:level 2 :subexp 2 :face fountain-metadata-key
+     ((:level 2 :subexp 0 :face fountain-metadata-key
               :invisible t
               :laxmatch t)
       (:level 2 :subexp 3 :face fountain-metadata-value
               :invisible t
-              :laxmatch t)
-      (:level 2 :subexp 0 :face fountain-comment
-              :invisible t
-              :override keep)))
-    (nil ,fountain-nbsp-regexp
+              :override t
+              :laxmatch t)))
+    ("action"
+     (lambda (limit)
+       (fountain-match-element 'fountain-action-p limit))
+     ((:level 1 :subexp 0)))
+    (nil
+     ,fountain-nbsp-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-syntax-chars)))
-    (nil ,fountain-underline-regexp
+    (nil
+     ,fountain-underline-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
           (:level 1 :subexp 3 :face underline)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
-    (nil ,fountain-italic-regexp
+    (nil
+     ,fountain-italic-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
           (:level 1 :subexp 3 :face italic)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
-    (nil ,fountain-bold-regexp
+    (nil
+     ,fountain-bold-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
           (:level 1 :subexp 3 :face bold)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
-    (nil ,fountain-bold-italic-regexp
+    (nil
+     ,fountain-bold-italic-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
           (:level 1 :subexp 3 :face bold-italic)
           (:level 1 :subexp 4 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)))
-    (nil ,fountain-lyrics-regexp
+    (nil
+     ,fountain-lyrics-regexp
          ((:level 1 :subexp 2 :face fountain-non-printing
                   :invisible fountain-emphasis-delim)
           (:level 1 :subexp 3 :face italic))))
@@ -3000,12 +3033,18 @@ keywords suitable for Font Lock."
                  (invisible (plist-get plist :invisible))
                  (invisible-props
                   (cond ((eq invisible t)
-                         `(invisible ,(intern (concat "fountain-" element))))
+                         (list 'invisible (intern (concat "fountain-" element))))
                         (invisible
-                         `(invisible ,invisible)))))
+                         (list 'invisible invisible)))))
             (setq facespec
                   (append facespec
                           (if element
+                              ;; (list (list subexp (list 'face face
+                              ;;                        align-props
+                              ;;                        invisible-props
+                              ;;                        'fountain-element element)
+                              ;;                 (plist-get plist :override)
+                              ;;                 (plist-get plist :laxmatch)))
                               (list `(,subexp '(face ,face
                                                      ,@align-props
                                                      ,@invisible-props
