@@ -2138,10 +2138,9 @@ data reflects `outline-regexp'."
       (if (< (point) end)
           (let ((element (fountain-parse-element)))
             (when element
-              (setq list (append (list element) list))
-              ;; (push element list)
+              (setq list (append list (list element)))
               (goto-char (plist-get (nth 1 element) :end))))))
-    (reverse list)))
+    list))
 
 ;;;; Export Functions ==========================================================
 
