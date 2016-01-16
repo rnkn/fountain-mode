@@ -2503,6 +2503,22 @@ Otherwise return `fountain-export-buffer'"
   (upcase-region (line-beginning-position) (point))
   (newline))
 
+(defun fountain-insert-alternate-character ()
+  "Insert the alternate character and newline.
+The alternate character is the second-last character within the
+scene."
+  (interactive)
+  (if (and (fountain-blank-p)
+           (save-excursion
+             (forward-line -1)
+             (fountain-blank-p)))
+      (let ((character (fountain-get-character -2 'scene)))
+        (if character
+            (insert character ?\n)
+          (message "No alternate character within scene")
+          (newline)))
+    (newline)))
+
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
