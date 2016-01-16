@@ -686,7 +686,7 @@ more blank lines)."
 
 will be exported as
 
-     HAL "
+    “HAL”"
   :type 'boolean
   :group 'fountain-export)
 
