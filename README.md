@@ -51,12 +51,8 @@ Requirements
 
 - Emacs 24.4
 - [s.el][], the long lost Emacs string manipulation library.
-- If you want to use UUIDs (useful for using notes as linked bookmarks) you'll
-  need either `uuidgen` CLT (usually preinstalled on OS X and Linux) or
-  [uuid.el][] Emacs package.
 
 [s.el]: https://github.com/magnars/s.el "s.el"
-[uuid.el]: https://github.com/nicferrier/emacs-uuid "uuid.el"
 
 Installation
 ------------
