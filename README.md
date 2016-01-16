@@ -19,13 +19,12 @@ Pictured: *Big Fish* by John August in Fountain Mode (using
 Features
 --------
 
-- Support for most of the Fountain 1.1 specification (scene numbers and
-  dual dialog are forthcoming)
+- Support for most of the Fountain 1.1 specification
 - Auto-align elements for a kind of WYSIWYG (display only, does not
   modify file contents)
 - Integration with `outline` to toggle visibility of sections and
   scenes
-- Export to HTML and PDF (PDF export requires [Prince][])
+- Export to HTML, LaTeX and Final Draft (FDX)
 - Include or omit a title page
 - Navigate by scene heading
 - Emphasis (bold, italic, underlined text)
@@ -41,17 +40,11 @@ Features
   scene headings
 - everything is customizable, of course
 
-The following features are not *yet* supported:
-
-- scene numbers
-- dual dialog
-
 Most common features are accessible from the menu. For a full list of
-functions and key-bindings, type `C-h m`.
+functions and key-bindings, type <kbd>C-h m</kbd>.
 
 See the [Wiki][] on GitHub for ways to extend Fountain Mode.
 
-[prince]: http://www.princexml.com "Prince"
 [wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
 
 Requirements
@@ -59,11 +52,6 @@ Requirements
 
 - Emacs 24.4
 - [s.el][], the long lost Emacs string manipulation library.
-- Exporting to PDF requires [Prince][], which is free for personal use.
-  Prince adds a removable PDF annotation on the first page; if you don't
-  like it, delete the annotation in a PDF application that supports
-  editing annotations, or open the PDF and print to PDF, which will
-  remove all annotations.
 - If you want to use UUIDs (useful for using notes as linked bookmarks) you'll
   need either `uuidgen` CLT (usually preinstalled on OS X and Linux) or
   [uuid.el][] Emacs package.
@@ -120,18 +108,18 @@ level, e.g.:
     An obese man (40s) with a large mustard stain on his shirt exits the
     elevator. He holds a hotdog.
 
-Cycle subtree visibility with `TAB`. Cycle global outline visibility
-with `<backtab>` (shift-TAB) or `C-u TAB`. More navigation and structure
+Cycle subtree visibility with <kbd>TAB</kbd>. Cycle global outline visibility
+with <kbd>S-TAB</kbd> or <kbd>C-u TAB</kbd>. More navigation and structure
 editing commands are:
 
-- `C-c C-f fountain-outline-forward`
-- `C-c C-b fountain-outline-backward`
-- `C-c C-n fountain-outline-next`
-- `C-c C-p fountain-outline-previous`
-- `C-c C-u fountain-outline-up`
-- `C-c C-v fountain-outline-shift-down`
-- `C-c C-^ fountain-outline-shift-up`
-- `C-c C-SPC fountain-outline-mark`
+- <kbd>C-c C-f</kbd> `fountain-outline-forward`
+- <kbd>C-c C-b</kbd> `fountain-outline-backward`
+- <kbd>C-c C-n</kbd> `fountain-outline-next`
+- <kbd>C-c C-p</kbd> `fountain-outline-previous`
+- <kbd>C-c C-u</kbd> `fountain-outline-up`
+- <kbd>C-c C-v</kbd> `fountain-outline-shift-down`
+- <kbd>C-c C-^</kbd> `fountain-outline-shift-up`
+- <kbd>C-c C-SPC</kbd> `fountain-outline-mark`
 
 Bugs and Feature Requests
 -------------------------
@@ -154,3 +142,30 @@ History
 See [Releases][] on GitHub.
 
 [releases]: https://github.com/rnkn/fountain-mode/releases "Fountain Mode releases"
+
+Todo
+---
+
+- [ ] test Emacs 24.4 package require
+- [ ] make Emacs 22 (GPL v2) compatible
+- [ ] update emacs.fountain@librelist.com
+- [ ] add action to font-lock-keywords
+- [ ] remove s.el dependencies
+- [ ] create proper imenu functions
+- [ ] rewrite element predicate function for hard wrapping #37
+- [ ] scene heading regexp should include omitted scenes #34
+- [ ] support for Mountain include workflow #33
+- [ ] support for scene numbers #32
+- [ ] support for dual dialogue #31
+- [ ] use lisp data model for export #30
+- [ ] convert metadata template to skeleton #29
+- [ ] setting Action Alignment / Customizing Export Alignment #27
+- [ ] forced scene heading syntax character cannot be hidden bug #26
+- [ ] MORE dialog does not sit flush with dialog block bug #23
+- [ ] visual-line-mode and wrap-prefix bug bug #22
+- [ ] export to PDF via LaTeX #20
+- [ ] forcing blank lines #18
+- [ ] make CSS mobile friendly #17
+- [ ] export to ePub #16
+- [ ] auto-upcase sluglines #2
+- [ ] boneyard and notes interfere with elements bug #1
