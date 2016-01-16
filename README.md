@@ -142,3 +142,30 @@ History
 See [Releases][] on GitHub.
 
 [releases]: https://github.com/rnkn/fountain-mode/releases "Fountain Mode releases"
+
+Todo
+---
+
+- [ ] test Emacs 24.4 package require
+- [ ] make Emacs 22 (GPL v2) compatible
+- [ ] update emacs.fountain@librelist.com
+- [ ] add action to font-lock-keywords
+- [ ] remove s.el dependencies
+- [ ] create proper imenu functions
+- [ ] rewrite element predicate function for hard wrapping #37
+- [ ] scene heading regexp should include omitted scenes #34
+- [ ] support for Mountain include workflow #33
+- [ ] support for scene numbers #32
+- [ ] support for dual dialogue #31
+- [ ] use lisp data model for export #30
+- [ ] convert metadata template to skeleton #29
+- [ ] setting Action Alignment / Customizing Export Alignment #27
+- [ ] forced scene heading syntax character cannot be hidden bug #26
+- [ ] MORE dialog does not sit flush with dialog block bug #23
+- [ ] visual-line-mode and wrap-prefix bug bug #22
+- [ ] export to PDF via LaTeX #20
+- [ ] forcing blank lines #18
+- [ ] make CSS mobile friendly #17
+- [ ] export to ePub #16
+- [ ] auto-upcase sluglines #2
+- [ ] boneyard and notes interfere with elements bug #1
