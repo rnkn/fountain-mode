@@ -2162,15 +2162,6 @@ Otherwise return `fountain-export-buffer'"
       (concat (file-name-base (buffer-file-name)) "." format)
     (format fountain-export-buffer format)))
 
-(defun fountain-export-get-metadata-value (key) ; FIXME combine with other
-  "Like `fountain-get-metadata-value' but filters for HTML."
-  (let* ((value (cdr (assoc key fountain-metadata)))
-         (s (if (listp value)
-                (s-join "\n" value)
-              value))
-         (s (fountain-export-filter s)))
-    s))
-
 (defun fountain-export-create-title-page-element (key)
   "Gets metadata value associated with KEY and creates HTML element."
   (let* ((s (fountain-export-get-metadata-value key))
@@ -2430,7 +2421,7 @@ Otherwise return `fountain-export-buffer'"
               (erase-buffer)))
           (if (/= fountain-export-tick (buffer-modified-tick))
               (save-excursion
-                (fountain-read-metadata t)
+                (fountain-read-metadata)
                 (setq fountain-data
                       (fountain-export-parse (point-max)))))
           ;; (let* ((element (pop fountain-export-content))
