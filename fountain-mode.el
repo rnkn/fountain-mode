@@ -464,14 +464,6 @@ similar to:
                  (const :tag "Include level 5" 5))
   :group 'fountain)
 
-(defcustom fountain-uuid-func
-  '(lambda () (shell-command-to-string "uuidgen"))
-  "Function for generating a UUID.
-The default function requires the command line tool \"uuidgen\"."
-  :tag "Fountain UUID Function"
-  :type 'function
-  :group 'fountain)
-
 ;;;; Align Group Customization =================================================
 
 (defcustom fountain-align-elements
@@ -1549,7 +1541,6 @@ syntax.
     ${fullname} User full name (defined in `user-full-name')
     ${nick}     User first name (defined in `user-login-name')
     ${email}    User email (defined in `user-mail-address')
-    ${uuid}     Insert a UUID (defined in `fountain-uuid-func')
 
 Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
 `point', but only use one of each."
@@ -1560,8 +1551,7 @@ Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
                         ("time" . ,(format-time-string fountain-short-time-format))
                         ("fullname" . ,user-full-name)
                         ("nick" . ,(capitalize user-login-name))
-                        ("email" . ,user-mail-address)
-                        ("uuid" . ,(fountain-uuid)))))
+                        ("email" . ,user-mail-address))))
     (let ((end (point-marker)))
       (goto-char start)
       (when (search-forward "$@" end t)
@@ -1572,11 +1562,6 @@ Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
           (replace-match "")
         (goto-char end))
       (set-marker end nil))))
-
-(defun fountain-uuid ()
-  "Return a lowercase 8-digit UUID by calling `fountain-uuid-func'."
-  (let ((s (downcase (funcall fountain-uuid-func))))
-    (car (split-string s "-"))))
 
 (defun fountain-get-character (&optional n limit)
   "Return Nth next character (or Nth previous if N is negative).
