@@ -1652,18 +1652,19 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
         (if (fountain-character-p)
             (match-string-no-properties 4))))))
 
-;; (defun fountain-get-scene-num ()
-;;   "Return the scene number of current scene."
-;;   (if (looking-at fountain-scene-num-regexp)
-;;       (s-chop-prefix "#" (match-string-no-properties 3))))
+(defun fountain-get-scene-number ()
+  "Return the scene number of current scene."
+  (if (fountain-scene-heading-p)
+      (match-string-no-properties 5)))
 
-;; (defun fountain-add-scene-num (n)
+;; (defun fountain-add-scene-number (n)
 ;;   "Add scene number N to current scene heading.
 ;; Assumes line matched `fountain-scene-heading-p'."
-;;   (end-of-line)
-;;   (insert "#" n)
-;;   (beginning-of-line)
-;;   (fountain-align-scene-num))
+;;   (when (fountain-scene-heading-p)
+;;     (end-of-line)
+;;     (insert "#" (number-to-string n))
+;;     (beginning-of-line)
+;;     (fountain-align-scene-number)))
 
 ;; (defun fountain-add-scene-nums (&optional arg)
 ;;   "Add scene numbers to all scene headings lacking.
@@ -1705,7 +1706,8 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 
 (defun fountain-align-scene-number ()
   "Align scene number to `fountain-align-scene-num'."
-  (if (and (fountain-scene-heading-p)
+  (if (and fountain-align-scene-num
+           (fountain-scene-heading-p)
            (match-string 4)
            (< (point) (match-beginning 4)))
       (let* ((pos (point))
@@ -2024,7 +2026,7 @@ data reflects `outline-regexp'."
 (defun fountain-parse-scene ()
   (let ((heading (fountain-parse-scene-heading))
         (num (match-string-no-properties 5))
-        (omit (s-starts-with? "OMIT" (match-string 0)))
+        (omit (string-prefix-p "OMIT" (match-string 0)))
         (beg (point))
         (end (save-excursion
                (outline-end-of-subtree)
@@ -2555,10 +2557,22 @@ If N is 0, move to beginning of scene."
                 (fountain-scene-heading-p)))
       (progn
         (goto-char (mark))
-        (error "Before first scene heading"))
+        (user-error "Before first scene heading"))
     (push-mark)
     (fountain-forward-scene 1)
     (exchange-point-and-mark)))
+
+(defun fountain-goto-scene (n)
+  "Move point to Nth scene."
+  (interactive "NGoto scene: ")
+  (goto-char (point-min))
+  (let ((scene (if (fountain-scene-heading-p) 1 0)))
+    (while (and (< scene n)
+                (not (eobp)))
+      (fountain-forward-scene)
+      (setq scene (if (match-string 5)
+                      (string-to-number (match-string-no-properties 5))
+                    (1+ scene))))))
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
@@ -3063,6 +3077,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-M-a") 'fountain-beginning-of-scene)
     (define-key map (kbd "C-M-e") 'fountain-end-of-scene)
     (define-key map (kbd "C-M-h") 'fountain-mark-scene)
+    (define-key map (kbd "M-g s") 'fountain-goto-scene)
     (define-key map (kbd "M-n") 'fountain-forward-character)
     (define-key map (kbd "M-p") 'fountain-backward-character)
     ;; outline commands
