@@ -299,6 +299,15 @@ with \\[fountain-save-font-lock-decoration]."
 (define-obsolete-face-alias 'fountain-section
   'fountain-section-heading "1.4.1")
 
+(make-obsolete 'fountain-export-buffer-to-html
+               'fountain-export "2.0.0")
+
+(make-obsolete 'fountain-export-buffer-to-pdf-via-html
+               'fountain-export "2.0.0")
+
+(make-obsolete 'fountain-export-pdf-via-html-command
+               'fountain-export-shell-script "2.0.0")
+
 ;;; Customization ==============================================================
 
 (defcustom fountain-mode-hook
