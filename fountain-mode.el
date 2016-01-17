@@ -555,448 +555,446 @@ This option does affect file contents."
 
 ;;;; Export Group Customization ================================================
 
-(defcustom fountain-export-element-set
-  '(scene-heading action character paren dialog trans)
-  "List of elements to include when exporting.
-You would usually keep this at its default, but changing becomes
-useful if, for example, you want to include your script notes, or
-only want to export your synopses.
+;; (defcustom fountain-export-include-elements
+;;   '(scene-heading action character paren dialog trans)
+;;   "List of elements to include when exporting.
+;; You would usually keep this at its default, but changing becomes
+;; useful if, for example, you want to include your script notes, or
+;; only want to export your synopses."
+;;   :type '(set
+;;           (const :tag "Scene Headings" scene-heading)
+;;           (const :tag "Action" action)
+;;           (const :tag "Character Names" character)
+;;           (const :tag "Parentheticals" paren)
+;;           (const :tag "Dialog" dialog)
+;;           (const :tag "Transitions" trans)
+;;           (const :tag "Section Headings" section-heading)
+;;           (const :tag "Synopses" synopsis)
+;;           (const :tag "Notes" note)
+;;           (const :tag "Comments" comment))
+;;   :group 'fountain-export)
 
-This set does not apply to metadata."
-  :type '(set
-          (const :tag "Scene Headings" scene-heading)
-          (const :tag "Action" action)
-          (const :tag "Character Names" character)
-          (const :tag "Parentheticals" paren)
-          (const :tag "Dialog" dialog)
-          (const :tag "Transitions" trans)
-          (const :tag "Section Headings" section-heading)
-          (const :tag "Synopses" synopsis)
-          (const :tag "Notes" note)
-          (const :tag "Comments" comment))
-  :group 'fountain-export)
+;; (defcustom fountain-export-buffer
+;;   "*Fountain %s Export*"
+;;   "Name of export buffer when source is not visiting a file.
 
-(defcustom fountain-export-buffer
-  "*Fountain %s Export*"
-  "Name of export buffer when source is not visiting a file.
+;; Passed the format being exported as a variable by `format'."
+;;   :type 'string
+;;   :group 'fountain-export)
 
-Passed the format being exported as a variable by `format'."
-  :type 'string
-  :group 'fountain-export)
+;; (defcustom fountain-export-default-command
+;;   'fountain-export-shell-script
+;;   "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
+;;   :type '(radio (function-item fountain-export-buffer-to-html)
+;;                 (function-item fountain-export-shell-script))
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-default-command
-  'fountain-export-shell-script
-  "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
-  :type '(radio (function-item fountain-export-buffer-to-html)
-                (function-item fountain-export-shell-script))
-  :group 'fountain-export)
+;; (defcustom fountain-export-include-title-page
+;;   t
+;;   "Generate a title page on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-include-title-page
-  t
-  "Generate a title page on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-inline-style
+;;   t
+;;   "If non-nil, use inline stylesheet.
+;; Otherwise, use an external stylesheet file."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-inline-style
-  t
-  "If non-nil, use inline stylesheet.
-Otherwise, use an external stylesheet file."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-page-size
+;;   "us-letter"
+;;   "Paper size to use on export."
+;;   :type '(radio (const :tag "US Letter" "us-letter")
+;;                 (const :tag "A4" "a4"))
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-page-size
-  "us-letter"
-  "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" "us-letter")
-                (const :tag "A4" "a4"))
-  :group 'fountain-export)
+;; (defcustom fountain-export-font
+;;   '("Courier" "Courier New" "monospace")
+;;   "List of font names to use when exporting, by priority."
+;;   :type '(repeat (string :tag "Font"))
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-font
-  '("Courier" "Courier New" "monospace")
-  "List of font names to use when exporting, by priority."
-  :type '(repeat (string :tag "Font"))
-  :group 'fountain-export)
+;; (defcustom fountain-export-bold-scene-headings
+;;   nil
+;;   "If non-nil, bold scene headings on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-bold-scene-headings
-  nil
-  "If non-nil, bold scene headings on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-underline-scene-headings
+;;   nil
+;;   "If non-nil, underline scene headings on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-underline-scene-headings
-  nil
-  "If non-nil, underline scene headings on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-bold-title
+;;   nil
+;;   "If non-nil, bold title on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-bold-title
-  nil
-  "If non-nil, bold title on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-underline-title
+;;   t
+;;   "If non-nil, underline title on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-underline-title
-  t
-  "If non-nil, underline title on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-upcase-title
+;;   t
+;;   "If non-nil, underline title on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-upcase-title
-  t
-  "If non-nil, underline title on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-double-space-scene-headings
+;;   nil
+;;   "If non-nil, double space before scene headings on export."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-double-space-scene-headings
-  nil
-  "If non-nil, double space before scene headings on export."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-action-orphans
+;;   2
+;;   "Number of allowable action orphan lines.
+;; When breaking action across pages, this integer is the minimum
+;; number of lines on the previous page."
+;;   :type 'integer
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-action-orphans
-  2
-  "Number of allowable action orphan lines.
-When breaking action across pages, this integer is the minimum
-number of lines on the previous page."
-  :type 'integer
-  :group 'fountain-export)
+;; (defcustom fountain-export-action-widows
+;;   2
+;;   "Number of allowable action widow lines.
+;; When breaking action across pages, this integer is the minimum
+;; number of lines on the following page."
+;;   :type 'integer
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-action-widows
-  2
-  "Number of allowable action widow lines.
-When breaking action across pages, this integer is the minimum
-number of lines on the following page."
-  :type 'integer
-  :group 'fountain-export)
+;; (defcustom fountain-export-dialog-orphans
+;;   2
+;;   "Number of allowable dialog orphan lines.
+;; When breaking dialog across pages, this integer is the minimum
+;; number of lines on the previous page."
+;;   :type 'integer
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-dialog-orphans
-  2
-  "Number of allowable dialog orphan lines.
-When breaking dialog across pages, this integer is the minimum
-number of lines on the previous page."
-  :type 'integer
-  :group 'fountain-export)
+;; (defcustom fountain-export-dialog-widows
+;;   2
+;;   "Number of allowable dialog widow lines.
+;; When breaking dialog across pages, this integer is the minimum
+;; number of lines on the following page."
+;;   :type 'integer
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-dialog-widows
-  2
-  "Number of allowable dialog widow lines.
-When breaking dialog across pages, this integer is the minimum
-number of lines on the following page."
-  :type 'integer
-  :group 'fountain-export)
+;; (defcustom fountain-export-more-dialog-string
+;;   "(MORE)"
+;;   "String to append to dialog when breaking across pages.
+;; Parentheses are not automatically added."
+;;   :type 'string
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-more-dialog-string
-  "(MORE)"
-  "String to append to dialog when breaking across pages.
-Parentheses are not automatically added."
-  :type 'string
-  :group 'fountain-export)
+;; (defcustom fountain-export-preserve-line-breaks
+;;   t
+;;   "If non-nil, convert all newlines into line breaks.
+;; Otherwise, only break paragraphs at explicit line breaks (one or
+;; more blank lines)."
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-preserve-line-breaks
-  t
-  "If non-nil, convert all newlines into line breaks.
-Otherwise, only break paragraphs at explicit line breaks (one or
-more blank lines)."
-  :type 'boolean
-  :group 'fountain-export)
+;; (defcustom fountain-export-convert-quotes
+;;   nil
+;;   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
 
-(defcustom fountain-export-convert-quotes
-  nil
-  "If non-nil, replace TeX-style quotes with \"smart-quotes\".
+;;     \`\`HAL\'\'
 
-    \`\`HAL\'\'
+;; will be exported as
 
-will be exported as
+;;     “HAL”"
+;;   :type 'boolean
+;;   :group 'fountain-export)
 
-    “HAL”"
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-shell-script
+(defcustom fountain-export-shell-command
   "afterwriting --source %s --pdf --overwrite"
   "Shell command string to convert Fountain source to ouput.
 \"%s\" will be substituted with `buffer-file-name'"
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-title-page-title-template
-  "${title}
-${credit}
-${author}"
-  "Template for creating title page title block."
-  :type 'string
-  :group 'fountain-export)
+;; (defcustom fountain-export-title-page-title-template
+;;   "${title}
+;; ${credit}
+;; ${author}"
+;;   "Template for creating title page title block."
+;;   :type 'string
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-title-page-left-template
-  "${draft}
-${date}
-${notes}"
-  "Template for creating title page left block."
-  :type 'string
-  :group 'fountain-export)
+;; (defcustom fountain-export-title-page-left-template
+;;   "${draft}
+;; ${date}
+;; ${notes}"
+;;   "Template for creating title page left block."
+;;   :type 'string
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-title-page-right-template
-  "${contact}"
-  "Template for creating title page right block."
-  :type 'string
-  :group 'fountain-export)
+;; (defcustom fountain-export-title-page-right-template
+;;   "${contact}"
+;;   "Template for creating title page right block."
+;;   :type 'string
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-style-template
-"@page {
-    size: ${page-size};
-    margin-top: 1in;
-    margin-right: 1in;
-    margin-bottom: 0.5in;
-    margin-left: 1.5in;
-}
+;; (defcustom fountain-export-style-template
+;; "@page {
+;;     size: ${page-size};
+;;     margin-top: 1in;
+;;     margin-right: 1in;
+;;     margin-bottom: 0.5in;
+;;     margin-left: 1.5in;
+;; }
 
-#title-page {
-    page: title;
-    margin: 0 auto;
-    width: 6in;
-    clear: both;
-    page-break-after: always;
-}
+;; #title-page {
+;;     page: title;
+;;     margin: 0 auto;
+;;     width: 6in;
+;;     clear: both;
+;;     page-break-after: always;
+;; }
 
-#screenplay {
-    margin: 0 auto;
-    width: 6in;
-    clear: both;
-    counter-reset: page 1;
-    page: screenplay;
-}
+;; #screenplay {
+;;     margin: 0 auto;
+;;     width: 6in;
+;;     clear: both;
+;;     counter-reset: page 1;
+;;     page: screenplay;
+;; }
 
-@media print {
-    #title {
-        margin-top: 3.5in;
-        margin-bottom: 4in;
-    }
-}
+;; @media print {
+;;     #title {
+;;         margin-top: 3.5in;
+;;         margin-bottom: 4in;
+;;     }
+;; }
 
-#title-page #title {
-    text-align: center;
-}
+;; #title-page #title {
+;;     text-align: center;
+;; }
 
-#title-page #title img {
-    width: 100%;
-}
+;; #title-page #title img {
+;;     width: 100%;
+;; }
 
-#title-page #left {
-    width: 50%;
-    float: left;
-}
+;; #title-page #left {
+;;     width: 50%;
+;;     float: left;
+;; }
 
-#title-page #right {
-    width: 50%;
-    float: right;
-    text-align: right;
-}
+;; #title-page #right {
+;;     width: 50%;
+;;     float: right;
+;;     text-align: right;
+;; }
 
-#title h1 {
-    text-decoration: ${title-underline};
-    text-transform: ${title-upcase};
-    font-weight: ${title-bold};
-}
+;; #title h1 {
+;;     text-decoration: ${title-underline};
+;;     text-transform: ${title-upcase};
+;;     font-weight: ${title-bold};
+;; }
 
-@page screenplay {
-    @top-right-corner {
-        font-family: ${font};
-        font-size: 12pt;
-        content: counter(page)\".\";
-        vertical-align: bottom;
-        padding-bottom: 1em;
-    }
-    @bottom-left {
-        font-family: ${font};
-        font-size: 12pt;
-        content: string(dialog-more, last);
-        margin-left: 2in;
-        vertical-align: top;
-    }
-}
+;; @page screenplay {
+;;     @top-right-corner {
+;;         font-family: ${font};
+;;         font-size: 12pt;
+;;         content: counter(page)\".\";
+;;         vertical-align: bottom;
+;;         padding-bottom: 1em;
+;;     }
+;;     @bottom-left {
+;;         font-family: ${font};
+;;         font-size: 12pt;
+;;         content: string(dialog-more, last);
+;;         margin-left: 2in;
+;;         vertical-align: top;
+;;     }
+;; }
 
-@page screenplay:first {
-    @top-right-corner {
-        content: normal;
-    }
-}
+;; @page screenplay:first {
+;;     @top-right-corner {
+;;         content: normal;
+;;     }
+;; }
 
-h1,h2,h3,h4,h5,h6 {
-    font-weight: normal;
-    font-size: 12pt;
-}
+;; h1,h2,h3,h4,h5,h6 {
+;;     font-weight: normal;
+;;     font-size: 12pt;
+;; }
 
-body {
-    font-family: ${font};
-    font-size: 12pt;
-    line-height: 1;
-}
+;; body {
+;;     font-family: ${font};
+;;     font-size: 12pt;
+;;     line-height: 1;
+;; }
 
-hr {
-    visibility: hidden;
-    page-break-after: always;
-}
+;; hr {
+;;     visibility: hidden;
+;;     page-break-after: always;
+;; }
 
-em {
-    font-style: italic;
-}
+;; em {
+;;     font-style: italic;
+;; }
 
-strong {
-    font-weight: bold;
-}
+;; strong {
+;;     font-weight: bold;
+;; }
 
-span.underline {
-    text-decoration: underline;
-}
+;; span.underline {
+;;     text-decoration: underline;
+;; }
 
-span.strikethrough {
-    text-line-through-style: solid;
-}
+;; span.strikethrough {
+;;     text-line-through-style: solid;
+;; }
 
-mark {
-    background-color: inherit;
-}
+;; mark {
+;;     background-color: inherit;
+;; }
 
-mark:before {
-    content: '*';
-    width: 0.5in;
-    position: absolute;
-    right: 0in;
-}
+;; mark:before {
+;;     content: '*';
+;;     width: 0.5in;
+;;     position: absolute;
+;;     right: 0in;
+;; }
 
-del:before {
-    content: '*';
-    width: 0.5in;
-    position: absolute;
-    right: 0in;
-}
+;; del:before {
+;;     content: '*';
+;;     width: 0.5in;
+;;     position: absolute;
+;;     right: 0in;
+;; }
 
-p {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0in;
-    width: auto;
-}
+;; p {
+;;     margin-top: 1em;
+;;     margin-bottom: 1em;
+;;     margin-left: 0in;
+;;     width: auto;
+;; }
 
-h2.scene-heading {
-    font-weight: ${scene-bold};
-    text-decoration: ${scene-underline};
-    margin-top: ${scene-spacing};
-    margin-bottom: 1em;
-    page-break-after: avoid;
-}
+;; h2.scene-heading {
+;;     font-weight: ${scene-bold};
+;;     text-decoration: ${scene-underline};
+;;     margin-top: ${scene-spacing};
+;;     margin-bottom: 1em;
+;;     page-break-after: avoid;
+;; }
 
-p.action {
-    white-space: pre-wrap;
-    orphans: ${action-orphans};
-    widows: ${action-widows};
-}
+;; p.action {
+;;     white-space: pre-wrap;
+;;     orphans: ${action-orphans};
+;;     widows: ${action-widows};
+;; }
 
-p.center {
-    text-align: center;
-    margin-left: 0;
-    width: 100%;
-    white-space: pre-wrap;
-}
+;; p.center {
+;;     text-align: center;
+;;     margin-left: 0;
+;;     width: 100%;
+;;     white-space: pre-wrap;
+;; }
 
-p.trans {
-    margin-left: 4in;
-    width: 2in;
-    page-break-before: avoid;
-}
+;; p.trans {
+;;     margin-left: 4in;
+;;     width: 2in;
+;;     page-break-before: avoid;
+;; }
 
-p.note {
-    display: none;
-}
+;; p.note {
+;;     display: none;
+;; }
 
-p.section {
-    display: none;
-}
+;; p.section {
+;;     display: none;
+;; }
 
-p.synopsis {
-    display: none;
-}
+;; p.synopsis {
+;;     display: none;
+;; }
 
-p.page-break {
-    visibility: hidden;
-    page-break-after: always;
-}
+;; p.page-break {
+;;     visibility: hidden;
+;;     page-break-after: always;
+;; }
 
-table.dialog {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 1in;
-    border-spacing: 0px;
-    width: 4in;
-    string-set: character attr(data-character) dialog-more \"${dialog-more}\";
-}
+;; table.dialog {
+;;     margin-top: 1em;
+;;     margin-bottom: 1em;
+;;     margin-left: 1in;
+;;     border-spacing: 0px;
+;;     width: 4in;
+;;     string-set: character attr(data-character) dialog-more \"${dialog-more}\";
+;; }
 
-table.dialog:after {
-    display: table-row;
-    content: \"\";
-    string-set: dialog-more \"\";
-}
+;; table.dialog:after {
+;;     display: table-row;
+;;     content: \"\";
+;;     string-set: dialog-more \"\";
+;; }
 
-tr.character {
-    page-break-after: avoid;
-}
+;; tr.character {
+;;     page-break-after: avoid;
+;; }
 
-tr.dialog {
-    orphans: ${dialog-orphans};
-    widows: ${dialog-widows};
-}
+;; tr.dialog {
+;;     orphans: ${dialog-orphans};
+;;     widows: ${dialog-widows};
+;; }
 
-tr.paren {
-    orphans: ${dialog-orphans};
-    widows: ${dialog-widows};
-    page-break-inside: avoid;
-    page-break-after: avoid;
-}
+;; tr.paren {
+;;     orphans: ${dialog-orphans};
+;;     widows: ${dialog-widows};
+;;     page-break-inside: avoid;
+;;     page-break-after: avoid;
+;; }
 
-td {
-    display: block;
-    padding: 0;
-}
+;; td {
+;;     display: block;
+;;     padding: 0;
+;; }
 
-td.character {
-    margin-left: 1in;
-}
+;; td.character {
+;;     margin-left: 1in;
+;; }
 
-td.dialog {
-    width: 3.5in;
-}
+;; td.dialog {
+;;     width: 3.5in;
+;; }
 
-td.paren {
-    margin-left: 0.6in;
-    text-indent: -0.6em;
-    width: 2in;
-}
+;; td.paren {
+;;     margin-left: 0.6in;
+;;     text-indent: -0.6em;
+;;     width: 2in;
+;; }
 
-table.dialog caption.character {
-    margin-left: 1in;
-    text-align: left;
-    caption-side: top;
-    caption-page: following;
-    content: string(character, last)\" ${dialog-contd}\";
-}"
-"Style template for exporting to HTML, and PDF via HTML.
-Only customize this if you really know what you're doing."
-  :type 'string
-  :group 'fountain-export)
+;; table.dialog caption.character {
+;;     margin-left: 1in;
+;;     text-align: left;
+;;     caption-side: top;
+;;     caption-page: following;
+;;     content: string(character, last)\" ${dialog-contd}\";
+;; }"
+;; "Style template for exporting to HTML, and PDF via HTML.
+;; Only customize this if you really know what you're doing."
+;;   :type 'string
+;;   :group 'fountain-export)
 
-(defcustom fountain-export-html-head-template
-  "<head>
-<meta charset=\"${charset}\">
-<meta name=\"author\" content=\"${author}\" />
-<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
-<title>${title}</title>
-${insert-style}
-</head>"
-  "HTML head template inserted into export buffer.
-Only customize this if you really know what you're dong.
-Currently, ${charset} will default to UTF-8."
-  :type 'string
-  :group 'fountain-export)
+;; (defcustom fountain-export-html-head-template
+;;   "<head>
+;; <meta charset=\"${charset}\">
+;; <meta name=\"author\" content=\"${author}\" />
+;; <meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
+;; <title>${title}</title>
+;; ${insert-style}
+;; </head>"
+;;   "HTML head template inserted into export buffer.
+;; Only customize this if you really know what you're dong.
+;; Currently, ${charset} will default to UTF-8."
+;;   :type 'string
+;;   :group 'fountain-export)
 
 ;;; Variables ==================================================================
 ;;;; Buffer Local Variables ====================================================
@@ -2118,184 +2116,184 @@ data reflects `outline-regexp'."
 
 ;;;; Export Functions ==========================================================
 
-(defun fountain-export-get-filename (format)
-  "If BUFFER is visiting a file, concat file name base and FORMAT.
-Otherwise return `fountain-export-buffer'"
-  (if (buffer-file-name)
-      (concat (file-name-base (buffer-file-name)) "." format)
-    (format fountain-export-buffer format)))
+;; (defun fountain-export-get-filename (format)
+;;   "If BUFFER is visiting a file, concat file name base and FORMAT.
+;; Otherwise return `fountain-export-buffer'"
+;;   (if (buffer-file-name)
+;;       (concat (file-name-base (buffer-file-name)) "." format)
+;;     (format fountain-export-buffer format)))
 
-(defun fountain-export-create-title-page-element (key)
-  "Gets metadata value associated with KEY and creates HTML element."
-  (let* ((s (fountain-export-get-metadata-value key))
-         (content (fountain-export-line-breaks s)))
-    (if (string= key "title")
-        (format "<h1>%s</h1>" content)
-      (format "<p>%s</p>" content))))
+;; (defun fountain-export-create-title-page-element (key)
+;;   "Gets metadata value associated with KEY and creates HTML element."
+;;   (let* ((s (fountain-export-get-metadata-value key))
+;;          (content (fountain-export-line-breaks s)))
+;;     (if (string= key "title")
+;;         (format "<h1>%s</h1>" content)
+;;       (format "<p>%s</p>" content))))
 
-(defun fountain-export-create-html-title-page ()
-  "Create title page based on `fountain-export-title-page-template'."
-  (if (cdr (assoc "title" fountain-metadata))
-      (concat
-       "<div id=\"title\">\n"
-       (s-format fountain-export-title-page-title-template
-                 'fountain-export-create-title-page-element)
-       "\n</div>\n<div id=\"left\">\n"
-       (s-format fountain-export-title-page-left-template
-                 'fountain-export-create-title-page-element)
-       "\n</div>\n<div id=\"right\">\n"
-       (s-format fountain-export-title-page-right-template
-                 'fountain-export-create-title-page-element)
-       "\n</div>\n")))
+;; (defun fountain-export-create-html-title-page ()
+;;   "Create title page based on `fountain-export-title-page-template'."
+;;   (if (cdr (assoc "title" fountain-metadata))
+;;       (concat
+;;        "<div id=\"title\">\n"
+;;        (s-format fountain-export-title-page-title-template
+;;                  'fountain-export-create-title-page-element)
+;;        "\n</div>\n<div id=\"left\">\n"
+;;        (s-format fountain-export-title-page-left-template
+;;                  'fountain-export-create-title-page-element)
+;;        "\n</div>\n<div id=\"right\">\n"
+;;        (s-format fountain-export-title-page-right-template
+;;                  'fountain-export-create-title-page-element)
+;;        "\n</div>\n")))
 
-(defun fountain-export-create-style ()
-  "Create stylesheet using `fountain-export-style-template'."
-  (let* ((page-size fountain-export-page-size)
-         (font
-          (mapconcat
-           (lambda (font) (concat "'" font "'"))
-           fountain-export-font ","))
-         (scene-bold
-          (if fountain-export-bold-scene-headings
-              "bold" "normal"))
-         (scene-underline
-          (if fountain-export-underline-scene-headings
-              "underline" "none"))
-         (scene-spacing
-          (if fountain-export-double-space-scene-headings
-              "2em" "1em"))
-         (title-bold
-          (if fountain-export-bold-title
-              "bold" "normal"))
-         (title-underline
-          (if fountain-export-underline-title
-              "underline" "none"))
-         (title-upcase
-          (if fountain-export-upcase-title
-              "uppercase" "none"))
-         (dialog-contd (concat "(" fountain-continued-dialog-string ")"))
-         (dialog-more fountain-export-more-dialog-string)
-         (action-orphans (int-to-string fountain-export-action-orphans))
-         (action-widows (int-to-string fountain-export-action-widows))
-         (dialog-orphans (int-to-string fountain-export-dialog-orphans))
-         (dialog-widows (int-to-string fountain-export-dialog-widows))
-         (style-rules (s-format fountain-export-style-template
-                          '(lambda (var)
-                             (symbol-value (intern var))))))
-    (if fountain-export-inline-style
-        (concat "<style type=\"text/css\">\n"
-                style-rules
-                "\n</style>")
-      (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
-            (outputdir (expand-file-name
-                        (file-name-directory (buffer-file-name)))))
-        (with-current-buffer cssfile
-          (erase-buffer)
-          (insert
-           (format
-            "/* Created with Emacs %s running Fountain Mode %s */\n"
-            emacs-version fountain-version)
-           style-rules)
-          (write-file outputdir))
-        (concat "<link rel=\"stylesheet\" href=\""
-                (buffer-name cssfile)
-                "\">")))))
+;; (defun fountain-export-create-style ()
+;;   "Create stylesheet using `fountain-export-style-template'."
+;;   (let* ((page-size fountain-export-page-size)
+;;          (font
+;;           (mapconcat
+;;            (lambda (font) (concat "'" font "'"))
+;;            fountain-export-font ","))
+;;          (scene-bold
+;;           (if fountain-export-bold-scene-headings
+;;               "bold" "normal"))
+;;          (scene-underline
+;;           (if fountain-export-underline-scene-headings
+;;               "underline" "none"))
+;;          (scene-spacing
+;;           (if fountain-export-double-space-scene-headings
+;;               "2em" "1em"))
+;;          (title-bold
+;;           (if fountain-export-bold-title
+;;               "bold" "normal"))
+;;          (title-underline
+;;           (if fountain-export-underline-title
+;;               "underline" "none"))
+;;          (title-upcase
+;;           (if fountain-export-upcase-title
+;;               "uppercase" "none"))
+;;          (dialog-contd (concat "(" fountain-continued-dialog-string ")"))
+;;          (dialog-more fountain-export-more-dialog-string)
+;;          (action-orphans (int-to-string fountain-export-action-orphans))
+;;          (action-widows (int-to-string fountain-export-action-widows))
+;;          (dialog-orphans (int-to-string fountain-export-dialog-orphans))
+;;          (dialog-widows (int-to-string fountain-export-dialog-widows))
+;;          (style-rules (s-format fountain-export-style-template
+;;                           '(lambda (var)
+;;                              (symbol-value (intern var))))))
+;;     (if fountain-export-inline-style
+;;         (concat "<style type=\"text/css\">\n"
+;;                 style-rules
+;;                 "\n</style>")
+;;       (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
+;;             (outputdir (expand-file-name
+;;                         (file-name-directory (buffer-file-name)))))
+;;         (with-current-buffer cssfile
+;;           (erase-buffer)
+;;           (insert
+;;            (format
+;;             "/* Created with Emacs %s running Fountain Mode %s */\n"
+;;             emacs-version fountain-version)
+;;            style-rules)
+;;           (write-file outputdir))
+;;         (concat "<link rel=\"stylesheet\" href=\""
+;;                 (buffer-name cssfile)
+;;                 "\">")))))
 
-(defun fountain-export-create-html-head ()
-  "Create HTML head using `fountain-export-html-head-template'."
-  (let ((insert-style (fountain-export-create-style))
-        (charset "utf-8")
-        (title (or (fountain-export-get-metadata-value "title")
-                   (file-name-base (buffer-name))))
-        (author (or (fountain-export-get-metadata-value "author")
-                    user-full-name)))
-    (s-format fountain-export-html-head-template
-              '(lambda (var)
-                 (symbol-value (intern var))))))
+;; (defun fountain-export-create-html-head ()
+;;   "Create HTML head using `fountain-export-html-head-template'."
+;;   (let ((insert-style (fountain-export-create-style))
+;;         (charset "utf-8")
+;;         (title (or (fountain-export-get-metadata-value "title")
+;;                    (file-name-base (buffer-name))))
+;;         (author (or (fountain-export-get-metadata-value "author")
+;;                     user-full-name)))
+;;     (s-format fountain-export-html-head-template
+;;               '(lambda (var)
+;;                  (symbol-value (intern var))))))
 
-(defun fountain-export-underline (s)
-  "Replace underlined text in S with HTML underline span tags."
-  (replace-regexp-in-string "_\\(.+?\\)_"
-                            "<span class=\"underline\">\\1</span>"
-                            s t))
+;; (defun fountain-export-underline (s)
+;;   "Replace underlined text in S with HTML underline span tags."
+;;   (replace-regexp-in-string "_\\(.+?\\)_"
+;;                             "<span class=\"underline\">\\1</span>"
+;;                             s t))
 
-(defun fountain-export-bold (s)
-  "Replace bold text in S with HTML strong tags."
-  (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
-                            "<strong>\\1</strong>"
-                            s t))
+;; (defun fountain-export-bold (s)
+;;   "Replace bold text in S with HTML strong tags."
+;;   (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
+;;                             "<strong>\\1</strong>"
+;;                             s t))
 
-(defun fountain-export-italic (s)
-  "Replace italic text in S with HTML emphasis tags."
-  (replace-regexp-in-string "\\*\\(.+?\\)\\*"
-                            "<em>\\1</em>"
-                            s t))
+;; (defun fountain-export-italic (s)
+;;   "Replace italic text in S with HTML emphasis tags."
+;;   (replace-regexp-in-string "\\*\\(.+?\\)\\*"
+;;                             "<em>\\1</em>"
+;;                             s t))
 
-(defun fountain-export-lyrics (s)
-  "Replace lyrics in S with HTML italic tags."
-  (replace-regexp-in-string "^~\s*\\(.+\\)"
-                            "<i>\\1</i>"
-                            s t))
+;; (defun fountain-export-lyrics (s)
+;;   "Replace lyrics in S with HTML italic tags."
+;;   (replace-regexp-in-string "^~\s*\\(.+\\)"
+;;                             "<i>\\1</i>"
+;;                             s t))
 
-(defun fountain-export-line-breaks (s)
-  "Replace newlines in S with HTML line breaks."
-  (replace-regexp-in-string "\n"
-                            "<br>\n"
-                            s))
+;; (defun fountain-export-line-breaks (s)
+;;   "Replace newlines in S with HTML line breaks."
+;;   (replace-regexp-in-string "\n"
+;;                             "<br>\n"
+;;                             s))
 
-(defun fountain-export-tex-quotes (s)
-  "Replace TeX-style quotes in S with \"smart\" quotes."
-  (s-replace-all '(("\\`" . "&#96;")
-                   ("\\'" . "&apos;")
-                   ("``" . "&ldquo;")
-                   ("''" . "&rdquo;")
-                   ("`" . "&lsquo;")
-                   ("'" . "&rsquo;")) s))
+;; (defun fountain-export-tex-quotes (s)
+;;   "Replace TeX-style quotes in S with \"smart\" quotes."
+;;   (s-replace-all '(("\\`" . "&#96;")
+;;                    ("\\'" . "&apos;")
+;;                    ("``" . "&ldquo;")
+;;                    ("''" . "&rdquo;")
+;;                    ("`" . "&lsquo;")
+;;                    ("'" . "&rsquo;")) s))
 
-(defun fountain-export-sanitize (s)
-  "Escape HTML characters in S."
-  (s-replace-all '(("&" . "&amp;")
-                   ("<" . "&lt;")
-                   (">" . "&gt;")) s))
+;; (defun fountain-export-sanitize (s)
+;;   "Escape HTML characters in S."
+;;   (s-replace-all '(("&" . "&amp;")
+;;                    ("<" . "&lt;")
+;;                    (">" . "&gt;")) s))
 
-(defun fountain-export-filter (sub-s)   ; FIXME update doc
-  (let* ((s (substring-no-properties sub-s))
-         (s (fountain-export-sanitize s))
-         (s (s-replace-all '(("\\\s" . "&nbsp;")
-                             ("^\\\\$" . "<br>\n")
-                             ("\\_" . "&#95;")
-                             ("\\*" . "&#42;")) s))
-         ;; (s (if fountain-export-preserve-line-breaks
-         ;;        (fountain-export-line-breaks s)
-         ;;      s))
-         (s (if fountain-export-convert-quotes
-                (fountain-export-tex-quotes s)
-              s))
-         (s (fountain-export-underline s))
-         (s (fountain-export-bold s))
-         (s (fountain-export-italic s))
-         (s (fountain-export-lyrics s)))
-    s))
+;; (defun fountain-export-filter (sub-s)   ; FIXME update doc
+;;   (let* ((s (substring-no-properties sub-s))
+;;          (s (fountain-export-sanitize s))
+;;          (s (s-replace-all '(("\\\s" . "&nbsp;")
+;;                              ("^\\\\$" . "<br>\n")
+;;                              ("\\_" . "&#95;")
+;;                              ("\\*" . "&#42;")) s))
+;;          ;; (s (if fountain-export-preserve-line-breaks
+;;          ;;        (fountain-export-line-breaks s)
+;;          ;;      s))
+;;          (s (if fountain-export-convert-quotes
+;;                 (fountain-export-tex-quotes s)
+;;               s))
+;;          (s (fountain-export-underline s))
+;;          (s (fountain-export-bold s))
+;;          (s (fountain-export-italic s))
+;;          (s (fountain-export-lyrics s)))
+;;     s))
 
-(defun fountain-export-create-html-dialog-table (content limit)
-  (let* ((dialog-contd (concat "(" fountain-continued-dialog-string ")"))
-         (character (fountain-export-filter
-                     (s-trim (car (s-slice-at dialog-contd content)))))
-         (table-start
-          (format (concat "<table class=\"dialog\" character=\"%s\">\n"
-                          "<caption class=\"character\">\n"
-                          "<tr class=\"character\"><td class=\"character\">%s</td></tr>\n")
-                  character content))
-         (table-body "")
-         (table-end "</table>\n"))
-    (goto-char (next-single-property-change
-                (point) 'fountain-element nil limit))
-    (while (< (point) limit)
-      (skip-chars-forward "\n")
-      (setq table-body
-            (concat table-body
-                    (fountain-export-create-html-element limit))))
-    (concat table-start table-body table-end)))
+;; (defun fountain-export-create-html-dialog-table (content limit)
+;;   (let* ((dialog-contd (concat "(" fountain-continued-dialog-string ")"))
+;;          (character (fountain-export-filter
+;;                      (s-trim (car (s-slice-at dialog-contd content)))))
+;;          (table-start
+;;           (format (concat "<table class=\"dialog\" character=\"%s\">\n"
+;;                           "<caption class=\"character\">\n"
+;;                           "<tr class=\"character\"><td class=\"character\">%s</td></tr>\n")
+;;                   character content))
+;;          (table-body "")
+;;          (table-end "</table>\n"))
+;;     (goto-char (next-single-property-change
+;;                 (point) 'fountain-element nil limit))
+;;     (while (< (point) limit)
+;;       (skip-chars-forward "\n")
+;;       (setq table-body
+;;             (concat table-body
+;;                     (fountain-export-create-html-element limit))))
+;;     (concat table-start table-body table-end)))
 
 ;; (defun fountain-export-create-html-element (limit)
 ;;   (let* ((index (point))
@@ -2357,45 +2355,42 @@ Otherwise return `fountain-export-buffer'"
 ;;   (fountain-export-span 'italic format s)
 ;;   (fountain-export-span 'lyric format s))
 
-(defun fountain-export-format-element (element format)
-  (let* ((type (car element))
-         (plist (nth 1 element))
-         (content (nth 2 element)))
-    (if (memq type fountain-export-element-set)
-        (let* ((template
-                (plist-get (cdr (assoc type fountain-export-format-plist))
-                           format))
-               (prefix (car template))
-               (suffix (cdr template)))
-          (concat prefix content suffix)))))
+;; (defun fountain-export-format-element (element format)
+;;   (let ((type (car element))
+;;         (plist (nth 1 element))
+;;         (content (nth 2 element)))
+;;     (if (memq type fountain-export-include-elements)
+;;         (let ((template (plist-get (cdr (assoc type fountain-export-format-plist))
+;;                                    format)))
+;;           (concat (car template) content (cdr template))))))
 
 ;; (setq fountain-export-tick (buffer-modified-tick))
 ;; fountain-export-content)
 
-(defun fountain-export (format)
-  (let* (complete
-         (source-buf (current-buffer))
-         (dest-buf (get-buffer-create
-                    (fountain-export-get-filename (symbol-name format)))))
-    (unwind-protect
-        (progn
-          (with-current-buffer dest-buf
-            (with-silent-modifications
-              (erase-buffer)))
-          (if (/= fountain-export-tick (buffer-modified-tick))
-              (save-excursion
-                (fountain-read-metadata)
-                (setq fountain-data
-                      (fountain-export-parse (point-max)))))
-          ;; (let* ((element (pop fountain-export-content))
-          ;;        (type (car element))
-          ;;        (content (nth 1 element))
-          ;;        (plist (nth 2 element)))
-          ;; (with-current-buffer dest-buf
-          ;;   (insert (fountain-export-format-element element format) ?\n)))
-          dest-buf)
-      (unless complete
-        (kill-buffer dest-buf)))))
+;; (defun fountain-export (format)
+;;   (let* (complete
+;;          (source-buf (current-buffer))
+;;          (dest-buf (get-buffer-create
+;;                     (fountain-export-get-filename (symbol-name format)))))
+;;     (unwind-protect
+;;         (progn
+;;           (with-current-buffer dest-buf
+;;             (with-silent-modifications
+;;               (erase-buffer)))
+;;           (if (/= fountain-export-tick (buffer-modified-tick))
+;;               (save-excursion
+;;                 (fountain-read-metadata)
+;;                 (setq fountain-data
+;;                       (fountain-export-parse (point-max)))))
+;;           ;; (let* ((element (pop fountain-export-content))
+;;           ;;        (type (car element))
+;;           ;;        (content (nth 1 element))
+;;           ;;        (plist (nth 2 element)))
+;;           ;; (with-current-buffer dest-buf
+;;           ;;   (insert (fountain-export-format-element element format) ?\n)))
+;;           dest-buf)
+;;       (unless complete
+;;         (kill-buffer dest-buf)))))
 
 ;; (defun fountain-export--html ()
 ;;   ;; internal function, don't call externally
@@ -2714,14 +2709,14 @@ then make the changes desired."
   (interactive)
   (funcall fountain-export-default-command))
 
-(defun fountain-export-shell-script (&optional buffer)
-  "Call shell script defined in `fountain-export-shell-script'."
+(defun fountain-export-shell-command (&optional buffer)
+  "Call shell script defined in `fountain-export-shell-command'."
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
          (file (buffer-file-name buffer)))
     (if file
         (async-shell-command
-         (format fountain-export-shell-script (shell-quote-argument file))
+         (format fountain-export-shell-command (shell-quote-argument file))
          "*Fountain Export Process*")
       (user-error "Buffer `%s' is not visiting a file" buffer))))
 
@@ -3095,10 +3090,11 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-S-i") 'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
-    (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
+    ;; (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
+    (define-key map (kbd "C-c C-e s") 'fountain-export-shell-command)
     ;; view commands
-    (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars)
-    (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim)
+    (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars) ; FIXME ??
+    (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim) ; FIXME ??
     map)
   "Mode map for `fountain-mode'.")
 
@@ -3167,27 +3163,28 @@ keywords suitable for Font Lock."
     "---"
     ("Export"
      ["Default" fountain-export-default]
-     ["Buffer to HTML" (fountain-export 'html)]
-     ["Buffer to LaTeX" (fountain-export 'latex)]
-     ["Buffer to FDX" (fountain-export 'fdx)]
-     "---"
-     ["Include Title Page"
-      fountain-toggle-export-include-title-page
-      :style toggle
-      :selected fountain-export-include-title-page]
-     "---"
-     ["Bold Scene Headings"
-      fountain-toggle-export-bold-scene-headings
-      :style toggle
-      :selected fountain-export-bold-scene-headings]
-     ["Underline Scene Headings"
-      fountain-toggle-export-underline-scene-headings
-      :style toggle
-      :selected fountain-export-underline-scene-headings]
-     ["Double-Space Scene Headings"
-      fountain-toggle-export-double-space-scene-headings
-      :style toggle
-      :selected fountain-export-double-space-scene-headings]
+     ["Run shell command" (fountain-export-shell-command)]
+     ;; ["Buffer to HTML" (fountain-export 'html)]
+     ;; ["Buffer to LaTeX" (fountain-export 'latex)]
+     ;; ["Buffer to FDX" (fountain-export 'fdx)]
+     ;; "---"
+     ;; ["Include Title Page"
+     ;;  fountain-toggle-export-include-title-page
+     ;;  :style toggle
+     ;;  :selected fountain-export-include-title-page]
+     ;; "---"
+     ;; ["Bold Scene Headings"
+     ;;  fountain-toggle-export-bold-scene-headings
+     ;;  :style toggle
+     ;;  :selected fountain-export-bold-scene-headings]
+     ;; ["Underline Scene Headings"
+     ;;  fountain-toggle-export-underline-scene-headings
+     ;;  :style toggle
+     ;;  :selected fountain-export-underline-scene-headings]
+     ;; ["Double-Space Scene Headings"
+     ;;  fountain-toggle-export-double-space-scene-headings
+     ;;  :style toggle
+     ;;  :selected fountain-export-double-space-scene-headings]
      "---"
      ["Customize Export" (customize-group 'fountain-export)])
     "---"
