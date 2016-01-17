@@ -447,7 +447,11 @@ similar to:
 
 (defcustom fountain-outline-startup-level
   0
-  "Outline level to show when visiting a file."
+  "Outline level to show when visiting a file.
+
+This can be set on a per-file basis by including in metadata:
+
+\tstartup-level: N"
   :type '(choice (const :tag "Show all" 0)
                  (const :tag "Show top-level" 1)
                  (const :tag "Show scene headings" 6)
@@ -1006,6 +1010,15 @@ Set with `fountain-read-metadata' upon calling `fountain-mode'.")
 (defvar-local fountain-outline-cycle
   0
   "Integer representing global outline cycling status.
+
+\t0\tShow all
+\t1\tShow level 1 section headings
+\t2\tShow level 2 section headings
+\t3\tShow level 3 section headings
+\t4\tShow level 4 section headings
+\t5\tShow level 5 section headings
+\t6\tShow scene headings
+
 Used by `fountain-outline-cycle'.")
 
 (defvar-local fountain-outline-cycle-subtree
@@ -1816,22 +1829,22 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
 
-\t\\[fountain-outline-cycle]\t\t\t\t\tCycle outline visibility of current subtree and its children
-\t\\[universal-argument] \\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of buffer
-\t\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\t\tShow all
-\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow outline visibility set in `fountain-outline-startup-level'"
+\t\\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of current subtree and its children
+\t\\[universal-argument] \\[fountain-outline-cycle]\t\t\tCycle outline visibility of buffer
+\t\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow all
+\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\tShow outline visibility set in `fountain-outline-startup-level'"
   (interactive "p")
-  (let* ((startup-level
-          (if fountain-outline-startup-level
+  (let* ((custom-level
+          (if fountain-outline-custom-level
               (save-excursion
                 (goto-char (point-min))
                 (let (found)
                   (while (and (not found)
                               (outline-next-heading))
                     (if (= (funcall outline-level)
-                           fountain-outline-startup-level)
+                           fountain-outline-custom-level)
                         (setq found t)))
-                  (if found fountain-outline-startup-level)))))
+                  (if found fountain-outline-custom-level)))))
          (highest-level
           (save-excursion
             (goto-char (point-max))
@@ -1845,9 +1858,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
               level))))
     (cond ((eq arg 4)
            (cond
-            ((and startup-level
+            ((and custom-level
                   (= fountain-outline-cycle 1))
-             (fountain-outline-hide-level startup-level))
+             (fountain-outline-hide-level custom-level))
             ((< 0 fountain-outline-cycle 6)
              (fountain-outline-hide-level 6))
             ((= fountain-outline-cycle 6)
@@ -1860,9 +1873,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
            (show-all)
            (message "Showing all")
            (setq fountain-outline-cycle 0))
-          ((and startup-level
+          ((and custom-level
                 (eq arg 64))
-           (fountain-outline-hide-level startup-level))
+           (fountain-outline-hide-level custom-level))
           (t
            (save-excursion
              (outline-back-to-heading)
@@ -1914,11 +1927,10 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-\t1. top-level section headins
-\t2. startup level, if non-nil
-\t   (set with `fountain-outline-cycle-startup-level' or in metadata)
-\t3. all section and scene headings
-\t4. everything"
+\tTop-level section headins
+\tValue of `fountain-outline-custom-level'
+\tAll section headings and scene headings
+\tEverything"
   (interactive)
   (fountain-outline-cycle 4))
 
