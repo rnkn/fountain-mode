@@ -473,46 +473,76 @@ This option does not affect file contents."
   :type 'boolean
   :group 'fountain-align)
 
+(defcustom fountain-align-section-heading
+  '(("screenplay" . 0) ("stageplay" . 30))
+  "Column integer to which section headings should be aligned.
+This option does not affect file contents."
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
+  :group 'fountain-align)
+
+(defcustom fountain-align-scene-heading
+  '(("screenplay" . 0) ("stageplay" . 30))
+  "Column integer to which scene headings should be aligned.
+This option does not affect file contents."
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
+  :group 'fountain-align)
+
+(defcustom fountain-align-synopsis
+  '(("screenplay" . 0) ("stageplay" . 30))
+  "Column integer to which synopses should be aligned.
+This option does not affect file contents."
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
+  :group 'fountain-align)
+
 (defcustom fountain-align-action
-  0
+  '(("screenplay" . 0) ("stageplay" . 20))
   "Column integer to which action should be aligned.
 This option does not affect file contents."
-  :type 'integer
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
   :group 'fountain-align)
 
 (defcustom fountain-align-character
-  20
+  '(("screenplay" . 20) ("stageplay" . 30))
   "Column integer to which characters names should be aligned.
 This option does not affect file contents."
-  :type 'integer
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
   :group 'fountain-align)
 
 (defcustom fountain-align-dialog
-  10
+  '(("screenplay" . 10) ("stageplay" . 0))
   "Column integer to which dialog should be aligned.
 This option does not affect file contents."
-  :type 'integer
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
   :group 'fountain-align)
 
 (defcustom fountain-align-paren
-  15
+  '(("screenplay" . 15) ("stageplay" . 20))
   "Column integer to which parentheticals should be aligned.
 This option does not affect file contents."
-  :type 'integer
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
   :group 'fountain-align)
 
 (defcustom fountain-align-trans
-  45
+  '(("screenplay" . 45) ("stageplay" . 30))
   "Column integer to which transitions should be aligned.
 This option does not affect file contents."
-  :type 'integer
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
   :group 'fountain-align)
 
 (defcustom fountain-align-center
-  20
+  '(("screenplay" . 20) ("stageplay" . 20))
   "Column integer to which centered text should be aligned.
 This option does not affect file contents."
-  :type 'integer
+  :type '(choice integer (alist :key-type (string :tag "Format")
+                                :value-type integer))
   :group 'fountain-align)
 
 (defcustom fountain-align-scene-num
@@ -2926,13 +2956,13 @@ message of \"S are now invisible/visible\"."
                   :invisible fountain-emphasis-delim)
           (:level 1 :subexp 3 :face italic))))
   "List of face properties to create element Font Lock keywords.
-Has the format:
+Takes the format:
 
-    (ELEMENT MATCHER PLIST-LIST)
+    (ELEMENT MATCHER SUB-PLIST)
 
 The first element, ELEMENT, is a string naming the element; if
 nil, this face is not considered an element. MATCHER is a regular
-expression or search function. PLIST-LIST is a list of plists,
+expression or search function. SUB-PLIST is a list of plists,
 assigning the following keywords:
 
     :level      integer representing level of `font-lock-maximum-decoration'
@@ -2950,6 +2980,14 @@ Regular expression should take the form:
     Group 3     export group
     Group 4     syntax characters")
 
+(defun fountain-get-align (element)
+  "Return ELEMENT align integer based on buffer format"
+  (if (integerp element) element
+    (let ((format (or (fountain-get-metadata-value "format")
+                      "screenplay")))
+      (cdr (or (assoc-string format element)
+               (car element))))))
+
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
 Uses `fountain-font-lock-keywords-plist' to create a list of
@@ -2960,18 +2998,19 @@ keywords suitable for Font Lock."
     (dolist (var fountain-font-lock-keywords-plist keywords)
       (let* ((element (car var))
              (matcher (nth 1 var))
-             (plist-list (nth 2 var))
-             (align (intern (concat "fountain-align-" element)))
+             (sub-plist (nth 2 var))
+             (align (let ((element (intern (concat "fountain-align-" element))))
+                      (if (boundp element)
+                          (fountain-get-align (symbol-value element)))))
              ;; if we're using auto-align and the align var is bound,
              ;; set the align properties
-             (align-props (if (and fountain-align-elements
-                                   (boundp align))
+             (align-props (if (and align fountain-align-elements)
                               `(line-prefix
                                 (space :align-to ,align)
                                 wrap-prefix
                                 (space :align-to ,align))))
              facespec)
-        (dolist (plist plist-list)
+        (dolist (plist sub-plist)
           (let* ((subexp (plist-get plist :subexp))
                  ;; if LEVEL is less or equal to DEC, use either face
                  ;; supplied in PLIST or intern fountain-ELEMENT,
@@ -3192,7 +3231,9 @@ keywords suitable for Font Lock."
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
   (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible fountain-element))
+              '(line-prefix wrap-prefix invisible))
+  (add-hook 'after-save-hook
+            'font-lock-refresh-defaults)
   (add-hook 'post-self-insert-hook
             'fountain-align-scene-number t t)
   (fountain-outline-hide-level fountain-outline-startup-level))

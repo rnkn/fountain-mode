@@ -111,14 +111,14 @@ Todo
 - [ ] test Emacs 24.4 package require
 - [ ] make Emacs 22 (GPL v2) compatible
 - [ ] update emacs.fountain@librelist.com
-- [ ] add action to font-lock-keywords
+- [X] add action to font-lock-keywords
 - [ ] remove s.el dependencies
 - [ ] create proper imenu functions
 - [ ] rewrite element predicate function for hard wrapping #37
 - [ ] scene heading regexp should include omitted scenes #34
 - [ ] support for Mountain include workflow #33
 - [ ] support for scene numbers #32
-- [ ] support for dual dialogue #31
+- [X] support for dual dialogue #31
 - [ ] use lisp data model for export #30
 - [ ] convert metadata template to skeleton #29
 - [ ] setting Action Alignment / Customizing Export Alignment #27
@@ -132,3 +132,4 @@ Todo
 - [ ] auto-upcase sluglines #2
 - [ ] boneyard and notes interfere with elements #1
 - [ ] update screenshot
+- [X] allow align settings per format
