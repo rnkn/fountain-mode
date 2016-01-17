@@ -1233,7 +1233,8 @@ not changed.")
 
 (defface fountain-note
   '((t (:inherit font-lock-comment-face)))
-  "Default face for notes.")
+  "Default face for notes."
+  :group 'fountain-faces)
 
 (defface fountain-section-heading
   '((t (:inherit font-lock-function-name-face)))
