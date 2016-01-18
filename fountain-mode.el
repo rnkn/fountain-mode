@@ -1338,7 +1338,7 @@ not changed.")
         (list
          (list "Notes" fountain-note-regexp 3)
          (list "Scene Headings" fountain-scene-heading-regexp 1)
-         (list "Sections" fountain-section-heading-regexp 3))))
+         (list "Sections" fountain-section-heading-regexp 1))))
 
 (defun fountain-init-regexp ()
   "Set variable regular expression values."
