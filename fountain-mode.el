@@ -1638,79 +1638,51 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
       (match-string-no-properties 5)))
 
 ;; (defun fountain-add-scene-number (n)
-;;   "Add scene number N to current scene heading.
-;; Assumes line matched `fountain-scene-heading-p'."
+;;   "Add scene number N to current scene heading."
 ;;   (when (fountain-scene-heading-p)
 ;;     (end-of-line)
-;;     (insert "#" (number-to-string n))
-;;     (beginning-of-line)
-;;     (fountain-align-scene-number)))
+;;     (unless (eq (char-before) ?\s) (insert ?\s))
+;;     (insert "#" n)))
 
-;; (defun fountain-add-scene-nums (&optional arg)
-;;   "Add scene numbers to all scene headings lacking.
+;; (defun fountain-add-scene-numbers (&optional arg)
+;;   "Add scene numbers to all scene headings.
 ;; If prefaced with ARG, overwrite existing scene numbers."
 ;;   (interactive)
-;;   (save-excursion
-;;     (goto-char (point-min))
-;;     (unless (fountain-scene-heading-p)
-;;       (fountain-forward-scene 1))
-;;     (let ((prev-scene-num "0"))
-;;       (while (not (eobp))
-;;         (let ((current-scene-num (fountain-get-scene-num)))
-;;           (if current-scene-num
-;;               ;; (fountain-align-scene-num)
-;;               (setq prev-scene-num current-scene-num)
-;;             (let* ((prev-scene-int (string-to-number prev-scene-num))
-;;                    (prev-scene-alpha
-;;                     (if (string-match "[a-z]+" prev-scene-num)
-;;                         (match-string 0 prev-scene-num)))
-;;                    (next-scene-num
-;;                     (save-excursion
-;;                       (while (not (or (eobp)
-;;                                       (fountain-get-scene-num)))
-;;                         (fountain-forward-scene 1))
-;;                       (fountain-get-scene-num)))
-;;                    (next-scene-int (if next-scene-num
-;;                                        (string-to-number next-scene-num)))
-;;                    (current-scene-num
-;;                     (if (or (not next-scene-int)
-;;                             (< (1+ prev-scene-int) next-scene-int))
-;;                         (int-to-string (1+ prev-scene-int))
-;;                       (concat (int-to-string prev-scene-int)
-;;                               (if prev-scene-alpha
-;;                                   (string (1+ (string-to-char prev-scene-alpha)))
-;;                                 "A")))))
-;;               (fountain-add-scene-num current-scene-num)
-;;               (setq prev-scene-num current-scene-num))))
-;;         (fountain-forward-scene 1)))))
-
-(defun fountain-align-scene-number ()
-  "Align scene number to `fountain-align-scene-num'."
-  (if (and fountain-align-scene-num
-           (fountain-scene-heading-p)
-           (match-string 4)
-           (< (point) (match-beginning 4)))
-      (let* ((pos (point))
-             (scene-heading-length
-              (string-width (match-string 3)))
-             (num-length
-              (string-width (match-string 4)))
-             (space-length
-              (- fountain-align-scene-num
-                 scene-heading-length
-                 num-length)))
-        (goto-char (match-end 3))
-        (delete-region (point) (match-beginning 4))
-        (insert-char ?\s space-length)
-        (goto-char pos))))
-
-(defun fountain-align-all-scene-numbers ()
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (while (not (eobp))
-      (fountain-align-scene-number)
-      (fountain-forward-scene 1))))
+;;   (let ((job (make-progress-reporter "Adding scene numbers...")))
+;;     (save-excursion
+;;       (goto-char (point-min))
+;;       (unless (fountain-scene-heading-p)
+;;         (fountain-forward-scene 1))
+;;       (let ((prev-scene-num "0"))
+;;         (while (not (eobp))
+;;           (let ((current-scene-num (fountain-get-scene-number)))
+;;             (if current-scene-num
+;;                 (setq prev-scene-num current-scene-num)
+;;               (let* ((prev-scene-int (string-to-number prev-scene-num))
+;;                      (prev-scene-alpha
+;;                       (if (string-match "[a-z]+" prev-scene-num)
+;;                           (match-string 0 prev-scene-num)))
+;;                      (next-scene-num
+;;                       (save-excursion
+;;                         (while (not (or (eobp)
+;;                                         (fountain-get-scene-number)))
+;;                           (fountain-forward-scene 1))
+;;                         (fountain-get-scene-number)))
+;;                      (next-scene-int (if next-scene-num
+;;                                          (string-to-number next-scene-num)))
+;;                      (current-scene-num
+;;                       (if (or (not next-scene-int)
+;;                               (< (1+ prev-scene-int) next-scene-int))
+;;                           (int-to-string (1+ prev-scene-int))
+;;                         (concat (int-to-string prev-scene-int)
+;;                                 (if prev-scene-alpha
+;;                                     (string (1+ (string-to-char prev-scene-alpha)))
+;;                                   "A")))))
+;;                 (fountain-add-scene-number current-scene-num)
+;;                 (setq prev-scene-num current-scene-num))))
+;;           (fountain-forward-scene 1)
+;;           (progress-reporter-update job))))
+;;     (progress-reporter-done job)))
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration'."
