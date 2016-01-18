@@ -549,12 +549,12 @@ This option does not affect file contents."
                                 :value-type integer))
   :group 'fountain-align)
 
-(defcustom fountain-align-scene-num
-  60
-  "Column integer to which scene numbers should be aligned.
+(defcustom fountain-align-scene-number
+  8
+  "Number of columns from right margin to which scene numbers should be aligned.
 This option does affect file contents."
   :type '(choice (const :tag "Do not align scene numbers" nil)
-                 (integer 60))
+                 (integer 8))
   :group 'fountain-align)
 
 ;;;; Export Group Customization ================================================
@@ -1031,16 +1031,24 @@ Used by `fountain-outline-cycle'.")
 (defvar fountain-scene-heading-regexp
   nil
   "Regular expression for matching scene headings.
-Set with `fountain-init-scene-heading-regexp'. Requires
-`fountain-scene-heading-p' for preceding blank line.")
+Set with `fountain-init-scene-heading-regexp'.
+
+\tGroup 1:\tmatch trimmed whitespace
+\tGroup 2:\tmatch leading . (for forced element)
+\tGroup 3:\tmatch scene heading without scene number (for export)
+\tGroup 4:\tmatch space between scene heading and scene number
+\tGroup 5:\tmatch scene number with # prefix
+\tGroup 6:\tmatch scene number
+
+Requires `fountain-scene-heading-p' for preceding blank line.")
 
 (defconst fountain-forced-scene-heading-regexp
-  "^\\(?1:\\(?2:\\.\\)\\(?3:\\<.*?\\)\\)"
+  "\\(?2:\\.\\)\\(?3:\\<.*?\\)"
   "Regular expression for matching forced scene headings.
 Requires `fountain-scene-heading-p' for preceding blank line.")
 
 (defconst fountain-scene-number-regexp
-  "#\\(?5:[a-z]?[0-9]+[a-z]?\\)"
+  "\\(?:\\(?4:[\s\t]+\\)\\(?:#\\(?5:[a-z]*[0-9]+[a-z]*\\)\\)\\)?"
   "Regular expression for matching scene numbers.
 Assumes line matches `fountain-scene-heading-p'.")
 
@@ -1308,13 +1316,16 @@ not changed.")
 (defun fountain-init-scene-heading-regexp ()
   "Initializes `fountain-scene-heading-regexp'."
   (setq fountain-scene-heading-regexp
-        (concat fountain-forced-scene-heading-regexp
-                "[\s\t]*?\\(?4:#\\(?5:[a-z]?[0-9]+[a-z]?\\)\\)?[\s\t]*$"
+        (concat "^\\(?1:"
+                fountain-forced-scene-heading-regexp
+                fountain-scene-number-regexp
+                "\\)[\s\t]*$"
                 "\\|"
                 "^\\(?1:\\(?3:"
                 (regexp-opt fountain-scene-heading-prefix-list)
                 "[.\s\t].*?\\)"
-                "[\s\t]*?\\(?4:#\\(?5:[a-z]?[0-9]+[a-z]?\\)\\)?\\)[\s\t]*$")))
+                fountain-scene-number-regexp
+                "\\)[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
   "Initializes `fountain-trans-regexp'."
@@ -2550,12 +2561,15 @@ If N is 0, move to beginning of scene."
   "Move point to Nth scene."
   (interactive "NGoto scene: ")
   (goto-char (point-min))
-  (let ((scene (if (fountain-scene-heading-p) 1 0)))
+  (let ((scene (if (fountain-scene-heading-p)
+                   (or (string-to-number (match-string 5))
+                       1)
+                 0)))
     (while (and (< scene n)
                 (not (eobp)))
-      (fountain-forward-scene)
+      (fountain-forward-scene 1)
       (setq scene (if (match-string 5)
-                      (string-to-number (match-string-no-properties 5))
+                      (string-to-number (match-string 5))
                     (1+ scene))))))
 
 (defun fountain-forward-character (&optional n limit)
@@ -2852,11 +2866,13 @@ message of \"S are now invisible/visible\"."
     ("scene-heading"
      (lambda (limit)
        (fountain-match-element 'fountain-scene-heading-p limit))
-     ((:level 2 :subexp 0
-              :override keep)
+     ((:level 2 :subexp 0)
       (:level 2 :subexp 2 :face fountain-comment
               ;; :invisible fountain-syntax-chars
               :override t
+              :laxmatch t)
+      (:level 1 :subexp 4
+              :display (- right-margin fountain-align-scene-number)
               :laxmatch t)))
     ("character"
      (lambda (limit)
@@ -3025,6 +3041,12 @@ keywords suitable for Font Lock."
                  (face (if (<= (plist-get plist :level) dec)
                            (or (plist-get plist :face)
                                (intern (concat "fountain-" element)))))
+                 ;; if DISPLAY is non-nil, add to DISPLAY-PROPS
+                 ;; FIXME: kinda hackish
+                 (display (plist-get plist :display))
+                 (display-props
+                  (if display
+                      (list 'display `(space :align-to ,display))))
                  ;; if INVISIBLE is non-nil, add to INVISIBLE-PROPS
                  (invisible (plist-get plist :invisible))
                  (invisible-props
@@ -3043,6 +3065,7 @@ keywords suitable for Font Lock."
                               ;;                 (plist-get plist :laxmatch)))
                               (list `(,subexp '(face ,face
                                                      ,@align-props
+                                                     ,@display-props
                                                      ,@invisible-props
                                                      fountain-element ,element)
                                               ,(plist-get plist :override)
@@ -3240,11 +3263,9 @@ keywords suitable for Font Lock."
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
   (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible))
+              '(display line-prefix wrap-prefix invisible))
   (add-hook 'after-save-hook
             'font-lock-refresh-defaults)
-  (add-hook 'post-self-insert-hook
-            'fountain-align-scene-number t t)
   (fountain-outline-hide-level fountain-outline-startup-level))
 
 (provide 'fountain-mode)
