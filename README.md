@@ -121,7 +121,7 @@ Todo
 - [X] support for dual dialogue #31
 - [ ] use lisp data model for export #30
 - [ ] convert metadata template to skeleton #29
-- [ ] setting Action Alignment / Customizing Export Alignment #27
+- [X] setting Action Alignment / Customizing Export Alignment #27
 - [ ] forced scene heading syntax character cannot be hidden #26
 - [ ] MORE dialog does not sit flush with dialog block #23
 - [ ] visual-line-mode and wrap-prefix bug #22
@@ -133,3 +133,4 @@ Todo
 - [ ] boneyard and notes interfere with elements #1
 - [ ] update screenshot
 - [X] allow align settings per format
+- [ ] add completion-at-point-functions
