@@ -1091,11 +1091,11 @@ Requires `fountain-metadata-p' for bobp.")
           "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
-    Group 1     match trimmed whitespace
-    Group 2     match leading @
-    Group 3     (export group) match character name and parenthetical
-    Group 4     match character name only
-    Group 5     match trailing ^ for dual dialog
+\tGroup 1:\tmatch trimmed whitespace
+\tGroup 2:\tmatch leading @ (for forced element)
+\tGroup 3:\tmatch character name and parenthetical (export group)
+\tGroup 4:\tmatch character name only
+\tGroup 5:\tmatch trailing ^ (for dual dialog)
 
 Requires `fountain-character-p'.")
 
@@ -2960,20 +2960,20 @@ nil, this face is not considered an element. MATCHER is a regular
 expression or search function. SUB-PLIST is a list of plists,
 assigning the following keywords:
 
-    :level      integer representing level of `font-lock-maximum-decoration'
-                at which face is applied
-    :subexp     subexpression to match
-    :face       face name to apply
-    :invisible  if t, adds :face property to invisible text property
-    :override   as per `font-lock-keywords'
-    :laxmatch   as per `font-lock-keywords'
+\t:level\t\tinteger representing level of `font-lock-maximum-decoration'
+\t\t\t\tat which face is applied
+\t:subexp\t\tsubexpression to match
+\t:face\t\tface name to apply
+\t:invisible\tif t, adds :face property to invisible text property
+\t:override\tas per `font-lock-keywords'
+\t:laxmatch\tas per `font-lock-keywords'
 
 Regular expression should take the form:
 
-    Group 1     match whole string with trimmed whitespace
-    Group 2     syntax characters
-    Group 3     export group
-    Group 4     syntax characters")
+\tGroup 1:\tmatch whole string with trimmed whitespace
+\tGroup 2:\tsyntax characters
+\tGroup 3:\texport group
+\tGroup 4-6:\tsyntax characters")
 
 (defun fountain-get-align (element)
   "Return ELEMENT align integer based on buffer format"
