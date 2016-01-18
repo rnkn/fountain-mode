@@ -3071,7 +3071,7 @@ keywords suitable for Font Lock."
     ;; editing commands
     (define-key map (kbd "C-c C-m") 'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-S-m") 'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-M-m") 'fountain-insert-alternate-character) ; FIXME
+    ;; (define-key map (kbd "C-M-m") 'fountain-insert-alternate-character)
     (define-key map (kbd "C-c C-c") 'fountain-upcase-line)
     (define-key map (kbd "C-c C-d") 'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") 'fountain-insert-note)
