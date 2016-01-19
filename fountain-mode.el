@@ -2092,7 +2092,7 @@ created HTML element to DESTBUF."
       (while (looking-at "\n*\s*\n")
         (goto-char (match-end 0)))
       (let* ((limit (save-excursion
-                     (re-search-forward "\n\s*\n\\|\\'" nil t)
+                     (re-search-forward "\n\s?\n\\|\\'" nil t)
                      (match-beginning 0)))
              (element (fountain-export-create-html-element limit)))
         (when element
