@@ -1179,39 +1179,43 @@ bold-italic delimiters together, e.g.
 
 (defconst fountain-export-format-plist
   '((document
-     html   "<section class=\"screenplay\">\n${content}</section>\n")
+     html   "<section class=\"screenplay\">\n${content}</section>\n"
+     tex    "${content}\n"
+     fdx    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<FinalDraft DocumentType=\"Script\">\n<Content>\n${content}</Content>\n</FinalDraft>\n")
     (section
      html   "<section class=\"section\">\n${content}</section>\n")
     (scene
      html   "<section class=\"scene\">\n${content}</section>\n")
     (dialog
-     html   "<div class=\"dialog\">\n${content}</div>\n"
-     tex    "\\begin{dialog}\n${content}\n\\end{dialog}")
+     html   "<div class=\"dialog\">\n${content}</div>\n\n"
+     tex    "\\\\begin{dialog}${content}\n\\\\end{dialog}\n\n")
     (scene-heading
      html   "<h2 class=\"scene-heading\">${content}</h2>\n"
-     tex    "\\sceneheading{${content}}"
-     fdx    "<Paragraph Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>")
+     tex    "\\\\sceneheading{${content}}\n\n"
+     fdx    "<Paragraph Number=\"${scene-num}\" Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (action
      html   "<p class=\"action\">${content}</p>\n"
-     tex    "${content}"
-     fdx    "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>")
+     tex    "${content}\n\n"
+     fdx    "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (character
      html   "<p class=\"character\">${content}</p>\n"
-     tex    "${content}"
-     fdx    "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>")
+     tex    "{${content}}\n"
+     fdx    "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (paren
      html   "<p class=\"paren\">${content}</p>\n"
-     tex    "\paren{${content}}")
+     tex    "\paren{${content}}\n"
+     fdx    "<Paragraph Type=\"Parenthetical\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (lines
      html   "<p class=\"lines\">${content}</p>\n"
-     tex    "${content}"
-     fdx    "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>")
+     fdx    "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (trans
      html   "<p class=\"trans\">${content}</p>\n"
-     tex    "\\trans{${content}}"
-     fdx    "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>")
+     tex    "\\\\trans{${content}}\n\n"
+     fdx    "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (center
-     html   "<p class=\"center\">${content}</p>")
+     html   "<p class=\"center\">${content}</p>\n"
+     tex    "\\\\begin{center}\n${content}\n\\\\end{center}\n"
+     fdx    "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
     (section-heading
      html   "<h1 class=\"section-heading\">${content}</h1>\n")
     (synopsis
