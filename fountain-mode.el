@@ -559,39 +559,48 @@ This option does affect file contents."
 
 ;;;; Export Group Customization ================================================
 
-;; (defcustom fountain-export-include-elements
-;;   '(scene-heading action character paren dialog trans)
-;;   "List of elements to include when exporting.
-;; You would usually keep this at its default, but changing becomes
-;; useful if, for example, you want to include your script notes, or
-;; only want to export your synopses."
-;;   :type '(set
-;;           (const :tag "Scene Headings" scene-heading)
-;;           (const :tag "Action" action)
-;;           (const :tag "Character Names" character)
-;;           (const :tag "Parentheticals" paren)
-;;           (const :tag "Dialog" dialog)
-;;           (const :tag "Transitions" trans)
-;;           (const :tag "Section Headings" section-heading)
-;;           (const :tag "Synopses" synopsis)
-;;           (const :tag "Notes" note)
-;;           (const :tag "Comments" comment))
-;;   :group 'fountain-export)
+(defcustom fountain-export-include-elements
+  '(("screenplay" . (scene-heading action character paren lines trans center))
+    ("stageplay" . (section-heading scene-heading action character paren lines trans center)))
+  "List of elements to include when exporting.
+You would usually keep this at its default, but changing becomes
+useful if, for example, you want to include your script notes, or
+only want to export your synopses."
+  :type '(alist :key-type (string :tag "Format")
+                :value-type (set :tag "Elements"
+                                 (const :tag "Section Headings" section-heading)
+                                 (const :tag "Scene Headings" scene-heading)
+                                 (const :tag "Action" action)
+                                 (const :tag "Character Names" character)
+                                 (const :tag "Parentheticals" paren)
+                                 (const :tag "Dialog" lines)
+                                 (const :tag "Transitions" trans)
+                                 (const :tag "Center Text" center)
+                                 (const :tag "Synopses" synopsis)
+                                 (const :tag "Notes" note)
+                                 (const :tag "Comments" comment)))
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-buffer
-;;   "*Fountain %s Export*"
-;;   "Name of export buffer when source is not visiting a file.
+(defcustom fountain-export-standalone
+  t
+  "If non-nil, export a standalone document.
+Otherwise export a snippet."
+  :type 'string
+  :group 'fountain-export)
 
-;; Passed the format being exported as a variable by `format'."
-;;   :type 'string
-;;   :group 'fountain-export)
+(defcustom fountain-export-buffer-name
+  "*Fountain %s Export*"
+  "Name of export buffer when source is not visiting a file.
+Passed the format being exported as a variable by `format'."
+  :type 'string
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-default-command
-;;   'fountain-export-shell-script
-;;   "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
-;;   :type '(radio (function-item fountain-export-buffer-to-html)
-;;                 (function-item fountain-export-shell-script))
-;;   :group 'fountain-export)
+(defcustom fountain-export-default-command
+  'fountain-export-buffer-to-html
+  "\\<fountain-mode-map>Default function to call with `fountain-export-default' \(\\[fountain-export-default]\)."
+  :type '(radio (function-item fountain-export-buffer-to-html)
+                (function-item fountain-export-shell-command))
+  :group 'fountain-export)
 
 ;; (defcustom fountain-export-include-title-page
 ;;   t
@@ -1169,66 +1178,61 @@ bold-italic delimiters together, e.g.
 ;;;; Export Variables ==========================================================
 
 (defconst fountain-export-format-plist
-  '((section
-     html  ("<div class=\"section\"> id=\"%s\"\n" . "\n</div>"))
+  '((document
+     html   "<section class=\"screenplay\">\n${content}</section>\n")
+    (section
+     html   "<section class=\"section\">\n${content}</section>\n")
     (scene
-     html  ("<div class=\"scene\" id=\"%s\">\n" . "\n</div>"))
+     html   "<section class=\"scene\">\n${content}</section>\n")
     (dialog
-     html  ("<table class=\"dialog\" data-character=\"%s\">\n<caption class=\"character\">" . "</table>"))
+     html   "<div class=\"dialog\">\n${content}</div>\n"
+     tex    "\\begin{dialog}\n${content}\n\\end{dialog}")
     (scene-heading
-     html  ("<h2 class=\"scene-heading\">" . "</h2>")
-     latex ("\\sceneheading{" . "}")
-     fdx   ("<Paragraph Type=\"Scene Heading\">\n<Text>" . "</Text>\n</Paragraph>"))
+     html   "<h2 class=\"scene-heading\">${content}</h2>\n"
+     tex    "\\sceneheading{${content}}"
+     fdx    "<Paragraph Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>")
     (action
-     html  ("<p class=\"action\">" . "</p>")
-     latex ("" . "")
-     fdx   ("<Paragraph Type=\"Action\">\n<Text>" . "</Text>\n</Paragraph>"))
+     html   "<p class=\"action\">${content}</p>\n"
+     tex    "${content}"
+     fdx    "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>")
     (character
-     html  ("<tr class=\"character\"><td class=\"character\">" . "</td></tr>")
-     latex ("\\begin{dialog}{" . "}")
-     fdx   ("<Paragraph Type=\"Character\">\n<Text>" . "</Text>\n</Paragraph>"))
+     html   "<p class=\"character\">${content}</p>\n"
+     tex    "${content}"
+     fdx    "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>")
     (paren
-     html  ("<tr class=\"paren\"><td class=\"paren\">" . "</td></tr>")
-     latex ("\paren{" . "}"))
+     html   "<p class=\"paren\">${content}</p>\n"
+     tex    "\paren{${content}}")
     (lines
-     html  ("<tr class=\"lines\"><td class=\"lines\">" . "</td></tr>")
-     latex ("" . "")
-     fdx   ("<Paragraph Type=\"Dialogue\">\n<Text>" . "</Text>\n</Paragraph>"))
+     html   "<p class=\"lines\">${content}</p>\n"
+     tex    "${content}"
+     fdx    "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>")
     (trans
-     html  ("<p class=\"trans\">" . "</p>")
-     latex ("\\trans{" . "}")
-     fdx   ("<Paragraph Type=\"Transition\">\n<Text>" . "</Text>\n</Paragraph>"))
+     html   "<p class=\"trans\">${content}</p>\n"
+     tex    "\\trans{${content}}"
+     fdx    "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>")
+    (center
+     html   "<p class=\"center\">${content}</p>")
     (section-heading
-     html  ("<p class=\"section-heading\">" . "</p>"))
+     html   "<h1 class=\"section-heading\">${content}</h1>\n")
     (synopsis
-     html  ("<p class=\"synopsis\">" . "</p>"))
+     html   "<p class=\"synopsis\">${content}</p>\n")
     (note
-     html  ("<p class=\"note\">" . "</p>"))
+     html   "<p class=\"note\">${content}</p>\n")
     (comment
-     html  ("<p class=\"comment\">" . "</p>"))
+     html   "<p class=\"comment\">${content}</p>\n")
     (underline
-     html  ("_\\(.+?\\)_" . "<span class=\"underline\">\\1</span>"))
+     html   "_\\(.+?\\)_${content}<span class=\"underline\">\\1</span>")
     (bold
-     html  ("\\*\\*\\(.+?\\)\\*\\*" . "<strong>\\1</strong>"))
+     html   "\\*\\*\\(.+?\\)\\*\\*${content}<strong>\\1</strong>")
     (italic
-     html  ("\\*\\(.+?\\)\\*" . "<em>\\1</em>"))
+     html   "\\*\\(.+?\\)\\*${content}<em>\\1</em>")
     (lyric
-     html  ("^~\s*\\(.+\\)" . "<i>\\1</i>")))
+     html   "^~\s*\\(.+\\)${content}<i>\\1</i>"))
   "List of strings to format exported elements")
-
-;; (plist-get (cdr (assoc 'scene-heading fountain-export-format-plist)) :latex)
-
-(defvar-local fountain-export-content
-  nil
-  "Local buffer content converted to list of `fountain-mode' elements.
-
-An element takes the form (TYPE CONTENT [PROPERTIES]) where TYPE
-is a symbol, CONTENT is a string, and PROPERTIES is an optional
-plist.")
 
 (defvar-local fountain-export-tick
   nil
-  "Value of `buffer-modified-tick' after `fountain-export-parse-buffer'.
+  "Value of `buffer-modified-tick' after `fountain-parse-buffer'.
 
 Checked when exporting to avoid parsing again if the buffer has
 not changed.")
@@ -1964,7 +1968,7 @@ data reflects `outline-regexp'."
                (point))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) :end))
-      (let ((contents (fountain-parse-region (point) end)))
+      (let ((contents (fountain-parse-region (point) end t)))
         (list 'section
               (list :begin beg
                     :end end
@@ -1989,7 +1993,7 @@ data reflects `outline-regexp'."
                (point))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) :end))
-      (let ((contents (fountain-parse-region (point) end)))
+      (let ((contents (fountain-parse-region (point) end t)))
         (list 'scene
               (list :begin beg
                     :end end
@@ -2017,7 +2021,7 @@ data reflects `outline-regexp'."
                  (point)))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) :end))
-      (let ((contents (fountain-parse-region (point) end)))
+      (let ((contents (fountain-parse-region (point) end t)))
         (list 'dialog
               (list :begin beg
                     :end end
@@ -2062,14 +2066,15 @@ data reflects `outline-regexp'."
         (match-string-no-properties 3)))
 
 (defun fountain-parse-action ()
-  (let ((beg (car (fountain-get-block-bounds)))
-        (end (cdr (fountain-get-block-bounds))))
-    (forward-line 0)
+  (let ((beg (point))
+        (end (save-excursion
+               (while (not (fountain-tachyon-p))
+                 (forward-char 1))
+               (1- (point)))))
     (list 'action
           (list :begin beg
                 :end end)
-          (s-trim-right (buffer-substring-no-properties
-                         (point) end)))))
+          (s-trim-right (buffer-substring-no-properties beg end)))))
 
 (defun fountain-parse-element ()
   (cond
@@ -2096,7 +2101,7 @@ data reflects `outline-regexp'."
    (t
     (fountain-parse-action))))
 
-(defun fountain-parse-region (beg end)
+(defun fountain-parse-region (beg end &optional recur)
   (let (list)
     (goto-char beg)
     (while (< (point) end)
@@ -2107,16 +2112,27 @@ data reflects `outline-regexp'."
             (when element
               (setq list (append list (list element)))
               (goto-char (plist-get (nth 1 element) :end))))))
-    list))
+    (if recur list
+      (list 'document
+            (list :begin beg
+                  :end end
+                  :format (or (fountain-get-metadata-value "format")
+                              "screenplay"))
+            list))))
+
+(defun fountain-parse-buffer ()
+  (prog1
+      (fountain-parse-region (point-min) (point-max))
+    (setq fountain-export-tick (buffer-modified-tick))))
 
 ;;;; Export Functions ==========================================================
 
-;; (defun fountain-export-get-filename (format)
-;;   "If BUFFER is visiting a file, concat file name base and FORMAT.
-;; Otherwise return `fountain-export-buffer'"
-;;   (if (buffer-file-name)
-;;       (concat (file-name-base (buffer-file-name)) "." format)
-;;     (format fountain-export-buffer format)))
+(defun fountain-export-get-filename (format)
+  "If BUFFER is visiting a file, concat file name base and FORMAT.
+Otherwise return `fountain-export-buffer'"
+  (if (buffer-file-name)
+      (concat (file-name-base (buffer-file-name)) "." format)
+    (format fountain-export-buffer format)))
 
 ;; (defun fountain-export-create-title-page-element (key)
 ;;   "Gets metadata value associated with KEY and creates HTML element."
@@ -2270,74 +2286,6 @@ data reflects `outline-regexp'."
 ;;          (s (fountain-export-lyrics s)))
 ;;     s))
 
-;; (defun fountain-export-create-html-dialog-table (content limit)
-;;   (let* ((dialog-contd (concat "(" fountain-continued-dialog-string ")"))
-;;          (character (fountain-export-filter
-;;                      (s-trim (car (s-slice-at dialog-contd content)))))
-;;          (table-start
-;;           (format (concat "<table class=\"dialog\" character=\"%s\">\n"
-;;                           "<caption class=\"character\">\n"
-;;                           "<tr class=\"character\"><td class=\"character\">%s</td></tr>\n")
-;;                   character content))
-;;          (table-body "")
-;;          (table-end "</table>\n"))
-;;     (goto-char (next-single-property-change
-;;                 (point) 'fountain-element nil limit))
-;;     (while (< (point) limit)
-;;       (skip-chars-forward "\n")
-;;       (setq table-body
-;;             (concat table-body
-;;                     (fountain-export-create-html-element limit))))
-;;     (concat table-start table-body table-end)))
-
-;; (defun fountain-export-create-html-element (limit)
-;;   (let* ((index (point))
-;;          (class (or (get-text-property index 'fountain-element)
-;;                     "action"))
-;;          (change (next-single-property-change
-;;                   index 'fountain-element nil limit)))
-;;     (when change
-;;       (let* ((sub-s (buffer-substring index change))
-;;              (content (fountain-export-filter sub-s))
-;;              (element
-;;               (cond ((string= class "character")
-;;                      (fountain-export-create-html-dialog-table content limit))
-;;                     ((member class '("dialog" "paren"))
-;;                      (format "<tr class=\"%s\"><td class=\"%s\">%s</td></tr>\n"
-;;                              class class content))
-;;                     ((string= class "scene-heading")
-;;                      (format "<h2 class=\"%s\">%s</h2>\n"
-;;                              class content))
-;;                     ((format "<p class=\"%s\">%s</p>\n"
-;;                              class content)))))
-;;         (if (string= class "character")
-;;             (goto-char limit)
-;;           (goto-char change))
-;;         element))))
-
-;; (defun fountain-export-parse-buffer (destbuf)
-;;   "Find and insert elements into DESTBUF.
-;; First, skip forward to next available text, mark point as index,
-;; then find the next \"fountain-element\" text property change from
-;; index, then pass substring from index to change to
-;; `fountain-export-create-html-element', then insert the newly
-;; created HTML element to DESTBUF."
-;;   (let ((job (make-progress-reporter "Parsing..." 0 100)))
-;;     (goto-char (point-min))
-;;     (while (null (eobp))
-;;       (while (looking-at "\n*\s*\n")
-;;         (goto-char (match-end 0)))
-;;       (let* ((limit (save-excursion
-;;                      (re-search-forward "\n\s*\n\\|\\'" nil t)
-;;                      (match-beginning 0)))
-;;              (element (fountain-export-create-html-element limit)))
-;;         (when element
-;;           (with-current-buffer destbuf
-;;             (with-silent-modifications
-;;               (insert element)))))
-;;       (progress-reporter-update
-;;        job (truncate (* (/ (float (point)) (buffer-size)) 100))))))
-
 ;; (defmacro fountain-export-span (span format s)
 ;;   (let* ((plist (plist-get (cdr (assoc span fountain-export-format-list)) format))
 ;;          (match (car plist))
@@ -2350,90 +2298,54 @@ data reflects `outline-regexp'."
 ;;   (fountain-export-span 'italic format s)
 ;;   (fountain-export-span 'lyric format s))
 
-;; (defun fountain-export-format-element (element format)
-;;   (let ((type (car element))
-;;         (plist (nth 1 element))
-;;         (content (nth 2 element)))
-;;     (if (memq type fountain-export-include-elements)
-;;         (let ((template (plist-get (cdr (assoc type fountain-export-format-plist))
-;;                                    format)))
-;;           (concat (car template) content (cdr template))))))
+(defun fountain-export-format-element (element format includes)
+  (let ((type (car element))
+        (plist (nth 1 element))
+        (content (nth 2 element))
+        template)
+    (setq template
+          (plist-get (cdr (assoc type fountain-export-format-plist))
+                     format))
+    (if (listp content)
+        (let (str)
+          (dolist (var content
+                       (replace-regexp-in-string "${content}" str template))
+            (setq str
+                  (concat str
+                          (fountain-export-format-element var format includes)))))
+      (if (memq type includes)
+          (replace-regexp-in-string "${content}" content template)))))
 
-;; (setq fountain-export-tick (buffer-modified-tick))
-;; fountain-export-content)
-
-;; (defun fountain-export (format)
-;;   (let* (complete
-;;          (source-buf (current-buffer))
-;;          (dest-buf (get-buffer-create
-;;                     (fountain-export-get-filename (symbol-name format)))))
-;;     (unwind-protect
-;;         (progn
-;;           (with-current-buffer dest-buf
-;;             (with-silent-modifications
-;;               (erase-buffer)))
-;;           (if (/= fountain-export-tick (buffer-modified-tick))
-;;               (save-excursion
-;;                 (fountain-read-metadata)
-;;                 (setq fountain-data
-;;                       (fountain-export-parse (point-max)))))
-;;           ;; (let* ((element (pop fountain-export-content))
-;;           ;;        (type (car element))
-;;           ;;        (content (nth 1 element))
-;;           ;;        (plist (nth 2 element)))
-;;           ;; (with-current-buffer dest-buf
-;;           ;;   (insert (fountain-export-format-element element format) ?\n)))
-;;           dest-buf)
-;;       (unless complete
-;;         (kill-buffer dest-buf)))))
-
-;; (defun fountain-export--html ()
-;;   ;; internal function, don't call externally
-;;   ;; use `fountain-export-buffer-to-html' instead
-;;   ;; first read the metadata
-;;   (fountain-read-metadata)
-;;   (let* ((sourcebuf (current-buffer))
-;;          (destbuf (get-buffer-create
-;;                    (fountain-export-get-filename "html")))
-;;          (head (fountain-export-create-html-head))
-;;          (title-page (fountain-export-create-html-title-page))
-;;          complete)
-;;     (unwind-protect
-;;         (progn
-;;           ;; fontify the accessible buffer
-;;           (fountain-export-fontify-buffer)
-;;           ;; create a temp buffer with source
-;;           (with-temp-buffer
-;;             (insert-buffer-substring sourcebuf)
-;;             ;; strip comments
-;;             (fountain-export-strip-comments)
-;;             ;; insert HTML head
-;;             (with-current-buffer destbuf
-;;               (with-silent-modifications
-;;                 (erase-buffer)
-;;                 (insert "<!DOCTYPE html>\n<html>\n"
-;;                         head "\n")
-;;                 ;; close head and open body
-;;                 (insert "<body>\n")
-;;                 ;; add the title page maybe
-;;                 (if (and title-page
-;;                          fountain-export-include-title-page)
-;;                     (insert "<section id=\"title-page\">\n"
-;;                             title-page
-;;                             "</section>\n"))
-;;                 (insert "<section id=\"screenplay\">\n")))
-;;             ;; parse the temp buffer
-;;             (fountain-export-parse-buffer))
-;;           ;; close HTML tags
-;;           (with-current-buffer destbuf
-;;             (with-silent-modifications
-;;               (insert "</section>\n</body>\n</html>")))
-;;           ;; signal completion and return DESTBUF
-;;           (setq complete t)
-;;           destbuf)
-;;       ;; if error occurs, kill the unsaved buffer
-;;       (unless complete
-;;         (kill-buffer destbuf)))))
+(defun fountain-export (format &optional snippet buffer)
+  (let ((sourcebuf (or buffer (current-buffer)))
+        (destbuf (get-buffer-create
+                  (fountain-export-get-filename (symbol-name format))))
+        complete)
+    (unwind-protect
+        (let ((job (make-progress-reporter "Exporting...")))
+          (with-current-buffer destbuf
+            (with-silent-modifications
+              (erase-buffer)))
+          (with-current-buffer sourcebuf
+            (let ((data (fountain-parse-buffer))
+                  (includes
+                   (cdr (or (assoc-string
+                             (or (fountain-get-metadata-value "format")
+                                 "screenplay")
+                             fountain-export-include-elements)
+                            (car fountain-export-include-elements))))
+                  str)
+              (setq str (fountain-export-format-element data format includes))
+              (with-current-buffer destbuf
+                (insert (if (or snippet
+                                (not fountain-export-standalone))
+                            str (replace-regexp-in-string "${content}" str template))))))
+          (progress-reporter-done job)
+          (setq complete t)
+          (set-buffer-major-mode destbuf)
+          (switch-to-buffer destbuf))
+      (unless complete
+        (kill-buffer destbuf)))))
 
 ;;;; Commands ==================================================================
 
