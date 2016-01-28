@@ -563,9 +563,8 @@ This option does affect file contents."
   '(("screenplay" . (scene-heading action character paren lines trans center))
     ("stageplay" . (section-heading scene-heading action character paren lines trans center)))
   "List of elements to include when exporting.
-You would usually keep this at its default, but changing becomes
-useful if, for example, you want to include your script notes, or
-only want to export your synopses."
+
+Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
                 :value-type (set :tag "Elements"
                                  (const :tag "Section Headings" section-heading)
@@ -577,8 +576,7 @@ only want to export your synopses."
                                  (const :tag "Transitions" trans)
                                  (const :tag "Center Text" center)
                                  (const :tag "Synopses" synopsis)
-                                 (const :tag "Notes" note)
-                                 (const :tag "Comments" comment)))
+                                 (const :tag "Notes" note)))
   :group 'fountain-export)
 
 (defcustom fountain-export-standalone
