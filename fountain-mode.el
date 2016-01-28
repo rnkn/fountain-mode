@@ -1565,29 +1565,32 @@ comments."
     (cons beg end)))
 
 (defun fountain-read-metadata ()
-  "Read and parse buffer metadata."
+  "Read metadata of current buffer and return as a property list.
+
+Key string is converted to lowercase, spaces are converted to
+dashes, and then interned.
+
+    \"Draft date: 2015-12-25\" -> (draft-date \"2015-12-25\")
+
+Value string remains a string."
   (let (list)
     (save-excursion
       (save-restriction
         (widen)
         (goto-char (point-min))
         (while (fountain-metadata-p)
-          (let ((element (fountain-parse-metadata)))
-            (goto-char (plist-get (nth 1 element) :end))
+          (let ((key (intern (replace-regexp-in-string
+                              "\s" "-"
+                              (downcase (match-string-no-properties 2)))))
+                (value (match-string-no-properties 3)))
             (forward-line 1)
-            (setq list (append list (list element)))))
-        list))))
-
-(defun fountain-get-metadata-value (key)
-  "Return the buffer metadata value associated with KEY."
-  (let ((list (fountain-read-metadata))
-        value)
-    (while list
-      (let ((element (pop list)))
-        (if (string= (plist-get (nth 1 element) :key) key)
-            (setq value (nth 2 element)
-                  list nil))))
-    value))
+            (while (and (fountain-metadata-p)
+                        (null (match-string 2)))
+              (setq value (concat value (if value "\n")
+                                  (match-string-no-properties 3)))
+              (forward-line 1))
+            (setq list (append list (list key value)))))))
+    list))
 
 (defun fountain-insert-template (template)
   "Format TEMPLATE according to the following list.
@@ -1947,16 +1950,16 @@ data reflects `outline-regexp'."
               end (match-end 0))
         (forward-line 1))
       (list 'metadata
-            (list :begin beg
-                  :end end
-                  :key key)
+            (list 'begin beg
+                  'end end
+                  'key key)
             value))))
 
 (defun fountain-parse-section-heading ()
   (list 'section-heading
-        (list :beg (match-beginning 0)
-              :end (match-end 0)
-              :level (funcall outline-level))
+        (list 'beg (match-beginning 0)
+              'end (match-end 0)
+              'level (funcall outline-level))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-section ()
@@ -1969,18 +1972,19 @@ data reflects `outline-regexp'."
                  (forward-char 1))
                (point))))
     (save-excursion
-      (goto-char (plist-get (nth 1 heading) :end))
+      (goto-char (plist-get (nth 1 heading) 'end))
       (let ((contents (fountain-parse-region (point) end t)))
         (list 'section
-              (list :begin beg
-                    :end end
-                    :level level)
+              (list 'begin beg
+                    'end end
+                    'level level)
               (append (list heading) contents))))))
 
 (defun fountain-parse-scene-heading ()
   (list 'scene-heading
-        (list :beg (match-beginning 0)
-              :end (match-end 0))
+        (list 'beg (match-beginning 0)
+              'end (match-end 0)
+              'number (match-string-no-properties 5))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-scene ()
@@ -1994,19 +1998,19 @@ data reflects `outline-regexp'."
                  (forward-char 1))
                (point))))
     (save-excursion
-      (goto-char (plist-get (nth 1 heading) :end))
+      (goto-char (plist-get (nth 1 heading) 'end))
       (let ((contents (fountain-parse-region (point) end t)))
         (list 'scene
-              (list :begin beg
-                    :end end
-                    :number num
-                    :omit omit)
+              (list 'begin beg
+                    'end end
+                    'number num
+                    'omit omit)
               (append (list heading) contents))))))
 
 (defun fountain-parse-dialog ()
   (let ((heading (list 'character
-                       (list :beg (match-beginning 0)
-                             :end (match-end 0))
+                       (list 'beg (match-beginning 0)
+                             'end (match-end 0))
                        (match-string-no-properties 3)))
         (name (match-string-no-properties 4))
         (dual (cond ((stringp (match-string 5))
@@ -2022,49 +2026,49 @@ data reflects `outline-regexp'."
                    (match-beginning 0)
                  (point)))))
     (save-excursion
-      (goto-char (plist-get (nth 1 heading) :end))
+      (goto-char (plist-get (nth 1 heading) 'end))
       (let ((contents (fountain-parse-region (point) end t)))
         (list 'dialog
-              (list :begin beg
-                    :end end
-                    :character name
-                    :dual dual)
+              (list 'begin beg
+                    'end end
+                    'character name
+                    'dual dual)
               (append (list heading) contents))))))
 
 (defun fountain-parse-lines ()
   (list 'lines
-        (list :begin (match-beginning 0)
-              :end (match-end 0))
+        (list 'begin (match-beginning 0)
+              'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-paren ()
   (list 'paren
-        (list :begin (match-beginning 0)
-              :end (match-end 0))
+        (list 'begin (match-beginning 0)
+              'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-trans ()
   (list 'trans
-        (list :begin (match-beginning 0)
-              :end (match-end 0))
+        (list 'begin (match-beginning 0)
+              'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-center ()
   (list 'center
-        (list :begin (match-beginning 0)
-              :end (match-end 0))
+        (list 'begin (match-beginning 0)
+              'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-synopsis ()
   (list 'synopsis
-        (list :begin (match-beginning 0)
-              :end (match-end 0))
+        (list 'begin (match-beginning 0)
+              'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-note ()
   (list 'note
-        (list :begin (match-beginning 0)
-              :end (match-end 0))
+        (list 'begin (match-beginning 0)
+              'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-action ()
@@ -2074,8 +2078,8 @@ data reflects `outline-regexp'."
                  (forward-char 1))
                (1- (point)))))
     (list 'action
-          (list :begin beg
-                :end end)
+          (list 'begin beg
+                'end end)
           (s-trim-right (buffer-substring-no-properties beg end)))))
 
 (defun fountain-parse-element ()
@@ -2103,7 +2107,7 @@ data reflects `outline-regexp'."
    (t
     (fountain-parse-action))))
 
-(defun fountain-parse-region (beg end &optional recur)
+(defun fountain-parse-region (beg end &optional recursive)
   (let (list)
     (goto-char beg)
     (while (< (point) end)
@@ -2113,19 +2117,13 @@ data reflects `outline-regexp'."
           (let ((element (fountain-parse-element)))
             (when element
               (setq list (append list (list element)))
-              (goto-char (plist-get (nth 1 element) :end))))))
-    (if recur list
+              (goto-char (plist-get (nth 1 element) 'end))))))
+    (if recursive list
       (list 'document
-            (list :begin beg
-                  :end end
-                  :format (or (fountain-get-metadata-value "format")
-                              "screenplay"))
+            (append (list 'begin beg
+                          'end end)
+                    (fountain-read-metadata))
             list))))
-
-(defun fountain-parse-buffer ()
-  (prog1
-      (fountain-parse-region (point-min) (point-max))
-    (setq fountain-export-tick (buffer-modified-tick))))
 
 ;;;; Export Functions ==========================================================
 
@@ -2892,7 +2890,8 @@ Regular expression should take the form:
 (defun fountain-get-align (element)
   "Return ELEMENT align integer based on buffer format"
   (if (integerp element) element
-    (let ((format (or (fountain-get-metadata-value "format")
+    (let ((format (or (plist-get (fountain-read-metadata)
+                                 'format)
                       "screenplay")))
       (cdr (or (assoc-string format element)
                (car element))))))
