@@ -778,248 +778,183 @@ ${author}"
   :type 'boolean
   :group 'fountain-export)
 
-;; (defcustom fountain-export-style-template
-;; "@page {
-;;     size: ${page-size};
-;;     margin-top: 1in;
-;;     margin-right: 1in;
-;;     margin-bottom: 0.5in;
-;;     margin-left: 1.5in;
-;; }
-
-;; #title-page {
-;;     page: title;
-;;     margin: 0 auto;
-;;     width: 6in;
-;;     clear: both;
-;;     page-break-after: always;
-;; }
-
-;; #screenplay {
-;;     margin: 0 auto;
-;;     width: 6in;
-;;     clear: both;
-;;     counter-reset: page 1;
-;;     page: screenplay;
-;; }
-
-;; @media print {
-;;     #title {
-;;         margin-top: 3.5in;
-;;         margin-bottom: 4in;
-;;     }
-;; }
-
-;; #title-page #title {
-;;     text-align: center;
-;; }
-
-;; #title-page #title img {
-;;     width: 100%;
-;; }
-
-;; #title-page #left {
-;;     width: 50%;
-;;     float: left;
-;; }
-
-;; #title-page #right {
-;;     width: 50%;
-;;     float: right;
-;;     text-align: right;
-;; }
-
-;; #title h1 {
-;;     text-decoration: ${title-underline};
-;;     text-transform: ${title-upcase};
-;;     font-weight: ${title-bold};
-;; }
-
-;; @page screenplay {
-;;     @top-right-corner {
-;;         font-family: ${font};
-;;         font-size: 12pt;
-;;         content: counter(page)\".\";
-;;         vertical-align: bottom;
-;;         padding-bottom: 1em;
-;;     }
-;;     @bottom-left {
-;;         font-family: ${font};
-;;         font-size: 12pt;
-;;         content: string(dialog-more, last);
-;;         margin-left: 2in;
-;;         vertical-align: top;
-;;     }
-;; }
-
-;; @page screenplay:first {
-;;     @top-right-corner {
-;;         content: normal;
-;;     }
-;; }
-
-;; h1,h2,h3,h4,h5,h6 {
-;;     font-weight: normal;
-;;     font-size: 12pt;
-;; }
-
-;; body {
-;;     font-family: ${font};
-;;     font-size: 12pt;
-;;     line-height: 1;
-;; }
-
-;; hr {
-;;     visibility: hidden;
-;;     page-break-after: always;
-;; }
-
-;; em {
-;;     font-style: italic;
-;; }
-
-;; strong {
-;;     font-weight: bold;
-;; }
-
-;; span.underline {
-;;     text-decoration: underline;
-;; }
-
-;; span.strikethrough {
-;;     text-line-through-style: solid;
-;; }
-
-;; mark {
-;;     background-color: inherit;
-;; }
-
-;; mark:before {
-;;     content: '*';
-;;     width: 0.5in;
-;;     position: absolute;
-;;     right: 0in;
-;; }
-
-;; del:before {
-;;     content: '*';
-;;     width: 0.5in;
-;;     position: absolute;
-;;     right: 0in;
-;; }
-
-;; p {
-;;     margin-top: 1em;
-;;     margin-bottom: 1em;
-;;     margin-left: 0in;
-;;     width: auto;
-;; }
-
-;; h2.scene-heading {
-;;     font-weight: ${scene-bold};
-;;     text-decoration: ${scene-underline};
-;;     margin-top: ${scene-spacing};
-;;     margin-bottom: 1em;
-;;     page-break-after: avoid;
-;; }
-
-;; p.action {
-;;     white-space: pre-wrap;
-;;     orphans: ${action-orphans};
-;;     widows: ${action-widows};
-;; }
-
-;; p.center {
-;;     text-align: center;
-;;     margin-left: 0;
-;;     width: 100%;
-;;     white-space: pre-wrap;
-;; }
-
-;; p.trans {
-;;     margin-left: 4in;
-;;     width: 2in;
-;;     page-break-before: avoid;
-;; }
-
-;; p.note {
-;;     display: none;
-;; }
-
-;; p.section {
-;;     display: none;
-;; }
-
-;; p.synopsis {
-;;     display: none;
-;; }
-
-;; p.page-break {
-;;     visibility: hidden;
-;;     page-break-after: always;
-;; }
-
-;; table.dialog {
-;;     margin-top: 1em;
-;;     margin-bottom: 1em;
-;;     margin-left: 1in;
-;;     border-spacing: 0px;
-;;     width: 4in;
-;;     string-set: character attr(data-character) dialog-more \"${dialog-more}\";
-;; }
-
-;; table.dialog:after {
-;;     display: table-row;
-;;     content: \"\";
-;;     string-set: dialog-more \"\";
-;; }
-
-;; tr.character {
-;;     page-break-after: avoid;
-;; }
-
-;; tr.dialog {
-;;     orphans: ${dialog-orphans};
-;;     widows: ${dialog-widows};
-;; }
-
-;; tr.paren {
-;;     orphans: ${dialog-orphans};
-;;     widows: ${dialog-widows};
-;;     page-break-inside: avoid;
-;;     page-break-after: avoid;
-;; }
-
-;; td {
-;;     display: block;
-;;     padding: 0;
-;; }
-
-;; td.character {
-;;     margin-left: 1in;
-;; }
-
-;; td.dialog {
-;;     width: 3.5in;
-;; }
-
-;; td.paren {
-;;     margin-left: 0.6in;
-;;     text-indent: -0.6em;
-;;     width: 2in;
-;; }
-
-;; table.dialog caption.character {
-;;     margin-left: 1in;
-;;     text-align: left;
-;;     caption-side: top;
-;;     caption-page: following;
-;;     content: string(character, last)\" ${dialog-contd}\";
-;; }"
-;; "Style template for exporting to HTML, and PDF via HTML.
-;; Only customize this if you really know what you're doing."
-;;   :type 'string
-;;   :group 'fountain-export)
+(defcustom fountain-export-html-style-template
+  "\
+@page screenplay, screenplay-title {
+  size: letter;
+  margin-top: 1in;
+  margin-right: 1in;
+  margin-bottom: 0.75in;
+  margin-left: 1.5in;
+}
+@page screenplay {
+  @top-right-corner {
+    font-family: \"Courier Prime\", \"Courier\", \"Courier Final Draft\", \"Courier New\";
+    font-size: 12pt;
+    content: counter(page) \".\";
+    vertical-align: bottom;
+    padding-bottom: 1em;
+  }
+}
+@page screenplay:first {
+  @top-right-corner {
+    content: normal;
+  }
+}
+.screenplay {
+  page: screenplay;
+  counter-reset: page;
+  font-family: \"Courier Prime\", \"Courier\", \"Courier Final Draft\", \"Courier New\";
+  font-size: 12pt;
+  line-height: 1;
+  width: 6in;
+  margin: 1em auto;
+  -webkit-text-size-adjust: none;
+}
+.screenplay .title-page {
+  page: screenplay-title;
+  page-break-after: always;
+  width: 6in;
+  margin-top: 0in;
+  margin-right: auto;
+  margin-bottom: 1em;
+  margin-left: auto;
+}
+.screenplay .title-page .title {
+  text-align: center;
+}
+@media print {
+  .screenplay .title-page .title {
+    margin-top: 3.5in;
+    margin-bottom: 4in;
+  }
+}
+.screenplay .title-page .title h1 {
+  text-transform: uppercase;
+  text-decoration: underline;
+}
+.screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
+  font-weight: inherit;
+  font-size: inherit;
+}
+.screenplay a {
+  color: inherit;
+  text-decoration: none;
+}
+.screenplay hr {
+  page-break-after: always;
+}
+@media print {
+  .screenplay hr {
+    visibility: hidden;
+  }
+}
+.screenplay mark {
+  background-color: yellow;
+}
+.screenplay mark:before {
+  content: '*';
+  width: 0.5in;
+  position: absolute;
+  right: 0in;
+}
+.screenplay del:before {
+  content: '*';
+  width: 0.5in;
+  position: absolute;
+  right: 0in;
+}
+.screenplay .scene {
+  margin-top: 2em;
+  width: auto;
+}
+.screenplay .scene-heading {
+  margin-bottom: 0em;
+  page-break-after: avoid;
+}
+.screenplay .action {
+  margin: 1em 0in;
+  white-space: pre-wrap;
+  orphans: 2;
+  widows: 2;
+}
+.screenplay .dialog {
+  display: table;
+  width: 4in;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 1.5in;
+}
+.screenplay .dialog .character {
+  margin-top: 0em;
+  margin-bottom: 0em;
+  margin-left: 1in;
+}
+.screenplay .dialog .lines {
+  width: 3.5in;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  orphans: 2;
+  widows: 2;
+}
+.screenplay .dialog .paren {
+  width: 2in;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  margin-left: 0.6in;
+  text-indent: -0.6em;
+  page-break-inside: avoid;
+  page-break-after: avoid;
+}
+.screenplay .dialog.dual {
+  width: 3in;
+}
+.screenplay .dialog.dual .lines {
+  width: 2.9in;
+}
+.screenplay .dialog.dual.left {
+  margin-top: 0em;
+  margin-left: 0in;
+  float: left;
+}
+.screenplay .dialog.dual.right {
+  clear: none;
+}
+.screenplay .trans {
+  margin-left: 4in;
+  width: 2in;
+  page-break-before: avoid;
+}
+.screenplay .note {
+  display: block;
+  font-size: 11pt;
+  font-family: \"Comic Sans MS\";
+  line-height: 1.5;
+  background-color: lightgoldenrodyellow;
+  padding: 1em;
+}
+.screenplay .synopsis {
+  display: block;
+  margin-top: 0em;
+  color: grey;
+  font-style: italic;
+}
+.screenplay .center {
+  text-align: center;
+  margin-left: 0in;
+  width: 100%;
+  white-space: pre-wrap;
+}
+.screenplay .underline {
+  text-decoration: underline;
+}
+.screenplay .section-heading {
+  display: none;
+}
+"
+"Style template for HTML export"
+  :type 'string
+  :group 'fountain-export)
 
 ;; (defcustom fountain-export-html-head-template
 ;;   "<head>
