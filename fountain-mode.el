@@ -1084,11 +1084,11 @@ Set with `fountain-init-trans-regexp'. Requires
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(?1:\\(?2:\\<[^:\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
+  (concat "^\\(?1:\\(?2:\\<[^;:'\",?()\\\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
           "\\|"
           "^\s+\\(?1:\\(?3:.+\\)\\)")
   "Regular expression for matching multi-line metadata values.
-Requires `fountain-metadata-p' for bobp.")
+Requires `fountain-metadata-p' for `bobp'.")
 
 (defconst fountain-character-regexp
   (concat "^[\s\t]*\\(?1:\\(?:"
@@ -1581,7 +1581,7 @@ Value string remains a string."
         (while (fountain-metadata-p)
           (let ((key (intern (replace-regexp-in-string
                               "\s" "-"
-                              (downcase (match-string-no-properties 2)))))
+                              (downcase (match-string 2)))))
                 (value (match-string-no-properties 3)))
             (forward-line 1)
             (while (and (fountain-metadata-p)
@@ -1589,7 +1589,9 @@ Value string remains a string."
               (setq value (concat value (if value "\n")
                                   (match-string-no-properties 3)))
               (forward-line 1))
-            (setq list (append list (list key value)))))))
+            (setq list (append list (list key value)))))
+        (skip-chars-forward "\n\s\t")
+        (setq list (append list (list 'content-start (point))))))
     list))
 
 (defun fountain-insert-template (template)
@@ -2084,8 +2086,6 @@ data reflects `outline-regexp'."
 
 (defun fountain-parse-element ()
   (cond
-   ((fountain-metadata-p)
-    (fountain-parse-metadata))
    ((fountain-section-heading-p)
     (fountain-parse-section))
    ((fountain-scene-heading-p)
@@ -2108,22 +2108,22 @@ data reflects `outline-regexp'."
     (fountain-parse-action))))
 
 (defun fountain-parse-region (beg end &optional recursive)
-  (let (list)
-    (goto-char beg)
+  (let ((metadata (fountain-read-metadata))
+        list)
+    (goto-char (max beg (plist-get metadata 'content-start)))
     (while (< (point) end)
       (while (looking-at "\n*\s*\n")
         (goto-char (match-end 0)))
       (if (< (point) end)
           (let ((element (fountain-parse-element)))
-            (when element
-              (setq list (append list (list element)))
-              (goto-char (plist-get (nth 1 element) 'end))))))
-    (if recursive list
+            (setq list (cons element list))
+            (goto-char (plist-get (nth 1 element) 'end)))))
+    (if recursive (reverse list)
       (list 'document
             (append (list 'begin beg
                           'end end)
-                    (fountain-read-metadata))
-            list))))
+                    metadata)
+            (reverse list)))))
 
 ;;;; Export Functions ==========================================================
 
