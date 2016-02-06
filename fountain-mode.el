@@ -2490,7 +2490,7 @@ Otherwise return `fountain-export-buffer'"
           (dolist (element content
                            (if template
                                (fountain-export-format-replace
-                                format plist content template)
+                                format plist str template)
                              str))
             (setq str
                   (concat str
