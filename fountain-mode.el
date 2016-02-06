@@ -1394,6 +1394,16 @@ not changed.")
   (setq-local comment-end
               (if fountain-switch-comment-syntax "" "*/")))
 
+(defun fountain-init-vars ()
+  "Initializes important variables."
+  (fountain-init-scene-heading-regexp)
+  (fountain-init-outline-regexp)
+  (fountain-init-trans-regexp)
+  (fountain-init-comment-syntax)
+  (setq-local comment-use-syntax t)
+  (setq-local outline-level 'fountain-outline-level)
+  (setq-local require-final-newline mode-require-final-newline))
+
 ;;;; Element Functions =========================================================
 
 (defun fountain-blank-p ()
@@ -2923,7 +2933,7 @@ Regular expression should take the form:
   "Return a new list of `font-lock-mode' keywords.
 Uses `fountain-font-lock-keywords-plist' to create a list of
 keywords suitable for Font Lock."
-  (fountain-init-regexp)
+  (fountain-init-vars)
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
     (dolist (var fountain-font-lock-keywords-plist keywords)
@@ -3151,27 +3161,25 @@ keywords suitable for Font Lock."
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
-  (fountain-init-regexp)
-  (fountain-init-comment-syntax)
-  (setq comment-use-syntax t)
+  (fountain-init-vars)
+  (fountain-init-imenu-generic-expression)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
-  (add-hook 'font-lock-extend-region-functions
-            'fountain-font-lock-extend-region t t)
-  (add-to-invisibility-spec '(outline . t))
+  (add-to-invisibility-spec (cons 'outline t))
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
-  (setq-local require-final-newline mode-require-final-newline)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level 'fountain-outline-level)
-  (let ((n (fountain-get-metadata-value 'startup-level)))
+  (setq-local font-lock-extra-managed-props
+              '(display line-prefix wrap-prefix invisible))
+  (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
     (if (stringp n)
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
-  (setq-local font-lock-extra-managed-props
-              '(display line-prefix wrap-prefix invisible))
+  (add-hook 'font-lock-extend-region-functions
+            'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             'font-lock-refresh-defaults)
   (fountain-outline-hide-level fountain-outline-startup-level))
