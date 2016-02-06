@@ -2270,58 +2270,50 @@ Otherwise return `fountain-export-buffer'"
 ;;                  'fountain-export-create-title-page-element)
 ;;        "\n</div>\n")))
 
-;; (defun fountain-export-create-style ()
-;;   "Create stylesheet using `fountain-export-style-template'."
-;;   (let* ((page-size fountain-export-page-size)
-;;          (font
-;;           (mapconcat
-;;            (lambda (font) (concat "'" font "'"))
-;;            fountain-export-font ","))
-;;          (scene-bold
-;;           (if fountain-export-bold-scene-headings
-;;               "bold" "normal"))
-;;          (scene-underline
-;;           (if fountain-export-underline-scene-headings
-;;               "underline" "none"))
-;;          (scene-spacing
-;;           (if fountain-export-double-space-scene-headings
-;;               "2em" "1em"))
-;;          (title-bold
-;;           (if fountain-export-bold-title
-;;               "bold" "normal"))
-;;          (title-underline
-;;           (if fountain-export-underline-title
-;;               "underline" "none"))
-;;          (title-upcase
-;;           (if fountain-export-upcase-title
-;;               "uppercase" "none"))
-;;          (dialog-contd (concat "(" fountain-continued-dialog-string ")"))
-;;          (dialog-more fountain-export-more-dialog-string)
-;;          (action-orphans (int-to-string fountain-export-action-orphans))
-;;          (action-widows (int-to-string fountain-export-action-widows))
-;;          (dialog-orphans (int-to-string fountain-export-dialog-orphans))
-;;          (dialog-widows (int-to-string fountain-export-dialog-widows))
-;;          (style-rules (s-format fountain-export-style-template
-;;                           '(lambda (var)
-;;                              (symbol-value (intern var))))))
-;;     (if fountain-export-inline-style
-;;         (concat "<style type=\"text/css\">\n"
-;;                 style-rules
-;;                 "\n</style>")
-;;       (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
-;;             (outputdir (expand-file-name
-;;                         (file-name-directory (buffer-file-name)))))
-;;         (with-current-buffer cssfile
-;;           (erase-buffer)
-;;           (insert
-;;            (format
-;;             "/* Created with Emacs %s running Fountain Mode %s */\n"
-;;             emacs-version fountain-version)
-;;            style-rules)
-;;           (write-file outputdir))
-;;         (concat "<link rel=\"stylesheet\" href=\""
-;;                 (buffer-name cssfile)
-;;                 "\">")))))
+(defun fountain-export-html-create-style ()
+  "Create stylesheet using `fountain-export-html-style-template'."
+  (let* ((page-size fountain-export-page-size)
+         (font
+          (mapconcat
+           (lambda (font) (concat "'" font "'"))
+           fountain-export-font ","))
+         (scene-bold
+          (if fountain-export-bold-scene-headings
+              "bold" "normal"))
+         (scene-underline
+          (if fountain-export-underline-scene-headings
+              "underline" "none"))
+         (scene-spacing
+          (if fountain-export-double-space-scene-headings
+              "2em" "1em"))
+         (title-bold
+          (if fountain-export-bold-title
+              "bold" "normal"))
+         (title-underline
+          (if fountain-export-underline-title
+              "underline" "none"))
+         (title-upcase
+          (if fountain-export-upcase-title
+              "uppercase" "none"))
+         (dialog-contd fountain-continued-dialog-string)
+         (dialog-more fountain-export-more-dialog-string)
+         (styles (s-format fountain-export-html-style-template
+                           '(lambda (var)
+                              (symbol-value (intern var))))))
+    (if fountain-export-html-inline-style
+        (concat "<style type=\"text/css\">\n"
+                styles
+                "\n</style>")
+      (let ((file (get-buffer-create (fountain-export-get-filename "css")))
+            (dir (expand-file-name
+                  (file-name-directory (buffer-file-name)))))
+        (with-current-buffer file
+          (erase-buffer)
+          (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
+                          emacs-version fountain-version)
+                  styles)
+          (write-file dir))
+        (concat "<link rel=\"stylesheet\" href=\"" (buffer-name file) "\">")))))
 
 ;; (defun fountain-export-create-html-head ()
 ;;   "Create HTML head using `fountain-export-html-head-template'."
