@@ -617,7 +617,7 @@ Otherwise export a snippet."
 (defcustom fountain-export-buffer-name
   "*Fountain %s Export*"
   "Name of export buffer when source is not visiting a file.
-Passed the format being exported as a variable by `format'."
+Passed to `format' with export format as single variable."
   :type 'string
   :group 'fountain-export)
 
@@ -2246,9 +2246,12 @@ data reflects `outline-regexp'."
 (defun fountain-export-get-filename (format)
   "If BUFFER is visiting a file, concat file name base and FORMAT.
 Otherwise return `fountain-export-buffer'"
-  (if (buffer-file-name)
-      (concat (file-name-base (buffer-file-name)) "." format)
-    (format fountain-export-buffer format)))
+  (cond (fountain-export-title-as-filename
+         (concat (plist-get (fountain-read-metadata) 'title) "." format))
+        ((buffer-file-name)
+         (concat (file-name-base (buffer-file-name)) "." format))
+        (t
+         (format fountain-export-buffer-name format))))
 
 ;; (defun fountain-export-create-title-page-element (key)
 ;;   "Gets metadata value associated with KEY and creates HTML element."
