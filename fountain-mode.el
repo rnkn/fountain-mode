@@ -2445,41 +2445,49 @@ Otherwise return `fountain-export-buffer'"
             (cadr (assoc type (assoc format fountain-export-element-templates)))))
     (if (listp content)
         (let (str)
-          (dolist (var content
-                       (replace-regexp-in-string "${content}" str template))
+          (dolist (element content
+                           (if template
+                               (fountain-export-format-replace
+                                format plist content template)
+                             str))
             (setq str
                   (concat str
-                          (fountain-export-format-element var format includes)))))
+                          (fountain-export-format-element
+                           element format includes)))))
       (if (memq type includes)
-          (replace-regexp-in-string "${content}" content template)))))
+          (if template
+              (fountain-export-format-replace
+               format plist content template)
+            content)))))
 
-(defun fountain-export (format &optional snippet buffer)
+(defun fountain-export-region (beg end format)
+  (let ((content (fountain-parse-region beg end)))
+    (fountain-export-format-element
+     content format
+     (cdr (or (assoc (or (plist-get (nth 1 content)
+                                    'format)
+                         "screenplay")
+                     fountain-export-include-elements)
+              (car fountain-export-include-elements))))))
+
+(defun fountain-export-buffer (format &optional snippet buffer)
+  (interactive
+   (list (intern (completing-read "Format: " '(html tex fdx) nil t))
+         (car current-prefix-arg)))
   (let ((sourcebuf (or buffer (current-buffer)))
-        (destbuf (get-buffer-create
+        (bufname (generate-new-buffer-name
                   (fountain-export-get-filename (symbol-name format))))
-        complete)
+        destbuf complete)
+    (setq destbuf (get-buffer-create bufname))
     (unwind-protect
-        (let ((job (make-progress-reporter "Exporting...")))
-          (with-current-buffer destbuf
-            (with-silent-modifications
-              (erase-buffer)))
-          (with-current-buffer sourcebuf
-            (let ((data (fountain-parse-buffer))
-                  (includes
-                   (cdr (or (assoc-string
-                             (or (fountain-get-metadata-value "format")
-                                 "screenplay")
-                             fountain-export-include-elements)
-                            (car fountain-export-include-elements))))
-                  str)
-              (setq str (fountain-export-format-element data format includes))
-              (with-current-buffer destbuf
-                (insert (if (or snippet
-                                (not fountain-export-standalone))
-                            str (replace-regexp-in-string "${content}" str template))))))
-          (progress-reporter-done job)
+        (with-current-buffer sourcebuf
+          (let ((str (fountain-export-region (point-min) (point-max)
+                                             format)))
+            (with-current-buffer destbuf
+              (with-silent-modifications
+                (erase-buffer))
+              (insert str)))
           (setq complete t)
-          (set-buffer-major-mode destbuf)
           (switch-to-buffer destbuf))
       (unless complete
         (kill-buffer destbuf)))))
