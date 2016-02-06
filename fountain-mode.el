@@ -2460,6 +2460,23 @@ Otherwise return `fountain-export-buffer'"
       (unless complete
         (kill-buffer destbuf)))))
 
+(defun fountain-export-buffer-to-html ()
+  (interactive)
+  (fountain-export-buffer 'html))
+
+(defun fountain-export-buffer-to-tex ()
+  (interactive)
+  (fountain-export-buffer 'tex))
+(defalias 'fountain-export-buffer-to-latex 'fountain-export-buffer-to-tex)
+
+(defun fountain-export-buffer-to-fdx ()
+  (interactive)
+  (fountain-export-buffer 'fdx))
+
+(defun fountain-export-buffer-to-fountain ()
+  (interactive)
+  (fountain-export-buffer 'fountain))
+
 ;;;; Commands ==================================================================
 
 (defun fountain-version ()
