@@ -2411,6 +2411,28 @@ Otherwise return `fountain-export-buffer'"
 ;;   (fountain-export-span 'italic format s)
 ;;   (fountain-export-span 'lyric format s))
 
+
+(defun fountain-export-format-replace (format plist str template)
+  (replace-regexp-in-string
+   "\\${\\([^\s\t\n()\"'`;]*?\\)}"
+   (lambda (match)
+     (let ((key (match-string 1 match))
+           value fun)
+       (setq value (plist-get plist key))
+       (cond ((string= key "content")
+              str)
+             ;; ((progn
+             ;;    (setq fun
+             ;;          (cadr (assoc key
+             ;;                       (cdr (assoc format
+             ;;                                   fountain-export-variable-replacements)))))
+             ;;    (if fun
+             ;;    (if value
+             ;;        (funcall fun value)
+             ;;      (funcall fun)))))
+             (t ""))))
+     template t t))
+
 (defun fountain-export-format-element (element format includes)
   (let ((type (car element))
         (plist (nth 1 element))
