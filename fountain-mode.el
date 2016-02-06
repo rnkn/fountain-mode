@@ -2417,8 +2417,10 @@ Otherwise return `fountain-export-buffer'"
         (content (nth 2 element))
         template)
     (setq template
-          (plist-get (cdr (assoc type fountain-export-format-plist))
-                     format))
+          (if (string= type 'document)
+              (if fountain-export-standalone
+                  (cadr (assoc format fountain-export-document-templates)))
+            (cadr (assoc type (assoc format fountain-export-element-templates)))))
     (if (listp content)
         (let (str)
           (dolist (var content
