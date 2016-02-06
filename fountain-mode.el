@@ -2358,18 +2358,6 @@ Otherwise return `fountain-export-buffer'"
           (write-file dir))
         (concat "<link rel=\"stylesheet\" href=\"" (buffer-name file) "\">")))))
 
-;; (defun fountain-export-create-html-head ()
-;;   "Create HTML head using `fountain-export-html-head-template'."
-;;   (let ((insert-style (fountain-export-create-style))
-;;         (charset "utf-8")
-;;         (title (or (fountain-export-get-metadata-value "title")
-;;                    (file-name-base (buffer-name))))
-;;         (author (or (fountain-export-get-metadata-value "author")
-;;                     user-full-name)))
-;;     (s-format fountain-export-html-head-template
-;;               '(lambda (var)
-;;                  (symbol-value (intern var))))))
-
 ;; (defun fountain-export-underline (s)
 ;;   "Replace underlined text in S with HTML underline span tags."
 ;;   (replace-regexp-in-string "_\\(.+?\\)_"
