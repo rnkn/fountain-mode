@@ -3130,7 +3130,9 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-S-i") 'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
-    ;; (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
+    (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
+    (define-key map (kbd "C-c C-e l") 'fountain-export-buffer-to-latex)
+    (define-key map (kbd "C-c C-e d") 'fountain-export-buffer-to-fdx)
     (define-key map (kbd "C-c C-e s") 'fountain-export-shell-command)
     ;; view commands
     (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars) ; FIXME ??
@@ -3203,10 +3205,10 @@ keywords suitable for Font Lock."
     "---"
     ("Export"
      ["Default" fountain-export-default]
-     ["Run shell command" (fountain-export-shell-command)]
-     ;; ["Buffer to HTML" (fountain-export 'html)]
-     ;; ["Buffer to LaTeX" (fountain-export 'latex)]
-     ;; ["Buffer to FDX" (fountain-export 'fdx)]
+     ["Run shell command" fountain-export-shell-command]
+     ["Buffer to HTML" fountain-export-buffer-to-html]
+     ["Buffer to LaTeX" fountain-export-buffer-to-latex]
+     ["Buffer to FDX" fountain-export-buffer-to-fdx]
      ;; "---"
      ;; ["Include Title Page"
      ;;  fountain-toggle-export-include-title-page
