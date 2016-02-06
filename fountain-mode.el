@@ -970,6 +970,130 @@ ${author}"
 ;;   :type 'string
 ;;   :group 'fountain-export)
 
+(defcustom fountain-export-document-templates
+  '((html "\
+<head>
+<meta charset=\"utf-8\">
+<meta name=\"author\" content=\"${author}\" />
+<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
+<title>${title}</title>
+${style}
+</head>
+<body>
+<section class=\"script screenplay\">
+${content}\
+</section>
+</body>
+")
+    (tex "\
+\\documentclass[12pt,letterpaper]{article}
+\\usepackage[left=1.25in,top=1in,bottom=0.75in,text=6in]{geometry}
+\\usepackage{fontspec}
+\\setmonofont{Courier Prime}
+\\renewcommand{\\familydefault}{\\ttdefault}
+\\usepackage{fancyhdr}
+\\usepackage{atbegshi}
+\\usepackage[normalem]{ulem}
+\\renewcommand{\\ULthickness}{1pt}
+
+\\pagestyle{fancy}
+\\fancyhf{}
+\\fancyhead[R]{\\thepage.}
+\\renewcommand{\\headrulewidth}{0pt}
+
+\\setlength{\\parskip}{12pt plus 0pt minus 0pt}
+\\linespread{0.82}
+\\hyphenpenalty=10000
+\\widowpenalty=10000
+\\clubpenalty=10000
+\\frenchspacing
+\\raggedright
+\\hfuzz=1in
+
+\\usepackage[style=english]{csquotes}
+\\MakeOuterQuote{\"}
+
+\\newif\\ifVSsceneheading
+\\VSsceneheadingtrue
+\\newif\\ifULsceneheading
+\\ULsceneheadingfalse
+\\newif\\ifBFsceneheading
+\\BFsceneheadingfalse
+
+\\newcommand*{\\sceneheading}[1]{%
+\\def\\thesceneheading{#1}
+\\ifVSsceneheading
+\\vspace{\\parskip}
+\\fi
+\\ifBFsceneheading
+\\let\\BFtmp\\thesceneheading
+\\renewcommand{\\thesceneheading}{\\textbf{\\BFtmp}}
+\\fi
+\\ifULsceneheading
+\\let\\ULtmp\\thesceneheading
+\\renewcommand{\\thesceneheading}{\\uline{\\ULtmp}}
+\\fi
+\\thesceneheading\\nopagebreak[4]%
+}
+
+\\newcommand{\\contd}{(CONT'D)}
+\\newcommand{\\more}{(MORE)}
+
+\\newcommand*{\\character}[1]{%
+\\hspace*{1.2in}\\parbox[t]{4in}{#1}\\parskip=0pt%
+}
+
+\\newenvironment*{dialog}[1]{%
+\\leftskip=1.5in%
+\\character{#1}\\mark{#1}\\par\\nopagebreak[4]%
+\\rightskip=2in
+}{%
+\\par\\mark{\\empty}%
+}
+
+\\newcommand*{\\paren}[1]{%
+\\parskip=0pt\\par%
+\\hspace*{0.5in}\\parbox[t]{2in}{%
+\\hangindent=0.1in\\hangafter=1#1}\\par\\nopagebreak[4]
+\\vspace{2pt}%
+}
+
+\\newcommand*{\\trans}[1]{%
+\\nopagebreak[4]\\hspace*{4in}\\parbox[t]{2in}{#1}%
+}
+
+\\AtBeginShipout{%
+\\if\\botmark\\empty
+\\else
+\\character{\\botmark{}~\\contd}%
+\\fi
+}
+
+\\title{${title}}
+\\author{${author}}
+\\date{${date}}
+
+\\begin{document}
+\\thispagestyle{empty}
+${content}\
+\\end{document}
+")
+    (fdx "\
+<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<FinalDraft DocumentType=\"Script\">
+<Content>
+${content}\
+</Content>
+</FinalDraft>
+"))
+  "Templates for exporting standalone documents."
+  :type '(repeat (group (choice (const :tag "HTML" html)
+                                (const :tag "LaTeX" tex)
+                                (const :tag "Final Draft" fdx)
+                                (other :tag "Custom"))
+                        (string :tag "Template")))
+  :group 'fountain-export)
+
 ;;; Variables ==================================================================
 ;;;; Buffer Local Variables ====================================================
 (defvar-local fountain-metadata
