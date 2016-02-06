@@ -1006,7 +1006,7 @@ This will return \"dialog dual left\"."
      (section-heading "<h1 class=\"section-heading\">${content}</h1>\n")
      (scene "<section class=\"scene\">\n${content}</section>\n")
      (scene-heading "<h2 class=\"scene-heading\" id=\"${number}\">${content}</h2>\n")
-     (dialog "<div class=\"dialog\">\n${content}</div>\n")
+     (dialog "<div class=\"${dual}\">\n${content}</div>\n")
      (character "<p class=\"character\">${content}</p>\n")
      (paren "<p class=\"paren\">${content}</p>\n")
      (lines "<p class=\"lines\">${content}</p>\n")
