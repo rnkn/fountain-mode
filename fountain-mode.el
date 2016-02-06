@@ -310,14 +310,17 @@ To disable element alignment, see `fountain-align-element'."
 (define-obsolete-face-alias 'fountain-section
   'fountain-section-heading "1.4.1")
 
-(make-obsolete 'fountain-export-buffer-to-html
-               'fountain-export "2.0.0")
+(make-obsolete 'fountain-export-title-page-left-template
+               'fountain-export-contact-template "2.0.0")
+
+(make-obsolete 'fountain-export-title-page-right-template
+               'fountain-export-contact-template "2.0.0")
 
 (make-obsolete 'fountain-export-buffer-to-pdf-via-html
-               'fountain-export "2.0.0")
+               'fountain-export-to-latex "2.0.0")
 
 (make-obsolete 'fountain-export-pdf-via-html-command
-               'fountain-export-shell-script "2.0.0")
+               'fountain-export-shell-command "2.0.0")
 
 ;;; Customization ==============================================================
 
@@ -631,61 +634,61 @@ Passed the format being exported as a variable by `format'."
 ;;   :type 'boolean
 ;;   :group 'fountain-export)
 
-;; (defcustom fountain-export-inline-style
-;;   t
-;;   "If non-nil, use inline stylesheet.
-;; Otherwise, use an external stylesheet file."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-html-inline-style
+  t
+  "If non-nil, use inline stylesheet.
+Otherwise, use an external stylesheet file."
+  :type 'boolean
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-page-size
-;;   "us-letter"
-;;   "Paper size to use on export."
-;;   :type '(radio (const :tag "US Letter" "us-letter")
-;;                 (const :tag "A4" "a4"))
-;;   :group 'fountain-export)
+(defcustom fountain-export-page-size
+  "us-letter"
+  "Paper size to use on export."
+  :type '(radio (const :tag "US Letter" "us-letter")
+                (const :tag "A4" "a4"))
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-font
-;;   '("Courier" "Courier New" "monospace")
-;;   "List of font names to use when exporting, by priority."
-;;   :type '(repeat (string :tag "Font"))
-;;   :group 'fountain-export)
+(defcustom fountain-export-font
+  '("Courier" "Courier New" "monospace")
+  "List of font names to use when exporting, by priority."
+  :type '(repeat (string :tag "Font"))
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-bold-scene-headings
-;;   nil
-;;   "If non-nil, bold scene headings on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-bold-scene-headings
+  nil
+  "If non-nil, bold scene headings on export."
+  :type 'boolean
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-underline-scene-headings
-;;   nil
-;;   "If non-nil, underline scene headings on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-underline-scene-headings
+  nil
+  "If non-nil, underline scene headings on export."
+  :type 'boolean
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-bold-title
-;;   nil
-;;   "If non-nil, bold title on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-bold-title
+  nil
+  "If non-nil, bold title on export."
+  :type 'boolean
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-underline-title
-;;   t
-;;   "If non-nil, underline title on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-underline-title
+  t
+  "If non-nil, underline title on export."
+  :type 'boolean
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-upcase-title
-;;   t
-;;   "If non-nil, underline title on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-upcase-title
+  t
+  "If non-nil, underline title on export."
+  :type 'boolean
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-double-space-scene-headings
-;;   nil
-;;   "If non-nil, double space before scene headings on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
+(defcustom fountain-export-double-space-scene-headings
+  nil
+  "If non-nil, double space before scene headings on export."
+  :type 'boolean
+  :group 'fountain-export)
 
 ;; (defcustom fountain-export-action-orphans
 ;;   2
@@ -719,12 +722,12 @@ Passed the format being exported as a variable by `format'."
 ;;   :type 'integer
 ;;   :group 'fountain-export)
 
-;; (defcustom fountain-export-more-dialog-string
-;;   "(MORE)"
-;;   "String to append to dialog when breaking across pages.
-;; Parentheses are not automatically added."
-;;   :type 'string
-;;   :group 'fountain-export)
+(defcustom fountain-export-more-dialog-string
+  "(MORE)"
+  "String to append to dialog when breaking across pages.
+Parentheses are not automatically added."
+  :type 'string
+  :group 'fountain-export)
 
 ;; (defcustom fountain-export-preserve-line-breaks
 ;;   t
@@ -753,27 +756,27 @@ Passed the format being exported as a variable by `format'."
   :type 'string
   :group 'fountain-export)
 
-;; (defcustom fountain-export-title-page-title-template
-;;   "${title}
-;; ${credit}
-;; ${author}"
-;;   "Template for creating title page title block."
-;;   :type 'string
-;;   :group 'fountain-export)
+(defcustom fountain-export-title-template
+  "\
+${title}
+written by
+${author}"
+  "Template for creating title page title block."
+  :type 'string
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-title-page-left-template
-;;   "${draft}
-;; ${date}
-;; ${notes}"
-;;   "Template for creating title page left block."
-;;   :type 'string
-;;   :group 'fountain-export)
+(defcustom fountain-export-contact-template
+  "\
+${author}"
+  "Template for creating title page left block."
+  :type 'string
+  :group 'fountain-export)
 
-;; (defcustom fountain-export-title-page-right-template
-;;   "${contact}"
-;;   "Template for creating title page right block."
-;;   :type 'string
-;;   :group 'fountain-export)
+(defcustom fountain-export-title-as-filename
+  nil
+  "If non-nil, use title metadata as export filename."
+  :type 'boolean
+  :group 'fountain-export)
 
 ;; (defcustom fountain-export-style-template
 ;; "@page {
