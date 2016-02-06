@@ -194,12 +194,12 @@
   "Faces used in `fountain-mode'.
 There are three levels of Font Lock decoration:
 
-    1. minimum: only highlights comments and syntax characters
+    1: minimum: highlights comments and syntax characters
 
-    2. default: highlights comments, metadata, scene headings,
+    2: default: highlights comments, metadata, scene headings,
        sections, synopses, notes and syntax characters
 
-    3. maximum: highlights comments, metadata keys, metadata
+    3: maximum: highlights comments, metadata keys, metadata
        values, scene headings, sections, synopses, notes,
        character names, parentheticals, dialog, transitions,
        center text and syntax characters
@@ -320,6 +320,8 @@ To disable element alignment, see `fountain-align-element'."
                'fountain-export-shell-script "2.0.0")
 
 ;;; Customization ==============================================================
+
+;;;; General Customization =====================================================
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
@@ -1041,13 +1043,13 @@ Set with `fountain-read-metadata' upon calling `fountain-mode'.")
   0
   "Integer representing global outline cycling status.
 
-\t0\tShow all
-\t1\tShow level 1 section headings
-\t2\tShow level 2 section headings
-\t3\tShow level 3 section headings
-\t4\tShow level 4 section headings
-\t5\tShow level 5 section headings
-\t6\tShow scene headings
+    0:  Show all
+    1:  Show level 1 section headings
+    2:  Show level 2 section headings
+    3:  Show level 3 section headings
+    4:  Show level 4 section headings
+    5:  Show level 5 section headings
+    6:  Show scene headings
 
 Used by `fountain-outline-cycle'.")
 
@@ -1056,19 +1058,19 @@ Used by `fountain-outline-cycle'.")
   "Integer representing subtree outline cycling status.
 Used by `fountain-outline-cycle'.")
 
-;;;; Regular Expressions Variables =============================================
+;;;; Regular Expression Variables ==============================================
 
 (defvar fountain-scene-heading-regexp
   nil
   "Regular expression for matching scene headings.
 Set with `fountain-init-scene-heading-regexp'.
 
-\tGroup 1:\tmatch trimmed whitespace
-\tGroup 2:\tmatch leading . (for forced element)
-\tGroup 3:\tmatch scene heading without scene number (for export)
-\tGroup 4:\tmatch space between scene heading and scene number
-\tGroup 5:\tmatch scene number with # prefix
-\tGroup 6:\tmatch scene number
+    Group 1:    match trimmed whitespace
+    Group 2:    match leading . (for forced element)
+    Group 3:    match scene heading without scene number (for export)
+    Group 4:    match space between scene heading and scene number
+    Group 5:    match scene number with # prefix
+    Group 6:    match scene number
 
 Requires `fountain-scene-heading-p' for preceding blank line.")
 
@@ -1121,11 +1123,11 @@ Requires `fountain-metadata-p' for `bobp'.")
           "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
-\tGroup 1:\tmatch trimmed whitespace
-\tGroup 2:\tmatch leading @ (for forced element)
-\tGroup 3:\tmatch character name and parenthetical (export group)
-\tGroup 4:\tmatch character name only
-\tGroup 5:\tmatch trailing ^ (for dual dialog)
+    Group 1:    match trimmed whitespace
+    Group 2:    match leading @ (for forced element)
+    Group 3:    match character name and parenthetical (export group)
+    Group 4:    match character name only
+    Group 5:    match trailing ^ (for dual dialog)
 
 Requires `fountain-character-p'.")
 
@@ -1474,7 +1476,7 @@ These include blank lines, section headings, synopses, notes, and
 comments."
   (or (fountain-blank-p)
       (fountain-comment-p)
-      (fountain-section-heading-p)
+      (fountain-section-heading-p) ; FIXME: what about stageplays?
       (fountain-synopsis-p)
       (fountain-note-p)))
 
@@ -1856,10 +1858,10 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
 
-\t\\[fountain-outline-cycle]\t\t\t\tCycle outline visibility of current subtree and its children
-\t\\[universal-argument] \\[fountain-outline-cycle]\t\t\tCycle outline visibility of buffer
-\t\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\t\tShow all
-\t\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]\tShow outline visibility set in `fountain-outline-startup-level'"
+    \\[fountain-outline-cycle]				Cycle outline visibility of current subtree and its children
+    \\[universal-argument] \\[fountain-outline-cycle]			Cycle outline visibility of buffer
+    \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		Show all
+    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	Show outline visibility set in `fountain-outline-startup-level'"
   (interactive "p")
   (let* ((custom-level
           (if fountain-outline-custom-level
@@ -1954,10 +1956,10 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-\tTop-level section headins
-\tValue of `fountain-outline-custom-level'
-\tAll section headings and scene headings
-\tEverything"
+    1:  Top-level section headins
+    2:  Value of `fountain-outline-custom-level'
+    3:  All section headings and scene headings
+    4:  Everything"
   (interactive)
   (fountain-outline-cycle 4))
 
@@ -2491,8 +2493,8 @@ If N is 0, move to beginning of scene."
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
-If LIMIT is 'scene, halt at next scene heading. If LIMIT is
-'dialog, halt at next non-dialog element."
+If LIMIT is 'scene, halt at end of scene. If LIMIT is 'dialog,
+halt at end of dialog."
   (interactive "^p")
   (let* ((i (or n 1))
          (p (if (< i 1) -1 1)))
@@ -2648,7 +2650,7 @@ then make the changes desired."
     (user-error "Decoration must be an integer 1-3")))
 
 (defun fountain-export-default ()
-  "Call function defined in `fountain-export-default-command'"
+  "Call function defined in `fountain-export-default-command'."
   (interactive)
   (funcall fountain-export-default-command))
 
@@ -2905,20 +2907,21 @@ nil, this face is not considered an element. MATCHER is a regular
 expression or search function. SUB-PLIST is a list of plists,
 assigning the following keywords:
 
-\t:level\t\tinteger representing level of `font-lock-maximum-decoration'
-\t\t\t\tat which face is applied
-\t:subexp\t\tsubexpression to match
-\t:face\t\tface name to apply
-\t:invisible\tif t, adds :face property to invisible text property
-\t:override\tas per `font-lock-keywords'
-\t:laxmatch\tas per `font-lock-keywords'
+    :level      integer representing level of `font-lock-maximum-decoration'
+                at which face is applied
+    :subexp     subexpression to match
+    :face       face name to apply
+    :invisible  if t, adds :face property to invisible text property
+    :override   as per `font-lock-keywords'
+    :laxmatch   as per `font-lock-keywords'
 
 Regular expression should take the form:
 
-\tGroup 1:\tmatch whole string with trimmed whitespace
-\tGroup 2:\tsyntax characters
-\tGroup 3:\texport group
-\tGroup 4-6:\tsyntax characters")
+    Group 1:    match whole string with trimmed whitespace
+    Group 2:    syntax characters
+    Group 3:    export group
+    Group 4+:  syntax characters")
+
 
 (defun fountain-get-align (element)
   "Return ELEMENT align integer based on buffer format"
