@@ -956,6 +956,49 @@ ${author}"
   :type 'string
   :group 'fountain-export)
 
+(defcustom fountain-export-format-getter-alist
+  '((html
+     (emacs-version
+      (lambda nil emacs-version))
+     (fountain-version fountain-version)
+     (style fountain-export-html-create-style)
+     (dual fountain-export-html-dual-dialog)))
+  "Association list of getter functions for formatting templates.
+
+    (FORMAT (KEY FUNCTION) ...)
+
+FORMAT is the export format, a symbol.
+
+KEY corresponds to ${key} in a format template. FUNCTION will be
+called with either no arguments, and return a string, or KEY's
+corresponding value in the property list of the element to be
+formatted, and return a variable string. e.g.
+
+    (dialog
+     (begin 2527 end 2547 character \"JOHN\" dual left)
+     ((character
+       (beg 2527 end 2535)
+       \"JOHN\")
+       (lines
+        (begin 2536 end 2546)
+        \"I don't believe you're here.\")))
+
+Given the parsed \"dialog\" element above, the following will
+call `fountain-export-html-dual-dialog' with argument \"left\"
+when exporting to HTML.
+
+    '((html
+       (dual fountain-export-html-dual-dialog)))
+
+This will return \"dialog dual left\"."
+  :type '(alist :key-type (choice :tag "Format"
+                                (const :tag "HTML" html)
+                                (const :tag "LaTeX" tex)
+                                (const :tag "Final Draft" fdx)
+                                (symbol :tag "Custom"))
+                :value-type (repeat (group (symbol :tag "Key")
+                                           function)))
+  :group 'fountain-export)
 
 (defcustom fountain-export-element-templates
   '((html
