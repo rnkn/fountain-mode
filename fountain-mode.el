@@ -956,19 +956,6 @@ ${author}"
   :type 'string
   :group 'fountain-export)
 
-;; (defcustom fountain-export-html-head-template
-;;   "<head>
-;; <meta charset=\"${charset}\">
-;; <meta name=\"author\" content=\"${author}\" />
-;; <meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
-;; <title>${title}</title>
-;; ${insert-style}
-;; </head>"
-;;   "HTML head template inserted into export buffer.
-;; Only customize this if you really know what you're dong.
-;; Currently, ${charset} will default to UTF-8."
-;;   :type 'string
-;;   :group 'fountain-export)
 
 (defcustom fountain-export-element-templates
   '((html
