@@ -585,8 +585,8 @@ This option does affect file contents."
 ;;;; Export Group Customization ================================================
 
 (defcustom fountain-export-include-elements
-  '(("screenplay" . (scene-heading action character paren lines trans center))
-    ("stageplay" . (section-heading scene-heading action character paren lines trans center)))
+  '(("screenplay" scene-heading action character paren lines trans center)
+    ("stageplay" section-heading scene-heading action character paren lines trans center))
   "List of elements to include when exporting.
 
 Note that comments (boneyard) are never included."
