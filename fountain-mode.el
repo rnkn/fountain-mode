@@ -1824,34 +1824,28 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
           ((integerp n) n)
           (t 2))))
 
-(defun fountain-font-lock-extend-region ()
-  "Extend region for fontification to text block."
-  (defvar font-lock-beg nil)
-  (defvar font-lock-end nil)
+;;;; Text Functions ============================================================
+
+(defun fountain-delete-comments-in-region (beg end)
   (let ((beg
          (save-excursion
-           (goto-char font-lock-beg)
-           (re-search-backward
-            "^[\s\t]*$"
-            (- (point) fountain-block-limit) 1)
-           (point)))
+           (goto-char beg)
+           (if (and (search-forward "*/" end t)
+                    (not (search-backward "/*" beg t))
+                    (search-backward "/*" nil t))
+               (match-beginning 0)
+             beg)))
         (end
          (save-excursion
-           (goto-char font-lock-end)
-           (re-search-forward
-            "^[\s\t]*$"
-            (+ (point) fountain-block-limit) 1)
-           (point)))
-        changed)
-    (goto-char font-lock-beg)
-    (unless (or (bobp)
-                (eq beg font-lock-beg))
-      (setq font-lock-beg beg changed t))
-    (goto-char font-lock-end)
-    (unless (or (eobp)
-                (eq end font-lock-end))
-      (setq font-lock-end end changed t))
-    changed))
+           (goto-char end)
+           (if (and (search-backward "/*" beg t)
+                    (not (search-forward "*/" end t))
+                    (search-forward "*/" nil t))
+               (match-end 0)
+             end))))
+  (goto-char beg)
+  (while (re-search-forward fountain-comment-regexp end t)
+    (delete-region (match-beginning 0) (match-end 0)))))
 
 ;;;; Outline Functions =========================================================
 
@@ -3006,6 +3000,33 @@ Regular expression should take the form:
     Group 3:    export group
     Group 4+:  syntax characters")
 
+
+(defun fountain-font-lock-extend-region ()
+  "Extend region for fontification to text block."
+  (defvar font-lock-beg nil)
+  (defvar font-lock-end nil)
+  (let ((beg
+         (save-excursion
+           (goto-char font-lock-beg)
+           (re-search-backward "^[\s\t]*$"
+                               (- (point) fountain-block-limit) 'move)
+           (point)))
+        (end
+         (save-excursion
+           (goto-char font-lock-end)
+           (re-search-forward "^[\s\t]*$"
+                              (+ (point) fountain-block-limit) 'move)
+           (point)))
+        changed)
+    (goto-char font-lock-beg)
+    (unless (or (bobp)
+                (eq beg font-lock-beg))
+      (setq font-lock-beg beg changed t))
+    (goto-char font-lock-end)
+    (unless (or (eobp)
+                (eq end font-lock-end))
+      (setq font-lock-end end changed t))
+    changed))
 
 (defun fountain-get-align (element)
   "Return ELEMENT align integer based on buffer format"
