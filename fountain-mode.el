@@ -1532,12 +1532,12 @@ bold-italic delimiters together, e.g.
     (save-restriction
       (widen)
       (forward-line 0)
-      (or (looking-at (concat fountain-note-regexp "[\s\t]*$"))
-          (let ((a (point)))
+      (or (looking-at fountain-note-regexp)
+          (let ((pos (point)))
             (if (re-search-backward "^[\s\t]*\n" nil 'move)
                 (goto-char (match-end 0)))
-            (and (looking-at (concat fountain-note-regexp "[\s\t]*$"))
-                 (< a (match-end 0))))))))
+            (and (looking-at fountain-note-regexp)
+                 (< pos (match-end 0))))))))
 
 (defun fountain-comment-p ()
   (save-excursion
@@ -1600,7 +1600,7 @@ comments."
       (save-restriction
         (widen)
         (forward-line 0)
-        (and (looking-at "[\s\t]*\\(?3:[^<>\n]+?\\)[\s\t]*$")
+        (and (looking-at "[\s\t]*\\(?1:\\(?3:[^<>\n]+?\\)\\)[\s\t]*$")
              (save-match-data
                (unless (bobp)
                  (forward-line -1)
@@ -2640,7 +2640,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
     (if arg
         (comment-dwim nil)
       (unless (fountain-blank-p)
-        (re-search-forward "^[\s\t]*$" nil 1))
+        (re-search-forward "^[\s\t]*$" nil 'move))
       (unless (save-excursion
                 (forward-line 1)
                 (fountain-blank-p))
