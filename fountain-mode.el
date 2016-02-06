@@ -970,6 +970,102 @@ ${author}"
 ;;   :type 'string
 ;;   :group 'fountain-export)
 
+(defcustom fountain-export-element-templates
+  '((html
+     (section "<section class=\"section\">\n${content}</section>\n")
+     (section-heading "<h1 class=\"section-heading\">${content}</h1>\n")
+     (scene "<section class=\"scene\">\n${content}</section>\n")
+     (scene-heading "<h2 class=\"scene-heading\" id=\"${number}\">${content}</h2>\n")
+     (dialog "<div class=\"dialog\">\n${content}</div>\n")
+     (character "<p class=\"character\">${content}</p>\n")
+     (paren "<p class=\"paren\">${content}</p>\n")
+     (lines "<p class=\"lines\">${content}</p>\n")
+     (trans "<p class=\"trans\">${content}</p>\n")
+     (action "<p class=\"action\">${content}</p>\n")
+     (synopsis "<p class=\"synopsis\">${content}</p>\n")
+     (note "<p class=\"note\">${content}</p>\n")
+     (center "<p class=\"center\">${content}</p>\n"))
+    (tex
+     (section "")
+     (section-heading "")
+     (scene "")
+     (scene-heading "\\sceneheading{${content}}\n\n")
+     (dialog "\\begin{dialog}${content}\n\\end{dialog}\n\n")
+     (character "{${content}}\n")
+     (paren "\\paren{${content}}\n")
+     (lines "${content}\n")
+     (trans "\\trans{${content}}\n\n")
+     (action "${content}\n\n")
+     (synopsis "")
+     (note "")
+     (center "\\note{${content}}\n\n"))
+    (fdx
+     (section "")
+     (section-heading "")
+     (scene "")
+     (scene-heading "<Paragraph Number=\"${number}\" Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (dialog "")
+     (character "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (paren "<Paragraph Type=\"Parenthetical\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (lines "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (trans "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (action "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (synopsis "")
+     (note "")
+     (center "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n"))
+    (fountain
+     (section "${content}")
+     (section-heading "${content}\n\n")
+     (scene "${content}")
+     (scene-heading "${content}\n\n")
+     (dialog "${content}")
+     (character "@${content}\n")
+     (paren "${content}\n")
+     (lines "${content}\n\n")
+     (trans "> ${content}\n\n")
+     (action "${content}\n\n")
+     (synopsis "= ${content}\n\n")
+     (note "[[ ${content} ]]\n\n")
+     (center "> ${content} <")))
+  "
+    section:            string of whole section
+    section-heading:    string of section heading (not including syntax chars)
+    scene:              string of whole scene
+    scene-heading       string of scene heading (not including syntax chars)
+    dialog:             string of whole dialogue block (including character,
+                        parentheticals, lines)
+    character:          string of character name (not including syntax chars)
+    paren:              string of parenthetical
+    lines:              string of dialogue lines (up to end or next
+                        parenthetical)
+    trans:              string of transition
+    action:             string of whole action block
+    synopsis:           string of synopsis (not including syntax chars)
+    note:               string of note (not including syntax chars)
+    center:             string of center text (not including syntax chars)
+"
+  :type '(alist :key-type (choice :tag "Format"
+                                  (const :tag "HTML" html)
+                                  (const :tag "LaTeX" tex)
+                                  (const :tag "Final Draft" fdx)
+                                  (const :tag "Fountain" fountain)
+                                  (symbol :tag "Custom"))
+                :value-type (group
+                        (group (const :tag "Section" section) string)
+                        (group (const :tag "Section Heading" section-heading) string)
+                        (group (const :tag "Scene" scene) string)
+                        (group (const :tag "Scene Heading" scene-heading) string)
+                        (group (const :tag "Dialogue" dialog) string)
+                        (group (const :tag "Character" character) string)
+                        (group (const :tag "Parenthetical" paren) string)
+                        (group (const :tag "Dialogue Lines" lines) string)
+                        (group (const :tag "Transition" trans) string)
+                        (group (const :tag "Action" action) string)
+                        (group (const :tag "Synopsis" synopsis) string)
+                        (group (const :tag "Note" note) string)
+                        (group (const :tag "Center Text" center) string)))
+  :group 'fountain-export)
+
 (defcustom fountain-export-document-templates
   '((html "\
 <head>
@@ -1261,70 +1357,6 @@ bold-italic delimiters together, e.g.
   "Regular expression for matching lyrics.")
 
 ;;;; Export Variables ==========================================================
-
-(defconst fountain-export-format-plist
-  '((document
-     html   "<section class=\"screenplay\">\n${content}</section>\n"
-     tex    "${content}\n"
-     fdx    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<FinalDraft DocumentType=\"Script\">\n<Content>\n${content}</Content>\n</FinalDraft>\n")
-    (section
-     html   "<section class=\"section\">\n${content}</section>\n")
-    (scene
-     html   "<section class=\"scene\">\n${content}</section>\n")
-    (dialog
-     html   "<div class=\"dialog\">\n${content}</div>\n\n"
-     tex    "\\\\begin{dialog}${content}\n\\\\end{dialog}\n\n")
-    (scene-heading
-     html   "<h2 class=\"scene-heading\">${content}</h2>\n"
-     tex    "\\\\sceneheading{${content}}\n\n"
-     fdx    "<Paragraph Number=\"${scene-num}\" Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (action
-     html   "<p class=\"action\">${content}</p>\n"
-     tex    "${content}\n\n"
-     fdx    "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (character
-     html   "<p class=\"character\">${content}</p>\n"
-     tex    "{${content}}\n"
-     fdx    "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (paren
-     html   "<p class=\"paren\">${content}</p>\n"
-     tex    "\paren{${content}}\n"
-     fdx    "<Paragraph Type=\"Parenthetical\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (lines
-     html   "<p class=\"lines\">${content}</p>\n"
-     fdx    "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (trans
-     html   "<p class=\"trans\">${content}</p>\n"
-     tex    "\\\\trans{${content}}\n\n"
-     fdx    "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (center
-     html   "<p class=\"center\">${content}</p>\n"
-     tex    "\\\\begin{center}\n${content}\n\\\\end{center}\n"
-     fdx    "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (section-heading
-     html   "<h1 class=\"section-heading\">${content}</h1>\n")
-    (synopsis
-     html   "<p class=\"synopsis\">${content}</p>\n")
-    (note
-     html   "<p class=\"note\">${content}</p>\n")
-    (comment
-     html   "<p class=\"comment\">${content}</p>\n")
-    (underline
-     html   "_\\(.+?\\)_${content}<span class=\"underline\">\\1</span>")
-    (bold
-     html   "\\*\\*\\(.+?\\)\\*\\*${content}<strong>\\1</strong>")
-    (italic
-     html   "\\*\\(.+?\\)\\*${content}<em>\\1</em>")
-    (lyric
-     html   "^~\s*\\(.+\\)${content}<i>\\1</i>"))
-  "List of strings to format exported elements")
-
-(defvar-local fountain-export-tick
-  nil
-  "Value of `buffer-modified-tick' after `fountain-parse-buffer'.
-
-Checked when exporting to avoid parsing again if the buffer has
-not changed.")
 
 ;;; Faces ======================================================================
 
