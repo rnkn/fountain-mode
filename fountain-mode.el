@@ -1211,11 +1211,20 @@ ${content}\
 ${content}\
 </Content>
 </FinalDraft>
+")
+    (fountain "\
+title: ${title}
+credit: ${credit}
+author: ${author}
+date: ${date}
+
+${content}\
 "))
-  "Templates for exporting standalone documents."
+  "Association list of format templates for standalone documents."
   :type '(repeat (group (choice (const :tag "HTML" html)
                                 (const :tag "LaTeX" tex)
                                 (const :tag "Final Draft" fdx)
+                                (const :tag "Fountain" fountain)
                                 (other :tag "Custom"))
                         (string :tag "Template")))
   :group 'fountain-export)
