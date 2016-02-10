@@ -401,11 +401,11 @@ changes desired."
 (defcustom fountain-block-limit
   10000
   "Integer to limit fontification block in characters.
-Used by `fountain-get-block-bounds'.
+Used by `fountain-font-lock-extend-region'.
 
-Sometimes `fountain-mode' can hang if asked for fontify a very
+Sometimes `font-lock-mode' can hang if asked for fontify a very
 large block of unbroken text. If you experience performance
-issues, consider reducing this integer."
+issues, consider reducing this value."
   :type 'integer
   :group 'fountain)
 
@@ -1720,17 +1720,6 @@ comments."
         (looking-at ".*")))))
 
 ;;;; Reading Functions =========================================================
-
-(defun fountain-get-block-bounds ()
-  "Return the beginning and end points of block at point."
-  (let* ((r (concat fountain-blank-regexp "\\|\\`\\|\\'"))
-         (beg (save-excursion
-                (re-search-backward
-                 r (- (point) fountain-block-limit) t)))
-         (end (save-excursion
-                (re-search-forward
-                 r (+ (point) fountain-block-limit) t))))
-    (cons beg end)))
 
 (defun fountain-read-metadata ()
   "Read metadata of current buffer and return as a property list.
