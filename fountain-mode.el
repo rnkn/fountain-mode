@@ -3232,6 +3232,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e l") 'fountain-export-buffer-to-latex)
     (define-key map (kbd "C-c C-e d") 'fountain-export-buffer-to-fdx)
+    (define-key map (kbd "C-c C-e f") 'fountain-export-buffer-to-fountain)
     (define-key map (kbd "C-c C-e s") 'fountain-export-shell-command)
     ;; view commands
     (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars) ; FIXME ??
@@ -3271,6 +3272,35 @@ keywords suitable for Font Lock."
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     ;; ["Add Scene Numbers" fountain-add-scene-nums]
     "---"
+    ("Export"
+     ["Default" fountain-export-default]
+     "---"
+     ["Buffer to HTML" fountain-export-buffer-to-html]
+     ["Buffer to LaTeX" fountain-export-buffer-to-latex]
+     ["Buffer to FDX" fountain-export-buffer-to-fdx]
+     ["Buffer to Fountain" fountain-export-buffer-to-fountain]
+     "---"
+     ["Run shell command" fountain-export-shell-command]
+     ;; ["Include Title Page"
+     ;;  fountain-toggle-export-include-title-page
+     ;;  :style toggle
+     ;;  :selected fountain-export-include-title-page]
+     ;; "---"
+     ;; ["Bold Scene Headings"
+     ;;  fountain-toggle-export-bold-scene-headings
+     ;;  :style toggle
+     ;;  :selected fountain-export-bold-scene-headings]
+     ;; ["Underline Scene Headings"
+     ;;  fountain-toggle-export-underline-scene-headings
+     ;;  :style toggle
+     ;;  :selected fountain-export-underline-scene-headings]
+     ;; ["Double-Space Scene Headings"
+     ;;  fountain-toggle-export-double-space-scene-headings
+     ;;  :style toggle
+     ;;  :selected fountain-export-double-space-scene-headings]
+     "---"
+     ["Customize Export" (customize-group 'fountain-export)])
+    "---"
     ["Display Elements Auto-Aligned"
      fountain-toggle-align-elements
      :style toggle
@@ -3301,33 +3331,6 @@ keywords suitable for Font Lock."
      ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
       :style toggle
       :selected fountain-hide-syntax-chars])
-    "---"
-    ("Export"
-     ["Default" fountain-export-default]
-     ["Run shell command" fountain-export-shell-command]
-     ["Buffer to HTML" fountain-export-buffer-to-html]
-     ["Buffer to LaTeX" fountain-export-buffer-to-latex]
-     ["Buffer to FDX" fountain-export-buffer-to-fdx]
-     ;; "---"
-     ;; ["Include Title Page"
-     ;;  fountain-toggle-export-include-title-page
-     ;;  :style toggle
-     ;;  :selected fountain-export-include-title-page]
-     ;; "---"
-     ;; ["Bold Scene Headings"
-     ;;  fountain-toggle-export-bold-scene-headings
-     ;;  :style toggle
-     ;;  :selected fountain-export-bold-scene-headings]
-     ;; ["Underline Scene Headings"
-     ;;  fountain-toggle-export-underline-scene-headings
-     ;;  :style toggle
-     ;;  :selected fountain-export-underline-scene-headings]
-     ;; ["Double-Space Scene Headings"
-     ;;  fountain-toggle-export-double-space-scene-headings
-     ;;  :style toggle
-     ;;  :selected fountain-export-double-space-scene-headings]
-     "---"
-     ["Customize Export" (customize-group 'fountain-export)])
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
