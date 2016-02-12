@@ -2524,10 +2524,9 @@ Otherwise return `fountain-export-buffer'"
   (interactive)
   (fountain-export-buffer 'html))
 
-(defun fountain-export-buffer-to-tex ()
+(defun fountain-export-buffer-to-latex ()
   (interactive)
   (fountain-export-buffer 'tex))
-(defalias 'fountain-export-buffer-to-latex 'fountain-export-buffer-to-tex)
 
 (defun fountain-export-buffer-to-fdx ()
   (interactive)
