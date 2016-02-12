@@ -772,16 +772,23 @@ ${author}"
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-title-as-filename
+(defcustom fountain-export-use-title-as-filename
   nil
   "If non-nil, use title metadata as export filename."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-html-use-inline-style
+  t
+  "If non-nil, use inline stylesheet.
+Otherwise, use an external stylesheet file."
   :type 'boolean
   :group 'fountain-export)
 
 (defcustom fountain-export-html-style-template
   "\
 @page screenplay, screenplay-title {
-  size: letter;
+  size: ${html-page-size};
   margin-top: 1in;
   margin-right: 1in;
   margin-bottom: 0.75in;
@@ -789,7 +796,7 @@ ${author}"
 }
 @page screenplay {
   @top-right-corner {
-    font-family: \"Courier Prime\", \"Courier\", \"Courier Final Draft\", \"Courier New\";
+    font-family: ${html-font};
     font-size: 12pt;
     content: counter(page) \".\";
     vertical-align: bottom;
@@ -849,26 +856,13 @@ ${author}"
     visibility: hidden;
   }
 }
-.screenplay mark {
-  background-color: yellow;
-}
-.screenplay mark:before {
-  content: '*';
-  width: 0.5in;
-  position: absolute;
-  right: 0in;
-}
-.screenplay del:before {
-  content: '*';
-  width: 0.5in;
-  position: absolute;
-  right: 0in;
-}
 .screenplay .scene {
-  margin-top: 2em;
+  margin-top: ${html-scene-spacing};
   width: auto;
 }
 .screenplay .scene-heading {
+  font-weight: ${html-scene-bold};
+  text-decoration: ${html-scene-underline};
   margin-bottom: 0em;
   page-break-after: avoid;
 }
@@ -952,61 +946,141 @@ ${author}"
   display: none;
 }
 "
-"Style template for HTML export"
+"Style template for HTML export."
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-format-getter-alist
+(defcustom fountain-export-format-replace-alist
   '((html
-     (emacs-version
-      (lambda nil emacs-version))
-     (fountain-version fountain-version)
-     (style fountain-export-html-create-style)
-     (dual fountain-export-html-dual-dialog)))
-  "Association list of getter functions for formatting templates.
+     ("&" "&amp;")
+     ("<" "&lt;")
+     (">" "&gt;")
+     ("\\\\\s" "&nbsp;")
+     ("^\\\\$" "<br>")
+     ("\\\\_" "&#95;")
+     ("\\\\\\*" "&#42;")
+     ("\\\\`" "&#96;")
+     ("\\\\'" "&apos;")
+     ("``" "&ldquo;")
+     ("''" "&rdquo;")
+     ("`" "&lsquo;")
+     ("'" "&rsquo;")
+     ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "<strong><em>\\1</em></strong>")
+     ("\\*\\*\\(.+?\\)\\*\\*" "<strong>\\1</strong>")
+     ("\\*\\(.+?\\)\\*" "<em>\\1</em>")
+     ("^~\s*\\(.+?\\)$\\*\\*" "<i>\\1</i>")
+     ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
+     ("\n" "<br>"))
+    (tex
+     ("%" "\\\\%")
+     ("\\$" "\\\\$")
+     ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "\\\\textbf{\\\\emph{\\1}}")
+     ("\\*\\*\\(.+?\\)\\*\\*" "\\\\textbf{\\1}")
+     ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
+     ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
+     ("_\\(.+?\\)_" "\\\\uline{\\1}")
+     ("\n" "\n\n")))
+  "Association list of regular expression export replacements.
+Replacements are made in sequential order. The sequence is
+important: first, characters that are special in the export
+format are sanitized, then escaped characters are converted to
+character codes, then format replacement is made."
+  :type '(alist :key-type (symbol :tag "Format")
+                :value-type (repeat (group regexp (string :tag "Replacement")))))
 
-    (FORMAT (KEY FUNCTION) ...)
+(defcustom fountain-export-template-replace-functions
+  '(("html-dialog-class"
+     fountain-export-html-dialog-class)
+    ("fountain-scene-heading-forced"
+     fountain-export-fountain-forced-scene-heading)
+    ("fountain-action-forced"
+     fountain-export-fountain-forced-action)
+    ("fountain-character-forced"
+     fountain-export-fountain-forced-character)
+    ("fountain-trans-forced"
+     fountain-export-fountain-forced-trans))
+  "Association list of replacement functions for formatting templates.
+FUNCTION is called with one argument, the property list of the
+format element (see `fountain-parse-element'), and must return a
+string.
 
-FORMAT is the export format, a symbol.
-
-KEY corresponds to ${key} in a format template. FUNCTION will be
-called with either no arguments, and return a string, or KEY's
-corresponding value in the property list of the element to be
-formatted, and return a variable string. e.g.
-
-    (dialog
-     (begin 2527 end 2547 character \"JOHN\" dual left)
-     ((character
-       (beg 2527 end 2535)
-       \"JOHN\")
-       (lines
-        (begin 2536 end 2546)
-        \"I don't believe you're here.\")))
-
-Given the parsed \"dialog\" element above, the following will
-call `fountain-export-html-dual-dialog' with argument \"left\"
-when exporting to HTML.
-
-    '((html
-       (dual fountain-export-html-dual-dialog)))
-
-This will return \"dialog dual left\"."
-  :type '(alist :key-type (choice :tag "Format"
-                                (const :tag "HTML" html)
-                                (const :tag "LaTeX" tex)
-                                (const :tag "Final Draft" fdx)
-                                (symbol :tag "Custom"))
-                :value-type (repeat (group (symbol :tag "Key")
-                                           function)))
+When exporting, this list take precedence over
+`fountain-generic-template-replace-functions'"
+  :type '(repeat (group string function))
   :group 'fountain-export)
 
-(defcustom fountain-export-element-templates
+(defcustom fountain-generic-template-replace-functions
+  '(("emacs-version"
+     (lambda () emacs-version))
+    ("fountain-version"
+     (lambda () fountain-version))
+    ("title"
+     (lambda ()
+       (or (plist-get (fountain-read-metadata)
+                      'title)
+           (file-base-name (buffer-name)))))
+    ("author"
+     (lambda ()
+       (plist-get (fountain-read-metadata)
+                  'author)))
+    ("email"
+     (lambda () user-mail-address))
+    ("date"
+     (lambda ()
+       (format-time-string "%F")))
+    ("html-page-size"
+     (lambda () fountain-export-page-size))
+    ("html-font"
+     (lambda ()
+       (mapconcat
+        (lambda (font) (concat "'" font "'"))
+        fountain-export-font ", ")))
+    ("html-scene-bold"
+     (lambda ()
+       (if (memq 'bold
+                 fountain-export-scene-heading-format)
+           "bold" "normal")))
+    ("html-scene-spacing"
+     (lambda ()
+       (if (memq 'double-space
+                 fountain-export-scene-heading-format)
+           "2em" "1em")))
+    ("html-scene-underline"
+     (lambda ()
+       (if (memq 'underline
+                 fountain-export-scene-heading-format)
+           "underline" "none")))
+    ("html-style" fountain-export-html-create-style))
+  "Association list of replacement funcations for formatting templates.
+FUNCTION is called no arguments and must return a string.
+
+This list is used for making template replacements in-buffer and
+when exporting, but `fountain-export-template-replace-functions'
+takes precedence when exporting."
+  :type '(repeat (group string function))
+  :group 'fountain)
+
+(defcustom fountain-export-templates
   '((html
+     (document "\
+<head>
+<meta charset=\"utf-8\">
+<meta name=\"author\" content=\"${author}\" />
+<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
+<title>${title}</title>
+${html-style}
+</head>
+<body>
+<section class=\"screenplay\">
+${content}\
+</section>
+</body>
+")
      (section "<section class=\"section\">\n${content}</section>\n")
      (section-heading "<h1 class=\"section-heading\">${content}</h1>\n")
      (scene "<section class=\"scene\">\n${content}</section>\n")
-     (scene-heading "<h2 class=\"scene-heading\" id=\"${number}\">${content}</h2>\n")
-     (dialog "<div class=\"${dual}\">\n${content}</div>\n")
+     (scene-heading "<h2 class=\"scene-heading\" id=\"${scene-number}\">${content}</h2>\n")
+     (dialog "<div class=\"${html-dialog-class}\">\n${content}</div>\n")
      (character "<p class=\"character\">${content}</p>\n")
      (paren "<p class=\"paren\">${content}</p>\n")
      (lines "<p class=\"lines\">${content}</p>\n")
@@ -1016,102 +1090,7 @@ This will return \"dialog dual left\"."
      (note "<p class=\"note\">${content}</p>\n")
      (center "<p class=\"center\">${content}</p>\n"))
     (tex
-     (section nil)
-     (section-heading nil)
-     (scene nil)
-     (scene-heading "\\sceneheading{${content}}\n\n")
-     (dialog "\\begin{dialog}${content}\n\\end{dialog}\n\n")
-     (character "{${content}}\n")
-     (paren "\\paren{${content}}\n")
-     (lines "${content}\n")
-     (trans "\\trans{${content}}\n\n")
-     (action "${content}\n\n")
-     (synopsis "")
-     (note "")
-     (center "\\center{${content}}\n\n"))
-    (fdx
-     (section nil)
-     (section-heading nil)
-     (scene nil)
-     (scene-heading "<Paragraph Number=\"${number}\" Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>\n")
-     (dialog nil)
-     (character "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>\n")
-     (paren "<Paragraph Type=\"Parenthetical\">\n<Text>${content}</Text>\n</Paragraph>\n")
-     (lines "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>\n")
-     (trans "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>\n")
-     (action "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
-     (synopsis "")
-     (note "")
-     (center "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n"))
-    (fountain
-     (section "${content}")
-     (section-heading "${content}\n\n")
-     (scene "${content}")
-     (scene-heading "${content}\n\n")
-     (dialog "${content}")
-     (character "@${content}\n")
-     (paren "${content}\n")
-     (lines "${content}\n\n")
-     (trans "> ${content}\n\n")
-     (action "${content}\n\n")
-     (synopsis "= ${content}\n\n")
-     (note "[[ ${content} ]]\n\n")
-     (center "> ${content} <")))
-  "
-    section:            string of whole section
-    section-heading:    string of section heading (not including syntax chars)
-    scene:              string of whole scene
-    scene-heading       string of scene heading (not including syntax chars)
-    dialog:             string of whole dialogue block (including character,
-                        parentheticals, lines)
-    character:          string of character name (not including syntax chars)
-    paren:              string of parenthetical
-    lines:              string of dialogue lines (up to end or next
-                        parenthetical)
-    trans:              string of transition
-    action:             string of whole action block
-    synopsis:           string of synopsis (not including syntax chars)
-    note:               string of note (not including syntax chars)
-    center:             string of center text (not including syntax chars)
-"
-  :type '(alist :key-type (choice :tag "Format"
-                                  (const :tag "HTML" html)
-                                  (const :tag "LaTeX" tex)
-                                  (const :tag "Final Draft" fdx)
-                                  (const :tag "Fountain" fountain)
-                                  (symbol :tag "Custom"))
-                :value-type (group
-                        (group (const :tag "Section" section) string)
-                        (group (const :tag "Section Heading" section-heading) string)
-                        (group (const :tag "Scene" scene) string)
-                        (group (const :tag "Scene Heading" scene-heading) string)
-                        (group (const :tag "Dialogue" dialog) string)
-                        (group (const :tag "Character" character) string)
-                        (group (const :tag "Parenthetical" paren) string)
-                        (group (const :tag "Dialogue Lines" lines) string)
-                        (group (const :tag "Transition" trans) string)
-                        (group (const :tag "Action" action) string)
-                        (group (const :tag "Synopsis" synopsis) string)
-                        (group (const :tag "Note" note) string)
-                        (group (const :tag "Center Text" center) string)))
-  :group 'fountain-export)
-
-(defcustom fountain-export-document-templates
-  '((html "\
-<head>
-<meta charset=\"utf-8\">
-<meta name=\"author\" content=\"${author}\" />
-<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
-<title>${title}</title>
-${style}
-</head>
-<body>
-<section class=\"script screenplay\">
-${content}\
-</section>
-</body>
-")
-    (tex "\
+     (document "\
 \\documentclass[12pt,letterpaper]{article}
 \\usepackage[left=1.25in,top=1in,bottom=0.75in,text=6in]{geometry}
 \\usepackage{fontspec}
@@ -1204,7 +1183,21 @@ ${content}\
 ${content}\
 \\end{document}
 ")
-    (fdx "\
+     (section nil)
+     (section-heading nil)
+     (scene nil)
+     (scene-heading "\\sceneheading{${content}}\n\n")
+     (dialog "\\begin{dialog}${content}\n\\end{dialog}\n\n")
+     (character "{${content}}\n")
+     (paren "\\paren{${content}}\n")
+     (lines "${content}\n")
+     (trans "\\trans{${content}}\n\n")
+     (action "${content}\n\n")
+     (synopsis "")
+     (note "")
+     (center "\\center{${content}}\n\n"))
+    (fdx
+     (document "\
 <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <FinalDraft DocumentType=\"Script\">
 <Content>
@@ -1212,21 +1205,108 @@ ${content}\
 </Content>
 </FinalDraft>
 ")
-    (fountain "\
+     (section nil)
+     (section-heading nil)
+     (scene nil)
+     (scene-heading "<Paragraph Number=\"${scene-number}\" Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (dialog nil)
+     (character "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (paren "<Paragraph Type=\"Parenthetical\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (lines "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (trans "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (action "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
+     (synopsis "")
+     (note "")
+     (center "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n"))
+    (fountain
+     (document "\
 title: ${title}
 credit: ${credit}
 author: ${author}
 date: ${date}
 
 ${content}\
-"))
-  "Association list of format templates for standalone documents."
-  :type '(repeat (group (choice (const :tag "HTML" html)
-                                (const :tag "LaTeX" tex)
-                                (const :tag "Final Draft" fdx)
-                                (const :tag "Fountain" fountain)
-                                (other :tag "Custom"))
-                        (string :tag "Template")))
+")
+     (section "${content}")
+     (section-heading "${content}\n\n")
+     (scene "${content}")
+     (scene-heading "${fountain-scene-heading-forced}${content}\n\n")
+     (dialog "${content}")
+     (character "${fountain-character-forced}${content}\n")
+     (paren "${content}\n")
+     (lines "${content}\n\n")
+     (trans "${fountain-trans-forced} ${content}\n\n")
+     (action "${fountain-action-forced}${content}\n\n")
+     (synopsis "= ${content}\n\n")
+     (note "[[ ${content} ]]\n\n")
+     (center "> ${content} <")))
+  "Association list of templates for each Fountain element.
+Takes the form:
+
+    (FORMAT (TYPE TEMPLATE) ...)
+
+FORMAT is the export format, a symbol. TYPE is the Fountain
+element, a symbol (see below). TEMPLATE is the template with
+which to format the format string. If TEMPLATE is nil, the format
+string is passed without formatting, whereas an empty string
+discards the format string and passes the empty string.
+
+Fountain element TYPES:
+
+    document            wrapper template for all content, see
+                        `fountain-export-standalone'
+    section             string of section, including child elements
+    section-heading     string of section heading, excluding syntax chars
+    scene               string of scene, including child elements
+    scene-heading       string of scene heading, excluing  syntax chars
+    dialog              string of dialogue block, including child elements
+    character           string of character name, excluding syntax chars
+    paren               string of parenthetical
+    lines               string of dialogue lines, up to end of dialogue block or
+                        next parenthetical
+    trans               string of transition, excluding syntax chars
+    action              string of action block
+    synopsis            string of synopsis, excluding syntax chars
+    note                string of note, excluding syntax chars
+    center              string of center text, excluding syntax chars
+
+If a TYPE is not included, its TEMPLATE is treated as nil.
+
+The format of TEMPLATE can include replacement keys in the form
+\"${key}\". Each TEMPLATE should include the \"${content}\" key,
+which will be replaced with the format string. Replacements are
+calculated in the following order:
+
+    1. ${content} is replaced with the format string.
+    2. If KEY corresponds to a property in the element's property list, and that
+       property is a string, ${KEY} is replaced with that string. See
+       `fountain-parse-element' for details on Fountain element property lists.
+    3. If KEY corresponds to a function in `fountain-export-template-replace-functions'
+       then ${KEY} is replaced with the result of that function.
+    4. If KEY corresponds to a function in `fountain-generic-template-replace-functions'
+       then ${KEY} is replace with the result of that function.
+    5. If none of the above, ${KEY} is replaced with an empty string."
+  :type '(alist :key-type (choice :tag "Format"
+                                  (const :tag "HTML" html)
+                                  (const :tag "LaTeX" tex)
+                                  (const :tag "Final Draft" fdx)
+                                  (const :tag "Fountain" fountain)
+                                  (symbol :tag "Custom"))
+                :value-type (group
+                             (group (const :tag "Document" document) (choice string (const nil)))
+                             (group (const :tag "Section" section) (choice string (const nil)))
+                             (group (const :tag "Section Heading" section-heading) (choice string (const nil)))
+                             (group (const :tag "Scene" scene) (choice string (const nil)))
+                             (group (const :tag "Scene Heading" scene-heading) (choice string (const nil)))
+                             (group (const :tag "Dialogue" dialog) (choice string (const nil)))
+                             (group (const :tag "Character" character) (choice string (const nil)))
+                             (group (const :tag "Parenthetical" paren) (choice string (const nil)))
+                             (group (const :tag "Dialogue Lines" lines) (choice string (const nil)))
+                             (group (const :tag "Transition" trans) (choice string (const nil)))
+                             (group (const :tag "Action" action) (choice string (const nil)))
+                             (group (const :tag "Synopsis" synopsis) (choice string (const nil)))
+                             (group (const :tag "Note" note) (choice string (const nil)))
+                             (group (const :tag "Center Text" center) (choice string (const nil)))))
   :group 'fountain-export)
 
 ;;; Variables ==================================================================
@@ -1395,7 +1475,9 @@ bold-italic delimiters together, e.g.
           "\\(?3:.+\\)")
   "Regular expression for matching lyrics.")
 
-;;;; Export Variables ==========================================================
+(defconst fountain-template-key-regexp
+  "\\${\\([^\s\t\n()\"'`;]*?\\)}"
+  "Regular expression key for making template replacements.")
 
 ;;; Faces ======================================================================
 
@@ -2313,153 +2395,77 @@ Otherwise return `fountain-export-buffer'"
 
 (defun fountain-export-html-create-style ()
   "Create stylesheet using `fountain-export-html-style-template'."
-  (let* ((page-size fountain-export-page-size)
-         (font
-          (mapconcat
-           (lambda (font) (concat "'" font "'"))
-           fountain-export-font ","))
-         (scene-bold
-          (if fountain-export-bold-scene-headings
-              "bold" "normal"))
-         (scene-underline
-          (if fountain-export-underline-scene-headings
-              "underline" "none"))
-         (scene-spacing
-          (if fountain-export-double-space-scene-headings
-              "2em" "1em"))
-         (title-bold
-          (if fountain-export-bold-title
-              "bold" "normal"))
-         (title-underline
-          (if fountain-export-underline-title
-              "underline" "none"))
-         (title-upcase
-          (if fountain-export-upcase-title
-              "uppercase" "none"))
-         (dialog-contd fountain-continued-dialog-string)
-         (dialog-more fountain-export-more-dialog-string)
-         (styles (s-format fountain-export-html-style-template
-                           '(lambda (var)
-                              (symbol-value (intern var))))))
-    (if fountain-export-html-inline-style
+  (let ((style (replace-regexp-in-string
+                fountain-template-key-regexp
+                (lambda (match)
+                  (let ((replacer
+                         (cadr (assoc (match-string 1 match)
+                                      fountain-generic-template-replace-functions))))
+                    (if replacer (funcall replacer) "")))
+                fountain-export-html-style-template t t)))
+    (if fountain-export-html-use-inline-style
         (concat "<style type=\"text/css\">\n"
-                styles
+                style
                 "\n</style>")
-      (let ((file (get-buffer-create (fountain-export-get-filename "css")))
+      (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
             (dir (expand-file-name
                   (file-name-directory (buffer-file-name)))))
-        (with-current-buffer file
+        (with-current-buffer cssfile
           (erase-buffer)
           (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
                           emacs-version fountain-version)
-                  styles)
+                  style)
           (write-file dir))
-        (concat "<link rel=\"stylesheet\" href=\"" (buffer-name file) "\">")))))
+        (concat "<link rel=\"stylesheet\" href=\"" (buffer-name cssfile) "\">")))))
 
-;; (defun fountain-export-underline (s)
-;;   "Replace underlined text in S with HTML underline span tags."
-;;   (replace-regexp-in-string "_\\(.+?\\)_"
-;;                             "<span class=\"underline\">\\1</span>"
-;;                             s t))
+(defun fountain-export-html-dialog-class (plist)
+  (let ((side (plist-get plist 'dual)))
+    (cond ((eq side 'left)
+           "dialog dual left")
+          ((eq side 'right)
+           "dialog dual right")
+          (t "dialog"))))
 
-;; (defun fountain-export-bold (s)
-;;   "Replace bold text in S with HTML strong tags."
-;;   (replace-regexp-in-string "\\*\\*\\(.+?\\)\\*\\*"
-;;                             "<strong>\\1</strong>"
-;;                             s t))
+(defun fountain-export-fountain-forced-scene-heading (plist)
+  (if (plist-get plist 'forced)
+      "." ""))
 
-;; (defun fountain-export-italic (s)
-;;   "Replace italic text in S with HTML emphasis tags."
-;;   (replace-regexp-in-string "\\*\\(.+?\\)\\*"
-;;                             "<em>\\1</em>"
-;;                             s t))
+(defun fountain-export-fountain-forced-character (plist)
+  (if (plist-get plist 'forced)
+      "@" ""))
 
-;; (defun fountain-export-lyrics (s)
-;;   "Replace lyrics in S with HTML italic tags."
-;;   (replace-regexp-in-string "^~\s*\\(.+\\)"
-;;                             "<i>\\1</i>"
-;;                             s t))
+(defun fountain-export-fountain-forced-trans (plist)
+  (if (plist-get plist 'forced)
+      ">" ""))
 
-;; (defun fountain-export-line-breaks (s)
-;;   "Replace newlines in S with HTML line breaks."
-;;   (replace-regexp-in-string "\n"
-;;                             "<br>\n"
-;;                             s))
+(defun fountain-export-fountain-forced-action (plist)
+  (if (plist-get plist 'forced)
+      "!" ""))
 
-;; (defun fountain-export-tex-quotes (s)
-;;   "Replace TeX-style quotes in S with \"smart\" quotes."
-;;   (s-replace-all '(("\\`" . "&#96;")
-;;                    ("\\'" . "&apos;")
-;;                    ("``" . "&ldquo;")
-;;                    ("''" . "&rdquo;")
-;;                    ("`" . "&lsquo;")
-;;                    ("'" . "&rsquo;")) s))
+(defun fountain-export-format-replace (format str)
+  (dolist (var
+           (cdr (assoc format fountain-export-format-replace-alist))
+           str)
+    (setq str
+          (replace-regexp-in-string
+           (car var) (cadr var) str t))))
 
-;; (defun fountain-export-sanitize (s)
-;;   "Escape HTML characters in S."
-;;   (s-replace-all '(("&" . "&amp;")
-;;                    ("<" . "&lt;")
-;;                    (">" . "&gt;")) s))
-
-;; (defun fountain-export-filter (sub-s)   ; FIXME update doc
-;;   (let* ((s (substring-no-properties sub-s))
-;;          (s (fountain-export-sanitize s))
-;;          (s (s-replace-all '(("\\\s" . "&nbsp;")
-;;                              ("^\\\\$" . "<br>\n")
-;;                              ("\\_" . "&#95;")
-;;                              ("\\*" . "&#42;")) s))
-;;          ;; (s (if fountain-export-preserve-line-breaks
-;;          ;;        (fountain-export-line-breaks s)
-;;          ;;      s))
-;;          (s (if fountain-export-convert-quotes
-;;                 (fountain-export-tex-quotes s)
-;;               s))
-;;          (s (fountain-export-underline s))
-;;          (s (fountain-export-bold s))
-;;          (s (fountain-export-italic s))
-;;          (s (fountain-export-lyrics s)))
-;;     s))
-
-;; (defmacro fountain-export-span (span format s)
-;;   (let* ((plist (plist-get (cdr (assoc span fountain-export-format-list)) format))
-;;          (match (car plist))
-;;          (template (cdr plist)))
-;;     `(replace-regexp-in-string ,match ,template s)))
-
-;; (defun fountain-export-string (format s)
-;;   (fountain-export-span 'underline format s)
-;;   (fountain-export-span 'bold format s)
-;;   (fountain-export-span 'italic format s)
-;;   (fountain-export-span 'lyric format s))
-
-(defun fountain-export-html-dual-dialog (&optional side)
-  (cond ((eq side 'left)
-         "dialog dual left")
-        ((eq side 'right)
-         "dialog dual right")
-        (t "dialog")))
-
-(defun fountain-export-format-replace (format plist str template)
+(defun fountain-export-template-replace (template str plist)
   (replace-regexp-in-string
-   "\\${\\([^\s\t\n()\"'`;]*?\\)}"
+   fountain-template-key-regexp
    (lambda (match)
-     (let ((key (intern (match-string 1 match)))
-           fun)
+     (let ((key (match-string 1 match)))
        (if (string= key "content") str
-         (let ((value (plist-get plist key)))
-           (cond ((stringp value) value)
-                 ;; ((boundp value) (symbol-value value))
-                 (t
-                  (let ((getter
-                         (cadr (assoc key
-                                      (cdr (assoc format
-                                                  fountain-export-format-getter-alist))))))
-                    (if getter
-                        (if value
-                            (funcall getter value)
-                          (funcall getter))
-                      ""))))))))
-     template t t))
+         (let ((value (plist-get plist (intern key))))
+           (if (stringp value) value
+             (let ((replacer-plist
+                    (cadr (assoc key fountain-export-template-replace-functions)))
+                   (replacer-generic
+                    (cadr (assoc key fountain-generic-template-replace-functions))))
+               (cond (replacer-plist (funcall replacer-plist plist))
+                     (replacer-generic (funcall replacer-generic))
+                     (""))))))))
+   template t t))
 
 (defun fountain-export-format-element (element format includes)
   (let ((type (car element))
@@ -2467,26 +2473,28 @@ Otherwise return `fountain-export-buffer'"
         (content (nth 2 element))
         template)
     (setq template
-          (if (string= type 'document)
-              (if fountain-export-standalone
-                  (cadr (assoc format fountain-export-document-templates)))
-            (cadr (assoc type (assoc format fountain-export-element-templates)))))
+          (if (or (and (eq type 'document)
+                       fountain-export-standalone)
+                  (not (eq type 'document)))
+              (cadr (assoc type (assoc format fountain-export-templates)))))
     (if (listp content)
         (let (str)
           (dolist (element content
                            (if template
-                               (fountain-export-format-replace
-                                format plist str template)
+                               (fountain-export-template-replace
+                                template str plist)
                              str))
             (setq str
                   (concat str
                           (fountain-export-format-element
                            element format includes)))))
-      (if (memq type includes)
-          (if template
-              (fountain-export-format-replace
-               format plist content template)
-            content)))))
+      (let ((str (fountain-export-format-replace
+                  format content)))
+        (if (memq type includes)
+            (if template
+                (fountain-export-template-replace
+                 template str plist)
+              str))))))
 
 (defun fountain-export-region (beg end format)
   (let ((content (fountain-parse-region beg end)))
@@ -2495,8 +2503,8 @@ Otherwise return `fountain-export-buffer'"
      (cdr (or (assoc (or (plist-get (nth 1 content)
                                     'format)
                          "screenplay")
-                     fountain-export-include-elements)
-              (car fountain-export-include-elements))))))
+                     fountain-export-include-elements-alist)
+              (car fountain-export-include-elements-alist))))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   (interactive
