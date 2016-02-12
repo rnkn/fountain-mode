@@ -2344,7 +2344,7 @@ data reflects `outline-regexp'."
         list)
     (goto-char (max beg (plist-get metadata 'content-start)))
     (while (< (point) end)
-      (while (looking-at "\n*\s*\n")
+      (while (looking-at "\n*\s?\n")
         (goto-char (match-end 0)))
       (if (< (point) end)
           (let ((element (fountain-parse-element)))
