@@ -2500,7 +2500,9 @@ Otherwise return `fountain-export-buffer'"
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   (interactive
-   (list (intern (completing-read "Format: " '(html tex fdx) nil t))
+   (list (intern (completing-read "Format: "
+                                  (mapcar 'car fountain-export-templates)
+                                  nil t))
          (car current-prefix-arg)))
   (let ((sourcebuf (or buffer (current-buffer)))
         (bufname (generate-new-buffer-name
