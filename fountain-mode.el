@@ -2170,25 +2170,6 @@ data reflects `outline-regexp'."
 
 ;;;; Parsing Functions =========================================================
 
-(defun fountain-parse-metadata ()
-  (let ((beg (match-beginning 0))
-        (end (match-end 0))
-        (key (downcase (match-string-no-properties 2)))
-        (value (match-string-no-properties 3)))
-    (save-excursion
-      (forward-line 1)
-      (while (and (fountain-metadata-p)
-                  (null (match-string 2)))
-        (setq value (concat value (if value "\n")
-                            (match-string-no-properties 3))
-              end (match-end 0))
-        (forward-line 1))
-      (list 'metadata
-            (list 'begin beg
-                  'end end
-                  'key key)
-            value))))
-
 (defun fountain-parse-section-heading ()
   (list 'section-heading
         (list 'beg (match-beginning 0)
