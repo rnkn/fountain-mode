@@ -10,8 +10,8 @@ format, visit <http://fountain.io>.
 
 ![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
 
-Pictured: *Big Fish* by John August in Fountain Mode (using `wombat` theme and
-running [imenu-list][] and [Olivetti][] minor modes)
+Pictured: *Big Fish* by John August in Fountain Mode (using [imenu-list][] and
+[Olivetti][] minor modes)
 
 [imenu-list]: https://github.com/bmag/imenu-list "imenu-list"
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
