@@ -1866,8 +1866,23 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 
 (defun fountain-get-scene-number ()
   "Return the scene number of current scene."
-  (if (fountain-scene-heading-p)
-      (match-string-no-properties 5)))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (fountain-forward-scene 0)
+      (or (match-string-no-properties 5)
+          (let ((pos (point))
+                scn)
+            (goto-char (point-min))
+            (unless (fountain-scene-heading-p)
+              (fountain-forward-scene 1))
+            (setq scn 1)
+            (while (and (< (point) pos)
+                        (not (eobp)))
+              (fountain-forward-scene 1)
+              (setq scn (or (match-string-no-properties 5)
+                            (1+ scn)))
+            (number-to-string scn)))))))
 
 ;; (defun fountain-add-scene-number (n)
 ;;   "Add scene number N to current scene heading."
