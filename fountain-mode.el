@@ -2212,7 +2212,7 @@ data reflects `outline-regexp'."
               (list 'begin beg
                     'end end
                     'level level)
-              (append (list heading) contents))))))
+              (cons heading contents))))))
 
 (defun fountain-parse-scene-heading ()
   (list 'scene-heading
@@ -2238,9 +2238,9 @@ data reflects `outline-regexp'."
         (list 'scene
               (list 'begin beg
                     'end end
-                    'number num
+                    'scene-number num
                     'omit omit)
-              (append (list heading) contents))))))
+              (cons heading contents))))))
 
 (defun fountain-parse-dialog ()
   (let ((heading (list 'character
@@ -2270,7 +2270,7 @@ data reflects `outline-regexp'."
                     'end end
                     'character name
                     'dual dual)
-              (append (list heading) contents))))))
+              (cons heading contents))))))
 
 (defun fountain-parse-lines ()
   (list 'lines
