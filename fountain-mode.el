@@ -653,40 +653,22 @@ Otherwise, use an external stylesheet file."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
 
-(defcustom fountain-export-bold-scene-headings
-  nil
-  "If non-nil, bold scene headings on export."
-  :type 'boolean
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline))
   :group 'fountain-export)
 
-(defcustom fountain-export-underline-scene-headings
-  nil
-  "If non-nil, underline scene headings on export."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-bold-title
-  nil
-  "If non-nil, bold title on export."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-underline-title
-  t
-  "If non-nil, underline title on export."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-upcase-title
-  t
-  "If non-nil, underline title on export."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-double-space-scene-headings
-  nil
-  "If non-nil, double space before scene headings on export."
-  :type 'boolean
+(defcustom fountain-export-title-format
+  '(upcase underline)
+  "List of format options applied when exporting script title.
+Options are: bold, upcase, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Uppercase" upcase)
+              (const :tag "Underlined" underline))
   :group 'fountain-export)
 
 ;; (defcustom fountain-export-action-orphans
