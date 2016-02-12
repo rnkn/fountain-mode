@@ -2259,7 +2259,7 @@ data reflects `outline-regexp'."
                      'left)))
         (beg (point))
         (end (save-excursion
-               (if (re-search-forward "^[\s\t]*$" nil 'move)
+               (if (re-search-forward "^\s?$" nil 'move)
                    (match-beginning 0)
                  (point)))))
     (save-excursion
