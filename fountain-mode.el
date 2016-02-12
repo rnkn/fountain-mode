@@ -2218,7 +2218,8 @@ data reflects `outline-regexp'."
   (list 'scene-heading
         (list 'beg (match-beginning 0)
               'end (match-end 0)
-              'number (match-string-no-properties 5))
+              'forced (stringp (match-string 2))
+              'scene-number (match-string-no-properties 5))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-scene ()
@@ -2244,9 +2245,11 @@ data reflects `outline-regexp'."
 (defun fountain-parse-dialog ()
   (let ((heading (list 'character
                        (list 'beg (match-beginning 0)
-                             'end (match-end 0))
+                             'end (match-end 0)
+                             'forced (stringp (match-string 2)))
                        (match-string-no-properties 3)))
         (name (match-string-no-properties 4))
+        (forced (stringp (match-string 2)))
         (dual (cond ((stringp (match-string 5))
                      'right)
                     ((save-excursion
@@ -2284,7 +2287,8 @@ data reflects `outline-regexp'."
 (defun fountain-parse-trans ()
   (list 'trans
         (list 'begin (match-beginning 0)
-              'end (match-end 0))
+              'end (match-end 0)
+              'forced (stringp (match-string 2)))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-center ()
