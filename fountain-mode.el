@@ -599,7 +599,7 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Action" action)
                                  (const :tag "Character Names" character)
                                  (const :tag "Parentheticals" paren)
-                                 (const :tag "Dialog" lines)
+                                 (const :tag "Dialogue" lines)
                                  (const :tag "Transitions" trans)
                                  (const :tag "Center Text" center)
                                  (const :tag "Synopses" synopsis)
@@ -733,7 +733,9 @@ Parentheses are not automatically added."
 (defcustom fountain-export-title-template
   "\
 ${title}
-written by
+
+${credit}
+
 ${author}"
   "Template for creating title page title block."
   :type 'string
@@ -2196,7 +2198,7 @@ data reflects `outline-regexp'."
 
 (defun fountain-parse-scene ()
   (let ((heading (fountain-parse-scene-heading))
-        (num (match-string-no-properties 5))
+        (num (match-string-no-properties 5)) ; FIXME: get-scene-number
         (omit (string-prefix-p "OMIT" (match-string 0)))
         (beg (point))
         (end (save-excursion
