@@ -587,11 +587,10 @@ This option does affect file contents."
 
 ;;;; Export Group Customization ================================================
 
-(defcustom fountain-export-include-elements
+(defcustom fountain-export-include-elements-alist
   '(("screenplay" scene-heading action character paren lines trans center)
     ("stageplay" section-heading scene-heading action character paren lines trans center))
-  "List of elements to include when exporting.
-
+  "Association list of elements to include when exporting.
 Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
                 :value-type (set :tag "Elements"
