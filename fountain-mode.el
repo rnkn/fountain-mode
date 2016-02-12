@@ -792,7 +792,7 @@ Otherwise, use an external stylesheet file."
 .screenplay {
   page: screenplay;
   counter-reset: page;
-  font-family: \"Courier Prime\", \"Courier\", \"Courier Final Draft\", \"Courier New\";
+  font-family: ${html-font};
   font-size: 12pt;
   line-height: 1;
   width: 6in;
@@ -869,6 +869,7 @@ Otherwise, use an external stylesheet file."
   width: 3.5in;
   margin-top: 0em;
   margin-bottom: 0em;
+  white-space: pre-wrap;
   orphans: 2;
   widows: 2;
 }
