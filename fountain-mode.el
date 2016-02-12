@@ -2581,8 +2581,8 @@ scene."
         (if character
             (insert character ?\n)
           (message "No alternate character within scene")
-          (newline)))
-    (newline)))
+          (insert-char ?\n)))
+    (insert-char ?\n)))
 
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative).
