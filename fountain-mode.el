@@ -2545,16 +2545,28 @@ Otherwise return `fountain-export-buffer'"
   (message "Fountain Mode %s" fountain-version))
 
 ;; not in use, delete?
-(defun fountain-upcase-line ()
-  "Upcase the line."
-  (interactive)
+(defun fountain-upcase-line (&optional arg)
+  "Upcase the line.
+If prefixed with ARG, insert \".\" at beginning of line to force
+a scene heading."
+  (interactive "P")
+  (if arg
+      (save-excursion
+        (forward-line 0)
+        (insert-char ?.)))
   (upcase-region (line-beginning-position) (line-end-position)))
 
-(defun fountain-upcase-line-and-newline ()
-  "Upcase the line and insert a newline."
-  (interactive)
+(defun fountain-upcase-line-and-newline (&optional arg)
+  "Upcase the line and insert a newline.
+If prefixed with ARG, insert \".\" at beginning of line to force
+a scene heading."
+  (interactive "P")
+  (if arg
+      (save-excursion
+        (forward-line 0)
+        (insert-char ?.)))
   (upcase-region (line-beginning-position) (point))
-  (newline))
+  (insert-char ?\n))
 
 (defun fountain-insert-alternate-character ()
   "Insert the alternate character and newline.
