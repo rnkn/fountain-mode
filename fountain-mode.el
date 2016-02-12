@@ -2362,7 +2362,7 @@ data reflects `outline-regexp'."
 (defun fountain-export-get-filename (format)
   "If BUFFER is visiting a file, concat file name base and FORMAT.
 Otherwise return `fountain-export-buffer'"
-  (cond (fountain-export-title-as-filename
+  (cond (fountain-export-use-title-as-filename
          (concat (plist-get (fountain-read-metadata) 'title) "." format))
         ((buffer-file-name)
          (concat (file-name-base (buffer-file-name)) "." format))
