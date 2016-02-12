@@ -627,16 +627,9 @@ Passed to `format' with export format as single variable."
                 (function-item fountain-export-shell-command))
   :group 'fountain-export)
 
-;; (defcustom fountain-export-include-title-page
-;;   t
-;;   "Generate a title page on export."
-;;   :type 'boolean
-;;   :group 'fountain-export)
-
-(defcustom fountain-export-html-inline-style
+(defcustom fountain-export-include-title-page
   t
-  "If non-nil, use inline stylesheet.
-Otherwise, use an external stylesheet file."
+  "Generate a title page on export."
   :type 'boolean
   :group 'fountain-export)
 
