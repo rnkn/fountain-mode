@@ -2033,16 +2033,16 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
   (interactive "p")
   (fountain-outline-shift-down (- n)))
 
-(defun fountain-outline-hide-level (n)
+(defun fountain-outline-hide-level (n &optional silent)
   (cond ((= n 0)
          (show-all)
-         (message "Showing all"))
+         (unless silent (message "Showing all")))
         ((= n 6)
          (hide-sublevels n)
-         (message "Showing scene headings"))
+         (unless silent (message "Showing scene headings")))
         (t
          (hide-sublevels n)
-         (message "Showing level %s headings" n)))
+         (unless silent (message "Showing level %s headings" n))))
   (setq fountain-outline-cycle n))
 
 (defun fountain-outline-cycle (&optional arg)
@@ -2474,14 +2474,19 @@ Otherwise return `fountain-export-buffer'"
               str))))))
 
 (defun fountain-export-region (beg end format)
-  (let ((content (fountain-parse-region beg end)))
-    (fountain-export-format-element
-     content format
-     (cdr (or (assoc (or (plist-get (nth 1 content)
-                                    'format)
-                         "screenplay")
-                     fountain-export-include-elements-alist)
-              (car fountain-export-include-elements-alist))))))
+  (let ((level fountain-outline-cycle))
+    (fountain-outline-hide-level 0 t)
+    (unwind-protect
+        (save-excursion
+          (let ((content (fountain-parse-region beg end)))
+            (fountain-export-format-element
+             content format
+             (cdr (or (assoc (or (plist-get (nth 1 content)
+                                            'format)
+                                 "screenplay")
+                             fountain-export-include-elements-alist)
+                      (car fountain-export-include-elements-alist))))))
+      (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   (interactive
@@ -3371,7 +3376,7 @@ keywords suitable for Font Lock."
             'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             'font-lock-refresh-defaults)
-  (fountain-outline-hide-level fountain-outline-startup-level))
+  (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
 ;;; fountain-mode.el ends here
