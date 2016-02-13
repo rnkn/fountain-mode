@@ -1010,7 +1010,7 @@ When exporting, this list take precedence over
     ("html-font"
      (lambda ()
        (mapconcat
-        (lambda (font) (concat "'" font "'"))
+        (lambda (font) (concat "\"" font "\""))
         fountain-export-font ", ")))
     ("html-scene-bold"
      (lambda ()
