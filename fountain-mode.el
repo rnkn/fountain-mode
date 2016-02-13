@@ -2484,8 +2484,10 @@ Otherwise return `fountain-export-buffer'"
                  template str plist)
               str))))))
 
-(defun fountain-export-region (beg end format)
-  (let ((level fountain-outline-cycle))
+(defun fountain-export-region (beg end format &optional snippet)
+  (let ((fountain-export-standalone
+         (unless snippet fountain-export-standalone))
+        (level fountain-outline-cycle))
     (fountain-outline-hide-level 0 t)
     (unwind-protect
         (save-excursion
@@ -2515,7 +2517,7 @@ Otherwise return `fountain-export-buffer'"
     (unwind-protect
         (with-current-buffer sourcebuf
           (let ((str (fountain-export-region (point-min) (point-max)
-                                             format)))
+                                             format snippet)))
             (with-current-buffer destbuf
               (with-silent-modifications
                 (erase-buffer))
