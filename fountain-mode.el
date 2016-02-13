@@ -1061,7 +1061,51 @@ When exporting, this list take precedence over
        (if (memq 'underline
                  fountain-export-scene-heading-format)
            "underline" "none")))
-    ("html-style" fountain-export-html-create-style))
+    ("html-style" fountain-export-html-create-style)
+    ("tex-font"
+     (lambda ()
+       (car fountain-export-font)))
+    ("tex-title-page"
+     (lambda ()
+       (if fountain-export-include-title-page
+           "true" "false")))
+    ("tex-scene-bold"
+     (lambda ()
+       (if (memq 'bold
+                 fountain-export-scene-heading-format)
+           "true" "false")))
+    ("tex-scene-spacing"
+     (lambda ()
+       (if (memq 'double-space
+                 fountain-export-scene-heading-format)
+           "true" "false")))
+    ("tex-scene-underline"
+     (lambda ()
+       (if (memq 'underline
+                 fountain-export-scene-heading-format)
+           "true" "false")))
+    ("tex-scene-numbers"
+     (lambda ()
+       "false"))
+    ("tex-title-underline"
+     (lambda ()
+       (if (memq 'underline
+                 fountain-export-title-format)
+           "true" "false")))
+    ("tex-title-upcase"
+     (lambda ()
+       (if (memq 'upcase
+                 fountain-export-title-format)
+           "true" "false")))
+    ("tex-title-bold"
+     (lambda ()
+       (if (memq 'bold
+                 fountain-export-title-format)
+           "true" "false")))
+    ("tex-contact-align-right"
+     (lambda ()
+       (if fountain-export-contact-align-right
+           "true" "false"))))
   "Association list of replacement funcations for formatting templates.
 FUNCTION is called no arguments and must return a string.
 
