@@ -3414,6 +3414,7 @@ keywords suitable for Font Lock."
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
+  (setq-local electric-indent-mode nil)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level 'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
