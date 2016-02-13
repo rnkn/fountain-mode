@@ -57,16 +57,19 @@ Installation
 *For users on OS X with no experience with Emacs, see the
 [Absolute Beginner's Guide (OS X)][guide].*
 
-Fountain Mode is available through [MELPA][] and [MELPA-stable][]. I encourage
-installing the stable version.
+The latest stable release of Fountain Mode is available via [MELPA-stable][].
 
 Alternately, download the [latest release][], move the files into your
 `load-path` and add the following line to your `.emacs` or `init.el` file:
 
     (require 'fountain-mode)
 
-If you want to use the `develop` branch (not recommended) to stay on the
-bleeding-edge, clone the repository in your `load-path` and require as above:
+If you prefer a more recent but possibly unstable version, install via
+[MELPA][]. This will get you the latest commits to the `master` branch.
+
+If you really know your way around Emacs Lisp and want to stay on the
+bleeding-edge by using the `develop` branch (not recommended), clone the
+repository into your `load-path` and require as above:
 
     git clone https://github.com/rnkn/fountain-mode.git
 
