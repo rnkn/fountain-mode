@@ -22,7 +22,7 @@ Features
 - Support for Fountain 1.1 specification
 - WYSIWYG auto-align elements (display only, does not modify file contents)
   specific to script format, e.g. screenplay, stageplay or user-defined format
-- Export to HTML, LaTeX, Final Draft (FDX), or user-defined formats
+- Export to HTML, LaTeX, Final Draft (FDX), Fountain, or user-defined formats
 - Export to standalone document or snippet
 - Integration with `outline` to toggle/cycle visibility of sections and scenes
 - Integration with `imenu` (sections, scene headings, notes)
