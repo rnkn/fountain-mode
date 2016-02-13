@@ -829,6 +829,7 @@ Otherwise, use an external stylesheet file."
   -webkit-text-size-adjust: none;
 }
 .screenplay .title-page {
+  display: ${html-title-page};
   page: screenplay-title;
   page-break-after: always;
   width: 6in;
@@ -1039,6 +1040,10 @@ When exporting, this list take precedence over
     ("date"
      (lambda ()
        (format-time-string "%F")))
+    ("html-title-page"
+     (lambda ()
+       (if fountain-export-include-title-page
+           "block" "none")))
     ("html-page-size"
      (lambda () fountain-export-page-size))
     ("html-font"
@@ -1127,6 +1132,16 @@ ${html-style}
 </head>
 <body>
 <section class=\"screenplay\">
+<section class=\"title-page\">
+<div class=\"title\">
+<h1>${title}</h1>
+<p>${credit}</p>
+<p>${author}</p>
+</div>
+<div class=\"contact\">
+${contact}
+</div>
+</section>
 ${content}\
 </section>
 </body>
