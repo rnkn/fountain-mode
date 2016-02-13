@@ -2383,16 +2383,16 @@ Otherwise return `fountain-export-buffer'"
     (if fountain-export-html-use-inline-style
         (concat "<style type=\"text/css\">\n"
                 style
-                "\n</style>")
+                "</style>")
       (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
             (dir (expand-file-name
                   (file-name-directory (buffer-file-name)))))
         (with-current-buffer cssfile
-          (erase-buffer)
-          (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
-                          emacs-version fountain-version)
-                  style)
-          (write-file dir))
+          (with-silent-modifications
+            (erase-buffer))
+            (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
+                            emacs-version fountain-version)
+                    style))
         (concat "<link rel=\"stylesheet\" href=\"" (buffer-name cssfile) "\">")))))
 
 (defun fountain-export-html-dialog-class (plist)
