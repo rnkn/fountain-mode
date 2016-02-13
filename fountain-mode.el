@@ -376,13 +376,10 @@ When same character speaks in succession, append
   :group 'fountain)
 
 (defcustom fountain-continued-dialog-string
-  "CONT'D"
+  "(CONT'D)"
   "String to append to character name speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, append this string
 to character when speaking in succession.
-
-Parentheses are added automatically, e.g. \"CONT'D\" becomes
-\"(CONT'D)\".
 
 WARNING: if you change this variable then call
 `fountain-continued-dialog-refresh', strings matching the
@@ -2757,12 +2754,10 @@ then make the changes desired."
   (interactive "P")
   (save-excursion
     (save-restriction
-      (widen)
       ;; first expand the region
+      (widen)
       (let ((start (make-marker))
             (end (make-marker))
-            ;; create continued string
-            (s (concat "(" fountain-continued-dialog-string ")")) ; FIXME do not add "(" ")"
             ;; create progress report
             (job (make-progress-reporter "Refreshing continued dialog...")))
         ;; set START and END markers since buffer contents will change
@@ -2782,19 +2777,23 @@ then make the changes desired."
                            (point))))
         ;; delete all matches in region
         (goto-char start)
-        (while (re-search-forward (concat "\s*" s) end t)
+        (while (re-search-forward
+                (concat "\s*" fountain-continued-dialog-string) end t)
           (replace-match "")
           (progress-reporter-update job))
         ;; add string where appropriate
         (when fountain-add-continued-dialog
           (goto-char start)
           (while (< (point) end)
-            (when (and (null (looking-at-p (concat ".*" s "$")))
+            (when (and (null (looking-at-p
+                              (concat ".*"
+                                      fountain-continued-dialog-string
+                                      "$")))
                        (fountain-character-p)
                        (s-equals? (fountain-get-character 0)
                                   (fountain-get-character -1 'scene)))
               (re-search-forward "\s*$" (line-end-position) t)
-              (replace-match (concat "\s" s)))
+              (replace-match (concat "\s" fountain-continued-dialog-string)))
             (forward-line 1)
             (progress-reporter-update job)))
         (set-marker start nil)
