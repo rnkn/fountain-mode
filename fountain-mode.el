@@ -2051,7 +2051,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
     \\[fountain-outline-cycle]				Cycle outline visibility of current subtree and its children
     \\[universal-argument] \\[fountain-outline-cycle]			Cycle outline visibility of buffer
     \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		Show all
-    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	Show outline visibility set in `fountain-outline-startup-level'"
+    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	Show outline visibility set in `fountain-outline-custom-level'"
   (interactive "p")
   (let* ((custom-level
           (if fountain-outline-custom-level
