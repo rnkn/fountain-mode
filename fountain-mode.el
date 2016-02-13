@@ -1312,6 +1312,14 @@ Used by `fountain-outline-cycle'.")
   "Integer representing subtree outline cycling status.
 Used by `fountain-outline-cycle'.")
 
+(defvar-local fountain-parse-job
+  (make-progress-reporter "Parsing..." 0 100)
+  "Buffer parsing progress reporter.")
+
+(defvar-local fountain-export-job
+  (make-progress-reporter "Exporting...")
+  "Buffer export progress reporter.")
+
 ;;;; Regular Expression Variables ==============================================
 
 (defvar fountain-scene-heading-regexp
@@ -2327,7 +2335,9 @@ data reflects `outline-regexp'."
       (if (< (point) end)
           (let ((element (fountain-parse-element)))
             (setq list (cons element list))
-            (goto-char (plist-get (nth 1 element) 'end)))))
+            (goto-char (plist-get (nth 1 element) 'end))
+            (progress-reporter-force-update fountain-parse-job
+                                            (* (/ (float (point)) (buffer-size)) 100)))))
     (if recursive (reverse list)
       (list 'document
             (append (list 'begin beg
@@ -2467,6 +2477,7 @@ Otherwise return `fountain-export-buffer'"
                            element format includes)))))
       (let ((str (fountain-export-format-replace
                   format content)))
+        (progress-reporter-force-update fountain-export-job)
         (if (memq type includes)
             (if template
                 (fountain-export-template-replace
@@ -2479,6 +2490,7 @@ Otherwise return `fountain-export-buffer'"
     (unwind-protect
         (save-excursion
           (let ((content (fountain-parse-region beg end)))
+            (progress-reporter-done fountain-parse-job)
             (fountain-export-format-element
              content format
              (cdr (or (assoc (or (plist-get (nth 1 content)
@@ -2486,6 +2498,7 @@ Otherwise return `fountain-export-buffer'"
                                  "screenplay")
                              fountain-export-include-elements-alist)
                       (car fountain-export-include-elements-alist))))))
+      (progress-reporter-done fountain-export-job)
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
