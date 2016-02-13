@@ -2526,18 +2526,22 @@ Otherwise return `fountain-export-buffer'"
         (kill-buffer destbuf)))))
 
 (defun fountain-export-buffer-to-html ()
+  "Convenience function for exporting buffer to HTML."
   (interactive)
   (fountain-export-buffer 'html))
 
 (defun fountain-export-buffer-to-latex ()
+  "Convenience function for exporting buffer to LaTeX."
   (interactive)
   (fountain-export-buffer 'tex))
 
 (defun fountain-export-buffer-to-fdx ()
+  "Convenience function for exporting buffer to Final Draft."
   (interactive)
   (fountain-export-buffer 'fdx))
 
 (defun fountain-export-buffer-to-fountain ()
+  "Convenience function for exporting buffer to Fountain."
   (interactive)
   (fountain-export-buffer 'fountain))
 
