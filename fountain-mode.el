@@ -1103,20 +1103,35 @@ ${content}\
     (tex
      (document "\
 \\documentclass[12pt,letterpaper]{article}
-\\usepackage[left=1.25in,top=1in,bottom=0.75in,text=6in]{geometry}
-\\usepackage{fontspec}
-\\setmonofont{Courier Prime}
-\\renewcommand{\\familydefault}{\\ttdefault}
-\\usepackage{fancyhdr}
-\\usepackage{atbegshi}
-\\usepackage[normalem]{ulem}
-\\renewcommand{\\ULthickness}{1pt}
 
+% Page Layout Settings
+\\usepackage[left=1.5in,right=1in,top=1in,bottom=0.75in]{geometry}
+
+% Title Page
+\\usepackage{titling}
+
+% Font Settings
+\\usepackage{fontspec}
+\\setmonofont{${tex-font}}
+\\renewcommand{\\familydefault}{\\ttdefault}
+
+% Header & Footer Settings
+\\usepackage{fancyhdr}
 \\pagestyle{fancy}
 \\fancyhf{}
 \\fancyhead[R]{\\thepage.}
+\\addtolength{\\headheight}{\\baselineskip}
 \\renewcommand{\\headrulewidth}{0pt}
 
+% Margin Settings
+\\usepackage{marginnote}
+\\renewcommand*{\\raggedleftmarginnote}{\\hspace{0.2in}}
+
+% Underlining
+\\usepackage[normalem]{ulem}
+\\renewcommand{\\ULthickness}{1pt}
+
+% Text Settings
 \\setlength{\\parskip}{12pt plus 0pt minus 0pt}
 \\linespread{0.82}
 \\hyphenpenalty=10000
@@ -1126,70 +1141,125 @@ ${content}\
 \\raggedright
 \\hfuzz=1in
 
-\\usepackage[style=english]{csquotes}
-\\MakeOuterQuote{\"}
-
+% Conditionals
 \\newif\\ifVSsceneheading
-\\VSsceneheadingtrue
+\\VSsceneheading${tex-scene-spacing}
 \\newif\\ifULsceneheading
-\\ULsceneheadingfalse
+\\ULsceneheading${tex-scene-underline}
 \\newif\\ifBFsceneheading
-\\BFsceneheadingfalse
+\\BFsceneheading${tex-scene-bold}
+\\newif\\ifSNsceneheading
+\\SNsceneheading${tex-scene-numbers}
+\\newif\\iftitlepage
+\\titlepage${tex-title-page}
+\\newif\\ifULtitle
+\\ULtitle${tex-title-underline}
+\\newif\\ifUCtitle
+\\UCtitle${tex-title-upcase}
+\\newif\\ifBFtitle
+\\BFtitle${tex-title-bold}
+\\newif\\ifARcontact
+\\ARcontact${tex-contact-align-right}
 
-\\newcommand*{\\sceneheading}[1]{%
-\\def\\thesceneheading{#1}
+% Element Macros
+\\newcommand*{\\sceneheading}[2][]{%
+\\def\\thesceneheading{#2}
 \\ifVSsceneheading
 \\vspace{\\parskip}
 \\fi
 \\ifBFsceneheading
 \\let\\BFtmp\\thesceneheading
-\\renewcommand{\\thesceneheading}{\\textbf{\\BFtmp}}
+\\def\\thesceneheading{\\textbf{\\BFtmp}}
 \\fi
 \\ifULsceneheading
 \\let\\ULtmp\\thesceneheading
-\\renewcommand{\\thesceneheading}{\\uline{\\ULtmp}}
+\\def\\thesceneheading{\\uline{\\ULtmp}}
 \\fi
 \\thesceneheading\\nopagebreak[4]%
+\\ifSNsceneheading
+\\normalmarginpar\\marginnote{#1}%
+\\reversemarginpar\\marginnote{#1}
+\\fi
 }
 
 \\newcommand{\\contd}{(CONT'D)}
 \\newcommand{\\more}{(MORE)}
 
 \\newcommand*{\\character}[1]{%
-\\hspace*{1.2in}\\parbox[t]{4in}{#1}\\parskip=0pt%
+\\hspace*{2.5in}\\parbox[t]{4in}{#1}%
 }
 
-\\newenvironment*{dialog}[1]{%
-\\leftskip=1.5in%
+\\newcommand*{\\dialogpar}{\\parshape 1 1in 3.5in}
+\\newenvironment{dialog}[1]{%
 \\character{#1}\\mark{#1}\\par\\nopagebreak[4]%
-\\rightskip=2in
+\\parskip=0pt
+\\dialogpar
 }{%
-\\par\\mark{\\empty}%
+\\par\\mark{\\empty}
 }
 
 \\newcommand*{\\paren}[1]{%
-\\parskip=0pt\\par%
-\\hspace*{0.5in}\\parbox[t]{2in}{%
+\\par%
+\\hspace*{1.5in}\\parbox[t]{2in}{%
 \\hangindent=0.1in\\hangafter=1#1}\\par\\nopagebreak[4]
 \\vspace{2pt}%
+\\dialogpar
 }
 
 \\newcommand*{\\trans}[1]{%
 \\nopagebreak[4]\\hspace*{4in}\\parbox[t]{2in}{#1}%
 }
 
+% Page Breaking Settings
+\\usepackage{atbegshi}
 \\AtBeginShipout{%
 \\if\\botmark\\empty
 \\else
 \\character{\\botmark{}~\\contd}%
-\\fi
+\\fi%
 }
 
 \\title{${title}}
 \\author{${author}}
 \\date{${date}}
+\\newcommand{\\credit}{${credit}}
+
+\\renewcommand{\\maketitle}{
+\\thispagestyle{empty}
+\\vspace*{3in}
+
+\\ifUCtitle
+\\let\\UCtmp\\thetitle
+\\def\\thetitle{\\MakeUppercase{\\UCtmp}}
+\\fi
+\\ifBFtitle
+\\let\\BFtmp\\thetitle
+\\def\\thetitle{\\textbf{\\BFtmp}}
+\\fi
+\\ifULtitle
+\\let\\ULtmp\\thetitle
+\\def\\thetitle{\\uline{\\ULtmp}}
+\\fi
+
+\\begin{center}
+\\thetitle\\par
+\\credit\\par
+\\theauthor\\par
+\\end{center}
+
+\\vspace*{3in}
+{\\ifARcontact
+\\flushright
+\\fi
+${contact}
+
+}\\clearpage
+}
 
 \\begin{document}
+\\iftitlepage
+\\maketitle
+\\fi
 \\thispagestyle{empty}
 ${content}\
 \\end{document}
