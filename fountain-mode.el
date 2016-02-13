@@ -274,6 +274,13 @@ To disable element alignment, see `fountain-align-element'."
 (define-obsolete-variable-alias 'fountain-hide-escapes
   'fountain-hide-syntax-chars "1.3.0")
 
+(define-obsolete-variable-alias 'fountain-export-inline-style
+  'fountain-export-html-use-inline-style "2.0.0")
+
+
+(define-obsolete-variable-alias 'fountain-export-style-template
+  'fountain-export-html-style-template "2.0.0")
+
 (define-obsolete-function-alias 'fountain-toggle-hide-escapes
   'fountain-toggle-hide-syntax-chars "1.3.0")
 
@@ -321,6 +328,36 @@ To disable element alignment, see `fountain-align-element'."
 
 (make-obsolete 'fountain-export-pdf-via-html-command
                'fountain-export-shell-command "2.0.0")
+
+(make-obsolete 'fountain-short-time-format
+               'fountain-generic-template-replace-functions "2.0.0")
+
+(make-obsolete 'fountain-long-time-format
+               'fountain-generic-template-replace-functions "2.0.0")
+
+(make-obsolete 'fountain-uuid-func
+               "use a third-party package instead." "2.0.0")
+
+(make-obsolete 'fountain-export-bold-scene-headings
+               'fountain-export-scene-heading-format "2.0.0")
+
+(make-obsolete 'fountain-export-underline-scene-headings
+               'fountain-export-scene-heading-format "2.0.0")
+
+(make-obsolete 'fountain-export-double-space-scene-headings
+               'fountain-export-scene-heading-format "2.0.0")
+
+(make-obsolete 'fountain-export-bold-title
+               'fountain-export-title-format "2.0.0")
+
+(make-obsolete 'fountain-export-underline-title
+               'fountain-export-title-format "2.0.0")
+
+(make-obsolete 'fountain-export-upcase-title
+               'fountain-export-title-format "2.0.0")
+
+(make-obsolete 'fountain-export-html-head-template
+               'fountain-export-templates "2.0.0")
 
 ;;; Customization ==============================================================
 
@@ -1285,11 +1322,6 @@ calculated in the following order:
 
 ;;; Variables ==================================================================
 ;;;; Buffer Local Variables ====================================================
-(defvar-local fountain-metadata
-  nil
-  "Metadata alist in the form of (KEY . VALUE).
-Set with `fountain-read-metadata' upon calling `fountain-mode'.")
-
 (defvar-local fountain-outline-cycle
   0
   "Integer representing global outline cycling status.
