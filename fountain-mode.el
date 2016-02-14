@@ -991,7 +991,8 @@ Otherwise, use an external stylesheet file."
      ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
      ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
      ("_\\(.+?\\)_" "\\\\uline{\\1}")
-     ("\n" "\n\n")))
+     ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
+     ("\n" "\s\\\\\\\\\n")))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
 important: first, characters that are special in the export
@@ -1888,7 +1889,7 @@ comments."
       (save-restriction
         (widen)
         (forward-line 0)
-        (and (looking-at "[\s\t]*\\(?1:\\(?3:[^<>\n]+?\\)\\)[\s\t]*$")
+        (and (looking-at "\\(?3:\s\s\\)\\|[\s\t]*\\(?1:\\(?3:[^<>\n]+?\\)\\)[\s\t]*$")
              (save-match-data
                (unless (bobp)
                  (forward-line -1)
