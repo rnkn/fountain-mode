@@ -1319,7 +1319,7 @@ ${content}\
 \\theauthor\\par
 \\end{center}
 
-\\vspace*{3in}
+\\vspace{3in}
 {\\ifARcontact
 \\flushright
 \\fi
