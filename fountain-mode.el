@@ -1994,25 +1994,25 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
         (if (fountain-character-p)
             (match-string-no-properties 4))))))
 
-(defun fountain-get-scene-number ()
-  "Return the scene number of current scene."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (fountain-forward-scene 0)
-      (or (match-string-no-properties 5)
-          (let ((pos (point))
-                scn)
-            (goto-char (point-min))
-            (unless (fountain-scene-heading-p)
-              (fountain-forward-scene 1))
-            (setq scn 1)
-            (while (and (< (point) pos)
-                        (not (eobp)))
-              (fountain-forward-scene 1)
-              (setq scn (or (match-string-no-properties 5)
-                            (1+ scn)))
-            (number-to-string scn)))))))
+;; (defun fountain-get-scene-number ()
+;;   "Return the scene number of current scene."
+;;   (save-excursion
+;;     (save-restriction
+;;       (widen)
+;;       (fountain-forward-scene 0)
+;;       (or (match-string-no-properties 5)
+;;           (let ((pos (point))
+;;                 scn)
+;;             (goto-char (point-min))
+;;             (unless (fountain-scene-heading-p)
+;;               (fountain-forward-scene 1))
+;;             (setq scn 1)
+;;             (while (and (< (point) pos)
+;;                         (not (eobp)))
+;;               (fountain-forward-scene 1)
+;;               (setq scn (or (match-string-no-properties 5)
+;;                             (1+ scn)))
+;;             (number-to-string scn)))))))
 
 ;; (defun fountain-add-scene-number (n)
 ;;   "Add scene number N to current scene heading."
@@ -2683,21 +2683,21 @@ a scene heading."
   (upcase-region (line-beginning-position) (point))
   (insert-char ?\n))
 
-(defun fountain-insert-alternate-character ()
-  "Insert the alternate character and newline.
-The alternate character is the second-last character within the
-scene."
-  (interactive)
-  (if (and (fountain-blank-p)
-           (save-excursion
-             (forward-line -1)
-             (fountain-blank-p)))
-      (let ((character (fountain-get-character -2 'scene)))
-        (if character
-            (insert character ?\n)
-          (message "No alternate character within scene")
-          (insert-char ?\n)))
-    (insert-char ?\n)))
+;; (defun fountain-insert-alternate-character ()
+;;   "Insert the alternate character and newline.
+;; The alternate character is the second-last character within the
+;; scene."
+;;   (interactive)
+;;   (if (and (fountain-blank-p)
+;;            (save-excursion
+;;              (forward-line -1)
+;;              (fountain-blank-p)))
+;;       (let ((character (fountain-get-character -2 'scene)))
+;;         (if character
+;;             (insert character ?\n)
+;;           (message "No alternate character within scene")
+;;           (insert-char ?\n)))
+;;     (insert-char ?\n)))
 
 (defun fountain-forward-scene (&optional n)
   "Move forward N scene headings (backward if N is negative).
