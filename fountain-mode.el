@@ -3406,7 +3406,7 @@ keywords suitable for Font Lock."
      "---"
      ["Buffer to HTML" fountain-export-buffer-to-html]
      ["Buffer to LaTeX" fountain-export-buffer-to-latex]
-     ["Buffer to FDX" fountain-export-buffer-to-fdx]
+     ["Buffer to Final Draft" fountain-export-buffer-to-fdx]
      ["Buffer to Fountain" fountain-export-buffer-to-fountain]
      "---"
      ["Run shell command" fountain-export-shell-command]
