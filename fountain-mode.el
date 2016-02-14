@@ -2526,29 +2526,6 @@ Otherwise return `fountain-export-buffer'"
         (t
          (format fountain-export-buffer-name format))))
 
-;; (defun fountain-export-create-title-page-element (key)
-;;   "Gets metadata value associated with KEY and creates HTML element."
-;;   (let* ((s (fountain-export-get-metadata-value key))
-;;          (content (fountain-export-line-breaks s)))
-;;     (if (string= key "title")
-;;         (format "<h1>%s</h1>" content)
-;;       (format "<p>%s</p>" content))))
-
-;; (defun fountain-export-create-html-title-page ()
-;;   "Create title page based on `fountain-export-title-page-template'."
-;;   (if (cdr (assoc "title" fountain-metadata))
-;;       (concat
-;;        "<div id=\"title\">\n"
-;;        (s-format fountain-export-title-page-title-template
-;;                  'fountain-export-create-title-page-element)
-;;        "\n</div>\n<div id=\"left\">\n"
-;;        (s-format fountain-export-title-page-left-template
-;;                  'fountain-export-create-title-page-element)
-;;        "\n</div>\n<div id=\"right\">\n"
-;;        (s-format fountain-export-title-page-right-template
-;;                  'fountain-export-create-title-page-element)
-;;        "\n</div>\n")))
-
 (defun fountain-export-html-create-style ()
   "Create stylesheet using `fountain-export-html-style-template'."
   (let ((style (replace-regexp-in-string
