@@ -1793,11 +1793,17 @@ bold-italic delimiters together, e.g.
     (save-restriction
       (widen)
       (if (eq (char-after) ?\*) (forward-char -1))
-      (or (forward-comment 1)
-          (let ((x (point)))
-            (search-backward "/*" nil t)
-            (and (forward-comment 1)
-                 (<= x (point))))))))
+      (forward-comment 1)
+      (let ((x (point))
+            beg end)
+        (search-backward "/*" nil t)
+        (setq beg (point-marker))
+        (if (and (forward-comment 1)
+                 (setq end (point-marker))
+                 (<= x end))
+            (progn (set-match-data (list beg end) t)
+                   t))))))
+
 (defalias 'fountain-boneyard-p 'fountain-comment-p)
 
 (defun fountain-tachyon-p ()
@@ -2425,7 +2431,7 @@ data reflects `outline-regexp'."
   (let ((beg (point))
         (end (save-excursion
                (while (not (fountain-tachyon-p))
-                 (forward-char 1))
+                 (forward-line 1))
                (1- (point)))))
     (list 'action
           (list 'begin beg
@@ -2460,7 +2466,8 @@ data reflects `outline-regexp'."
         list)
     (goto-char (max beg (plist-get metadata 'content-start)))
     (while (< (point) end)
-      (while (looking-at "\n*\s?\n")
+      (while (or (looking-at "\n*\s?\n")
+                 (fountain-comment-p))
         (goto-char (match-end 0)))
       (if (< (point) end)
           (let ((element (fountain-parse-element)))
