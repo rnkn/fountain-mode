@@ -2576,7 +2576,7 @@ Otherwise return `fountain-export-buffer'"
   (if (plist-get plist 'forced)
       "!" ""))
 
-(defun fountain-export-format-replace (format str)
+(defun fountain-export-format-string (format str)
   (dolist (var
            (cdr (assoc format fountain-export-format-replace-alist))
            str)
@@ -2584,14 +2584,15 @@ Otherwise return `fountain-export-buffer'"
           (replace-regexp-in-string
            (car var) (cadr var) str t))))
 
-(defun fountain-export-template-replace (template str plist)
+(defun fountain-export-template-replace (template str format plist)
   (replace-regexp-in-string
    fountain-template-key-regexp
    (lambda (match)
      (let ((key (match-string 1 match)))
        (if (string= key "content") str
          (let ((value (plist-get plist (intern key))))
-           (if (stringp value) value
+           (if (stringp value)
+               (fountain-export-format-string format value)
              (let ((replacer-plist
                     (cadr (assoc key fountain-export-template-replace-functions)))
                    (replacer-generic
@@ -2616,19 +2617,19 @@ Otherwise return `fountain-export-buffer'"
           (dolist (element content
                            (if template
                                (fountain-export-template-replace
-                                template str plist)
+                                template str format plist)
                              str))
             (setq str
                   (concat str
                           (fountain-export-format-element
                            element format includes)))))
-      (let ((str (fountain-export-format-replace
+      (let ((str (fountain-export-format-string
                   format content)))
         (progress-reporter-force-update fountain-export-job)
         (if (memq type includes)
             (if template
                 (fountain-export-template-replace
-                 template str plist)
+                 template str format plist)
               str))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
