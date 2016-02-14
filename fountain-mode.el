@@ -631,6 +631,12 @@ Passed to `format' with export format as single variable."
   :type '(repeat (string :tag "Font"))
   :group 'fountain-export)
 
+(defcustom fountain-export-contact-align-right
+  nil
+  "If non-nil, align title page contact block on the right."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-scene-heading-format
   '(double-space)
   "List of format options applied when exporting scene headings.
