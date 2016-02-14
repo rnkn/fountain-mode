@@ -1040,6 +1040,12 @@ When exporting, this list take precedence over
     ("date"
      (lambda ()
        (format-time-string "%F")))
+    ("dialog-contd"
+     (lambda ()
+       fountain-continued-dialog-string))
+    ("dialog-more"
+     (lambda ()
+       fountain-export-more-dialog-string))
     ("html-title-page"
      (lambda ()
        (if fountain-export-include-title-page
@@ -1166,6 +1172,18 @@ ${content}\
 % Page Layout Settings
 \\usepackage[left=1.5in,right=1in,top=1in,bottom=0.75in]{geometry}
 
+% Text Settings
+\\baselineskip=12pt
+\\parskip=12pt plus 0pt minus 0pt
+\\topskip=0pt plus 0pt minus 0pt
+\\linespread{0.82}
+\\hyphenpenalty=10000
+\\widowpenalty=10000
+\\clubpenalty=10000
+\\frenchspacing
+\\raggedright
+\\hfuzz=1in
+
 % Title Page
 \\usepackage{titling}
 
@@ -1179,7 +1197,8 @@ ${content}\
 \\pagestyle{fancy}
 \\fancyhf{}
 \\fancyhead[R]{\\thepage.}
-\\addtolength{\\headheight}{\\baselineskip}
+\\headheight=\\baselineskip
+\\headsep=\\baselineskip
 \\renewcommand{\\headrulewidth}{0pt}
 
 % Margin Settings
@@ -1189,16 +1208,6 @@ ${content}\
 % Underlining
 \\usepackage[normalem]{ulem}
 \\renewcommand{\\ULthickness}{1pt}
-
-% Text Settings
-\\setlength{\\parskip}{12pt plus 0pt minus 0pt}
-\\linespread{0.82}
-\\hyphenpenalty=10000
-\\widowpenalty=10000
-\\clubpenalty=10000
-\\frenchspacing
-\\raggedright
-\\hfuzz=1in
 
 % Conditionals
 \\newif\\ifVSsceneheading
@@ -1221,6 +1230,7 @@ ${content}\
 \\ARcontact${tex-contact-align-right}
 
 % Element Macros
+\\usepackage{xstring}
 \\newcommand*{\\sceneheading}[2][]{%
 \\def\\thesceneheading{#2}
 \\ifVSsceneheading
@@ -1241,28 +1251,30 @@ ${content}\
 \\fi
 }
 
-\\newcommand{\\contd}{(CONT'D)}
-\\newcommand{\\more}{(MORE)}
+\\newcommand{\\contd}{${dialog-contd}}
+\\newcommand{\\more}{${dialog-more}}
 
 \\newcommand*{\\character}[1]{%
-\\hspace*{2.5in}\\parbox[t]{4in}{#1}%
+\\hspace*{1in}\\parbox[t]{4in}{#1}%
 }
 
-\\newcommand*{\\dialogpar}{\\parshape 1 1in 3.5in}
 \\newenvironment{dialog}[1]{%
-\\character{#1}\\mark{#1}\\par\\nopagebreak[4]%
 \\parskip=0pt
-\\dialogpar
+\\begin{list}{}{%
+\\topsep=0pt\\partopsep=0pt\\itemsep=0pt\\parsep=0pt%
+\\leftmargin=1in\\rightmargin=1.5in%
+}%
+\\item\\character{#1}\\mark{#1}\\nopagebreak[4]%
 }{%
-\\par\\mark{\\empty}
+\\mark{\\empty}%
+\\end{list}%
 }
 
 \\newcommand*{\\paren}[1]{%
 \\par%
-\\hspace*{1.5in}\\parbox[t]{2in}{%
+\\hspace*{0.5in}\\parbox[t]{2in}{%
 \\hangindent=0.1in\\hangafter=1#1}\\par\\nopagebreak[4]
 \\vspace{2pt}%
-\\dialogpar
 }
 
 \\newcommand*{\\trans}[1]{%
@@ -1274,7 +1286,7 @@ ${content}\
 \\AtBeginShipout{%
 \\if\\botmark\\empty
 \\else
-\\character{\\botmark{}~\\contd}%
+\\hspace*{1in}\\character{\\StrDel[1]{\\botmark}{\\contd}~\\contd}%
 \\fi%
 }
 
@@ -1310,8 +1322,7 @@ ${content}\
 {\\ifARcontact
 \\flushright
 \\fi
-${contact}
-
+${contact}\\par
 }\\clearpage
 }
 
