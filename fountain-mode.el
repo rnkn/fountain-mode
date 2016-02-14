@@ -3055,9 +3055,6 @@ message of \"S are now invisible/visible\"."
                    fountain-align-elements
                    fountain-add-continued-dialog
                    fountain-export-include-title-page
-                   fountain-export-bold-scene-headings
-                   fountain-export-underline-scene-headings
-                   fountain-export-double-space-scene-headings
                    font-lock-maximum-decoration))
       (if (customize-mark-to-save opt)
           (setq unsaved t)))
