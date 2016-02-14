@@ -1,6 +1,7 @@
 Fountain Mode
 =============
 
+[![License GPL 3](http://www.gnu.org/licenses/gpl-3.0.txt)](https://img.shields.io/badge/license-GPL_3-green.svg)
 [![MELPA Stable](http://stable.melpa.org/packages/fountain-mode-badge.svg)](http://stable.melpa.org/#/fountain-mode)
 [![MELPA](http://melpa.org/packages/fountain-mode-badge.svg)](http://melpa.org/#/fountain-mode)
 
