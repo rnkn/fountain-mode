@@ -606,9 +606,12 @@ Passed to `format' with export format as single variable."
   :group 'fountain-export)
 
 (defcustom fountain-export-default-command
-  'fountain-export-buffer-to-html
+  'fountain-export-buffer-to-latex
   "\\<fountain-mode-map>Default function to call with `fountain-export-default' \(\\[fountain-export-default]\)."
-  :type '(radio (function-item fountain-export-buffer-to-html)
+  :type '(radio (function-item fountain-export-buffer-to-latex)
+                (function-item fountain-export-buffer-to-html)
+                (function-item fountain-export-buffer-to-fdx)
+                (function-item fountain-export-buffer-to-fountain)
                 (function-item fountain-export-shell-command))
   :group 'fountain-export)
 
@@ -2940,12 +2943,12 @@ then make the changes desired."
   (funcall fountain-export-default-command))
 
 (defun fountain-export-shell-command (&optional buffer)
-  "Call shell script defined in `fountain-export-shell-command'."
+  "Call shell command defined in `fountain-export-shell-command'."
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
          (file (buffer-file-name buffer)))
     (if file
-        (async-shell-command
+        (async-shell-command            ; FIXME use start-process
          (format fountain-export-shell-command (shell-quote-argument file))
          "*Fountain Export Process*")
       (user-error "Buffer `%s' is not visiting a file" buffer))))
