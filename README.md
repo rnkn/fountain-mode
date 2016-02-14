@@ -1,17 +1,18 @@
 Fountain Mode
 =============
 
+[![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.txt)
 [![MELPA Stable](http://stable.melpa.org/packages/fountain-mode-badge.svg)](http://stable.melpa.org/#/fountain-mode)
 [![MELPA](http://melpa.org/packages/fountain-mode-badge.svg)](http://melpa.org/#/fountain-mode)
 
-Fountain Mode aims to be a full-featured screenwriting environment for
-GNU Emacs using the Fountain markup format. For more information on the
-Fountain markup format, visit <http://fountain.io>.
+Fountain Mode aims to be a full-featured screenwriting environment for GNU Emacs
+using the Fountain markup format. For more information on the Fountain markup
+format, visit <http://fountain.io>.
 
 ![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
 
-Pictured: *Big Fish* by John August in Fountain Mode
-(using [Imenu-list][] and [Olivetti][] minor modes)
+Pictured: *Big Fish* by John August in Fountain Mode (using [imenu-list][] and
+[Olivetti][] minor modes)
 
 [imenu-list]: https://github.com/bmag/imenu-list "imenu-list"
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
@@ -19,39 +20,28 @@ Pictured: *Big Fish* by John August in Fountain Mode
 Features
 --------
 
-- Support for most of the Fountain 1.1 specification (scene numbers and
-  dual dialog are forthcoming)
-- Auto-align elements for a kind of WYSIWYG (display only, does not
-  modify file contents)
-- Integration with `outline` to toggle visibility of sections and
-  scenes
-- Export to HTML and PDF (PDF export requires [Prince][])
+- Support for Fountain 1.1 specification
+- WYSIWYG auto-align elements (display only, does not modify file contents)
+  specific to script format, e.g. screenplay, stageplay or user-defined format
+- Export to HTML, LaTeX, Final Draft (FDX), Fountain, or user-defined formats
+- Export to standalone document or snippet
+- Integration with `outline` to toggle/cycle visibility of sections and scenes
+- Integration with `imenu` (sections, scene headings, notes)
+- Add/remove automatic continuation string to successively speaking characters
+- Navigation by section, scene, or character name
+- 3 levels of element syntax highlighting
+- Support for both official and legacy commenting (boneyard) syntax
 - Include or omit a title page
-- Navigate by scene heading
 - Emphasis (bold, italic, underlined text)
 - Toggle visibility of emphasis delimiters and syntax characters
-- Multiple levels of syntax highlighting for all elements
-- Add/remove automatic "(CONT'D)" to successively speaking characters
-- Automatic "(MORE)" and "(CONT'D)" when breaking dialog across pages in
-  PDF output
 - Templates for inserting synopses, notes and metadata
-- Support for both official and legacy commenting (boneyard) syntax
-- Integration with `imenu` (Sections, Scene Headings, Notes)
-- Navigator (using `occur`) for section headings, synopses, notes and
-  scene headings
-- everything is customizable, of course
+- Everything customizable
 
-The following features are not *yet* supported:
-
-- scene numbers
-- dual dialog
-
-Most common features are accessible from the menu. For a full list of
-functions and key-bindings, type `C-h m`.
+Most common features are accessible from the menu. For a full list of functions
+and key-bindings, type <kbd>C-h m</kbd>.
 
 See the [Wiki][] on GitHub for ways to extend Fountain Mode.
 
-[prince]: http://www.princexml.com "Prince"
 [wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
 
 Requirements
@@ -59,36 +49,30 @@ Requirements
 
 - Emacs 24.4
 - [s.el][], the long lost Emacs string manipulation library.
-- Exporting to PDF requires [Prince][], which is free for personal use.
-  Prince adds a removable PDF annotation on the first page; if you don't
-  like it, delete the annotation in a PDF application that supports
-  editing annotations, or open the PDF and print to PDF, which will
-  remove all annotations.
-- If you want to use UUIDs (useful for using notes as linked bookmarks) you'll
-  need either `uuidgen` CLT (usually preinstalled on OS X and Linux) or
-  [uuid.el][] Emacs package.
+- LaTeX packages for PDF export: `geometry`, `titling`, `fontspec`, `fancyhdr`,
+  `marginnote`, `ulem`, `xstring`, `atbegshi`
 
 [s.el]: https://github.com/magnars/s.el "s.el"
-[uuid.el]: https://github.com/nicferrier/emacs-uuid "uuid.el"
 
 Installation
 ------------
 
 *For users on OS X with no experience with Emacs, see the
-[Absolute Beginner's Guide (OS X)][beginners guide].*
+[Absolute Beginner's Guide (OS X)][guide].*
 
-Fountain Mode is available through [MELPA][] and [MELPA-stable][]. I
-encourage installing the stable version.
+The latest stable release of Fountain Mode is available via [MELPA-stable][].
 
 Alternately, download the [latest release][], move the files into your
-`load-path` and add the following line to your `.emacs` or `init.el`
-file:
+`load-path` and add the following line to your `.emacs` or `init.el` file:
 
     (require 'fountain-mode)
 
-If you want to use the `develop` branch (not recommended) to stay on
-the bleeding-edge, clone the repository in your `load-path` and
-require as above:
+If you prefer a more recent but possibly unstable version, install via
+[MELPA][]. This will get you the latest commits to the `master` branch.
+
+If you really know your way around Emacs Lisp and want to stay on the
+bleeding-edge by using the `develop` branch (not recommended), clone the
+repository into your `load-path` and require as above:
 
     git clone https://github.com/rnkn/fountain-mode.git
 
@@ -97,47 +81,15 @@ following:
 
     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
 
-[beginners guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(OS-X) "Absolute Beginner's Guide (OS X)"
-[melpa]: http://melpa.org "MELPA"
-[melpa-stable]: http://stable.melpa.org "MELPA-stable"
+[guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(OS-X) "Absolute Beginner's Guide (OS X)"
+[melpa]: http://melpa.org/#/fountain-mode "MELPA"
+[melpa-stable]: http://stable.melpa.org/#/fountain-mode "MELPA-stable"
 [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
-
-Outlining
----------
-
-There are six possible levels of outline subtrees. Section headings
-count as the first five levels and scene headings count as the sixth
-level, e.g.:
-
-    # section level 1
-    ## section level 2
-    ### section level 3
-    #### section level 4
-    ##### section level 5
-    ###### invalid section level
-    INT. LEVEL 6 - DAY
-
-    An obese man (40s) with a large mustard stain on his shirt exits the
-    elevator. He holds a hotdog.
-
-Cycle subtree visibility with `TAB`. Cycle global outline visibility
-with `<backtab>` (shift-TAB) or `C-u TAB`. More navigation and structure
-editing commands are:
-
-- `C-c C-f fountain-outline-forward`
-- `C-c C-b fountain-outline-backward`
-- `C-c C-n fountain-outline-next`
-- `C-c C-p fountain-outline-previous`
-- `C-c C-u fountain-outline-up`
-- `C-c C-v fountain-outline-shift-down`
-- `C-c C-^ fountain-outline-shift-up`
-- `C-c C-SPC fountain-outline-mark`
 
 Bugs and Feature Requests
 -------------------------
 
-Raise an issue on the [Issues][] page on GitHub, or simply send an email
-to the mailing list: <emacs.fountain@librelist.com>.
+Please raise an issue on the [Issues][] page on GitHub.
 
 [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 
