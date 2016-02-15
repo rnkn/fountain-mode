@@ -2583,7 +2583,9 @@ Otherwise return `fountain-export-buffer'"
                      (replacer-plist-fun
                       (cadr (assoc key fountain-export-template-replace-functions)))
                      (replacer-generic-fun
-                      (cadr (assoc key fountain-generic-template-replace-functions))))
+                      (cadr (assoc key (append
+                                        fountain-template-replace-functions
+                                        fountain-additional-template-replace-functions)))))
                 (cond ((string= key "content") str)
                       ((stringp value)
                        (fountain-export-format-string format value))
