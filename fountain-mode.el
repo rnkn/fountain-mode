@@ -2549,29 +2549,31 @@ Otherwise return `fountain-export-buffer'"
           (replace-regexp-in-string
            (car var) (cadr var) str t))))
 
-(defun fountain-export-template-replace (template str format plist)
-  (replace-regexp-in-string
-   fountain-template-key-regexp
-   (lambda (match)
-     (let ((key (match-string 1 match)))
-       (if (string= key "content") str
-         (let ((value (plist-get plist (intern key))))
-           (if (stringp value)
-               (fountain-export-format-string format value)
-             (let ((replacer-plist
-                    (cadr (assoc key fountain-export-template-replace-functions)))
-                   (replacer-generic
-                    (cadr (assoc key fountain-generic-template-replace-functions))))
-               (cond (replacer-plist (funcall replacer-plist plist))
-                     (replacer-generic (funcall replacer-generic))
-                     (""))))))))
-   template t t))
-
 (defun fountain-export-format-element (element format includes)
   (let ((type (car element))
         (plist (nth 1 element))
         (content (nth 2 element))
-        template)
+        template
+        (replace-fun
+         (lambda (str)
+           (replace-regexp-in-string
+            fountain-template-key-regexp
+            (lambda (match)
+              (let* ((key (match-string 1 match))
+                     (value (plist-get plist (intern key)))
+                     (replacer-plist-fun
+                      (cadr (assoc key fountain-export-template-replace-functions)))
+                     (replacer-generic-fun
+                      (cadr (assoc key fountain-generic-template-replace-functions))))
+                (cond ((string= key "content") str)
+                      ((stringp value)
+                       (fountain-export-format-string format value))
+                      (replacer-plist-fun
+                       (funcall replacer-plist-fun plist))
+                      (replacer-generic-fun
+                       (funcall replacer-generic-fun))
+                      (t ""))))
+            template t t))))
     (setq template
           (if (or (and (eq type 'document)
                        fountain-export-standalone)
@@ -2581,8 +2583,7 @@ Otherwise return `fountain-export-buffer'"
         (let (str)
           (dolist (element content
                            (if template
-                               (fountain-export-template-replace
-                                template str format plist)
+                               (funcall replace-fun str)
                              str))
             (setq str
                   (concat str
@@ -2593,8 +2594,7 @@ Otherwise return `fountain-export-buffer'"
         (progress-reporter-force-update fountain-export-job)
         (if (memq type includes)
             (if template
-                (fountain-export-template-replace
-                 template str format plist)
+                (funcall replace-fun str)
               str))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
