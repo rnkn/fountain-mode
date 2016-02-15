@@ -960,30 +960,6 @@ character codes, then format replacement is made."
                 :value-type (repeat (group regexp (string :tag "Replacement"))))
   :group 'fountain-export)
 
-(defvar fountain-export-template-replace-functions
-  '(("html-dialog-class"
-     fountain-export-html-dialog-class)
-    ("fountain-scene-heading-forced"
-     fountain-export-fountain-forced-scene-heading)
-    ("fountain-action-forced"
-     fountain-export-fountain-forced-action)
-    ("fountain-character-forced"
-     fountain-export-fountain-forced-character)
-    ("fountain-trans-forced"
-     fountain-export-fountain-forced-trans))
-  "Association list of replacement functions for formatting templates.
-FUNCTION is called no arguments and must return a string.
-
-FUNCTION is called with one argument, the property list of the
-format element (see `fountain-parse-element'), and must return a
-string.
-
-When exporting, this list take precedence over
-`fountain-template-replace-functions' and
-`fountain-additional-template-replace-functions'"
-  :type '(repeat (group string function))
-  :group 'fountain-export)
-
 (defvar fountain-template-replace-functions
   '(("emacs-version"
      (lambda () emacs-version))
@@ -1007,10 +983,34 @@ When exporting, this list take precedence over
     ("dialog-more"
      (lambda ()
        fountain-export-more-dialog-string))
-    ("html-title-page"
+    ("html-dialog-class"
      (lambda ()
-       (if fountain-export-include-title-page
-           "block" "none")))
+       (let ((side (plist-get plist 'dual)))
+         (cond ((eq side 'left)
+                "dialog dual left")
+               ((eq side 'right)
+                "dialog dual right")
+               (t "dialog")))))
+    ("fountain-scene-heading-forced"
+     (lambda ()
+       (if (plist-get plist 'forced)
+           "." "")))
+    ("fountain-action-forced"
+     (lambda ()
+       (if (plist-get plist 'forced)
+           "!" "")))
+    ("fountain-character-forced"
+     (lambda ()
+       (if (plist-get plist 'forced)
+           "@" "")))
+    ("fountain-trans-forced"
+     (lambda ()
+       (if (plist-get plist 'forced)
+           ">" "")))
+     ("html-title-page"
+      (lambda ()
+        (if fountain-export-include-title-page
+            "block" "none")))
     ("html-page-size"
      (lambda () fountain-export-page-size))
     ("html-font"
@@ -1407,12 +1407,10 @@ calculated in the following order:
     2. If KEY corresponds to a property in the element's property list, and that
        property is a string, ${KEY} is replaced with that string. See
        `fountain-parse-element' for details on Fountain element property lists.
-    3. If KEY corresponds to a function in `fountain-export-template-replace-functions'
-       then ${KEY} is replaced with the result of that function.
-    4. If KEY corresponds to a function in `fountain-template-replace-functions'
+    3. If KEY corresponds to a function in `fountain-template-replace-functions'
        or `fountain-additional-template-replace-functions' then ${KEY} is
        replace with the result of that function.
-    5. If none of the above, ${KEY} is replaced with an empty string."
+    4. If none of the above, ${KEY} is replaced with an empty string."
   :type '(alist :key-type (choice :tag "Format"
                                   (const :tag "HTML" html)
                                   (const :tag "LaTeX" tex)
@@ -2518,7 +2516,7 @@ Otherwise return `fountain-export-buffer'"
                          (cadr (assoc (match-string 1 match)
                                       (append
                                        fountain-template-replace-functions
-                                       fountain-additional-template-replace-functions))))
+                                       fountain-additional-template-replace-functions)))))
                     (if replacer (funcall replacer) "")))
                 fountain-export-html-style-template t t)))
     (if fountain-export-html-use-inline-style
@@ -2536,30 +2534,6 @@ Otherwise return `fountain-export-buffer'"
                     style))
         (concat "<link rel=\"stylesheet\" href=\"" (buffer-name cssfile) "\">")))))
 
-(defun fountain-export-html-dialog-class (plist)
-  (let ((side (plist-get plist 'dual)))
-    (cond ((eq side 'left)
-           "dialog dual left")
-          ((eq side 'right)
-           "dialog dual right")
-          (t "dialog"))))
-
-(defun fountain-export-fountain-forced-scene-heading (plist)
-  (if (plist-get plist 'forced)
-      "." ""))
-
-(defun fountain-export-fountain-forced-character (plist)
-  (if (plist-get plist 'forced)
-      "@" ""))
-
-(defun fountain-export-fountain-forced-trans (plist)
-  (if (plist-get plist 'forced)
-      ">" ""))
-
-(defun fountain-export-fountain-forced-action (plist)
-  (if (plist-get plist 'forced)
-      "!" ""))
-
 (defun fountain-export-format-string (format str)
   (dolist (var
            (cdr (assoc format fountain-export-format-replace-alist))
@@ -2569,32 +2543,28 @@ Otherwise return `fountain-export-buffer'"
            (car var) (cadr var) str t))))
 
 (defun fountain-export-format-element (element format includes)
-  (let ((type (car element))
-        (plist (nth 1 element))
-        (content (nth 2 element))
-        template
-        (replace-fun
-         (lambda (str)
-           (replace-regexp-in-string
-            fountain-template-key-regexp
-            (lambda (match)
-              (let* ((key (match-string 1 match))
-                     (value (plist-get plist (intern key)))
-                     (replacer-plist-fun
-                      (cadr (assoc key fountain-export-template-replace-functions)))
-                     (replacer-generic-fun
-                      (cadr (assoc key (append
-                                        fountain-template-replace-functions
-                                        fountain-additional-template-replace-functions)))))
-                (cond ((string= key "content") str)
-                      ((stringp value)
-                       (fountain-export-format-string format value))
-                      (replacer-plist-fun
-                       (funcall replacer-plist-fun plist))
-                      (replacer-generic-fun
-                       (funcall replacer-generic-fun))
-                      (t ""))))
-            template t t))))
+  (let* ((type (car element))
+         (plist (nth 1 element))
+         (content (nth 2 element))
+         str template
+         (replacer
+          (lambda ()
+            (replace-regexp-in-string
+             fountain-template-key-regexp
+             (lambda (match)
+               (let* ((key (match-string 1 match))
+                      (value (plist-get plist (intern key)))
+                      (replacer
+                       (cadr (assoc key (append
+                                         fountain-template-replace-functions
+                                         fountain-additional-template-replace-functions)))))
+                 (cond ((string= key "content") str)
+                       ((stringp value)
+                        (fountain-export-format-string format value))
+                       (replacer
+                        (funcall replacer))
+                       (t ""))))
+             template t t))))
     (setq template
           (if (or (and (eq type 'document)
                        fountain-export-standalone)
@@ -2604,7 +2574,7 @@ Otherwise return `fountain-export-buffer'"
         (let (str)
           (dolist (element content
                            (if template
-                               (funcall replace-fun str)
+                               (funcall replacer)
                              str))
             (setq str
                   (concat str
@@ -2614,9 +2584,7 @@ Otherwise return `fountain-export-buffer'"
                   format content)))
         (progress-reporter-force-update fountain-export-job)
         (if (memq type includes)
-            (if template
-                (funcall replace-fun str)
-              str))))))
+            (if template (funcall replacer) str))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
   (let ((fountain-export-standalone
