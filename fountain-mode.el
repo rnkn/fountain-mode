@@ -82,12 +82,9 @@
 
 ;;     (require 'fountain-mode)
 
-;; If you prefer a more recent but possibly unstable version, install via
-;; [MELPA][]. This will get you the latest commits to the `master` branch.
-
-;; If you really know your way around Emacs Lisp and want to stay on the
-;; bleeding-edge by using the `develop` branch (not recommended), clone the
-;; repository into your `load-path` and require as above:
+;; If you prefer the latest but perhaps unstable version, install via
+;; [MELPA][], or clone the repository into your `load-path` and require as
+;; above:
 
 ;;     git clone https://github.com/rnkn/fountain-mode.git
 
