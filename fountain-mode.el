@@ -278,10 +278,10 @@ To disable element alignment, see `fountain-align-element'."
                'fountain-export-shell-command "2.0.0")
 
 (make-obsolete 'fountain-short-time-format
-               'fountain-generic-template-replace-functions "2.0.0")
+               'fountain-additional-template-replace-functions "2.0.0")
 
 (make-obsolete 'fountain-long-time-format
-               'fountain-generic-template-replace-functions "2.0.0")
+               'fountain-additional-template-replace-functions "2.0.0")
 
 (make-obsolete 'fountain-uuid-func
                "use a third-party package instead." "2.0.0")
@@ -957,9 +957,10 @@ important: first, characters that are special in the export
 format are sanitized, then escaped characters are converted to
 character codes, then format replacement is made."
   :type '(alist :key-type (symbol :tag "Format")
-                :value-type (repeat (group regexp (string :tag "Replacement")))))
+                :value-type (repeat (group regexp (string :tag "Replacement"))))
+  :group 'fountain-export)
 
-(defcustom fountain-export-template-replace-functions
+(defvar fountain-export-template-replace-functions
   '(("html-dialog-class"
      fountain-export-html-dialog-class)
     ("fountain-scene-heading-forced"
@@ -971,16 +972,19 @@ character codes, then format replacement is made."
     ("fountain-trans-forced"
      fountain-export-fountain-forced-trans))
   "Association list of replacement functions for formatting templates.
+FUNCTION is called no arguments and must return a string.
+
 FUNCTION is called with one argument, the property list of the
 format element (see `fountain-parse-element'), and must return a
 string.
 
 When exporting, this list take precedence over
-`fountain-generic-template-replace-functions'"
+`fountain-template-replace-functions' and
+`fountain-additional-template-replace-functions'"
   :type '(repeat (group string function))
   :group 'fountain-export)
 
-(defcustom fountain-generic-template-replace-functions
+(defvar fountain-template-replace-functions
   '(("emacs-version"
      (lambda () emacs-version))
     ("fountain-version"
@@ -994,8 +998,6 @@ When exporting, this list take precedence over
      (lambda ()
        (plist-get (fountain-read-metadata)
                   'author)))
-    ("email"
-     (lambda () user-mail-address))
     ("date"
      (lambda ()
        (format-time-string "%F")))
@@ -1076,12 +1078,26 @@ When exporting, this list take precedence over
      (lambda ()
        (if fountain-export-contact-align-right
            "true" "false"))))
-  "Association list of replacement funcations for formatting templates.
-FUNCTION is called no arguments and must return a string.
-
+  "Association list of replacement functions for formatting templates.
 This list is used for making template replacements in-buffer and
-when exporting, but `fountain-export-template-replace-functions'
-takes precedence when exporting."
+when exporting.
+
+    (\"email\" (lambda () user-mail-address))
+
+This replaces ${email} with the value of `user-mail-address'.")
+
+(defcustom fountain-additional-template-replace-functions
+  nil
+"Association list of additional replacement functions for formatting templates.
+This list is used for making template replacements in-buffer and
+when exporting.
+
+For each STRING, the corresponding FUNCTION is called with no
+arguments and must return a string, e.g.
+
+    (\"email\" (lambda () user-mail-address))
+
+This replaces ${email} with the value of `user-mail-address'."
   :type '(repeat (group string function))
   :group 'fountain)
 
@@ -1393,8 +1409,9 @@ calculated in the following order:
        `fountain-parse-element' for details on Fountain element property lists.
     3. If KEY corresponds to a function in `fountain-export-template-replace-functions'
        then ${KEY} is replaced with the result of that function.
-    4. If KEY corresponds to a function in `fountain-generic-template-replace-functions'
-       then ${KEY} is replace with the result of that function.
+    4. If KEY corresponds to a function in `fountain-template-replace-functions'
+       or `fountain-additional-template-replace-functions' then ${KEY} is
+       replace with the result of that function.
     5. If none of the above, ${KEY} is replaced with an empty string."
   :type '(alist :key-type (choice :tag "Format"
                                   (const :tag "HTML" html)
@@ -2499,7 +2516,9 @@ Otherwise return `fountain-export-buffer'"
                 (lambda (match)
                   (let ((replacer
                          (cadr (assoc (match-string 1 match)
-                                      fountain-generic-template-replace-functions))))
+                                      (append
+                                       fountain-template-replace-functions
+                                       fountain-additional-template-replace-functions))))
                     (if replacer (funcall replacer) "")))
                 fountain-export-html-style-template t t)))
     (if fountain-export-html-use-inline-style
