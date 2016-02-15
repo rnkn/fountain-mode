@@ -1503,7 +1503,7 @@ Set with `fountain-init-trans-regexp'. Requires
 (defconst fountain-metadata-regexp
   (concat "^\\(?1:\\(?2:\\<[^;:'\",?()\\\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
           "\\|"
-          "^\s+\\(?1:\\(?3:.+\\)\\)")
+          "^[\s\t]+\\(?1:\\(?3:.+\\)\\)")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-metadata-p' for `bobp'.")
 
