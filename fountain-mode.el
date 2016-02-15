@@ -943,13 +943,14 @@ Otherwise, use an external stylesheet file."
     (tex
      ("%" "\\\\%")
      ("\\$" "\\\\$")
+     ("&" "\\\\&")
      ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "\\\\textbf{\\\\emph{\\1}}")
      ("\\*\\*\\(.+?\\)\\*\\*" "\\\\textbf{\\1}")
      ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
      ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
      ("_\\(.+?\\)_" "\\\\uline{\\1}")
      ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
-     ("\n" "\s\\\\\\\\\n")))
+     ("\n" "\s\\\\\\\\\s")))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
 important: first, characters that are special in the export
