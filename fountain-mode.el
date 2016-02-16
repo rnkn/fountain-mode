@@ -950,7 +950,7 @@ Otherwise, use an external stylesheet file."
      ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
      ("_\\(.+?\\)_" "\\\\uline{\\1}")
      ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
-     ("\n" "\s\\\\\\\\\s")))
+     ("\n" "\s\\\\{protecting{\\\\\\\\}\s")))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
 important: first, characters that are special in the export
@@ -1136,170 +1136,197 @@ ${content}\
      (center "<p class=\"center\">${content}</p>\n"))
     (tex
      (document "\
-\\documentclass[12pt,letterpaper]{article}
+\\documentclass[12pt,${page-size}]{article}
+
+% Conditionals
+\\usepackage{etoolbox}
+\\newtoggle{includetitlepage}
+\\newtoggle{underlinetitle}
+\\newtoggle{uppercasetitle}
+\\newtoggle{boldtitle}
+\\newtoggle{contactalignright}
+\\newtoggle{doublespacesceneheadings}
+\\newtoggle{underlinesceneheadings}
+\\newtoggle{boldsceneheadings}
+\\newtoggle{includescenenumbers}
+\\newtoggle{numberfirstpage}
+
+\\settoggle{includetitlepage}{${include-title-page}}
+\\settoggle{underlinetitle}{${title-underline}}
+\\settoggle{uppercasetitle}{${title-upcase}}
+\\settoggle{boldtitle}{${title-bold}}
+\\settoggle{contactalignright}{${title-contact-align}}
+\\settoggle{doublespacesceneheadings}{${scene-heading-spacing}}
+\\settoggle{underlinesceneheadings}{${scene-heading-underline}}
+\\settoggle{boldsceneheadings}{${scene-heading-bold}}
+\\settoggle{includescenenumbers}{${include-scene-numbers}}
+\\settoggle{numberfirstpage}{${number-first-page}}
 
 % Page Layout Settings
 \\usepackage[left=1.5in,right=1in,top=1in,bottom=0.75in]{geometry}
 
+% Font Settings
+\\usepackage{fontspec}
+\\setmonofont{${font}}
+\\renewcommand{\\familydefault}{\\ttdefault}
+
 % Text Settings
-\\baselineskip=12pt
-\\parskip=12pt plus 0pt minus 0pt
-\\topskip=0pt plus 0pt minus 0pt
-\\linespread{0.82}
+\\setlength{\\baselineskip}{12pt plus 0pt minus 0pt}
+\\setlength{\\parskip}{12pt plus 0pt minus 0pt}
+\\setlength{\\topskip}{0pt plus 0pt minus 0pt}
+\\setlength{\\headheight}{\\baselineskip}
+\\setlength{\\headsep}{\\baselineskip}
+\\linespread{0.85}
 \\hyphenpenalty=10000
 \\widowpenalty=10000
 \\clubpenalty=10000
 \\frenchspacing
 \\raggedright
-\\hfuzz=1in
 
-% Title Page
-\\usepackage{titling}
-
-% Font Settings
-\\usepackage{fontspec}
-\\setmonofont{${tex-font}}
-\\renewcommand{\\familydefault}{\\ttdefault}
+% Underlining
+\\usepackage[normalem]{ulem}
+\\renewcommand{\\ULthickness}{1pt}
 
 % Header & Footer Settings
 \\usepackage{fancyhdr}
 \\pagestyle{fancy}
 \\fancyhf{}
 \\fancyhead[R]{\\thepage.}
-\\headheight=\\baselineskip
-\\headsep=\\baselineskip
 \\renewcommand{\\headrulewidth}{0pt}
 
 % Margin Settings
 \\usepackage{marginnote}
 \\renewcommand*{\\raggedleftmarginnote}{\\hspace{0.2in}}
 
-% Underlining
-\\usepackage[normalem]{ulem}
-\\renewcommand{\\ULthickness}{1pt}
-
-% Conditionals
-\\newif\\ifVSsceneheading
-\\VSsceneheading${tex-scene-spacing}
-\\newif\\ifULsceneheading
-\\ULsceneheading${tex-scene-underline}
-\\newif\\ifBFsceneheading
-\\BFsceneheading${tex-scene-bold}
-\\newif\\ifSNsceneheading
-\\SNsceneheading${tex-scene-numbers}
-\\newif\\iftitlepage
-\\titlepage${tex-title-page}
-\\newif\\ifULtitle
-\\ULtitle${tex-title-underline}
-\\newif\\ifUCtitle
-\\UCtitle${tex-title-upcase}
-\\newif\\ifBFtitle
-\\BFtitle${tex-title-bold}
-\\newif\\ifARcontact
-\\ARcontact${tex-contact-align-right}
-
-% Element Macros
-\\usepackage{xstring}
-\\newcommand*{\\sceneheading}[2][]{%
-\\def\\thesceneheading{#2}
-\\ifVSsceneheading
-\\vspace{\\parskip}
-\\fi
-\\ifBFsceneheading
-\\let\\BFtmp\\thesceneheading
-\\def\\thesceneheading{\\textbf{\\BFtmp}}
-\\fi
-\\ifULsceneheading
-\\let\\ULtmp\\thesceneheading
-\\def\\thesceneheading{\\uline{\\ULtmp}}
-\\fi
-\\thesceneheading\\nopagebreak[4]%
-\\ifSNsceneheading
-\\normalmarginpar\\marginnote{#1}%
-\\reversemarginpar\\marginnote{#1}
-\\fi
-}
-
-\\newcommand{\\contd}{${dialog-contd}}
-\\newcommand{\\more}{${dialog-more}}
-
-\\newcommand*{\\character}[1]{%
-\\hspace*{1in}\\parbox[t]{4in}{#1}%
-}
-
-\\newenvironment{dialog}[1]{%
-\\parskip=0pt
-\\begin{list}{}{%
-\\topsep=0pt\\partopsep=0pt\\itemsep=0pt\\parsep=0pt%
-\\leftmargin=1in\\rightmargin=1.5in%
-}%
-\\item\\character{#1}\\mark{#1}\\nopagebreak[4]%
-}{%
-\\mark{\\empty}%
-\\end{list}%
-}
-
-\\newcommand*{\\paren}[1]{%
-\\par%
-\\hspace*{0.5in}\\parbox[t]{2in}{%
-\\hangindent=0.1in\\hangafter=1#1}\\par\\nopagebreak[4]
-\\vspace{2pt}%
-}
-
-\\newcommand*{\\trans}[1]{%
-\\nopagebreak[4]\\hspace*{4in}\\parbox[t]{2in}{#1}%
-}
-
-% Page Breaking Settings
-\\usepackage{atbegshi}
-\\AtBeginShipout{%
-\\if\\botmark\\empty
-\\else
-\\hspace*{1in}\\character{\\StrDel[1]{\\botmark}{\\contd}~\\contd}%
-\\fi%
-}
+% Title Page
+\\usepackage{titling}
 
 \\title{${title}}
 \\author{${author}}
 \\date{${date}}
 \\newcommand{\\credit}{${credit}}
+\\newcommand{\\contact}{${contact}}
 
-\\renewcommand{\\maketitle}{
-\\thispagestyle{empty}
-\\vspace*{3in}
+\\newcommand{\\maketitlepage}{
+  \\thispagestyle{empty}
+  \\vspace*{3in}
 
-\\ifUCtitle
-\\let\\UCtmp\\thetitle
-\\def\\thetitle{\\MakeUppercase{\\UCtmp}}
-\\fi
-\\ifBFtitle
-\\let\\BFtmp\\thetitle
-\\def\\thetitle{\\textbf{\\BFtmp}}
-\\fi
-\\ifULtitle
-\\let\\ULtmp\\thetitle
-\\def\\thetitle{\\uline{\\ULtmp}}
-\\fi
+  \\iftoggle{boldtitle}{%
+    \\let\\BFtmp\\thetitle
+    \\renewcommand{\\thetitle}{\\textbf{\\BFtmp}}%
+  }{}
+  \\iftoggle{underlinetitle}{%
+    \\let\\ULtmp\\thetitle
+    \\renewcommand{\\thetitle}{\\uline{\\ULtmp}}%
+  }{}%
 
-\\begin{center}
-\\thetitle\\par
-\\credit\\par
-\\theauthor\\par
-\\end{center}
+  \\begin{center}
+    \\iftoggle{uppercasetitle}{%
+      \\begin{MakeUppercase}
+        \\thetitle
+      \\end{MakeUppercase}
+    }{\\thetitle}\\par
+    \\credit\\par
+    \\theauthor\\par
+  \\end{center}
 
-\\vspace{3in}
-{\\ifARcontact
-\\flushright
-\\fi
-${contact}\\par
-}\\clearpage
+  \\vspace{3in}
+  \\iftoggle{contactalignright}{%
+    \\begin{flushright}
+      \\contact
+    \\end{flushright}
+  }{%
+    \\contact
+  }\\par
+  \\clearpage
 }
 
+% Scene Headings
+\\newcommand*{\\sceneheading}[2][]{%
+  \\def\\thesceneheading{#2}
+  \\iftoggle{doublespacesceneheadings}{%
+    \\vspace{\\parskip}
+  }{}
+  \\iftoggle{boldsceneheadings}{%
+    \\let\\BFtmp\\thesceneheading
+    \\renewcommand{\\thesceneheading}{\\textbf{\\BFtmp}}
+  }{}
+  \\iftoggle{underlinesceneheadings}{%
+    \\let\\ULtmp\\thesceneheading
+    \\renewcommand{\\thesceneheading}{\\uline{\\ULtmp}}
+  }{}
+  \\thesceneheading\\nopagebreak[4]%
+  \\iftoggle{includescenenumbers}{%
+    \\normalmarginpar\\marginnote{#1}\\reversemarginpar\\marginnote{#1}%
+  }{}
+}
+
+% Dialogue
+\\usepackage{xstring}
+\\newcommand{\\contd}{${contd}}
+\\newcommand{\\more}{${more}}
+\\newlength{\\characterindent}
+\\newlength{\\characterwidth}
+\\newlength{\\dialogindent}
+\\newlength{\\dialogwidth}
+\\setlength{\\characterindent}{1in}
+\\setlength{\\characterwidth}{4in}
+\\setlength{\\dialogindent}{1.5in}
+\\setlength{\\dialogwidth}{3.5in}
+\\newcommand*{\\character}[1]{%
+  \\hspace*{\\characterindent}\\parbox[t]{\\characterwidth}{#1}%
+}
+\\newenvironment{dialog}[1]{%
+  \\setlength{\\parskip}{0pt}
+  \\begin{list}{}{%
+      \\setlength{\\topsep}{0pt}
+      \\setlength{\\partopsep}{0pt}
+      \\setlength{\\parsep}{0pt}
+      \\setlength{\\leftmargin}{\\dialogindent}
+      \\setlength{\\rightmargin}{\\dimexpr\\linewidth-\\leftmargin-\\dialogwidth}
+    }%
+  \\item\\character{#1}\\mark{#1}\\nopagebreak[4]%
+  }{%
+    \\mark{\\empty}\\end{list}%
+}
+\\newcommand*{\\paren}[1]{%
+  \\par%
+  \\hspace*{0.5in}\\parbox[t]{2in}{%
+    \\hangindent=0.1in\\hangafter=1#1}\\par\\nopagebreak[4]
+  \\vspace{2pt}%
+}
+
+% Transitions
+\\newlength{\\transindent}
+\\newlength{\\transwidth}
+\\setlength{\\transindent}{4in}
+\\setlength{\\transwidth}{2in}
+\\newcommand*{\\trans}[1]{%
+  \\nopagebreak[4]\\hspace*{\\transindent}\\parbox[t]{\\transwidth}{#1}
+}
+
+% Center Text
+\\newcommand{\\centertext}[1]{%
+  \\setlength{\\topsep}{0pt}
+  \\begin{center}#1\\end{center}
+}
+
+% Page Breaking Settings
+\\usepackage{atbegshi}
+\\AtBeginShipout{%
+  \\if\\botmark\\empty
+  \\else
+  \\hspace*{\\dialogindent}\\character{\\StrDel[1]{\\botmark}{\\contd}\\space\\contd}%
+  \\fi%
+}
+
+% Document
 \\begin{document}
-\\iftitlepage
-\\maketitle
-\\fi
-\\thispagestyle{empty}
+
+\\iftoggle{includetitlepage}{\\maketitlepage}{}
+
+\\setcounter{page}{1}
+\\iftoggle{numberfirstpage}{}{\\thispagestyle{empty}}
 ${content}\
 \\end{document}
 ")
@@ -1315,7 +1342,7 @@ ${content}\
      (action "${content}\n\n")
      (synopsis "")
      (note "")
-     (center "\\center{${content}}\n\n"))
+     (center "\\centertext{${content}}\n\n"))
     (fdx
      (document "\
 <?xml version=\"1.0\" encoding=\"UTF-8\" ?>
