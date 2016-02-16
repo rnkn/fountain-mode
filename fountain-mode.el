@@ -951,7 +951,7 @@ Otherwise, use an external stylesheet file."
      ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
      ("_\\(.+?\\)_" "\\\\uline{\\1}")
      ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
-     ("\n" "\s\\\\{protecting{\\\\\\\\}\s")))
+     ("\n" "\s\\\\protecting{\\\\\\\\}\s")))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
 important: first, characters that are special in the export
