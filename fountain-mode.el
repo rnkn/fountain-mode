@@ -2582,7 +2582,7 @@ Otherwise return `fountain-export-buffer'"
                  (cond ((string= key "content") str)
                        ((stringp value)
                         (fountain-export-format-string format value))
-                       (replacer
+                       ((and replacer (stringp (funcall replacer)))
                         (funcall replacer))
                        (t ""))))
              template t t))))
