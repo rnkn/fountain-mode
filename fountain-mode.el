@@ -755,7 +755,7 @@ Otherwise, use an external stylesheet file."
 (defcustom fountain-export-html-style-template
   "\
 @page screenplay, screenplay-title {
-  size: ${html-page-size};
+  size: ${page-size};
   margin-top: 1in;
   margin-right: 1in;
   margin-bottom: 0.75in;
@@ -763,7 +763,7 @@ Otherwise, use an external stylesheet file."
 }
 @page screenplay {
   @top-right-corner {
-    font-family: ${html-font};
+    font-family: ${font};
     font-size: 12pt;
     content: counter(page) \".\";
     vertical-align: bottom;
@@ -778,7 +778,7 @@ Otherwise, use an external stylesheet file."
 .screenplay {
   page: screenplay;
   counter-reset: page;
-  font-family: ${html-font};
+  font-family: ${font};
   font-size: 12pt;
   line-height: 1;
   width: 6in;
@@ -786,7 +786,7 @@ Otherwise, use an external stylesheet file."
   -webkit-text-size-adjust: none;
 }
 .screenplay .title-page {
-  display: ${html-title-page};
+  display: ${include-title-page};
   page: screenplay-title;
   page-break-after: always;
   width: 6in;
@@ -805,8 +805,9 @@ Otherwise, use an external stylesheet file."
   }
 }
 .screenplay .title-page .title h1 {
-  text-transform: uppercase;
-  text-decoration: underline;
+  font-weight: ${title-bold};
+  text-transform: ${title-upcase};
+  text-decoration: ${title-underline};
 }
 .screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
   font-weight: inherit;
@@ -825,12 +826,12 @@ Otherwise, use an external stylesheet file."
   }
 }
 .screenplay .scene {
-  margin-top: ${html-scene-spacing};
+  margin-top: ${scene-heading-spacing};
   width: auto;
 }
 .screenplay .scene-heading {
-  font-weight: ${html-scene-bold};
-  text-decoration: ${html-scene-underline};
+  font-weight: ${scene-heading-bold};
+  text-decoration: ${scene-heading-underline};
   margin-bottom: 0em;
   page-break-after: avoid;
 }
@@ -1055,23 +1056,34 @@ character codes, then format replacement is made."
        "false"))
     ("title-underline"
      (lambda ()
-       (if (memq 'underline
-                 fountain-export-title-format)
-           "true" "false")))
+       (let ((opt (cdr (assoc format '((html "underline" "none")
+                                       (tex "true" "false"))))))
+         (if (memq 'underline
+                   fountain-export-title-format)
+             (car opt) (cadr opt)))))
     ("title-upcase"
      (lambda ()
-       (if (memq 'upcase
-                 fountain-export-title-format)
-           "true" "false")))
+       (let ((opt (cdr (assoc format '((html "uppercase" "none")
+                                       (tex "true" "false"))))))
+         (if (memq 'upcase
+                   fountain-export-title-format)
+             (car opt) (cadr opt)))))
     ("title-bold"
      (lambda ()
-       (if (memq 'bold
-                 fountain-export-title-format)
-           "true" "false")))
-    ("contact-align-right"
+       (let ((opt (cdr (assoc format '((html "bold" "normal")
+                                       (tex "true" "false"))))))
+         (if (memq 'bold
+                   fountain-export-title-format)
+             (car opt) (cadr opt)))))
+    ("title-contact-align"
      (lambda ()
-       (if fountain-export-contact-align-right
-           "true" "false"))))
+       (let ((opt (cdr (assoc format '((html "?" "?")
+                                       (tex "true" "false"))))))
+         (if fountain-export-contact-align-right
+             (car opt) (cadr opt)))))
+    ("number-first-page"
+     (lambda ()
+       "false")))
   "Association list of replacement functions for formatting templates.
 This list is used for making template replacements in-buffer and
 when exporting.
