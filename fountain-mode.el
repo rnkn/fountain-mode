@@ -966,26 +966,13 @@ character codes, then format replacement is made."
      (lambda () emacs-version))
     ("fountain-version"
      (lambda () fountain-version))
-    ("title"
-     (lambda ()
-       (or (plist-get (fountain-read-metadata)
-                      'title)
-           (file-base-name (buffer-name)))))
-    ("author"
-     (lambda ()
-       (plist-get (fountain-read-metadata)
-                  'author)))
-    ("date"
-     (lambda ()
-       (plist-get (fountain-read-metadata)
-                  'date)))
-    ("dialog-contd"
+    ("contd"
      (lambda ()
        fountain-continued-dialog-string))
-    ("dialog-more"
+    ("more"
      (lambda ()
        fountain-export-more-dialog-string))
-    ("html-dialog-class"
+    ("html-dialog-class"                ; FIXME dual-dialog
      (lambda ()
        (let ((side (plist-get plist 'dual)))
          (cond ((eq side 'left)
