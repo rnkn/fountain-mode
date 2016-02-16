@@ -619,10 +619,10 @@ Passed to `format' with export format as single variable."
   :group 'fountain-export)
 
 (defcustom fountain-export-page-size
-  "us-letter"
+  'letter
   "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" "us-letter")
-                (const :tag "A4" "a4"))
+  :type '(radio (const :tag "US Letter" 'letter)
+                (const :tag "A4" 'a4))
   :group 'fountain-export)
 
 (defcustom fountain-export-font
@@ -976,7 +976,8 @@ character codes, then format replacement is made."
                   'author)))
     ("date"
      (lambda ()
-       (format-time-string "%F")))
+       (plist-get (fountain-read-metadata)
+                  'date)))
     ("dialog-contd"
      (lambda ()
        fountain-continued-dialog-string))
@@ -1007,74 +1008,67 @@ character codes, then format replacement is made."
      (lambda ()
        (if (plist-get plist 'forced)
            ">" "")))
-     ("html-title-page"
+     ("include-title-page"
       (lambda ()
-        (if fountain-export-include-title-page
-            "block" "none")))
-    ("html-page-size"
-     (lambda () fountain-export-page-size))
-    ("html-font"
+        (let ((opt (cdr (assoc format '((html "block" "none")
+                                        (tex "true" "false"))))))
+          (if fountain-export-include-title-page
+              (car opt) (cadr opt)))))
+    ("page-size"
      (lambda ()
-       (mapconcat
-        (lambda (font) (concat "\"" font "\""))
-        fountain-export-font ", ")))
-    ("html-scene-bold"
+       (let ((opt (cdr (assoc format '((html "letter" "a4")
+                                       (tex "letterpaper" "a4paper"))))))
+         (if (eq fountain-export-page-size 'letter)
+             (car opt) (cadr opt)))))
+    ("font"
      (lambda ()
+       (cond ((eq format 'html)
+              (mapconcat
+               (lambda (font) (concat "\"" font "\""))
+               fountain-export-font ", "))
+             ((eq format 'tex)
+              (car fountain-export-font)))))
+    ("scene-heading-bold"
+     (lambda ()
+       (let ((opt (cdr (assoc format '((html "bold" "normal")
+                                       (tex "true" "false"))))))
        (if (memq 'bold
                  fountain-export-scene-heading-format)
-           "bold" "normal")))
-    ("html-scene-spacing"
+           (car opt) (cadr opt)))))
+    ("scene-heading-spacing"
      (lambda ()
+       (let ((opt (cdr (assoc format '((html "2em" "1em")
+                                       (tex "true" "false"))))))
        (if (memq 'double-space
                  fountain-export-scene-heading-format)
-           "2em" "1em")))
-    ("html-scene-underline"
+           (car opt) (cadr opt)))))
+    ("scene-heading-underline"
      (lambda ()
+       (let ((opt (cdr (assoc format '((html "underline" "none")
+                                       (tex "true" "false"))))))
        (if (memq 'underline
                  fountain-export-scene-heading-format)
-           "underline" "none")))
+           (car opt) (cadr opt)))))
     ("html-style" fountain-export-html-create-style)
-    ("tex-font"
-     (lambda ()
-       (car fountain-export-font)))
-    ("tex-title-page"
-     (lambda ()
-       (if fountain-export-include-title-page
-           "true" "false")))
-    ("tex-scene-bold"
-     (lambda ()
-       (if (memq 'bold
-                 fountain-export-scene-heading-format)
-           "true" "false")))
-    ("tex-scene-spacing"
-     (lambda ()
-       (if (memq 'double-space
-                 fountain-export-scene-heading-format)
-           "true" "false")))
-    ("tex-scene-underline"
-     (lambda ()
-       (if (memq 'underline
-                 fountain-export-scene-heading-format)
-           "true" "false")))
-    ("tex-scene-numbers"
+    ("include-scene-numbers"
      (lambda ()
        "false"))
-    ("tex-title-underline"
+    ("title-underline"
      (lambda ()
        (if (memq 'underline
                  fountain-export-title-format)
            "true" "false")))
-    ("tex-title-upcase"
+    ("title-upcase"
      (lambda ()
        (if (memq 'upcase
                  fountain-export-title-format)
            "true" "false")))
-    ("tex-title-bold"
+    ("title-bold"
      (lambda ()
        (if (memq 'bold
                  fountain-export-title-format)
            "true" "false")))
-    ("tex-contact-align-right"
+    ("contact-align-right"
      (lambda ()
        (if fountain-export-contact-align-right
            "true" "false"))))
