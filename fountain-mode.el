@@ -3429,13 +3429,16 @@ keywords suitable for Font Lock."
      :selected fountain-switch-comment-syntax]
     "---"
     ("Syntax Highlighting"
-     ["Minimum" (fountain-set-font-lock-decoration 1)
+     ["Minimum"
+      (fountain-set-font-lock-decoration 1)
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 1)]
-     ["Default" (fountain-set-font-lock-decoration 2)
+     ["Default"
+      (fountain-set-font-lock-decoration 2)
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 2)]
-     ["Maximum" (fountain-set-font-lock-decoration 3)
+     ["Maximum"
+      (fountain-set-font-lock-decoration 3)
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 3)])
     ("Show/Hide"
