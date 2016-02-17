@@ -2974,16 +2974,15 @@ then make the changes desired."
   (customize-set-variable 'fountain-switch-comment-syntax
                           (not fountain-switch-comment-syntax))
   (fountain-init-comment-syntax)
-  (message "Default comment syntax is now %s"
+  (message "Fountain Default Comment Syntax is now: %s"
            (if fountain-switch-comment-syntax
                "\"// COMMENT\"" "\"/* COMMENT */\"")))
 
-(defun fountain-toggle-hide-element (element s)
+(defun fountain-toggle-hide-element (element)
   "Toggle visibility of fountain-ELEMENT, using S for feedback.
 Toggles the value of fountain-hide-ELEMENT, then, if
 fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
-`buffer-invisibility-spec', otherwise removes it. Returns a
-message of \"S are now invisible/visible\"."
+`buffer-invisibility-spec', otherwise removes it."
   (let* ((option (intern (concat "fountain-hide-" element)))
          (symbol (intern (concat "fountain-" element))))
     (customize-set-variable option
@@ -2991,21 +2990,21 @@ message of \"S are now invisible/visible\"."
     (if (symbol-value option)
         (add-to-invisibility-spec symbol)
       (remove-from-invisibility-spec symbol))
-    (jit-lock-refontify)
-    (message "%s are now %s"
-             s (if (symbol-value option)
-                   "invisible" "visible"))))
+    (font-lock-refresh-defaults)
+    (message "%s are now: %s"
+             (custom-unlispify-tag-name symbol)
+             (if (symbol-value option)
+                 "invisible" "visible"))))
 
 (defun fountain-toggle-hide-emphasis-delim ()
   "Toggle `fountain-hide-emphasis-delim'."
   (interactive)
-  (fountain-toggle-hide-element "emphasis-delim" "Emphasis delimiters"))
+  (fountain-toggle-hide-element "emphasis-delim"))
 
 (defun fountain-toggle-hide-syntax-chars ()
   "Toggle `fountain-hide-syntax-chars'."
   (interactive)
-  (fountain-toggle-hide-element "syntax-chars" "Syntax characters"))
-
+  (fountain-toggle-hide-element "syntax-chars"))
 
 (defun fountain-save-options ()
   (interactive)
