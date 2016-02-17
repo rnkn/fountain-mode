@@ -354,9 +354,13 @@ Call `fountain-mode' again for changes to take effect."
 
 (defcustom fountain-add-continued-dialog
   t
-  "\\<fountain-mode-map>If non-nil, add continued dialog appropriately with \\[fountain-continued-dialog-refresh].
-When same character speaks in succession, append
-`fountain-continued-dialog-string'."
+  "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
+
+When non-nil, append `fountain-continued-dialog-string' to
+successively speaking characters with `fountain-continued-dialog-refresh'.
+
+ When nil, remove `fountain-continued-dialog-string' with
+ `fountain-continued-dialog-refresh'."
   :type 'boolean
   :group 'fountain)
 
@@ -374,11 +378,6 @@ to nil and run `fountain-continued-dialog-refresh', then make the
 changes desired."
   :type 'string
   :group 'fountain)
-
-;; (defcustom fountain-trim-whitespace nil
-;;   "If non-nil, trim whitespace around elements."
-;;   :type 'boolean
-;;   :group 'fountain)
 
 (defcustom fountain-block-limit
   10000
@@ -614,7 +613,7 @@ Passed to `format' with export format as single variable."
 
 (defcustom fountain-export-include-title-page
   t
-  "Generate a title page on export."
+  "Include a title page on export."
   :type 'boolean
   :group 'fountain-export)
 
@@ -654,38 +653,6 @@ Options are: bold, upcase, underline."
               (const :tag "Uppercase" upcase)
               (const :tag "Underlined" underline))
   :group 'fountain-export)
-
-;; (defcustom fountain-export-action-orphans
-;;   2
-;;   "Number of allowable action orphan lines.
-;; When breaking action across pages, this integer is the minimum
-;; number of lines on the previous page."
-;;   :type 'integer
-;;   :group 'fountain-export)
-
-;; (defcustom fountain-export-action-widows
-;;   2
-;;   "Number of allowable action widow lines.
-;; When breaking action across pages, this integer is the minimum
-;; number of lines on the following page."
-;;   :type 'integer
-;;   :group 'fountain-export)
-
-;; (defcustom fountain-export-dialog-orphans
-;;   2
-;;   "Number of allowable dialog orphan lines.
-;; When breaking dialog across pages, this integer is the minimum
-;; number of lines on the previous page."
-;;   :type 'integer
-;;   :group 'fountain-export)
-
-;; (defcustom fountain-export-dialog-widows
-;;   2
-;;   "Number of allowable dialog widow lines.
-;; When breaking dialog across pages, this integer is the minimum
-;; number of lines on the following page."
-;;   :type 'integer
-;;   :group 'fountain-export)
 
 (defcustom fountain-export-more-dialog-string
   "(MORE)"
@@ -1762,8 +1729,8 @@ bold-italic delimiters together, e.g.
 (defun fountain-init-vars ()
   "Initializes important variables."
   (fountain-init-scene-heading-regexp)
-  (fountain-init-outline-regexp)
   (fountain-init-trans-regexp)
+  (fountain-init-outline-regexp)
   (fountain-init-comment-syntax)
   (setq-local comment-use-syntax t)
   (setq-local outline-level 'fountain-outline-level)
