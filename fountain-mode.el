@@ -3006,60 +3006,6 @@ message of \"S are now invisible/visible\"."
   (interactive)
   (fountain-toggle-hide-element "syntax-chars" "Syntax characters"))
 
-(defun fountain-toggle-align-elements ()
-  "Toggle `fountain-align-elements'."
-  (interactive)
-  (customize-set-variable 'fountain-align-elements
-                          (not fountain-align-elements))
-  (font-lock-refresh-defaults)
-  (message "Elements are now displayed %s"
-           (if fountain-align-elements
-               "aligned" "non-aligned")))
-
-(defun fountain-toggle-add-continued-dialog ()
-  "Toggle `fountain-add-continued-dialog'"
-  (interactive)
-  (customize-set-variable 'fountain-add-continued-dialog
-                          (not fountain-add-continued-dialog))
-  (message "Continued dialog is now %s"
-           (if fountain-add-continued-dialog
-               "added" "removed")))
-
-(defun fountain-toggle-export-include-title-page ()
-  "Toggle `fountain-export-include-title-page'."
-  (interactive)
-  (customize-set-variable 'fountain-export-include-title-page
-                          (not fountain-export-include-title-page))
-  (message "Title page is now %s on export"
-           (if fountain-export-include-title-page
-               "included" "omitted")))
-
-(defun fountain-toggle-export-bold-scene-headings ()
-  "Toggle `fountain-export-bold-scene-headings'"
-  (interactive)
-  (customize-set-variable 'fountain-export-bold-scene-headings
-                          (not fountain-export-bold-scene-headings))
-  (message "Scene headings will now export %s"
-           (if fountain-export-bold-scene-headings
-               "bold" "normal")))
-
-(defun fountain-toggle-export-underline-scene-headings ()
-  "Toggle `fountain-export-underline-scene-headings'"
-  (interactive)
-  (customize-set-variable 'fountain-export-underline-scene-headings
-                          (not fountain-export-underline-scene-headings))
-  (message "Scene headings will now export %s"
-           (if fountain-export-underline-scene-headings
-               "underlined" "normal")))
-
-(defun fountain-toggle-export-double-space-scene-headings ()
-  "Toggle `fountain-export-double-space-scene-headings'"
-  (interactive)
-  (customize-set-variable fountain-export-double-space-scene-headings
-                          (not fountain-export-double-space-scene-headings))
-  (message "Scene headings will now export %s"
-           (if fountain-export-double-space-scene-headings
-               "double-spaced" "single-spaced")))
 
 (defun fountain-save-options ()
   (interactive)
@@ -3070,6 +3016,8 @@ message of \"S are now invisible/visible\"."
                    fountain-align-elements
                    fountain-add-continued-dialog
                    fountain-export-include-title-page
+                   fountain-export-title-format
+                   fountain-export-scene-heading-format
                    font-lock-maximum-decoration))
       (if (customize-mark-to-save opt)
           (setq unsaved t)))
@@ -3386,6 +3334,21 @@ keywords suitable for Font Lock."
 
 ;;; Menu =======================================================================
 
+(defun fountain-toggle-custom-variable (var &optional elt)
+  (if (listp (car (get var 'standard-value)))
+      (when elt
+        (if (memq elt (symbol-value var))
+            (customize-set-variable var
+                                    (delq elt (symbol-value var)))
+          (customize-set-variable var
+                                  (cons elt (symbol-value var)))))
+    (customize-set-variable var
+                            (not (symbol-value var))))
+  (font-lock-refresh-defaults)
+  (message "%s is now: %s"
+           (custom-unlispify-tag-name var)
+           (symbol-value var)))
+
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
@@ -3425,32 +3388,39 @@ keywords suitable for Font Lock."
      ["Buffer to Fountain" fountain-export-buffer-to-fountain]
      "---"
      ["Run shell command" fountain-export-shell-command]
-     ;; ["Include Title Page"
-     ;;  fountain-toggle-export-include-title-page
-     ;;  :style toggle
-     ;;  :selected fountain-export-include-title-page]
-     ;; "---"
-     ;; ["Bold Scene Headings"
-     ;;  fountain-toggle-export-bold-scene-headings
-     ;;  :style toggle
-     ;;  :selected fountain-export-bold-scene-headings]
-     ;; ["Underline Scene Headings"
-     ;;  fountain-toggle-export-underline-scene-headings
-     ;;  :style toggle
-     ;;  :selected fountain-export-underline-scene-headings]
-     ;; ["Double-Space Scene Headings"
-     ;;  fountain-toggle-export-double-space-scene-headings
-     ;;  :style toggle
-     ;;  :selected fountain-export-double-space-scene-headings]
      "---"
-     ["Customize Export" (customize-group 'fountain-export)])
+     ["Include Title Page"
+      (fountain-toggle-custom-variable
+       'fountain-export-include-title-page)
+      :style toggle
+      :selected fountain-export-include-title-page]
+     ["Bold Scene Headings"
+      (fountain-toggle-custom-variable
+       'fountain-export-scene-heading-format 'bold)
+      :style toggle
+      :selected (memq 'bold fountain-export-scene-heading-format)]
+     ["Double-Space Scene Headings"
+      (fountain-toggle-custom-variable
+       'fountain-export-scene-heading-format 'double-space)
+      :style toggle
+      :selected (memq 'double-space fountain-export-scene-heading-format)]
+     ["Underline Scene Headings"
+      (fountain-toggle-custom-variable
+       'fountain-export-scene-heading-format 'underline)
+      :style toggle
+      :selected (memq 'underline fountain-export-scene-heading-format)]
+     "---"
+     ["Customize Export"
+      (customize-group 'fountain-export)])
     "---"
     ["Display Elements Auto-Aligned"
-     fountain-toggle-align-elements
+     (fountain-toggle-custom-variable
+      'fountain-align-elements)
      :style toggle
      :selected fountain-align-elements]
     ["Add Continued Dialog"
-     fountain-toggle-add-continued-dialog
+     (fountain-toggle-custom-variable
+      'fountain-add-continued-dialog)
      :style toggle
      :selected fountain-add-continued-dialog]
     ["Switch Default Comment Syntax"
