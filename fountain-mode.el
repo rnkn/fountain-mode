@@ -65,7 +65,7 @@
 ;; - Emacs 24.4
 ;; - [s.el][], the long lost Emacs string manipulation library.
 ;; - LaTeX packages for PDF export: `geometry`, `titling`, `fontspec`, `fancyhdr`,
-;;   `marginnote`, `ulem`, `xstring`, `atbegshi`
+;;   `marginnote`, `ulem`, `xstring`, `oberdiek`
 
 ;; [s.el]: https://github.com/magnars/s.el "s.el"
 
