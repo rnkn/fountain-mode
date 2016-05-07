@@ -1297,6 +1297,10 @@ ${content}\
 \\iftoggle{numberfirstpage}{}{\\thispagestyle{empty}}
 ${content}\
 \\end{document}
+
+% Local Variables:
+% TeX-engine: xetex
+% End:
 ")
      (section nil)
      (section-heading nil)
