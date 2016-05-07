@@ -700,8 +700,7 @@ ${author}"
   :group 'fountain-export)
 
 (defcustom fountain-export-contact-template
-  "\
-${author}"
+  "${contact}"
   "Template for creating title page left block."
   :type 'string
   :group 'fountain-export)
@@ -939,6 +938,9 @@ character codes, then format replacement is made."
     ("more"
      (lambda ()
        fountain-export-more-dialog-string))
+    ("contact-template"
+     (lambda ()
+       fountain-export-contact-template))
     ("html-dialog-class"                ; FIXME dual-dialog
      (lambda ()
        (let ((side (plist-get plist 'dual)))
@@ -1080,7 +1082,7 @@ ${html-style}
 <p>${author}</p>
 </div>
 <div class=\"contact\">
-${contact}
+${contact-template}
 </div>
 </section>
 ${content}\
@@ -1171,7 +1173,7 @@ ${content}\
 \\author{${author}}
 \\date{${date}}
 \\newcommand{\\credit}{${credit}}
-\\newcommand{\\contact}{${contact}}
+\\newcommand{\\contact}{${contact-template}}
 
 \\newcommand{\\maketitlepage}{
   \\thispagestyle{empty}
