@@ -2536,11 +2536,33 @@ Otherwise return `fountain-export-buffer'"
           (replace-regexp-in-string
            (car var) (cadr var) str t))))
 
+(defmacro fountain-export-template-replace (type plist content template)
+  `(replace-regexp-in-string
+    fountain-template-key-regexp
+    (lambda (match)
+      (let* ((key (match-string 1 match))
+             (value (plist-get plist (intern key)))
+             (replacer
+              (cadr (assoc key (append
+                                fountain-template-replace-functions
+                                fountain-additional-template-replace-functions)))))
+        (cond ((string= key "content") str)
+              ((stringp value)
+               (fountain-export-format-string format value))
+              ((and replacer (stringp (funcall replacer)))
+               (funcall replacer))
+              (t ""))))
+    template t t))
+
 (defun fountain-export-format-element (element format includes)
   (let* ((type (car element))
          (plist (nth 1 element))
          (content (nth 2 element))
-         str template
+         (template
+          (if (or (and (eq type 'document)
+                       fountain-export-standalone)
+                  (not (eq type 'document)))
+              (cadr (assoc type (assoc format fountain-export-templates)))))
          (replacer
           (lambda ()
             (replace-regexp-in-string
@@ -2558,12 +2580,8 @@ Otherwise return `fountain-export-buffer'"
                        ((and replacer (stringp (funcall replacer)))
                         (funcall replacer))
                        (t ""))))
-             template t t))))
-    (setq template
-          (if (or (and (eq type 'document)
-                       fountain-export-standalone)
-                  (not (eq type 'document)))
-              (cadr (assoc type (assoc format fountain-export-templates)))))
+             template t t)))
+         str)
     (if (listp content)
         (let (str)
           (dolist (element content
