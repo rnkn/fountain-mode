@@ -225,7 +225,6 @@ To disable element alignment, see `fountain-align-element'."
 (define-obsolete-variable-alias 'fountain-export-inline-style
   'fountain-export-html-use-inline-style "2.0.0")
 
-
 (define-obsolete-variable-alias 'fountain-export-style-template
   'fountain-export-html-style-template "2.0.0")
 
@@ -284,7 +283,7 @@ To disable element alignment, see `fountain-align-element'."
                'fountain-additional-template-replace-functions "2.0.0")
 
 (make-obsolete 'fountain-uuid-func
-               "use a third-party package instead." "2.0.0")
+               "use a third-party package." "2.0.0")
 
 (make-obsolete 'fountain-export-bold-scene-headings
                'fountain-export-scene-heading-format "2.0.0")
@@ -1179,8 +1178,7 @@ ${content}\
 
 % Local Variables:
 % TeX-engine: xetex
-% End:
-")
+% End:")
      (section nil)
      (section-heading nil)
      (scene nil)
@@ -1201,8 +1199,7 @@ ${content}\
 <Content>
 ${content}\
 </Content>
-</FinalDraft>
-")
+</FinalDraft>")
      (section nil)
      (section-heading nil)
      (scene nil)
@@ -1223,8 +1220,7 @@ credit: ${credit}
 author: ${author}
 date: ${date}
 
-${content}\
-")
+${content}")
      (section "${content}")
      (section-heading "${content}\n\n")
      (scene "${content}")
@@ -1987,9 +1983,9 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
                     (search-forward "*/" nil t))
                (match-end 0)
              end))))
-  (goto-char beg)
-  (while (re-search-forward fountain-comment-regexp end t)
-    (delete-region (match-beginning 0) (match-end 0)))))
+    (goto-char beg)
+    (while (re-search-forward fountain-comment-regexp end t)
+      (delete-region (match-beginning 0) (match-end 0)))))
 
 ;;;; Outline Functions =========================================================
 
@@ -2194,7 +2190,7 @@ data reflects `outline-regexp'."
 
 (defun fountain-parse-section-heading ()
   (list 'section-heading
-        (list 'beg (match-beginning 0)
+        (list 'begin (match-beginning 0)
               'end (match-end 0)
               'level (funcall outline-level))
         (match-string-no-properties 3)))
@@ -2219,10 +2215,10 @@ data reflects `outline-regexp'."
 
 (defun fountain-parse-scene-heading ()
   (list 'scene-heading
-        (list 'beg (match-beginning 0)
+        (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'forced (stringp (match-string 2))
-              'scene-number (match-string-no-properties 5))
+              'scene-number (match-string-no-properties 5)
+              'forced (stringp (match-string 2)))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-scene ()
@@ -2318,11 +2314,11 @@ data reflects `outline-regexp'."
                (while (not (or (fountain-tachyon-p)
                                (eobp)))
                  (forward-line 1))
-               (1- (point)))))
+               (1- (point)))))          ; FIXME: this is messy
     (list 'action
           (list 'begin beg
                 'end end)
-          (s-trim-right (buffer-substring-no-properties beg end)))))
+          (s-trim-right (buffer-substring-no-properties beg end))))) ; FIXME: remove s
 
 (defun fountain-parse-element ()
   (cond
@@ -2569,12 +2565,12 @@ This replaces ${email} with the value of `user-mail-address'.")
     (setq destbuf (get-buffer-create bufname))
     (unwind-protect
         (with-current-buffer sourcebuf
-          (let ((str (fountain-export-region (point-min) (point-max)
-                                             format snippet)))
+          (let ((string (fountain-export-region (point-min) (point-max)
+                                                format snippet)))
             (with-current-buffer destbuf
               (with-silent-modifications
                 (erase-buffer))
-              (insert str)))
+              (insert string)))
           (setq complete t)
           (switch-to-buffer destbuf))
       (unless complete
@@ -2607,7 +2603,6 @@ This replaces ${email} with the value of `user-mail-address'.")
   (interactive)
   (message "Fountain Mode %s" fountain-version))
 
-;; not in use, delete?
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
 If prefixed with ARG, insert \".\" at beginning of line to force
@@ -2685,7 +2680,7 @@ If N is 0, move to beginning of scene."
   (unless (eobp)
     (forward-char -1)))
 
-(defun fountain-mark-scene ()
+(defun fountain-mark-scene ()           ; FIXME: extending region
   "Put mark at end of this scene, point at beginning."
   (interactive)
   ;; (if (or extend
@@ -2706,7 +2701,7 @@ If N is 0, move to beginning of scene."
     (fountain-outline-next 1)
     (exchange-point-and-mark)))
 
-(defun fountain-goto-scene (n)
+(defun fountain-goto-scene (n)          ; FIXME: scene numbering
   "Move point to Nth scene."
   (interactive "NGoto scene: ")
   (goto-char (point-min))
@@ -2790,7 +2785,7 @@ If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]
   (interactive)
   (widen)
   (goto-char (point-min))
-  (fountain-insert-template fountain-metadata-template))
+  (fountain-insert-template fountain-metadata-template)) ; FIXME: replace insert-template
 
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
@@ -2841,13 +2836,13 @@ then make the changes desired."
         (when fountain-add-continued-dialog
           (goto-char start)
           (while (< (point) end)
-            (when (and (null (looking-at-p
-                              (concat ".*"
-                                      fountain-continued-dialog-string
-                                      "$")))
+            (when (and (not (looking-at-p
+                             (concat ".*"
+                                     fountain-continued-dialog-string
+                                     "$")))
                        (fountain-character-p)
-                       (s-equals? (fountain-get-character 0)
-                                  (fountain-get-character -1 'scene)))
+                       (string= (fountain-get-character 0)
+                                (fountain-get-character -1 'scene)))
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" fountain-continued-dialog-string)))
             (forward-line 1)
@@ -2937,6 +2932,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
   (fountain-toggle-hide-element "syntax-chars"))
 
 (defun fountain-save-options ()
+  "Save `fountain-mode' options with `customize'."
   (interactive)
   (let (unsaved)
     (dolist (opt '(fountain-switch-comment-syntax
@@ -3098,7 +3094,6 @@ Regular expression should take the form:
     Group 2:    syntax characters
     Group 3:    export group
     Group 4+:  syntax characters")
-
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
