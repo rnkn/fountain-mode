@@ -2237,30 +2237,30 @@ data reflects `outline-regexp'."
         (list 'scene
               (list 'begin beg
                     'end end
-                    'scene-number num
-                    'omit omit)
+                    'scene-number num)
               (cons heading contents))))))
 
 (defun fountain-parse-dialog ()
-  (let ((heading (list 'character
-                       (list 'beg (match-beginning 0)
-                             'end (match-end 0)
-                             'forced (stringp (match-string 2)))
-                       (match-string-no-properties 3)))
-        (name (match-string-no-properties 4))
-        (forced (stringp (match-string 2)))
-        (dual (cond ((stringp (match-string 5))
-                     'right)
-                    ((save-excursion
-                       (fountain-forward-character 1 'dialog)
-                       (and (fountain-character-p)
-                            (stringp (match-string 5))))
-                     'left)))
-        (beg (point))
-        (end (save-excursion
-               (if (re-search-forward "^\s?$" nil 'move)
-                   (match-beginning 0)
-                 (point)))))
+  (let* ((heading (list 'character
+                        (list 'begin (match-beginning 0)
+                              'end (match-end 0)
+                              'forced (stringp (match-string 2)))
+                        (match-string-no-properties 3)))
+         (name (match-string-no-properties 4))
+         (contd (string= name
+                         (fountain-get-character -1 'scene)))
+         (dual (cond ((stringp (match-string 5))
+                      'right)
+                     ((save-excursion
+                        (fountain-forward-character 1 'dialog)
+                        (and (fountain-character-p)
+                             (stringp (match-string 5))))
+                      'left)))
+         (beg (point))
+         (end (save-excursion
+                (if (re-search-forward "^\s?$" nil 'move)
+                    (match-beginning 0)
+                  (point)))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) 'end))
       (let ((contents (fountain-parse-region (point) end)))
@@ -2268,6 +2268,7 @@ data reflects `outline-regexp'."
               (list 'begin beg
                     'end end
                     'character name
+                    'contd contd
                     'dual dual)
               (cons heading contents))))))
 
