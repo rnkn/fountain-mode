@@ -307,6 +307,9 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete 'fountain-export-html-head-template
                'fountain-export-templates "2.0.0")
 
+(make-obsolete 'fountain-export-html-use-inline-style
+               "use inline style." "2.1.0")
+
 ;;; Customization ==============================================================
 
 ;;;; General Customization =====================================================
@@ -711,181 +714,6 @@ ${author}"
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-html-use-inline-style
-  t
-  "If non-nil, use inline stylesheet.
-Otherwise, use an external stylesheet file."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-html-style-template
-  "\
-@page screenplay, screenplay-title {
-  size: ${page-size};
-  margin-top: 1in;
-  margin-right: 1in;
-  margin-bottom: 0.75in;
-  margin-left: 1.5in;
-}
-@page screenplay {
-  @top-right-corner {
-    font-family: ${font};
-    font-size: 12pt;
-    content: counter(page) \".\";
-    vertical-align: bottom;
-    padding-bottom: 1em;
-  }
-}
-@page screenplay:first {
-  @top-right-corner {
-    content: normal;
-  }
-}
-.screenplay {
-  page: screenplay;
-  counter-reset: page;
-  font-family: ${font};
-  font-size: 12pt;
-  line-height: 1;
-  width: 6in;
-  margin: 1em auto;
-  -webkit-text-size-adjust: none;
-}
-.screenplay .title-page {
-  display: ${include-title-page};
-  page: screenplay-title;
-  page-break-after: always;
-  width: 6in;
-  margin-top: 0in;
-  margin-right: auto;
-  margin-bottom: 1em;
-  margin-left: auto;
-}
-.screenplay .title-page .title {
-  text-align: center;
-}
-@media print {
-  .screenplay .title-page .title {
-    margin-top: 3.5in;
-    margin-bottom: 4in;
-  }
-}
-.screenplay .title-page .title h1 {
-  font-weight: ${title-bold};
-  text-transform: ${title-upcase};
-  text-decoration: ${title-underline};
-}
-.screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
-  font-weight: inherit;
-  font-size: inherit;
-}
-.screenplay a {
-  color: inherit;
-  text-decoration: none;
-}
-.screenplay hr {
-  page-break-after: always;
-}
-@media print {
-  .screenplay hr {
-    visibility: hidden;
-  }
-}
-.screenplay .scene {
-  margin-top: ${scene-heading-spacing};
-  width: auto;
-}
-.screenplay .scene-heading {
-  font-weight: ${scene-heading-bold};
-  text-decoration: ${scene-heading-underline};
-  margin-bottom: 0em;
-  page-break-after: avoid;
-}
-.screenplay .action {
-  margin: 1em 0in;
-  white-space: pre-wrap;
-  orphans: 2;
-  widows: 2;
-}
-.screenplay .dialog {
-  display: table;
-  width: 4in;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  margin-left: 1.5in;
-}
-.screenplay .dialog .character {
-  margin-top: 0em;
-  margin-bottom: 0em;
-  margin-left: 1in;
-}
-.screenplay .dialog .lines {
-  width: 3.5in;
-  margin-top: 0em;
-  margin-bottom: 0em;
-  white-space: pre-wrap;
-  orphans: 2;
-  widows: 2;
-}
-.screenplay .dialog .paren {
-  width: 2in;
-  margin-top: 0em;
-  margin-bottom: 0em;
-  margin-left: 0.6in;
-  text-indent: -0.6em;
-  page-break-inside: avoid;
-  page-break-after: avoid;
-}
-.screenplay .dialog.dual {
-  width: 3in;
-}
-.screenplay .dialog.dual .lines {
-  width: 2.9in;
-}
-.screenplay .dialog.dual.left {
-  margin-top: 0em;
-  margin-left: 0in;
-  float: left;
-}
-.screenplay .dialog.dual.right {
-  clear: none;
-}
-.screenplay .trans {
-  margin-left: 4in;
-  width: 2in;
-  page-break-before: avoid;
-}
-.screenplay .note {
-  display: block;
-  font-size: 11pt;
-  font-family: \"Comic Sans MS\";
-  line-height: 1.5;
-  background-color: lightgoldenrodyellow;
-  padding: 1em;
-}
-.screenplay .synopsis {
-  display: block;
-  margin-top: 0em;
-  color: grey;
-  font-style: italic;
-}
-.screenplay .center {
-  text-align: center;
-  margin-left: 0in;
-  width: 100%;
-  white-space: pre-wrap;
-}
-.screenplay .underline {
-  text-decoration: underline;
-}
-.screenplay .section-heading {
-  display: none;
-}
-"
-"Style template for HTML export."
-  :type 'string
-  :group 'fountain-export)
-
 (defcustom fountain-export-format-replace-alist
   '((html
      ("&" "&amp;")
@@ -927,130 +755,9 @@ character codes, then format replacement is made."
                 :value-type (repeat (group regexp (string :tag "Replacement"))))
   :group 'fountain-export)
 
-(defvar fountain-template-replace-functions
-  '(("emacs-version"
-     (lambda () emacs-version))
-    ("fountain-version"
-     (lambda () fountain-version))
-    ("contd"
-     (lambda ()
-       fountain-continued-dialog-string))
-    ("more"
-     (lambda ()
-       fountain-export-more-dialog-string))
-    ("contact-template"
-     (lambda ()
-       fountain-export-contact-template))
-    ("html-dialog-class"                ; FIXME dual-dialog
-     (lambda ()
-       (let ((side (plist-get plist 'dual)))
-         (cond ((eq side 'left)
-                "dialog dual left")
-               ((eq side 'right)
-                "dialog dual right")
-               (t "dialog")))))
-    ("fountain-scene-heading-forced"
-     (lambda ()
-       (if (plist-get plist 'forced)
-           "." "")))
-    ("fountain-action-forced"
-     (lambda ()
-       (if (plist-get plist 'forced)
-           "!" "")))
-    ("fountain-character-forced"
-     (lambda ()
-       (if (plist-get plist 'forced)
-           "@" "")))
-    ("fountain-trans-forced"
-     (lambda ()
-       (if (plist-get plist 'forced)
-           ">" "")))
-     ("include-title-page"
-      (lambda ()
-        (let ((opt (cdr (assoc format '((html "block" "none")
-                                        (tex "true" "false"))))))
-          (if fountain-export-include-title-page
-              (car opt) (cadr opt)))))
-    ("page-size"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "letter" "a4")
-                                       (tex "letterpaper" "a4paper"))))))
-         (if (eq fountain-export-page-size 'letter)
-             (car opt) (cadr opt)))))
-    ("font"
-     (lambda ()
-       (cond ((eq format 'html)
-              (mapconcat
-               (lambda (font) (concat "\"" font "\""))
-               fountain-export-font ", "))
-             ((eq format 'tex)
-              (car fountain-export-font)))))
-    ("scene-heading-bold"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                       (tex "true" "false"))))))
-       (if (memq 'bold
-                 fountain-export-scene-heading-format)
-           (car opt) (cadr opt)))))
-    ("scene-heading-spacing"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "2em" "1em")
-                                       (tex "true" "false"))))))
-       (if (memq 'double-space
-                 fountain-export-scene-heading-format)
-           (car opt) (cadr opt)))))
-    ("scene-heading-underline"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "underline" "none")
-                                       (tex "true" "false"))))))
-       (if (memq 'underline
-                 fountain-export-scene-heading-format)
-           (car opt) (cadr opt)))))
-    ("html-style" fountain-export-html-create-style)
-    ("include-scene-numbers"
-     (lambda ()
-       "false"))
-    ("title-underline"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "underline" "none")
-                                       (tex "true" "false"))))))
-         (if (memq 'underline
-                   fountain-export-title-format)
-             (car opt) (cadr opt)))))
-    ("title-upcase"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "uppercase" "none")
-                                       (tex "true" "false"))))))
-         (if (memq 'upcase
-                   fountain-export-title-format)
-             (car opt) (cadr opt)))))
-    ("title-bold"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                       (tex "true" "false"))))))
-         (if (memq 'bold
-                   fountain-export-title-format)
-             (car opt) (cadr opt)))))
-    ("title-contact-align"
-     (lambda ()
-       (let ((opt (cdr (assoc format '((html "?" "?")
-                                       (tex "true" "false"))))))
-         (if fountain-export-contact-align-right
-             (car opt) (cadr opt)))))
-    ("number-first-page"
-     (lambda ()
-       "false")))
-  "Association list of replacement functions for formatting templates.
-This list is used for making template replacements in-buffer and
-when exporting.
-
-    (\"email\" (lambda () user-mail-address))
-
-This replaces ${email} with the value of `user-mail-address'.")
-
 (defcustom fountain-additional-template-replace-functions
   nil
-"Association list of additional replacement functions for formatting templates.
+  "Association list of additional replacement functions for formatting templates.
 This list is used for making template replacements in-buffer and
 when exporting.
 
@@ -1071,7 +778,179 @@ This replaces ${email} with the value of `user-mail-address'."
 <meta name=\"author\" content=\"${author}\" />
 <meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
 <title>${title}</title>
-${html-style}
+<style type=\"text/css\">
+@page screenplay, screenplay-title {
+  size: ${page-size};
+  margin-top: 1in;
+  margin-right: 1in;
+  margin-bottom: 0.75in;
+  margin-left: 1.5in;
+}
+@page screenplay {
+  @top-right-corner {
+    font-family: ${font};
+    font-size: 12pt;
+    content: counter(page) \".\";
+    vertical-align: bottom;
+    padding-bottom: 1em;
+  }
+}
+@page screenplay:first {
+  @top-right-corner {
+    content: normal;
+  }
+}
+.screenplay {
+  page: screenplay;
+  counter-reset: page;
+  font-family: ${font};
+  font-size: 12pt;
+  line-height: 1;
+  max-width: 6in;
+  margin: 1em auto;
+  -webkit-text-size-adjust: none;
+}
+.screenplay .title-page {
+  display: ${include-title-page};
+  page: screenplay-title;
+  page-break-after: always;
+  margin-top: 0in;
+  margin-right: auto;
+  margin-bottom: 1em;
+  margin-left: auto;
+}
+.screenplay .title-page .title {
+  text-align: center;
+}
+@media print {
+  .screenplay .title-page .title {
+    margin-top: 3.5in;
+    margin-bottom: 4in;
+  }
+}
+.screenplay .title-page .title h1 {
+  font-weight: ${title-bold};
+  text-transform: ${title-upcase};
+  text-decoration: ${title-underline};
+}
+.screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
+  font-weight: inherit;
+  font-size: inherit;
+}
+.screenplay a {
+  color: inherit;
+  text-decoration: none;
+}
+.screenplay hr {
+  page-break-after: always;
+}
+@media print {
+  .screenplay hr {
+    visibility: hidden;
+  }
+}
+.screenplay .scene {
+  width: 100%;
+  margin-top: ${scene-heading-spacing};
+}
+.screenplay .scene-heading {
+  font-weight: ${scene-heading-bold};
+  text-decoration: ${scene-heading-underline};
+  margin-bottom: 0em;
+  page-break-after: avoid;
+}
+.screenplay .action {
+  margin: 1em 0;
+  white-space: pre-wrap;
+  orphans: 2;
+  widows: 2;
+}
+.screenplay .dialog {
+  display: table;
+  width: 75%;
+  max-width: 4in;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 17%;
+}
+.screenplay .dialog .character {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 25%;
+  margin-right: 0;
+}
+.screenplay .dialog .lines {
+  max-width: 3.5in;
+  margin-top: 0;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  orphans: 2;
+  widows: 2;
+}
+.screenplay .dialog .paren {
+  width: 50%;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 10%;
+  text-indent: -0.6em;
+  page-break-inside: avoid;
+  page-break-after: avoid;
+}
+.screenplay .dialog.dual {
+  width: 50%;
+}
+.screenplay .dialog.dual .lines {
+  width: 48%;
+}
+.screenplay .dialog.dual.left {
+  margin-top: 0;
+  margin-left: 0;
+  float: left;
+}
+.screenplay .dialog.dual.right {
+  clear: none;
+}
+.screenplay .trans {
+  max-width: 2in;
+  margin-left: 64%;
+  page-break-before: avoid;
+}
+.screenplay .note {
+  display: block;
+  font-size: 11pt;
+  font-family: \"Comic Sans MS\";
+  line-height: 1.5;
+  background-color: lightgoldenrodyellow;
+  padding: 1em;
+}
+.screenplay .synopsis {
+  display: block;
+  margin-top: 0;
+  color: grey;
+  font-style: italic;
+}
+.screenplay .center {
+  text-align: center;
+  margin-left: 0;
+  width: 100%;
+  white-space: pre-wrap;
+}
+.screenplay .underline {
+  text-decoration: underline;
+}
+.screenplay .section-heading {
+  display: none;
+}
+.screenplay .menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  color: white;
+  background-color: rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+</style>
 </head>
 <body>
 <section class=\"screenplay\">
@@ -1086,14 +965,14 @@ ${contact-template}
 </div>
 </section>
 ${content}\
+<div class=\"menu\">Aa</div>
 </section>
-</body>
-")
+</body>")
      (section "<section class=\"section\">\n${content}</section>\n")
      (section-heading "<h1 class=\"section-heading\">${content}</h1>\n")
      (scene "<section class=\"scene\">\n${content}</section>\n")
      (scene-heading "<h2 class=\"scene-heading\" id=\"${scene-number}\">${content}</h2>\n")
-     (dialog "<div class=\"${html-dialog-class}\">\n${content}</div>\n")
+     (dialog "<div class=\"dialog\">\n${content}</div>\n")
      (character "<p class=\"character\">${content}</p>\n")
      (paren "<p class=\"paren\">${content}</p>\n")
      (lines "<p class=\"lines\">${content}</p>\n")
@@ -2523,94 +2402,154 @@ Otherwise return `fountain-export-buffer'"
         (with-current-buffer cssfile
           (with-silent-modifications
             (erase-buffer))
-            (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
-                            emacs-version fountain-version)
-                    style))
+          (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
+                          emacs-version fountain-version)
+                  style))
         (concat "<link rel=\"stylesheet\" href=\"" (buffer-name cssfile) "\">")))))
 
-(defun fountain-export-format-string (format str)
-  (dolist (var
-           (cdr (assoc format fountain-export-format-replace-alist))
-           str)
-    (setq str
-          (replace-regexp-in-string
-           (car var) (cadr var) str t))))
+(defun fountain-export-format-string (string format)
+  (dolist (var (cdr (assoc format fountain-export-format-replace-alist))
+               string)
+    (setq string (replace-regexp-in-string
+                  (car var) (cadr var) string t))))
 
-(defmacro fountain-export-template-replace (type plist content template)
-  `(replace-regexp-in-string
-    fountain-template-key-regexp
-    (lambda (match)
-      (let* ((key (match-string 1 match))
-             (value (plist-get plist (intern key)))
-             (replacer
-              (cadr (assoc key (append
-                                fountain-template-replace-functions
-                                fountain-additional-template-replace-functions)))))
-        (cond ((string= key "content") str)
-              ((stringp value)
-               (fountain-export-format-string format value))
-              ((and replacer (stringp (funcall replacer)))
-               (funcall replacer))
-              (t ""))))
-    template t t))
+(defvar fountain-template-replace-sexps
+  '(("emacs-version" emacs-version)
+    ("fountain-version" fountain-version)
+    ("contd" fountain-continued-dialog-string)
+    ("more" fountain-export-more-dialog-string)
+    ("contact-template" fountain-export-contact-template)
+    ("fountain-scene-heading-forced"
+     (if (plist-get plist 'forced) "." ""))
+    ("fountain-action-forced"
+     (if (plist-get plist 'forced) "!" ""))
+    ("fountain-character-forced"
+     (if (plist-get plist 'forced) "@" ""))
+    ("fountain-trans-forced"
+     (if (plist-get plist 'forced) ">" ""))
+    ("html-dialog-class"
+     (let ((side (plist-get plist 'dual)))
+       (cond ((eq side 'left)
+              "dialog dual left")
+             ((eq side 'right)
+              "dialog dual right")
+             (t "dialog"))))
+    ("include-title-page"
+     (let ((opt (cdr (assoc format '((html "block" "none")
+                                     (tex "true" "false"))))))
+       (if fountain-export-include-title-page
+           (car opt) (cadr opt))))
+    ("page-size"
+     (let ((opt (cdr (assoc format '((html "letter" "a4")
+                                     (tex "letterpaper" "a4paper"))))))
+       (if (eq fountain-export-page-size 'letter)
+           (car opt) (cadr opt))))
+    ("font"
+     (cond ((eq format 'html)
+            (mapconcat
+             (lambda (font) (concat "\"" font "\""))
+             fountain-export-font ", "))
+           ((eq format 'tex)
+            (car fountain-export-font))))
+    ("scene-heading-bold"
+     (let ((opt (cdr (assoc format '((html "bold" "normal")
+                                     (tex "true" "false"))))))
+       (if (member 'bold fountain-export-scene-heading-format)
+           (car opt) (cadr opt))))
+    ("scene-heading-spacing"
+     (let ((opt (cdr (assoc format '((html "2em" "1em")
+                                     (tex "true" "false"))))))
+       (if (member 'double-space fountain-export-scene-heading-format)
+           (car opt) (cadr opt))))
+    ("scene-heading-underline"
+     (let ((opt (cdr (assoc format '((html "underline" "none")
+                                     (tex "true" "false"))))))
+       (if (member 'underline fountain-export-scene-heading-format)
+           (car opt) (cadr opt))))
+    ;; ("html-style" (fountain-export-html-create-style))
+    ("include-scene-numbers" "false")
+    ("title-underline"
+     (let ((opt (cdr (assoc format '((html "underline" "none")
+                                     (tex "true" "false"))))))
+       (if (member 'underline fountain-export-title-format)
+           (car opt) (cadr opt))))
+    ("title-upcase"
+     (let ((opt (cdr (assoc format '((html "uppercase" "none")
+                                     (tex "true" "false"))))))
+       (if (member 'upcase fountain-export-title-format)
+           (car opt) (cadr opt))))
+    ("title-bold"
+     (let ((opt (cdr (assoc format '((html "bold" "normal")
+                                     (tex "true" "false"))))))
+       (if (member 'bold fountain-export-title-format)
+           (car opt) (cadr opt))))
+    ("title-contact-align"
+     (let ((opt (cdr (assoc format '((html "?" "?")
+                                     (tex "true" "false"))))))
+       (if fountain-export-contact-align-right
+           (car opt) (cadr opt))))
+    ("number-first-page" "false"))
+  "Association list of sexps for formatting templates.
+This list is used for making template replacements in-buffer and
+when exporting.
+
+    (\"email\" user-mail-address)
+
+This replaces ${email} with the value of `user-mail-address'.")
+
+(defun fountain-export-format-template (type plist string format)
+  (with-temp-buffer
+    (insert (cadr (assoc type (assoc format fountain-export-templates))))
+    (goto-char (point-min))
+    (while (re-search-forward fountain-template-key-regexp nil t)
+      (let* ((key (match-string 1))
+             (value (plist-get plist (intern key))))
+        (replace-match
+         (cond ((string= key "content")
+                string)
+               ((stringp value)
+                (fountain-export-format-string value format))
+               ((eval (cadr (assoc key fountain-template-replace-sexps))
+                      (list (cons 'type type)
+                            (cons 'plist plist)
+                            (cons 'string string)
+                            (cons 'format format)
+                            t)))
+               (t ""))
+         t t))
+      (goto-char (point-min)))
+    (buffer-string)))
 
 (defun fountain-export-format-element (element format includes)
   (let* ((type (car element))
          (plist (nth 1 element))
-         (content (nth 2 element))
-         (template
-          (if (or (and (eq type 'document)
-                       fountain-export-standalone)
-                  (not (eq type 'document)))
-              (cadr (assoc type (assoc format fountain-export-templates)))))
-         (replacer
-          (lambda ()
-            (replace-regexp-in-string
-             fountain-template-key-regexp
-             (lambda (match)
-               (let* ((key (match-string 1 match))
-                      (value (plist-get plist (intern key)))
-                      (replacer
-                       (cadr (assoc key (append
-                                         fountain-template-replace-functions
-                                         fountain-additional-template-replace-functions)))))
-                 (cond ((string= key "content") str)
-                       ((stringp value)
-                        (fountain-export-format-string format value))
-                       ((and replacer (stringp (funcall replacer)))
-                        (funcall replacer))
-                       (t ""))))
-             template t t)))
-         str)
-    (if (listp content)
-        (let (str)
-          (dolist (element content
-                           (if template
-                               (funcall replacer)
-                             str))
-            (setq str
-                  (concat str
-                          (fountain-export-format-element
-                           element format includes)))))
-      (let ((str (fountain-export-format-string
-                  format content)))
-        (progress-reporter-force-update fountain-export-job)
-        (if (memq type includes)
-            (if template (funcall replacer) str))))))
+         (content (nth 2 element)))
+    (cond ((and (stringp content)
+                (member type includes))
+           (fountain-export-format-template
+            type plist (fountain-export-format-string content format) format))
+          ((listp content)
+           (let (string)
+             (dolist (element content
+                              (fountain-export-format-template
+                               type plist string format))
+               (setq string
+                     (concat string
+                             (fountain-export-format-element
+                              element format includes)))))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
-  (let ((fountain-export-standalone
-         (unless snippet fountain-export-standalone))
-        (level fountain-outline-cycle))
+  (let ((metadata (fountain-read-metadata))
+        (level fountain-outline-cycle)
+        (standalone (unless snippet fountain-export-standalone)))
     (fountain-outline-hide-level 0 t)
     (unwind-protect
         (save-excursion
-          (let ((content (fountain-parse-region beg end)))
+          (let ((tree (fountain-parse-region beg end)))
             (progress-reporter-done fountain-parse-job)
             (fountain-export-format-element
-             content format
-             (cdr (or (assoc (or (plist-get (nth 1 content)
-                                            'format)
+             (list 'document metadata tree) format
+             (cdr (or (assoc (or (plist-get metadata 'format)
                                  "screenplay")
                              fountain-export-include-elements-alist)
                       (car fountain-export-include-elements-alist))))))
