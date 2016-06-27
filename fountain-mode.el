@@ -1472,7 +1472,7 @@ bold-italic delimiters together, e.g.
   "Regular expression for matching lyrics.")
 
 (defconst fountain-template-key-regexp
-  "\\${\\([^\s\t\n()\"'`;]*?\\)}"
+  "\\${\\(.+?\\)}"
   "Regular expression key for making template replacements.")
 
 ;;; Faces ======================================================================
