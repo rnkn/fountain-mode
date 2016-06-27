@@ -2206,7 +2206,7 @@ data reflects `outline-regexp'."
                (point))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) 'end))
-      (let ((contents (fountain-parse-region (point) end t)))
+      (let ((contents (fountain-parse-region (point) end)))
         (list 'section
               (list 'begin beg
                     'end end
@@ -2233,7 +2233,7 @@ data reflects `outline-regexp'."
                (point))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) 'end))
-      (let ((contents (fountain-parse-region (point) end t)))
+      (let ((contents (fountain-parse-region (point) end)))
         (list 'scene
               (list 'begin beg
                     'end end
@@ -2263,7 +2263,7 @@ data reflects `outline-regexp'."
                  (point)))))
     (save-excursion
       (goto-char (plist-get (nth 1 heading) 'end))
-      (let ((contents (fountain-parse-region (point) end t)))
+      (let ((contents (fountain-parse-region (point) end)))
         (list 'dialog
               (list 'begin beg
                     'end end
@@ -2343,13 +2343,13 @@ data reflects `outline-regexp'."
    (t
     (fountain-parse-action))))
 
-(defun fountain-parse-region (beg end &optional recursive)
-  (let ((metadata (fountain-read-metadata))
-        list)
-    (goto-char (max beg (plist-get metadata 'content-start)))
+(defun fountain-parse-region (beg end)
+  (let (list)
+    (goto-char beg)
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
-                 (fountain-comment-p))
+                 (fountain-comment-p)
+                 (fountain-metadata-p))
         (goto-char (match-end 0)))
       (if (< (point) end)
           (let ((element (fountain-parse-element)))
@@ -2357,12 +2357,7 @@ data reflects `outline-regexp'."
             (goto-char (plist-get (nth 1 element) 'end))
             (progress-reporter-force-update fountain-parse-job
                                             (* (/ (float (point)) (buffer-size)) 100)))))
-    (if recursive (reverse list)
-      (list 'document
-            (append (list 'begin beg
-                          'end end)
-                    metadata)
-            (reverse list)))))
+    (reverse list)))
 
 ;;;; Export Functions ==========================================================
 
