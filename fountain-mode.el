@@ -1,4 +1,4 @@
-;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup
+;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2016 Paul Rankin
 
