@@ -2224,7 +2224,6 @@ data reflects `outline-regexp'."
 (defun fountain-parse-scene ()
   (let ((heading (fountain-parse-scene-heading))
         (num (match-string-no-properties 5)) ; FIXME: get-scene-number
-        (omit (string-prefix-p "OMIT" (match-string 0)))
         (beg (point))
         (end (save-excursion
                (outline-end-of-subtree)
