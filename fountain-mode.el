@@ -1117,7 +1117,7 @@ ${content}\
 \\newlength{\\dialogwidth}
 \\setlength{\\characterindent}{1in}
 \\setlength{\\characterwidth}{4in}
-\\setlength{\\dialogindent}{1.5in}
+\\setlength{\\dialogindent}{1in}
 \\setlength{\\dialogwidth}{3.5in}
 \\newcommand*{\\character}[1]{%
   \\hspace*{\\characterindent}\\parbox[t]{\\characterwidth}{#1}%
