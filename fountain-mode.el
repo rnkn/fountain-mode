@@ -2371,33 +2371,6 @@ Otherwise return `fountain-export-buffer'"
         (t
          (format fountain-export-buffer-name format))))
 
-(defun fountain-export-html-create-style ()
-  "Create stylesheet using `fountain-export-html-style-template'."
-  (let ((style (replace-regexp-in-string
-                fountain-template-key-regexp
-                (lambda (match)
-                  (let ((replacer
-                         (cadr (assoc (match-string 1 match)
-                                      (append
-                                       fountain-template-replace-functions
-                                       fountain-additional-template-replace-functions)))))
-                    (if replacer (funcall replacer) "")))
-                fountain-export-html-style-template t t)))
-    (if fountain-export-html-use-inline-style
-        (concat "<style type=\"text/css\">\n"
-                style
-                "</style>")
-      (let ((cssfile (get-buffer-create (fountain-export-get-filename "css")))
-            (dir (expand-file-name
-                  (file-name-directory (buffer-file-name)))))
-        (with-current-buffer cssfile
-          (with-silent-modifications
-            (erase-buffer))
-          (insert (format "/* Created with Emacs %s running Fountain Mode %s */\n"
-                          emacs-version fountain-version)
-                  style))
-        (concat "<link rel=\"stylesheet\" href=\"" (buffer-name cssfile) "\">")))))
-
 (defun fountain-export-format-string (string format)
   (dolist (var (cdr (assoc format fountain-export-format-replace-alist))
                string)
