@@ -2325,11 +2325,12 @@ Includes child elements."
                (while (not (or (fountain-tachyon-p)
                                (eobp)))
                  (forward-line 1))
-               (1- (point)))))          ; FIXME: this is messy
+               (skip-chars-backward "\s\t\n")
+               (point))))
     (list 'action
           (list 'begin beg
                 'end end)
-          (s-trim-right (buffer-substring-no-properties beg end))))) ; FIXME: remove s
+          (buffer-substring-no-properties beg end)))) ; FIXME: remove s
 
 (defun fountain-parse-element ()
   "Call appropropriate element parsing function for matched element at point."
