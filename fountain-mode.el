@@ -1545,7 +1545,7 @@ bold-italic delimiters together, e.g.
 ;;;; Initializing Functions ====================================================
 
 (defun fountain-init-scene-heading-regexp ()
-  "Initializes `fountain-scene-heading-regexp'."
+  "Initialize `fountain-scene-heading-regexp'."
   (setq fountain-scene-heading-regexp
         (concat "^\\(?1:"
                 fountain-forced-scene-heading-regexp
@@ -1559,7 +1559,7 @@ bold-italic delimiters together, e.g.
                 "\\)[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
-  "Initializes `fountain-trans-regexp'."
+  "Initialize `fountain-trans-regexp'."
   (setq fountain-trans-regexp
         (concat "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:[^<>\n]*?\\)\\)[\s\t]*$"
                 "\\|"
@@ -1568,14 +1568,14 @@ bold-italic delimiters together, e.g.
                 "\\)\\)[\s\t]*$")))
 
 (defun fountain-init-outline-regexp ()
-  "Initializes `outline-regexp'."
+  "Initialize `outline-regexp'."
   (setq-local outline-regexp
               (concat fountain-section-heading-regexp
                       "\\|"
                       fountain-scene-heading-regexp)))
 
 (defun fountain-init-imenu-generic-expression ()
-  "Initializes `imenu-generic-expression'."
+  "Initialize `imenu-generic-expression'."
   (setq imenu-generic-expression
         (list
          (list "Notes" fountain-note-regexp 3)
@@ -1597,7 +1597,7 @@ bold-italic delimiters together, e.g.
               (if fountain-switch-comment-syntax "" "*/")))
 
 (defun fountain-init-vars ()
-  "Initializes important variables."
+  "Initialize important variables."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
@@ -1659,6 +1659,7 @@ bold-italic delimiters together, e.g.
                  (< pos (match-end 0))))))))
 
 (defun fountain-comment-p ()
+  "Match comment if point is at a comment, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -1725,7 +1726,7 @@ comments."
       (save-restriction
         (widen)
         (forward-line 0)
-        (and (looking-at "\\(?3:\s\s\\)\\|[\s\t]*\\(?1:\\(?3:[^<>\n]+?\\)\\)[\s\t]*$")
+        (and (looking-at "\\(?3:\s\s\\)\\|[\s\t]*\\(?1:\\(?3:[^<>\n]+?\\)\\)[\s\t]*$") ; FIXME: what is this?
              (save-match-data
                (unless (bobp)
                  (forward-line -1)
@@ -1956,6 +1957,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 ;;;; Text Functions ============================================================
 
 (defun fountain-delete-comments-in-region (beg end)
+  "Delete comments in region between BEG and END."
   (let ((beg
          (save-excursion
            (goto-char beg)
@@ -2048,6 +2050,8 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
   (fountain-outline-shift-down (- n)))
 
 (defun fountain-outline-hide-level (n &optional silent)
+  "Set outline visibilty to outline level N.
+Display a message unless SILENT."
   (cond ((= n 0)
          (show-all)
          (unless silent (message "Showing all")))
@@ -2060,12 +2064,13 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
   (setq fountain-outline-cycle n))
 
 (defun fountain-outline-cycle (&optional arg)
-  "\\<fountain-mode-map>Cycle outline visibility of buffer or current subtree.
+  "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
-    \\[fountain-outline-cycle]				Cycle outline visibility of current subtree and its children
-    \\[universal-argument] \\[fountain-outline-cycle]			Cycle outline visibility of buffer
-    \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		Show all
-    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	Show outline visibility set in `fountain-outline-custom-level'"
+    \\[fountain-outline-cycle]				If ARG is nil, cycle outline visibility of current
+                    subtree and its children
+    \\[universal-argument] \\[fountain-outline-cycle]			If ARG is 4, cycle outline visibility of buffer
+    \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		If ARG is 16, show all
+    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in `fountain-outline-custom-level'"
   (interactive "p")
   (let* ((custom-level
           (if fountain-outline-custom-level
@@ -2178,6 +2183,7 @@ data reflects `outline-regexp'."
 ;;;; Parsing Functions =========================================================
 
 (defun fountain-parse-section-heading ()
+  "Return an element list for matched section heading at point."
   (list 'section-heading
         (list 'begin (match-beginning 0)
               'end (match-end 0)
@@ -2185,6 +2191,8 @@ data reflects `outline-regexp'."
         (match-string-no-properties 3)))
 
 (defun fountain-parse-section ()
+  "Return an element list for matched section heading at point.
+Includes child elements."
   (let ((heading (fountain-parse-section-heading))
         (level (funcall outline-level))
         (beg (point))
@@ -2203,6 +2211,7 @@ data reflects `outline-regexp'."
               (cons heading contents))))))
 
 (defun fountain-parse-scene-heading ()
+  "Return an element list for matched scene heading at point."
   (list 'scene-heading
         (list 'begin (match-beginning 0)
               'end (match-end 0)
@@ -2211,6 +2220,8 @@ data reflects `outline-regexp'."
         (match-string-no-properties 3)))
 
 (defun fountain-parse-scene ()
+  "Return an element list for matched scene heading at point.
+Includes child elements."
   (let ((heading (fountain-parse-scene-heading))
         (num (match-string-no-properties 5)) ; FIXME: get-scene-number
         (beg (point))
@@ -2229,6 +2240,8 @@ data reflects `outline-regexp'."
               (cons heading contents))))))
 
 (defun fountain-parse-dialog ()
+  "Return an element list for matched character at point.
+Includes child elements."
   (let* ((dual (cond ((stringp (match-string 5))
                       'right)
                      ((save-excursion
@@ -2263,18 +2276,21 @@ data reflects `outline-regexp'."
               (cons character contents))))))
 
 (defun fountain-parse-lines ()
+  "Return an element list for matched dialogue at point."
   (list 'lines
         (list 'begin (match-beginning 0)
               'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-paren ()
+  "Return an element list for matched parenthetical at point."
   (list 'paren
         (list 'begin (match-beginning 0)
               'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-trans ()
+  "Return an element list for matched transition at point."
   (list 'trans
         (list 'begin (match-beginning 0)
               'end (match-end 0)
@@ -2282,24 +2298,28 @@ data reflects `outline-regexp'."
         (match-string-no-properties 3)))
 
 (defun fountain-parse-center ()
+  "Return an element list for matched center text at point."
   (list 'center
         (list 'begin (match-beginning 0)
               'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-synopsis ()
+  "Return an element list for matched synopsis at point."
   (list 'synopsis
         (list 'begin (match-beginning 0)
               'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-note ()
+  "Return an element list for matched note at point."
   (list 'note
         (list 'begin (match-beginning 0)
               'end (match-end 0))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-action ()
+  "Return an element list for action at point."
   (let ((beg (point))
         (end (save-excursion
                (while (not (or (fountain-tachyon-p)
@@ -2312,6 +2332,7 @@ data reflects `outline-regexp'."
           (s-trim-right (buffer-substring-no-properties beg end))))) ; FIXME: remove s
 
 (defun fountain-parse-element ()
+  "Call appropropriate element parsing function for matched element at point."
   (cond
    ((fountain-section-heading-p)
     (fountain-parse-section))
@@ -2335,6 +2356,11 @@ data reflects `outline-regexp'."
     (fountain-parse-action))))
 
 (defun fountain-parse-region (beg end)
+  "Return a list of parsed element lists in region between BEG and END.
+
+Ignores blank lines, comments and metadata. Calls
+`fountain-parse-element' and adds element list to list, then
+moves to property value of end of element."
   (let (list)
     (goto-char beg)
     (while (< (point) (min end (point-max)))
@@ -2363,6 +2389,7 @@ Otherwise return `fountain-export-buffer'"
          (format fountain-export-buffer-name format))))
 
 (defun fountain-export-format-string (string format)
+  "Replaces matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
   (dolist (var (cdr (assoc format fountain-export-format-replace-alist))
                string)
     (setq string (replace-regexp-in-string
@@ -2475,9 +2502,16 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
       string)))
 
 (defun fountain-export-format-element (element format includes)
-  (let* ((type (car element))
-         (plist (nth 1 element))
-         (tree (nth 2 element)))
+  "Return a formatted string from ELEMENT according to FORMAT.
+Only return format string if INCLUDES contains the car of ELEMENT.
+
+Break ELEMENT into type, plist and tree. If tree is a string and
+INCLUDES contains type then call `fountain-export-format-template'
+with type, plist, tree as a formatted string, and format. If tree is a list,
+recursively call self, concatenating the resulting strings. "
+  (let ((type (car element))
+        (plist (nth 1 element))
+        (tree (nth 2 element)))
     (cond ((and (stringp tree)
                 (member type includes))
            (fountain-export-format-template
