@@ -3421,6 +3421,9 @@ the presence of ELT in VAR, otherwise toggle the value of VAR."
 ;;; Mode Definition ============================================================
 
 ;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
+
+;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
