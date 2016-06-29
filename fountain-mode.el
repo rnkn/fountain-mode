@@ -2207,7 +2207,7 @@ data reflects `outline-regexp'."
         (list 'begin (match-beginning 0)
               'end (match-end 0)
               'scene-number (match-string-no-properties 5)
-              'forced (match-string-no-properties 2))
+              'forced (stringp (match-string-no-properties 2)))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-scene ()
@@ -2240,7 +2240,7 @@ data reflects `outline-regexp'."
          (character (list 'character
                           (list 'begin (match-beginning 0)
                                 'end (match-end 0)
-                                'forced (match-string-no-properties 2)
+                                'forced (stringp (match-string-no-properties 2))
                                 'dual dual)
                           (match-string-no-properties 3)))
          (name (match-string-no-properties 4))
@@ -2278,7 +2278,7 @@ data reflects `outline-regexp'."
   (list 'trans
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'forced (match-string-no-properties 2))
+              'forced (stringp (match-string-no-properties 2)))
         (match-string-no-properties 3)))
 
 (defun fountain-parse-center ()
@@ -2401,6 +2401,14 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
                                                (cons 'contd fountain-continued-dialog-string)
                                                (cons 'more fountain-export-more-dialog-string)
                                                (cons 'contact-template fountain-export-contact-template)
+                                               (cons 'forced
+                                                     (cond ((eq format 'fountain)
+                                                            (cond ((eq type 'scene-heading)
+                                                                   ".")
+                                                                  ((eq type 'character)
+                                                                   "@")
+                                                                  ((eq type 'trans)
+                                                                   "> ")))))
                                                (cons 'dual-dialog
                                                      (cond ((and (eq format 'fountain)
                                                                  (eq (plist-get plist 'dual) 'right))
