@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 2.0.1
+;; Version: 2.1.0
 ;; Package-Requires: ((emacs "24.4.0") (s "1.9.0"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -122,7 +122,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.0.1")
+  "2.1.0")
 
 ;;; Requirements ===============================================================
 
