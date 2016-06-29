@@ -309,6 +309,9 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete 'fountain-export-html-use-inline-style
                "use inline style." "2.1.0")
 
+(make-obsolete 'fountain-additional-template-replace-functions
+               "use built-in `fountain-export-format-template'." "2.1.0")
+
 ;;; Customization ==============================================================
 
 ;;;; General Customization =====================================================
@@ -753,21 +756,6 @@ character codes, then format replacement is made."
   :type '(alist :key-type (symbol :tag "Format")
                 :value-type (repeat (group regexp (string :tag "Replacement"))))
   :group 'fountain-export)
-
-(defcustom fountain-additional-template-replace-functions
-  nil
-  "Association list of additional replacement functions for formatting templates.
-This list is used for making template replacements in-buffer and
-when exporting.
-
-For each STRING, the corresponding FUNCTION is called with no
-arguments and must return a string, e.g.
-
-    (\"email\" (lambda () user-mail-address))
-
-This replaces ${email} with the value of `user-mail-address'."
-  :type '(repeat (group string function))
-  :group 'fountain)
 
 (defcustom fountain-export-templates
   '((html
