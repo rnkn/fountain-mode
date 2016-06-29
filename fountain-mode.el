@@ -1249,8 +1249,8 @@ Takes the form:
 FORMAT is the export format, a symbol. TYPE is the Fountain
 element, a symbol (see below). TEMPLATE is the template with
 which to format the format string. If TEMPLATE is nil, the format
-string is passed without formatting, whereas an empty string
-discards the format string and passes the empty string.
+string is passed as is without formatting, whereas an empty
+string discards the format string and passes the empty string.
 
 Fountain element TYPES:
 
@@ -1259,7 +1259,7 @@ Fountain element TYPES:
     section             string of section, including child elements
     section-heading     string of section heading, excluding syntax chars
     scene               string of scene, including child elements
-    scene-heading       string of scene heading, excluing  syntax chars
+    scene-heading       string of scene heading, excluing syntax chars
     dialog              string of dialogue block, including child elements
     character           string of character name, excluding syntax chars
     paren               string of parenthetical
@@ -1273,19 +1273,13 @@ Fountain element TYPES:
 
 If a TYPE is not included, its TEMPLATE is treated as nil.
 
-The format of TEMPLATE can include replacement keys in the form
-\"${key}\". Each TEMPLATE should include the \"${content}\" key,
-which will be replaced with the format string. Replacements are
-calculated in the following order:
+The format of TEMPLATE can include replacement keys in the form:
 
-    1. ${content} is replaced with the format string.
-    2. If KEY corresponds to a property in the element's property list, and that
-       property is a string, ${KEY} is replaced with that string. See
-       `fountain-parse-element' for details on Fountain element property lists.
-    3. If KEY corresponds to a function in `fountain-template-replace-functions'
-       or `fountain-additional-template-replace-functions' then ${KEY} is
-       replace with the result of that function.
-    4. If none of the above, ${KEY} is replaced with an empty string."
+    ${key}
+
+Each TEMPLATE should include the ${content} key. See
+`fountain-export-format-template' for how replacement strings are
+calculated."
   :type '(alist :key-type (choice :tag "Format"
                                   (const :tag "HTML" html)
                                   (const :tag "LaTeX" tex)
