@@ -1840,7 +1840,7 @@ syntax.
 Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
 `point', but only use one of each."
   (let ((start (point)))
-    (insert (s-format template 'aget
+    (insert (s-format template 'aget    ; FIXME: remove s
                       `(("title" . ,(file-name-base (buffer-name)))
                         ("longtime" . ,(format-time-string fountain-long-time-format))
                         ("time" . ,(format-time-string fountain-short-time-format))
@@ -2389,7 +2389,7 @@ Otherwise return `fountain-export-buffer'"
          (format fountain-export-buffer-name format))))
 
 (defun fountain-export-format-string (string format)
-  "Replaces matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
+  "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
   (dolist (var (cdr (assoc format fountain-export-format-replace-alist))
                string)
     (setq string (replace-regexp-in-string
@@ -2516,7 +2516,7 @@ Only return format string if INCLUDES contains the car of ELEMENT.
 Break ELEMENT into type, plist and tree. If tree is a string and
 INCLUDES contains type then call `fountain-export-format-template'
 with type, plist, tree as a formatted string, and format. If tree is a list,
-recursively call self, concatenating the resulting strings. "
+recursively call self, concatenating the resulting strings."
   (let ((type (car element))
         (plist (nth 1 element))
         (tree (nth 2 element)))
@@ -2535,6 +2535,19 @@ recursively call self, concatenating the resulting strings. "
                               element format includes)))))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
+  "Return an export string of region between BEG and END in FORMAT.
+If SNIPPET, do not include a document template wrapper.
+
+Save current outline visibility level, then show all. Then read
+file metadata. Then calculate elements included in export from
+assocation list in `fountain-export-include-elements-alist'
+corresponding to FORMAT. Then parse the region into an element tree.
+
+If exporting a standalone document, call
+`fountain-export-format-element' with tree, FORMAT and list of
+included elements, otherwise walk the element tree calling
+`fountain-export-format-element' and concatenate the resulting
+strings."
   (let ((level fountain-outline-cycle))
     (fountain-outline-hide-level 0 t)
     (unwind-protect
@@ -2560,6 +2573,11 @@ recursively call self, concatenating the resulting strings. "
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
+  "Export current buffer or BUFFER to export format FORMAT.
+Do not export a standalone document if SNIPPET is non-nil.
+
+Switch to destination buffer if completes without errors,
+otherwise kill destination buffer."
   (interactive
    (list (intern (completing-read "Format: "
                                   (mapcar 'car fountain-export-templates)
@@ -2771,7 +2789,8 @@ halt at end of dialog."
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note based on `fountain-note-template' underneath current element.
-If prefixed with \\[universal-argument], only insert note delimiters (\"[[\" \"]]\")."
+If prefixed with ARG (\\[universal-argument]), only insert note
+delimiters (\"[[\" \"]]\")."
   (interactive "P")
   (let ((comment-start "[[")
         (comment-end "]]"))
@@ -2801,8 +2820,8 @@ If `fountain-add-continued-dialog' is non-nil, add
 succession, otherwise remove all occurences.
 
 If region is active, act on region, otherwise act on current
-scene. If prefixed with \\[universal-argument], act on whole
-buffer (this can take a while).
+scene. If prefixed with ARG (\\[universal-argument]), act on
+whole buffer (this can take a while).
 
 WARNING: if you change `fountain-continued-dialog-string' then
 call this function, strings matching the previous value will not
@@ -2890,7 +2909,8 @@ then make the changes desired."
   (funcall fountain-export-default-command))
 
 (defun fountain-export-shell-command (&optional buffer)
-  "Call shell command defined in `fountain-export-shell-command'."
+  "Call shell command defined in variable `fountain-export-shell-command'.
+Command acts on current buffer or BUFFER."
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
          (file (buffer-file-name buffer)))
@@ -3130,7 +3150,7 @@ Regular expression should take the form:
     changed))
 
 (defun fountain-get-align (element)
-  "Return ELEMENT align integer based on buffer format"
+  "Return ELEMENT align integer based on buffer format."
   (if (integerp element) element
     (let ((format (or (plist-get (fountain-read-metadata)
                                  'format)
@@ -3266,6 +3286,10 @@ keywords suitable for Font Lock."
 ;;; Menu =======================================================================
 
 (defun fountain-toggle-custom-variable (var &optional elt)
+  "Toggle variable VAR using `customize'.
+
+If VAR's standard value is a list, and ELT is provided, toggle
+the presence of ELT in VAR, otherwise toggle the value of VAR."
   (if (listp (car (get var 'standard-value)))
       (when elt
         (if (memq elt (symbol-value var))
