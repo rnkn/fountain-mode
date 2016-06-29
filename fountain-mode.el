@@ -2535,18 +2535,18 @@ recursively call self, concatenating the resulting strings. "
                               element format includes)))))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
-  (let* ((metadata (fountain-read-metadata))
-         (level fountain-outline-cycle)
-         (includes
-          (cdr (or (assoc (or (plist-get metadata 'format)
-                              "screenplay")
-                          fountain-export-include-elements-alist)
-                   (car fountain-export-include-elements-alist))))
-         (standalone (unless snippet fountain-export-standalone)))
+  (let ((level fountain-outline-cycle))
     (fountain-outline-hide-level 0 t)
     (unwind-protect
         (save-excursion
-          (let ((tree (fountain-parse-region beg end)))
+          (let* ((metadata (fountain-read-metadata))
+                 (includes
+                  (cdr (or (assoc (or (plist-get metadata 'format)
+                                      "screenplay")
+                                  fountain-export-include-elements-alist)
+                           (car fountain-export-include-elements-alist))))
+                 (standalone (unless snippet fountain-export-standalone))
+                 (tree (fountain-parse-region beg end)))
             (progress-reporter-done fountain-parse-job)
             (if standalone
                 (fountain-export-format-element
