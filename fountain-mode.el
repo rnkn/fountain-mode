@@ -2489,14 +2489,14 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
 (defun fountain-export-format-element (element format includes)
   (let* ((type (car element))
          (plist (nth 1 element))
-         (content (nth 2 element)))
-    (cond ((and (stringp content)
+         (tree (nth 2 element)))
+    (cond ((and (stringp tree)
                 (member type includes))
            (fountain-export-format-template
-            type plist (fountain-export-format-string content format) format))
-          ((listp content)
+            type plist (fountain-export-format-string tree format) format))
+          ((listp tree)
            (let (string)
-             (dolist (element content
+             (dolist (element tree
                               (fountain-export-format-template
                                type plist string format))
                (setq string
@@ -2505,20 +2505,27 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
                               element format includes)))))))))
 
 (defun fountain-export-region (beg end format &optional snippet)
-  (let ((metadata (fountain-read-metadata))
-        (level fountain-outline-cycle)
-        (standalone (unless snippet fountain-export-standalone)))
+  (let* ((metadata (fountain-read-metadata))
+         (level fountain-outline-cycle)
+         (includes
+          (cdr (or (assoc (or (plist-get metadata 'format)
+                              "screenplay")
+                          fountain-export-include-elements-alist)
+                   (car fountain-export-include-elements-alist))))
+         (standalone (unless snippet fountain-export-standalone)))
     (fountain-outline-hide-level 0 t)
     (unwind-protect
         (save-excursion
           (let ((tree (fountain-parse-region beg end)))
             (progress-reporter-done fountain-parse-job)
-            (fountain-export-format-element
-             (list 'document metadata tree) format
-             (cdr (or (assoc (or (plist-get metadata 'format)
-                                 "screenplay")
-                             fountain-export-include-elements-alist)
-                      (car fountain-export-include-elements-alist))))))
+            (if standalone
+                (fountain-export-format-element
+                 (list 'document metadata tree) format includes)
+              (let (string)
+                (dolist (element tree string)
+                  (setq string
+                        (concat string (fountain-export-format-element
+                                        element format includes)))))))) ; FIXME: DRY
       (progress-reporter-done fountain-export-job)
       (fountain-outline-hide-level level t))))
 
