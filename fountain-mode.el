@@ -856,10 +856,12 @@ This replaces ${email} with the value of `user-mail-address'."
   font-weight: ${scene-heading-bold};
   text-decoration: ${scene-heading-underline};
   margin-bottom: 0em;
+  clear: both;
   page-break-after: avoid;
 }
 .screenplay .action {
   margin: 1em 0;
+  clear: both;
   white-space: pre-wrap;
   orphans: 2;
   widows: 2;
@@ -871,6 +873,7 @@ This replaces ${email} with the value of `user-mail-address'."
   margin-top: 1em;
   margin-bottom: 1em;
   margin-left: 17%;
+  clear: both;
 }
 .screenplay .dialog .character {
   margin-top: 0;
@@ -896,22 +899,26 @@ This replaces ${email} with the value of `user-mail-address'."
   page-break-after: avoid;
 }
 .screenplay .dialog.dual {
-  width: 50%;
-}
-.screenplay .dialog.dual .lines {
-  width: 48%;
-}
-.screenplay .dialog.dual.left {
+  min-width: 16em;
+  max-width: 50%;
   margin-top: 0;
   margin-left: 0;
+}
+.screenplay .dialog.dual .lines {
+  width: 95%;
+}
+.screenplay .dialog.dual.left {
   float: left;
+  clear: left;
 }
 .screenplay .dialog.dual.right {
-  clear: none;
+  float: right;
+  clear: right;
 }
 .screenplay .trans {
   max-width: 2in;
   margin-left: 64%;
+  clear: both;
   page-break-before: avoid;
 }
 .screenplay .note {
@@ -938,7 +945,7 @@ This replaces ${email} with the value of `user-mail-address'."
   text-decoration: underline;
 }
 .screenplay .section-heading {
-  display: none;
+  display: block;
 }
 .screenplay .menu {
   display: none;
