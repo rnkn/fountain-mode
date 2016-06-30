@@ -3292,13 +3292,15 @@ keywords suitable for Font Lock."
 
 If VAR's custom type is boolean, toggle the value of VAR,
 otherwise, if ELT is provided, toggle the presence of ELT in VAR."
-  (if (eq (get var 'custom-type) 'boolean)
-      (customize-set-variable var (not (symbol-value var)))
-    (when (and elt (memq elt (symbol-value var)))
-      (customize-set-variable var
-                              (delq elt (symbol-value var)))
-      (customize-set-variable var
-                              (cons elt (symbol-value var)))))
+  (cond ((eq (get var 'custom-type) 'boolean)
+         (customize-set-variable var (not (symbol-value var))))
+        ((and elt
+              (listp (eval (car (get var 'standard-value)))))
+         (if (memq elt (symbol-value var))
+             (customize-set-variable var
+                                     (delq elt (symbol-value var)))
+           (customize-set-variable var
+                                   (cons elt (symbol-value var))))))
   (font-lock-refresh-defaults)
   (message "%s is now: %s"
            (custom-unlispify-tag-name var)
