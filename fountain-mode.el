@@ -801,7 +801,7 @@ character codes, then format replacement is made."
   display: ${include-title-page};
   page: screenplay-title;
   page-break-after: always;
-  margin-top: 0in;
+  margin-top: 0;
   margin-right: auto;
   margin-bottom: 1em;
   margin-left: auto;
@@ -887,7 +887,6 @@ character codes, then format replacement is made."
   page-break-after: avoid;
 }
 .screenplay .dialog.dual {
-  min-width: 16em;
   max-width: 50%;
   margin-top: 0;
   margin-left: 0;
