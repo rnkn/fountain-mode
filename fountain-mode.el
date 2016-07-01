@@ -1397,7 +1397,7 @@ Requires `fountain-character-p'.")
 (defconst fountain-paren-regexp
   (concat "^[\s\t]*\\(?3:([^)\n]*)\\)[\s\t]*\\(?:"
           fountain-comment-regexp
-          "\\)$")
+          "\\)?$")
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or dialog.")
 
