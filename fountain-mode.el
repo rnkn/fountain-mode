@@ -878,10 +878,10 @@ character codes, then format replacement is made."
   widows: 2;
 }
 .screenplay .dialog .paren {
-  width: 50%;
+  max-width: 2in;
   margin-top: 0;
   margin-bottom: 0;
-  margin-left: 10%;
+  margin-left: 15%;
   text-indent: -0.6em;
   page-break-inside: avoid;
   page-break-after: avoid;
