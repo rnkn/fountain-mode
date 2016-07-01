@@ -1381,7 +1381,9 @@ Requires `fountain-metadata-p' for `bobp'.")
           "\\(?2:@\\)\\(?3:\\(?4:[^<>\n]+?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
           "\\|"
           "\\(?3:\\(?4:[A-Z][^<>a-z\n]*?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
-          "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
+          "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*\\(?:"
+          fountain-comment-regexp
+          "\\)?$")
   "Regular expression for matching character names.
 
     Group 1:    match trimmed whitespace
@@ -1393,7 +1395,9 @@ Requires `fountain-metadata-p' for `bobp'.")
 Requires `fountain-character-p'.")
 
 (defconst fountain-paren-regexp
-  "^[\s\t]*\\(?3:([^)\n]*)\\)[\s\t]*$"
+  (concat "^[\s\t]*\\(?3:([^)\n]*)\\)[\s\t]*\\(?:"
+          fountain-comment-regexp
+          "\\)$")
   "Regular expression for matching parentheticals.
 Requires `fountain-paren-p' for preceding character or dialog.")
 
@@ -2997,7 +3001,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
     ("character"
      (lambda (limit)
        (fountain-match-element 'fountain-character-p limit))
-     ((:level 3 :subexp 0)
+     ((:level 3 :subexp 0
+              :override append)
       (:level 3 :subexp 2
               :invisible fountain-syntax-chars
               :override append
@@ -3008,11 +3013,13 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
     ("dialog"
      (lambda (limit)
        (fountain-match-element 'fountain-dialog-p limit))
-     ((:level 3 :subexp 0)))
+     ((:level 3 :subexp 0
+              :override append)))
     ("paren"
      (lambda (limit)
        (fountain-match-element 'fountain-paren-p limit))
-     ((:level 3 :subexp 0)))
+     ((:level 3 :subexp 0
+              :override append)))
     ("trans"
      (lambda (limit)
        (fountain-match-element 'fountain-trans-p limit))
