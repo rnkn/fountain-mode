@@ -1364,9 +1364,9 @@ Set with `fountain-init-trans-regexp'. Requires
   "Regular expression for non-breaking space.")
 
 (defconst fountain-comment-regexp
-  (concat "\\(//[\s\t]*\\(.*\\)\\)"
+  (concat "\\(?://[\s\t]*\\(?:.*\\)\\)"
           "\\|"
-          "\\(?1:\\(?2:/\\*\\)[\s\t]*\\(?3:\\(.\\|\n\\)*?\\)[\s\t]*\\*/\\)")
+          "\\(?:\\(?:/\\*\\)[\s\t]*\\(?:\\(?:.\\|\n\\)*?\\)[\s\t]*\\*/\\)")
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
