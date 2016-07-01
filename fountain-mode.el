@@ -2582,7 +2582,7 @@ Switch to destination buffer if completes without errors,
 otherwise kill destination buffer."
   (interactive
    (list (intern (completing-read "Format: "
-                                  (mapcar 'car fountain-export-templates)
+                                  (mapcar #'car fountain-export-templates)
                                   nil t))
          (car current-prefix-arg)))
   (let ((sourcebuf (or buffer (current-buffer)))
@@ -3241,47 +3241,46 @@ keywords suitable for Font Lock."
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; editing commands
-    (define-key map (kbd "C-c C-m") 'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-S-m") 'fountain-upcase-line-and-newline)
-    ;; (define-key map (kbd "C-M-m") 'fountain-insert-alternate-character)
-    (define-key map (kbd "C-c C-c") 'fountain-upcase-line)
-    (define-key map (kbd "C-c C-d") 'fountain-continued-dialog-refresh)
-    (define-key map (kbd "C-c C-z") 'fountain-insert-note)
-    (define-key map (kbd "C-c C-a") 'fountain-insert-synopsis)
-    (define-key map (kbd "C-c C-x i") 'fountain-insert-metadata)
-    ;; (define-key map (kbd "C-c C-x #") 'fountain-add-scene-nums)
-    (define-key map (kbd "C-c C-x f") 'fountain-set-font-lock-decoration)
+    (define-key map (kbd "C-c C-m") #'fountain-upcase-line-and-newline)
+    (define-key map (kbd "C-S-m") #'fountain-upcase-line-and-newline)
+    (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
+    (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
+    (define-key map (kbd "C-c C-z") #'fountain-insert-note)
+    (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
+    (define-key map (kbd "C-c C-x i") #'fountain-insert-metadata)
+    ;; (define-key map (kbd "C-c C-x #") #'fountain-add-scene-nums)
+    (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     ;; navigation commands
-    (define-key map (kbd "C-M-n") 'fountain-forward-scene)
-    (define-key map (kbd "C-M-p") 'fountain-backward-scene)
-    (define-key map (kbd "C-M-a") 'fountain-beginning-of-scene)
-    (define-key map (kbd "C-M-e") 'fountain-end-of-scene)
-    (define-key map (kbd "C-M-h") 'fountain-mark-scene)
-    (define-key map (kbd "M-g s") 'fountain-goto-scene)
-    (define-key map (kbd "M-n") 'fountain-forward-character)
-    (define-key map (kbd "M-p") 'fountain-backward-character)
+    (define-key map (kbd "C-M-n") #'fountain-forward-scene)
+    (define-key map (kbd "C-M-p") #'fountain-backward-scene)
+    (define-key map (kbd "C-M-a") #'fountain-beginning-of-scene)
+    (define-key map (kbd "C-M-e") #'fountain-end-of-scene)
+    (define-key map (kbd "C-M-h") #'fountain-mark-scene)
+    (define-key map (kbd "M-g s") #'fountain-goto-scene)
+    (define-key map (kbd "M-n") #'fountain-forward-character)
+    (define-key map (kbd "M-p") #'fountain-backward-character)
     ;; outline commands
-    (define-key map (kbd "C-c C-n") 'fountain-outline-next)
-    (define-key map (kbd "C-c C-p") 'fountain-outline-previous)
-    (define-key map (kbd "C-c C-f") 'fountain-outline-forward)
-    (define-key map (kbd "C-c C-b") 'fountain-outline-backward)
-    (define-key map (kbd "C-c C-u") 'fountain-outline-up)
-    (define-key map (kbd "C-c C-^") 'fountain-outline-shift-up)
-    (define-key map (kbd "C-c C-v") 'fountain-outline-shift-down)
-    (define-key map (kbd "C-c C-SPC") 'fountain-outline-mark)
-    (define-key map (kbd "C-i") 'fountain-outline-cycle)
-    (define-key map (kbd "<backtab>") 'fountain-outline-cycle-global)
-    (define-key map (kbd "C-S-i") 'fountain-outline-cycle-global)
+    (define-key map (kbd "C-c C-n") #'fountain-outline-next)
+    (define-key map (kbd "C-c C-p") #'fountain-outline-previous)
+    (define-key map (kbd "C-c C-f") #'fountain-outline-forward)
+    (define-key map (kbd "C-c C-b") #'fountain-outline-backward)
+    (define-key map (kbd "C-c C-u") #'fountain-outline-up)
+    (define-key map (kbd "C-c C-^") #'fountain-outline-shift-up)
+    (define-key map (kbd "C-c C-v") #'fountain-outline-shift-down)
+    (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
+    (define-key map (kbd "C-i") #'fountain-outline-cycle)
+    (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
+    (define-key map (kbd "C-S-i") #'fountain-outline-cycle-global)
     ;; exporting commands
-    (define-key map (kbd "C-c C-e C-e") 'fountain-export-default)
-    (define-key map (kbd "C-c C-e h") 'fountain-export-buffer-to-html)
-    (define-key map (kbd "C-c C-e l") 'fountain-export-buffer-to-latex)
-    (define-key map (kbd "C-c C-e d") 'fountain-export-buffer-to-fdx)
-    (define-key map (kbd "C-c C-e f") 'fountain-export-buffer-to-fountain)
-    (define-key map (kbd "C-c C-e s") 'fountain-export-shell-command)
+    (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
+    (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
+    (define-key map (kbd "C-c C-e l") #'fountain-export-buffer-to-latex)
+    (define-key map (kbd "C-c C-e d") #'fountain-export-buffer-to-fdx)
+    (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
+    (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
     ;; view commands
-    (define-key map (kbd "C-c C-x !") 'fountain-toggle-hide-syntax-chars) ; FIXME ??
-    (define-key map (kbd "C-c C-x *") 'fountain-toggle-hide-emphasis-delim) ; FIXME ??
+    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-syntax-chars) ; FIXME ??
+    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-delim) ; FIXME ??
     map)
   "Mode map for `fountain-mode'.")
 
@@ -3439,7 +3438,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
   (setq-local font-lock-comment-face 'fountain-comment)
-  (setq-local outline-level 'fountain-outline-level)
+  (setq-local outline-level #'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
               '(display line-prefix wrap-prefix invisible))
   (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
@@ -3447,9 +3446,9 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
   (add-hook 'font-lock-extend-region-functions
-            'fountain-font-lock-extend-region t t)
+            #'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
-            'font-lock-refresh-defaults)
+            #'font-lock-refresh-defaults)
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
