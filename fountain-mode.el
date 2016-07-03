@@ -3447,6 +3447,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   (setq-local outline-level #'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
               '(display line-prefix wrap-prefix invisible))
+  (setq-local page-delimiter fountain-page-break-regexp)
   (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
     (if (stringp n)
         (setq-local fountain-outline-startup-level
