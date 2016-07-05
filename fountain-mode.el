@@ -2553,27 +2553,41 @@ If exporting a standalone document, call
 included elements, otherwise walk the element tree calling
 `fountain-export-format-element' and concatenate the resulting
 strings."
-  (let ((level fountain-outline-cycle))
+  (let* ((level fountain-outline-cycle)
+         (metadata (fountain-read-metadata))
+         (includes
+          (cdr (or (assoc (or (plist-get metadata 'format)
+                              "screenplay")
+                          fountain-export-include-elements-alist)
+                   (car fountain-export-include-elements-alist))))
+         (standalone (unless snippet fountain-export-standalone)))
     (fountain-outline-hide-level 0 t)
     (unwind-protect
         (save-excursion
-          (let* ((metadata (fountain-read-metadata))
-                 (includes
-                  (cdr (or (assoc (or (plist-get metadata 'format)
-                                      "screenplay")
-                                  fountain-export-include-elements-alist)
-                           (car fountain-export-include-elements-alist))))
-                 (standalone (unless snippet fountain-export-standalone))
-                 (tree (fountain-parse-region beg end)))
-            (progress-reporter-done fountain-parse-job)
-            (if standalone
-                (fountain-export-format-element
-                 (list 'document metadata tree) format includes)
-              (let (string)
-                (dolist (element tree string)
-                  (setq string
-                        (concat string (fountain-export-format-element
-                                        element format includes)))))))) ; FIXME: DRY
+          (let* ((beg (progn
+                        (goto-char beg)
+                        (while (fountain-metadata-p)
+                          (forward-line 1))
+                        (skip-chars-forward "\s\n\t")
+                        (point)))
+                 (end (if (re-search-forward fountain-script-end-regexp end t)
+                          (match-beginning 0)
+                        end))
+                 (string (buffer-substring-no-properties beg end)))
+            (with-temp-buffer
+              (insert string)
+              (fountain-init-vars)
+              (fountain-delete-comments-in-region (point-min) (point-max))
+              (let ((tree (fountain-parse-region (point-min) (point-max))))
+                (progress-reporter-done fountain-parse-job)
+                (if standalone
+                    (fountain-export-format-element
+                     (list 'document metadata tree) format includes)
+                  (let (string)
+                    (dolist (element tree string)
+                      (setq string
+                            (concat string (fountain-export-format-element
+                                            element format includes)))))))))) ; FIXME: DRY
       (progress-reporter-done fountain-export-job)
       (fountain-outline-hide-level level t))))
 
