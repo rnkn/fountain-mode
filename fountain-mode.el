@@ -124,13 +124,15 @@
 (defconst fountain-version
   "2.1.0")
 
-;;; Requirements ===============================================================
+
+;;; Requirements
 
 (require 's)
 (require 'easymenu)
 (require 'outline)
 
-;;; Group Definitions ==========================================================
+
+;;; Group Definitions
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
@@ -181,7 +183,8 @@ To disable element alignment, see `fountain-align-element'."
   :prefix "fountain-align-"
   :group 'fountain)
 
-;;; Obsolete Warnings ==========================================================
+
+;;; Obsolete Warnings
 
 (define-obsolete-variable-alias 'fountain-indent-character-col
   'fountain-align-character "0.12.0")
@@ -312,9 +315,8 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete 'fountain-additional-template-replace-functions
                "use built-in `fountain-export-format-template'." "2.1.0")
 
-;;; Customization ==============================================================
-
-;;;; General Customization =====================================================
+
+;;; Customization
 
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode)
@@ -470,7 +472,8 @@ This can be set on a per-file basis by including in metadata:
                  (const :tag "Include level 5" 5))
   :group 'fountain)
 
-;;;; Align Group Customization =================================================
+
+;;;; Align Group Customization
 
 (defcustom fountain-align-elements
   t
@@ -571,7 +574,8 @@ This option does affect file contents."
                  (integer 8))
   :group 'fountain-align)
 
-;;;; Export Group Customization ================================================
+
+;;;; Export Group Customization
 
 (defcustom fountain-export-include-elements-alist
   '(("screenplay" scene-heading action character paren lines trans center)
@@ -1290,8 +1294,11 @@ calculated."
                              (group (const :tag "Center Text" center) (choice string (const nil)))))
   :group 'fountain-export)
 
-;;; Variables ==================================================================
-;;;; Buffer Local Variables ====================================================
+
+;;; Variables
+
+;;;; Buffer Local Variables
+
 (defvar-local fountain-outline-cycle
   0
   "Integer representing global outline cycling status.
@@ -1319,7 +1326,8 @@ Used by `fountain-outline-cycle'.")
   (make-progress-reporter "Exporting...")
   "Buffer export progress reporter.")
 
-;;;; Regular Expression Variables ==============================================
+
+;;;; Regular Expression Variables
 
 (defvar fountain-scene-heading-regexp
   nil
@@ -1472,7 +1480,8 @@ bold-italic delimiters together, e.g.
   "\\${\\(.+?\\)}"
   "Regular expression key for making template replacements.")
 
-;;; Faces ======================================================================
+
+;;; Faces
 
 (defface fountain-action
   '((t nil))
@@ -1549,8 +1558,10 @@ bold-italic delimiters together, e.g.
   "Default face for transitions."
   :group 'fountain-faces)
 
-;;; Functions ==================================================================
-;;;; Initializing Functions ====================================================
+
+;;; Functions
+
+;;;; Initializing Functions
 
 (defun fountain-init-scene-heading-regexp ()
   "Initialize `fountain-scene-heading-regexp'."
@@ -1614,7 +1625,8 @@ bold-italic delimiters together, e.g.
   (setq-local outline-level 'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline))
 
-;;;; Element Functions =========================================================
+
+;;;; Element Functions
 
 (defun fountain-blank-p ()
   "Return non-nil if point is at a blank line."
@@ -1801,7 +1813,8 @@ comments."
         (forward-line 0)
         (looking-at ".*")))))
 
-;;;; Reading Functions =========================================================
+
+;;;; Reading Functions
 
 (defun fountain-read-metadata ()
   "Read metadata of current buffer and return as a property list.
@@ -1962,7 +1975,8 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
           ((integerp n) n)
           (t 2))))
 
-;;;; Text Functions ============================================================
+
+;;;; Text Functions
 
 (defun fountain-delete-comments-in-region (beg end)
   "Delete comments in region between BEG and END."
@@ -1986,7 +2000,8 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
     (while (re-search-forward fountain-comment-regexp end t)
       (delete-region (match-beginning 0) (match-end 0)))))
 
-;;;; Outline Functions =========================================================
+
+;;;; Outline Functions
 
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
@@ -2188,7 +2203,8 @@ data reflects `outline-regexp'."
       (string-width (match-string 2))
     6))
 
-;;;; Parsing Functions =========================================================
+
+;;;; Parsing Functions
 
 (defun fountain-parse-section-heading ()
   "Return an element list for matched section heading at point."
@@ -2385,7 +2401,8 @@ moves to property value of end of element."
                                             (* (/ (float (point)) (buffer-size)) 100)))))
     (reverse list)))
 
-;;;; Export Functions ==========================================================
+
+;;;; Export Functions
 
 (defun fountain-export-get-filename (format)
   "If BUFFER is visiting a file, concat file name base and FORMAT.
@@ -2645,7 +2662,8 @@ otherwise kill destination buffer."
   (interactive)
   (fountain-export-buffer 'fountain))
 
-;;;; Commands ==================================================================
+
+;;;; Commands
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
@@ -2999,7 +3017,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
           (setq unsaved t)))
     (if unsaved (custom-save-all))))
 
-;;; Font Lock ==================================================================
+
+;;; Font Lock
 
 (defvar fountain-font-lock-keywords-plist
   `(("note"
@@ -3261,7 +3280,7 @@ keywords suitable for Font Lock."
       (forward-line 1))
     match))
 
-;;; Keys =======================================================================
+;;; Keys
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
@@ -3309,7 +3328,8 @@ keywords suitable for Font Lock."
     map)
   "Mode map for `fountain-mode'.")
 
-;;; Menu =======================================================================
+
+;;; Menu
 
 (defun fountain-toggle-custom-variable (var &optional elt)
   "Toggle variable VAR using `customize'.
@@ -3434,7 +3454,8 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
-;;; Syntax Table ===============================================================
+
+;;; Syntax Table
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
@@ -3444,7 +3465,8 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
     syntax)
   "Syntax table for `fountain-mode'.")
 
-;;; Mode Definition ============================================================
+
+;;; Mode Definition
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
