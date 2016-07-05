@@ -1409,6 +1409,11 @@ Requires `fountain-paren-p' for preceding character or dialog.")
   "^[\s\t]*=\\{3,\\}.*"
   "Regular expression for matching page breaks.")
 
+(defconst fountain-script-end-regexp
+  (concat fountain-page-break-regexp
+          "end.*")
+  "Regular expression for matching script end break.")
+
 (defconst fountain-note-regexp
   "\\(\\[\\[[\s\t]*\\(?3:\\(?:.\n?\\)*?\\)[\s\t]*]]\\)"
   "Regular expression for matching notes.")
