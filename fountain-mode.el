@@ -28,7 +28,7 @@
 ;; Fountain Mode
 ;; =============
 
-;; Fountain Mode aims to be a full-featured screenwriting environment for GNU Emacs
+;; Fountain Mode is a complete screenwriting environment for GNU Emacs
 ;; using the Fountain markup format. For more information on the Fountain markup
 ;; format, visit <http://fountain.io>.
 
@@ -40,23 +40,33 @@
 ;;   specific to script format, e.g. screenplay, stageplay or user-defined format
 ;; - Export to HTML, LaTeX, Final Draft (FDX), Fountain, or user-defined formats
 ;; - Export to standalone document or snippet
-;; - Integration with `outline` to toggle/cycle visibility of sections and scenes
+;; - Integration with `outline` to fold/cycle visibility of sections and scenes
+;;   ([more information][outlining])
 ;; - Integration with `imenu` (sections, scene headings, notes)
 ;; - Add/remove automatic continuation string to successively speaking characters
-;; - Navigation by section, scene, or character name
+;; - Navigation by section, scene, character name, or page
 ;; - 3 levels of element syntax highlighting
+;; - Automatic loading for `*.fountain` files
 ;; - Support for both official and legacy commenting (boneyard) syntax
 ;; - Include or omit a title page
 ;; - Emphasis (bold, italic, underlined text)
 ;; - Toggle visibility of emphasis delimiters and syntax characters
 ;; - Templates for inserting synopses, notes and metadata
-;; - Everything customizable
+;; - Everything is customizable
+
+;; Check out the [Nicholl Fellowship sample script][nicholl] exported from Fountain
+;; Mode to [HTML][], [LaTeX][] and [Final Draft][fdx].
 
 ;; Most common features are accessible from the menu. For a full list of functions
-;; and key-bindings, type C-h m.
+;; and key-bindings, type <kbd>C-h m</kbd>.
 
 ;; See the [Wiki][] on GitHub for ways to extend Fountain Mode.
 
+;; [outlining]: https://github.com/rnkn/fountain-mode/wiki/Outlining
+;; [nicholl]: http://www.oscars.org/nicholl/screenwriting-resources
+;; [html]: https://rawgit.com/rnkn/mcqueen/master/sample/sample.html
+;; [latex]: https://www.sharelatex.com/project/54ed9180966959cb7fdbde8e
+;; [fdx]: http://files.paulwrankin.com/fountain-mode/Nicholl%20Fellowship%20sample.fdx
 ;; [wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
 
 ;; Requirements
@@ -64,8 +74,8 @@
 
 ;; - Emacs 24.4
 ;; - [s.el][], the long lost Emacs string manipulation library.
-;; - LaTeX packages for PDF export: `geometry`, `titling`, `fontspec`, `fancyhdr`,
-;;   `marginnote`, `ulem`, `xstring`, `oberdiek`
+;; - LaTeX packages for PDF export: `geometry` `fontspec` `titling` `fancyhdr`
+;;   `marginnote` `ulem` `xstring` `oberdiek`
 
 ;; [s.el]: https://github.com/magnars/s.el "s.el"
 
@@ -88,11 +98,6 @@
 
 ;;     git clone https://github.com/rnkn/fountain-mode.git
 
-;; To load Fountain Mode whenever you open a `.fountain` file, also add the
-;; following:
-
-;;     (add-to-list 'auto-mode-alist '("\\.fountain$" . fountain-mode))
-
 ;; [guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(OS-X) "Absolute Beginner's Guide (OS X)"
 ;; [melpa]: http://melpa.org/#/fountain-mode "MELPA"
 ;; [melpa-stable]: http://stable.melpa.org/#/fountain-mode "MELPA-stable"
@@ -102,6 +107,10 @@
 ;; -------------------------
 
 ;; Please raise an issue on the [Issues][] page on GitHub.
+
+;; - Emacs currently has a bug with `visual-line-mode` that produces erratic
+;;   navigation behavior when displaying very long lines. More information here:
+;;   <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=23879>
 
 ;; [issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
 
