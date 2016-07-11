@@ -1177,7 +1177,7 @@ ${content}\
      (section-heading nil)
      (scene nil)
      (scene-heading "\\sceneheading{${content}}\n\n")
-     (dialog "\\begin{dialog}${content}\n\\end{dialog}\n\n")
+     (dialog "\\begin{dialog}${content}\\end{dialog}\n\n")
      (character "{${content}}\n")
      (paren "\\paren{${content}}\n")
      (lines "${content}\n")
