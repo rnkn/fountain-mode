@@ -1226,6 +1226,8 @@ title: ${title}
 credit: ${credit}
 author: ${author}
 date: ${date}
+contact:
+    ${contact-template}
 
 ${content}")
      (section "${content}")
