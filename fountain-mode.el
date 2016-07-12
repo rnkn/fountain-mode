@@ -2064,7 +2064,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
       (setq i (1- i)))
     (if (< 0 n)
         (funcall end-point-fun))
-    (move-marker insert-point (point))
+    (set-marker insert-point (point))
     (insert (delete-and-extract-region beg end))
     (goto-char insert-point)
     (if folded
@@ -3174,7 +3174,7 @@ Regular expression should take the form:
     Group 1:    match whole string with trimmed whitespace
     Group 2:    syntax characters
     Group 3:    export group
-    Group 4+:  syntax characters")
+    Group 4+:   syntax characters")
 
 (defun fountain-font-lock-extend-region ()
   "Extend region for fontification to text block."
@@ -3247,7 +3247,7 @@ keywords suitable for Font Lock."
                  (display (plist-get plist :display))
                  (display-props
                   (if display
-                      (list 'display `(space :align-to ,display))))
+                      (list 'display (list 'space :align-to display))))
                  ;; if INVISIBLE is non-nil, add to INVISIBLE-PROPS
                  (invisible (plist-get plist :invisible))
                  (invisible-props
