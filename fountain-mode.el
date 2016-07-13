@@ -1360,7 +1360,7 @@ Requires `fountain-scene-heading-p' for preceding blank line.")
 Requires `fountain-scene-heading-p' for preceding blank line.")
 
 (defconst fountain-scene-number-regexp
-  "\\(?:\\(?4:[\s\t]+\\)\\(?:#\\(?5:[a-z]*[0-9]+[a-z]*\\)\\)\\)?"
+  "\\(?:\\(?4:[\s\t]+\\)\\(?:#\\(?5:[a-z0-9\\.-]+\\)#\\)\\)?"
   "Regular expression for matching scene numbers.
 Assumes line matches `fountain-scene-heading-p'.")
 
