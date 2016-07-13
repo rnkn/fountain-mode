@@ -1694,15 +1694,14 @@ bold-italic delimiters together, e.g.
   (save-excursion
     (save-restriction
       (widen)
-      (if (eq (char-after) ?\*) (forward-char -1))
-      (forward-comment 1)
+      (if (eq (char-before) ?*) (forward-char -1))
       (let ((x (point))
             beg end)
-        (search-backward "/*" nil t)
-        (setq beg (point-marker))
-        (if (and (forward-comment 1)
-                 (setq end (point-marker))
-                 (<= x end))
+        (search-forward "*/" nil t)
+        (setq end (point-marker))
+        (if (and (forward-comment -1)
+                 (setq beg (point-marker))
+                 (<= beg x end))
             (progn (set-match-data (list beg end) t)
                    t))))))
 
