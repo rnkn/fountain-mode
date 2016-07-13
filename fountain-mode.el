@@ -2400,6 +2400,7 @@ moves to property value of end of element."
     (goto-char beg)
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
+                 (fountain-comment-p)
                  (fountain-metadata-p))
         (goto-char (match-end 0)))
       (if (< (point) end)
