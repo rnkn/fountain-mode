@@ -26,8 +26,8 @@ Features
 - Export to HTML, LaTeX, Final Draft (FDX), Fountain, or user-defined formats
 - Export to standalone document or snippet
 - Integration with `outline` to fold/cycle visibility of sections and scenes
-  ([more information][outlining])
 - Integration with `imenu` (sections, scene headings, notes)
+- Intergration with `auto-insert`
 - Add/remove automatic continuation string to successively speaking characters
 - Navigation by section, scene, character name, or page
 - 3 levels of element syntax highlighting
@@ -36,23 +36,20 @@ Features
 - Include or omit a title page
 - Emphasis (bold, italic, underlined text)
 - Toggle visibility of emphasis delimiters and syntax characters
-- Templates for inserting synopses, notes and metadata
 - Everything is customizable
 
-Check out the [Nicholl Fellowship sample script][nicholl] exported from Fountain
-Mode to [HTML][], [LaTeX][] and [Final Draft][fdx].
+Check out the Nicholl Fellowship sample script exported from Fountain Mode to:
+
+- [HTML](https://rawgit.com/rnkn/mcqueen/master/sample/sample.html)
+- [LaTeX](https://www.sharelatex.com/project/54ed9180966959cb7fdbde8e)
+- [Final Draft](http://files.paulwrankin.com/fountain-mode/Nicholl%20Fellowship%20sample.fdx)
+
+More information on outlining here: <https://github.com/rnkn/fountain-mode/wiki/Outlining>
 
 Most common features are accessible from the menu. For a full list of functions
 and key-bindings, type <kbd>C-h m</kbd>.
 
-See the [Wiki][] on GitHub for ways to extend Fountain Mode.
-
-[outlining]: https://github.com/rnkn/fountain-mode/wiki/Outlining
-[nicholl]: http://www.oscars.org/nicholl/screenwriting-resources
-[html]: https://rawgit.com/rnkn/mcqueen/master/sample/sample.html
-[latex]: https://www.sharelatex.com/project/54ed9180966959cb7fdbde8e
-[fdx]: http://files.paulwrankin.com/fountain-mode/Nicholl%20Fellowship%20sample.fdx
-[wiki]: https://github.com/rnkn/fountain-mode/wiki "Fountain Mode wiki"
+For more, see the [Wiki](https://github.com/rnkn/fountain-mode/wiki).
 
 Requirements
 ------------
@@ -70,7 +67,8 @@ Installation
 *For users on OS X with no experience with Emacs, see the
 [Absolute Beginner's Guide (OS X)][guide].*
 
-The latest stable release of Fountain Mode is available via [MELPA-stable][].
+The latest stable release of Fountain Mode is available via
+[MELPA-stable](http://stable.melpa.org/#/fountain-mode).
 
 Alternately, download the [latest release][], move the files into your
 `load-path` and add the following line to your `.emacs` or `init.el` file:
@@ -91,24 +89,18 @@ above:
 Bugs and Feature Requests
 -------------------------
 
-Please raise an issue on the [Issues][] page on GitHub.
+Please raise an issue on [Issues](https://github.com/rnkn/fountain-mode/issues).
 
 - Emacs currently has a bug with `visual-line-mode` that produces erratic
   navigation behavior when displaying very long lines. More information here:
   <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=23879>
 
-[issues]: https://github.com/rnkn/fountain-mode/issues "Fountain Mode issues"
-
 Roadmap
 -------
 
-See [Milestones][] on GitHub.
-
-[milestones]: https://github.com/rnkn/fountain-mode/milestones "Fountain Mode milestones"
+See [Milestones](https://github.com/rnkn/fountain-mode/milestones).
 
 History
 -------
 
-See [Releases][] on GitHub.
-
-[releases]: https://github.com/rnkn/fountain-mode/releases "Fountain Mode releases"
+See [Releases](https://github.com/rnkn/fountain-mode/releases).
