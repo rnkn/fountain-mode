@@ -324,6 +324,12 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete 'fountain-additional-template-replace-functions
                "use built-in `fountain-export-format-template'." "2.1.0")
 
+(make-obsolete 'fountain-insert-metadata
+               'auto-insert "2.1.2")
+
+(make-obsolete 'fountain-metadata-template
+               'fountain-metadata-skeleton "2.1.2")
+
 
 ;;; Customization
 
@@ -331,13 +337,6 @@ To disable element alignment, see `fountain-align-element'."
   '(turn-on-visual-line-mode)
   "Mode hook for `fountain-mode', run after the mode is turned on."
   :type 'hook
-  :group 'fountain)
-
-(defcustom fountain-metadata-template
-  "title: ${title}\ncredit: written by\nauthor: ${fullname}\ndraft: first\ndate: ${longtime}\ncontact: ${email}\n"
-  "\\<fountain-mode-map>Template inserted at beginning of buffer with \\[fountain-insert-metadata].
-See `fountain-insert-template'."
-  :type 'string
   :group 'fountain)
 
 (defcustom fountain-scene-heading-prefix-list
@@ -1307,6 +1306,16 @@ calculated."
 
 
 ;;; Variables
+
+(defvar fountain-metadata-skeleton
+  '(nil
+    "title: " (skeleton-read "Title: " (file-name-base (buffer-name))) | -7 "\n"
+    "credit: " (skeleton-read "Credit: " "written by") | -9 "\n"
+    "author: " (skeleton-read "Author: " user-full-name) | -9 "\n"
+    "format: " (skeleton-read "Script format: " "screenplay") | -9 "\n"
+    "source: " (skeleton-read "Source: ") | -9 "\n"
+    "date: " (skeleton-read "Date: " (format-time-string "%F")) | -7 "\n"
+    "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
 
 ;;;; Buffer Local Variables
 
@@ -2858,13 +2867,6 @@ delimiters (\"[[\" \"]]\")."
       (comment-indent)
       (fountain-insert-template fountain-note-template))))
 
-(defun fountain-insert-metadata ()
-  "Insert metadata based on `fountain-metadata-template' at bobp."
-  (interactive)
-  (widen)
-  (goto-char (point-min))
-  (fountain-insert-template fountain-metadata-template)) ; FIXME: replace insert-template
-
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, add
@@ -3301,7 +3303,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
-    (define-key map (kbd "C-c C-x i") #'fountain-insert-metadata)
+    (define-key map (kbd "C-c C-x i") #'auto-insert)
     ;; (define-key map (kbd "C-c C-x #") #'fountain-add-scene-nums)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     ;; navigation commands
@@ -3384,7 +3386,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
      ["Shift Section/Scene Up" fountain-outline-shift-up]
      ["Shift Section/Scene Down" fountain-outline-shift-down])
     "---"
-    ["Insert Metadata" fountain-insert-metadata]
+    ["Insert Metadata" auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
@@ -3487,6 +3489,9 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   :group 'fountain
   (fountain-init-vars)
   (fountain-init-imenu-generic-expression)
+  (with-eval-after-load 'autoinsert
+    (define-auto-insert 'fountain-mode
+      fountain-metadata-skeleton))
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
   (add-to-invisibility-spec (cons 'outline t))
