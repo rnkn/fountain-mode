@@ -3499,6 +3499,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
+  (setq-local electric-indent-mode 0)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
