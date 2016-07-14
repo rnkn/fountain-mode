@@ -323,6 +323,12 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete 'fountain-metadata-template
                'fountain-metadata-skeleton "2.1.2")
 
+(make-obsolete 'fountain-long-time-format
+               'fountain-time-format "2.1.2")
+
+(define-obsolete-variable-alias 'fountain-short-time-format
+  'fountain-time-format "2.1.2")
+
 
 ;;; Customization
 
@@ -426,14 +432,8 @@ if you prefer the latter, set this option to non-nil."
   :type 'boolean
   :group 'fountain)
 
-(defcustom fountain-short-time-format
-  "%x"
-  "Format of date and time. See `format-time-string'."
-  :type 'string
-  :group 'fountain)
-
-(defcustom fountain-long-time-format
-  "%B %-e, %Y"
+(defcustom fountain-time-format
+  "%F"
   "Format of date and time. See `format-time-string'."
   :type 'string
   :group 'fountain)
@@ -1307,7 +1307,7 @@ calculated."
     "author: " (skeleton-read "Author: " user-full-name) | -9 "\n"
     "format: " (skeleton-read "Script format: " "screenplay") | -9 "\n"
     "source: " (skeleton-read "Source: ") | -9 "\n"
-    "date: " (skeleton-read "Date: " (format-time-string "%F")) | -7 "\n"
+    "date: " (skeleton-read "Date: " (format-time-string fountain-time-format)) | -7 "\n"
     "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
 
 ;;;; Buffer Local Variables
