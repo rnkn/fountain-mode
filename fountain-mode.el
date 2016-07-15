@@ -3476,15 +3476,17 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
 
+    ;;;###autoload
+    (with-eval-after-load 'autoinsert
+      (define-auto-insert '(fountain-mode . "Fountain metadata skeleton")
+        fountain-metadata-skeleton))
+
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (fountain-init-vars)
   (fountain-init-imenu-generic-expression)
-  (with-eval-after-load 'autoinsert
-    (define-auto-insert 'fountain-mode
-      fountain-metadata-skeleton))
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
   (add-to-invisibility-spec (cons 'outline t))
