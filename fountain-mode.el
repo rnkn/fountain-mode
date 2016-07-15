@@ -2924,6 +2924,21 @@ then make the changes desired."
         (set-marker end nil)
         (progress-reporter-done job)))))
 
+(defun fountain-show-end-notes ()
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (if (re-search-forward fountain-script-end-regexp nil t)
+          (progn
+            (pop-to-buffer (make-indirect-buffer (current-buffer) (concat (buffer-name) "<end-notes>") t))
+            (goto-char (point-min))
+            (re-search-forward fountain-script-end-regexp nil t)
+            (forward-line 1)
+            (narrow-to-region (point) (point-max)))
+        (user-error "Buffer %s does not contain end notes" (buffer-name))))))
+
 (defun fountain-set-font-lock-decoration (n)
   "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
   (interactive "NMaximum decoration (1-3): ")
