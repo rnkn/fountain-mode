@@ -1864,8 +1864,7 @@ To include an item in a template you must use the full \"${foo}\"
 syntax.
 
     ${title}    Buffer name without extension
-    ${longtime} Long date format (defined in `fountain-long-time-format')
-    ${time}     Short date format (defined in `fountain-short-time-format')
+    ${time}     Short date format (defined in `fountain-time-format')
     ${fullname} User full name (defined in `user-full-name')
     ${nick}     User first name (defined in `user-login-name')
     ${email}    User email (defined in `user-mail-address')
@@ -1875,8 +1874,7 @@ Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
   (let ((start (point)))
     (insert (s-format template 'aget    ; FIXME: remove s
                       `(("title" . ,(file-name-base (buffer-name)))
-                        ("longtime" . ,(format-time-string fountain-long-time-format))
-                        ("time" . ,(format-time-string fountain-short-time-format))
+                        ("time" . ,(format-time-string fountain-time-format))
                         ("fullname" . ,user-full-name)
                         ("nick" . ,(capitalize user-login-name))
                         ("email" . ,user-mail-address))))
