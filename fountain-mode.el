@@ -769,6 +769,7 @@ character codes, then format replacement is made."
 <meta charset=\"utf-8\">
 <meta name=\"author\" content=\"${author}\" />
 <meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
 <title>${title}</title>
 <style type=\"text/css\">
 @page screenplay, screenplay-title {
