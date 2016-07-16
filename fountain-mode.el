@@ -3320,7 +3320,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
     (define-key map (kbd "TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
-    (define-key map (kbd "<S-tab>") #'fountain-outline-cycle-global)
+    (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
     (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
