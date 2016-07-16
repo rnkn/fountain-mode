@@ -3290,8 +3290,8 @@ keywords suitable for Font Lock."
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; editing commands
-    (define-key map (kbd "C-c C-m") #'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-S-m") #'fountain-upcase-line-and-newline)
+    (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
+    (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
     (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
@@ -3317,9 +3317,9 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-^") #'fountain-outline-shift-up)
     (define-key map (kbd "C-c C-v") #'fountain-outline-shift-down)
     (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
-    (define-key map (kbd "C-i") #'fountain-outline-cycle)
+    (define-key map (kbd "TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
-    (define-key map (kbd "C-S-i") #'fountain-outline-cycle-global)
+    (define-key map (kbd "<S-tab>") #'fountain-outline-cycle-global)
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
     (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
