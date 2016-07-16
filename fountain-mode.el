@@ -2099,11 +2099,12 @@ Display a message unless SILENT."
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
-    \\[fountain-outline-cycle]				If ARG is nil, cycle outline visibility of current
-                    subtree and its children
-    \\[universal-argument] \\[fountain-outline-cycle]			If ARG is 4, cycle outline visibility of buffer
-    \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		If ARG is 16, show all
-    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in `fountain-outline-custom-level'"
+	\\[fountain-outline-cycle]				If ARG is nil, cycle outline visibility of current
+					subtree and its children
+	\\[universal-argument] \\[fountain-outline-cycle]			If ARG is 4, cycle outline visibility of buffer
+	\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		If ARG is 16, show all
+	\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in
+					`fountain-outline-custom-level'"
   (interactive "p")
   (let* ((custom-level
           (if fountain-outline-custom-level
