@@ -2216,6 +2216,47 @@ data reflects `outline-regexp'."
     6))
 
 
+;;;; Endnotes
+
+(defgroup fountain-endnotes ()
+  "Options for displaying endnotes."
+  :group 'fountain)
+
+(defcustom fountain-endnotes-buffer-name
+  "*%s<endnotes>*"
+  "Name of buffer in which to display file endnotes.
+`%s' is replaced with `buffer-name'."
+  :type 'string
+  :group 'fountain-endnotes)
+
+(defcustom fountain-endnotes-display-function
+  '(display-buffer-pop-up-window)
+  "Doc"
+  :type '(radio (const :tag "Pop-up new window" (display-buffer-pop-up-window))
+                (const :tag "Pop-up new frame" (display-buffer-pop-up-frame))
+                (const :tag "Show in same window" (display-buffer-same-window)))
+  :group 'fountain-endnotes)
+
+(defun fountain-show-endnotes ()
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (let ((beg (if (re-search-forward fountain-script-end-regexp nil t)
+                     (point)))
+            (bufname (format fountain-endnotes-buffer-name (buffer-name))))
+        (if beg (progn
+                  (display-buffer
+                   (or (get-buffer bufname)
+                       (progn
+                         (make-indirect-buffer (current-buffer) bufname t)))
+                   fountain-endnotes-display-function)
+                  (with-current-buffer bufname
+                    (narrow-to-region (1+ beg) (point-max))))
+          (message "Buffer %s does not contain endnotes" (buffer-name)))))))
+
+
 ;;;; Parsing Functions
 
 (defun fountain-parse-section-heading ()
@@ -2923,21 +2964,6 @@ then make the changes desired."
         (set-marker start nil)
         (set-marker end nil)
         (progress-reporter-done job)))))
-
-(defun fountain-show-end-notes ()
-  (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (if (re-search-forward fountain-script-end-regexp nil t)
-          (progn
-            (pop-to-buffer (make-indirect-buffer (current-buffer) (concat (buffer-name) "<end-notes>") t))
-            (goto-char (point-min))
-            (re-search-forward fountain-script-end-regexp nil t)
-            (forward-line 1)
-            (narrow-to-region (point) (point-max)))
-        (user-error "Buffer %s does not contain end notes" (buffer-name))))))
 
 (defun fountain-set-font-lock-decoration (n)
   "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
