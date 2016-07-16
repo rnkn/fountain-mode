@@ -607,7 +607,7 @@ Otherwise export a snippet."
 (defcustom fountain-export-buffer-name
   "*Fountain %s Export*"
   "Name of export buffer when source is not visiting a file.
-Passed to `format' with export format as single variable."
+`%s' is replaced with export format."
   :type 'string
   :group 'fountain-export)
 
