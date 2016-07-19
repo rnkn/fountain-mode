@@ -5,7 +5,7 @@
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
 ;; Version: 2.1.3
-;; Package-Requires: ((emacs "24.4.0") (s "1.9.0"))
+;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
@@ -70,11 +70,8 @@
 ;; ------------
 
 ;; - Emacs 24.4
-;; - [s.el][], the long lost Emacs string manipulation library.
 ;; - LaTeX packages for PDF export: `geometry` `fontspec` `titling` `fancyhdr`
 ;;   `marginnote` `ulem` `xstring` `oberdiek`
-
-;; [s.el]: https://github.com/magnars/s.el "s.el"
 
 ;; Installation
 ;; ------------
@@ -129,7 +126,6 @@
 
 ;;; Requirements
 
-(require 's)
 (require 'easymenu)
 (require 'outline)
 
@@ -1623,7 +1619,7 @@ bold-italic delimiters together, e.g.
          (list "Scene Headings" fountain-scene-heading-regexp 1)
          (list "Sections" fountain-section-heading-regexp 1))))
 
-(defun fountain-init-regexp ()
+(defun fountain-init-regexp ()          ; FIXME not in use
   "Set variable regular expression values."
   (fountain-init-scene-heading-regexp)
   (fountain-init-outline-regexp)
