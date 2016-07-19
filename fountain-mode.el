@@ -352,7 +352,7 @@ Call `fountain-mode' again for changes to take effect."
   '("TO:" "WITH:" "FADE OUT" "TO BLACK")
   "List of transition endings (case insensitive).
 This list is used to match the endings of transitions,
-e.g. \"TO:\" will match both the following:
+e.g. `TO:' will match both the following:
 
     CUT TO:
 
@@ -402,7 +402,7 @@ issues, consider reducing this value."
 
 (defcustom fountain-switch-comment-syntax
   nil
-  "\\<fountain-mode-map>If non-nil, use \"//\" as default comment syntax (boneyard).
+  "\\<fountain-mode-map>If non-nil, use `//' as default comment syntax (boneyard).
 Two syntaxes are supported:
 
     /* this text is a comment */
@@ -698,7 +698,7 @@ Parentheses are not automatically added."
 (defcustom fountain-export-shell-command
   "afterwriting --source %s --pdf --overwrite"
   "Shell command string to convert Fountain source to ouput.
-\"%s\" will be substituted with `buffer-file-name'"
+`%s' will be substituted with `buffer-file-name'"
   :type 'string
   :group 'fountain-export)
 
@@ -1839,7 +1839,7 @@ comments."
 Key string is converted to lowercase, spaces are converted to
 dashes, and then interned.
 
-    \"Draft date: 2015-12-25\" -> (draft-date \"2015-12-25\")
+    Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")
 
 Value string remains a string."
   (let (list)
@@ -2659,7 +2659,7 @@ otherwise kill destination buffer."
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
-If prefixed with ARG, insert \".\" at beginning of line to force
+If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
   (if arg
@@ -2670,7 +2670,7 @@ a scene heading."
 
 (defun fountain-upcase-line-and-newline (&optional arg)
   "Upcase the line and insert a newline.
-If prefixed with ARG, insert \".\" at beginning of line to force
+If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
   (if arg
