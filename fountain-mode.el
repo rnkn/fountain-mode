@@ -1859,37 +1859,6 @@ Value string remains a string."
         (setq list (append list (list 'content-start (point))))))
     list))
 
-(defun fountain-insert-template (template)
-  "Format TEMPLATE according to the following list.
-To include an item in a template you must use the full \"${foo}\"
-syntax.
-
-    ${title}    Buffer name without extension
-    ${time}     Short date format (defined in `fountain-time-format')
-    ${fullname} User full name (defined in `user-full-name')
-    ${nick}     User first name (defined in `user-login-name')
-    ${email}    User email (defined in `user-mail-address')
-
-Optionally, use \"$@\" to set the `mark' and \"$?\" to set the
-`point', but only use one of each."
-  (let ((start (point)))
-    (insert (s-format template 'aget    ; FIXME: remove s
-                      `(("title" . ,(file-name-base (buffer-name)))
-                        ("time" . ,(format-time-string fountain-time-format))
-                        ("fullname" . ,user-full-name)
-                        ("nick" . ,(capitalize user-login-name))
-                        ("email" . ,user-mail-address))))
-    (let ((end (point-marker)))
-      (goto-char start)
-      (when (search-forward "$@" end t)
-        (replace-match "")
-        (push-mark (point) t t))
-      (goto-char start)
-      (if (search-forward "$?" end t)
-          (replace-match "")
-        (goto-char end))
-      (set-marker end nil))))
-
 (defun fountain-get-character (&optional n limit)
   "Return Nth next character (or Nth previous if N is negative).
 If N is non-nil, return Nth next character or Nth previous
