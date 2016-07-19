@@ -601,7 +601,7 @@ Note that comments (boneyard) are never included."
   t
   "If non-nil, export a standalone document.
 Otherwise export a snippet."
-  :type 'string
+  :type 'boolean
   :group 'fountain-export)
 
 (defcustom fountain-export-buffer-name
