@@ -2845,12 +2845,13 @@ halt at end of dialog."
 
 (defun fountain-insert-note (&optional arg)
   "Insert a note based on `fountain-note-template' underneath current element.
-If prefixed with ARG (\\[universal-argument]), only insert note
-delimiters (\"[[\" \"]]\")."
+If region is active and it is appropriate to act on, only
+surround region with note delimiters (`[[ ]]'). If prefixed with
+ARG (\\[universal-argument]), only insert note delimiters."
   (interactive "P")
   (let ((comment-start "[[")
         (comment-end "]]"))
-    (if arg
+    (if (or arg (use-region-p))
         (comment-dwim nil)
       (unless (fountain-blank-p)
         (re-search-forward "^[\s\t]*$" nil 'move))
@@ -2860,7 +2861,22 @@ delimiters (\"[[\" \"]]\")."
         (save-excursion
           (insert-char ?\n)))
       (comment-indent)
-      (fountain-insert-template fountain-note-template))))
+      (insert
+       (with-temp-buffer
+         (insert fountain-note-template)
+         (goto-char (point-min))
+         (while (re-search-forward fountain-template-key-regexp nil t)
+           (let ((key (match-string 1)))
+             (replace-match
+              (cdr
+               (assoc-string key (list (cons 'title (file-name-base (buffer-name)))
+                                       (cons 'time (format-time-string fountain-time-format))
+                                       (cons 'fullname user-full-name)
+                                       (cons 'nick (capitalize user-login-name))
+                                       (cons 'email user-mail-address))))
+              t t))
+           (goto-char (point-min)))
+         (buffer-string))))))
 
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
