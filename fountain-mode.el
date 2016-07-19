@@ -441,12 +441,20 @@ if you prefer the latter, set this option to non-nil."
 (defcustom fountain-note-template
   "${time} - ${fullname}: "
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
-See `fountain-insert-template'.
 
-The default \"${time} - ${fullname}: \" will insert something
+To include an item in a template you must use the full `${key}'
+syntax.
+
+    ${title}    Buffer name without extension
+    ${time}     Short date format (defined in `fountain-time-format')
+    ${fullname} User full name (defined in `user-full-name')
+    ${nick}     User first name (defined in `user-login-name')
+    ${email}    User email (defined in `user-mail-address')
+
+The default `${time} - ${fullname}: ' will insert something
 similar to:
 
-\[\[01/20/14 - Alan Smithee: \]\]"
+\[\[2014-20-01 - Alan Smithee: \]\]"
   :type 'string
   :group 'fountain)
 
