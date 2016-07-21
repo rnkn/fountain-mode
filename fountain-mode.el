@@ -2392,28 +2392,41 @@ moves to property value of end of element."
 (defvar fountain-export-formats
   '((html
      :tag "HTML"
+     :ext ".html"
      :template fountain-export-html-template
      :hook fountain-export-html-hook)
     (tex
      :tag "LaTeX"
+     :ext ".tex"
      :template fountain-export-tex-template
      :hook fountain-export-tex-hook)
     (fdx
      :tag "Final Draft"
+     :ext ".fdx"
      :template fountain-export-fdx-template
      :hook fountain-export-fdx-hook)
     (fountain
      :tag "Fountain"
+     :ext ".fountain"
      :template fountain-export-fountain-template
      :hook fountain-export-fountain-hook)
     (txt
      :tag "plaintext"
+     :ext ".txt"
      :template fountain-export-txt-template
      :hook fountain-export-txt-hook)
     (ps
      :tag "PostScript"
+     :ext ".ps"
      :template fountain-export-ps-template
-     :hook fountain-export-ps-hook)))
+     :hook fountain-export-ps-hook))
+  "Association list of export formats.
+Takes the form:
+
+    (FORMAT :tag TAG [:template TEMPLATE] [:hook HOOK])
+
+Where TAG is a string providing a pretty format name, TEMPLATE is
+a symbol and HOOK is a symbol of a hook.")
 
 (defun fountain-export-get-filename (format)
   "If BUFFER is visiting a file, concat file name base and FORMAT.
