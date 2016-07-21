@@ -23,11 +23,11 @@ Features
 - Support for Fountain 1.1 specification
 - WYSIWYG auto-align elements (display only, does not modify file contents)
   specific to script format, e.g. screenplay, stageplay or user-defined format
-- Export to HTML, LaTeX, Final Draft (FDX), Fountain, or user-defined formats
+- Export to HTML, LaTeX, Final Draft (FDX), or Fountain
 - Export to standalone document or snippet
 - Integration with `outline` to fold/cycle visibility of sections and scenes
 - Integration with `imenu` (sections, scene headings, notes)
-- Intergration with `auto-insert`
+- Intergration with `auto-insert` for title page metadata
 - Add/remove automatic continuation string to successively speaking characters
 - Navigation by section, scene, character name, or page
 - 3 levels of element syntax highlighting
