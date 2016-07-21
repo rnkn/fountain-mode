@@ -2676,6 +2676,301 @@ otherwise kill destination buffer."
   (fountain-export-buffer 'fountain))
 
 
+;;;; HTML Export
+
+(defcustom fountain-export-html-template
+  '((document "\
+<head>
+<meta charset=\"utf-8\">
+<meta name=\"author\" content=\"${author}\" />
+<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
+<title>${title}</title>
+<style type=\"text/css\">
+@page screenplay, screenplay-title {
+  size: ${page-size};
+  margin-top: 1in;
+  margin-right: 1in;
+  margin-bottom: 0.75in;
+  margin-left: 1.5in;
+}
+@page screenplay {
+  @top-right-corner {
+    font-family: ${font};
+    font-size: 12pt;
+    content: counter(page) \".\";
+    vertical-align: bottom;
+    padding-bottom: 1em;
+  }
+}
+@page screenplay:first {
+  @top-right-corner {
+    content: normal;
+  }
+}
+.screenplay {
+  page: screenplay;
+  counter-reset: page;
+  font-family: ${font};
+  font-size: 12pt;
+  line-height: 1;
+  max-width: 6in;
+  margin: 1em auto;
+  -webkit-text-size-adjust: none;
+}
+.screenplay .title-page {
+  display: ${include-title-page};
+  page: screenplay-title;
+  page-break-after: always;
+  margin-top: 0;
+  margin-right: auto;
+  margin-bottom: 1em;
+  margin-left: auto;
+}
+.screenplay .title-page .title {
+  text-align: center;
+}
+@media print {
+  .screenplay .title-page .title {
+    margin-top: 3.5in;
+    margin-bottom: 4in;
+  }
+}
+.screenplay .title-page .title h1 {
+  font-weight: ${title-bold};
+  text-transform: ${title-upcase};
+  text-decoration: ${title-underline};
+}
+.screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
+  font-weight: inherit;
+  font-size: inherit;
+}
+.screenplay a {
+  color: inherit;
+  text-decoration: none;
+}
+.screenplay hr {
+  page-break-after: always;
+}
+@media print {
+  .screenplay hr {
+    visibility: hidden;
+  }
+}
+.screenplay .scene {
+  width: 100%;
+  margin-top: ${scene-heading-spacing};
+}
+.screenplay .scene-heading {
+  font-weight: ${scene-heading-bold};
+  text-decoration: ${scene-heading-underline};
+  margin-bottom: 0em;
+  clear: both;
+  page-break-after: avoid;
+}
+.screenplay .action {
+  margin: 1em 0;
+  clear: both;
+  white-space: pre-wrap;
+  orphans: 2;
+  widows: 2;
+}
+.screenplay .dialog {
+  display: table;
+  width: 75%;
+  max-width: 4in;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 17%;
+  clear: both;
+}
+.screenplay .dialog .character {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 25%;
+  margin-right: 0;
+}
+.screenplay .dialog .lines {
+  max-width: 3.5in;
+  margin-top: 0;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  orphans: 2;
+  widows: 2;
+}
+.screenplay .dialog .paren {
+  max-width: 2in;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 15%;
+  text-indent: -0.6em;
+  page-break-inside: avoid;
+  page-break-after: avoid;
+}
+.screenplay .dialog.dual {
+  max-width: 50%;
+  margin-top: 0;
+  margin-left: 0;
+}
+.screenplay .dialog.dual .lines {
+  width: 95%;
+}
+.screenplay .dialog.dual.left {
+  float: left;
+  clear: left;
+}
+.screenplay .dialog.dual.right {
+  float: right;
+  clear: right;
+}
+.screenplay .trans {
+  max-width: 2in;
+  margin-left: 64%;
+  clear: both;
+  page-break-before: avoid;
+}
+.screenplay .note {
+  display: block;
+  font-size: 11pt;
+  font-family: \"Comic Sans MS\";
+  line-height: 1.5;
+  background-color: lightgoldenrodyellow;
+  padding: 1em;
+}
+.screenplay .synopsis {
+  display: block;
+  margin-top: 0;
+  color: grey;
+  font-style: italic;
+}
+.screenplay .center {
+  text-align: center;
+  margin-left: 0;
+  width: 100%;
+  white-space: pre-wrap;
+}
+.screenplay .underline {
+  text-decoration: underline;
+}
+.screenplay .section-heading {
+  display: block;
+}
+.screenplay .menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  color: white;
+  background-color: rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<section class=\"screenplay\">
+<section class=\"title-page\">
+<div class=\"title\">
+<h1>${title}</h1>
+<p>${credit}</p>
+<p>${author}</p>
+</div>
+<div class=\"contact\">
+${contact-template}
+</div>
+</section>
+${content}\
+<div class=\"menu\">Aa</div>
+</section>
+</body>")
+     (section "<section class=\"section\">\n${content}</section>\n")
+     (section-heading "<h1 class=\"section-heading\">${content}</h1>\n")
+     (scene "<section class=\"scene\">\n${content}</section>\n")
+     (scene-heading "<h2 class=\"scene-heading\" id=\"${scene-number}\">${content}</h2>\n")
+     (dialog "<div class=\"${dual-dialog}\">\n${content}</div>\n")
+     (character "<p class=\"character\">${content}</p>\n")
+     (paren "<p class=\"paren\">${content}</p>\n")
+     (lines "<p class=\"lines\">${content}</p>\n")
+     (trans "<p class=\"trans\">${content}</p>\n")
+     (action "<p class=\"action\">${content}</p>\n")
+     (synopsis "<p class=\"synopsis\">${content}</p>\n")
+     (note "<p class=\"note\">${content}</p>\n")
+     (center "<p class=\"center\">${content}</p>\n"))
+    "Association list of element templates for exporting to HTML.
+Takes the form:
+
+    ((ELEMENT TEMPLATE) ...)
+
+ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
+is the template with which to format the format string. If
+TEMPLATE is nil, the format string is passed as is without
+formatting. An empty string discards the format string and passes
+the empty string.
+
+Fountain ELEMENTs:
+
+    document            wrapper template for all content, see
+                        `fountain-export-standalone'
+    section             string of section, including child elements
+    section-heading     string of section heading, excluding syntax chars
+    scene               string of scene, including child elements
+    scene-heading       string of scene heading, excluing syntax chars
+    dialog              string of dialogue block, including child elements
+    character           string of character name, excluding syntax chars
+    paren               string of parenthetical
+    lines               string of dialogue lines, up to end of dialogue block or
+                        next parenthetical
+    trans               string of transition, excluding syntax chars
+    action              string of action block
+    synopsis            string of synopsis, excluding syntax chars
+    note                string of note, excluding syntax chars
+    center              string of center text, excluding syntax chars
+
+The format of TEMPLATE can include replacement keys in the form
+`${key}'. Each TEMPLATE should include the ${content} key. See
+`fountain-export-format-template' for how replacement strings are
+calculated."
+    :type '(list
+            (group (const :tag "Document" document)
+                   (choice string (const nil)))
+            (group (const :tag "Section" section)
+                   (choice string (const nil)))
+            (group (const :tag "Section Heading" section-heading)
+                   (choice string (const nil)))
+            (group (const :tag "Scene" scene)
+                   (choice string (const nil)))
+            (group (const :tag "Scene Heading" scene-heading)
+                   (choice string (const nil)))
+            (group (const :tag "Dialogue" dialog)
+                   (choice string (const nil)))
+            (group (const :tag "Character" character)
+                   (choice string (const nil)))
+            (group (const :tag "Parenthetical" paren)
+                   (choice string (const nil)))
+            (group (const :tag "Dialogue Lines" lines)
+                   (choice string (const nil)))
+            (group (const :tag "Transition" trans)
+                   (choice string (const nil)))
+            (group (const :tag "Action" action)
+                   (choice string (const nil)))
+            (group (const :tag "Synopsis" synopsis)
+                   (choice string (const nil)))
+            (group (const :tag "Note" note)
+                   (choice string (const nil)))
+            (group (const :tag "Center Text" center)
+                   (choice string (const nil))))
+    :group 'fountain-export)
+
+(defcustom fountain-export-html-hook
+  nil
+  "Hook run with export buffer on sucessful export to HTML."
+  :type 'hook
+  :group 'fountain-export)
+
+(defun fountain-export-buffer-to-html ()
+  "Convenience function for exporting buffer to HTML."
+  (interactive)
+  (fountain-export-buffer 'html))
+
 ;;;; Commands
 
 (defun fountain-version ()
