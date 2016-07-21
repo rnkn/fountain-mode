@@ -2632,11 +2632,13 @@ Switch to destination buffer if completes without errors,
 otherwise kill destination buffer."
   (interactive
    (list (intern (completing-read "Format: "
-                                  (mapcar #'car fountain-export-templates) nil t))
+                                  (mapcar #'car fountain-export-formats) nil t))
          (car current-prefix-arg)))
   (let ((sourcebuf (or buffer (current-buffer)))
         (destbuf (get-buffer-create
                   (fountain-export-get-filename (symbol-name format))))
+        (hook (plist-get (cdr (assoc format fountain-export-formats))
+                         :hook))
         complete)
     (unwind-protect
         (with-current-buffer sourcebuf
@@ -2651,7 +2653,8 @@ otherwise kill destination buffer."
               (insert string)))
           (setq complete t)
           (switch-to-buffer destbuf)
-          (write-file (buffer-name) t))
+          (write-file (buffer-name) t)
+          (run-hooks hook))
       (unless complete
         (kill-buffer destbuf)))))
 
