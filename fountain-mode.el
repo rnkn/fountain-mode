@@ -1817,11 +1817,13 @@ moves to property value of end of element."
      :tag "HTML"
      :ext ".html"
      :template fountain-export-html-template
+     :replace fountain-export-html-replace-alist
      :hook fountain-export-html-hook)
     (tex
      :tag "LaTeX"
      :ext ".tex"
      :template fountain-export-tex-template
+     :replace fountain-export-tex-replace-alist
      :hook fountain-export-tex-hook)
     (fdx
      :tag "Final Draft"
@@ -1918,7 +1920,12 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
     3. If KEY corresponds with remaining replacement conditions then ${KEY} is
        replaced with that string.
     4. If none of the above, ${KEY} is replaced with an empty string."
-  (let ((template (cadr (assoc type (assoc format fountain-export-templates)))))
+  (let ((template
+         (cadr
+          (assoc type
+                 (symbol-value (plist-get (cdr (assoc format
+                                                      fountain-export-formats))
+                                          :template))))))
     (if template
         (with-temp-buffer
           (insert template)
@@ -2111,7 +2118,7 @@ otherwise kill destination buffer."
          (car current-prefix-arg)))
   (let ((sourcebuf (or buffer (current-buffer)))
         (destbuf (get-buffer-create
-                  (fountain-export-get-filename (symbol-name format))))
+                  (fountain-export-get-filename format)))
         (hook (plist-get (cdr (assoc format fountain-export-formats))
                          :hook))
         complete)
