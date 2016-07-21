@@ -580,152 +580,6 @@ This option does affect file contents."
   :group 'fountain-align)
 
 
-;;;; Export Group Customization
-
-(defcustom fountain-export-include-elements-alist
-  '(("screenplay" scene-heading action character paren lines trans center)
-    ("stageplay" section-heading scene-heading action character paren lines trans center))
-  "Association list of elements to include when exporting.
-Note that comments (boneyard) are never included."
-  :type '(alist :key-type (string :tag "Format")
-                :value-type (set :tag "Elements"
-                                 (const :tag "Section Headings" section-heading)
-                                 (const :tag "Scene Headings" scene-heading)
-                                 (const :tag "Action" action)
-                                 (const :tag "Character Names" character)
-                                 (const :tag "Parentheticals" paren)
-                                 (const :tag "Dialogue" lines)
-                                 (const :tag "Transitions" trans)
-                                 (const :tag "Center Text" center)
-                                 (const :tag "Synopses" synopsis)
-                                 (const :tag "Notes" note)))
-  :group 'fountain-export)
-
-(defcustom fountain-export-standalone
-  t
-  "If non-nil, export a standalone document.
-Otherwise export a snippet."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-buffer-name
-  "*Fountain %s Export*"
-  "Name of export buffer when source is not visiting a file.
-Passed to `format' with export format as single variable."
-  :type 'string
-  :group 'fountain-export)
-
-(defcustom fountain-export-default-command
-  'fountain-export-buffer-to-latex
-  "\\<fountain-mode-map>Default function to call with `fountain-export-default' \(\\[fountain-export-default]\)."
-  :type '(radio (function-item fountain-export-buffer-to-latex)
-                (function-item fountain-export-buffer-to-html)
-                (function-item fountain-export-buffer-to-fdx)
-                (function-item fountain-export-buffer-to-fountain)
-                (function-item fountain-export-shell-command))
-  :group 'fountain-export)
-
-(defcustom fountain-export-include-title-page
-  t
-  "Include a title page on export."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-page-size
-  'letter
-  "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4))
-  :group 'fountain-export)
-
-(defcustom fountain-export-font
-  '("Courier" "Courier New" "monospace")
-  "List of font names to use when exporting, by priority."
-  :type '(repeat (string :tag "Font"))
-  :group 'fountain-export)
-
-(defcustom fountain-export-contact-align-right
-  nil
-  "If non-nil, align title page contact block on the right."
-  :type 'boolean
-  :group 'fountain-export)
-
-(defcustom fountain-export-scene-heading-format
-  '(double-space)
-  "List of format options applied when exporting scene headings.
-Options are: bold, double-space, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Double-spaced" double-space)
-              (const :tag "Underlined" underline))
-  :group 'fountain-export)
-
-(defcustom fountain-export-title-format
-  '(upcase underline)
-  "List of format options applied when exporting script title.
-Options are: bold, upcase, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Uppercase" upcase)
-              (const :tag "Underlined" underline))
-  :group 'fountain-export)
-
-(defcustom fountain-export-more-dialog-string
-  "(MORE)"
-  "String to append to dialog when breaking across pages.
-Parentheses are not automatically added."
-  :type 'string
-  :group 'fountain-export)
-
-;; (defcustom fountain-export-preserve-line-breaks
-;;   t
-;;   "If non-nil, convert all newlines into line breaks.
-;; Otherwise, only break paragraphs at explicit line breaks (one or
-;; more blank lines)."
-;;   :type 'boolean
-;;   :group 'fountain-export)
-
-;; (defcustom fountain-export-convert-quotes
-;;   nil
-;;   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
-
-;;     \`\`HAL\'\'
-
-;; will be exported as
-
-;;     “HAL”"
-;;   :type 'boolean
-;;   :group 'fountain-export)
-
-(defcustom fountain-export-shell-command
-  "afterwriting --source %s --pdf --overwrite"
-  "Shell command string to convert Fountain source to ouput.
-`%s' will be substituted with `buffer-file-name'"
-  :type 'string
-  :group 'fountain-export)
-
-(defcustom fountain-export-title-template
-  "\
-${title}
-
-${credit}
-
-${author}"
-  "Template for creating title page title block."
-  :type 'string
-  :group 'fountain-export)
-
-(defcustom fountain-export-contact-template
-  "${contact}"
-  "Template for creating title page left block."
-  :type 'string
-  :group 'fountain-export)
-
-(defcustom fountain-export-use-title-as-filename
-  nil
-  "If non-nil, use title metadata as export filename."
-  :type 'boolean
-  :group 'fountain-export)
-
-
 ;;; Variables
 
 (defvar fountain-metadata-skeleton
@@ -1812,6 +1666,144 @@ moves to property value of end of element."
 
 ;;; General Export
 
+(defcustom fountain-export-include-elements-alist
+  '(("screenplay" scene-heading action character paren lines trans center)
+    ("stageplay" section-heading scene-heading action character paren lines trans center))
+  "Association list of elements to include when exporting.
+Note that comments (boneyard) are never included."
+  :type '(alist :key-type (string :tag "Format")
+                :value-type (set :tag "Elements"
+                                 (const :tag "Section Headings" section-heading)
+                                 (const :tag "Scene Headings" scene-heading)
+                                 (const :tag "Action" action)
+                                 (const :tag "Character Names" character)
+                                 (const :tag "Parentheticals" paren)
+                                 (const :tag "Dialogue" lines)
+                                 (const :tag "Transitions" trans)
+                                 (const :tag "Center Text" center)
+                                 (const :tag "Synopses" synopsis)
+                                 (const :tag "Notes" note)))
+  :group 'fountain-export)
+
+(defcustom fountain-export-standalone
+  t
+  "If non-nil, export a standalone document.
+Otherwise export a snippet."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-buffer-name
+  "*Fountain %s Export*"
+  "Name of export buffer when source is not visiting a file.
+Passed to `format' with export format as single variable."
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-default-command
+  'fountain-export-buffer-to-latex
+  "\\<fountain-mode-map>Default function to call with `fountain-export-default' \(\\[fountain-export-default]\)."
+  :type '(radio (function-item fountain-export-buffer-to-latex)
+                (function-item fountain-export-buffer-to-html)
+                (function-item fountain-export-buffer-to-fdx)
+                (function-item fountain-export-buffer-to-fountain)
+                (function-item fountain-export-shell-command))
+  :group 'fountain-export)
+
+(defcustom fountain-export-include-title-page
+  t
+  "Include a title page on export."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-page-size
+  'letter
+  "Paper size to use on export."
+  :type '(radio (const :tag "US Letter" letter)
+                (const :tag "A4" a4))
+  :group 'fountain-export)
+
+(defcustom fountain-export-font
+  '("Courier" "Courier New" "monospace")
+  "List of font names to use when exporting, by priority."
+  :type '(repeat (string :tag "Font"))
+  :group 'fountain-export)
+
+(defcustom fountain-export-contact-align-right
+  nil
+  "If non-nil, align title page contact block on the right."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline))
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-format
+  '(upcase underline)
+  "List of format options applied when exporting script title.
+Options are: bold, upcase, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Uppercase" upcase)
+              (const :tag "Underlined" underline))
+  :group 'fountain-export)
+
+(defcustom fountain-export-more-dialog-string
+  "(MORE)"
+  "String to append to dialog when breaking across pages.
+Parentheses are not automatically added."
+  :type 'string
+  :group 'fountain-export)
+
+;; (defcustom fountain-export-convert-quotes
+;;   nil
+;;   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
+
+;;     \`\`HAL\'\'
+
+;; will be exported as
+
+;;     “HAL”"
+;;   :type 'boolean
+;;   :group 'fountain-export)
+
+(defcustom fountain-export-shell-command
+  "afterwriting --source %s --pdf --overwrite"
+  "Shell command string to convert Fountain source to ouput.
+`%s' will be substituted with `buffer-file-name'"
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-template
+  "\
+${title}
+
+${credit}
+
+${author}"
+  "Template for creating title page title block."
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-contact-template
+  "${contact}"
+  "Template for creating title page left block."
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-use-title-as-filename
+  nil
+  "If non-nil, use title metadata as export filename.
+
+This is useful if you are exporting to Fountain and need to
+specify a different filename."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defvar fountain-export-formats
   '((html
      :tag "HTML"
@@ -2142,7 +2134,7 @@ otherwise kill destination buffer."
         (kill-buffer destbuf)))))
 
 
-;;;; HTML Export
+;;; HTML Export
 
 (defcustom fountain-export-html-template
   '((document "\
@@ -2438,7 +2430,7 @@ character codes, then format replacement is made."
   (fountain-export-buffer 'html))
 
 
-;;;; LaTeX Export
+;;; LaTeX Export
 
 (defcustom fountain-export-tex-template
   '((document "\
@@ -2720,7 +2712,7 @@ character codes, then format replacement is made."
   (fountain-export-buffer 'tex))
 
 
-;;;; Final Draft Export
+;;; Final Draft Export
 
 (defcustom fountain-export-fdx-template
   '((document "\
@@ -2792,7 +2784,7 @@ calculated."
   (fountain-export-buffer 'fdx))
 
 
-;;;; Fountain Export
+;;; Fountain Export
 
 (defcustom fountain-export-fountain-template
   '((document "\
