@@ -2600,9 +2600,12 @@ strings."
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   "Export current buffer or BUFFER to export format FORMAT.
-Do not export a standalone document if SNIPPET is non-nil.
 
-Switch to destination buffer if completes without errors,
+If destination buffer is not empty, ask to overwrite or generate
+a new buffer. If destination buffer is the same as source buffer,
+generate a new buffer.
+
+Switch to destination buffer if complete without errors,
 otherwise kill destination buffer."
   (interactive
    (list (intern (completing-read "Format: "
@@ -2612,20 +2615,21 @@ otherwise kill destination buffer."
         (destbuf (get-buffer-create
                   (fountain-export-get-filename (symbol-name format))))
         complete)
+    (when (< 0 (buffer-size destbuf))
+      (if (or (eq (current-buffer) destbuf)
+              (not (y-or-n-p (format "Buffer `%s' is not empty; overwrite? " destbuf))))
+        (setq destbuf (generate-new-buffer (buffer-name destbuf)))))
     (unwind-protect
         (with-current-buffer sourcebuf
           (let ((string (fountain-export-region (point-min) (point-max)
                                                 format snippet)))
             (with-current-buffer destbuf
               (with-silent-modifications
-                (if (and (< 0 (string-width (buffer-string)))
-                         (y-or-n-p (format "Buffer `%s' is not empty; overwrite? "
-                                           (buffer-name))))
-                 (erase-buffer)))
-              (insert string)))
-          (setq complete t)
-          (switch-to-buffer destbuf)
-          (write-file (buffer-name) t))
+                (erase-buffer)
+                (insert string)))
+            (setq complete t)
+            (switch-to-buffer destbuf)
+            (write-file (buffer-name) t)))
       (unless complete
         (kill-buffer destbuf)))))
 
