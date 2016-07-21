@@ -1843,30 +1843,66 @@ moves to property value of end of element."
      :ext ".ps"
      :template fountain-export-ps-template
      :hook fountain-export-ps-hook))
-  "Association list of export formats.
+  "Association list of export formats and their properties.
 Takes the form:
 
-    (FORMAT :tag TAG [:template TEMPLATE] [:hook HOOK])
+    (FORMAT KEYWORD PROPERTY)")
 
-Where TAG is a string providing a pretty format name, TEMPLATE is
-a symbol and HOOK is a symbol of a hook.")
+(define-widget 'fountain-element-list-type 'lazy
+  "Doc"
+  :offset 4
+  :type '(list
+          (group (const :tag "Document" document)
+                 (choice string (const nil)))
+          (group (const :tag "Section" section)
+                 (choice string (const nil)))
+          (group (const :tag "Section Heading" section-heading)
+                 (choice string (const nil)))
+          (group (const :tag "Scene" scene)
+                 (choice string (const nil)))
+          (group (const :tag "Scene Heading" scene-heading)
+                 (choice string (const nil)))
+          (group (const :tag "Dialogue" dialog)
+                 (choice string (const nil)))
+          (group (const :tag "Character" character)
+                 (choice string (const nil)))
+          (group (const :tag "Parenthetical" paren)
+                 (choice string (const nil)))
+          (group (const :tag "Dialogue Lines" lines)
+                 (choice string (const nil)))
+          (group (const :tag "Transition" trans)
+                 (choice string (const nil)))
+          (group (const :tag "Action" action)
+                 (choice string (const nil)))
+          (group (const :tag "Synopsis" synopsis)
+                 (choice string (const nil)))
+          (group (const :tag "Note" note)
+                 (choice string (const nil)))
+          (group (const :tag "Center Text" center)
+                 (choice string (const nil)))))
 
 (defun fountain-export-get-filename (format)
   "If BUFFER is visiting a file, concat file name base and FORMAT.
 Otherwise return `fountain-export-buffer'"
-  (cond (fountain-export-use-title-as-filename
-         (concat (plist-get (fountain-read-metadata) 'title) "." format))
-        ((buffer-file-name)
-         (concat (file-name-base (buffer-file-name)) "." format))
-        (t
-         (format fountain-export-buffer-name format))))
+  (let ((tag (plist-get (cdr (assoc format fountain-export-formats))
+                        :tag))
+        (ext (plist-get (cdr (assoc format fountain-export-formats))
+                        :ext)))
+    (cond (fountain-export-use-title-as-filename
+           (concat (plist-get (fountain-read-metadata) 'title) ext))
+          ((buffer-file-name)
+           (concat (file-name-base (buffer-file-name)) ext))
+          (t
+           (format fountain-export-buffer-name tag)))))
 
 (defun fountain-export-format-string (string format)
   "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
-  (dolist (var (cdr (assoc format fountain-export-format-replace-alist))
-               string)
+  (let ((alist (symbol-value
+                (plist-get (cdr (assoc format fountain-export-formats))
+                           :replace))))
+  (dolist (var alist string)
     (setq string (replace-regexp-in-string
-                  (car var) (cadr var) string t))))
+                  (car var) (cadr var) string t)))))
 
 (defun fountain-export-format-template (type plist string format)
   "Format STRING in an export template.
@@ -2352,36 +2388,36 @@ The format of TEMPLATE can include replacement keys in the form
 `${key}'. Each TEMPLATE should include the ${content} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
-    :type '(list
-            (group (const :tag "Document" document)
-                   (choice string (const nil)))
-            (group (const :tag "Section" section)
-                   (choice string (const nil)))
-            (group (const :tag "Section Heading" section-heading)
-                   (choice string (const nil)))
-            (group (const :tag "Scene" scene)
-                   (choice string (const nil)))
-            (group (const :tag "Scene Heading" scene-heading)
-                   (choice string (const nil)))
-            (group (const :tag "Dialogue" dialog)
-                   (choice string (const nil)))
-            (group (const :tag "Character" character)
-                   (choice string (const nil)))
-            (group (const :tag "Parenthetical" paren)
-                   (choice string (const nil)))
-            (group (const :tag "Dialogue Lines" lines)
-                   (choice string (const nil)))
-            (group (const :tag "Transition" trans)
-                   (choice string (const nil)))
-            (group (const :tag "Action" action)
-                   (choice string (const nil)))
-            (group (const :tag "Synopsis" synopsis)
-                   (choice string (const nil)))
-            (group (const :tag "Note" note)
-                   (choice string (const nil)))
-            (group (const :tag "Center Text" center)
-                   (choice string (const nil))))
+    :type 'fountain-element-list-type
     :group 'fountain-export)
+
+(defcustom fountain-export-html-replace-alist
+  '(("&" "&amp;")
+    ("<" "&lt;")
+    (">" "&gt;")
+    ("\\\\\s" "&nbsp;")
+    ("^\\\\$" "<br>")
+    ("\\\\_" "&#95;")
+    ("\\\\\\*" "&#42;")
+    ("\\\\`" "&#96;")
+    ("\\\\'" "&apos;")
+    ("``" "&ldquo;")
+    ("''" "&rdquo;")
+    ("`" "&lsquo;")
+    ("'" "&rsquo;")
+    ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "<strong><em>\\1</em></strong>")
+    ("\\*\\*\\(.+?\\)\\*\\*" "<strong>\\1</strong>")
+    ("\\*\\(.+?\\)\\*" "<em>\\1</em>")
+    ("^~\s*\\(.+?\\)$\\*\\*" "<i>\\1</i>")
+    ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
+    ("\n" "<br>"))
+  "Association list of regular expression export replacements.
+Replacements are made in sequential order. The sequence is
+important: first, characters that are special in the export
+format are sanitized, then escaped characters are converted to
+character codes, then format replacement is made."
+  :type '(repeat (group regexp (string :tag "Replacement")))
+  :group 'fountain-export)
 
 (defcustom fountain-export-html-hook
   nil
@@ -2596,20 +2632,20 @@ ${content}\
 % Local Variables:
 % TeX-engine: xetex
 % End:")
-     (section nil)
-     (section-heading nil)
-     (scene nil)
-     (scene-heading "\\sceneheading{${content}}\n\n")
-     (dialog "\\begin{dialog}${content}\\end{dialog}\n\n")
-     (character "{${content}}\n")
-     (paren "\\paren{${content}}\n")
-     (lines "${content}\n")
-     (trans "\\trans{${content}}\n\n")
-     (action "${content}\n\n")
-     (synopsis "")
-     (note "")
-     (center "\\centertext{${content}}\n\n"))
-    "Association list of element templates for exporting to LaTeX.
+    (section nil)
+    (section-heading nil)
+    (scene nil)
+    (scene-heading "\\sceneheading{${content}}\n\n")
+    (dialog "\\begin{dialog}${content}\\end{dialog}\n\n")
+    (character "{${content}}\n")
+    (paren "\\paren{${content}}\n")
+    (lines "${content}\n")
+    (trans "\\trans{${content}}\n\n")
+    (action "${content}\n\n")
+    (synopsis "")
+    (note "")
+    (center "\\centertext{${content}}\n\n"))
+  "Association list of element templates for exporting to LaTeX.
 Takes the form:
 
     ((ELEMENT TEMPLATE) ...)
@@ -2643,36 +2679,27 @@ The format of TEMPLATE can include replacement keys in the form
 `${key}'. Each TEMPLATE should include the ${content} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
-    :type '(list
-            (group (const :tag "Document" document)
-                   (choice string (const nil)))
-            (group (const :tag "Section" section)
-                   (choice string (const nil)))
-            (group (const :tag "Section Heading" section-heading)
-                   (choice string (const nil)))
-            (group (const :tag "Scene" scene)
-                   (choice string (const nil)))
-            (group (const :tag "Scene Heading" scene-heading)
-                   (choice string (const nil)))
-            (group (const :tag "Dialogue" dialog)
-                   (choice string (const nil)))
-            (group (const :tag "Character" character)
-                   (choice string (const nil)))
-            (group (const :tag "Parenthetical" paren)
-                   (choice string (const nil)))
-            (group (const :tag "Dialogue Lines" lines)
-                   (choice string (const nil)))
-            (group (const :tag "Transition" trans)
-                   (choice string (const nil)))
-            (group (const :tag "Action" action)
-                   (choice string (const nil)))
-            (group (const :tag "Synopsis" synopsis)
-                   (choice string (const nil)))
-            (group (const :tag "Note" note)
-                   (choice string (const nil)))
-            (group (const :tag "Center Text" center)
-                   (choice string (const nil))))
-    :group 'fountain-export)
+  :type 'fountain-element-list-type
+  :group 'fountain-export)
+
+(defcustom fountain-export-tex-replace-alist
+  '(("%" "\\\\%")
+    ("\\$" "\\\\$")
+    ("&" "\\\\&")
+    ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "\\\\textbf{\\\\emph{\\1}}")
+    ("\\*\\*\\(.+?\\)\\*\\*" "\\\\textbf{\\1}")
+    ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
+    ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
+    ("_\\(.+?\\)_" "\\\\uline{\\1}")
+    ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
+    ("\n" "\s\\\\protecting{\\\\\\\\}\s"))
+  "Association list of regular expression export replacements.
+Replacements are made in sequential order. The sequence is
+important: first, characters that are special in the export
+format are sanitized, then escaped characters are converted to
+character codes, then format replacement is made."
+  :type '(repeat (group regexp (string :tag "Replacement")))
+  :group 'fountain-export)
 
 (defcustom fountain-export-tex-hook
   nil
@@ -2709,7 +2736,7 @@ ${content}\
     (synopsis "")
     (note "")
     (center "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")) 
-    "Association list of element templates for exporting to Final Draft.
+  "Association list of element templates for exporting to Final Draft.
 Takes the form:
 
     ((ELEMENT TEMPLATE) ...)
@@ -2743,36 +2770,8 @@ The format of TEMPLATE can include replacement keys in the form
 `${key}'. Each TEMPLATE should include the ${content} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
-    :type '(list
-            (group (const :tag "Document" document)
-                   (choice string (const nil)))
-            (group (const :tag "Section" section)
-                   (choice string (const nil)))
-            (group (const :tag "Section Heading" section-heading)
-                   (choice string (const nil)))
-            (group (const :tag "Scene" scene)
-                   (choice string (const nil)))
-            (group (const :tag "Scene Heading" scene-heading)
-                   (choice string (const nil)))
-            (group (const :tag "Dialogue" dialog)
-                   (choice string (const nil)))
-            (group (const :tag "Character" character)
-                   (choice string (const nil)))
-            (group (const :tag "Parenthetical" paren)
-                   (choice string (const nil)))
-            (group (const :tag "Dialogue Lines" lines)
-                   (choice string (const nil)))
-            (group (const :tag "Transition" trans)
-                   (choice string (const nil)))
-            (group (const :tag "Action" action)
-                   (choice string (const nil)))
-            (group (const :tag "Synopsis" synopsis)
-                   (choice string (const nil)))
-            (group (const :tag "Note" note)
-                   (choice string (const nil)))
-            (group (const :tag "Center Text" center)
-                   (choice string (const nil))))
-    :group 'fountain-export)
+  :type 'fountain-element-list-type
+  :group 'fountain-export)
 
 (defcustom fountain-export-fdx-hook
   nil
