@@ -3043,21 +3043,17 @@ ARG (\\[universal-argument]), only insert note delimiters."
           (insert-char ?\n)))
       (comment-indent)
       (insert
-       (with-temp-buffer
-         (insert fountain-note-template)
-         (goto-char (point-min))
-         (while (re-search-forward fountain-template-key-regexp nil t)
-           (let ((key (match-string 1)))
-             (replace-match
-              (cdr
-               (assoc-string key (list (cons 'title (file-name-base (buffer-name)))
-                                       (cons 'time (format-time-string fountain-time-format))
-                                       (cons 'fullname user-full-name)
-                                       (cons 'nick (capitalize user-login-name))
-                                       (cons 'email user-mail-address))))
-              t t))
-           (goto-char (point-min)))
-         (buffer-string))))))
+       (replace-regexp-in-string
+        fountain-template-key-regexp
+        (lambda (match)
+          (let ((key (match-string 1 match)))
+            (cdr
+             (assoc-string key (list (cons 'title (file-name-base (buffer-name)))
+                                     (cons 'time (format-time-string fountain-time-format))
+                                     (cons 'fullname user-full-name)
+                                     (cons 'nick (capitalize user-login-name))
+                                     (cons 'email user-mail-address))))))
+        fountain-note-template)))))
 
 (defun fountain-continued-dialog-refresh (&optional arg)
   "Add or remove continued dialog on characters speaking in succession.
