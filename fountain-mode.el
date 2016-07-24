@@ -2629,6 +2629,7 @@ ${content}\
 \\end{document}
 
 % Local Variables:
+% tex-command: \"xelatex\"
 % TeX-engine: xetex
 % End:")
     (section nil)
