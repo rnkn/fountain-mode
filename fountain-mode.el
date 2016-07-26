@@ -896,13 +896,6 @@ bold-italic delimiters together, e.g.
          (list "Scene Headings" fountain-scene-heading-regexp 1)
          (list "Sections" fountain-section-heading-regexp 1))))
 
-(defun fountain-init-regexp ()          ; FIXME not in use
-  "Set variable regular expression values."
-  (fountain-init-scene-heading-regexp)
-  (fountain-init-outline-regexp)
-  (fountain-init-trans-regexp)
-  (fountain-init-imenu-generic-expression))
-
 (defun fountain-init-comment-syntax ()
   "Set comment syntax according to `fountain-switch-comment-syntax'."
   (setq-local comment-start
@@ -911,13 +904,15 @@ bold-italic delimiters together, e.g.
               (if fountain-switch-comment-syntax "" "*/")))
 
 (defun fountain-init-vars ()
-  "Initialize important variables."
+  "Initialize important variables.
+These are required for functions to operate with temporary buffers."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
   (fountain-init-comment-syntax)
   (setq-local comment-use-syntax t)
-  (setq-local outline-level 'fountain-outline-level)
+  (setq-local page-delimiter fountain-page-break-regexp)
+  (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline))
 
 
@@ -3691,10 +3686,8 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   (if fountain-hide-syntax-chars
       (add-to-invisibility-spec 'fountain-syntax))
   (setq-local font-lock-comment-face 'fountain-comment)
-  (setq-local outline-level #'fountain-outline-level)
   (setq-local font-lock-extra-managed-props
               '(display line-prefix wrap-prefix invisible))
-  (setq-local page-delimiter fountain-page-break-regexp)
   (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
     (if (stringp n)
         (setq-local fountain-outline-startup-level
