@@ -633,7 +633,7 @@ Set with `fountain-init-scene-heading-regexp'.
     Group 2:    match leading . (for forced element)
     Group 3:    match scene heading without scene number (for export)
     Group 4:    match space between scene heading and scene number
-    Group 5:    match scene number with # prefix
+    Group 5:    match scene number with # delimiters
     Group 6:    match scene number
 
 Requires `fountain-match-scene-heading' for preceding blank line.")
@@ -644,7 +644,7 @@ Requires `fountain-match-scene-heading' for preceding blank line.")
 Requires `fountain-match-scene-heading' for preceding blank line.")
 
 (defconst fountain-scene-number-regexp
-  "\\(?:\\(?4:[\s\t]+\\)\\(?:#\\(?5:[a-z0-9\\.-]+\\)#\\)\\)?"
+  "\\(?4:[\s\t]+\\)\\(?5:#\\(?6:[a-z0-9\\.-]+\\)#\\)"
   "Regular expression for matching scene numbers.
 Assumes line matches `fountain-match-scene-heading'.")
 
@@ -863,14 +863,15 @@ bold-italic delimiters together, e.g.
   (setq fountain-scene-heading-regexp
         (concat "^\\(?1:"
                 fountain-forced-scene-heading-regexp
+                "\\(?:"
                 fountain-scene-number-regexp
-                "\\)[\s\t]*$"
+                "\\)?\\)[\s\t]*$"
                 "\\|"
                 "^\\(?1:\\(?3:"
                 (regexp-opt fountain-scene-heading-prefix-list)
-                "[.\s\t].*?\\)"
+                "[.\s\t].*?\\)\\(?:"
                 fountain-scene-number-regexp
-                "\\)[\s\t]*$")))
+                "\\)?\\)[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
   "Initialize `fountain-trans-regexp'."
@@ -1504,7 +1505,7 @@ Includes child elements."
   "Return an element list for matched scene heading at point.
 Includes child elements."
   (let ((heading (fountain-parse-scene-heading))
-        (num (match-string-no-properties 5)) ; FIXME: get-scene-number
+        (num (match-string-no-properties 6)) ; FIXME: get-scene-number
         (beg (point))
         (end (save-excursion
                (outline-end-of-subtree)
@@ -2963,15 +2964,15 @@ If N is 0, move to beginning of scene."
   "Move point to Nth scene."
   (interactive "NGoto scene: ")
   (goto-char (point-min))
-                   (or (string-to-number (match-string 5))
   (let ((scene (if (fountain-match-scene-heading)
+                   (or (string-to-number (match-string 6))
                        1)
                  0)))
     (while (and (< scene n)
                 (not (eobp)))
       (fountain-forward-scene 1)
-      (setq scene (if (match-string 5)
-                      (string-to-number (match-string 5))
+      (setq scene (if (match-string 6)
+                      (string-to-number (match-string 6))
                     (1+ scene))))))
 
 (defun fountain-forward-character (&optional n limit)
