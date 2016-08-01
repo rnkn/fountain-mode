@@ -1903,11 +1903,10 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
        replaced with that string.
     4. If none of the above, {{KEY}} is replaced with an empty string."
   (let ((template
-         (cadr
-          (assoc type
-                 (symbol-value (plist-get (cdr (assoc format
-                                                      fountain-export-formats))
-                                          :template))))))
+         (cadr (assoc type
+                      (symbol-value (plist-get (cdr (assoc format
+                                                           fountain-export-formats))
+                                               :template))))))
     (if template
         (with-temp-buffer
           (insert template)
@@ -1921,87 +1920,73 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
                      ((stringp value)
                       (fountain-export-format-string value format))
                      ((cdr
-                       (assoc-string key (list (cons 'emacs-version emacs-version)
-                                               (cons 'fountain-version fountain-version)
-                                               (cons 'contd fountain-continued-dialog-string)
-                                               (cons 'more fountain-export-more-dialog-string)
-                                               (cons 'contact-template fountain-export-contact-template)
-                                               (cons 'forced
-                                                     (if (and (plist-get plist 'forced)
-                                                              (eq format 'fountain))
-                                                         (cond ((eq type 'scene-heading)
-                                                                ".")
-                                                               ((eq type 'character)
-                                                                "@")
-                                                               ((eq type 'trans)
-                                                                "> "))))
-                                               (cons 'dual-dialog
-                                                     (cond ((and (eq format 'fountain)
-                                                                 (eq (plist-get plist 'dual) 'right))
-                                                            " ^")
-                                                           ((eq format 'html)
-                                                            (let ((opt (plist-get plist 'dual)))
-                                                              (cond ((eq opt 'left)
-                                                                     "dialog dual left")
-                                                                    ((eq opt 'right)
-                                                                     "dialog dual right")
-                                                                    (t "dialog"))))))
-                                               (cons 'include-title-page
-                                                     (let ((opt (cdr (assoc format '((html "block" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if fountain-export-include-title-page
-                                                           (car opt) (cadr opt))))
-                                               (cons 'page-size
-                                                     (let ((opt (cdr (assoc format '((html "letter" "a4")
-                                                                                     (tex "letterpaper" "a4paper"))))))
-                                                       (if (eq fountain-export-page-size 'letter)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'font
-                                                     (cond ((eq format 'html)
-                                                            (mapconcat
-                                                             (lambda (font) (concat "\"" font "\""))
-                                                             fountain-export-font ", "))
-                                                           ((eq format 'tex)
-                                                            (car fountain-export-font))))
-                                               (cons 'scene-heading-bold
-                                                     (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'bold fountain-export-scene-heading-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'scene-heading-spacing
-                                                     (let ((opt (cdr (assoc format '((html "2em" "1em")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'double-space fountain-export-scene-heading-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'scene-heading-underline
-                                                     (let ((opt (cdr (assoc format '((html "underline" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'underline fountain-export-scene-heading-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-underline
-                                                     (let ((opt (cdr (assoc format '((html "underline" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'underline fountain-export-title-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-upcase
-                                                     (let ((opt (cdr (assoc format '((html "uppercase" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'upcase fountain-export-title-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-bold
-                                                     (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'bold fountain-export-title-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-contact-align
-                                                     (let ((opt (cdr (assoc format '((html "?" "?")
-                                                                                     (tex "true" "false"))))))
-                                                       (if fountain-export-contact-align-right
-                                                           (car opt) (cadr opt))))
-                                               (cons 'include-scene-numbers
-                                                     "false")
-                                               (cons 'number-first-page
-                                                     "false")))))
+                       (assoc key (list (cons "emacs-version" emacs-version)
+                                        (cons "fountain-version" fountain-version)
+                                        (cons "contd" fountain-continued-dialog-string)
+                                        (cons "more" fountain-export-more-dialog-string)
+                                        (cons "title-template"
+                                              (fountain-export-format-string fountain-export-title-template format))
+                                        (cons "contact-template"
+                                              (fountain-export-format-string fountain-export-contact-template format))
+                                        (cons "forced"
+                                              (if (and (plist-get plist 'forced)
+                                                       (eq format 'fountain))
+                                                  (cond ((eq type 'scene-heading)
+                                                         ".")
+                                                        ((eq type 'character)
+                                                         "@")
+                                                        ((eq type 'trans)
+                                                         "> "))))
+                                        (cons "dual-dialog"
+                                              (cond ((and (eq format 'fountain)
+                                                          (eq (plist-get plist 'dual) 'right))
+                                                     " ^")
+                                                    ((eq format 'html)
+                                                     (let ((opt (plist-get plist 'dual)))
+                                                       (cond ((eq opt 'left)
+                                                              "dialog dual left")
+                                                             ((eq opt 'right)
+                                                              "dialog dual right")
+                                                             (t "dialog"))))))
+                                        (cons "include-title-page"
+                                              (let ((opt (cdr (assoc format '((html "block" "none")
+                                                                              (tex "true" "false"))))))
+                                                (if fountain-export-include-title-page
+                                                    (car opt) (cadr opt))))
+                                        (cons "page-size"
+                                              (let ((opt (cdr (assoc format '((html "letter" "a4")
+                                                                              (tex "letterpaper" "a4paper"))))))
+                                                (if (eq fountain-export-page-size 'letter)
+                                                    (car opt) (cadr opt))))
+                                        (cons "font"
+                                              (cond ((eq format 'html)
+                                                     (mapconcat
+                                                      (lambda (font) (concat "\"" font "\""))
+                                                      fountain-export-font ", "))
+                                                    ((eq format 'tex)
+                                                     (car fountain-export-font))))
+                                        (cons "scene-heading-bold"
+                                              (let ((opt (cdr (assoc format '((html "bold" "normal")
+                                                                              (tex "true" "false"))))))
+                                                (if (member 'bold fountain-export-scene-heading-format)
+                                                    (car opt) (cadr opt))))
+                                        (cons "scene-heading-spacing"
+                                              (let ((opt (cdr (assoc format '((html "2em" "1em")
+                                                                              (tex "true" "false"))))))
+                                                (if (member 'double-space fountain-export-scene-heading-format)
+                                                    (car opt) (cadr opt))))
+                                        (cons "scene-heading-underline"
+                                              (let ((opt (cdr (assoc format '((html "underline" "none")
+                                                                              (tex "true" "false"))))))
+                                                (if (member 'underline fountain-export-scene-heading-format)
+                                                    (car opt) (cadr opt))))
+                                        (cons "title-contact-align"
+                                              (let ((opt (cdr (assoc format '((html "?" "?")
+                                                                              (tex "true" "false"))))))
+                                                (if fountain-export-contact-align-right
+                                                    (car opt) (cadr opt))))
+                                        (cons "include-scene-numbers" "false")
+                                        (cons "number-first-page" "false")))))
                      (t ""))
                t t))
             (goto-char (point-min)))
