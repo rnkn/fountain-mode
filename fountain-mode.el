@@ -2378,6 +2378,7 @@ calculated."
     ("\\*\\(.+?\\)\\*" "<em>\\1</em>")
     ("^~\s*\\(.+?\\)$\\*\\*" "<i>\\1</i>")
     ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
+    ("\n\n+" "<br><br>")
     ("\n" "<br>"))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
