@@ -435,7 +435,7 @@ if you prefer the latter, set this option to non-nil."
   :group 'fountain)
 
 (defcustom fountain-note-template
-  "${time} - ${fullname}: "
+  " ${time} - ${fullname}: "
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 
 To include an item in a template you must use the full `${key}'
@@ -447,10 +447,10 @@ syntax.
     ${nick}     User first name (defined in `user-login-name')
     ${email}    User email (defined in `user-mail-address')
 
-The default `${time} - ${fullname}: ' will insert something
+The default ` ${time} - ${fullname}: ' will insert something
 similar to:
 
-\[\[2014-20-01 - Alan Smithee: \]\]"
+\[\[ 2014-20-01 - Alan Smithee: \]\]"
   :type 'string
   :group 'fountain)
 
