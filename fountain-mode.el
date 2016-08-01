@@ -2302,8 +2302,8 @@ otherwise kill destination buffer."
 <body>
 <section class=\"screenplay\">
 <section class=\"title-page\">
-<div class=\"title\">{{title-template}}</div>
-<div class=\"contact\">{{contact-template}}</div>
+<p class=\"title\">{{title-template}}</p>
+<p class=\"contact\">{{contact-template}}</p>
 </section>
 {{content}}\
 <div class=\"menu\">Aa</div>
