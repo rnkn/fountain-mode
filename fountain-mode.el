@@ -2656,6 +2656,7 @@ calculated."
     ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
     ("_\\(.+?\\)_" "\\\\uline{\\1}")
     ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
+    ("\n\n+" "\s\\\\par\s")
     ("\n" "\s\\\\protecting{\\\\\\\\}\s"))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
