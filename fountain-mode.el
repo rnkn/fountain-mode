@@ -2287,6 +2287,8 @@ otherwise kill destination buffer."
 }
 .screenplay .section-heading {
   display: block;
+  text-align: center;
+  text-decoration: underline;
 }
 .screenplay .menu {
   display: none;
@@ -2489,6 +2491,13 @@ character codes, then format replacement is made."
   \\clearpage
 }
 
+% Section Headings
+\\newcommand{\\sectionheading}[1]{%
+  \\begin{center}
+    \\uline{#1}
+  \\end{center}
+}
+
 % Scene Headings
 \\newcommand*{\\sceneheading}[2][]{%
   \\def\\thesceneheading{#2}
@@ -2583,7 +2592,7 @@ character codes, then format replacement is made."
 % TeX-engine: xetex
 % End:")
     (section nil)
-    (section-heading nil)
+    (section-heading "\\sectionheading{{{content}}}\n\n")
     (scene nil)
     (scene-heading "\\sceneheading{{{content}}}\n\n")
     (dialog "\\begin{dialog}{{content}}\\end{dialog}\n\n")
