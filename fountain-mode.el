@@ -325,6 +325,9 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete-variable 'fountain-export-format-replace-alist
                         "use individual export replace alists instead." "2.1.4")
 
+(make-obsolete-variable 'fountain-export-title-format
+                        "edit `fountain-export-title-template' instead." "2.1.4")
+
 
 ;;; Customization
 
@@ -1736,15 +1739,6 @@ Passed to `format' with export format as single variable."
 Options are: bold, double-space, underline."
   :type '(set (const :tag "Bold" bold)
               (const :tag "Double-spaced" double-space)
-              (const :tag "Underlined" underline))
-  :group 'fountain-export)
-
-(defcustom fountain-export-title-format
-  '(upcase underline)
-  "List of format options applied when exporting script title.
-Options are: bold, upcase, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Uppercase" upcase)
               (const :tag "Underlined" underline))
   :group 'fountain-export)
 
