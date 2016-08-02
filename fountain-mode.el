@@ -3282,7 +3282,10 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
               :override t)))
     ("page-break"
      ,fountain-page-break-regexp
-     ((:level 2 :subexp 0 :face fountain-page-break)))
+     ((:level 2 :subexp 0 :face fountain-page-break)
+      (:level 2 :subexp 2 :face fountain-page-number
+              :override t
+              :laxmatch t)))
     ("metadata"
      (lambda (limit)
        (fountain-match-element 'fountain-match-metadata limit))
