@@ -1688,8 +1688,9 @@ moves to property value of end of element."
 ;;; General Export
 
 (defcustom fountain-export-include-elements-alist
-  '(("screenplay" scene-heading action character paren lines trans center)
-    ("stageplay" section-heading scene-heading action character paren lines trans center))
+  '(("screenplay" scene-heading action character paren lines trans center page-break)
+    ("teleplay" section-heading scene-heading action character paren lines trans center page-break)
+    ("stageplay" section-heading scene-heading action character paren lines trans center page-break))
   "Association list of elements to include when exporting.
 Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
@@ -1702,6 +1703,7 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Dialogue" lines)
                                  (const :tag "Transitions" trans)
                                  (const :tag "Center Text" center)
+                                 (const :tag "Page Breaks" page-break)
                                  (const :tag "Synopses" synopsis)
                                  (const :tag "Notes" note)))
   :group 'fountain-export)
@@ -2345,7 +2347,7 @@ otherwise kill destination buffer."
      (lines "<p class=\"lines\">{{content}}</p>\n")
      (trans "<p class=\"trans\">{{content}}</p>\n")
      (action "<p class=\"action\">{{content}}</p>\n")
-     (page-break "<br>\n")
+     (page-break "<hr>\n")
      (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
      (note "<p class=\"note\">{{content}}</p>\n")
      (center "<p class=\"center\">{{content}}</p>\n"))
