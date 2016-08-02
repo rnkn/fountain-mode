@@ -811,6 +811,11 @@ bold-italic delimiters together, e.g.
   "Default face for page breaks."
   :group 'fountain-faces)
 
+(defface fountain-page-number
+  '((t (:inherit font-lock-function-name-face)))
+  "Default face for page numbers."
+  :group 'fountain-faces)
+
 (defface fountain-scene-heading
   '((t (:inherit font-lock-keyword-face)))
   "Default face for scene headings."
