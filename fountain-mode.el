@@ -1258,7 +1258,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
       (delete-region (match-beginning 0) (match-end 0)))))
 
 
-;;;; Outline Functions
+;;; Outline Functions
 
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
@@ -1266,6 +1266,22 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defalias 'fountain-outline-backward 'outline-backward-same-level)
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
+
+(defun fountain-outline-patch-outline ()
+  (unless (advice-member-p "fountain-mode-patch" 'outline-invisible-p)
+    (with-demoted-errors "Error: %S"
+      (advice-add 'outline-invisible-p :filter-return
+                  (lambda (return) (or (eq return 'outline)
+                                       (eq return t)))
+                  '((name . "fountain-mode-patch")))
+      (dolist (fun '(outline-back-to-heading
+                     outline-on-heading-p
+                     outline-next-visible-heading))
+        (let ((source (find-function-noselect fun)))
+          (with-current-buffer (car source)
+            (goto-char (cdr source))
+            (eval (read (current-buffer))))))
+      (message "Function `outline-invisible-p' has been patched"))))
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
@@ -3679,6 +3695,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   :group 'fountain
   (fountain-init-vars)
   (fountain-init-imenu-generic-expression)
+  (fountain-outline-patch-outline)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
   (add-to-invisibility-spec (cons 'outline t))
