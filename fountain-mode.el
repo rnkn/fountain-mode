@@ -1601,6 +1601,14 @@ Includes child elements."
               'end (match-end 0))
         (match-string-no-properties 3)))
 
+(defun fountain-parse-page-break ()
+  "Return an element list for matched page break at point."
+  (list 'page-break
+        (list 'begin (match-beginning 0)
+              'end (match-end 0)
+              'number (match-string-no-properties 2))
+        (match-string-no-properties 2)))
+
 (defun fountain-parse-synopsis ()
   "Return an element list for matched synopsis at point."
   (list 'synopsis
@@ -1646,6 +1654,8 @@ Includes child elements."
     (fountain-parse-trans))
    ((fountain-match-center)
     (fountain-parse-center))
+   ((fountain-match-page-break)
+    (fountain-parse-page-break))
    ((fountain-match-synopsis)
     (fountain-parse-synopsis))
    ((fountain-match-note)
