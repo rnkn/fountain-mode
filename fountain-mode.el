@@ -958,6 +958,13 @@ comments."
                  (forward-line -1)
                  (fountain-match-metadata)))))))
 
+(defun fountain-match-page-break  ()
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (looking-at fountain-page-break-regexp))))
+
 (defun fountain-match-section-heading ()
   "Match section heading if point is at section heading, nil otherwise."
   (save-excursion
