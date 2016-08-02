@@ -3243,7 +3243,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
        (fountain-match-element 'fountain-match-scene-heading limit))
      ((:level 2 :subexp 0)
       (:level 2 :subexp 2 :face fountain-comment
-              ;; :invisible fountain-syntax-chars
+              :invisible fountain-syntax-chars
               :override t
               :laxmatch t)
       (:level 1 :subexp 4
@@ -3702,7 +3702,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
-      (add-to-invisibility-spec 'fountain-syntax))
+      (add-to-invisibility-spec 'fountain-syntax-chars))
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local font-lock-extra-managed-props
               '(display line-prefix wrap-prefix invisible))
