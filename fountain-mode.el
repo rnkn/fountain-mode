@@ -1270,6 +1270,12 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defcustom fountain-patch-emacs-bugs
   t
   "If non-nil, attempt to patch known bugs in Emacs <= 24.4.
+See function `fountain-patch-emacs-bugs'."
+  :type 'boolean
+  :group 'fountain)
+
+(defun fountain-patch-emacs-bugs ()
+  "Attempt to patch known bugs in Emacs <= 24.4.
 
 Adds advice to override `outline-move-subtree-down' to work when
 switching the second-last subtree in an outline with the last.
@@ -1278,10 +1284,6 @@ See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=19102>
 Adds advice to override `outline-invisible-p' to return non-nil
 only if invisible text property is `eq' to outline.
 See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=24073>"
-  :type 'boolean
-  :group 'fountain)
-
-(defun fountain-patch-emacs-bugs ()
   (when fountain-patch-emacs-bugs
     (unless (advice-member-p "fountain-mode-patch" 'outline-invisible-p)
       (with-demoted-errors "Error: %S"
