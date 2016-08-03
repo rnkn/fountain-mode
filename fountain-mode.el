@@ -1286,19 +1286,27 @@ only if invisible text property is `eq' to outline.
 See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=24073>"
   (when fountain-patch-emacs-bugs
     (unless (advice-member-p "fountain-mode-patch" 'outline-invisible-p)
-      (with-demoted-errors "Error: %S"
-        (advice-add 'outline-invisible-p :override
-                    (lambda (&optional pos)
-                      (eq (get-char-property (or pos (point)) 'invisible)
-                          'outline))
-                    '((name . "fountain-mode-patch")))
-        (dolist (fun '(outline-back-to-heading
-                       outline-on-heading-p
-                       outline-next-visible-heading))
-          (let ((source (find-function-noselect fun)))
-            (with-current-buffer (car source)
-              (goto-char (cdr source))
-              (eval (read (current-buffer))))))
+      ;; The original `outline-invisible-p' returns non-nil for ANY invisible
+      ;; property of text at point:
+      ;; (get-char-property (or pos (point)) 'invisible))
+      ;; We want to only return non-nil if property is 'outline
+      (advice-add 'outline-invisible-p :override
+                  (lambda (&optional pos)
+                    (eq (get-char-property (or pos (point)) 'invisible)
+                        'outline))
+                  '((name . "fountain-mode-patch")))
+      ;; Because `outline-invisible-p' is an inline function, we need to
+      ;; reevaluate those functions that called the original bugged version.
+      ;; This is impossible for users who have installed Emacs without
+      ;; uncompiled source, so we need to demote errors.
+      (with-demoted-errors
+          (dolist (fun '(outline-back-to-heading
+                         outline-on-heading-p
+                         outline-next-visible-heading))
+            (let ((source (find-function-noselect fun)))
+              (with-current-buffer (car source)
+                (goto-char (cdr source))
+                (eval (read (current-buffer))))))
         (message "fountain-mode: Function `outline-invisible-p' has been patched")))
     (unless (or (<= 24.5 (string-to-number emacs-version))
                 (advice-member-p "fountain-mode-patch" 'outline-move-subtree-down))
