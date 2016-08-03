@@ -1298,7 +1298,8 @@ See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=24073>"
               (goto-char (cdr source))
               (eval (read (current-buffer))))))
         (message "fountain-mode: Function `outline-invisible-p' has been patched")))
-    (unless (advice-member-p "fountain-mode-patch" 'outline-move-subtree-down)
+    (unless (or (<= 24.5 (string-to-number emacs-version))
+                (advice-member-p "fountain-mode-patch" 'outline-move-subtree-down))
       (advice-add 'outline-move-subtree-down :override
                   'fountain-outline-shift-down
                   '((name . "fountain-mode-patch")))
