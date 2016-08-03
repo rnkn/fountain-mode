@@ -1267,21 +1267,42 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
-(defun fountain-outline-patch-outline ()
-  (unless (advice-member-p "fountain-mode-patch" 'outline-invisible-p)
-    (with-demoted-errors "Error: %S"
-      (advice-add 'outline-invisible-p :filter-return
-                  (lambda (return) (or (eq return 'outline)
-                                       (eq return t)))
+(defcustom fountain-patch-emacs-bugs
+  t
+  "If non-nil, attempt to patch known bugs in Emacs <= 24.4.
+
+Adds advice to override `outline-move-subtree-down' to work when
+switching the second-last subtree in an outline with the last.
+See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=19102>
+
+Adds advice to override `outline-invisible-p' to return non-nil
+only if invisible text property is `eq' to outline.
+See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=24073>"
+  :type 'boolean
+  :group 'fountain)
+
+(defun fountain-patch-emacs-bugs ()
+  (when fountain-patch-emacs-bugs
+    (unless (advice-member-p "fountain-mode-patch" 'outline-invisible-p)
+      (with-demoted-errors "Error: %S"
+        (advice-add 'outline-invisible-p :override
+                    (lambda (&optional pos)
+                      (eq (get-char-property (or pos (point)) 'invisible)
+                          'outline))
+                    '((name . "fountain-mode-patch")))
+        (dolist (fun '(outline-back-to-heading
+                       outline-on-heading-p
+                       outline-next-visible-heading))
+          (let ((source (find-function-noselect fun)))
+            (with-current-buffer (car source)
+              (goto-char (cdr source))
+              (eval (read (current-buffer))))))
+        (message "fountain-mode: Function `outline-invisible-p' has been patched")))
+    (unless (advice-member-p "fountain-mode-patch" 'outline-move-subtree-down)
+      (advice-add 'outline-move-subtree-down :override
+                  'fountain-outline-shift-down
                   '((name . "fountain-mode-patch")))
-      (dolist (fun '(outline-back-to-heading
-                     outline-on-heading-p
-                     outline-next-visible-heading))
-        (let ((source (find-function-noselect fun)))
-          (with-current-buffer (car source)
-            (goto-char (cdr source))
-            (eval (read (current-buffer))))))
-      (message "Function `outline-invisible-p' has been patched"))))
+      (message "fountain-mode: Function `outline-move-subtree-down' has been patched"))))
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
@@ -3695,7 +3716,6 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   :group 'fountain
   (fountain-init-vars)
   (fountain-init-imenu-generic-expression)
-  (fountain-outline-patch-outline)
   (setq font-lock-defaults
         '(fountain-create-font-lock-keywords nil t))
   (add-to-invisibility-spec (cons 'outline t))
@@ -3714,6 +3734,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
             #'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             #'font-lock-refresh-defaults)
+  (fountain-patch-emacs-bugs)
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
