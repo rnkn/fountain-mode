@@ -614,11 +614,11 @@ Used by `fountain-outline-cycle'.")
 Used by `fountain-outline-cycle'.")
 
 (defvar-local fountain-parse-job
-  (make-progress-reporter "Parsing..." 0 100)
+  nil
   "Buffer parsing progress reporter.")
 
 (defvar-local fountain-export-job
-  (make-progress-reporter "Exporting...")
+  nil
   "Buffer export progress reporter.")
 
 
@@ -1703,8 +1703,7 @@ moves to property value of end of element."
           (let ((element (fountain-parse-element)))
             (setq list (cons element list))
             (goto-char (plist-get (nth 1 element) 'end))
-            (progress-reporter-force-update fountain-parse-job
-                                            (* (/ (float (point)) (buffer-size)) 100)))))
+            (progress-reporter-update fountain-parse-job))))
     (reverse list)))
 
 
@@ -2075,6 +2074,7 @@ recursively call self, concatenating the resulting strings."
         (tree (nth 2 element)))
     (cond ((and (stringp tree)
                 (member type includes))
+           (progress-reporter-update fountain-export-job)
            (fountain-export-format-template
             type plist (fountain-export-format-string tree format) format))
           ((listp tree)
@@ -2121,22 +2121,26 @@ strings."
                  (end (if (re-search-forward fountain-script-end-regexp end t)
                           (match-beginning 0)
                         end))
-                 (string (buffer-substring-no-properties beg end)))
+                 (string (buffer-substring-no-properties beg end))
+                 tree)
             (with-temp-buffer
               (insert string)
               (fountain-init-vars)
               (fountain-delete-comments-in-region (point-min) (point-max))
-              (let ((tree (fountain-parse-region (point-min) (point-max))))
-                (progress-reporter-done fountain-parse-job)
-                (if standalone
-                    (fountain-export-format-element
-                     (list 'document metadata tree) format includes)
-                  (let (string)
-                    (dolist (element tree string)
-                      (setq string
-                            (concat string (fountain-export-format-element
-                                            element format includes)))))))))) ; FIXME: DRY
-      (progress-reporter-done fountain-export-job)
+              (setq fountain-parse-job
+                    (make-progress-reporter "Parsing..."))
+              (setq tree (fountain-parse-region (point-min) (point-max)))
+              (progress-reporter-done fountain-parse-job)
+              (setq fountain-export-job
+                    (make-progress-reporter "Exporting..."))
+              (if standalone
+                  (fountain-export-format-element
+                   (list 'document metadata tree) format includes)
+                (let (string)
+                  (dolist (element tree string)
+                    (setq string
+                          (concat string (fountain-export-format-element
+                                          element format includes))))))))) ; FIXME: DRY
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
@@ -2170,6 +2174,7 @@ otherwise kill destination buffer."
               (with-silent-modifications
                 (erase-buffer)
                 (insert string))))
+          (progress-reporter-done fountain-export-job)
           (setq complete t)
           (switch-to-buffer destbuf)
           (write-file (buffer-name) t)
