@@ -1274,46 +1274,39 @@ See function `fountain-patch-emacs-bugs'."
   :type 'boolean
   :group 'fountain)
 
+(defun fountain-outline-invisible-p (&optional pos)
+  "Override `outline-invisible-p' for correct return.
+
+Return non-nil only if the character after POS or `point' has
+invisible text property `eq' to 'outline. See
+<http://debbugs.gnu.org/24073>."
+  (eq (get-char-property (or pos (point)) 'invisible) 'outline))
+
 (defun fountain-patch-emacs-bugs ()
   "Attempt to patch known bugs in Emacs <= 24.4.
 
-Adds advice to override `outline-move-subtree-down' to work when
-switching the second-last subtree in an outline with the last.
-See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=19102>
-
 Adds advice to override `outline-invisible-p' to return non-nil
-only if invisible text property is `eq' to outline.
-See <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=24073>"
-  (when fountain-patch-emacs-bugs
-    (unless (advice-member-p "fountain-mode-patch" 'outline-invisible-p)
-      ;; The original `outline-invisible-p' returns non-nil for ANY invisible
-      ;; property of text at point:
-      ;; (get-char-property (or pos (point)) 'invisible))
-      ;; We want to only return non-nil if property is 'outline
-      (advice-add 'outline-invisible-p :override
-                  (lambda (&optional pos)
-                    (eq (get-char-property (or pos (point)) 'invisible)
-                        'outline))
-                  '((name . "fountain-mode-patch")))
-      ;; Because `outline-invisible-p' is an inline function, we need to
-      ;; reevaluate those functions that called the original bugged version.
-      ;; This is impossible for users who have installed Emacs without
-      ;; uncompiled source, so we need to demote errors.
-      (with-demoted-errors
-          (dolist (fun '(outline-back-to-heading
-                         outline-on-heading-p
-                         outline-next-visible-heading))
-            (let ((source (find-function-noselect fun)))
-              (with-current-buffer (car source)
-                (goto-char (cdr source))
-                (eval (read (current-buffer))))))
-        (message "fountain-mode: Function `outline-invisible-p' has been patched")))
-    (unless (or (<= 24.5 (string-to-number emacs-version))
-                (advice-member-p "fountain-mode-patch" 'outline-move-subtree-down))
-      (advice-add 'outline-move-subtree-down :override
-                  'fountain-outline-shift-down
-                  '((name . "fountain-mode-patch")))
-      (message "fountain-mode: Function `outline-move-subtree-down' has been patched"))))
+only if the character after POS or `point' has invisible text
+property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
+  (unless (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
+    ;; The original `outline-invisible-p' returns non-nil for ANY invisible
+    ;; property of text at point:
+    ;; (get-char-property (or pos (point)) 'invisible))
+    ;; We want to only return non-nil if property is 'outline
+    (advice-add 'outline-invisible-p :override 'fountain-outline-invisible-p)
+    ;; Because `outline-invisible-p' is an inline function, we need to
+    ;; reevaluate those functions that called the original bugged version.
+    ;; This is impossible for users who have installed Emacs without
+    ;; uncompiled source, so we need to demote errors.
+    (with-demoted-errors
+        (dolist (fun '(outline-back-to-heading
+                       outline-on-heading-p
+                       outline-next-visible-heading))
+          (let ((source (find-function-noselect fun)))
+            (with-current-buffer (car source)
+              (goto-char (cdr source))
+              (eval (read (current-buffer))))))
+      (message "fountain-mode: Function `outline-invisible-p' has been patched"))))
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
@@ -3750,7 +3743,8 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
             #'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             #'font-lock-refresh-defaults)
-  (fountain-patch-emacs-bugs)
+  (if fountain-patch-emacs-bugs
+      (fountain-patch-emacs-bugs))
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
