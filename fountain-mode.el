@@ -325,6 +325,9 @@ To disable element alignment, see `fountain-align-element'."
 (make-obsolete-variable 'fountain-export-format-replace-alist
                         "use individual export replace alists instead." "2.1.4")
 
+(make-obsolete-variable 'fountain-export-title-format
+                        "edit `fountain-export-title-template' instead." "2.1.4")
+
 
 ;;; Customization
 
@@ -435,19 +438,19 @@ if you prefer the latter, set this option to non-nil."
   :group 'fountain)
 
 (defcustom fountain-note-template
-  " ${time} - ${fullname}: "
+  " {{time}} - {{fullname}}: "
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 
-To include an item in a template you must use the full `${key}'
+To include an item in a template you must use the full `{{KEY}}'
 syntax.
 
-    ${title}    Buffer name without extension
-    ${time}     Short date format (defined in `fountain-time-format')
-    ${fullname} User full name (defined in `user-full-name')
-    ${nick}     User first name (defined in `user-login-name')
-    ${email}    User email (defined in `user-mail-address')
+    {{title}}    Buffer name without extension
+    {{time}}     Short date format (defined in `fountain-time-format')
+    {{fullname}} User full name (defined in `user-full-name')
+    {{nick}}     User first name (defined in `user-login-name')
+    {{email}}    User email (defined in `user-mail-address')
 
-The default ` ${time} - ${fullname}: ' will insert something
+The default ` {{time}} - {{fullname}}: ' will insert something
 similar to:
 
 \[\[ 2014-20-01 - Alan Smithee: \]\]"
@@ -772,7 +775,7 @@ bold-italic delimiters together, e.g.
   "Regular expression for matching lyrics.")
 
 (defconst fountain-template-key-regexp
-  "\\${\\(.+?\\)}"
+  "{{\\([^{}\n]+?\\)}}"
   "Regular expression key for making template replacements.")
 
 
@@ -1779,15 +1782,6 @@ Options are: bold, double-space, underline."
               (const :tag "Underlined" underline))
   :group 'fountain-export)
 
-(defcustom fountain-export-title-format
-  '(upcase underline)
-  "List of format options applied when exporting script title.
-Options are: bold, upcase, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Uppercase" upcase)
-              (const :tag "Underlined" underline))
-  :group 'fountain-export)
-
 (defcustom fountain-export-more-dialog-string
   "(MORE)"
   "String to append to dialog when breaking across pages.
@@ -1816,17 +1810,17 @@ Parentheses are not automatically added."
 
 (defcustom fountain-export-title-template
   "\
-${title}
+_{{title}}_
 
-${credit}
+{{credit}}
 
-${author}"
+{{author}}"
   "Template for creating title page title block."
   :type 'string
   :group 'fountain-export)
 
 (defcustom fountain-export-contact-template
-  "${contact}"
+  "{{contact}}"
   "Template for creating title page left block."
   :type 'string
   :group 'fountain-export)
@@ -1904,6 +1898,8 @@ Takes the form:
                  (choice string (const nil)))
           (group (const :tag "Action" action)
                  (choice string (const nil)))
+          (group (const :tag "Page Break" break)
+                 (choice string (const nil)))
           (group (const :tag "Synopsis" synopsis)
                  (choice string (const nil)))
           (group (const :tag "Note" note)
@@ -1941,19 +1937,18 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
 `fountain-export-templates' then replace matches of
 `fountain-template-key-regexp' in the following order:
 
-    1. ${content} is replaced with STRING.
-    2. If KEY corresponds to a string property PLIST then ${KEY} is replaced
+    1. {{content}} is replaced with STRING.
+    2. If KEY corresponds to a string property PLIST then {{KEY}} is replaced
        with that string. See `fountain-parse-element' for details on Fountain
        element property lists.
-    3. If KEY corresponds with remaining replacement conditions then ${KEY} is
+    3. If KEY corresponds with remaining replacement conditions then {{KEY}} is
        replaced with that string.
-    4. If none of the above, ${KEY} is replaced with an empty string."
+    4. If none of the above, {{KEY}} is replaced with an empty string."
   (let ((template
-         (cadr
-          (assoc type
-                 (symbol-value (plist-get (cdr (assoc format
-                                                      fountain-export-formats))
-                                          :template))))))
+         (cadr (assoc type
+                      (symbol-value (plist-get (cdr (assoc format
+                                                           fountain-export-formats))
+                                               :template))))))
     (if template
         (with-temp-buffer
           (insert template)
@@ -1967,87 +1962,73 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
                      ((stringp value)
                       (fountain-export-format-string value format))
                      ((cdr
-                       (assoc-string key (list (cons 'emacs-version emacs-version)
-                                               (cons 'fountain-version fountain-version)
-                                               (cons 'contd fountain-continued-dialog-string)
-                                               (cons 'more fountain-export-more-dialog-string)
-                                               (cons 'contact-template fountain-export-contact-template)
-                                               (cons 'forced
-                                                     (if (and (plist-get plist 'forced)
-                                                              (eq format 'fountain))
-                                                         (cond ((eq type 'scene-heading)
-                                                                ".")
-                                                               ((eq type 'character)
-                                                                "@")
-                                                               ((eq type 'trans)
-                                                                "> "))))
-                                               (cons 'dual-dialog
-                                                     (cond ((and (eq format 'fountain)
-                                                                 (eq (plist-get plist 'dual) 'right))
-                                                            " ^")
-                                                           ((eq format 'html)
-                                                            (let ((opt (plist-get plist 'dual)))
-                                                              (cond ((eq opt 'left)
-                                                                     "dialog dual left")
-                                                                    ((eq opt 'right)
-                                                                     "dialog dual right")
-                                                                    (t "dialog"))))))
-                                               (cons 'include-title-page
-                                                     (let ((opt (cdr (assoc format '((html "block" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if fountain-export-include-title-page
-                                                           (car opt) (cadr opt))))
-                                               (cons 'page-size
-                                                     (let ((opt (cdr (assoc format '((html "letter" "a4")
-                                                                                     (tex "letterpaper" "a4paper"))))))
-                                                       (if (eq fountain-export-page-size 'letter)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'font
-                                                     (cond ((eq format 'html)
-                                                            (mapconcat
-                                                             (lambda (font) (concat "\"" font "\""))
-                                                             fountain-export-font ", "))
-                                                           ((eq format 'tex)
-                                                            (car fountain-export-font))))
-                                               (cons 'scene-heading-bold
-                                                     (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'bold fountain-export-scene-heading-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'scene-heading-spacing
-                                                     (let ((opt (cdr (assoc format '((html "2em" "1em")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'double-space fountain-export-scene-heading-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'scene-heading-underline
-                                                     (let ((opt (cdr (assoc format '((html "underline" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'underline fountain-export-scene-heading-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-underline
-                                                     (let ((opt (cdr (assoc format '((html "underline" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'underline fountain-export-title-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-upcase
-                                                     (let ((opt (cdr (assoc format '((html "uppercase" "none")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'upcase fountain-export-title-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-bold
-                                                     (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                                                                     (tex "true" "false"))))))
-                                                       (if (member 'bold fountain-export-title-format)
-                                                           (car opt) (cadr opt))))
-                                               (cons 'title-contact-align
-                                                     (let ((opt (cdr (assoc format '((html "?" "?")
-                                                                                     (tex "true" "false"))))))
-                                                       (if fountain-export-contact-align-right
-                                                           (car opt) (cadr opt))))
-                                               (cons 'include-scene-numbers
-                                                     "false")
-                                               (cons 'number-first-page
-                                                     "false")))))
+                       (assoc key (list (cons "emacs-version" emacs-version)
+                                        (cons "fountain-version" fountain-version)
+                                        (cons "contd" fountain-continued-dialog-string)
+                                        (cons "more" fountain-export-more-dialog-string)
+                                        (cons "title-template"
+                                              (fountain-export-format-string fountain-export-title-template format))
+                                        (cons "contact-template"
+                                              (fountain-export-format-string fountain-export-contact-template format))
+                                        (cons "forced"
+                                              (if (and (plist-get plist 'forced)
+                                                       (eq format 'fountain))
+                                                  (cond ((eq type 'scene-heading)
+                                                         ".")
+                                                        ((eq type 'character)
+                                                         "@")
+                                                        ((eq type 'trans)
+                                                         "> "))))
+                                        (cons "dual-dialog"
+                                              (cond ((and (eq format 'fountain)
+                                                          (eq (plist-get plist 'dual) 'right))
+                                                     " ^")
+                                                    ((eq format 'html)
+                                                     (let ((opt (plist-get plist 'dual)))
+                                                       (cond ((eq opt 'left)
+                                                              "dialog dual left")
+                                                             ((eq opt 'right)
+                                                              "dialog dual right")
+                                                             (t "dialog"))))))
+                                        (cons "include-title-page"
+                                              (let ((opt (cdr (assoc format '((html "block" "none")
+                                                                              (tex "true" "false"))))))
+                                                (if fountain-export-include-title-page
+                                                    (car opt) (cadr opt))))
+                                        (cons "page-size"
+                                              (let ((opt (cdr (assoc format '((html "letter" "a4")
+                                                                              (tex "letterpaper" "a4paper"))))))
+                                                (if (eq fountain-export-page-size 'letter)
+                                                    (car opt) (cadr opt))))
+                                        (cons "font"
+                                              (cond ((eq format 'html)
+                                                     (mapconcat
+                                                      (lambda (font) (concat "\"" font "\""))
+                                                      fountain-export-font ", "))
+                                                    ((eq format 'tex)
+                                                     (car fountain-export-font))))
+                                        (cons "scene-heading-bold"
+                                              (let ((opt (cdr (assoc format '((html "bold" "normal")
+                                                                              (tex "true" "false"))))))
+                                                (if (member 'bold fountain-export-scene-heading-format)
+                                                    (car opt) (cadr opt))))
+                                        (cons "scene-heading-spacing"
+                                              (let ((opt (cdr (assoc format '((html "2em" "1em")
+                                                                              (tex "true" "false"))))))
+                                                (if (member 'double-space fountain-export-scene-heading-format)
+                                                    (car opt) (cadr opt))))
+                                        (cons "scene-heading-underline"
+                                              (let ((opt (cdr (assoc format '((html "underline" "none")
+                                                                              (tex "true" "false"))))))
+                                                (if (member 'underline fountain-export-scene-heading-format)
+                                                    (car opt) (cadr opt))))
+                                        (cons "title-contact-align"
+                                              (let ((opt (cdr (assoc format '((html "?" "?")
+                                                                              (tex "true" "false"))))))
+                                                (if fountain-export-contact-align-right
+                                                    (car opt) (cadr opt))))
+                                        (cons "include-scene-numbers" "false")
+                                        (cons "number-first-page" "false")))))
                      (t ""))
                t t))
             (goto-char (point-min)))
@@ -2182,13 +2163,13 @@ otherwise kill destination buffer."
   '((document "\
 <head>
 <meta charset=\"utf-8\">
-<meta name=\"author\" content=\"${author}\" />
-<meta name=\"generator\" content=\"Emacs ${emacs-version} running Fountain Mode ${fountain-version}\" />
+<meta name=\"author\" content=\"{{author}}\" />
+<meta name=\"generator\" content=\"Emacs {{emacs-version}} running Fountain Mode {{fountain-version}}\" />
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
-<title>${title}</title>
+<title>{{title}}</title>
 <style type=\"text/css\">
 @page screenplay, screenplay-title {
-  size: ${page-size};
+  size: {{page-size}};
   margin-top: 1in;
   margin-right: 1in;
   margin-bottom: 0.75in;
@@ -2196,7 +2177,7 @@ otherwise kill destination buffer."
 }
 @page screenplay {
   @top-right-corner {
-    font-family: ${font};
+    font-family: {{font}};
     font-size: 12pt;
     content: counter(page) \".\";
     vertical-align: bottom;
@@ -2211,7 +2192,7 @@ otherwise kill destination buffer."
 .screenplay {
   page: screenplay;
   counter-reset: page;
-  font-family: ${font};
+  font-family: {{font}};
   font-size: 12pt;
   line-height: 1;
   max-width: 6in;
@@ -2219,7 +2200,7 @@ otherwise kill destination buffer."
   -webkit-text-size-adjust: none;
 }
 .screenplay .title-page {
-  display: ${include-title-page};
+  display: {{include-title-page}};
   page: screenplay-title;
   page-break-after: always;
   margin-top: 0;
@@ -2237,9 +2218,9 @@ otherwise kill destination buffer."
   }
 }
 .screenplay .title-page .title h1 {
-  font-weight: ${title-bold};
-  text-transform: ${title-upcase};
-  text-decoration: ${title-underline};
+  font-weight: {{title-bold}};
+  text-transform: {{title-upcase}};
+  text-decoration: {{title-underline}};
 }
 .screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
   font-weight: inherit;
@@ -2259,11 +2240,11 @@ otherwise kill destination buffer."
 }
 .screenplay .scene {
   width: 100%;
-  margin-top: ${scene-heading-spacing};
+  margin-top: {{scene-heading-spacing}};
 }
 .screenplay .scene-heading {
-  font-weight: ${scene-heading-bold};
-  text-decoration: ${scene-heading-underline};
+  font-weight: {{scene-heading-bold}};
+  text-decoration: {{scene-heading-underline}};
   margin-bottom: 0em;
   clear: both;
   page-break-after: avoid;
@@ -2354,6 +2335,8 @@ otherwise kill destination buffer."
 }
 .screenplay .section-heading {
   display: block;
+  text-align: center;
+  text-decoration: underline;
 }
 .screenplay .menu {
   display: none;
@@ -2369,32 +2352,27 @@ otherwise kill destination buffer."
 <body>
 <section class=\"screenplay\">
 <section class=\"title-page\">
-<div class=\"title\">
-<h1>${title}</h1>
-<p>${credit}</p>
-<p>${author}</p>
-</div>
-<div class=\"contact\">
-${contact-template}
-</div>
+<p class=\"title\">{{title-template}}</p>
+<p class=\"contact\">{{contact-template}}</p>
 </section>
-${content}\
+{{content}}\
 <div class=\"menu\">Aa</div>
 </section>
 </body>")
-     (section "<section class=\"section\">\n${content}</section>\n")
-     (section-heading "<h1 class=\"section-heading\">${content}</h1>\n")
-     (scene "<section class=\"scene\">\n${content}</section>\n")
-     (scene-heading "<h2 class=\"scene-heading\" id=\"${scene-number}\">${content}</h2>\n")
-     (dialog "<div class=\"${dual-dialog}\">\n${content}</div>\n")
-     (character "<p class=\"character\">${content}</p>\n")
-     (paren "<p class=\"paren\">${content}</p>\n")
-     (lines "<p class=\"lines\">${content}</p>\n")
-     (trans "<p class=\"trans\">${content}</p>\n")
-     (action "<p class=\"action\">${content}</p>\n")
-     (synopsis "<p class=\"synopsis\">${content}</p>\n")
-     (note "<p class=\"note\">${content}</p>\n")
-     (center "<p class=\"center\">${content}</p>\n"))
+     (section "<section class=\"section\">\n{{content}}</section>\n")
+     (section-heading "<h1 class=\"section-heading\">{{content}}</h1>\n")
+     (scene "<section class=\"scene\">\n{{content}}</section>\n")
+     (scene-heading "<h2 class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</h2>\n")
+     (dialog "<div class=\"{{dual-dialog}}\">\n{{content}}</div>\n")
+     (character "<p class=\"character\">{{content}}</p>\n")
+     (paren "<p class=\"paren\">{{content}}</p>\n")
+     (lines "<p class=\"lines\">{{content}}</p>\n")
+     (trans "<p class=\"trans\">{{content}}</p>\n")
+     (action "<p class=\"action\">{{content}}</p>\n")
+     (break "<br>\n")
+     (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
+     (note "<p class=\"note\">{{content}}</p>\n")
+     (center "<p class=\"center\">{{content}}</p>\n"))
     "Association list of element templates for exporting to HTML.
 Takes the form:
 
@@ -2426,7 +2404,7 @@ Fountain ELEMENTs:
     center              string of center text, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
-`${key}'. Each TEMPLATE should include the ${content} key. See
+`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
     :type 'fountain-element-list-type
@@ -2451,6 +2429,7 @@ calculated."
     ("\\*\\(.+?\\)\\*" "<em>\\1</em>")
     ("^~\s*\\(.+?\\)$\\*\\*" "<i>\\1</i>")
     ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
+    ("\n\n+" "<br><br>")
     ("\n" "<br>"))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
@@ -2476,14 +2455,11 @@ character codes, then format replacement is made."
 
 (defcustom fountain-export-tex-template
   '((document "\
-\\documentclass[12pt,${page-size}]{article}
+\\documentclass[12pt,{{page-size}}]{article}
 
 % Conditionals
 \\usepackage{etoolbox}
 \\newtoggle{includetitlepage}
-\\newtoggle{underlinetitle}
-\\newtoggle{uppercasetitle}
-\\newtoggle{boldtitle}
 \\newtoggle{contactalignright}
 \\newtoggle{doublespacesceneheadings}
 \\newtoggle{underlinesceneheadings}
@@ -2491,23 +2467,20 @@ character codes, then format replacement is made."
 \\newtoggle{includescenenumbers}
 \\newtoggle{numberfirstpage}
 
-\\settoggle{includetitlepage}{${include-title-page}}
-\\settoggle{underlinetitle}{${title-underline}}
-\\settoggle{uppercasetitle}{${title-upcase}}
-\\settoggle{boldtitle}{${title-bold}}
-\\settoggle{contactalignright}{${title-contact-align}}
-\\settoggle{doublespacesceneheadings}{${scene-heading-spacing}}
-\\settoggle{underlinesceneheadings}{${scene-heading-underline}}
-\\settoggle{boldsceneheadings}{${scene-heading-bold}}
-\\settoggle{includescenenumbers}{${include-scene-numbers}}
-\\settoggle{numberfirstpage}{${number-first-page}}
+\\settoggle{includetitlepage}{{{include-title-page}}}
+\\settoggle{contactalignright}{{{title-contact-align}}}
+\\settoggle{doublespacesceneheadings}{{{scene-heading-spacing}}}
+\\settoggle{underlinesceneheadings}{{{scene-heading-underline}}}
+\\settoggle{boldsceneheadings}{{{scene-heading-bold}}}
+\\settoggle{includescenenumbers}{{{include-scene-numbers}}}
+\\settoggle{numberfirstpage}{{{number-first-page}}}
 
 % Page Layout Settings
 \\usepackage[left=1.5in,right=1in,top=1in,bottom=0.75in]{geometry}
 
 % Font Settings
 \\usepackage{fontspec}
-\\setmonofont{${font}}
+\\setmonofont{{{font}}}
 \\renewcommand{\\familydefault}{\\ttdefault}
 
 % Text Settings
@@ -2541,44 +2514,37 @@ character codes, then format replacement is made."
 % Title Page
 \\usepackage{titling}
 
-\\title{${title}}
-\\author{${author}}
-\\date{${date}}
-\\newcommand{\\credit}{${credit}}
-\\newcommand{\\contact}{${contact-template}}
+\\title{{{title}}}
+\\author{{{author}}}
+\\date{{{date}}}
+\\newcommand{\\credit}{{{credit}}}
+\\newcommand{\\titletemplate}{{{title-template}}}
+\\newcommand{\\contacttemplate}{{{contact-template}}}
 
 \\newcommand{\\maketitlepage}{
   \\thispagestyle{empty}
   \\vspace*{3in}
 
-  \\iftoggle{boldtitle}{%
-    \\let\\BFtmp\\thetitle
-    \\renewcommand{\\thetitle}{\\textbf{\\BFtmp}}%
-  }{}
-  \\iftoggle{underlinetitle}{%
-    \\let\\ULtmp\\thetitle
-    \\renewcommand{\\thetitle}{\\uline{\\ULtmp}}%
-  }{}%
-
   \\begin{center}
-    \\iftoggle{uppercasetitle}{%
-      \\begin{MakeUppercase}
-        \\thetitle
-      \\end{MakeUppercase}
-    }{\\thetitle}\\par
-    \\credit\\par
-    \\theauthor\\par
+    \\titletemplate\\par
   \\end{center}
 
   \\vspace{3in}
   \\iftoggle{contactalignright}{%
     \\begin{flushright}
-      \\contact
+      \\contacttemplate
     \\end{flushright}
   }{%
-    \\contact
+    \\contacttemplate
   }\\par
   \\clearpage
+}
+
+% Section Headings
+\\newcommand{\\sectionheading}[1]{%
+  \\begin{center}
+    \\uline{#1}
+  \\end{center}
 }
 
 % Scene Headings
@@ -2603,8 +2569,8 @@ character codes, then format replacement is made."
 
 % Dialogue
 \\usepackage{xstring}
-\\newcommand{\\contd}{${contd}}
-\\newcommand{\\more}{${more}}
+\\newcommand{\\contd}{{{contd}}}
+\\newcommand{\\more}{{{more}}}
 \\newlength{\\characterindent}
 \\newlength{\\characterwidth}
 \\newlength{\\dialogindent}
@@ -2667,7 +2633,7 @@ character codes, then format replacement is made."
 
 \\setcounter{page}{1}
 \\iftoggle{numberfirstpage}{}{\\thispagestyle{empty}}
-${content}\
+{{content}}\
 \\end{document}
 
 % Local Variables:
@@ -2675,18 +2641,19 @@ ${content}\
 % TeX-engine: xetex
 % End:")
     (section nil)
-    (section-heading nil)
+    (section-heading "\\sectionheading{{{content}}}\n\n")
     (scene nil)
-    (scene-heading "\\sceneheading{${content}}\n\n")
-    (dialog "\\begin{dialog}${content}\\end{dialog}\n\n")
-    (character "{${content}}\n")
-    (paren "\\paren{${content}}\n")
-    (lines "${content}\n")
-    (trans "\\trans{${content}}\n\n")
-    (action "${content}\n\n")
+    (scene-heading "\\sceneheading{{{content}}}\n\n")
+    (dialog "\\begin{dialog}{{content}}\\end{dialog}\n\n")
+    (character "{{{content}}}\n")
+    (paren "\\paren{{{content}}}\n")
+    (lines "{{content}}\n")
+    (trans "\\trans{{{content}}}\n\n")
+    (action "{{content}}\n\n")
+    (break "\\clearpage\n\n")
     (synopsis "")
     (note "")
-    (center "\\centertext{${content}}\n\n"))
+    (center "\\centertext{{{content}}}\n\n"))
   "Association list of element templates for exporting to LaTeX.
 Takes the form:
 
@@ -2718,7 +2685,7 @@ Fountain ELEMENTs:
     center              string of center text, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
-`${key}'. Each TEMPLATE should include the ${content} key. See
+`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
   :type 'fountain-element-list-type
@@ -2734,6 +2701,7 @@ calculated."
     ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
     ("_\\(.+?\\)_" "\\\\uline{\\1}")
     ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
+    ("\n\n+" "\s\\\\par\s")
     ("\n" "\s\\\\protecting{\\\\\\\\}\s"))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
@@ -2762,22 +2730,23 @@ character codes, then format replacement is made."
 <?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>
 <FinalDraft DocumentType=\"Script\" Template=\"No\" Version=\"1\">
 <Content>
-${content}\
+{{content}}\
 </Content>
 </FinalDraft>")
     (section nil)
     (section-heading nil)
     (scene nil)
-    (scene-heading "<Paragraph Number=\"${scene-number}\" Type=\"Scene Heading\">\n<Text>${content}</Text>\n</Paragraph>\n")
+    (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (dialog nil)
-    (character "<Paragraph Type=\"Character\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (paren "<Paragraph Type=\"Parenthetical\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (lines "<Paragraph Type=\"Dialogue\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (trans "<Paragraph Type=\"Transition\">\n<Text>${content}</Text>\n</Paragraph>\n")
-    (action "<Paragraph Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n")
+    (character "<Paragraph Type=\"Character\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (paren "<Paragraph Type=\"Parenthetical\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (lines "<Paragraph Type=\"Dialogue\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (trans "<Paragraph Type=\"Transition\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (action "<Paragraph Type=\"Action\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (break "<Paragraph StartsNewPage=\"Yes\">\n</Paragraph>\n")
     (synopsis "")
     (note "")
-    (center "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>${content}</Text>\n</Paragraph>\n"))
+    (center "<Paragraph Alignment=\"Center\" Type=\"Action\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
   "Association list of element templates for exporting to Final Draft.
 Takes the form:
 
@@ -2809,7 +2778,7 @@ Fountain ELEMENTs:
     center              string of center text, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
-`${key}'. Each TEMPLATE should include the ${content} key. See
+`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
   :type 'fountain-element-list-type
@@ -2831,27 +2800,28 @@ calculated."
 
 (defcustom fountain-export-fountain-template
   '((document "\
-title: ${title}
-credit: ${credit}
-author: ${author}
-date: ${date}
+title: {{title}}
+credit: {{credit}}
+author: {{author}}
+date: {{date}}
 contact:
-    ${contact-template}
+    {{contact-template}}
 
-${content}")
-    (section "${content}")
-    (section-heading "${content}\n\n")
-    (scene "${content}")
-    (scene-heading "${forced}${content}\n\n")
-    (dialog "${content}\n")
-    (character "${forced}${content}${dual-dialog}\n")
-    (paren "${content}\n")
-    (lines "${content}\n")
-    (trans "${forced}${content}\n\n")
-    (action "${forced}${content}\n\n")
-    (synopsis "= ${content}\n\n")
-    (note "[[ ${content} ]]\n\n")
-    (center "> ${content} <"))
+{{content}}")
+    (section "{{content}}")
+    (section-heading "{{content}}\n\n")
+    (scene "{{content}}")
+    (scene-heading "{{forced}}{{content}}\n\n")
+    (dialog "{{content}}\n")
+    (character "{{forced}}{{content}}{{dual-dialog}}\n")
+    (paren "{{content}}\n")
+    (lines "{{content}}\n")
+    (trans "{{forced}}{{content}}\n\n")
+    (action "{{forced}}{{content}}\n\n")
+    (break "===\n\n")
+    (synopsis "= {{content}}\n\n")
+    (note "[[ {{content}} ]]\n\n")
+    (center "> {{content}} <"))
   "Association list of element templates for exporting to Final Draft.
 Takes the form:
 
@@ -2883,7 +2853,7 @@ Fountain ELEMENTs:
     center              string of center text, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
-`${key}'. Each TEMPLATE should include the ${content} key. See
+`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
   :type 'fountain-element-list-type
