@@ -2107,14 +2107,16 @@ strings."
               (progress-reporter-done fountain-parse-job)
               (setq fountain-export-job
                     (make-progress-reporter "Exporting..."))
-              (if standalone
-                  (fountain-export-format-element
-                   (list 'document metadata tree) format includes)
-                (let (string)
-                  (dolist (element tree string)
-                    (setq string
-                          (concat string (fountain-export-format-element
-                                          element format includes))))))))) ; FIXME: DRY
+              (unwind-protect
+                  (if standalone
+                      (fountain-export-format-element
+                       (list 'document metadata tree) format includes)
+                    (let (string)
+                      (dolist (element tree string)
+                        (setq string
+                              (concat string (fountain-export-format-element
+                                              element format includes)))))) ; FIXME: DRY
+                (progress-reporter-done fountain-export-job)))))
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
@@ -2148,7 +2150,6 @@ otherwise kill destination buffer."
               (with-silent-modifications
                 (erase-buffer)
                 (insert string))))
-          (progress-reporter-done fountain-export-job)
           (setq complete t)
           (switch-to-buffer destbuf)
           (write-file (buffer-name) t)
