@@ -2107,7 +2107,7 @@ strings."
               (progress-reporter-done fountain-parse-job)
               (setq fountain-export-job
                     (make-progress-reporter "Exporting..."))
-              (unwind-protect
+              (prog1
                   (if standalone
                       (fountain-export-format-element
                        (list 'document metadata tree) format includes)
