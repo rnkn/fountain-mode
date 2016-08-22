@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 2.2.0
+;; Version: 2.2.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -121,7 +121,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.2.0")
+  "2.2.1")
 
 
 ;;; Requirements
@@ -439,7 +439,7 @@ if you prefer the latter, set this option to non-nil."
 
 (defcustom fountain-note-template
   " {{time}} - {{fullname}}: "
-  "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
+  "\\<fountain-mode-map>Template for inserting notes with `fountain-insert-note' (\\[fountain-insert-note]).
 
 To include an item in a template you must use the full `{{KEY}}'
 syntax.
