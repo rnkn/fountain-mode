@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 2.1.4
+;; Version: 2.1.5
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -121,7 +121,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.1.4")
+  "2.1.5")
 
 
 ;;; Requirements
@@ -617,11 +617,11 @@ Used by `fountain-outline-cycle'.")
 Used by `fountain-outline-cycle'.")
 
 (defvar-local fountain-parse-job
-  (make-progress-reporter "Parsing..." 0 100)
+  nil
   "Buffer parsing progress reporter.")
 
 (defvar-local fountain-export-job
-  (make-progress-reporter "Exporting...")
+  nil
   "Buffer export progress reporter.")
 
 
@@ -1273,7 +1273,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
       (delete-region (match-beginning 0) (match-end 0)))))
 
 
-;;;; Outline Functions
+;;; Outline Functions
 
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
@@ -1281,6 +1281,47 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defalias 'fountain-outline-backward 'outline-backward-same-level)
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
+
+(defcustom fountain-patch-emacs-bugs
+  t
+  "If non-nil, attempt to patch known bugs in Emacs <= 24.4.
+See function `fountain-patch-emacs-bugs'."
+  :type 'boolean
+  :group 'fountain)
+
+(defun fountain-outline-invisible-p (&optional pos)
+  "Override `outline-invisible-p' for correct return.
+
+Return non-nil only if the character after POS or `point' has
+invisible text property `eq' to 'outline. See
+<http://debbugs.gnu.org/24073>."
+  (eq (get-char-property (or pos (point)) 'invisible) 'outline))
+
+(defun fountain-patch-emacs-bugs ()
+  "Attempt to patch known bugs in Emacs <= 24.4.
+
+Adds advice to override `outline-invisible-p' to return non-nil
+only if the character after POS or `point' has invisible text
+property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
+  (unless (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
+    ;; The original `outline-invisible-p' returns non-nil for ANY invisible
+    ;; property of text at point:
+    ;; (get-char-property (or pos (point)) 'invisible))
+    ;; We want to only return non-nil if property is 'outline
+    (advice-add 'outline-invisible-p :override 'fountain-outline-invisible-p)
+    ;; Because `outline-invisible-p' is an inline function, we need to
+    ;; reevaluate those functions that called the original bugged version.
+    ;; This is impossible for users who have installed Emacs without
+    ;; uncompiled source, so we need to demote errors.
+    (with-demoted-errors
+        (dolist (fun '(outline-back-to-heading
+                       outline-on-heading-p
+                       outline-next-visible-heading))
+          (let ((source (find-function-noselect fun)))
+            (with-current-buffer (car source)
+              (goto-char (cdr source))
+              (eval (read (current-buffer))))))
+      (message "fountain-mode: Function `outline-invisible-p' has been patched"))))
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
@@ -1680,8 +1721,7 @@ moves to property value of end of element."
           (let ((element (fountain-parse-element)))
             (setq list (cons element list))
             (goto-char (plist-get (nth 1 element) 'end))
-            (progress-reporter-force-update fountain-parse-job
-                                            (* (/ (float (point)) (buffer-size)) 100)))))
+            (progress-reporter-update fountain-parse-job))))
     (reverse list)))
 
 
@@ -2032,6 +2072,7 @@ recursively call self, concatenating the resulting strings."
         (tree (nth 2 element)))
     (cond ((and (stringp tree)
                 (member type includes))
+           (progress-reporter-update fountain-export-job)
            (fountain-export-format-template
             type plist (fountain-export-format-string tree format) format))
           ((listp tree)
@@ -2078,22 +2119,26 @@ strings."
                  (end (if (re-search-forward fountain-script-end-regexp end t)
                           (match-beginning 0)
                         end))
-                 (string (buffer-substring-no-properties beg end)))
+                 (string (buffer-substring-no-properties beg end))
+                 tree)
             (with-temp-buffer
               (insert string)
               (fountain-init-vars)
               (fountain-delete-comments-in-region (point-min) (point-max))
-              (let ((tree (fountain-parse-region (point-min) (point-max))))
-                (progress-reporter-done fountain-parse-job)
-                (if standalone
-                    (fountain-export-format-element
-                     (list 'document metadata tree) format includes)
-                  (let (string)
-                    (dolist (element tree string)
-                      (setq string
-                            (concat string (fountain-export-format-element
-                                            element format includes)))))))))) ; FIXME: DRY
-      (progress-reporter-done fountain-export-job)
+              (setq fountain-parse-job
+                    (make-progress-reporter "Parsing..."))
+              (setq tree (fountain-parse-region (point-min) (point-max)))
+              (progress-reporter-done fountain-parse-job)
+              (setq fountain-export-job
+                    (make-progress-reporter "Exporting..."))
+              (if standalone
+                  (fountain-export-format-element
+                   (list 'document metadata tree) format includes)
+                (let (string)
+                  (dolist (element tree string)
+                    (setq string
+                          (concat string (fountain-export-format-element
+                                          element format includes))))))))) ; FIXME: DRY
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
@@ -2127,6 +2172,7 @@ otherwise kill destination buffer."
               (with-silent-modifications
                 (erase-buffer)
                 (insert string))))
+          (progress-reporter-done fountain-export-job)
           (setq complete t)
           (switch-to-buffer destbuf)
           (write-file (buffer-name) t)
@@ -3221,7 +3267,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
        (fountain-match-element 'fountain-match-scene-heading limit))
      ((:level 2 :subexp 0)
       (:level 2 :subexp 2 :face fountain-comment
-              ;; :invisible fountain-syntax-chars
+              :invisible fountain-syntax-chars
               :override t
               :laxmatch t)
       (:level 1 :subexp 4
@@ -3682,7 +3728,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
   (if fountain-hide-emphasis-delim
       (add-to-invisibility-spec 'fountain-emphasis-delim))
   (if fountain-hide-syntax-chars
-      (add-to-invisibility-spec 'fountain-syntax))
+      (add-to-invisibility-spec 'fountain-syntax-chars))
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local font-lock-extra-managed-props
               '(display line-prefix wrap-prefix invisible))
@@ -3694,6 +3740,8 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
             #'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
             #'font-lock-refresh-defaults)
+  (if fountain-patch-emacs-bugs
+      (fountain-patch-emacs-bugs))
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
