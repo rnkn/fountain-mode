@@ -1270,6 +1270,14 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
+(when (version< emacs-version "25")
+  (defalias 'outline-show-all 'show-all)
+  (defalias 'outline-show-entry 'show-entry)
+  (defalias 'outline-show-subtree 'show-subtree)
+  (defalias 'outline-show-children 'show-children)
+  (defalias 'outline-hide-subtree 'hide-subtree)
+  (defalias 'outline-hide-sublevels 'hide-sublevels))
+
 (defcustom fountain-patch-emacs-bugs
   t
   "If non-nil, attempt to patch known bugs in Emacs <= 24.4.
@@ -1360,7 +1368,7 @@ property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
     (insert (delete-and-extract-region beg end))
     (goto-char insert-point)
     (if folded
-        (hide-subtree))
+        (outline-hide-subtree))
     ;; remove temp newline
     (if hanging-line
         (save-excursion
@@ -1377,13 +1385,13 @@ property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
   "Set outline visibilty to outline level N.
 Display a message unless SILENT."
   (cond ((= n 0)
-         (show-all)
+         (outline-show-all)
          (unless silent (message "Showing all")))
         ((= n 6)
-         (hide-sublevels n)
+         (outline-hide-sublevels n)
          (unless silent (message "Showing scene headings")))
         (t
-         (hide-sublevels n)
+         (outline-hide-sublevels n)
          (unless silent (message "Showing level %s headings" n))))
   (setq fountain-outline-cycle n))
 
@@ -1397,32 +1405,31 @@ Display a message unless SILENT."
     \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in
                     `fountain-outline-custom-level'"
   (interactive "p")
-  (let* ((custom-level
-          (if fountain-outline-custom-level
-              (save-excursion
-                (goto-char (point-min))
-                (let (found)
-                  (while (and (not found)
-                              (outline-next-heading))
-                    (if (= (funcall outline-level)
-                           fountain-outline-custom-level)
-                        (setq found t)))
-                  (if found fountain-outline-custom-level)))))
-         (highest-level
-          (save-excursion
-            (goto-char (point-max))
-            (outline-back-to-heading t)
-            (let ((level (funcall outline-level)))
-              (while (and (not (bobp))
-                          (< 1 level))
-                (outline-up-heading 1 t)
-                (unless (bobp)
-                  (setq level (funcall outline-level))))
-              level))))
+  (let ((custom-level
+         (if fountain-outline-custom-level
+             (save-excursion
+               (goto-char (point-min))
+               (let (found)
+                 (while (and (not found)
+                             (outline-next-heading))
+                   (if (= (funcall outline-level)
+                          fountain-outline-custom-level)
+                       (setq found t)))
+                 (if found fountain-outline-custom-level)))))
+        (highest-level
+         (save-excursion
+           (goto-char (point-max))
+           (outline-back-to-heading t)
+           (let ((level (funcall outline-level)))
+             (while (and (not (bobp))
+                         (< 1 level))
+               (outline-up-heading 1 t)
+               (unless (bobp)
+                 (setq level (funcall outline-level))))
+             level))))
     (cond ((eq arg 4)
            (cond
-            ((and custom-level
-                  (= fountain-outline-cycle 1))
+            ((and (= fountain-outline-cycle 1) custom-level)
              (fountain-outline-hide-level custom-level))
             ((< 0 fountain-outline-cycle 6)
              (fountain-outline-hide-level 6))
@@ -1433,11 +1440,10 @@ Display a message unless SILENT."
             (t
              (fountain-outline-hide-level highest-level))))
           ((eq arg 16)
-           (show-all)
+           (outline-show-all)
            (message "Showing all")
            (setq fountain-outline-cycle 0))
-          ((and custom-level
-                (eq arg 64))
+          ((and (eq arg 64) custom-level)
            (fountain-outline-hide-level custom-level))
           (t
            (save-excursion
@@ -1470,17 +1476,17 @@ Display a message unless SILENT."
                  (setq fountain-outline-cycle-subtree 0))
                 ((and (<= eos eol)
                       children)
-                 (show-entry)
-                 (show-children)
+                 (outline-show-entry)
+                 (outline-show-children)
                  (message "Showing headings")
                  (setq fountain-outline-cycle-subtree 2))
                 ((or (<= eos eol)
                      (= fountain-outline-cycle-subtree 2))
-                 (show-subtree)
+                 (outline-show-subtree)
                  (message "Showing contents")
                  (setq fountain-outline-cycle-subtree 3))
                 (t
-                 (hide-subtree)
+                 (outline-hide-subtree)
                  (message "Hiding contents")
                  (setq fountain-outline-cycle-subtree 1)))))))))
 
