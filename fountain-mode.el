@@ -3224,7 +3224,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
                    fountain-align-elements
                    fountain-add-continued-dialog
                    fountain-export-include-title-page
-                   fountain-export-title-format
                    fountain-export-scene-heading-format
                    font-lock-maximum-decoration))
       (if (customize-mark-to-save opt)
