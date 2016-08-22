@@ -1301,7 +1301,7 @@ property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
     ;; reevaluate those functions that called the original bugged version.
     ;; This is impossible for users who have installed Emacs without
     ;; uncompiled source, so we need to demote errors.
-    (with-demoted-errors
+    (with-demoted-errors "Error: %S"
         (dolist (fun '(outline-back-to-heading
                        outline-on-heading-p
                        outline-next-visible-heading))
