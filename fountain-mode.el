@@ -3246,7 +3246,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)
-      (:level 1 :subexp 4
+      (:level 2 :subexp 4
               :display (- right-margin fountain-align-scene-number)
               :laxmatch t)))
     ("character"
