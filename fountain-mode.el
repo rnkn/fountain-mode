@@ -2896,9 +2896,10 @@ If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
   (if arg
-      (save-excursion
-        (forward-line 0)
-        (insert-char ?.)))
+      (unless (fountain-match-scene-heading)
+        (save-excursion
+          (forward-line 0)
+          (insert-char ?.))))
   (upcase-region (line-beginning-position) (point))
   (insert-char ?\n))
 
