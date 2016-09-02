@@ -1017,7 +1017,8 @@ comments."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (forward-line 0)
-      (and (let ((case-fold-search nil))
+      (and (not (looking-at fountain-forced-action-mark-regexp))
+           (let ((case-fold-search nil))
              (looking-at fountain-character-regexp))
            (save-match-data
              (save-restriction
@@ -1656,7 +1657,11 @@ Includes child elements."
     (list 'action
           (list 'begin beg
                 'end end)
-          (buffer-substring-no-properties beg end)))) ; FIXME: remove s
+          (buffer-substring-no-properties
+           (if (string-match fountain-forced-action-mark-regexp
+                             (buffer-substring beg end))
+               (1+ beg) beg)
+           end))))
 
 (defun fountain-parse-element ()
   "Call appropropriate element parsing function for matched element at point."
