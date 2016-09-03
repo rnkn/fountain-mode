@@ -1552,7 +1552,7 @@ Includes child elements."
 Includes child elements."
   (let ((heading (fountain-parse-scene-heading))
         (num (match-string-no-properties 6)) ; FIXME: get-scene-number
-        (beg (point))
+        (beg (match-beginning 0))
         (end (save-excursion
                (outline-end-of-subtree)
                (unless (eobp)
@@ -1585,7 +1585,7 @@ Includes child elements."
                                 'dual dual)
                           (match-string-no-properties 3)))
          (name (match-string-no-properties 4))
-         (beg (point))
+         (beg (match-beginning 0))
          (end (save-excursion
                 (if (re-search-forward "^\s?$" nil 'move)
                     (match-beginning 0)
@@ -1648,7 +1648,7 @@ Includes child elements."
 
 (defun fountain-parse-action ()
   "Return an element list for action at point."
-  (let ((beg (point))
+  (let ((beg (line-beginning-position))
         (end (save-excursion
                (while (not (or (fountain-tachyon-p)
                                (eobp)))
@@ -1705,7 +1705,8 @@ moves to property value of end of element."
           (let ((element (fountain-parse-element)))
             (setq list (cons element list))
             (goto-char (plist-get (nth 1 element) 'end))
-            (progress-reporter-update fountain-parse-job))))
+            (if fountain-parse-job
+                (progress-reporter-update fountain-parse-job)))))
     (reverse list)))
 
 
@@ -2123,6 +2124,8 @@ strings."
                               (concat string (fountain-export-format-element
                                               element format includes)))))) ; FIXME: DRY
                 (progress-reporter-done fountain-export-job)))))
+      (setq fountain-parse-job nil
+            fountain-export-job nil)
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
