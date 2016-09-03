@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 2.2.1
+;; Version: 2.2.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -121,7 +121,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.2.1")
+  "2.2.2")
 
 
 ;;; Requirements
@@ -1281,9 +1281,10 @@ See function `fountain-patch-emacs-bugs'."
 (defun fountain-outline-invisible-p (&optional pos)
   "Override `outline-invisible-p' for correct return.
 
-Return non-nil only if the character after POS or `point' has
-invisible text property `eq' to 'outline. See
-<http://debbugs.gnu.org/24073>."
+Non-nil if the character after POS has outline invisible property.
+If POS is nil, use `point' instead.
+
+See <http://debbugs.gnu.org/24073>."
   (eq (get-char-property (or pos (point)) 'invisible) 'outline))
 
 (defun fountain-patch-emacs-bugs ()
