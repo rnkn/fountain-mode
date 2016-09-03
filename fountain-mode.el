@@ -3007,9 +3007,10 @@ If N is 0, move to beginning of scene."
 If LIMIT is 'scene, halt at end of scene. If LIMIT is 'dialog,
 halt at end of dialog."
   (interactive "^p")
-  (let* ((i (or n 1))
-         (p (if (< i 1) -1 1)))
-    (while (/= i 0)
+  (let (p)
+    (setq n (or n 1)
+          p (if (< n 1) -1 1))
+    (while (/= n 0)
       (if (fountain-match-character)
           (forward-line p))
       (while (cond ((eq limit 'scene)
@@ -3024,13 +3025,13 @@ halt at end of dialog."
                    ((not (or (= (point) (buffer-end p))
                              (fountain-match-character)))))
         (forward-line p))
-      (setq i (- i p)))))
+      (setq n (- n p)))))
 
 (defun fountain-backward-character (&optional n)
   "Move backward N character (foward if N is negative)."
   (interactive "^p")
-  (let ((i (or n 1)))
-    (fountain-forward-character (- i))))
+  (setq n (or n 1))
+  (fountain-forward-character (- n)))
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
