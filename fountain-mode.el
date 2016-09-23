@@ -1912,7 +1912,7 @@ Takes the form:
     (FORMAT KEYWORD PROPERTY)")
 
 (define-widget 'fountain-element-list-type 'lazy
-  "Doc"
+  "Customize widget for Fountain templates."
   :offset 4
   :type '(list
           (group (const :tag "Document" document)
@@ -2021,11 +2021,11 @@ If TYPE corresponds to a FORMAT that corresponds to a template in
                                                         ((eq type 'character)
                                                          "@")
                                                         ((eq type 'trans)
-                                                         "> "))))
+                                                         ">\s"))))
                                         (cons "dual-dialog"
                                               (cond ((and (eq format 'fountain)
                                                           (eq (plist-get plist 'dual) 'right))
-                                                     " ^")
+                                                     "\s^")
                                                     ((eq format 'html)
                                                      (let ((opt (plist-get plist 'dual)))
                                                        (cond ((eq opt 'left)
