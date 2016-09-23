@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 2.1.5
+;; Version: 2.2.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -121,7 +121,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.1.5")
+  "2.2.2")
 
 
 ;;; Requirements
@@ -439,7 +439,7 @@ if you prefer the latter, set this option to non-nil."
 
 (defcustom fountain-note-template
   " {{time}} - {{fullname}}: "
-  "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
+  "\\<fountain-mode-map>Template for inserting notes with `fountain-insert-note' (\\[fountain-insert-note]).
 
 To include an item in a template you must use the full `{{KEY}}'
 syntax.
@@ -1029,7 +1029,8 @@ comments."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (forward-line 0)
-      (and (let ((case-fold-search nil))
+      (and (not (looking-at fountain-forced-action-mark-regexp))
+           (let ((case-fold-search nil))
              (looking-at fountain-character-regexp))
            (save-match-data
              (save-restriction
@@ -1292,9 +1293,10 @@ See function `fountain-patch-emacs-bugs'."
 (defun fountain-outline-invisible-p (&optional pos)
   "Override `outline-invisible-p' for correct return.
 
-Return non-nil only if the character after POS or `point' has
-invisible text property `eq' to 'outline. See
-<http://debbugs.gnu.org/24073>."
+Non-nil if the character after POS has outline invisible property.
+If POS is nil, use `point' instead.
+
+See <http://debbugs.gnu.org/24073>."
   (eq (get-char-property (or pos (point)) 'invisible) 'outline))
 
 (defun fountain-patch-emacs-bugs ()
@@ -1313,7 +1315,7 @@ property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
     ;; reevaluate those functions that called the original bugged version.
     ;; This is impossible for users who have installed Emacs without
     ;; uncompiled source, so we need to demote errors.
-    (with-demoted-errors
+    (with-demoted-errors "Error: %S"
         (dolist (fun '(outline-back-to-heading
                        outline-on-heading-p
                        outline-next-visible-heading))
@@ -1502,7 +1504,7 @@ Display a message unless SILENT."
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-    1:  Top-level section headins
+    1:  Top-level section headings
     2:  Value of `fountain-outline-custom-level'
     3:  All section headings and scene headings
     4:  Everything"
@@ -1562,7 +1564,7 @@ Includes child elements."
 Includes child elements."
   (let ((heading (fountain-parse-scene-heading))
         (num (match-string-no-properties 6)) ; FIXME: get-scene-number
-        (beg (point))
+        (beg (match-beginning 0))
         (end (save-excursion
                (outline-end-of-subtree)
                (unless (eobp)
@@ -1595,7 +1597,7 @@ Includes child elements."
                                 'dual dual)
                           (match-string-no-properties 3)))
          (name (match-string-no-properties 4))
-         (beg (point))
+         (beg (match-beginning 0))
          (end (save-excursion
                 (if (re-search-forward "^\s?$" nil 'move)
                     (match-beginning 0)
@@ -1666,7 +1668,7 @@ Includes child elements."
 
 (defun fountain-parse-action ()
   "Return an element list for action at point."
-  (let ((beg (point))
+  (let ((beg (line-beginning-position))
         (end (save-excursion
                (while (not (or (fountain-tachyon-p)
                                (eobp)))
@@ -1676,7 +1678,11 @@ Includes child elements."
     (list 'action
           (list 'begin beg
                 'end end)
-          (buffer-substring-no-properties beg end)))) ; FIXME: remove s
+          (buffer-substring-no-properties
+           (if (string-match fountain-forced-action-mark-regexp
+                             (buffer-substring beg end))
+               (1+ beg) beg)
+           end))))
 
 (defun fountain-parse-element ()
   "Call appropropriate element parsing function for matched element at point."
@@ -1721,7 +1727,8 @@ moves to property value of end of element."
           (let ((element (fountain-parse-element)))
             (setq list (cons element list))
             (goto-char (plist-get (nth 1 element) 'end))
-            (progress-reporter-update fountain-parse-job))))
+            (if fountain-parse-job
+                (progress-reporter-update fountain-parse-job)))))
     (reverse list)))
 
 
@@ -2131,14 +2138,18 @@ strings."
               (progress-reporter-done fountain-parse-job)
               (setq fountain-export-job
                     (make-progress-reporter "Exporting..."))
-              (if standalone
-                  (fountain-export-format-element
-                   (list 'document metadata tree) format includes)
-                (let (string)
-                  (dolist (element tree string)
-                    (setq string
-                          (concat string (fountain-export-format-element
-                                          element format includes))))))))) ; FIXME: DRY
+              (prog1
+                  (if standalone
+                      (fountain-export-format-element
+                       (list 'document metadata tree) format includes)
+                    (let (string)
+                      (dolist (element tree string)
+                        (setq string
+                              (concat string (fountain-export-format-element
+                                              element format includes)))))) ; FIXME: DRY
+                (progress-reporter-done fountain-export-job)))))
+      (setq fountain-parse-job nil
+            fountain-export-job nil)
       (fountain-outline-hide-level level t))))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
@@ -2172,7 +2183,6 @@ otherwise kill destination buffer."
               (with-silent-modifications
                 (erase-buffer)
                 (insert string))))
-          (progress-reporter-done fountain-export-job)
           (setq complete t)
           (switch-to-buffer destbuf)
           (write-file (buffer-name) t)
@@ -2919,9 +2929,10 @@ If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
   (if arg
-      (save-excursion
-        (forward-line 0)
-        (insert-char ?.)))
+      (unless (fountain-match-scene-heading)
+        (save-excursion
+          (forward-line 0)
+          (insert-char ?.))))
   (upcase-region (line-beginning-position) (point))
   (insert-char ?\n))
 
@@ -2967,12 +2978,12 @@ If N is 0, move to beginning of scene."
   (let ((i (or n 1)))
     (fountain-forward-scene (- i))))
 
-(defun fountain-beginning-of-scene ()
+(defun fountain-beginning-of-scene ()   ; FIXME: needed?
   "Move point to beginning of current scene."
   (interactive "^")
   (fountain-forward-scene 0))
 
-(defun fountain-end-of-scene ()
+(defun fountain-end-of-scene ()         ; FIXME: needed?
   "Move point to end of current scene."
   (interactive "^")
   (fountain-forward-scene 1)
@@ -2997,7 +3008,7 @@ If N is 0, move to beginning of scene."
         (goto-char (mark))
         (user-error "Before first scene heading"))
     (push-mark)
-    (fountain-outline-next 1)
+    (fountain-forward-scene 1)
     (exchange-point-and-mark)))
 
 (defun fountain-goto-scene (n)          ; FIXME: scene numbering
@@ -3020,9 +3031,10 @@ If N is 0, move to beginning of scene."
 If LIMIT is 'scene, halt at end of scene. If LIMIT is 'dialog,
 halt at end of dialog."
   (interactive "^p")
-  (let* ((i (or n 1))
-         (p (if (< i 1) -1 1)))
-    (while (/= i 0)
+  (let (p)
+    (setq n (or n 1)
+          p (if (< n 1) -1 1))
+    (while (/= n 0)
       (if (fountain-match-character)
           (forward-line p))
       (while (cond ((eq limit 'scene)
@@ -3037,13 +3049,13 @@ halt at end of dialog."
                    ((not (or (= (point) (buffer-end p))
                              (fountain-match-character)))))
         (forward-line p))
-      (setq i (- i p)))))
+      (setq n (- n p)))))
 
 (defun fountain-backward-character (&optional n)
   "Move backward N character (foward if N is negative)."
   (interactive "^p")
-  (let ((i (or n 1)))
-    (fountain-forward-character (- i))))
+  (setq n (or n 1))
+  (fountain-forward-character (- n)))
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
@@ -3122,14 +3134,14 @@ then make the changes desired."
                           ((use-region-p)
                            (region-beginning))
                           (t
-                           (fountain-beginning-of-scene)
+                           (fountain-forward-scene 0)
                            (point))))
         (set-marker end
                     (cond (arg (point-max))
                           ((use-region-p)
                            (region-end))
                           (t
-                           (fountain-end-of-scene)
+                           (fountain-forward-scene 1)
                            (point))))
         ;; delete all matches in region
         (goto-char start)
@@ -3247,7 +3259,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
                    fountain-align-elements
                    fountain-add-continued-dialog
                    fountain-export-include-title-page
-                   fountain-export-title-format
                    fountain-export-scene-heading-format
                    font-lock-maximum-decoration))
       (if (customize-mark-to-save opt)
@@ -3270,7 +3281,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)
-      (:level 1 :subexp 4
+      (:level 2 :subexp 4
               :display (- right-margin fountain-align-scene-number)
               :laxmatch t)))
     ("character"
