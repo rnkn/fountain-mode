@@ -1492,7 +1492,7 @@ Display a message unless SILENT."
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-    1:  Top-level section headins
+    1:  Top-level section headings
     2:  Value of `fountain-outline-custom-level'
     3:  All section headings and scene headings
     4:  Everything"
@@ -2954,12 +2954,12 @@ If N is 0, move to beginning of scene."
   (let ((i (or n 1)))
     (fountain-forward-scene (- i))))
 
-(defun fountain-beginning-of-scene ()
+(defun fountain-beginning-of-scene ()   ; FIXME: needed?
   "Move point to beginning of current scene."
   (interactive "^")
   (fountain-forward-scene 0))
 
-(defun fountain-end-of-scene ()
+(defun fountain-end-of-scene ()         ; FIXME: needed?
   "Move point to end of current scene."
   (interactive "^")
   (fountain-forward-scene 1)
@@ -2984,7 +2984,7 @@ If N is 0, move to beginning of scene."
         (goto-char (mark))
         (user-error "Before first scene heading"))
     (push-mark)
-    (fountain-outline-next 1)
+    (fountain-forward-scene 1)
     (exchange-point-and-mark)))
 
 (defun fountain-goto-scene (n)          ; FIXME: scene numbering
@@ -3110,14 +3110,14 @@ then make the changes desired."
                           ((use-region-p)
                            (region-beginning))
                           (t
-                           (fountain-beginning-of-scene)
+                           (fountain-forward-scene 0)
                            (point))))
         (set-marker end
                     (cond (arg (point-max))
                           ((use-region-p)
                            (region-end))
                           (t
-                           (fountain-end-of-scene)
+                           (fountain-forward-scene 1)
                            (point))))
         ;; delete all matches in region
         (goto-char start)
