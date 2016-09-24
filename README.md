@@ -1,9 +1,9 @@
 Fountain Mode
 =============
 
-[![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.txt)
-[![MELPA Stable](http://stable.melpa.org/packages/fountain-mode-badge.svg)](http://stable.melpa.org/#/fountain-mode)
-[![MELPA](http://melpa.org/packages/fountain-mode-badge.svg)](http://melpa.org/#/fountain-mode)
+[![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
+[![MELPA Stable](https://stable.melpa.org/packages/fountain-mode-badge.svg)](https://stable.melpa.org/#/fountain-mode)
+[![MELPA](https://melpa.org/packages/fountain-mode-badge.svg)](https://melpa.org/#/fountain-mode)
 
 Fountain Mode is a complete screenwriting environment for GNU Emacs
 using the Fountain markup format. For more information on the Fountain markup
