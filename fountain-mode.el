@@ -1246,7 +1246,18 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
           (t 2))))
 
 
-;;;; Text Functions
+;;; Text Functions
+
+(defcustom fountain-auto-upcase-scene-headings
+  t
+  "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
+  :type 'boolean
+  :group 'fountain)
+
+(defun fountain-auto-upcase ()
+  (if (and fountain-auto-upcase-scene-headings
+           (fountain-match-scene-heading))
+      (upcase-region (line-beginning-position) (point))))
 
 (defun fountain-delete-comments-in-region (beg end)
   "Delete comments in region between BEG and END."
@@ -3681,6 +3692,11 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
       'fountain-align-elements)
      :style toggle
      :selected fountain-align-elements]
+    ["Auto-Upcase Scene Headings"
+     (fountain-toggle-custom-variable
+      'fountain-auto-upcase-scene-headings)
+     :style toggle
+     :selected fountain-auto-upcase-scene-headings]
     ["Add Continued Dialog"
      (fountain-toggle-custom-variable
       'fountain-add-continued-dialog)
@@ -3758,6 +3774,8 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
     (if (stringp n)
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
+  (add-hook 'post-self-insert-hook
+            #'fountain-auto-upcase t t)
   (add-hook 'font-lock-extend-region-functions
             #'fountain-font-lock-extend-region t t)
   (add-hook 'after-save-hook
