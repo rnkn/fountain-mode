@@ -2878,7 +2878,7 @@ contact:
     (synopsis "= {{content}}\n\n")
     (note "[[ {{content}} ]]\n\n")
     (center "> {{content}} <"))
-  "Association list of element templates for exporting to Final Draft.
+  "Association list of element templates for exporting to Fountain.
 Takes the form:
 
     ((ELEMENT TEMPLATE) ...)
