@@ -3184,16 +3184,17 @@ script may result in errors in output."
 
 e.g. \"AA10\" -> (10 1 1)"
   (let (number revision)
-  (if fountain-prefix-revised-scene-numbers
-      (when (string-match "\\([a-z]*\\)\\([0-9]+\\)" string)
-        (setq number (string-to-number (match-string-no-properties 2 string))
-              revision (upcase (match-string-no-properties 1 string))))
-    (when (string-match "\\([0-9]+\\)\\([a-z]*\\)" string)
-      (setq number (string-to-number (match-string-no-properties 1 string))
-            revision (upcase (match-string-no-properties 2 string)))))
-  (setq revision
-              (mapcar '(lambda (n) (- n 64)) revision))
-  (cons number revision)))
+    (when (stringp string)
+      (if fountain-prefix-revised-scene-numbers
+          (when (string-match "\\([a-z]*\\)[\\.-]*\\([0-9]+\\)[\\.-]*" string)
+            (setq number (string-to-number (match-string-no-properties 2 string))
+                  revision (upcase (match-string-no-properties 1 string))))
+        (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
+          (setq number (string-to-number (match-string-no-properties 1 string))
+                revision (upcase (match-string-no-properties 2 string)))))
+      (setq revision
+            (mapcar '(lambda (n) (- n 64)) revision))
+      (cons number revision))))
 
 (defun fountain-get-scene-number ()
   "Return the scene number of current scene."
