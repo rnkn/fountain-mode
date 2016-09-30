@@ -3179,45 +3179,86 @@ script may result in errors in output."
   :group 'fountain)
 
 (defun fountain-scene-number-to-list (string)
-  "Read scene number string and return a qualified list.
+  "Read scene number STRING and return a qualified list.
 
-e.g. \"AA10\" -> (10 1 1)"
+If `fountain-prefix-revised-scene-numbers' is non-nil:
+
+    \"10\" -> (10)
+    \"AA10\" -> (9 1 1)
+
+Or if nil:
+
+    \"10\" -> (10)
+    \"10AA\" -> (10 1 1)"
   (let (number revision)
     (when (stringp string)
       (if fountain-prefix-revised-scene-numbers
           (when (string-match "\\([a-z]*\\)[\\.-]*\\([0-9]+\\)[\\.-]*" string)
-            (setq number (string-to-number (match-string-no-properties 2 string))
-                  revision (upcase (match-string-no-properties 1 string))))
+            (setq number (string-to-number (match-string 2 string))
+                  revision (match-string 1 string))
+            (unless (string-empty-p revision) (setq number (1- number))))
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string))
-                revision (upcase (match-string-no-properties 2 string)))))
-      (setq revision
-            (mapcar '(lambda (n) (- n 64)) revision))
+                revision (match-string-no-properties 2 string))))
+      (setq revision (mapcar '(lambda (n) (- (upcase n) 64)) revision))
       (cons number revision))))
 
+(defun fountain-scene-number-to-string (list)
+  "Read scene number LIST and return a qualified string.
+
+If `fountain-prefix-revised-scene-numbers' is non-nil:
+
+    (10) -> \"10\"
+    (9 1 1) -> \"AA10\"
+
+Or if nil:
+
+    (10) -> \"10\"
+    (9 1 1) -> \"9AA\""
+  (when (listp list)
+    (let ((number (car list))
+              (revision (mapconcat '(lambda (a) (char-to-string (+ a 64)))
+                                   (cdr list) nil)))
+          (if fountain-prefix-revised-scene-numbers
+              (progn
+                (unless (string-empty-p revision) (setq number (1+ number)))
+                (concat revision (number-to-string number)))
+            (concat (number-to-string number) revision)))))
+
 (defun fountain-get-scene-number ()
-  "Return the scene number of current scene."
+  "Return the scene number of current scene as a qualified list."
   (save-excursion
     (save-restriction
       (widen)
       (fountain-forward-scene 0)
-      (or (match-string-no-properties 6)
+      (or (fountain-scene-number-to-list (match-string 6))
           (let ((pos (point))
                 scene)
             (goto-char (point-min))
             (unless (fountain-match-scene-heading)
-              (fountain-forward-scene 1))
-            (setq scene (or (match-string-no-properties 6)
-                            1))
-            (while (and (< (point) pos)
-                        (not (eobp)))
               (fountain-forward-scene 1)
-
-              (setq scene (or (match-string-no-properties 6)
-                              (1+ scene))))
-            (number-to-string scene))))))
-
-
+              (if (<= (point) pos)
+                  (setq scene
+                        (or (fountain-scene-number-to-list (match-string 6))
+                            (list 1)))
+                (user-error "Before first scene heading")))
+            (while (< (point) pos (point-max))
+              (fountain-forward-scene 1)
+              (setq scene
+                    (or (fountain-scene-number-to-list (match-string 6))
+                        (let ((scene-maybe (append (butlast scene)
+                                                   (list (1+ (car (last scene))))))
+                              (next-scene (save-excursion
+                                            (fountain-forward-scene 1)
+                                            (fountain-scene-number-to-list (match-string 6)))))
+                          (cond ((or (not next-scene)
+                                     (version-list-< scene-maybe next-scene))
+                                 scene-maybe)
+                                ((version-list-< next-scene scene)
+                                 (user-error "Scene numbers are out of order"))
+                                (t
+                                 (append scene (list 1))))))))
+            scene)))))
 
 ;; (defun fountain-add-scene-number (num)
 ;;   "Add scene number NUM to current scene heading."
