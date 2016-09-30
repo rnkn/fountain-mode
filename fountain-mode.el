@@ -121,7 +121,8 @@
 ;;; Code:
 
 (defconst fountain-version
-  (pkg-info-version-info 'fountain-mode))
+  "2.2.2")
+  ;; (pkg-info-version-info 'fountain-mode))
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
