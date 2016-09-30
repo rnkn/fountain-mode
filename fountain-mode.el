@@ -3140,25 +3140,84 @@ then make the changes desired."
 
 ;;; Scene Numbers
 
-;; (defun fountain-get-scene-number ()
-;;   "Return the scene number of current scene."
-;;   (save-excursion
-;;     (save-restriction
-;;       (widen)
-;;       (fountain-forward-scene 0)
-;;       (or (match-string-no-properties 5)
-;;           (let ((pos (point))
-;;                 scn)
-;;             (goto-char (point-min))
-;;             (unless (fountain-match-scene-heading)
-;;               (fountain-forward-scene 1))
-;;             (setq scn 1)
-;;             (while (and (< (point) pos)
-;;                         (not (eobp)))
-;;               (fountain-forward-scene 1)
-;;               (setq scn (or (match-string-no-properties 5)
-;;                             (1+ scn)))
-;;             (number-to-string scn)))))))
+(defcustom fountain-prefix-revised-scene-numbers
+  t
+  "If non-nil, prefix revision letters to scene numbers.
+
+When inserting new scenes in the first revision numbering works
+as follows:
+
+    10
+    A11 (new scene)
+    11
+
+...and in the next revision:
+
+    10
+    AA11 (new scene)
+    A11
+    B11 (new scene)
+    11
+
+If nil, when inserting new scenes in the first revision numbering
+works as follows:
+
+    10
+    10A (new scene)
+    11
+
+...and in the next revision:
+
+    10
+    10AA (new scene)
+    10A
+    10B (new scene)
+    11
+
+WARNING: Using conflicting scene numbering formats in the same
+script may result in errors in output."
+  :type 'boolean
+  :group 'fountain)
+
+(defun fountain-scene-number-to-list (string)
+  "Read scene number string and return a qualified list.
+
+e.g. \"AA10\" -> (10 1 1)"
+  (let (number revision)
+  (if fountain-prefix-revised-scene-numbers
+      (when (string-match "\\([a-z]*\\)\\([0-9]+\\)" string)
+        (setq number (string-to-number (match-string-no-properties 2 string))
+              revision (upcase (match-string-no-properties 1 string))))
+    (when (string-match "\\([0-9]+\\)\\([a-z]*\\)" string)
+      (setq number (string-to-number (match-string-no-properties 1 string))
+            revision (upcase (match-string-no-properties 2 string)))))
+  (setq revision
+              (mapcar '(lambda (n) (- n 64)) revision))
+  (cons number revision)))
+
+(defun fountain-get-scene-number ()
+  "Return the scene number of current scene."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (fountain-forward-scene 0)
+      (or (match-string-no-properties 6)
+          (let ((pos (point))
+                scene)
+            (goto-char (point-min))
+            (unless (fountain-match-scene-heading)
+              (fountain-forward-scene 1))
+            (setq scene (or (match-string-no-properties 6)
+                            1))
+            (while (and (< (point) pos)
+                        (not (eobp)))
+              (fountain-forward-scene 1)
+
+              (setq scene (or (match-string-no-properties 6)
+                              (1+ scene))))
+            (number-to-string scene))))))
+
+
 
 ;; (defun fountain-add-scene-number (num)
 ;;   "Add scene number NUM to current scene heading."
