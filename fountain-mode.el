@@ -2849,27 +2849,27 @@ data reflects `outline-regexp'."
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
   (interactive "^p")
-  (let* ((i (or n 1))
-         (p (if (<= i 0) -1 1))
+  (or n (setq n 1))
+  (let* ((p (if (<= n 0) -1 1))
          (move-fun
           (lambda ()
             (while (not (or (eq (point) (buffer-end p))
                             (fountain-match-scene-heading)))
               (forward-line p)))))
-    (if (/= i 0)
-        (while (/= i 0)
+    (if (/= n 0)
+        (while (/= n 0)
           (if (fountain-match-scene-heading)
               (forward-line p))
           (funcall move-fun)
-          (setq i (- i p)))
+          (setq n (- n p)))
       (forward-line 0)
       (funcall move-fun))))
 
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
-  (let ((i (or n 1)))
-    (fountain-forward-scene (- i))))
+  (or n (setq n 1))
+  (fountain-forward-scene (- n)))
 
 (defun fountain-beginning-of-scene ()   ; FIXME: needed?
   "Move point to beginning of current scene."
@@ -2924,9 +2924,8 @@ If N is 0, move to beginning of scene."
 If LIMIT is 'scene, halt at end of scene. If LIMIT is 'dialog,
 halt at end of dialog."
   (interactive "^p")
-  (let (p)
-    (setq n (or n 1)
-          p (if (< n 1) -1 1))
+  (or n (setq n 1))
+  (let (p (if (< n 1) -1 1))
     (while (/= n 0)
       (if (fountain-match-character)
           (forward-line p))
