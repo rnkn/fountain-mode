@@ -3226,40 +3226,41 @@ Or if nil:
                 (concat revision (number-to-string number)))
             (concat (number-to-string number) revision)))))
 
-(defun fountain-get-scene-number ()
-  "Return the scene number of current scene as a qualified list."
+(defun fountain-get-scene-number (&optional n)
+  "Return the scene number of the Nth scene as a qualified list."
+  (or n (setq n 0))
   (save-excursion
     (save-restriction
       (widen)
       (fountain-forward-scene 0)
+      (unless (= n 0) (fountain-forward-scene n))
       (or (fountain-scene-number-to-list (match-string 6))
           (let ((pos (point))
-                scene)
+                last-scene current-scene next-scene)
             (goto-char (point-min))
             (unless (fountain-match-scene-heading)
               (fountain-forward-scene 1)
               (if (<= (point) pos)
-                  (setq scene
+                  (setq current-scene
                         (or (fountain-scene-number-to-list (match-string 6))
                             (list 1)))
                 (user-error "Before first scene heading")))
             (while (< (point) pos (point-max))
               (fountain-forward-scene 1)
-              (setq scene
-                    (or (fountain-scene-number-to-list (match-string 6))
-                        (let ((scene-maybe (append (butlast scene)
-                                                   (list (1+ (car (last scene))))))
-                              (next-scene (save-excursion
-                                            (fountain-forward-scene 1)
-                                            (fountain-scene-number-to-list (match-string 6)))))
-                          (cond ((or (not next-scene)
-                                     (version-list-< scene-maybe next-scene))
-                                 scene-maybe)
-                                ((version-list-< next-scene scene)
-                                 (user-error "Scene numbers are out of order"))
-                                (t
-                                 (append scene (list 1))))))))
-            scene)))))
+              (setq last-scene current-scene
+                    current-scene (or (fountain-scene-number-to-list (match-string 6))
+                                      (list (1+ (car current-scene))))))
+            (save-excursion
+              (while (not (or next-scene (eobp)))
+                (fountain-forward-scene 1)
+                (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
+            (if (and next-scene (version-list-<= next-scene current-scene))
+                (setq current-scene (append (butlast current-scene)
+                                            (list (1+ (car (last current-scene)))))))
+            (if (or (not next-scene)
+                    (version-list-< current-scene next-scene))
+                   current-scene
+              (append last-scene (list 1))))))))
 
 ;; (defun fountain-add-scene-number (num)
 ;;   "Add scene number NUM to current scene heading."
