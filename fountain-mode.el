@@ -3234,33 +3234,44 @@ Or if nil:
       (widen)
       (fountain-forward-scene 0)
       (unless (= n 0) (fountain-forward-scene n))
-      (or (fountain-scene-number-to-list (match-string 6))
-          (let ((pos (point))
-                last-scene current-scene next-scene)
-            (goto-char (point-min))
-            (unless (fountain-match-scene-heading)
-              (fountain-forward-scene 1)
-              (if (<= (point) pos)
-                  (setq current-scene
-                        (or (fountain-scene-number-to-list (match-string 6))
-                            (list 1)))
-                (user-error "Before first scene heading")))
-            (while (< (point) pos (point-max))
-              (fountain-forward-scene 1)
-              (setq last-scene current-scene
-                    current-scene (or (fountain-scene-number-to-list (match-string 6))
-                                      (list (1+ (car current-scene))))))
-            (save-excursion
-              (while (not (or next-scene (eobp)))
-                (fountain-forward-scene 1)
-                (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
-            (if (and next-scene (version-list-<= next-scene current-scene))
-                (setq current-scene (append (butlast current-scene)
-                                            (list (1+ (car (last current-scene)))))))
-            (if (or (not next-scene)
-                    (version-list-< current-scene next-scene))
-                   current-scene
-              (append last-scene (list 1))))))))
+      (or
+       ;; First check if current scene is already numbered.
+       (fountain-scene-number-to-list (match-string 6))
+       ;; Otherwise, go to point-min.
+       (let ((pos (point))
+             last-scene current-scene next-scene)
+         (goto-char (point-min))
+         (unless (fountain-match-scene-heading)
+           (fountain-forward-scene 1)
+           (if (<= (point) pos)
+               (setq current-scene
+                     (or (fountain-scene-number-to-list (match-string 6))
+                         (list 1)))
+             (user-error "Before first scene heading")))
+         ;; Move through scene headings, setting the last scene heading to
+         ;; current, and current to an increment of the car of current.
+         (while (< (point) pos (point-max))
+           (fountain-forward-scene 1)
+           (setq last-scene current-scene
+                 current-scene (or (fountain-scene-number-to-list (match-string 6))
+                                   (list (1+ (car current-scene))))))
+         ;; Now get the next available scene number.
+         (save-excursion
+           (while (not (or next-scene (eobp)))
+             (fountain-forward-scene 1)
+             (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
+         ;; If the next scene number is less or equal to the current, increment
+         ;; the last revision number of current.
+         (if (and next-scene (version-list-<= next-scene current-scene))
+             (setq current-scene (append (butlast current-scene)
+                                         (list (1+ (car (last current-scene)))))))
+         ;; If there is no next scene number, of the next scene number is less
+         ;; than current, use current.
+         (if (or (not next-scene)
+                 (version-list-< current-scene next-scene))
+             current-scene
+           ;; Otherwise, append a revision to last scene number..
+           (append last-scene (list 1))))))))
 
 ;; (defun fountain-add-scene-number (num)
 ;;   "Add scene number NUM to current scene heading."
