@@ -3201,7 +3201,7 @@ Or if nil:
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string))
                 revision (match-string-no-properties 2 string))))
-      (setq revision (mapcar '(lambda (n) (- (upcase n) 64)) revision))
+      (setq revision (mapcar #'(lambda (n) (- (upcase n) 64)) revision))
       (cons number revision))))
 
 (defun fountain-scene-number-to-string (list)
@@ -3218,13 +3218,13 @@ Or if nil:
     (9 1 1) -> \"9AA\""
   (when (listp list)
     (let ((number (car list))
-              (revision (mapconcat '(lambda (a) (char-to-string (+ a 64)))
-                                   (cdr list) nil)))
-          (if fountain-prefix-revised-scene-numbers
-              (progn
-                (unless (string-empty-p revision) (setq number (1+ number)))
-                (concat revision (number-to-string number)))
-            (concat (number-to-string number) revision)))))
+          (revision (mapconcat #'(lambda (char) (char-to-string (+ char 64)))
+                               (cdr list) nil)))
+      (if fountain-prefix-revised-scene-numbers
+          (progn
+            (unless (string-empty-p revision) (setq number (1+ number)))
+            (concat revision (number-to-string number)))
+        (concat (number-to-string number) revision)))))
 
 (defun fountain-get-scene-number (&optional n)
   "Return the scene number of the Nth scene as a qualified list."
