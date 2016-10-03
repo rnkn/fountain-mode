@@ -2926,7 +2926,7 @@ If LIMIT is 'scene, halt at end of scene. If LIMIT is 'dialog,
 halt at end of dialog."
   (interactive "^p")
   (or n (setq n 1))
-  (let (p (if (< n 1) -1 1))
+  (let ((p (if (< n 1) -1 1)))
     (while (/= n 0)
       (if (fountain-match-character)
           (forward-line p))
