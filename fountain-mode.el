@@ -3238,40 +3238,42 @@ Or if nil:
        ;; First check if current scene is already numbered.
        (fountain-scene-number-to-list (match-string 6))
        ;; Otherwise, go to point-min.
-       (let ((pos (point))
+       (let ((x (point))
              last-scene current-scene next-scene)
          (goto-char (point-min))
+         ;; Unless we're already at a scene heading, go to next scene heading
+         ;; and set current-scene.
          (unless (fountain-match-scene-heading)
            (fountain-forward-scene 1)
-           (if (<= (point) pos)
+           (if (<= (point) x)
                (setq current-scene
                      (or (fountain-scene-number-to-list (match-string 6))
                          (list 1)))
              (user-error "Before first scene heading")))
-         ;; Move through scene headings, setting the last scene heading to
-         ;; current, and current to an increment of the car of current.
-         (while (< (point) pos (point-max))
+         ;; Move through scene headings, setting the last-scene heading to
+         ;; current-scene, and current-scene to an increment of the car of
+         ;; last-scene.
+         (while (< (point) x (point-max))
            (fountain-forward-scene 1)
            (setq last-scene current-scene
                  current-scene (or (fountain-scene-number-to-list (match-string 6))
-                                   (list (1+ (car current-scene))))))
-         ;; Now get the next available scene number.
+                                   (list (1+ (car last-scene))))))
+         ;; Now move through scene headings and get the next available scene
+         ;; number.
          (save-excursion
            (while (not (or next-scene (eobp)))
              (fountain-forward-scene 1)
-             (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
-         ;; If the next scene number is less or equal to the current, increment
-         ;; the last revision number of current.
-         (if (and next-scene (version-list-<= next-scene current-scene))
-             (setq current-scene (append (butlast current-scene)
-                                         (list (1+ (car (last current-scene)))))))
-         ;; If there is no next scene number, of the next scene number is less
-         ;; than current, use current.
-         (if (or (not next-scene)
-                 (version-list-< current-scene next-scene))
-             current-scene
-           ;; Otherwise, append a revision to last scene number..
-           (append last-scene (list 1))))))))
+             (if (fountain-match-scene-heading)
+                 (setq next-scene (fountain-scene-number-to-list (match-string 6))))))
+         ;; If the next-scene number is less or equal to current-scene, set
+         ;; current-scene to an increment of last-scene, or if this is still
+         ;; less or equal to next-scene, append '(1) to current-scene.
+         (let (i scene)
+           (while (and next-scene (version-list-<= next-scene current-scene))
+             (setq i (pop last-scene)
+                   current-scene (append scene (list (1+ (or i 0))))
+                   scene (append scene (list (or i 1))))))
+         current-scene)))))
 
 ;; (defun fountain-add-scene-number (num)
 ;;   "Add scene number NUM to current scene heading."
