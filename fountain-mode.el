@@ -830,6 +830,12 @@ To switch between these levels, customize the value of
          "\\(?:\\(?4:[\s\t]+\\)\\(?5:#\\(?6:[a-z0-9\\.-]+\\)#\\)\\)?"
          ;; eolp
          "\\)[\s\t]*$"
+         "\\|"
+         ;; or match an omitted scene
+         "^\\(?1:\\(?3:OMIT\\(?:TED\\)?\\)"
+         "[.\s\t]*?\\)"
+         ;; scene number
+         "\\(?:\\(?4:[\s\t]+\\)\\(?5:#\\(?6:[a-z0-9\\.-]+\\)#\\)\\)?"
          ;; or match regular scene heading
          "\\|"
          "^\\(?1:\\(?3:"
