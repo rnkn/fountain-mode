@@ -3257,7 +3257,8 @@ Or if nil:
          ;; less or equal to current-scene, scene numbers are out of order.
          ((and current-scene next-scene
                (version-list-<= next-scene current-scene))
-          (user-error "Scene numbers are out of order"))
+          (user-error "Scene `%s' is out of order"
+                      (fountain-scene-number-to-string current-scene)))
          ;; Otherwise, if there's a current scene and either no next-scene or
          ;; there is and it's greater then current-scene, just return
          ;; current-scene.
@@ -3299,7 +3300,10 @@ Or if nil:
                 (while (and next-scene (version-list-<= next-scene current-scene))
                   (setq n (pop last-scene)
                         current-scene (append scene (list (1+ (or n 0))))
-                        scene (append scene (list (or n 1))))))))
+                        scene (append scene (list (or n 1))))
+                  (if (version-list-<= next-scene scene)
+                      (user-error "Scene `%s' is out of order"
+                      (fountain-scene-number-to-string current-scene)))))))
           current-scene))))))
 
 ;; (defun fountain-add-scene-number (num)
