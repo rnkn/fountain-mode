@@ -3308,28 +3308,28 @@ Or if nil:
 
 (defun fountain-remove-scene-numbers ()
   (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let (buffer-invisibility-spec)
-        (goto-char (point-min))
-        (unless (fountain-match-scene-heading)
-          (fountain-forward-scene 1))
-        (while (and (fountain-match-scene-heading)
-                    (not (eobp)))
-          (if (match-string 6)
-              (delete-region (match-beginning 4)
-                             (match-end 5)))
-          (fountain-forward-scene 1))))))
+  (if (y-or-n-p "Are you sure you want to remove scene numbers? ")
+      (save-excursion
+        (save-restriction
+          (widen)
+          (let (buffer-invisibility-spec)
+            (goto-char (point-min))
+            (unless (fountain-match-scene-heading)
+              (fountain-forward-scene 1))
+            (while (and (fountain-match-scene-heading)
+                        (not (eobp)))
+              (if (match-string 6)
+                  (delete-region (match-beginning 4)
+                                 (match-end 5)))
+              (fountain-forward-scene 1)))))))
 
-(defun fountain-add-scene-numbers (&optional force)
-  (interactive "P")
-  (if force
-      (fountain-remove-scene-numbers))
+(defun fountain-add-scene-numbers ()
+  (interactive)
   (save-excursion
     (save-restriction
       (widen)
-      (let (buffer-invisibility-spec)
+      (let ((job (make-progress-reporter "Adding scene numbers..."))
+            buffer-invisibility-spec)
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
           (fountain-forward-scene 1))
@@ -3339,54 +3339,9 @@ Or if nil:
             (end-of-line)
             (delete-horizontal-space t)
             (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
-          (fountain-forward-scene 1))))))
-
-;; (defun fountain-add-scene-number (num)
-;;   "Add scene number NUM to current scene heading."
-;;   (when (fountain-match-scene-heading)
-;;     (end-of-line)
-;;     (unless (eq (char-before) ?\s) (insert ?\s))
-;;     (insert "#" num "#")))
-
-;; (defun fountain-add-scene-numbers (&optional arg)
-;;   "Add scene numbers to all scene headings.
-;; If prefaced with ARG, overwrite existing scene numbers."
-;;   (interactive)
-;;   (let ((job (make-progress-reporter "Adding scene numbers...")))
-;;     (save-excursion
-;;       (goto-char (point-min))
-;;       (unless (fountain-match-scene-heading)
-;;         (fountain-forward-scene 1))
-;;       (let ((prev-scene-num "0"))
-;;         (while (not (eobp))
-;;           (let ((current-scene-num (fountain-get-scene-number)))
-;;             (if current-scene-num
-;;                 (setq prev-scene-num current-scene-num)
-;;               (let* ((prev-scene-int (string-to-number prev-scene-num))
-;;                      (prev-scene-alpha
-;;                       (if (string-match "[a-z]+" prev-scene-num)
-;;                           (match-string 0 prev-scene-num)))
-;;                      (next-scene-num
-;;                       (save-excursion
-;;                         (while (not (or (eobp)
-;;                                         (fountain-get-scene-number)))
-;;                           (fountain-forward-scene 1))
-;;                         (fountain-get-scene-number)))
-;;                      (next-scene-int (if next-scene-num
-;;                                          (string-to-number next-scene-num)))
-;;                      (current-scene-num
-;;                       (if (or (not next-scene-int)
-;;                               (< (1+ prev-scene-int) next-scene-int))
-;;                           (int-to-string (1+ prev-scene-int))
-;;                         (concat (int-to-string prev-scene-int)
-;;                                 (if prev-scene-alpha
-;;                                     (string (1+ (string-to-char prev-scene-alpha)))
-;;                                   "A")))))
-;;                 (fountain-add-scene-number current-scene-num)
-;;                 (setq prev-scene-num current-scene-num))))
-;;           (fountain-forward-scene 1)
-;;           (progress-reporter-update job))))
-;;     (progress-reporter-done job)))
+          (fountain-forward-scene 1)
+          (progress-reporter-update job))
+        (progress-reporter-done job)))))
 
 
 ;;; Font Lock
