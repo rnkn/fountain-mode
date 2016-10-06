@@ -3650,7 +3650,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
-    ;; (define-key map (kbd "C-c C-x #") #'fountain-add-scene-nums)
+    (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
+    (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     ;; navigation commands
     (define-key map (kbd "C-M-n") #'fountain-forward-scene)
@@ -3776,7 +3777,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character])
-    "---"
     ("Outline"
      ["Cycle Scene/Section Visibility" fountain-outline-cycle]
      ["Cycle Global Visibility" fountain-outline-cycle-global]
@@ -3790,6 +3790,9 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      ["Mark Section/Scene" fountain-outline-mark]
      ["Shift Section/Scene Up" fountain-outline-shift-up]
      ["Shift Section/Scene Down" fountain-outline-shift-down])
+    ("Locking"
+     ["Add Scene Numbers" fountain-add-scene-numbers]
+     ["Remove Scene Numbers" fountain-remove-scene-numbers])
     "---"
     ["Insert Metadata" auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
