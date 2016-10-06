@@ -3303,8 +3303,43 @@ Or if nil:
                         scene (append scene (list (or n 1))))
                   (if (version-list-<= next-scene scene)
                       (user-error "Scene `%s' is out of order"
-                      (fountain-scene-number-to-string current-scene)))))))
+                                  (fountain-scene-number-to-string current-scene)))))))
           current-scene))))))
+
+(defun fountain-remove-scene-numbers ()
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let (buffer-invisibility-spec)
+        (goto-char (point-min))
+        (unless (fountain-match-scene-heading)
+          (fountain-forward-scene 1))
+        (while (and (fountain-match-scene-heading)
+                    (not (eobp)))
+          (if (match-string 6)
+              (delete-region (match-beginning 4)
+                             (match-end 5)))
+          (fountain-forward-scene 1))))))
+
+(defun fountain-add-scene-numbers (&optional force)
+  (interactive "P")
+  (if force
+      (fountain-remove-scene-numbers))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let (buffer-invisibility-spec)
+        (goto-char (point-min))
+        (unless (fountain-match-scene-heading)
+          (fountain-forward-scene 1))
+        (while (and (fountain-match-scene-heading)
+                    (not (eobp)))
+          (unless (match-string 6)
+            (end-of-line)
+            (delete-horizontal-space t)
+            (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
+          (fountain-forward-scene 1))))))
 
 ;; (defun fountain-add-scene-number (num)
 ;;   "Add scene number NUM to current scene heading."
