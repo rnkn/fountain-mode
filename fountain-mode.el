@@ -3867,10 +3867,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       'fountain-add-continued-dialog)
      :style toggle
      :selected fountain-add-continued-dialog]
-    ["Switch Default Comment Syntax"
-     fountain-toggle-comment-syntax
-     :style toggle
-     :selected fountain-switch-comment-syntax]
     "---"
     ("Syntax Highlighting"
      ["Minimum"
