@@ -2911,20 +2911,25 @@ If N is 0, move to beginning of scene."
     (fountain-forward-scene 1)
     (exchange-point-and-mark)))
 
-(defun fountain-goto-scene (n)          ; FIXME: scene numbering
-  "Move point to Nth scene."
+(defun fountain-goto-scene (n)
+  "Move point to Nth scene in current buffer.
+
+Ignores revised scene numbers scenes.
+
+    10  = 10
+    10B = 10
+    A10 =  9"
   (interactive "NGoto scene: ")
   (goto-char (point-min))
   (let ((scene (if (fountain-match-scene-heading)
-                   (or (string-to-number (match-string 6))
-                       1)
+                   (car (fountain-scene-number-to-list (match-string 6)))
                  0)))
     (while (and (< scene n)
-                (not (eobp)))
+                (< (point) (point-max)))
       (fountain-forward-scene 1)
-      (setq scene (if (match-string 6)
-                      (string-to-number (match-string 6))
-                    (1+ scene))))))
+      (if (fountain-match-scene-heading)
+          (setq scene (or (car (fountain-scene-number-to-list (match-string 6)))
+                          (1+ scene)))))))
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
