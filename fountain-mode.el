@@ -2973,7 +2973,9 @@ halt at end of dialog."
 (defun fountain-auto-upcase ()
   (if (and fountain-auto-upcase-scene-headings
            (fountain-match-scene-heading))
-      (upcase-region (line-beginning-position) (point))))
+      (upcase-region (line-beginning-position)
+                     (or (match-end 3)
+                         (point)))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
