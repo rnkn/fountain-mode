@@ -3154,46 +3154,29 @@ then make the changes desired."
 ;;; Scene Numbers
 
 (defcustom fountain-prefix-revised-scene-numbers
-  t
-  "If non-nil, prefix revision letters to scene numbers.
+  nil
+  "If non-nil, prefix revision letters to new scene numbers.
 
-When inserting new scenes in the first revision numbering works
-as follows:
-
-    10
-    A11 (new scene)
-    11
-
-...and in the next revision:
-
-    10
-    AA11 (new scene)
-    A11
-    B11 (new scene)
-    11
-
-If nil, when inserting new scenes in the first revision numbering
-works as follows:
+If nil, when inserting new scene headings after numbering
+existing scene headings, revised scene numbers work as follows:
 
     10
     10A (new scene)
     11
 
-...and in the next revision:
+If non-nil, revised scene numbers work as follows:
 
     10
-    10AA (new scene)
-    10A
-    10B (new scene)
+    A11 (new scene)
     11
 
-WARNING: Using conflicting scene numbering formats in the same
+WARNING: Using conflicting revised scene numbers in the same
 script may result in errors in output."
   :type 'boolean
   :group 'fountain)
 
 (defun fountain-scene-number-to-list (string)
-  "Read scene number STRING and return a qualified list.
+  "Read scene number STRING and return a list.
 
 If `fountain-prefix-revised-scene-numbers' is non-nil:
 
@@ -3218,14 +3201,14 @@ Or if nil:
       (cons number revision))))
 
 (defun fountain-scene-number-to-string (list)
-  "Read scene number LIST and return a qualified string.
+  "Read scene number LIST and return a string.
 
 If `fountain-prefix-revised-scene-numbers' is non-nil:
 
     (10) -> \"10\"
     (9 1 1) -> \"AA10\"
 
-Or if nil:
+Or, if nil:
 
     (10) -> \"10\"
     (9 1 1) -> \"9AA\""
@@ -3314,6 +3297,7 @@ Or if nil:
           current-scene))))))
 
 (defun fountain-remove-scene-numbers ()
+  "Remove scene numbers from scene headings in current buffer."
   (interactive)
   (if (y-or-n-p "Are you sure you want to remove scene numbers? ")
       (save-excursion
@@ -3324,31 +3308,57 @@ Or if nil:
             (unless (fountain-match-scene-heading)
               (fountain-forward-scene 1))
             (while (and (fountain-match-scene-heading)
-                        (not (eobp)))
+                        (< (point) (point-max)))
               (if (match-string 6)
                   (delete-region (match-beginning 4)
                                  (match-end 5)))
               (fountain-forward-scene 1)))))))
 
 (defun fountain-add-scene-numbers ()
+  "Add scene numbers to scene headings in current buffer.
+
+Adding scene numbers to scene headings after numbering existing
+scene headings will use a prefix or suffix letter, depending on
+the value of `fountain-prefix-revised-scene-numbers':
+
+    10
+    10A <- new scene
+    10B <- new scene
+    11
+
+If further scene headings are inserted:
+
+    10
+    10A
+    10AA <- new scene
+    10B
+    11
+
+In this example, you can't automatically number a new scene
+between 10 and 10A (which might be numbered as 10aA). Instead,
+add these scene numbers manually. Note that if
+`fountain-auto-upcase-scene-headings' is non-nil you will need to
+insert the scene number delimiters (\"##\") first, to protect the
+scene number from being auto-upcased.."
   (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let ((job (make-progress-reporter "Adding scene numbers..."))
-            buffer-invisibility-spec)
-        (goto-char (point-min))
-        (unless (fountain-match-scene-heading)
-          (fountain-forward-scene 1))
-        (while (and (fountain-match-scene-heading)
-                    (not (eobp)))
-          (unless (match-string 6)
-            (end-of-line)
-            (delete-horizontal-space t)
-            (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
-          (fountain-forward-scene 1)
-          (progress-reporter-update job))
-        (progress-reporter-done job)))))
+  (if (y-or-n-p "Are you sure you want to add scene numbers? ")
+      (save-excursion
+        (save-restriction
+          (widen)
+          (let ((job (make-progress-reporter "Adding scene numbers..."))
+                buffer-invisibility-spec)
+            (goto-char (point-min))
+            (unless (fountain-match-scene-heading)
+              (fountain-forward-scene 1))
+            (while (and (fountain-match-scene-heading)
+                        (< (point) (point-max)))
+              (unless (match-string 6)
+                (end-of-line)
+                (delete-horizontal-space t)
+                (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
+              (fountain-forward-scene 1)
+              (progress-reporter-update job))
+            (progress-reporter-done job))))))
 
 
 ;;; Font Lock
