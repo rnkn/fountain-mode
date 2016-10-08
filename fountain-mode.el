@@ -3789,6 +3789,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
   "Menu for `fountain-mode'."
   '("Fountain"
     ("Navigate"
+     ["Go to Scene Heading..." fountain-goto-scene]
+     "---"
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene]
      "---"
@@ -3815,7 +3817,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
-    ;; ["Add Scene Numbers" fountain-add-scene-nums]
     "---"
     ("Export"
      ["Default" fountain-export-default]
