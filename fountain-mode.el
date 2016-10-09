@@ -542,7 +542,9 @@ This option does affect file contents."
                 (car element))))))
 
 
-;;; Skeletons
+;;; Autoinsert
+
+(require 'autoinsert)
 
 (defvar fountain-metadata-skeleton
   '(nil
@@ -553,6 +555,9 @@ This option does affect file contents."
     "source: " (skeleton-read "Source: ") | -9 "\n"
     "date: " (skeleton-read "Date: " (format-time-string fountain-time-format)) | -7 "\n"
     "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
+
+(define-auto-insert '(fountain-mode . "Fountain metadata skeleton")
+  fountain-metadata-skeleton)
 
 
 ;;; Regular Expressions
@@ -3757,11 +3762,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
-
-;;;###autoload
-(with-eval-after-load 'autoinsert
-  (define-auto-insert '(fountain-mode . "Fountain metadata skeleton")
-    fountain-metadata-skeleton))
 
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
