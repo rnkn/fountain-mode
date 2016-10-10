@@ -3376,12 +3376,18 @@ scene number from being auto-upcased.."
 
 (defvar fountain-font-lock-keywords-plist
   (backquote
-   ;; Notes
-   ((,fountain-note-regexp
-     ((:level 2 :subexp 0 :face fountain-note)))
+   (;; Section Heading
+    (,fountain-section-heading-regexp
+     ((:level 2 :subexp 0 :face fountain-section-heading
+              :invisible section-heading)
+      (:level 2 :subexp 2 :face fountain-non-printing
+              :override t))
+     ,fountain-align-scene-heading)
+    ;; Scene Headings
     ((lambda (limit)
        (fountain-match-element 'fountain-match-scene-heading limit))
-     ((:level 2 :subexp 0 :face fountain-scene-heading)
+     ((:level 2 :subexp 0 :face fountain-scene-heading
+              :invisible scene-heading)
       (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override append
@@ -3393,7 +3399,8 @@ scene number from being auto-upcased.."
     ;; Character
     ((lambda (limit)
        (fountain-match-element 'fountain-match-character limit))
-     ((:level 3 :subexp 0 :face fountain-character)
+     ((:level 3 :subexp 0 :face fountain-character
+              :invisible character)
       (:level 3 :subexp 2
               :invisible fountain-syntax-chars
               :laxmatch t)
@@ -3401,61 +3408,63 @@ scene number from being auto-upcased.."
               :override append
               :laxmatch t))
      ,fountain-align-character)
-    ;; Dialog
-    ((lambda (limit)
-       (fountain-match-element 'fountain-match-dialog limit))
-     ((:level 3 :subexp 0 :face fountain-dialog))
-     ,fountain-align-dialog)
     ;; Parenthetical
     ((lambda (limit)
        (fountain-match-element 'fountain-match-paren limit))
-     ((:level 3 :subexp 0 :face fountain-paren))
+     ((:level 3 :subexp 0 :face fountain-paren
+              :invisible paren))
      ,fountain-align-paren)
+    ;; Dialog
+    ((lambda (limit)
+       (fountain-match-element 'fountain-match-dialog limit))
+     ((:level 3 :subexp 0 :face fountain-dialog
+              :invisible lines))
+     ,fountain-align-dialog)
     ;; Transition
     ((lambda (limit)
        (fountain-match-element 'fountain-match-trans limit))
-     ((:level 3 :subexp 0 :face fountain-trans)
+     ((:level 3 :subexp 0 :face fountain-trans
+              :invisible trans)
       (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
      ,fountain-align-trans)
-    ;; Forced-action mark
-    (,fountain-forced-action-mark-regexp
-     ((:level 1 :subexp 0 :face fountain-comment
-              :invisible fountain-syntax-chars)))
     ;; Center text
     (,fountain-center-regexp
      ((:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)
-      (:level 3 :subexp 3)
+      (:level 3 :subexp 3
+              :invisible center)
       (:level 2 :subexp 4 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t))
      ,fountain-align-center)
-    ;; Section Heading
-    (,fountain-section-heading-regexp
-     ((:level 2 :subexp 3)
-      (:level 2 :subexp 2 :face fountain-comment))
-     ,fountain-align-scene-heading)
-    ;; Synopsis
+    ;; Page-break
+    (,fountain-page-break-regexp
+     ((:level 2 :subexp 0 :face fountain-page-break
+              :invisible page-break)
+      (:level 2 :subexp 2 :face fountain-page-number
+              :override t
+              :laxmatch t)))
+    ;; Synopses
     (,fountain-synopsis-regexp
-     ((:level 2 :subexp 0 :face fountain-synopsis)
+     ((:level 2 :subexp 0 :face fountain-synopsis
+              :invisible synopsis)
       (:level 2 :subexp 2 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t))
      ,fountain-align-synopsis)
-    ;; Page-break
-    (,fountain-page-break-regexp
-     ((:level 2 :subexp 0 :face fountain-page-break)
-      (:level 2 :subexp 2 :face fountain-page-number
-              :override t
-              :laxmatch t)))
+    ;; Notes
+    (,fountain-note-regexp
+     ((:level 2 :subexp 0 :face fountain-note
+              :invisible note)))
     ;; Metedata
     ((lambda (limit)
        (fountain-match-element 'fountain-match-metadata limit))
      ((:level 2 :subexp 0 :face fountain-metadata-key
+              :invisible metadata
               :laxmatch t)
       (:level 2 :subexp 3 :face fountain-metadata-value
               :override t
@@ -3463,7 +3472,10 @@ scene number from being auto-upcased.."
     ;; Action
     ((lambda (limit)
        (fountain-match-element 'fountain-match-action limit))
-     ((:level 1 :subexp 0 :face fountain-action))
+     ((:level 1 :subexp 2 :face fountain-non-printing
+              :invisible fountain-syntax-chars)
+      (:level 1 :subexp 0 :face fountain-action
+              :invisible action))
      ,fountain-align-action)
     ;; Non-breaking space
     (,fountain-nbsp-regexp
