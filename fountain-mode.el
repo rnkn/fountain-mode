@@ -621,9 +621,7 @@ Requires `fountain-match-metadata' for `bobp'.")
           "\\(?2:@\\)\\(?3:\\(?4:[^<>\n]+?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
           "\\|"
           "\\(?3:\\(?4:[^a-z<>\n]*?[A-Z][^a-z<>\n]*?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
-          "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*\\(?:"
-          fountain-comment-regexp
-          "\\)?$")
+          "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
     Group 1: match trimmed whitespace
@@ -635,9 +633,7 @@ Requires `fountain-match-metadata' for `bobp'.")
 Requires `fountain-match-character'.")
 
 (defconst fountain-paren-regexp
-  (concat "^[\s\t]*\\(?3:([^)\n]*)\\)[\s\t]*\\(?:"
-          fountain-comment-regexp
-          "\\)?$")
+  (concat "^[\s\t]*\\(?3:([^)\n]*)\\)[\s\t]*$")
   "Regular expression for matching parentheticals.
 Requires `fountain-match-paren' for preceding character or dialog.")
 
