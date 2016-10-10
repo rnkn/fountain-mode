@@ -569,11 +569,21 @@ Set with `fountain-init-scene-heading-regexp'.
     Group 1: match trimmed whitespace
     Group 2: match leading . (for forced element)
     Group 3: match scene heading without scene number (for export)
-    Group 4: match space between scene heading and scene number
-    Group 5: match scene number with # delimiters
+    Group 4: match space before scene number
+    Group 5: match first # delimiter
     Group 6: match scene number
+    Group 7: match last # delimiter
 
 Requires `fountain-match-scene-heading' for preceding blank line.")
+
+(defvar fountain-scene-number-regexp
+  "\\(?4:[\s\t]+\\)\\(?5:#\\)\\(?6:[a-z0-9\\.-]+\\)\\(?7:#\\)"
+  "Regular expression for matching scene numbers.
+
+    Group 4: match space before scene number
+    Group 5: match first # delimiter
+    Group 6: match scene number
+    Group 7: match last # delimiter")
 
 (defvar fountain-trans-regexp
   nil
@@ -825,38 +835,37 @@ To switch between these levels, customize the value of
 ;;; Initializing
 
 (defun fountain-init-scene-heading-regexp ()
-  "Initialize scene heading regular expression with `fountain-scene-heading-prefix-list'."
+  "Initialize scene heading regular expression.
+Uses `fountain-scene-heading-prefix-list' to create non-forced
+scene heading regular expression."
   (setq fountain-scene-heading-regexp
         (concat
-         ;; first match forced scene heading
+         ;; First match forced scene heading.
          "^\\(?1:\\(?2:\\.\\)\\(?3:\\<.*?\\)"
-         ;; scene number
-         "\\(?:\\(?4:[\s\t]+\\)\\(?5:#\\(?6:[a-z0-9\\.-]+\\)#\\)\\)?"
-         ;; eolp
+         "\\(?:" fountain-scene-number-regexp "\\)?"
          "\\)[\s\t]*$"
+         ;; Or match omitted scene.
          "\\|"
-         ;; or match an omitted scene
          "^\\(?1:\\(?3:OMIT\\(?:TED\\)?\\)"
-         "[.\s\t]*?\\)"
-         ;; scene number
-         "\\(?:\\(?4:[\s\t]+\\)\\(?5:#\\(?6:[a-z0-9\\.-]+\\)#\\)\\)?"
-         ;; or match regular scene heading
+         "\\(?:" fountain-scene-number-regexp "\\)?"
+         "\\)[\s\t]*$"
+         ;; Or match regular scene heading.
          "\\|"
          "^\\(?1:\\(?3:"
          (regexp-opt fountain-scene-heading-prefix-list)
          "[.\s\t].*?\\)"
-         ;; scene number
-         "\\(?:\\(?4:[\s\t]+\\)\\(?5:#\\(?6:[a-z0-9\\.-]+\\)#\\)\\)?"
-         ;; eolp
+         "\\(?:" fountain-scene-number-regexp "\\)?"
          "\\)[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
-  "Initialize transition regular expression with `fountain-trans-suffix-list'."
+  "Initialize transition regular expression.
+Uses `fountain-trans-suffix-list' to create non-forced tranistion
+regular expression."
   (setq fountain-trans-regexp
         (concat
-         ;; first match forced transition
+         ;; First match forced transition.
          "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:[^<>\n]*?\\)\\)[\s\t]*$"
-         ;; or match regular transition
+         ;; Or match regular transition.
          "\\|"
          "^[\s\t]*\\(?1:\\(?3:[[:upper:]\s\t]*"
          (upcase (regexp-opt fountain-trans-suffix-list))
@@ -3315,7 +3324,7 @@ Or, if nil:
                         (< (point) (point-max)))
               (if (match-string 6)
                   (delete-region (match-beginning 4)
-                                 (match-end 5)))
+                                 (match-end 7)))
               (fountain-forward-scene 1)))))))
 
 (defun fountain-add-scene-numbers ()
