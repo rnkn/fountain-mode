@@ -3839,7 +3839,14 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      ["Buffer to Final Draft" fountain-export-buffer-to-fdx]
      ["Buffer to Fountain" fountain-export-buffer-to-fountain]
      "---"
-     ["Run shell command" fountain-export-shell-command]
+     ["Run Shell Command" fountain-export-shell-command]
+     "---"
+     ["US Letter Page Size" (customize-set-variable 'fountain-export-page-size 'letter)
+      :style radio
+      :selected (eq fountain-export-page-size 'letter)]
+     ["A4 Page Size" (customize-set-variable 'fountain-export-page-size 'a4)
+      :style radio
+      :selected (eq fountain-export-page-size 'a4)]
      "---"
      ["Include Title Page"
       (fountain-toggle-custom-variable
