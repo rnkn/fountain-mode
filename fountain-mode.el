@@ -3801,7 +3801,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
-    ("Navigate"
+    ("Navigation"
      ["Go to Scene Heading..." fountain-goto-scene]
      "---"
      ["Next Scene Heading" fountain-forward-scene]
@@ -3809,7 +3809,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character])
-    ("Outline"
+    ("Outlining"
      ["Cycle Scene/Section Visibility" fountain-outline-cycle]
      ["Cycle Global Visibility" fountain-outline-cycle-global]
      "---"
@@ -3831,7 +3831,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
     ["Insert Note" fountain-insert-note]
     ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
     "---"
-    ("Export"
+    ("Exporting"
      ["Default" fountain-export-default]
      "---"
      ["Buffer to HTML" fountain-export-buffer-to-html]
