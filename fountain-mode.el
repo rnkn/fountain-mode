@@ -595,9 +595,9 @@ Set with `fountain-init-trans-regexp'. Requires
   "^\s?$"
   "Regular expression for matching an empty line.")
 
-(defconst fountain-forced-action-mark-regexp
-  "^!"
-  "Regular expression for forced action mark.")
+(defconst fountain-forced-action-regexp
+  "^\\(?2:!\\)\\(?3:.*\\)"
+  "Regular expression for forced action.")
 
 (defconst fountain-nbsp-regexp
   "\\(?:^\\|[^\\]\\)\\(?1:\\(?2:\\\\\\)\s\\)"
@@ -1079,22 +1079,24 @@ comments."
 
 (defun fountain-match-action ()
   "Match action text if point is at action, nil otherwise."
-  (unless (or (fountain-tachyon-p)
-              (fountain-match-metadata)
-              (fountain-match-section-heading)
-              (fountain-match-scene-heading)
-              (fountain-match-character)
-              (fountain-match-dialog)
-              (fountain-match-paren)
-              (fountain-match-trans)
-              (fountain-match-center)
-              (fountain-match-synopsis)
-              (fountain-match-note))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (forward-line 0)
-        (looking-at ".*")))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (or (looking-at fountain-forced-action-regexp)
+          (and (not (or (fountain-blank-p)
+                        (fountain-match-comment)
+                        (fountain-match-metadata)
+                        (fountain-match-section-heading)
+                        (fountain-match-scene-heading)
+                        (fountain-match-character)
+                        (fountain-match-dialog)
+                        (fountain-match-paren)
+                        (fountain-match-trans)
+                        (fountain-match-center)
+                        (fountain-match-synopsis)
+                        (fountain-match-note)))
+               (looking-at "\\(?3:.*\\)"))))))
 
 
 ;;; Emacs Bugs
