@@ -1,9 +1,9 @@
 Fountain Mode
 =============
 
-[![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.txt)
-[![MELPA Stable](http://stable.melpa.org/packages/fountain-mode-badge.svg)](http://stable.melpa.org/#/fountain-mode)
-[![MELPA](http://melpa.org/packages/fountain-mode-badge.svg)](http://melpa.org/#/fountain-mode)
+[![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
+[![MELPA Stable](https://stable.melpa.org/packages/fountain-mode-badge.svg)](https://stable.melpa.org/#/fountain-mode)
+[![MELPA](https://melpa.org/packages/fountain-mode-badge.svg)](https://melpa.org/#/fountain-mode)
 
 Fountain Mode is a complete screenwriting environment for GNU Emacs
 using the Fountain markup format. For more information on the Fountain markup
@@ -23,11 +23,11 @@ Features
 - Support for Fountain 1.1 specification
 - WYSIWYG auto-align elements (display only, does not modify file contents)
   specific to script format, e.g. screenplay, stageplay or user-defined format
-- Export to HTML, LaTeX, Final Draft (FDX), Fountain, or user-defined formats
+- Export to HTML, LaTeX, Final Draft (FDX), or Fountain
 - Export to standalone document or snippet
 - Integration with `outline` to fold/cycle visibility of sections and scenes
 - Integration with `imenu` (sections, scene headings, notes)
-- Intergration with `auto-insert`
+- Intergration with `auto-insert` for title page metadata
 - Add/remove automatic continuation string to successively speaking characters
 - Navigation by section, scene, character name, or page
 - 3 levels of element syntax highlighting
@@ -55,11 +55,8 @@ Requirements
 ------------
 
 - Emacs 24.4
-- [s.el][], the long lost Emacs string manipulation library.
 - LaTeX packages for PDF export: `geometry` `fontspec` `titling` `fancyhdr`
   `marginnote` `ulem` `xstring` `oberdiek`
-
-[s.el]: https://github.com/magnars/s.el "s.el"
 
 Installation
 ------------
