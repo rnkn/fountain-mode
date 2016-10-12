@@ -2455,47 +2455,6 @@ character codes, then format replacement is made."
   (fountain-export-buffer 'tex))
 
 
-;;;; Endnotes
-
-(defgroup fountain-endnotes ()
-  "Options for displaying endnotes."
-  :group 'fountain)
-
-(defcustom fountain-endnotes-buffer-name
-  "*%s<endnotes>*"
-  "Name of buffer in which to display file endnotes.
-`%s' is replaced with `buffer-name'."
-  :type 'string
-  :group 'fountain-endnotes)
-
-(defcustom fountain-endnotes-display-function
-  '(display-buffer-pop-up-window)
-  "Doc"
-  :type '(radio (const :tag "Pop-up new window" (display-buffer-pop-up-window))
-                (const :tag "Pop-up new frame" (display-buffer-pop-up-frame))
-                (const :tag "Show in same window" (display-buffer-same-window)))
-  :group 'fountain-endnotes)
-
-(defun fountain-show-endnotes ()
-  (interactive)
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (let ((beg (if (re-search-forward fountain-script-end-regexp nil t)
-                     (point)))
-            (bufname (format fountain-endnotes-buffer-name (buffer-name))))
-        (if beg (progn
-                  (display-buffer
-                   (or (get-buffer bufname)
-                       (progn
-                         (make-indirect-buffer (current-buffer) bufname t)))
-                   fountain-endnotes-display-function)
-                  (with-current-buffer bufname
-                    (narrow-to-region (1+ beg) (point-max))))
-          (message "Buffer %s does not contain endnotes" (buffer-name)))))))
-
-
 ;;; -> FDX
 
 (defcustom fountain-export-fdx-template
@@ -3014,6 +2973,47 @@ halt at end of dialog."
   (interactive "^p")
   (setq n (or n 1))
   (fountain-forward-character (- n)))
+
+
+;;; Endnotes
+
+(defgroup fountain-endnotes ()
+  "Options for displaying endnotes."
+  :group 'fountain)
+
+(defcustom fountain-endnotes-buffer-name
+  "*%s<endnotes>*"
+  "Name of buffer in which to display file endnotes.
+`%s' is replaced with `buffer-name'."
+  :type 'string
+  :group 'fountain-endnotes)
+
+(defcustom fountain-endnotes-display-function
+  '(display-buffer-pop-up-window)
+  "Doc"
+  :type '(radio (const :tag "Pop-up new window" (display-buffer-pop-up-window))
+                (const :tag "Pop-up new frame" (display-buffer-pop-up-frame))
+                (const :tag "Show in same window" (display-buffer-same-window)))
+  :group 'fountain-endnotes)
+
+(defun fountain-show-endnotes ()
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (let ((beg (if (re-search-forward fountain-script-end-regexp nil t)
+                     (point)))
+            (bufname (format fountain-endnotes-buffer-name (buffer-name))))
+        (if beg (progn
+                  (display-buffer
+                   (or (get-buffer bufname)
+                       (progn
+                         (make-indirect-buffer (current-buffer) bufname t)))
+                   fountain-endnotes-display-function)
+                  (with-current-buffer bufname
+                    (narrow-to-region (1+ beg) (point-max))))
+          (message "Buffer %s does not contain endnotes" (buffer-name)))))))
 
 
 ;;; Editing
