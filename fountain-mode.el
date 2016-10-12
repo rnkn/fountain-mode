@@ -521,7 +521,7 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-display-scene-numbers-in-margin
-  t
+  nil
   "If non-nil, display scene numbers in the right margin.
 
 If nil, do not change scene number display.
