@@ -520,16 +520,18 @@ This option does not affect file contents."
                  (repeat (group (string :tag "Format") integer)))
   :group 'fountain-align)
 
-(defcustom fountain-align-scene-number
-  8
-  "Column integer from right margin to which scene numbers should be aligned.
+(defcustom fountain-display-scene-numbers-in-margin
+  t
+  "If non-nil, display scene numbers in the right margin.
 
-If nil, do not align scene numbers.
+If nil, do not change scene number display.
 
 This option does affect file contents."
-  :type '(choice (const :tag "Do not align scene numbers" nil)
-                 (integer 8))
+  :type 'boolean
   :group 'fountain-align)
+
+(define-obsolete-variable-alias 'fountain-align-scene-number
+  'fountain-display-scene-numbers-in-margin "2.3.0")
 
 (defun fountain-get-align (element)
   "Return ELEMENT align integer based on buffer format."
@@ -3393,7 +3395,17 @@ scene number from being auto-upcased.."
               :override append
               :laxmatch t)
       (:level 2 :subexp 4
-              :display (- right-margin fountain-align-scene-number)
+              :laxmatch t)
+      (:level 2 :subexp 5 :face fountain-non-printing
+              :invisible fountain-syntax-chars
+              :override append
+              :laxmatch t)
+      (:level 2 :subexp 6
+              :override append
+              :laxmatch t)
+      (:level 2 :subexp 7 :face fountain-non-printing
+              :invisible fountain-syntax-chars
+              :override append
               :laxmatch t))
      ,fountain-align-scene-heading)
     ;; Character
@@ -3640,18 +3652,14 @@ keywords suitable for Font Lock."
                 (face (if (<= (plist-get var :level) dec)
                           (plist-get var :face)))
                 (invisible (plist-get var :invisible))
-                (display (plist-get var :display))
-                invisible-props display-props)
-            (if display
-                (setq display-props (list 'display (list 'space :align-to display))))
+                invisible-props)
             (if invisible
                 (setq invisible-props (list 'invisible invisible)))
             (setq facespec
                   (append facespec
                           (list (backquote (,subexp '(face ,face
-                                                      ,@align-props
-                                                      ,@display-props
-                                                      ,@invisible-props)
+                                                           ,@align-props
+                                                           ,@invisible-props)
                                                     ,(plist-get var :override)
                                                     ,(plist-get var :laxmatch))))))))
         (setq keywords
@@ -3667,6 +3675,18 @@ keywords suitable for Font Lock."
           (setq match t))
       (forward-line 1))
     match))
+
+(defun fountain-redisplay-scene-numbers (start end)
+  (goto-char start)
+  (while (< (point) end)
+    (if (fountain-match-scene-heading)
+        (if (and fountain-display-scene-numbers-in-margin
+                 (match-string 6))
+            (put-text-property (match-beginning 6) (match-end 6)
+                               'display
+                               (list '(margin right-margin) (match-string-no-properties 6)))
+          (remove-text-properties (match-beginning 0) (match-end 0) '(display))))
+    (forward-line 1)))
 
 
 ;;; Key Bindings
@@ -3878,6 +3898,11 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       'fountain-align-elements)
      :style toggle
      :selected fountain-align-elements]
+    ["Display Scene Numbers in Margin"
+     (fountain-toggle-custom-variable
+      'fountain-display-scene-numbers-in-margin)
+     :style toggle
+     :selected fountain-display-scene-numbers-in-margin]
     ["Auto-Upcase Scene Headings"
      (fountain-toggle-custom-variable
       'fountain-auto-upcase-scene-headings)
@@ -3946,7 +3971,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       (add-to-invisibility-spec 'fountain-syntax-chars))
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local font-lock-extra-managed-props
-              '(display line-prefix wrap-prefix invisible))
+              '(line-prefix wrap-prefix invisible))
   (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
     (if (stringp n)
         (setq-local fountain-outline-startup-level
@@ -3955,10 +3980,9 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
             #'fountain-auto-upcase t t)
   (add-hook 'font-lock-extend-region-functions
             #'fountain-font-lock-extend-region t t)
-  (add-hook 'after-save-hook
-            #'font-lock-refresh-defaults)
   (if fountain-patch-emacs-bugs
       (fountain-patch-emacs-bugs))
+  (jit-lock-register #'fountain-redisplay-scene-numbers t)
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
