@@ -637,9 +637,9 @@ Requires `fountain-match-character'.")
   "Regular expression for matching parentheticals.
 Requires `fountain-match-paren' for preceding character or dialog.")
 
-(defconst fountain-action-regexp
-  (concat "\\(.\\|\n\\)+?\n" fountain-blank-regexp)
-  "Regular expression for matching action.")
+;; (defconst fountain-action-regexp
+;;   (concat "\\(.\\|\n\\)+?\n" fountain-blank-regexp)
+;;   "Regular expression for matching action.")
 
 (defconst fountain-page-break-regexp
   "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
@@ -1006,7 +1006,7 @@ comments."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (forward-line 0)
-      (and (not (looking-at fountain-forced-action-mark-regexp))
+      (and (not (looking-at fountain-forced-action-regexp))
            (let ((case-fold-search nil))
              (looking-at fountain-character-regexp))
            (save-match-data
@@ -1354,7 +1354,7 @@ Includes child elements."
                 'page-break (prog1 fountain-new-page
                               (setq fountain-new-page nil)))
           (buffer-substring-no-properties
-           (if (string-match fountain-forced-action-mark-regexp
+           (if (string-match fountain-forced-action-regexp
                              (buffer-substring beg end))
                (1+ beg) beg)
            end))))
@@ -3472,10 +3472,12 @@ scene number from being auto-upcased.."
     ;; Action
     ((lambda (limit)
        (fountain-match-element 'fountain-match-action limit))
-     ((:level 1 :subexp 2 :face fountain-non-printing
-              :invisible fountain-syntax-chars)
-      (:level 1 :subexp 0 :face fountain-action
-              :invisible action))
+     ((:level 1 :subexp 0 :face fountain-action
+              :invisible action)
+      (:level 1 :subexp 2 :face fountain-non-printing
+              :invisible fountain-syntax-chars
+              :override t
+              :laxmatch t))
      ,fountain-align-action)
     ;; Non-breaking space
     (,fountain-nbsp-regexp
