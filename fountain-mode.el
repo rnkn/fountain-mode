@@ -2982,7 +2982,7 @@ halt at end of dialog."
   :group 'fountain)
 
 (defcustom fountain-endnotes-buffer-name
-  "*%s<endnotes>*"
+  "%s<endnotes>"
   "Name of buffer in which to display file endnotes.
 `%s' is replaced with `buffer-name'."
   :type 'string
