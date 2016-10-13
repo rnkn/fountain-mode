@@ -644,7 +644,7 @@ Requires `fountain-match-paren' for preceding character or dialog.")
 ;;   "Regular expression for matching action.")
 
 (defconst fountain-page-break-regexp
-  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
+  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*"
   "Regular expression for matching page breaks.")
 
 (defconst fountain-script-end-regexp
