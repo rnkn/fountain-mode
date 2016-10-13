@@ -2989,11 +2989,11 @@ halt at end of dialog."
   :group 'fountain-endnotes)
 
 (defcustom fountain-endnotes-display-function
-  '(display-buffer-pop-up-window)
-  "Doc"
-  :type '(radio (const :tag "Pop-up new window" (display-buffer-pop-up-window))
-                (const :tag "Pop-up new frame" (display-buffer-pop-up-frame))
-                (const :tag "Show in same window" (display-buffer-same-window)))
+  'display-buffer-pop-up-window
+  "Buffer display function used to display endnotes."
+  :type '(radio (const :tag "Pop-up new window" display-buffer-pop-up-window)
+                (const :tag "Pop-up new frame" display-buffer-pop-up-frame)
+                (const :tag "Show in same window" display-buffer-same-window))
   :group 'fountain-endnotes)
 
 (defun fountain-show-endnotes ()
@@ -3010,10 +3010,10 @@ halt at end of dialog."
                    (or (get-buffer bufname)
                        (progn
                          (make-indirect-buffer (current-buffer) bufname t)))
-                   fountain-endnotes-display-function)
+                   (cons fountain-endnotes-display-function nil))
                   (with-current-buffer bufname
                     (narrow-to-region (1+ beg) (point-max))))
-          (message "Buffer %s does not contain endnotes" (buffer-name)))))))
+          (user-error "Buffer `%s' does not contain endnotes" (buffer-name)))))))
 
 
 ;;; Editing
