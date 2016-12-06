@@ -1378,7 +1378,7 @@ If NEW-PAGE is non-nil, the next element starts a new page."
    ((fountain-match-page-break)
     (fountain-parse-page-break (match-data)))
    (t
-    (looking-at fountain-action-regexp)
+    (fountain-match-action)
     (fountain-parse-action (match-data) new-page))))
 
 (defun fountain-parse-region (beg end)
