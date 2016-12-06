@@ -3600,7 +3600,7 @@ scene number from being auto-upcased.."
        (fountain-match-element 'fountain-match-action limit))
      ((:level 1 :subexp 0 :face fountain-action
               :invisible action)
-      (:level 1 :subexp 2 :face fountain-non-printing
+      (:level 1 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
