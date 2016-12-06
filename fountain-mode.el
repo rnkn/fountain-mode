@@ -1180,11 +1180,6 @@ property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
 
 ;;; Parsing
 
-(defvar-local fountain-new-page
-  nil
-  "Non-nil if next element starts a new page.
-Used by `fountain-parse-region'")
-
 (defun fountain-get-character (&optional n limit)
   "Return Nth next character (or Nth previous if N is negative).
 If N is non-nil, return Nth next character or Nth previous
