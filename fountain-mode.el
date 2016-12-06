@@ -597,9 +597,12 @@ Set with `fountain-init-trans-regexp'. Requires
   "^\s?$"
   "Regular expression for matching an empty line.")
 
-(defconst fountain-forced-action-regexp
-  "^\\(?2:!\\)\\(?3:.*\\)"
-  "Regular expression for forced action.")
+(defconst fountain-action-regexp
+  "^\\(!\\)?\\(.*\\)[\s\t]*$"
+  "Regular expression for forced action.
+
+    Group 1: match forced action mark
+    Group 2: match trimmed whitespace (export group)")
 
 (defconst fountain-nbsp-regexp
   "\\(?:^\\|[^\\]\\)\\(?1:\\(?2:\\\\\\)\s\\)"
@@ -632,41 +635,73 @@ Requires `fountain-match-metadata' for `bobp'.")
     Group 4: match character name only
     Group 5: match trailing ^ (for dual dialog)
 
-Requires `fountain-match-character'.")
+Requires `fountain-match-character' for preceding blank line.")
+
+(defconst fountain-dialog-regexp
+  (concat "\\(\s\s\\)"
+          "\\|"
+          "[\s\t]*\\([^<>\n]+?\\)[\s\t]*$")
+  "Regular expression for matching dialogue.
+
+    Group 1: match trimmed whitespace
+
+Requires `fountain-match-dialog' for preceding character,
+parenthetical or dialogue.")
 
 (defconst fountain-paren-regexp
-  (concat "^[\s\t]*\\(?3:([^)\n]*)\\)[\s\t]*$")
+  (concat "^[\s\t]*\\(([^)\n]*)\\)[\s\t]*$")
   "Regular expression for matching parentheticals.
-Requires `fountain-match-paren' for preceding character or dialog.")
 
-;; (defconst fountain-action-regexp
-;;   (concat "\\(.\\|\n\\)+?\n" fountain-blank-regexp)
-;;   "Regular expression for matching action.")
+    Group 1: match trimmed whitespace (export group)
+
+Requires `fountain-match-paren' for preceding character or
+dialogue.")
 
 (defconst fountain-page-break-regexp
-  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*"
-  "Regular expression for matching page breaks.")
+  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
+  "Regular expression for matching page breaks.
+
+    Group 1: leading ===
+    Group 2: forced page number (export group)")
 
 (defconst fountain-script-end-regexp
-  (concat fountain-page-break-regexp
-          "end.*")
-  "Regular expression for matching script end break.")
+  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\(end\\)\\>.*$"
+  "Regular expression for matching script end break.
+
+    Group 1: leading ===
+    Group 2: end")
 
 (defconst fountain-note-regexp
-  "\\(\\[\\[[\s\t]*\\(?3:\\(?:.\n?\\)*?\\)[\s\t]*]]\\)"
-  "Regular expression for matching notes.")
+  "\\(\\[\\[[\s\t]*\\(\\(?:.\n?\\)*?\\)[\s\t]*]]\\)"
+  "Regular expression for matching notes.
+
+    Group 1: note including [[ ]] delimiters
+    Group 2: note (export group)")
 
 (defconst fountain-section-heading-regexp
   "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
-  "Regular expression for matching section headings.")
+  "Regular expression for matching section headings.
+
+    Group 1: match trimmed whitespace
+    Group 2: match leading #'s
+    Group 3: match heading (export group)")
 
 (defconst fountain-synopsis-regexp
-  "^\\(\\(?2:=[\s\t]*\\)\\(?3:[^=\n].*?\\)\\)[\s\t]*$"
-  "Regular expression for matching synopses.")
+  "^\\(\\(=[\s\t]*\\)\\([^=\n].*?\\)\\)[\s\t]*$"
+  "Regular expression for matching synopses.
+
+    Group 1: match trimmed whitespace
+    Group 2: leading =
+    Group 3: synopsis (export group)")
 
 (defconst fountain-center-regexp
   "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:.*?\\)\\(?4:[\s\t]*<\\)\\)[\s\t]*$"
-  "Regular expression for matching centered text.")
+  "Regular expression for matching centered text.
+
+    Group 1: match trimmed whitespace
+    Group 2: match leading > and whitespace
+    Group 3: match center text (export group)
+    Group 4: match trailing whitespace and <")
 
 (defconst fountain-underline-regexp
   (concat "\\(^\\|[^\\]\\)"
@@ -1008,7 +1043,8 @@ comments."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (forward-line 0)
-      (and (not (looking-at fountain-forced-action-regexp))
+      (and (not (and (looking-at-p fountain-action-regexp)
+                     (match-string 1)))
            (let ((case-fold-search nil))
              (looking-at fountain-character-regexp))
            (save-match-data
@@ -1031,7 +1067,7 @@ comments."
       (save-restriction
         (widen)
         (forward-line 0)
-        (and (looking-at "\\(?3:\s\s\\)\\|[\s\t]*\\(?1:\\(?3:[^<>\n]+?\\)\\)[\s\t]*$") ; FIXME: what is this?
+        (and (looking-at fountain-dialog-regexp)
              (save-match-data
                (unless (bobp)
                  (forward-line -1)
@@ -1190,211 +1226,169 @@ Value string remains a string."
         (setq list (append list (list 'content-start (point))))))
     list))
 
-(defun fountain-parse-section (&optional job)
-  "Return an element list for matched section heading at point.
-Includes child elements."
-  (let ((heading
-         (list 'section-heading
-               (list 'begin (match-beginning 0)
-                     'end (match-end 0)
-                     'level (funcall outline-level)
-                     'page-break (prog1 fountain-new-page
-                                   (setq fountain-new-page nil)))
-               (match-string-no-properties 3)))
-        (level (funcall outline-level))
-        (beg (point))
-        (end (save-excursion
-               (outline-end-of-subtree)
-               (unless (eobp)
-                 (forward-char 1))
-               (point))))
-    (save-excursion
-      (goto-char (plist-get (nth 1 heading) 'end))
-      (let ((contents (fountain-parse-region (point) end job)))
-        (list 'section
-              (list 'begin beg
-                    'end end
-                    'level level)
-              (cons heading contents))))))
-
-(defun fountain-parse-scene (&optional job)
-  "Return an element list for matched scene heading at point.
-Includes child elements."
-  (let ((heading
-         (list 'scene-heading
-               (list 'begin (match-beginning 0)
-                     'end (match-end 0)
-                     'scene-number (match-string-no-properties 6)
-                     'forced (stringp (match-string-no-properties 2))
-                     'page-break (prog1 fountain-new-page
-                                   (setq fountain-new-page nil)))
-               (match-string-no-properties 3)))
-        (num (match-string-no-properties 6)) ; FIXME: get-scene-number
-        (beg (match-beginning 0))
-        (end (save-excursion
-               (outline-end-of-subtree)
-               (unless (eobp)
-                 (forward-char 1))
-               (point))))
-    (save-excursion
-      (goto-char (plist-get (nth 1 heading) 'end))
-      (let ((contents (fountain-parse-region (point) end job)))
-        (list 'scene
-              (list 'begin beg
-                    'end end
-                    'scene-number num)
-              (cons heading contents))))))
-
-(defun fountain-parse-dialog (&optional job)
-  "Return an element list for matched character at point.
-Includes child elements."
-  (let* ((dual (cond ((stringp (match-string 5))
-                      'right)
-                     ((save-excursion
-                        (save-match-data
-                          (fountain-forward-character 1 'dialog)
-                          (and (fountain-match-character)
-                               (stringp (match-string 5)))))
-                      'left)))
-         (character (list 'character
-                          (list 'begin (match-beginning 0)
-                                'end (match-end 0)
-                                'forced (stringp (match-string-no-properties 2))
-                                'dual dual
-                                'page-break (prog1 fountain-new-page
-                                              (setq fountain-new-page nil)))
-                          (match-string-no-properties 3)))
-         (name (match-string-no-properties 4))
-         (beg (match-beginning 0))
-         (end (save-excursion
-                (if (re-search-forward "^\s?$" nil 'move)
-                    (match-beginning 0)
-                  (point))))
-         (contd (string= name
-                         (fountain-get-character -1 'scene))))
-    (save-excursion
-      (goto-char (plist-get (nth 1 character) 'end))
-      (let ((contents (fountain-parse-region (point) end job)))
-        (list 'dialog
-              (list 'begin beg
-                    'end end
-                    'character name
-                    'contd contd
-                    'dual dual)
-              (cons character contents))))))
-
-(defun fountain-parse-lines ()
-  "Return an element list for matched dialogue at point."
-  (list 'lines
+(defun fountain-parse-section-heading (match-data &optional new-page)
+  "Return an element list for matched section heading."
+  (set-match-data match-data)
+  (list 'section-heading
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'page-break (prog1 fountain-new-page
-                            (setq fountain-new-page nil)))
+              'level (save-excursion
+                       (goto-char (match-beginning 0))
+                       (funcall outline-level))
+              'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-paren ()
-  "Return an element list for matched parenthetical at point."
+(defun fountain-parse-scene-heading (match-data &optional new-page)
+  "Return an element list for matched scene heading."
+  (set-match-data match-data)
+  (list 'scene-heading
+        (list 'begin (match-beginning 0)
+              'end (match-end 0)
+              'scene-number (save-excursion
+                              (save-match-data
+                                (goto-char (match-beginning 0))
+                                (fountain-scene-number-to-string
+                                 (fountain-get-scene-number 0))))
+              'forced (stringp (match-string-no-properties 2))
+              'new-page new-page)
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-character (match-data &optional new-page)
+  "Return an element list for matched character."
+  (set-match-data match-data)
+  (list 'character
+        (list 'begin (match-beginning 0)
+              'end (match-end 0)
+              'forced (stringp (match-string-no-properties 2))
+              'dual (cond ((stringp (match-string 5))
+                           'right)
+                          ((save-excursion
+                             (save-match-data
+                               (goto-char (match-beginning 0))
+                               (fountain-forward-character 1 'dialog)
+                               (and (fountain-match-character)
+                                    (stringp (match-string 5)))))
+                           'left))
+              'new-page new-page)
+        (match-string-no-properties 3)))
+
+(defun fountain-parse-dialog (match-data &optional new-page)
+  "Return an element list for matched dialogue."
+  (set-match-data match-data)
+  (list 'dialog
+        (list 'begin (match-beginning 0)
+              'end (match-end 0)
+              'new-page new-page)
+        (match-string-no-properties 1)))
+
+(defun fountain-parse-paren (match-data &optional new-page)
+  "Return an element list for matched parenthetical."
+  (set-match-data match-data)
   (list 'paren
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'page-break (prog1 fountain-new-page
-                            (setq fountain-new-page nil)))
-        (match-string-no-properties 3)))
+              'new-page new-page)
+        (match-string-no-properties 1)))
 
-(defun fountain-parse-trans ()
-  "Return an element list for matched transition at point."
+(defun fountain-parse-trans (match-data &optional new-page)
+  "Return an element list for matched transition."
+  (set-match-data match-data)
   (list 'trans
         (list 'begin (match-beginning 0)
               'end (match-end 0)
               'forced (stringp (match-string-no-properties 2))
-              'page-break (prog1 fountain-new-page
-                            (setq fountain-new-page nil)))
+              'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-center ()
-  "Return an element list for matched center text at point."
+(defun fountain-parse-center (match-data &optional new-page)
+  "Return an element list for matched center text."
   (list 'center
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'page-break (prog1 fountain-new-page
-                            (setq fountain-new-page nil)))
+              'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-page-break ()
-  "Return an element list for matched page break at point."
+(defun fountain-parse-page-break (match-data)
+  "Return an element list for matched page break."
+  (set-match-data match-data)
   (list 'page-break
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'page-break (match-string-no-properties 2))))
+              'new-page 't
+              'page-number (match-string-no-properties 2))))
 
-(defun fountain-parse-synopsis ()
-  "Return an element list for matched synopsis at point."
+(defun fountain-parse-synopsis (match-data &optional new-page)
+  "Return an element list for matched synopsis."
+  (set-match-data match-data)
   (list 'synopsis
         (list 'begin (match-beginning 0)
-              'end (match-end 0))
+              'end (match-end 0)
+              'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-note ()
-  "Return an element list for matched note at point."
+(defun fountain-parse-note (match-data &optional new-page)
+  "Return an element list for matched note."
+  (set-match-data match-data)
   (list 'note
         (list 'begin (match-beginning 0)
-              'end (match-end 0))
-        (match-string-no-properties 3)))
+              'end (match-end 0)
+              'new-page new-page)
+        (match-string-no-properties 2)))
 
-(defun fountain-parse-action ()
-  "Return an element list for action at point."
-  (let ((beg (line-beginning-position))
+(defun fountain-parse-action (match-data &optional new-page)
+  "Return an element list for matched action."
+  (set-match-data match-data)
+  (let ((beg (match-beginning 0))
         (end (save-excursion
-               (while (not (or (fountain-tachyon-p)
-                               (eobp)))
-                 (forward-line 1))
-               (skip-chars-backward "\s\t\n")
-               (point))))
+               (save-match-data
+                 (while (not (or (fountain-blank-p)
+                                 (eobp)))
+                   (forward-line 1))
+                 (skip-chars-backward "\s\t\n")
+                 (point)))))
     (list 'action
           (list 'begin beg
                 'end end
-                'page-break (prog1 fountain-new-page
-                              (setq fountain-new-page nil)))
-          (buffer-substring-no-properties
-           (if (string-match fountain-forced-action-regexp
-                             (buffer-substring beg end))
-               (1+ beg) beg)
-           end))))
+                'forced (stringp (match-string 1))
+                'new-page new-page)
+          (buffer-substring-no-properties (match-beginning 2) end))))
 
-(defun fountain-parse-element (&optional job)
-  "Call appropropriate element parsing function for matched element at point."
+(defun fountain-parse-element (&optional new-page)
+  "Call appropropriate element parsing function for matched element at point.
+If NEW-PAGE is non-nil, the next element starts a new page."
   (cond
    ((fountain-match-section-heading)
-    (fountain-parse-section job))
+    (fountain-parse-section-heading (match-data) new-page))
    ((fountain-match-scene-heading)
-    (fountain-parse-scene job))
+    (fountain-parse-scene-heading (match-data) new-page))
    ((fountain-match-character)
-    (fountain-parse-dialog job))
+    (fountain-parse-character (match-data) new-page))
    ((fountain-match-dialog)
-    (fountain-parse-lines))
+    (fountain-parse-dialog (match-data) new-page))
    ((fountain-match-paren)
-    (fountain-parse-paren))
+    (fountain-parse-paren (match-data) new-page))
    ((fountain-match-trans)
-    (fountain-parse-trans))
+    (fountain-parse-trans (match-data) new-page))
    ((fountain-match-center)
-    (fountain-parse-center))
-   ((fountain-match-page-break)
-    (fountain-parse-page-break))
+    (fountain-parse-center (match-data) new-page))
    ((fountain-match-synopsis)
-    (fountain-parse-synopsis))
+    (fountain-parse-synopsis (match-data) new-page))
    ((fountain-match-note)
-    (fountain-parse-note))
+    (fountain-parse-note (match-data) new-page))
+   ((fountain-match-page-break)
+    (fountain-parse-page-break (match-data)))
    (t
-    (fountain-parse-action))))
+    (looking-at fountain-action-regexp)
+    (fountain-parse-action (match-data) new-page))))
 
-(defun fountain-parse-region (beg end &optional job)
-  "Return a list of parsed element lists in region between BEG and END
-Update progress of JOB.
+(defun fountain-parse-region (beg end)
+  "Return a list of parsed element lists in region between BEG and END.
 
 Ignores blank lines, comments and metadata. Calls
 `fountain-parse-element' and adds element list to list, then
 moves to property value of end of element."
-  (let (list)
+  (let ((job (make-progress-reporter "Parsing..." 0 100))
+        list)
     (goto-char beg)
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
@@ -1402,12 +1396,15 @@ moves to property value of end of element."
                  (fountain-match-metadata))
         (goto-char (match-end 0)))
       (if (< (point) end)
-          (let ((element (fountain-parse-element job)))
+          (let (element new-page)
+            (setq new-page (eq (caar list) 'page-break)
+                  element (fountain-parse-element new-page))
             (push element list)
-            (goto-char (plist-get (nth 1 element) 'end))
-            (if (eq (car element) 'page-break)
-                (setq fountain-new-page t))
-            (if job (progress-reporter-update job)))))
+            (goto-char (plist-get (nth 1 element) 'end))))
+      (progress-reporter-update job
+                                (* (/ (float (- (point) beg))
+                                      (float (- end beg)))
+                                   100)))
     (reverse list)))
 
 
