@@ -1048,7 +1048,7 @@ comments."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (forward-line 0)
-      (and (not (and (looking-at-p fountain-action-regexp)
+      (and (not (and (looking-at fountain-action-regexp)
                      (match-string 1)))
            (let ((case-fold-search nil))
              (looking-at fountain-character-regexp))
