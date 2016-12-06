@@ -570,7 +570,7 @@ Set with `fountain-init-scene-heading-regexp'.
 
     Group 1: match trimmed whitespace
     Group 2: match leading . (for forced element)
-    Group 3: match scene heading without scene number (for export)
+    Group 3: match scene heading without scene number (export group)
     Group 4: match space before scene number
     Group 5: match first # delimiter
     Group 6: match scene number
@@ -590,6 +590,11 @@ Requires `fountain-match-scene-heading' for preceding blank line.")
 (defvar fountain-trans-regexp
   nil
   "Regular expression for matching transitions.
+
+    Group 1: match trimmed whitespace
+    Group 2: match forced transition mark
+    Group 3: match transition (export group)
+
 Set with `fountain-init-trans-regexp'. Requires
 `fountain-match-trans' for preceding and succeeding blank lines.")
 
@@ -3329,7 +3334,8 @@ Or, if nil:
         (concat (number-to-string number) revision)))))
 
 (defun fountain-get-scene-number (&optional n)
-  "Return the scene number of the Nth scene as a qualified list."
+  "Return the scene number of the Nth next scene as a qualified list.
+Return Nth previous if N is negative."
   (or n (setq n 0))
   (save-excursion
     (save-restriction
