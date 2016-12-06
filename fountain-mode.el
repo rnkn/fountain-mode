@@ -1126,7 +1126,8 @@ comments."
     (save-restriction
       (widen)
       (forward-line 0)
-      (or (looking-at fountain-forced-action-regexp)
+      (or (and (looking-at fountain-action-regexp)
+               (match-string 1))
           (and (not (or (fountain-blank-p)
                         (fountain-match-comment)
                         (fountain-match-metadata)
@@ -1139,7 +1140,7 @@ comments."
                         (fountain-match-center)
                         (fountain-match-synopsis)
                         (fountain-match-note)))
-               (looking-at "\\(?3:.*\\)"))))))
+               (looking-at fountain-action-regexp))))))
 
 
 ;;; Emacs Bugs
