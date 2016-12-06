@@ -1341,6 +1341,7 @@ Value string remains a string."
   (let ((beg (match-beginning 0))
         (end (save-excursion
                (save-match-data
+                 (goto-char (match-beginning 0))
                  (while (not (or (fountain-blank-p)
                                  (eobp)))
                    (forward-line 1))
