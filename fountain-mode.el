@@ -1351,7 +1351,8 @@ Value string remains a string."
                 'end end
                 'forced (stringp (match-string 1))
                 'new-page new-page)
-          (buffer-substring-no-properties (match-beginning 2) end))))
+          (replace-regexp-in-string
+           "^!" "" (buffer-substring-no-properties (match-beginning 2) end)))))
 
 (defun fountain-parse-element (&optional new-page)
   "Call appropropriate element parsing function for matched element at point.
