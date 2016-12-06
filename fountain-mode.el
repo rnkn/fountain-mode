@@ -3344,69 +3344,86 @@ Return Nth previous if N is negative."
       (unless (= n 0) (fountain-forward-scene n))
       (unless (fountain-match-scene-heading)
         (user-error "Before first scene heading"))
+      ;; First, check if there are any scene numbers at all. If not we
+      ;; can save a lot of work.
       (let ((x (point))
-            ;; First, check if scene heading is already numbered.
-            (current-scene (fountain-scene-number-to-list (match-string 6)))
-            last-scene next-scene)
-        ;; Check if there is a next-scene. No previous scene number can be
-        ;; greater or equal to this.
-        (while (not (or next-scene (eobp)))
-          (fountain-forward-scene 1)
-          (if (fountain-match-scene-heading)
-              (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
-        (cond
-         ;; If there's both a next-scene and current-scene, but next-scene is
-         ;; less or equal to current-scene, scene numbers are out of order.
-         ((and current-scene next-scene
-               (version-list-<= next-scene current-scene))
-          (user-error "Scene `%s' is out of order"
-                      (fountain-scene-number-to-string current-scene)))
-         ;; Otherwise, if there's a current scene and either no next-scene or
-         ;; there is and it's greater then current-scene, just return
-         ;; current-scene.
-         (current-scene)
-         ;; There is no current-scene yet...
-         (t
-          ;; Go to the first scene heading and if it's already numberd set it to
-          ;; that, or just (list 1). Also set last-scene.
-          (goto-char (point-min))
-          (unless (fountain-match-scene-heading)
-            (fountain-forward-scene 1))
-          (if (<= (point) x)
-              (setq current-scene
-                    (or (fountain-scene-number-to-list (match-string 6))
-                        (list 1))))
-          ;; While before point x, go forward through each scene heading,
-          ;; setting last-scene to current-scene and current-scene to an
-          ;; incement of the car of last-scene.
-          (while (< (point) x (point-max))
+            found)
+        (goto-char (point-min))
+        (while (not (or found (eobp)))
+          (re-search-forward fountain-scene-heading-regexp nil 'move)
+          (setq found (match-string 6)))
+      (goto-char x)
+      (if found
+          (let ((current-scene (fountain-scene-number-to-list (match-string 6)))
+                last-scene next-scene)
+            ;; Check if scene heading is already numbered and if there
+            ;; is a next-scene. No previousscene number can be greater
+            ;; or equal to this.
+            (while (not (or next-scene (eobp)))
+              (fountain-forward-scene 1)
+              (if (fountain-match-scene-heading)
+                  (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
+            (cond
+             ;; If there's both a next-scene and current-scene, but next-scene is
+             ;; less or equal to current-scene, scene numbers are out of order.
+             ((and current-scene next-scene
+                   (version-list-<= next-scene current-scene))
+              (user-error "Scene `%s' is out of order"
+                          (fountain-scene-number-to-string current-scene)))
+             ;; Otherwise, if there's a current scene and either no next-scene or
+             ;; there is and it's greater then current-scene, just return
+             ;; current-scene.
+             (current-scene)
+             ;; There is no current-scene yet...
+             (t
+              ;; Go to the first scene heading and if it's already numberd set it to
+              ;; that, or just (list 1). Also set last-scene.
+              (goto-char (point-min))
+              (unless (fountain-match-scene-heading)
+                (fountain-forward-scene 1))
+              (if (<= (point) x)
+                  (setq current-scene
+                        (or (fountain-scene-number-to-list (match-string 6))
+                            (list 1))))
+              ;; While before point x, go forward through each scene heading,
+              ;; setting last-scene to current-scene and current-scene to an
+              ;; incement of the car of last-scene.
+              (while (< (point) x (point-max))
+                (fountain-forward-scene 1)
+                (when (fountain-match-scene-heading)
+                  (setq last-scene current-scene
+                        current-scene (or (fountain-scene-number-to-list (match-string 6))
+                                          (list (1+ (car last-scene)))))
+                  ;; However, this might make current-scene greater or equal to
+                  ;; next-scene, so if there is a next-scene, for each current-scene
+                  ;; check if next-scene is less or equal to current-scene. If so,
+                  ;; pop the car from last-scene (which should always be less than
+                  ;; next-scene) as n, set current-scene to (list scene (1+ n)) and
+                  ;; set scene to (list scene n). Loop through this so that the last
+                  ;; (or only) element of current-scene is incremented by 1, and
+                  ;; scene is appended with n or 1. e.g.
+                  ;;
+                  ;;    current-scene (4 2) -> (4 3)
+                  ;;    scene (4 2) -> (4 2 1)
+                  ;;
+                  ;; Return current-scene.
+                  (let (n scene)
+                    (while (and next-scene (version-list-<= next-scene current-scene))
+                      (setq n (pop last-scene)
+                            current-scene (append scene (list (1+ (or n 0))))
+                            scene (append scene (list (or n 1))))
+                      (if (version-list-<= next-scene scene)
+                          (user-error "Scene `%s' is out of order"
+                                      (fountain-scene-number-to-string current-scene)))))))
+              current-scene)))
+        ;; There were no scene numbers, so we can just count the scenes.
+        (goto-char (point-min))
+        (let ((scene (if (fountain-match-scene-heading) 1 0)))
+          (while (< (point) x)
             (fountain-forward-scene 1)
-            (when (fountain-match-scene-heading)
-              (setq last-scene current-scene
-                    current-scene (or (fountain-scene-number-to-list (match-string 6))
-                                      (list (1+ (car last-scene)))))
-              ;; However, this might make current-scene greater or equal to
-              ;; next-scene, so if there is a next-scene, for each current-scene
-              ;; check if next-scene is less or equal to current-scene. If so,
-              ;; pop the car from last-scene (which should always be less than
-              ;; next-scene) as n, set current-scene to (list scene (1+ n)) and
-              ;; set scene to (list scene n). Loop through this so that the last
-              ;; (or only) element of current-scene is incremented by 1, and
-              ;; scene is appended with n or 1. e.g.
-              ;;
-              ;;    current-scene (4 2) -> (4 3)
-              ;;    scene (4 2) -> (4 2 1)
-              ;;
-              ;; Return current-scene.
-              (let (n scene)
-                (while (and next-scene (version-list-<= next-scene current-scene))
-                  (setq n (pop last-scene)
-                        current-scene (append scene (list (1+ (or n 0))))
-                        scene (append scene (list (or n 1))))
-                  (if (version-list-<= next-scene scene)
-                      (user-error "Scene `%s' is out of order"
-                                  (fountain-scene-number-to-string current-scene)))))))
-          current-scene))))))
+            (if (fountain-match-scene-heading)
+                (setq scene (1+ scene))))
+          scene))))))
 
 (defun fountain-remove-scene-numbers ()
   "Remove scene numbers from scene headings in current buffer."
