@@ -2603,7 +2603,6 @@ calculated."
   (fountain-export-buffer 'fountain))
 
 
-
 ;;; Outlining
 
 (require 'outline)
