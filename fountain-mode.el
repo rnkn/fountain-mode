@@ -3673,14 +3673,7 @@ assigning the following keywords:
     :face       face name to apply
     :invisible  if t, adds :face property to invisible text property
     :override   as per `font-lock-keywords'
-    :laxmatch   as per `font-lock-keywords'
-
-Regular expression should take the form:
-
-    Group 1: match whole string with trimmed whitespace
-    Group 2: syntax characters
-    Group 3: export group
-    Group 4...: syntax characters")
+    :laxmatch   as per `font-lock-keywords'")
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration' for `fountain-mode'."
