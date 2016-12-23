@@ -4186,8 +4186,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
             #'fountain-auto-upcase t t)
   (add-hook 'font-lock-extend-region-functions
             #'fountain-font-lock-extend-region t t)
-  (if fountain-patch-emacs-bugs
-      (fountain-patch-emacs-bugs))
+  (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers t)
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
