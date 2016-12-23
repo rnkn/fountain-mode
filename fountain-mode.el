@@ -920,8 +920,8 @@ regular expression."
   "Initialize `imenu-generic-expression'."
   (setq imenu-generic-expression
         (list
-         (list "Notes" fountain-note-regexp 3)
-         (list "Scene Headings" fountain-scene-heading-regexp 1)
+         (list "Notes" fountain-note-regexp 2)
+         (list "Scene Headings" fountain-scene-heading-regexp 3)
          (list "Sections" fountain-section-heading-regexp 1))))
 
 (defun fountain-init-comment-syntax ()
