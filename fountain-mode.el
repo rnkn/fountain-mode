@@ -1007,11 +1007,12 @@ comments."
       (widen)
       (forward-line 0)
       (or (looking-at fountain-note-regexp)
-          (let ((pos (point)))
-            (if (re-search-backward "^[\s\t]*\n" nil 'move)
-                (goto-char (match-end 0)))
+          (let ((x (point)))
+            (when (re-search-backward fountain-blank-regexp nil t)
+              (goto-char (match-end 0))
+              (skip-chars-forward "\n\s\t"))
             (and (looking-at fountain-note-regexp)
-                 (< pos (match-end 0))))))))
+                 (< x (match-end 0))))))))
 
 (defun fountain-match-comment ()            ; FIXME: does not see "//" comments
   "Match comment if point is at a comment, nil otherwise."
