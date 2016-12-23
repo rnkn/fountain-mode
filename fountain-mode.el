@@ -3801,7 +3801,12 @@ assigning the following keywords:
                  (cond ((= n 1) "minimum")
                        ((= n 2) "default")
                        ((= n 3) "maximum")))
-        (font-lock-refresh-defaults))
+        (font-lock-refresh-defaults)
+        (font-lock-ensure (save-excursion
+                            (goto-char (point-min))
+                            (re-search-forward fountain-script-end-regexp nil 'move)
+                            (point))
+                          (point-max)))
     (user-error "Decoration must be an integer 1-3")))
 
 (defun fountain-font-lock-extend-region ()
