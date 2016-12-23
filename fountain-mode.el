@@ -3595,7 +3595,7 @@ scene number from being auto-upcased.."
        (fountain-match-element 'fountain-match-scene-heading limit))
      ((:level 2 :subexp 0 :face fountain-scene-heading
               :invisible scene-heading)
-      (:level 2 :subexp 2 :face fountain-comment
+      (:level 2 :subexp 2 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override append
               :laxmatch t)
@@ -3620,6 +3620,7 @@ scene number from being auto-upcased.."
               :invisible character)
       (:level 3 :subexp 2
               :invisible fountain-syntax-chars
+              :override t
               :laxmatch t)
       (:level 3 :subexp 5 :face highlight
               :override append
@@ -3635,7 +3636,7 @@ scene number from being auto-upcased.."
     ((lambda (limit)
        (fountain-match-element 'fountain-match-dialog limit))
      ((:level 3 :subexp 0 :face fountain-dialog
-              :invisible lines))
+              :invisible dialog))
      fountain-align-dialog)
     ;; Transition
     ((lambda (limit)
