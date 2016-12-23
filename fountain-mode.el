@@ -1234,9 +1234,16 @@ Value string remains a string."
   (list 'section-heading
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'level (save-excursion
-                       (goto-char (match-beginning 0))
-                       (funcall outline-level))
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
+              'level
+              (save-excursion
+                (goto-char (match-beginning 0))
+                (funcall outline-level))
               'new-page new-page)
         (match-string-no-properties 3)))
 
@@ -1246,11 +1253,18 @@ Value string remains a string."
   (list 'scene-heading
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'scene-number (save-excursion
-                              (save-match-data
-                                (goto-char (match-beginning 0))
-                                (fountain-scene-number-to-string
-                                 (fountain-get-scene-number 0))))
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
+              'scene-number
+              (save-excursion
+                (save-match-data
+                  (goto-char (match-beginning 0))
+                  (fountain-scene-number-to-string
+                   (fountain-get-scene-number 0))))
               'forced (stringp (match-string-no-properties 2))
               'new-page new-page)
         (match-string-no-properties 3)))
@@ -1261,16 +1275,25 @@ Value string remains a string."
   (list 'character
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (save-match-data
+                  (goto-char (match-beginning 0))
+                  (re-search-forward fountain-blank-regexp nil 'move)
+                  (skip-chars-forward "\n\s\t")
+                  (point)))
               'forced (stringp (match-string-no-properties 2))
-              'dual (cond ((stringp (match-string 5))
-                           'right)
-                          ((save-excursion
-                             (save-match-data
-                               (goto-char (match-beginning 0))
-                               (fountain-forward-character 1 'dialog)
-                               (and (fountain-match-character)
-                                    (stringp (match-string 5)))))
-                           'left))
+              'dual
+              (cond ((stringp (match-string 5))
+                     'right)
+                    ((save-excursion
+                       (save-match-data
+                         (goto-char (match-beginning 0))
+                         (fountain-forward-character 1 'dialog)
+                         (and (fountain-match-character)
+                              (stringp (match-string 5)))))
+                     'left))
               'new-page new-page)
         (match-string-no-properties 3)))
 
@@ -1280,6 +1303,19 @@ Value string remains a string."
   (list 'dialog
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin
+              (save-excursion
+                (save-match-data
+                  (goto-char (match-beginning 0))
+                  (fountain-forward-character -1)
+                  (point)))
+              'block-end
+              (save-excursion
+                (save-match-data
+                  (goto-char (match-beginning 0))
+                  (re-search-forward fountain-blank-regexp nil 'move)
+                  (skip-chars-forward "\n\s\t")
+                  (point)))
               'new-page new-page)
         (match-string-no-properties 1)))
 
@@ -1289,6 +1325,19 @@ Value string remains a string."
   (list 'paren
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin
+              (save-excursion
+                (save-match-data
+                  (goto-char (match-beginning 0))
+                  (fountain-forward-character -1)
+                  (point)))
+              'block-end
+              (save-excursion
+                (save-match-data
+                  (goto-char (match-beginning 0))
+                  (re-search-forward fountain-blank-regexp nil 'move)
+                  (skip-chars-forward "\n\s\t")
+                  (point)))
               'new-page new-page)
         (match-string-no-properties 1)))
 
@@ -1298,6 +1347,12 @@ Value string remains a string."
   (list 'trans
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
               'forced (stringp (match-string-no-properties 2))
               'new-page new-page)
         (match-string-no-properties 3)))
@@ -1307,6 +1362,12 @@ Value string remains a string."
   (list 'center
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
               'new-page new-page)
         (match-string-no-properties 3)))
 
@@ -1316,7 +1377,13 @@ Value string remains a string."
   (list 'page-break
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'new-page 't
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
+              'new-page t
               'page-number (match-string-no-properties 2))))
 
 (defun fountain-parse-synopsis (match-data &optional new-page)
@@ -1325,6 +1392,12 @@ Value string remains a string."
   (list 'synopsis
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
               'new-page new-page)
         (match-string-no-properties 3)))
 
@@ -1334,6 +1407,12 @@ Value string remains a string."
   (list 'note
         (list 'begin (match-beginning 0)
               'end (match-end 0)
+              'block-begin (match-beginning 0)
+              'block-end
+              (save-excursion
+                (goto-char (match-end 0))
+                (skip-chars-forward "\n\s\t")
+                (point))
               'new-page new-page)
         (match-string-no-properties 2)))
 
@@ -1341,25 +1420,36 @@ Value string remains a string."
   "Return an element list for matched action."
   (set-match-data match-data)
   (let ((beg (match-beginning 0))
-        (end (save-excursion
-               (save-match-data
-                 (goto-char (match-beginning 0))
-                 (while (not (or (fountain-blank-p)
-                                 (eobp)))
-                   (forward-line 1))
-                 (skip-chars-backward "\s\t\n")
-                 (point)))))
+        (end
+         (save-excursion
+           (save-match-data
+             (goto-char (match-beginning 0))
+             (re-search-forward fountain-blank-regexp nil 'move)
+             (skip-chars-backward "\n\s\t")
+             (point))))
+        string)
     (list 'action
           (list 'begin beg
                 'end end
+                'block-begin beg
+                'block-end
+                (save-excursion
+                  (goto-char end)
+                  (skip-chars-forward "\n\s\t")
+                  (point))
                 'forced (stringp (match-string 1))
                 'new-page new-page)
-          (replace-regexp-in-string
-           "^!" "" (buffer-substring-no-properties (match-beginning 2) end)))))
+          (setq string (buffer-substring-no-properties (match-beginning 2) end)
+                string (replace-regexp-in-string "^!" "" string)))))
 
 (defun fountain-parse-element (&optional new-page)
   "Call appropropriate element parsing function for matched element at point.
 If NEW-PAGE is non-nil, the next element starts a new page."
+  (forward-line 0)
+  (while (or (looking-at "\n*\s?\n")
+             (fountain-match-comment)
+             (fountain-match-metadata))
+    (goto-char (match-end 0)))
   (cond
    ((fountain-match-section-heading)
     (fountain-parse-section-heading (match-data) new-page))
