@@ -643,9 +643,9 @@ Requires `fountain-match-metadata' for `bobp'.")
 Requires `fountain-match-character' for preceding blank line.")
 
 (defconst fountain-dialog-regexp
-  (concat "\\(\s\s\\)"
+  (concat "^\\(\s\s\\)$"
           "\\|"
-          "[\s\t]*\\([^<>\n]+?\\)[\s\t]*$")
+          "^[\s\t]*\\(?1:[^<>\n]+?\\)[\s\t]*$")
   "Regular expression for matching dialogue.
 
     Group 1: match trimmed whitespace
