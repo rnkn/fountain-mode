@@ -1228,7 +1228,7 @@ Value string remains a string."
         (setq list (append list (list 'content-start (point))))))
     list))
 
-(defun fountain-parse-section-heading (match-data &optional new-page)
+(defun fountain-parse-section-heading (match-data &optional export new-page)
   "Return an element list for matched section heading."
   (set-match-data match-data)
   (list 'section-heading
@@ -1244,10 +1244,11 @@ Value string remains a string."
               (save-excursion
                 (goto-char (match-beginning 0))
                 (funcall outline-level))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-scene-heading (match-data &optional new-page)
+(defun fountain-parse-scene-heading (match-data &optional export new-page)
   "Return an element list for matched scene heading."
   (set-match-data match-data)
   (list 'scene-heading
@@ -1266,10 +1267,11 @@ Value string remains a string."
                   (fountain-scene-number-to-string
                    (fountain-get-scene-number 0))))
               'forced (stringp (match-string-no-properties 2))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-character (match-data &optional new-page)
+(defun fountain-parse-character (match-data &optional export new-page)
   "Return an element list for matched character."
   (set-match-data match-data)
   (list 'character
@@ -1294,10 +1296,11 @@ Value string remains a string."
                          (and (fountain-match-character)
                               (stringp (match-string 5)))))
                      'left))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-dialog (match-data &optional new-page)
+(defun fountain-parse-dialog (match-data &optional export new-page)
   "Return an element list for matched dialogue."
   (set-match-data match-data)
   (list 'dialog
@@ -1316,10 +1319,11 @@ Value string remains a string."
                   (re-search-forward fountain-blank-regexp nil 'move)
                   (skip-chars-forward "\n\s\t")
                   (point)))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 1)))
 
-(defun fountain-parse-paren (match-data &optional new-page)
+(defun fountain-parse-paren (match-data &optional export new-page)
   "Return an element list for matched parenthetical."
   (set-match-data match-data)
   (list 'paren
@@ -1338,10 +1342,11 @@ Value string remains a string."
                   (re-search-forward fountain-blank-regexp nil 'move)
                   (skip-chars-forward "\n\s\t")
                   (point)))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 1)))
 
-(defun fountain-parse-trans (match-data &optional new-page)
+(defun fountain-parse-trans (match-data &optional export new-page)
   "Return an element list for matched transition."
   (set-match-data match-data)
   (list 'trans
@@ -1354,10 +1359,11 @@ Value string remains a string."
                 (skip-chars-forward "\n\s\t")
                 (point))
               'forced (stringp (match-string-no-properties 2))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-center (match-data &optional new-page)
+(defun fountain-parse-center (match-data &optional export new-page)
   "Return an element list for matched center text."
   (list 'center
         (list 'begin (match-beginning 0)
@@ -1368,10 +1374,11 @@ Value string remains a string."
                 (goto-char (match-end 0))
                 (skip-chars-forward "\n\s\t")
                 (point))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-page-break (match-data)
+(defun fountain-parse-page-break (match-data &optional export)
   "Return an element list for matched page break."
   (set-match-data match-data)
   (list 'page-break
@@ -1383,10 +1390,11 @@ Value string remains a string."
                 (goto-char (match-end 0))
                 (skip-chars-forward "\n\s\t")
                 (point))
+              'export (if export t)
               'new-page t
               'page-number (match-string-no-properties 2))))
 
-(defun fountain-parse-synopsis (match-data &optional new-page)
+(defun fountain-parse-synopsis (match-data &optional export new-page)
   "Return an element list for matched synopsis."
   (set-match-data match-data)
   (list 'synopsis
@@ -1398,10 +1406,11 @@ Value string remains a string."
                 (goto-char (match-end 0))
                 (skip-chars-forward "\n\s\t")
                 (point))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 3)))
 
-(defun fountain-parse-note (match-data &optional new-page)
+(defun fountain-parse-note (match-data &optional export new-page)
   "Return an element list for matched note."
   (set-match-data match-data)
   (list 'note
@@ -1413,10 +1422,11 @@ Value string remains a string."
                 (goto-char (match-end 0))
                 (skip-chars-forward "\n\s\t")
                 (point))
+              'export (if export t)
               'new-page new-page)
         (match-string-no-properties 2)))
 
-(defun fountain-parse-action (match-data &optional new-page)
+(defun fountain-parse-action (match-data &optional export new-page)
   "Return an element list for matched action."
   (set-match-data match-data)
   (let ((beg (match-beginning 0))
@@ -1438,11 +1448,12 @@ Value string remains a string."
                   (skip-chars-forward "\n\s\t")
                   (point))
                 'forced (stringp (match-string 1))
+                'export (if export t)
                 'new-page new-page)
           (setq string (buffer-substring-no-properties (match-beginning 2) end)
                 string (replace-regexp-in-string "^!" "" string)))))
 
-(defun fountain-parse-element (&optional new-page)
+(defun fountain-parse-element (includes &optional new-page)
   "Call appropropriate element parsing function for matched element at point.
 If NEW-PAGE is non-nil, the next element starts a new page."
   (forward-line 0)
@@ -1452,28 +1463,39 @@ If NEW-PAGE is non-nil, the next element starts a new page."
     (goto-char (match-end 0)))
   (cond
    ((fountain-match-section-heading)
-    (fountain-parse-section-heading (match-data) new-page))
+    (fountain-parse-section-heading
+     (match-data) (memq 'section-heading includes) new-page))
    ((fountain-match-scene-heading)
-    (fountain-parse-scene-heading (match-data) new-page))
+    (fountain-parse-scene-heading
+     (match-data) (memq 'scene-heading includes) new-page))
    ((fountain-match-character)
-    (fountain-parse-character (match-data) new-page))
+    (fountain-parse-character
+     (match-data) (memq 'character includes) new-page))
    ((fountain-match-dialog)
-    (fountain-parse-dialog (match-data) new-page))
+    (fountain-parse-dialog
+     (match-data) (memq 'dialog includes) new-page))
    ((fountain-match-paren)
-    (fountain-parse-paren (match-data) new-page))
+    (fountain-parse-paren
+     (match-data) (memq 'paren includes) new-page))
    ((fountain-match-trans)
-    (fountain-parse-trans (match-data) new-page))
+    (fountain-parse-trans
+     (match-data) (memq 'trans includes) new-page))
    ((fountain-match-center)
-    (fountain-parse-center (match-data) new-page))
+    (fountain-parse-center
+     (match-data) (memq 'center includes) new-page))
    ((fountain-match-synopsis)
-    (fountain-parse-synopsis (match-data) new-page))
+    (fountain-parse-synopsis
+     (match-data) (memq 'synopsis includes) new-page))
    ((fountain-match-note)
-    (fountain-parse-note (match-data) new-page))
+    (fountain-parse-note
+     (match-data) (memq 'note includes) new-page))
    ((fountain-match-page-break)
-    (fountain-parse-page-break (match-data)))
+    (fountain-parse-page-break
+     (match-data) (memq 'page-break includes)))
    (t
     (fountain-match-action)
-    (fountain-parse-action (match-data) new-page))))
+    (fountain-parse-action
+     (match-data) (memq 'action includes) new-page))))
 
 (defun fountain-parse-region (beg end)
   "Return a list of parsed element lists in region between BEG and END.
@@ -1482,6 +1504,11 @@ Ignores blank lines, comments and metadata. Calls
 `fountain-parse-element' and adds element list to list, then
 moves to property value of end of element."
   (let ((job (make-progress-reporter "Parsing..." 0 100))
+        (includes
+         (cdr (or (assq (or (plist-get (fountain-read-metadata) 'format)
+                            "screenplay")
+                        fountain-export-include-elements-alist)
+                  (car fountain-export-include-elements-alist))))
         list)
     (goto-char beg)
     (while (< (point) (min end (point-max)))
@@ -1492,7 +1519,7 @@ moves to property value of end of element."
       (if (< (point) end)
           (let (element new-page)
             (setq new-page (eq (caar list) 'page-break)
-                  element (fountain-parse-element new-page))
+                  element (fountain-parse-element includes new-page))
             (push element list)
             (goto-char (plist-get (nth 1 element) 'end))))
       (progress-reporter-update job
@@ -1510,9 +1537,9 @@ moves to property value of end of element."
   :group 'fountain)
 
 (defcustom fountain-export-include-elements-alist
-  '(("screenplay" scene-heading action character paren lines trans center page-break)
-    ("teleplay" section-heading scene-heading action character paren lines trans center page-break)
-    ("stageplay" section-heading scene-heading action character paren lines trans center page-break))
+  '(("screenplay" scene-heading action character dialog paren trans center page-break)
+    ("teleplay" section-heading scene-heading action character dialog paren trans center page-break)
+    ("stageplay" section-heading scene-heading action character dialog paren trans center page-break))
   "Association list of elements to include when exporting.
 Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
@@ -1521,8 +1548,8 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Scene Headings" scene-heading)
                                  (const :tag "Action" action)
                                  (const :tag "Character Names" character)
+                                 (const :tag "Dialogue" dialog)
                                  (const :tag "Parentheticals" paren)
-                                 (const :tag "Dialogue" lines)
                                  (const :tag "Transitions" trans)
                                  (const :tag "Center Text" center)
                                  (const :tag "Page Breaks" page-break)
