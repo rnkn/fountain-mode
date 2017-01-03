@@ -3539,7 +3539,7 @@ Return Nth previous if N is negative."
             (fountain-forward-scene 1)
             (if (fountain-match-scene-heading)
                 (setq scene (1+ scene))))
-          scene))))))
+          (list scene)))))))
 
 (defun fountain-remove-scene-numbers ()
   "Remove scene numbers from scene headings in current buffer."
