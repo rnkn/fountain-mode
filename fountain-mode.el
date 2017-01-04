@@ -137,36 +137,6 @@
 
 ;;; Obsolete Warnings
 
-(define-obsolete-variable-alias 'fountain-indent-character-col
-  'fountain-align-character "0.12.0")
-
-(define-obsolete-variable-alias 'fountain-indent-dialog-col
-  'fountain-align-dialog "0.12.0")
-
-(define-obsolete-variable-alias 'fountain-indent-paren-col
-  'fountain-align-paren "0.12.0")
-
-(define-obsolete-variable-alias 'fountain-indent-trans-col
-  'fountain-align-trans "0.12.0")
-
-(define-obsolete-variable-alias 'fountain-indent-centered-col
-  'fountain-align-centered "0.12.0")
-
-(define-obsolete-variable-alias 'fountain-indent-character
-  'fountain-align-character "0.13.0")
-
-(define-obsolete-variable-alias 'fountain-indent-dialog
-  'fountain-align-dialog "0.13.0")
-
-(define-obsolete-variable-alias 'fountain-indent-paren
-  'fountain-align-paren "0.13.0")
-
-(define-obsolete-variable-alias 'fountain-indent-trans
-  'fountain-align-trans "0.13.0")
-
-(define-obsolete-variable-alias 'fountain-indent-centered
-  'fountain-align-centered "0.13.0")
-
 (define-obsolete-variable-alias 'fountain-align-centered
   'fountain-align-center "1.1.0")
 
