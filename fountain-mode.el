@@ -1189,9 +1189,7 @@ Value string remains a string. e.g.
               (setq value (concat value (if value "\n")
                                   (match-string-no-properties 3)))
               (forward-line 1))
-            (setq list (append list (list key value)))))
-        (skip-chars-forward "\n\s\t")
-        (setq list (append list (list 'content-start (point))))))
+            (setq list (append list (list key value)))))))
     list))
 
 (defun fountain-parse-section-heading (match-data &optional export new-page)
