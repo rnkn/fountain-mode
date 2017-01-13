@@ -1171,21 +1171,17 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-read-metadata ()
   "Read metadata of current buffer and return as a property list.
 
-Key string is converted to lowercase, spaces are converted to
-dashes, and then interned.
+Key string is slugified using `fountain-slugify', and interned.
+Value string remains a string. e.g.
 
-    Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")
-
-Value string remains a string."
+    Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
   (let (list)
     (save-excursion
       (save-restriction
         (widen)
         (goto-char (point-min))
         (while (fountain-match-metadata)
-          (let ((key (intern (replace-regexp-in-string
-                              "\s" "-"
-                              (downcase (match-string 2)))))
+          (let ((key (intern (fountain-slugify (match-string 2))))
                 (value (match-string-no-properties 3)))
             (forward-line 1)
             (while (and (fountain-match-metadata)
@@ -1723,6 +1719,18 @@ Otherwise return `fountain-export-buffer'"
            (concat (file-name-base (buffer-file-name)) "." ext))
           (t
            (format fountain-export-buffer-name tag)))))
+
+(defun fountain-slugify (string)
+  "Convert STRING to one suitable for slugs.
+
+STRING is downcased, non-alphanumeric characters are removed, and
+spaces are converted to dashes. e.g.
+
+    Hello Wayne's World 2! -> hello-wanyes-world-2"
+  (string-join
+   (mapcar 'downcase
+           (split-string(replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" string)
+                         "[^[:alnum:]]+" t)) "-"))
 
 (defun fountain-export-format-string (string format)
   "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
