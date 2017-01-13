@@ -3364,13 +3364,13 @@ If nil, when inserting new scene headings after numbering
 existing scene headings, revised scene numbers work as follows:
 
     10
-    10A (new scene)
+    10A <- new scene
     11
 
 If non-nil, revised scene numbers work as follows:
 
     10
-    A11 (new scene)
+    A11 <- new scene
     11
 
 WARNING: Using conflicting revised scene numbers in the same
