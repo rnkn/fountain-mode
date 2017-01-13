@@ -1486,10 +1486,10 @@ moves to property value of end of element."
                   element (fountain-parse-element includes new-page))
             (push element list)
             (goto-char (plist-get (nth 1 element) 'end))))
-      (progress-reporter-update job
-                                (* (/ (float (- (point) beg))
-                                      (float (- end beg)))
-                                   100)))
+      (progress-reporter-update job (* (/ (float (- (point) beg))
+                                          (float (- end beg)))
+                                       100)))
+    (progress-reporter-done job)
     (reverse list)))
 
 
