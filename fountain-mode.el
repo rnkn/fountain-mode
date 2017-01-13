@@ -3520,20 +3520,19 @@ Return Nth previous if N is negative."
 (defun fountain-remove-scene-numbers ()
   "Remove scene numbers from scene headings in current buffer."
   (interactive)
-  (if (y-or-n-p "Are you sure you want to remove scene numbers? ")
-      (save-excursion
-        (save-restriction
-          (widen)
-          (let (buffer-invisibility-spec)
-            (goto-char (point-min))
-            (unless (fountain-match-scene-heading)
-              (fountain-forward-scene 1))
-            (while (and (fountain-match-scene-heading)
-                        (< (point) (point-max)))
-              (if (match-string 6)
-                  (delete-region (match-beginning 4)
-                                 (match-end 7)))
-              (fountain-forward-scene 1)))))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let (buffer-invisibility-spec)
+        (goto-char (point-min))
+        (unless (fountain-match-scene-heading)
+          (fountain-forward-scene 1))
+        (while (and (fountain-match-scene-heading)
+                    (< (point) (point-max)))
+          (if (match-string 6)
+              (delete-region (match-beginning 4)
+                             (match-end 7)))
+          (fountain-forward-scene 1))))))
 
 (defun fountain-add-scene-numbers ()
   "Add scene numbers to scene headings in current buffer.
@@ -3560,26 +3559,25 @@ between 10 and 10A (which might be numbered as 10aA). Instead,
 add these scene numbers manually. Note that if
 `fountain-auto-upcase-scene-headings' is non-nil you will need to
 insert the scene number delimiters (\"##\") first, to protect the
-scene number from being auto-upcased.."
+scene number from being auto-upcased."
   (interactive)
-  (if (y-or-n-p "Are you sure you want to add scene numbers? ")
-      (save-excursion
-        (save-restriction
-          (widen)
-          (let ((job (make-progress-reporter "Adding scene numbers..."))
-                buffer-invisibility-spec)
-            (goto-char (point-min))
-            (unless (fountain-match-scene-heading)
-              (fountain-forward-scene 1))
-            (while (and (fountain-match-scene-heading)
-                        (< (point) (point-max)))
-              (unless (match-string 6)
-                (end-of-line)
-                (delete-horizontal-space t)
-                (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
-              (fountain-forward-scene 1)
-              (progress-reporter-update job))
-            (progress-reporter-done job))))))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let ((job (make-progress-reporter "Adding scene numbers..."))
+            buffer-invisibility-spec)
+        (goto-char (point-min))
+        (unless (fountain-match-scene-heading)
+          (fountain-forward-scene 1))
+        (while (and (fountain-match-scene-heading)
+                    (< (point) (point-max)))
+          (unless (match-string 6)
+            (end-of-line)
+            (delete-horizontal-space t)
+            (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
+          (fountain-forward-scene 1)
+          (progress-reporter-update job))
+        (progress-reporter-done job)))))
 
 
 ;;; Font Lock
