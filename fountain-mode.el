@@ -590,7 +590,7 @@ Set with `fountain-init-trans-regexp'. Requires
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(?1:\\(?2:\\<[^;:'\",?()\\\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
+  (concat "^\\(?1:\\(?2:[^:\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
           "\\|"
           "^[\s\t]+\\(?1:\\(?3:.+\\)\\)")
   "Regular expression for matching multi-line metadata values.
