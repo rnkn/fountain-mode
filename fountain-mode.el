@@ -1175,22 +1175,25 @@ Key string is slugified using `fountain-slugify', and interned.
 Value string remains a string. e.g.
 
     Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
-  (let (list)
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (let (list)
         (while (fountain-match-metadata)
-          (let ((key (intern (fountain-slugify (match-string 2))))
+          (let ((key (match-string 2))
                 (value (match-string-no-properties 3)))
             (forward-line 1)
             (while (and (fountain-match-metadata)
                         (null (match-string 2)))
-              (setq value (concat value (if value "\n")
-                                  (match-string-no-properties 3)))
+              (setq value
+                    (concat value (if value "\n")
+                            (match-string-no-properties 3)))
               (forward-line 1))
-            (setq list (append list (list key value)))))))
-    list))
+            (setq list
+                  (append list (list (intern (fountain-slugify key))
+                                     value)))))
+        list))))
 
 (defun fountain-parse-section-heading (match-data &optional export new-page)
   "Return an element list for matched section heading."
@@ -1722,13 +1725,15 @@ Otherwise return `fountain-export-buffer'"
   "Convert STRING to one suitable for slugs.
 
 STRING is downcased, non-alphanumeric characters are removed, and
-spaces are converted to dashes. e.g.
+whitespace is converted to dashes. e.g.
 
     Hello Wayne's World 2! -> hello-wanyes-world-2"
-  (string-join
-   (mapcar 'downcase
-           (split-string(replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" string)
-                         "[^[:alnum:]]+" t)) "-"))
+  (mapconcat 'identity
+             (split-string
+              (downcase
+               (replace-regexp-in-string "[^\.\n\s\t-_[:alnum:]]" "" string))
+              "[^[:alnum:]]+" t)
+             "-"))
 
 (defun fountain-export-format-string (string format)
   "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
