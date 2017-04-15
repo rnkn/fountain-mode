@@ -2136,82 +2136,115 @@ Command acts on current buffer or BUFFER."
     visibility: hidden;
   }
 }
-.screenplay .scene {
-  width: 100%;
-  margin-top: {{scene-heading-spacing}};
+.screenplay mark {
+  background-color: yellow;
+}
+.screenplay mark:before {
+  content: '*';
+  width: 0.5in;
+  position: absolute;
+  right: 0;
+}
+.screenplay del:before {
+  content: '*';
+  width: 0.5in;
+  position: absolute;
+  right: 0;
+}
+.screenplay .section-heading {
+  display: block;
+  text-align: center;
+  text-decoration: underline;
 }
 .screenplay .scene-heading {
-  font-weight: {{scene-heading-bold}};
-  text-decoration: {{scene-heading-underline}};
-  margin-bottom: 0em;
+  margin-top: {{scene-heading-spacing}};
+  margin-bottom: 0;
   clear: both;
   page-break-after: avoid;
 }
 .screenplay .action {
-  margin: 1em 0;
+  margin-top: 1em;
+  margin-bottom: 0;
   clear: both;
   white-space: pre-wrap;
   orphans: 2;
   widows: 2;
 }
-.screenplay .dialog {
-  display: table;
-  width: 75%;
+.screenplay .character {
   max-width: 4in;
   margin-top: 1em;
-  margin-bottom: 1em;
-  margin-left: 17%;
+  margin-left: 33%;
+  margin-bottom: 0;
   clear: both;
 }
-.screenplay .dialog .character {
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 25%;
-  margin-right: 0;
+.screenplay .character.dual-left {
+  width: 33%;
+  margin-left: 0;
+  padding-left: 15%;
+  float: left;
+  clear: left;
 }
-.screenplay .dialog .lines {
+.screenplay .character.dual-right {
+  width: 33%;
+  margin-left: 50%;
+  padding-left: 15%;
+  clear: right;
+}
+.screenplay .dialog {
   max-width: 3.5in;
   margin-top: 0;
   margin-bottom: 0;
+  margin-left: 17%;
+  clear: both;
   white-space: pre-wrap;
   orphans: 2;
   widows: 2;
 }
-.screenplay .dialog .paren {
+.screenplay .dialog.dual-left {
+  width: 48%;
+  margin-left: 0;
+  float: left;
+  clear: left;
+}
+.screenplay .dialog.dual-right {
+  width: 48%;
+  margin-left: 50%;
+  clear: right;
+}
+.screenplay .paren {
   max-width: 2in;
   margin-top: 0;
   margin-bottom: 0;
-  margin-left: 15%;
+  margin-left: 27%;
   text-indent: -0.6em;
   page-break-inside: avoid;
   page-break-after: avoid;
 }
-.screenplay .dialog.dual {
-  max-width: 50%;
-  margin-top: 0;
+.screenplay .paren.dual-left {
+  width: 38%;
   margin-left: 0;
-}
-.screenplay .dialog.dual .lines {
-  width: 95%;
-}
-.screenplay .dialog.dual.left {
+  padding-left: 10%;
   float: left;
   clear: left;
 }
-.screenplay .dialog.dual.right {
-  float: right;
+.screenplay .paren.dual-right {
+  width: 38%;
+  margin-left: 50%;
+  padding-left: 10%;
   clear: right;
 }
 .screenplay .trans {
   max-width: 2in;
-  margin-left: 64%;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 63%;
   clear: both;
   page-break-before: avoid;
 }
 .screenplay .note {
   display: block;
   font-size: 11pt;
-  font-family: \"Comic Sans MS\";
+  font-family: \"Comic Sans MS\", \"Helvetica\", \"Marker Felt\";
   line-height: 1.5;
   background-color: lightgoldenrodyellow;
   padding: 1em;
@@ -2224,16 +2257,10 @@ Command acts on current buffer or BUFFER."
 }
 .screenplay .center {
   text-align: center;
-  margin-left: 0;
   width: 100%;
   white-space: pre-wrap;
 }
 .screenplay .underline {
-  text-decoration: underline;
-}
-.screenplay .section-heading {
-  display: block;
-  text-align: center;
   text-decoration: underline;
 }
 .screenplay .menu {
@@ -2242,7 +2269,7 @@ Command acts on current buffer or BUFFER."
   top: 0;
   right: 0;
   color: white;
-  background-color: rgba(0,0,0,0.25);
+  background-color: rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
 </style>
@@ -2257,14 +2284,11 @@ Command acts on current buffer or BUFFER."
 <div class=\"menu\">Aa</div>
 </section>
 </body>")
-     (section "<section class=\"section\">\n{{content}}</section>\n")
-     (section-heading "<h1 class=\"section-heading\">{{content}}</h1>\n")
-     (scene "<section class=\"scene\">\n{{content}}</section>\n")
-     (scene-heading "<h2 class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</h2>\n")
-     (dialog "<div class=\"{{dual-dialog}}\">\n{{content}}</div>\n")
-     (character "<p class=\"character\">{{content}}</p>\n")
-     (paren "<p class=\"paren\">{{content}}</p>\n")
-     (lines "<p class=\"lines\">{{content}}</p>\n")
+     (section-heading "<a href=\"#{{slugify}}\"><p class=\"section-heading\" id=\"{{slugify}}\">{{content}}</p></a>\n")
+     (scene-heading "<a href=\"#{{scene-number}}\"><p class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</p></a>\n")
+     (character "<p class=\"character{{dual-dialog}}\">{{content}}</p>\n")
+     (dialog "<p class=\"dialog{{dual-dialog}}\">{{content}}</p>\n")
+     (paren "<p class=\"paren{{dual-dialog}}\">{{content}}</p>\n")
      (trans "<p class=\"trans\">{{content}}</p>\n")
      (action "<p class=\"action\">{{content}}</p>\n")
      (page-break "<hr>\n")
@@ -2286,14 +2310,11 @@ Fountain ELEMENTs:
 
     document            wrapper template for all content, see
                         `fountain-export-standalone'
-    section             string of section, including child elements
     section-heading     string of section heading, excluding syntax chars
-    scene               string of scene, including child elements
     scene-heading       string of scene heading, excluing syntax chars
-    dialog              string of dialogue block, including child elements
     character           string of character name, excluding syntax chars
     paren               string of parenthetical
-    lines               string of dialogue lines, up to end of dialogue block or
+    dialog              string of dialogue lines, up to end of dialogue block or
                         next parenthetical
     trans               string of transition, excluding syntax chars
     action              string of action block
