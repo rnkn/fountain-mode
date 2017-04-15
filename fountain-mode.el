@@ -225,7 +225,7 @@
                         'fountain-export-templates "2.0.0")
 
 (make-obsolete-variable 'fountain-export-html-use-inline-style
-                        "use inline style instead." "2.1.0")
+                        "use inline style instead." "2.1.0") ; FIXME: make this customizable
 
 (make-obsolete-variable 'fountain-additional-template-replace-functions
                         'fountain-export-format-template "2.1.0")
@@ -966,7 +966,7 @@ comments."
                  (forward-line -1)
                  (fountain-match-metadata)))))))
 
-(defun fountain-match-page-break  ()
+(defun fountain-match-page-break ()
   (save-excursion
     (save-restriction
       (widen)
