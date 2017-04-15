@@ -2286,7 +2286,9 @@ calculated."
     :group 'fountain-export)
 
 (defcustom fountain-export-html-replace-alist
-  '(("&" "&amp;")
+  (backquote
+   ((,fountain-comment-regexp "")
+    ("&" "&amp;")
     ("<" "&lt;")
     (">" "&gt;")
     ("\\\\\s" "&nbsp;")
@@ -2305,7 +2307,7 @@ calculated."
     ("^~\s*\\(.+?\\)$\\*\\*" "<i>\\1</i>")
     ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
     ("\n\n+" "<br><br>")
-    ("\n" "<br>"))
+    ("\n" "<br>")))
   "Association list of regular expression export replacements.
 Replacements are made in sequential order. The sequence is
 important: first, characters that are special in the export
