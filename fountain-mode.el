@@ -1754,19 +1754,21 @@ Takes the form:
           (group (const :tag "Center Text" center)
                  (choice string (const nil)))))
 
-(defun fountain-export-get-filename (format)
-  "If BUFFER is visiting a file, concat file name base and FORMAT.
-Otherwise return `fountain-export-buffer'"
+(defun fountain-export-get-filename (format &optional buffer)
+  "If buffer is visiting a file, concat file name base and FORMAT.
+Otherwise return `fountain-export-buffer' formatted with export
+format tag."
   (let ((tag (plist-get (cdr (assoc format fountain-export-formats))
                         :tag))
         (ext (plist-get (cdr (assoc format fountain-export-formats))
                         :ext)))
-    (cond (fountain-export-use-title-as-filename
-           (concat (plist-get (fountain-read-metadata) 'title) "." ext))
-          ((buffer-file-name)
-           (concat (file-name-base (buffer-file-name)) "." ext))
-          (t
-           (format fountain-export-buffer-name tag)))))
+    (with-current-buffer (or buffer (current-buffer))
+      (cond (fountain-export-use-title-as-filename
+             (concat (plist-get (fountain-read-metadata) 'title) "." ext))
+            ((buffer-file-name)
+             (concat (file-name-base (buffer-file-name)) "." ext))
+            (t
+             (format fountain-export-buffer-name tag))))))
 
 (defun fountain-slugify (string)
   "Convert STRING to one suitable for slugs.
