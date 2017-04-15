@@ -1474,7 +1474,7 @@ Value string remains a string. e.g.
           (setq string (buffer-substring-no-properties (match-beginning 2) end)
                 string (replace-regexp-in-string "^!" "" string)))))
 
-(defun fountain-parse-element (includes &optional new-page)
+(defun fountain-parse-element (&optional includes new-page)
   "Call appropropriate element parsing function for matched element at point.
 If NEW-PAGE is non-nil, the next element starts a new page."
   (forward-line 0)
