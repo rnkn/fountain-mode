@@ -1478,11 +1478,10 @@ Value string remains a string. e.g.
   "Call appropropriate element parsing function for matched element at point.
 If NEW-PAGE is non-nil, the next element starts a new page."
   (forward-line 0)
-  (while (or (looking-at "\n*\s?\n")
-             (fountain-match-comment)
-             (fountain-match-metadata))
-    (goto-char (match-end 0)))
   (cond
+   ((fountain-match-metadata)
+    (fountain-parse-metadata
+     (match-data) (memq 'title-page includes)))
    ((fountain-match-section-heading)
     (fountain-parse-section-heading
      (match-data) (memq 'section-heading includes) new-page))
@@ -1534,8 +1533,7 @@ moves to property value of end of element."
     (goto-char beg)
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
-                 (fountain-match-comment)
-                 (fountain-match-metadata))
+                 (fountain-match-comment))
         (goto-char (match-end 0)))
       (if (< (point) end)
           (let (element new-page)
