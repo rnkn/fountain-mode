@@ -1893,44 +1893,27 @@ If exporting a standalone document, call
 included elements, otherwise walk the element tree calling
 `fountain-export-format-element' and concatenate the resulting
 strings."
-  (let* ((metadata (fountain-read-metadata))
-         (includes
-          (cdr (or (assoc (or (plist-get metadata 'format)
-                              "screenplay")
-                          fountain-export-include-elements-alist)
-                   (car fountain-export-include-elements-alist))))
-         (standalone (unless snippet fountain-export-standalone)))
-    (fountain-outline-hide-level 0 t)
-    (save-excursion
-      (let* ((beg (progn
-                    (goto-char beg)
-                    (while (fountain-match-metadata)
-                      (forward-line 1))
-                    (skip-chars-forward "\s\n\t")
-                    (point)))
-             (end (if (re-search-forward fountain-script-end-regexp end t)
-                      (match-beginning 0)
-                    end))
-             (string (buffer-substring-no-properties beg end))
-             parse-job export-job tree)
-        (with-temp-buffer
-          (fountain-init-vars)
-          (insert string)
-          (fountain-delete-comments-in-region (point-min) (point-max))
-          (setq parse-job (make-progress-reporter "Parsing...")
-                tree (fountain-parse-region (point-min) (point-max) parse-job))
-          (progress-reporter-done parse-job)
-          (setq export-job (make-progress-reporter "Exporting..."))
-          (prog1
-              (if standalone
-                  (fountain-export-format-element
-                   (list 'document metadata tree) format includes export-job)
-                (let (string)
-                  (dolist (element tree string)
-                    (setq string
-                          (concat string (fountain-export-format-element
-                                          element format includes export-job)))))) ; FIXME: DRY
-            (progress-reporter-done export-job)))))))
+  ;; (fountain-outline-hide-level 0 t)
+  (let ((metadata (fountain-read-metadata))
+        (job (make-progress-reporter "Exporting..." 0 100))
+        list list-length string)
+    (setq end (save-excursion
+                (goto-char beg)
+                (if (re-search-forward fountain-script-end-regexp end t)
+                    (match-beginning 0)
+                  end))
+          list (fountain-parse-region beg end)
+          list-length (float (length list)))
+    ;; (push metadata list)
+    (while list
+      (setq string
+            (concat string (fountain-export-element (pop list) format)))
+      (progress-reporter-update job (* (/ (- list-length
+                                             (length list))
+                                          list-length)
+                                       100)))
+      (progress-reporter-done job)
+      string))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   "Export current buffer or BUFFER to export format FORMAT.
