@@ -2648,14 +2648,11 @@ character codes, then format replacement is made."
 {{content}}\
 </Content>
 </FinalDraft>")
-    (section nil)
     (section-heading nil)
-    (scene nil)
     (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (dialog nil)
     (character "<Paragraph Type=\"Character\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (dialog "<Paragraph Type=\"Dialogue\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (paren "<Paragraph Type=\"Parenthetical\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (lines "<Paragraph Type=\"Dialogue\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (trans "<Paragraph Type=\"Transition\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (action "<Paragraph Type=\"Action\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (page-break "")
