@@ -410,7 +410,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-section-heading
-  '(("screenplay" 0) ("stageplay" 30))
+  '(("screenplay" 0)
+    ("teleplay" 0)
+    ("stageplay" 30))
   "Column integer to which section headings should be aligned.
 
 This option does not affect file contents."
@@ -419,7 +421,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-scene-heading
-  '(("screenplay" 0) ("stageplay" 30))
+  '(("screenplay" 0)
+    ("teleplay" 0)
+    ("stageplay" 30))
   "Column integer to which scene headings should be aligned.
 
 This option does not affect file contents."
@@ -428,7 +432,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-synopsis
-  '(("screenplay" 0) ("stageplay" 30))
+  '(("screenplay" 0)
+    ("teleplay" 0)
+    ("stageplay" 30))
   "Column integer to which synopses should be aligned.
 
 This option does not affect file contents."
@@ -437,7 +443,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-action
-  '(("screenplay" 0) ("stageplay" 20))
+  '(("screenplay" 0)
+    ("teleplay" 0)
+    ("stageplay" 20))
   "Column integer to which action should be aligned.
 
 This option does not affect file contents."
@@ -446,7 +454,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-character
-  '(("screenplay" 20) ("stageplay" 30))
+  '(("screenplay" 20)
+    ("teleplay" 20)
+    ("stageplay" 30))
   "Column integer to which characters names should be aligned.
 
 This option does not affect file contents."
@@ -455,7 +465,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-dialog
-  '(("screenplay" 10) ("stageplay" 0))
+  '(("screenplay" 10)
+    ("teleplay" 10)
+    ("stageplay" 0))
   "Column integer to which dialog should be aligned.
 
 This option does not affect file contents."
@@ -464,7 +476,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-paren
-  '(("screenplay" 15) ("stageplay" 20))
+  '(("screenplay" 15)
+    ("teleplay" 15)
+    ("stageplay" 20))
   "Column integer to which parentheticals should be aligned.
 
 This option does not affect file contents."
@@ -473,7 +487,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-trans
-  '(("screenplay" 45) ("stageplay" 30))
+  '(("screenplay" 45)
+    ("teleplay" 45)
+    ("stageplay" 30))
   "Column integer to which transitions should be aligned.
 
 This option does not affect file contents."
@@ -482,7 +498,9 @@ This option does not affect file contents."
   :group 'fountain-align)
 
 (defcustom fountain-align-center
-  '(("screenplay" 20) ("stageplay" 20))
+  '(("screenplay" 20)
+    ("teleplay" 20)
+    ("stageplay" 20))
   "Column integer to which centered text should be aligned.
 
 This option does not affect file contents."
