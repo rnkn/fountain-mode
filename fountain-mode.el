@@ -365,9 +365,8 @@ if you prefer the latter, set this option to non-nil."
 
 (defcustom fountain-note-template
   " {{time}} - {{fullname}}: "
-  "\\<fountain-mode-map>Template for inserting notes with `fountain-insert-note' (\\[fountain-insert-note]).
-
-To include an item in a template you must use the full `{{KEY}}'
+  "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
+To include an item in a template you must use the full {{KEY}}
 syntax.
 
     {{title}}    Buffer name without extension
@@ -376,8 +375,7 @@ syntax.
     {{nick}}     User first name (defined in `user-login-name')
     {{email}}    User email (defined in `user-mail-address')
 
-The default ` {{time}} - {{fullname}}: ' will insert something
-similar to:
+The default {{time}} - {{fullname}}: will insert something like:
 
 \[\[ 2014-20-01 - Alan Smithee: \]\]"
   :type 'string
@@ -1613,7 +1611,7 @@ Passed to `format' with export format as single variable."
 
 (defcustom fountain-export-default-command
   'fountain-export-buffer-to-latex
-  "\\<fountain-mode-map>Default function to call with `fountain-export-default' \(\\[fountain-export-default]\)."
+  "\\<fountain-mode-map>Default function to call with \\[fountain-export-default]."
   :type '(radio (function-item fountain-export-buffer-to-latex)
                 (function-item fountain-export-buffer-to-html)
                 (function-item fountain-export-buffer-to-fdx)
@@ -2948,6 +2946,7 @@ Display a message unless SILENT."
     \\[fountain-outline-cycle]				If ARG is nil, cycle outline visibility of current
                     subtree and its children
     \\[universal-argument] \\[fountain-outline-cycle]			If ARG is 4, cycle outline visibility of buffer
+					(same as \\[fountain-outline-cycle-global])
     \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		If ARG is 16, show all
     \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in
                     `fountain-outline-custom-level'"
