@@ -1536,13 +1536,14 @@ moves to property value of end of element."
   :group 'fountain)
 
 (defcustom fountain-export-include-elements-alist
-  '(("screenplay" scene-heading action character dialog paren trans center page-break)
-    ("teleplay" section-heading scene-heading action character dialog paren trans center page-break)
-    ("stageplay" section-heading scene-heading action character dialog paren trans center page-break))
+  '(("screenplay" title-page scene-heading action character dialog paren trans center page-break)
+    ("teleplay" title-page section-heading scene-heading action character dialog paren trans center page-break)
+    ("stageplay" title-page section-heading scene-heading action character dialog paren trans center page-break))
   "Association list of elements to include when exporting.
 Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
                 :value-type (set :tag "Elements"
+                                 (const :tag "Title Page" title-page)
                                  (const :tag "Section Headings" section-heading)
                                  (const :tag "Scene Headings" scene-heading)
                                  (const :tag "Action" action)
@@ -4049,15 +4050,14 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
   "Save `fountain-mode' options with `customize'."
   (interactive)
   (let (unsaved)
-    (dolist (opt '(fountain-switch-comment-syntax
-                   fountain-hide-emphasis-delim
-                   fountain-hide-syntax-chars
-                   fountain-align-elements
-                   fountain-add-continued-dialog
-                   fountain-export-include-title-page
-                   fountain-export-scene-heading-format
-                   font-lock-maximum-decoration))
-      (if (customize-mark-to-save opt)
+    (dolist (option '(fountain-align-elements
+                      fountain-add-continued-dialog
+                      fountain-hide-emphasis-delim
+                      fountain-hide-syntax-chars
+                      fountain-display-scene-numbers-in-margin
+                      fountain-export-scene-heading-format
+                      font-lock-maximum-decoration))
+      (if (customize-mark-to-save option)
           (setq unsaved t)))
     (if unsaved (custom-save-all))))
 
