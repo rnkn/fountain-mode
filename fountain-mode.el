@@ -1152,6 +1152,8 @@ property `eq' to 'outline. See <http://debbugs.gnu.org/24073>."
 
 ;;; Parsing
 
+(require 'subr-x)
+
 (defun fountain-get-character (&optional n limit)
   "Return Nth next character (or Nth previous if N is negative).
 If N is non-nil, return Nth next character or Nth previous
@@ -1777,12 +1779,12 @@ STRING is downcased, non-alphanumeric characters are removed, and
 whitespace is converted to dashes. e.g.
 
     Hello Wayne's World 2! -> hello-wanyes-world-2"
-  (mapconcat 'identity
-             (split-string
-              (downcase
-               (replace-regexp-in-string "[^\.\n\s\t-_[:alnum:]]" "" string))
-              "[^[:alnum:]]+" t)
-             "-"))
+  (string-join
+    (split-string
+      (downcase
+        (replace-regexp-in-string "[^\.\n\s\t-_[:alnum:]]" "" string))
+      "[^[:alnum:]]+" t)
+    "-"))
 
 (defun fountain-export-format-string (string format)
   "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
