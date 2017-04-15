@@ -1195,6 +1195,28 @@ Value string remains a string. e.g.
                                      value)))))
         list))))
 
+(defun fountain-parse-metadata (match-data &optional export)
+  (let ((beg (match-beginning 0))
+        (metadata (fountain-read-metadata)))
+    (list 'metadata
+          (append (list 'begin beg
+                        'end
+                        (save-excursion
+                          (goto-char beg)
+                          (re-search-forward fountain-blank-regexp nil 'move)
+                          (skip-chars-backward "\n\s\t")
+                          (point))
+                        'block-begin beg
+                        'block-end
+                        (save-excursion
+                          (goto-char beg)
+                          (re-search-forward fountain-blank-regexp nil 'move)
+                          (skip-chars-forward "\n\s\t")
+                          (point))
+                        'export (if export t)
+                        'new-page t)
+                  metadata))))
+
 (defun fountain-parse-section-heading (match-data &optional export new-page)
   "Return an element list for matched section heading."
   (set-match-data match-data)
