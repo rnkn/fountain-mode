@@ -743,30 +743,33 @@ bold-italic delimiters together, e.g.
   "Faces used in `fountain-mode'.
 There are three levels of `font-lock-mode' decoration:
 
-    1 (minimum): comments
-                 syntax characters
+    1 (minimum):
+        Comments
+        Syntax Characters
 
-    2 (default): comments
-                 syntax characters
-                 metadata
-                 scene headings
-                 section headings
-                 synopses
-                 notes
+    2 (default):
+        Comments
+        Syntax Characters
+        Metadata
+        Scene Headings
+        Section Headings
+        Synopses
+        Notes
 
-    3 (maximum): comments
-                 syntax characters
-                 metadata keys
-                 metadata values
-                 section headings
-                 scene headings
-                 synopses
-                 notes
-                 character names
-                 parentheticals
-                 dialog
-                 transitions
-                 center text
+    3 (maximum):
+        Comments
+        Syntax Characters
+        Metadata Keys
+        Metadata Values
+        Section Headings
+        Scene Headings
+        Synopses
+        Notes
+        Character Names
+        Parentheticals
+        Dialog
+        Transitions
+        Center Text
 
 To switch between these levels, customize the value of
 `font-lock-maximum-decoration'. This can be set with
