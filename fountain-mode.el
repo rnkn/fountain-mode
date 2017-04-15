@@ -1530,7 +1530,7 @@ moves to property value of end of element."
                             "screenplay")
                         fountain-export-include-elements-alist)
                   (car fountain-export-include-elements-alist))))
-        list)
+        list)                           ; FIXME: make sure export funs parse metadata
     (goto-char beg)
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
@@ -2677,14 +2677,11 @@ Fountain ELEMENTs:
 
     document            wrapper template for all content, see
                         `fountain-export-standalone'
-    section             string of section, including child elements
     section-heading     string of section heading, excluding syntax chars
-    scene               string of scene, including child elements
     scene-heading       string of scene heading, excluing syntax chars
-    dialog              string of dialogue block, including child elements
     character           string of character name, excluding syntax chars
     paren               string of parenthetical
-    lines               string of dialogue lines, up to end of dialogue block or
+    dialog              string of dialogue lines, up to end of dialogue block or
                         next parenthetical
     trans               string of transition, excluding syntax chars
     action              string of action block
@@ -2849,7 +2846,7 @@ This can be set on a per-file basis by including in metadata:
 
 (defun fountain-outline-invisible-p (&optional pos)
   "Non-nil if the character after POS has outline invisible property.
- If POS is nil, use `point' instead."
+If POS is nil, use `point' instead."
   (eq (get-char-property (or pos (point)) 'invisible) 'outline))
 
 (defun fountain-outline-shift-down (&optional n)
@@ -3975,7 +3972,7 @@ keywords suitable for Font Lock."
                       (list (cons matcher facespec))))))))
 
 (defun fountain-match-element (fun limit)
-  "If FUN returns non-nil before LIMIT, return match data."
+  "If FUN returns non-nil before LIMIT, return non-nil."
   (let (match)
     (while (and (null match)
                 (< (point) limit))
