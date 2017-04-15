@@ -1309,6 +1309,21 @@ Value string remains a string. e.g.
                   (re-search-forward fountain-blank-regexp nil 'move)
                   (skip-chars-forward "\n\s\t")
                   (point)))
+              'dual
+              (cond ((save-excursion
+                       (save-match-data
+                         (goto-char (match-beginning 0))
+                         (fountain-forward-character -1 'dialog)
+                         (and (fountain-match-character)
+                              (stringp (match-string 5)))))
+                     'right)
+                    ((save-excursion
+                       (save-match-data
+                         (goto-char (match-beginning 0))
+                         (fountain-forward-character 1 'dialog)
+                         (and (fountain-match-character)
+                              (stringp (match-string 5)))))
+                     'left))
               'export (if export t)
               'new-page new-page)
         (match-string-no-properties 1)))
