@@ -1799,140 +1799,164 @@ whitespace is converted to dashes. e.g.
     (setq string (replace-regexp-in-string
                   (car var) (cadr var) string t)))))
 
-(defun fountain-export-format-template (type plist string format)
-  "Format STRING in an export template.
+(defconst fountain-export-element-translations
+  '((emacs-version)
+    (fountain-version)
+    (dual-dialog
+     (fountain
+      (character
+       (dual
+        (right . " ^"))))
+     (html
+      (character
+       (dual
+        (left . " dual-left")
+        (right . " dual-right")))))
+    (page-size
+     (html . fountain-export-page-size))
+    (forced
+     (fountain
+      (scene-heading
+       (forced . "."))
+      (character
+       (forced . "@"))
+      (trans
+       (forced . "> "))
+      (action
+       (forced . "!"))))))
 
-If TYPE corresponds to a FORMAT that corresponds to a template in
-`fountain-export-templates' then replace matches of
-`fountain-template-key-regexp' in the following order:
+(defconst fountain-export-element-rules
+  '((cons "emacs-version"
+          emacs-version)
+    (cons "fountain-version"
+          (concat "Fountain Mode " fountain-version))
+    (cons "contd"
+          fountain-continued-dialog-string)
+    (cons "more"
+          fountain-export-more-dialog-string)
+    (cons "slugify"
+          (fountain-slugify string))
+    (cons "title-template"
+          (fountain-export-format-string fountain-export-title-template format))
+    (cons "contact-template"
+          (fountain-export-format-string fountain-export-contact-template format))
+    (cons "new-page"
+          (cond ((eq format 'fdx)
+                 (if (plist-get plist 'new-page)
+                     " StartsNewPage=\"Yes\""))))
+    (cons "forced"
+          (cond ((eq format 'fountain)
+                 (if (plist-get plist 'forced)
+                     (cond ((eq type 'scene-heading) ".")
+                           ((eq type 'character) "@")
+                           ((eq type 'trans) "> ")
+                           ((eq type 'action) "!"))))))
+    (cons "dual-dialog"
+          (cond ((eq format 'fountain)
+                 (if (eq (plist-get plist 'dual) 'right) " ^"))
+                ((eq format 'html)
+                 (cond ((eq (plist-get plist 'dual) 'left) " dual-left")
+                       ((eq (plist-get plist 'dual) 'right) " dual-right")))))
+    (cons "page-size"
+          (cond ((eq format 'html)
+                 (symbol-name fountain-export-page-size))
+                ((eq format 'tex)
+                 (if (eq fountain-export-page-size 'letter)
+                     "letterpaper" "a4paper"))))
+    (cons "font"
+          (cond ((eq format 'html)
+                 (mapconcat (lambda (font) (concat "\"" font "\""))
+                            fountain-export-font ", "))
+                ((eq format 'tex)
+                 (car fountain-export-font))))
+    (cons "scene-heading-bold"
+          (cond ((eq format 'html)
+                 (if (memq 'bold fountain-export-scene-heading-format)
+                     "bold" "normal"))
+                ((eq format 'tex)
+                 (if (memq 'bold fountain-export-scene-heading-format)
+                     "true" "false"))))
+    (cons "scene-heading-spacing"
+          (cond ((eq format 'html)
+                 (if (memq 'double-space fountain-export-scene-heading-format)
+                     "2em" "1em"))
+                ((eq format 'tex)
+                 (if (memq 'double-space fountain-export-scene-heading-format)
+                     "true" "false"))))
+    (cons "scene-heading-underline"
+          (cond ((eq format 'html)
+                 (if (memq 'underline fountain-export-scene-heading-format)
+                     "underline" "none"))
+                ((eq format 'tex)
+                 (if (memq 'underline fountain-export-scene-heading-format)
+                     "true" "false"))))
+    (cons "title-contact-align"
+          (cond ((eq format 'html) "FIXME")
+                ((eq format 'tex)
+                 (if fountain-export-contact-align-right "true" "false"))))
+    (cons "include-scene-numbers" "false")
+    (cons "number-first-page" "false")))
+
+(defun fountain-export-element (element format)
+  "Return a formatted string from ELEMENT according to FORMAT.
+
+Break ELEMENT into TYPE, PLIST and STRING.
+
+If PLIST property `export' is non-nil, check if TYPE corresponds
+to a TEMPLATE in `fountain-export-templates' for FORMAT. If so,
+replace matches of `fountain-template-key-regexp' in the
+following order:
 
     1. {{content}} is replaced with STRING.
-    2. If KEY corresponds to a string property PLIST then {{KEY}} is replaced
-       with that string. See `fountain-parse-element' for details on Fountain
-       element property lists.
+    2. If KEY corresponds to a string property in PLIST then {{KEY}} is
+       replaced with that string.
     3. If KEY corresponds with remaining replacement conditions then {{KEY}} is
        replaced with that string.
     4. If none of the above, {{KEY}} is replaced with an empty string."
-  (let ((template
-         (cadr (assoc type
-                      (symbol-value (plist-get (cdr (assoc format
-                                                           fountain-export-formats))
-                                               :template))))))
-    (if template
-        (with-temp-buffer
-          (insert template)
-          (goto-char (point-min))
-          (while (re-search-forward fountain-template-key-regexp nil t)
-            (let* ((key (match-string 1))
-                   (value (plist-get plist (intern key))))
-              (replace-match
-               (cond ((string= key "content")
-                      string)
-                     ((stringp value)
-                      (fountain-export-format-string value format))
-                     ((cdr
-                       (assoc key (list (cons "emacs-version" emacs-version)
-                                        (cons "fountain-version" (fountain-version))
-                                        (cons "contd" fountain-continued-dialog-string)
-                                        (cons "more" fountain-export-more-dialog-string)
-                                        (cons "title-template"
-                                              (fountain-export-format-string fountain-export-title-template format))
-                                        (cons "contact-template"
-                                              (fountain-export-format-string fountain-export-contact-template format))
-                                        (cons "page-break"
-                                              (if (and (plist-get plist 'page-break)
-                                                       (eq format 'fdx))
-                                                  "\sStartsNewPage=\"Yes\""))
-                                        (cons "forced"
-                                              (if (and (plist-get plist 'forced)
-                                                       (eq format 'fountain))
-                                                  (cond ((eq type 'scene-heading)
-                                                         ".")
-                                                        ((eq type 'character)
-                                                         "@")
-                                                        ((eq type 'trans)
-                                                         ">\s"))))
-                                        (cons "dual-dialog"
-                                              (cond ((and (eq format 'fountain)
-                                                          (eq (plist-get plist 'dual) 'right))
-                                                     "\s^")
-                                                    ((eq format 'html)
-                                                     (let ((opt (plist-get plist 'dual)))
-                                                       (cond ((eq opt 'left)
-                                                              "dialog dual left")
-                                                             ((eq opt 'right)
-                                                              "dialog dual right")
-                                                             (t "dialog"))))))
-                                        (cons "include-title-page"
-                                              (let ((opt (cdr (assoc format '((html "block" "none")
-                                                                              (tex "true" "false"))))))
-                                                (if fountain-export-include-title-page
-                                                    (car opt) (cadr opt))))
-                                        (cons "page-size"
-                                              (let ((opt (cdr (assoc format '((html "letter" "a4")
-                                                                              (tex "letterpaper" "a4paper"))))))
-                                                (if (eq fountain-export-page-size 'letter)
-                                                    (car opt) (cadr opt))))
-                                        (cons "font"
-                                              (cond ((eq format 'html)
-                                                     (mapconcat
-                                                      (lambda (font) (concat "\"" font "\""))
-                                                      fountain-export-font ", "))
-                                                    ((eq format 'tex)
-                                                     (car fountain-export-font))))
-                                        (cons "scene-heading-bold"
-                                              (let ((opt (cdr (assoc format '((html "bold" "normal")
-                                                                              (tex "true" "false"))))))
-                                                (if (member 'bold fountain-export-scene-heading-format)
-                                                    (car opt) (cadr opt))))
-                                        (cons "scene-heading-spacing"
-                                              (let ((opt (cdr (assoc format '((html "2em" "1em")
-                                                                              (tex "true" "false"))))))
-                                                (if (member 'double-space fountain-export-scene-heading-format)
-                                                    (car opt) (cadr opt))))
-                                        (cons "scene-heading-underline"
-                                              (let ((opt (cdr (assoc format '((html "underline" "none")
-                                                                              (tex "true" "false"))))))
-                                                (if (member 'underline fountain-export-scene-heading-format)
-                                                    (car opt) (cadr opt))))
-                                        (cons "title-contact-align"
-                                              (let ((opt (cdr (assoc format '((html "?" "?")
-                                                                              (tex "true" "false"))))))
-                                                (if fountain-export-contact-align-right
-                                                    (car opt) (cadr opt))))
-                                        (cons "include-scene-numbers" "false")
-                                        (cons "number-first-page" "false")))))
-                     (t ""))
-               t t))
-            (goto-char (point-min)))
-          (buffer-string))
-      string)))
-
-(defun fountain-export-format-element (element format includes &optional job)
-  "Return a formatted string from ELEMENT according to FORMAT.
-Only return format string if INCLUDES contains the car of ELEMENT.
-
-Break ELEMENT into type, plist and tree. If tree is a string and
-INCLUDES contains type then call `fountain-export-format-template'
-with type, plist, tree as a formatted string, and format. If tree is a list,
-recursively call self, concatenating the resulting strings."
   (let ((type (car element))
         (plist (nth 1 element))
-        (tree (nth 2 element)))
-    (cond ((and (stringp tree)
-                (memq type includes))
-           (prog1
-               (fountain-export-format-template
-                type plist (fountain-export-format-string tree format) format)
-             (if job (progress-reporter-update job))))
-          ((listp tree)
-           (let (string)
-             (dolist (element tree (fountain-export-format-template
-                                    type plist string format))
-               (setq string
-                     (concat string
-                             (fountain-export-format-element
-                              element format includes job)))))))))
+        (string (nth 2 element))
+        template)
+    (if (stringp string)
+        (setq string (fountain-export-format-string string format)))
+    (setq template
+          (cadr (assq type
+                      (symbol-value
+                       (plist-get (alist-get format
+                                             fountain-export-formats)
+                                  :template)))))
+    (if (and template (plist-get plist 'export))
+        (while (string-match fountain-template-key-regexp template)
+          (setq template
+                (replace-regexp-in-string
+                 fountain-template-key-regexp
+                 (lambda (match)
+                   (let* ((key (match-string 1 match))
+                          (value (plist-get plist (intern key))))
+                     (cond ((string= key "content")
+                            string)
+                           ((stringp value)
+                            (fountain-export-format-string value format))
+                           ((eval (alist-get key fountain-export-element-rules) t))
+                           (t ""))))
+                 template))))))
+
+        ;; (with-temp-buffer
+        ;;   (insert template)
+        ;;   (goto-char (point-min))
+        ;;   (while (re-search-forward fountain-template-key-regexp nil t)
+        ;;     (let* ((key (match-string 1))
+        ;;            (value (plist-get plist (intern key))))
+        ;;       (replace-match
+        ;;        (cond ((string= key "content")
+        ;;               string)
+        ;;              ((stringp value)
+        ;;               (fountain-export-format-string value format))
+        ;;              ((eval (alist-get key fountain-export-element-rules) t))
+        ;;              (t ""))
+        ;;        t t))
+        ;;     (goto-char (point-min)))
+        ;;   (buffer-string)))))
 
 (defun fountain-export-region (beg end format &optional snippet)
   "Return an export string of region between BEG and END in FORMAT.
