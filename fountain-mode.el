@@ -1568,8 +1568,8 @@ moves to property value of end of element."
         (includes
          (cdr (or (assq (or (plist-get (fountain-read-metadata) 'format)
                             "screenplay")
-                        fountain-export-include-elements-alist)
-                  (car fountain-export-include-elements-alist))))
+                        fountain-export-include-elements)
+                  (car fountain-export-include-elements))))
         list)                           ; FIXME: make sure export funs parse metadata
     (goto-char beg)
     (while (< (point) (min end (point-max)))
@@ -1596,7 +1596,7 @@ moves to property value of end of element."
   :prefix "fountain-export-"
   :group 'fountain)
 
-(defcustom fountain-export-include-elements-alist
+(defcustom fountain-export-include-elements
   '(("screenplay" title-page scene-heading action character dialog paren trans center page-break)
     ("teleplay" title-page section-heading scene-heading action character dialog paren trans center page-break)
     ("stageplay" title-page section-heading scene-heading action character dialog paren trans center page-break))
@@ -1617,6 +1617,9 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Synopses" synopsis)
                                  (const :tag "Notes" note)))
   :group 'fountain-export)
+
+(define-obsolete-variable-alias 'fountain-export-include-elements-alist
+  'fountain-export-include-elements "3.0.0")
 
 (defcustom fountain-export-standalone
   t
@@ -1999,7 +2002,7 @@ If SNIPPET, do not include a document template wrapper.
 
 Save current outline visibility level, then show all. Then read
 file metadata. Then calculate elements included in export from
-assocation list in `fountain-export-include-elements-alist'
+assocation list in `fountain-export-include-elements'
 corresponding to FORMAT. Then parse the region into an element tree.
 
 If exporting a standalone document, call
