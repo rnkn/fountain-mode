@@ -1942,33 +1942,39 @@ generate a new buffer.
 Switch to destination buffer if complete without errors,
 otherwise kill destination buffer."
   (interactive
-   (list (intern (completing-read "Format: "
-                                  (mapcar #'car fountain-export-formats) nil t))
+   (list (intern
+          (completing-read "Format: "
+                           (mapcar #'car fountain-export-formats) nil t))
          (car current-prefix-arg)))
-  (let ((sourcebuf (or buffer (current-buffer)))
-        (destbuf (get-buffer-create
-                  (fountain-export-get-filename format)))
-        (hook (plist-get (cdr (assoc format fountain-export-formats))
+  (setq buffer (or buffer (current-buffer)))
+  (let ((dest-buffer (get-buffer-create
+                  (fountain-export-get-filename format buffer)))
+        (hook (plist-get (alist-get format
+                                    fountain-export-formats)
                          :hook))
-        complete)
-    (when (< 0 (buffer-size destbuf))
-      (if (or (eq (current-buffer) destbuf)
-              (not (y-or-n-p (format "Buffer `%s' is not empty; overwrite? " destbuf))))
-        (setq destbuf (generate-new-buffer (buffer-name destbuf)))))
+        string complete)
+    (when (< 0 (buffer-size dest-buffer))
+      (if (or (eq (current-buffer) dest-buffer)
+              (not (y-or-n-p (format "Buffer `%s' is not empty; overwrite? "
+                                     dest-buffer))))
+          (progn
+            (setq dest-buffer (generate-new-buffer (buffer-name dest-buffer)))
+            (message "Using new buffer `%s'"
+                     dest-buffer))))
     (unwind-protect
-        (with-current-buffer sourcebuf
-          (let ((string (fountain-export-region (point-min) (point-max)
-                                                format snippet)))
-            (with-current-buffer destbuf
-              (with-silent-modifications
-                (erase-buffer)
-                (insert string))))
-          (setq complete t)
-          (switch-to-buffer destbuf)
+        (with-current-buffer buffer
+          (setq string
+                (fountain-export-region (point-min) (point-max) format snippet))
+          (with-current-buffer dest-buffer
+            (with-silent-modifications
+              (erase-buffer)
+              (insert string)))
+          (switch-to-buffer dest-buffer)
           (write-file (buffer-name) t)
+          (setq complete t)
           (run-hooks hook))
       (unless complete
-        (kill-buffer destbuf)))))
+        (kill-buffer dest-buffer)))))
 
 (defun fountain-export-default ()
   "Call function defined in `fountain-export-default-command'."
