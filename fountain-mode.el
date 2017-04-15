@@ -3791,7 +3791,7 @@ assigning the following keywords:
   "Return the value of `font-lock-maximum-decoration' for `fountain-mode'."
   (let ((n (if (listp font-lock-maximum-decoration)
                (cdr (or (assq 'fountain-mode font-lock-maximum-decoration)
-                        (assq t font-lock-maximum-decoration)))
+                        (assq 't font-lock-maximum-decoration)))
              font-lock-maximum-decoration)))
     (cond ((null n) 2)
           ((eq n t) 3)
