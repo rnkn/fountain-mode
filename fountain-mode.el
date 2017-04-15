@@ -2117,7 +2117,6 @@ Command acts on current buffer or BUFFER."
   }
 }
 .screenplay .title-page .title h1 {
-  font-weight: {{title-bold}};
   text-transform: {{title-upcase}};
   text-decoration: {{title-underline}};
 }
