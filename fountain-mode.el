@@ -1270,25 +1270,42 @@ Value string remains a string. e.g.
 (defun fountain-parse-dialog (match-data &optional export new-page)
   "Return an element list for matched dialogue."
   (set-match-data match-data)
-  (list 'dialog
-        (list 'begin (match-beginning 0)
-              'end (match-end 0)
-              'block-begin
-              (save-excursion
-                (save-match-data
-                  (goto-char (match-beginning 0))
-                  (fountain-forward-character -1)
-                  (point)))
-              'block-end
-              (save-excursion
-                (save-match-data
-                  (goto-char (match-beginning 0))
-                  (re-search-forward fountain-blank-regexp nil 'move)
-                  (skip-chars-forward "\n\s\t")
-                  (point)))
-              'export (if export t)
-              'new-page new-page)
-        (match-string-no-properties 1)))
+  (let ((beg (match-beginning 0))
+        (end (match-end 0)))
+    (list 'dialog
+          (list 'begin beg
+                'end end
+                'block-begin
+                (save-excursion
+                  (save-match-data
+                    (goto-char beg)
+                    (fountain-forward-character -1)
+                    (point)))
+                'block-end
+                (save-excursion
+                  (save-match-data
+                    (goto-char end)
+                    (re-search-forward fountain-blank-regexp nil 'move)
+                    (skip-chars-forward "\n\s\t")
+                    (point)))
+                'dual
+                (cond ((save-excursion
+                         (save-match-data
+                           (goto-char beg)
+                           (fountain-forward-character -1 'dialog)
+                           (and (fountain-match-character)
+                                (stringp (match-string 5)))))
+                       'right)
+                      ((save-excursion
+                         (save-match-data
+                           (goto-char beg)
+                           (fountain-forward-character 1 'dialog)
+                           (and (fountain-match-character)
+                                (stringp (match-string 5)))))
+                       'left))
+                'export (if export t)
+                'new-page new-page)
+          (match-string-no-properties 1))))
 
 (defun fountain-parse-paren (match-data &optional export new-page)
   "Return an element list for matched parenthetical."
