@@ -1170,23 +1170,19 @@ comments."
 
 (defun fountain-element ()
   "Return element at point as a symbol"
-  (save-excursion
-    (save-restriction
-      (widen)
-      (forward-line 0)
-      (cond
-       ((fountain-match-metadata) 'metadata)
-       ((fountain-match-section-heading) 'section-heading)
-       ((fountain-match-scene-heading) 'scene-heading)
-       ((fountain-match-character) 'character)
-       ((fountain-match-dialog) 'dialog)
-       ((fountain-match-paren) 'paren)
-       ((fountain-match-trans) trans)
-       ((fountain-match-center) 'center)
-       ((fountain-match-synopsis) 'synopsis)
-       ((fountain-match-note) 'note)
-       ((fountain-match-page-break) 'page-break)
-       (t 'action)))))
+  (cond
+   ((fountain-match-metadata) 'metadata)
+   ((fountain-match-section-heading) 'section-heading)
+   ((fountain-match-scene-heading) 'scene-heading)
+   ((fountain-match-character) 'character)
+   ((fountain-match-dialog) 'dialog)
+   ((fountain-match-paren) 'paren)
+   ((fountain-match-trans) trans)
+   ((fountain-match-center) 'center)
+   ((fountain-match-synopsis) 'synopsis)
+   ((fountain-match-note) 'note)
+   ((fountain-match-page-break) 'page-break)
+   (t 'action)))
 
 
 ;;; Parsing
