@@ -3236,7 +3236,7 @@ To hide this buffer from the buffer list, prefix with a space."
   :group 'fountain-endnotes)
 
 (defcustom fountain-endnotes-window-size
-  '(0.4 0.25)
+  '(0.3 0.25)
   "Height and width of the endnotes window as a fraction of root window."
   :type '(list (float :tag "Height")
                (float :tag "Width"))
