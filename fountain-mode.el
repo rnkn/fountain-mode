@@ -3163,27 +3163,33 @@ Ignores revised scene numbers scenes.
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
-If LIMIT is 'scene, halt at end of scene. If LIMIT is 'dialog,
-halt at end of dialog."
+If LIMIT is 'dialog, halt at end of dialog. If LIMIT is 'scene,
+halt at end of scene."
   (interactive "^p")
-  (or n (setq n 1))
-  (let ((p (if (< n 1) -1 1)))
-    (while (/= n 0)
-      (if (fountain-match-character)
-          (forward-line p))
-      (while (cond ((eq limit 'scene)
-                    (not (or (= (point) (buffer-end p))
-                             (fountain-match-character)
-                             (fountain-match-scene-heading))))
-                   ((eq limit 'dialog)
-                    (and (not (= (point) (buffer-end p)))
-                         (or (fountain-match-dialog)
-                             (fountain-match-paren)
-                             (fountain-tachyon-p))))
-                   ((not (or (= (point) (buffer-end p))
-                             (fountain-match-character)))))
-        (forward-line p))
-      (setq n (- n p)))))
+  (unless n (setq n 1))
+  (let* ((p (if (<= n 0) -1 1))
+         (move-fun
+          (lambda ()
+            (while (cond ((eq limit 'dialog)
+                          (and (not (= (point) (buffer-end p)))
+                               (or (fountain-match-dialog)
+                                   (fountain-match-paren)
+                                   (fountain-tachyon-p))))
+                         ((eq limit 'scene)
+                          (not (or (= (point) (buffer-end p))
+                                   (fountain-match-character)
+                                   (fountain-match-scene-heading))))
+                         ((not (or (= (point) (buffer-end p))
+                                   (fountain-match-character)))))
+              (forward-line p)))))
+    (if (/= n 0)
+        (while (/= n 0)
+          (if (fountain-match-character)
+              (forward-line p))
+          (funcall move-fun)
+          (setq n (- n p)))
+      (forward-line 0)
+      (funcall move-fun))))
 
 (defun fountain-backward-character (&optional n)
   "Move backward N character (foward if N is negative)."
