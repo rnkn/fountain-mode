@@ -1589,7 +1589,7 @@ Otherwise export a snippet."
 
 (defcustom fountain-export-buffer-name
   "*Fountain %s Export*"
-  "Name of export buffer when source is not visiting a file.
+  "Name of export buffer when source buffer is not visiting a file.
 Passed to `format' with export format as single variable."
   :type 'string
   :group 'fountain-export)
@@ -1638,8 +1638,7 @@ Options are: bold, double-space, underline."
 
 (defcustom fountain-export-more-dialog-string
   "(MORE)"
-  "String to append to dialog when breaking across pages.
-Parentheses are not automatically added."
+  "String to append to dialog when breaking across pages."
   :type 'string
   :group 'fountain-export)
 
@@ -2299,17 +2298,22 @@ Fountain ELEMENTs:
 
     document            wrapper template for all content, see
                         `fountain-export-standalone'
-    section-heading     string of section heading, excluding syntax chars
-    scene-heading       string of scene heading, excluing syntax chars
-    character           string of character name, excluding syntax chars
-    paren               string of parenthetical
-    dialog              string of dialogue lines, up to end of dialogue block or
+    section             section string, including child elements
+    section-heading     section heading string, excluding syntax chars
+    scene               scene string, including child elements
+    scene-heading       scene heading string, excluing syntax chars
+    dialog              dialogue string, including child elements
+    dual-dialog         dual dialogue string, including child elements
+    character           character string, excluding syntax chars
+    paren               parenthetical string
+    lines               dialogue lines, up to end of dialogue block or
                         next parenthetical
-    trans               string of transition, excluding syntax chars
-    action              string of action block
-    synopsis            string of synopsis, excluding syntax chars
-    note                string of note, excluding syntax chars
-    center              string of center text, excluding syntax chars
+    trans               transition string, excluding syntax chars
+    action              action string
+    page-break          page break, including forced page number
+    synopsis            synopsis string, excluding syntax chars
+    note                note string, excluding syntax chars
+    center              center text string, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
 `{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
@@ -2397,17 +2401,22 @@ Fountain ELEMENTs:
 
     document            wrapper template for all content, see
                         `fountain-export-standalone'
-    section-heading     string of section heading, excluding syntax chars
-    scene-heading       string of scene heading, excluing syntax chars
-    character           string of character name, excluding syntax chars
-    paren               string of parenthetical
-    dialog              string of dialogue lines, up to end of dialogue block or
+    section             section string, including child elements
+    section-heading     section heading string, excluding syntax chars
+    scene               scene string, including child elements
+    scene-heading       scene heading string, excluing syntax chars
+    dialog              dialogue string, including child elements
+    dual-dialog         dual dialogue string, including child elements
+    character           character string, excluding syntax chars
+    paren               parenthetical string
+    lines               dialogue lines, up to end of dialogue block or
                         next parenthetical
-    trans               string of transition, excluding syntax chars
-    action              string of action block
-    synopsis            string of synopsis, excluding syntax chars
-    note                string of note, excluding syntax chars
-    center              string of center text, excluding syntax chars
+    trans               transition string, excluding syntax chars
+    action              action string
+    page-break          page break, including forced page number
+    synopsis            synopsis string, excluding syntax chars
+    note                note string, excluding syntax chars
+    center              center text string, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
 `{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
@@ -2469,20 +2478,22 @@ Fountain ELEMENTs:
 
     document            wrapper template for all content, see
                         `fountain-export-standalone'
-    section             string of section, including child elements
-    section-heading     string of section heading, excluding syntax chars
-    scene               string of scene, including child elements
-    scene-heading       string of scene heading, excluing syntax chars
-    dialog              string of dialogue block, including child elements
-    character           string of character name, excluding syntax chars
-    paren               string of parenthetical
-    lines               string of dialogue lines, up to end of dialogue block or
+    section             section string, including child elements
+    section-heading     section heading string, excluding syntax chars
+    scene               scene string, including child elements
+    scene-heading       scene heading string, excluing syntax chars
+    dialog              dialogue string, including child elements
+    dual-dialog         dual dialogue string, including child elements
+    character           character string, excluding syntax chars
+    paren               parenthetical string
+    lines               dialogue lines, up to end of dialogue block or
                         next parenthetical
-    trans               string of transition, excluding syntax chars
-    action              string of action block
-    synopsis            string of synopsis, excluding syntax chars
-    note                string of note, excluding syntax chars
-    center              string of center text, excluding syntax chars
+    trans               transition string, excluding syntax chars
+    action              action string
+    page-break          page break, including forced page number
+    synopsis            synopsis string, excluding syntax chars
+    note                note string, excluding syntax chars
+    center              center text string, excluding syntax chars
 
 The format of TEMPLATE can include replacement keys in the form
 `{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
