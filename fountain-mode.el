@@ -1300,7 +1300,8 @@ within left-side dual dialogue, and nil otherwise."
     (list 'section
           (list 'begin beg
                 'end end
-                'starts-new-page starts-new-page)
+                'starts-new-page starts-new-page
+                'export t)
           (cons section-heading content))))
 
 (defun fountain-parse-scene (match-data &optional export include-elements)
@@ -1364,7 +1365,8 @@ Includes child elements."
           (list 'dialog
                 (list 'begin beg
                       'end end
-                      'dual dual)
+                      'dual dual
+                      'export t)
                 (cons character (fountain-parse-region (point) end include-elements))))
     (if (eq dual 'left)
         (let ((end
@@ -1376,7 +1378,8 @@ Includes child elements."
           (list 'dual-dialog
                 (list 'begin beg
                       'end end
-                      'starts-new-page starts-new-page)
+                      'starts-new-page starts-new-page
+                      'export (if export t))
                 (cons first-dialog
                       (fountain-parse-region (plist-get (nth 1 first-dialog) 'end)
                                              end include-elements))))
