@@ -1770,6 +1770,8 @@ format tag."
             (t
              (format fountain-export-buffer-name tag))))))
 
+(require 'subr-x)
+
 (defun fountain-slugify (string)
   "Convert STRING to one suitable for slugs.
 
