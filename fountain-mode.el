@@ -1991,38 +1991,46 @@ generate a new buffer.
 
 Switch to destination buffer if complete without errors,
 otherwise kill destination buffer."
+  ;; If called interactively, present export format options.
   (interactive
    (list (intern
-          (completing-read "Format: "
+          (completing-read "Export format: "
                            (mapcar #'car fountain-export-formats) nil t))
          (car current-prefix-arg)))
   (setq buffer (or buffer (current-buffer)))
   (let ((dest-buffer (get-buffer-create
-                  (fountain-export-get-filename format buffer)))
-        (hook (plist-get (alist-get format
-                                    fountain-export-formats)
+                      (fountain-export-get-filename format buffer)))
+        (hook (plist-get (alist-get format fountain-export-formats)
                          :hook))
         string complete)
-    (when (< 0 (buffer-size dest-buffer))
-      (if (or (eq (current-buffer) dest-buffer)
-              (not (y-or-n-p (format "Buffer `%s' is not empty; overwrite? "
-                                     dest-buffer))))
-          (progn
-            (setq dest-buffer (generate-new-buffer (buffer-name dest-buffer)))
-            (message "Using new buffer `%s'"
-                     dest-buffer))))
     (unwind-protect
         (with-current-buffer buffer
+          ;; If DEST-BUFFER is not empty, check if it is the current buffer, or
+          ;; if not, if the user does not wish to overwrite.
+          (when (< 0 (buffer-size dest-buffer))
+            (if (or (eq (current-buffer) dest-buffer)
+                    (not (y-or-n-p (format "Buffer `%s' is not empty; overwrite? "
+                                           dest-buffer))))
+                ;; If so, generate a new buffer.
+                (progn
+                  (setq dest-buffer
+                        (generate-new-buffer (buffer-name dest-buffer)))
+                  (message "Using new buffer `%s'" dest-buffer))))
+          ;; Export the region to STRING.
           (setq string
                 (fountain-export-region (point-min) (point-max) format snippet))
+          ;; Insert STRING into DEST-BUFFER.
           (with-current-buffer dest-buffer
             (with-silent-modifications
               (erase-buffer)
               (insert string)))
+          ;; Switch to DEST-BUFFER and save.
           (switch-to-buffer dest-buffer)
           (write-file (buffer-name) t)
+          ;; Set COMPLETE flag and run hooks.
           (setq complete t)
           (run-hooks hook))
+      ;; If export failed, kill DEST-BUFFER.
       (unless complete
         (kill-buffer dest-buffer)))))
 
