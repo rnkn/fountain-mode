@@ -1526,7 +1526,7 @@ Includes child elements."
     (fountain-parse-action
      (match-data) (memq 'action include-elements)))))
 
-(defun fountain-parse-region (beg end &optional include-elements)
+(defun fountain-parse-region (beg end &optional include-elements job)
   "Return a list of parsed element lists in region between BEG and END.
 
 Use list INCLUDE-ELEMENTS to determine exported elements, or
@@ -1543,23 +1543,19 @@ moves to property value \"end\" of element."
                     fountain-export-include-elements)
                    (car fountain-export-include-elements)))))
   (goto-char beg)
-  ;; (unless job
-  ;;   (setq job (make-progress-reporter "Parsing..." 0 100)))
+  (unless job
+    (setq job (make-progress-reporter "Parsing...")))
   (let (list)                      ; FIXME: make sure export funs parse metadata
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
                  (fountain-match-comment))
         (goto-char (match-end 0)))
       (if (< (point) end)
-          (let (element starts-new-page)
-            (setq starts-new-page (eq (caar list) 'page-break)
-                  element (fountain-parse-element include-elements starts-new-page))
+          (let ((element (fountain-parse-element include-elements)))
             (push element list)
-            (goto-char (plist-get (nth 1 element) 'end)))))
-    ;;   (progress-reporter-update job (* (/ (float (- (point) beg))
-    ;;                                       (float (- end beg)))
-    ;;                                    100)))
-    ;; (progress-reporter-done job)
+            (goto-char (plist-get (nth 1 element) 'end))))
+      (progress-reporter-update job))
+    (progress-reporter-done job)
     (reverse list)))
 
 
