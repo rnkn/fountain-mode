@@ -2793,7 +2793,7 @@ data reflects `outline-regexp'."
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
   (interactive "^p")
-  (or n (setq n 1))
+  (unless n (setq n 1))
   (let* ((p (if (<= n 0) -1 1))
          (move-fun
           (lambda ()
@@ -3265,7 +3265,7 @@ Or, if nil:
 (defun fountain-get-scene-number (&optional n)
   "Return the scene number of the Nth next scene as a list.
 Return Nth previous if N is negative."
-  (or n (setq n 0))
+  (unless n (setq n 0))
   (save-excursion
     (save-restriction
       (widen)
