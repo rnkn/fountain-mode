@@ -2060,6 +2060,34 @@ Command acts on current buffer or BUFFER."
       (user-error "Buffer `%s' is not visiting a file" buffer))))
 
 
+;;; -> plaintext
+
+(defcustom fountain-export-txt-hook
+  nil
+  "Hook run with export buffer on sucessful export to plaintext."
+  :type 'hook
+  :group 'fountain-export)
+
+(defun fountain-export-buffer-to-txt ()
+  "Convenience function for exporting buffer to plaintext."
+  (interactive)
+  (fountain-export-buffer 'txt))
+
+
+;;; -> PostScript
+
+(defcustom fountain-export-ps-hook
+  nil
+  "Hook run with export buffer on sucessful export to PostScript."
+  :type 'hook
+  :group 'fountain-export)
+
+(defun fountain-export-buffer-to-ps ()
+  "Convenience function for exporting buffer to PostScript."
+  (interactive)
+  (fountain-export-buffer 'ps))
+
+
 ;;; -> HTML
 
 (defcustom fountain-export-html-template
