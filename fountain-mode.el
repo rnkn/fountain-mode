@@ -1318,12 +1318,12 @@ Includes child elements."
                 (match-string-no-properties 3)))
          (beg (match-beginning 0))
          (forced (stringp (match-string 2)))
-         (scene-number
-          (save-excursion
-            (save-match-data
-              (goto-char (match-beginning 0))
-              (fountain-scene-number-to-string
-               (fountain-get-scene-number 0)))))
+         ;; (scene-number
+         ;;  (save-excursion
+         ;;    (save-match-data
+         ;;      (goto-char (match-beginning 0))
+         ;;      (fountain-scene-number-to-string
+         ;;       (fountain-get-scene-number 0)))))
          (end (save-excursion
                 (outline-end-of-subtree)     ; FIXME: prefer native funs
                 (unless (eobp)
@@ -1335,8 +1335,9 @@ Includes child elements."
     (list 'scene
           (list 'begin beg
                 'end end
-                'scene-number scene-number
-                'starts-new-page starts-new-page)
+                ;; 'scene-number scene-number
+                'starts-new-page starts-new-page
+                'export t)
           (cons scene-heading content))))
 
 (defun fountain-parse-dialog (match-data &optional export include-elements)
