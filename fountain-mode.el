@@ -655,7 +655,7 @@ dialogue.")
     Group 1: leading ===
     Group 2: forced page number (export group)")
 
-(defconst fountain-script-end-regexp
+(defconst fountain-end-regexp
   "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\(end\\)\\>.*$"
   "Regular expression for matching script end break.
 
@@ -901,7 +901,9 @@ regular expression."
 (defun fountain-init-outline-regexp ()
   "Initialize `outline-regexp'."
   (setq-local outline-regexp
-              (concat fountain-section-heading-regexp
+              (concat fountain-end-regexp
+                      "\\|"
+                      fountain-section-heading-regexp
                       "\\|"
                       fountain-scene-heading-regexp)))
 
@@ -2777,9 +2779,11 @@ outline visibility through the following states:
   "Return the heading's nesting level in the outline.
 Assumes that point is at the beginning of a heading and match
 data reflects `outline-regexp'."
-  (if (string-prefix-p "#" (match-string 0))
-      (string-width (match-string 2))
-    6))
+  (cond ((string-match fountain-end-regexp (match-string 0))
+         1)
+        ((string-prefix-p "#" (match-string 0))
+         (string-width (match-string 2)))
+        (t 6)))
 
 
 ;;; Navigation
@@ -2973,7 +2977,7 @@ persist even when calling \\[delete-other-windows]."
     (save-restriction
       (widen)
       (goto-char (point-min))
-      (let ((beg (if (re-search-forward fountain-script-end-regexp nil t)
+      (let ((beg (if (re-search-forward fountain-end-regexp nil t)
                      (point)))
             (src (current-buffer))
             (buf (format fountain-endnotes-buffer-name (buffer-name))))
@@ -3651,7 +3655,7 @@ assigning the following keywords:
         (font-lock-refresh-defaults)
         (font-lock-ensure (save-excursion
                             (goto-char (point-min))
-                            (re-search-forward fountain-script-end-regexp nil 'move)
+                            (re-search-forward fountain-end-regexp nil 'move)
                             (point))
                           (point-max)))
     (user-error "Decoration must be an integer 1-3")))
