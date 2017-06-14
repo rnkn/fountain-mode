@@ -2419,17 +2419,21 @@ character codes, then format replacement is made."
 {{content}}\
 </Content>
 </FinalDraft>")
-    (section-heading nil)
-    (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (character "<Paragraph Type=\"Character\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (dialog "<Paragraph Type=\"Dialogue\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (paren "<Paragraph Type=\"Parenthetical\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (trans "<Paragraph Type=\"Transition\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (action "<Paragraph Type=\"Action\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (section nil)
+    (section-heading "")
+    (scene nil)
+    (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (dual-dialog "<Paragraph StartsNewPage=\"{{starts-new-page}}\">\n<DualDialogue>\n{{content}}</DualDialogue>\n</DualDialogue>\n")
+    (dialog nil)
+    (character "<Paragraph Type=\"Character\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (paren "<Paragraph Type=\"Parenthetical\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (lines "<Paragraph Type=\"Dialogue\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (trans "<Paragraph Type=\"Transition\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (action "<Paragraph Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (page-break "")
     (synopsis "")
     (note "")
-    (center "<Paragraph Alignment=\"Center\" Type=\"Action\"{{page-break}}>\n<Text>{{content}}</Text>\n</Paragraph>\n"))
+    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
   "Association list of element templates for exporting to Final Draft.
 Takes the form:
 
