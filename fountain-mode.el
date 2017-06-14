@@ -1361,6 +1361,7 @@ Includes child elements."
             (point)))
          first-dialog)
     (goto-char (plist-get (nth 1 character) 'end))
+    ;; Parse the first dialogue tree, which may be the only dialogue tree.
     (setq first-dialog
           (list 'dialog
                 (list 'begin beg
@@ -1368,21 +1369,29 @@ Includes child elements."
                       'dual dual
                       'export t)
                 (cons character (fountain-parse-region (point) end include-elements))))
+    ;; If at the first (left) character of dual dialogue, parse a dual-dialogue
+    ;; tree, containing dialogue trees.
     (if (eq dual 'left)
+        ;; Find the end of the dual-dialogue.
         (let ((end
                (save-excursion
                  (while (fountain-dual-dialog)
                    (fountain-forward-character 1 'dialog))
                  (skip-chars-backward "\n\s\t")
                  (point))))
+          ;; Return the dual-dialogue tree.
           (list 'dual-dialog
                 (list 'begin beg
                       'end end
                       'starts-new-page starts-new-page
                       'export (if export t))
+                ;; Add the first dialogue block to the head of the dual-dialogue
+                ;; tree.
                 (cons first-dialog
+                      ;; Parse the containing region.
                       (fountain-parse-region (plist-get (nth 1 first-dialog) 'end)
                                              end include-elements))))
+      ;; Otherwise, return the first dialogue tree.
       first-dialog)))
 
 (defun fountain-parse-lines (match-data &optional export)
@@ -2640,18 +2649,18 @@ If POS is nil, use `point' instead."
          (end-point-fun
           (lambda ()
             (outline-end-of-subtree)
-            ;; newline if none at eof
+            ;; Add newline if none at eof.
             (if (and (eobp)
                      (/= (char-before) ?\n))
                 (insert-char ?\n))
-            ;; temp newline if only 1 at eof
+            ;; Temporary newline if only 1 at eof
             (when (and (eobp)
                        (save-excursion
                          (forward-line -1)
                          (not (fountain-blank-p))))
               (insert-char ?\n)
               (setq hanging-line t))
-            ;; avoid eobp signal
+            ;; Avoid eobp signal.
             (unless (eobp)
               (forward-char 1))
             (point)))
@@ -3202,20 +3211,19 @@ then make the changes desired."
                           (t
                            (fountain-forward-scene 1)
                            (point))))
-        ;; delete all matches in region
+        ;; Delete all matches in region.
+        ;; FIXME: should this check character elements?
         (goto-char start)
         (while (re-search-forward
                 (concat "\s*" fountain-continued-dialog-string) end t)
           (replace-match "")
           (progress-reporter-update job))
-        ;; add string where appropriate
+        ;; When FOUNTAIN-ADD-CONTINUED-DIALOG, add string where appropriate.
         (when fountain-add-continued-dialog
           (goto-char start)
           (while (< (point) end)
             (when (and (not (looking-at-p
-                             (concat ".*"
-                                     fountain-continued-dialog-string
-                                     "$")))
+                             (concat ".*" fountain-continued-dialog-string "$")))
                        (fountain-match-character)
                        (string= (fountain-get-character 0)
                                 (fountain-get-character -1 'scene)))
