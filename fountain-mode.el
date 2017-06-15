@@ -858,6 +858,11 @@ To switch between these levels, customize the value of
   "Default face for transitions."
   :group 'fountain-faces)
 
+(defface fountain-include
+  '((t (:inherit font-lock-warning-face)))
+  "Default face for file inclusions."
+  :group 'fountain-faces)
+
 
 ;;; Initializing
 
@@ -1187,6 +1192,33 @@ comments."
    (t 'action)))
 
 
+;;; Inclusions
+
+(defvar fountain-include-regexp
+  "^[\s\t]*{{[\s\t]*\\(?1:[^:\n]+:\\)?[\s\t]*\\(?2:.+?\\)[\s\t]*}}[\s\t]*")
+
+(defun fountain-match-include ()
+  "Match inclusion if point is at inclusion, nil otherwise."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 0)
+      (looking-at fountain-include-regexp))))
+
+(defun fountain-include-find-file (&optional same-window noselect)
+  (interactive "P")
+  (if (and (fountain-match-include)
+           (save-match-data
+             (string-match "include:" (match-string 1))))
+      (let ((filename (expand-file-name (match-string 2))))
+        (cond (same-window
+               (find-file filename))
+              (noselect
+               (find-file-noselect filename))
+              (t
+               (find-file-other-window filename))))))
+
+
 ;;; Parsing
 
 (require 'subr-x)
@@ -1275,6 +1307,20 @@ within left-side dual dialogue, and nil otherwise."
                  'export (if export t))
            metadata))))
 
+(defun fountain-parse-end-of-subtree (beg)
+  (save-excursion
+    (goto-char beg)
+    (outline-end-of-subtree)
+    (unless (eobp)
+      (forward-char 1))
+    (let ((end (point)))
+      (goto-char beg)
+      (if (and (re-search-forward fountain-include-regexp end t)
+               (save-match-data
+                 (string-match "include:" (match-string 1))))
+          (match-beginning 0)
+        end))))
+
 (defun fountain-parse-section (match-data &optional export include-elements)
   "Return an element list for matched section heading."
   (set-match-data match-data)
@@ -1289,11 +1335,7 @@ within left-side dual dialogue, and nil otherwise."
                (match-string-no-properties 3)))
         (beg (match-beginning 0))
         (starts-new-page (fountain-starts-new-page))
-        (end (save-excursion
-               (outline-end-of-subtree)
-               (unless (eobp)
-                 (forward-char 1))
-               (point)))
+        (end (fountain-parse-end-of-subtree beg))
         content)
     (goto-char (plist-get (nth 1 section-heading) 'end))
     (setq content (fountain-parse-region (point) end include-elements))
@@ -1308,35 +1350,31 @@ within left-side dual dialogue, and nil otherwise."
   "Return an element list for matched scene heading at point.
 Includes child elements."
   (set-match-data match-data)
-  (let* ((starts-new-page (fountain-starts-new-page))
+  (let* ((beg (match-beginning 0))
+         (starts-new-page (fountain-starts-new-page))
+         (scene-number
+          (save-excursion
+            (save-match-data
+              (goto-char (match-beginning 0))
+              (fountain-scene-number-to-string
+               (fountain-get-scene-number 0)))))
          (scene-heading
           (list 'scene-heading
                 (list 'begin (match-beginning 0)
                       'end (match-end 0)
+                      'scene-number scene-number
                       'forced (stringp (match-string 2))
                       'export (if export t)
                       'starts-new-page starts-new-page)
                 (match-string-no-properties 3)))
-         (beg (match-beginning 0))
-         (forced (stringp (match-string 2)))
-         ;; (scene-number
-         ;;  (save-excursion
-         ;;    (save-match-data
-         ;;      (goto-char (match-beginning 0))
-         ;;      (fountain-scene-number-to-string
-         ;;       (fountain-get-scene-number 0)))))
-         (end (save-excursion
-                (outline-end-of-subtree)     ; FIXME: prefer native funs
-                (unless (eobp)
-                  (forward-char 1))
-                (point)))
+         (end (fountain-parse-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 scene-heading) 'end))
     (setq content (fountain-parse-region (point) end include-elements))
     (list 'scene
           (list 'begin beg
                 'end end
-                ;; 'scene-number scene-number
+                'scene-number scene-number
                 'starts-new-page starts-new-page
                 'export t)
           (cons scene-heading content))))
@@ -1463,6 +1501,21 @@ Includes child elements."
               'starts-new-page (fountain-starts-new-page))
         (match-string-no-properties 2)))
 
+(defun fountain-parse-include (match-data &optional export)
+  "Return an element list for matched inclusions."
+  (set-match-data match-data)
+  (let ((beg (match-beginning 0))
+        (end (match-end 0))
+        content)
+    (goto-char beg)
+    (with-current-buffer (fountain-include-find-file nil t)
+      (setq content (fountain-parse-region (point-min) (point-max))))
+    (list 'include
+          (list 'begin beg
+                'end end
+                'export (if export t))
+          content)))
+
 (defun fountain-parse-action (match-data &optional export)
   "Return an element list for matched action."
   (set-match-data match-data)
@@ -1518,6 +1571,9 @@ Includes child elements."
    ((fountain-match-note)
     (fountain-parse-note
      (match-data) (memq 'note include-elements)))
+   ((fountain-match-include)
+    (fountain-parse-include
+     (match-data) (memq 'include include-elements)))
    ((fountain-match-page-break)
     (fountain-parse-page-break
      (match-data) (memq 'page-break include-elements)))
@@ -1567,9 +1623,9 @@ moves to property value \"end\" of element."
   :group 'fountain)
 
 (defcustom fountain-export-include-elements
-  '(("screenplay" title-page scene-heading action character lines paren trans center page-break)
-    ("teleplay" title-page section-heading scene-heading action character lines paren trans center page-break)
-    ("stageplay" title-page section-heading scene-heading action character lines paren trans center page-break))
+  '(("screenplay" title-page scene-heading action character lines paren trans center page-break include)
+    ("teleplay" title-page section-heading scene-heading action character lines paren trans center page-break include)
+    ("stageplay" title-page section-heading scene-heading action character lines paren trans center page-break include))
   "Association list of elements to include when exporting.
 Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
@@ -1585,7 +1641,8 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Center Text" center)
                                  (const :tag "Page Breaks" page-break)
                                  (const :tag "Synopses" synopsis)
-                                 (const :tag "Notes" note)))
+                                 (const :tag "Notes" note)
+                                 (const :tag "Included Files" include)))
   :group 'fountain-export)
 
 (define-obsolete-variable-alias 'fountain-export-include-elements-alist
@@ -2476,11 +2533,12 @@ Fountain ELEMENTs:
     synopsis            synopsis string, excluding syntax chars
     note                note string, excluding syntax chars
     center              center text string, excluding syntax chars
+    include             inclusion string
 
 The format of TEMPLATE can include replacement keys in the form
-`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
-`fountain-export-format-template' for how replacement strings are
-calculated."
+{{KEY}}. Each TEMPLATE should include the {{content}} key.
+
+If TEMPLATE is nil, the string is discarded."
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
@@ -3578,6 +3636,10 @@ scene number from being auto-upcased."
     (,fountain-note-regexp
      ((:level 2 :subexp 0 :face fountain-note
               :invisible note)))
+    ;; Inclusions
+    (,fountain-include-regexp
+     ((:level 2 :subexp 0 :face fountain-include
+              :invisible include)))
     ;; Metedata
     ((lambda (limit)
        (fountain-match-element 'fountain-match-metadata limit))
@@ -3808,6 +3870,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
+    (define-key map (kbd "C-c C-o") #'fountain-include-find-file)
     ;; navigation commands
     (define-key map (kbd "C-M-n") #'fountain-forward-scene)
     (define-key map (kbd "C-M-p") #'fountain-backward-scene)
