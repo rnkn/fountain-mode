@@ -1759,6 +1759,14 @@ Takes the form:
           (group (const :tag "Center Text" center)
                  (choice string (const nil)))))
 
+(defun fountain-export-include-element-p (elt)
+  "Returns non-nil if exporting ELT current format."
+  (memq elt (cdr (assoc-string
+                  (or (plist-get (fountain-read-metadata)
+                                 'format)
+                      "screenplay")
+                  fountain-export-include-elements))))
+
 (defun fountain-export-get-filename (format &optional buffer)
   "If buffer is visiting a file, concat file name base and FORMAT.
 Otherwise return `fountain-export-buffer' formatted with export
@@ -3849,14 +3857,30 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
         ((and elt
               (listp (eval (car (get var 'standard-value)))))
          (if (memq elt (symbol-value var))
-             (customize-set-variable var
-                                     (delq elt (symbol-value var)))
-           (customize-set-variable var
-                                   (cons elt (symbol-value var))))))
+             (customize-set-variable var (delq elt (symbol-value var)))
+           (customize-set-variable var (cons elt (symbol-value var))))))
   (font-lock-refresh-defaults)
   (message "%s is now: %s"
            (custom-unlispify-tag-name var)
            (symbol-value var)))
+
+(defun fountain-toggle-export-title-page ()
+  "Toggle title-page in `fountain-export-include-elements'."
+  (interactive)
+  (let* ((var fountain-export-include-elements)
+         (format (or (plist-get (fountain-read-metadata)
+                                'format)
+                     "screenplay"))
+         (list (cdr (assoc-string format var))))
+    (setq list
+          (if (memq 'title-page list)
+              (delq 'title-page list)
+            (cons 'title-page list)))
+    (setq var (delq (assoc-string format var) var))
+    (customize-set-variable 'fountain-export-include-elements
+                            (cons (cons format list) var))
+    (message "Title page export is now %s"
+             (if (memq 'title-page list) "enabled" "disabled"))))
 
 (defun fountain-toggle-hide-element (element)
   "Toggle visibility of fountain-ELEMENT, using S for feedback.
@@ -3966,11 +3990,9 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :style radio
       :selected (eq fountain-export-page-size 'a4)]
      "---"
-     ["Include Title Page"
-      (fountain-toggle-custom-variable
-       'fountain-export-include-title-page)
+     ["Include Title Page" fountain-toggle-export-title-page
       :style toggle
-      :selected fountain-export-include-title-page]
+      :selected (fountain-export-include-element-p 'title-page)]
      ["Bold Scene Headings"
       (fountain-toggle-custom-variable
        'fountain-export-scene-heading-format 'bold)
