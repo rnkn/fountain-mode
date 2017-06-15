@@ -678,7 +678,7 @@ dialogue.")
     Group 3: match heading (export group)")
 
 (defconst fountain-synopsis-regexp
-  "^\\(\\(=[\s\t]*\\)\\([^=\n].*?\\)\\)[\s\t]*$"
+  "^\\(\\(=[\s\t]*\\)\\([^=\n].+?\\)\\)[\s\t]*$"
   "Regular expression for matching synopses.
 
     Group 1: match trimmed whitespace
