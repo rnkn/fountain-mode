@@ -2424,31 +2424,29 @@ character codes, then format replacement is made."
 {{content}}\
 </Content>
 </FinalDraft>")
-    (section nil)
-    (section-heading "")
-    (scene nil)
+    (section "{{content}}")
+    (section-heading nil)
+    (scene "{{content}}")
     (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (dual-dialog "<Paragraph StartsNewPage=\"{{starts-new-page}}\">\n<DualDialogue>\n{{content}}</DualDialogue>\n</DualDialogue>\n")
-    (dialog nil)
+    (dialog "{{content}}")
     (character "<Paragraph Type=\"Character\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (paren "<Paragraph Type=\"Parenthetical\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (lines "<Paragraph Type=\"Dialogue\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (trans "<Paragraph Type=\"Transition\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
     (action "<Paragraph Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (page-break "")
-    (synopsis "")
-    (note "")
-    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
+    (page-break nil)
+    (synopsis nil)
+    (note nil)
+    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (include "{{content}}"))
   "Association list of element templates for exporting to Final Draft.
 Takes the form:
 
     ((ELEMENT TEMPLATE) ...)
 
 ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
-is the template with which to format the format string. If
-TEMPLATE is nil, the format string is passed as is without
-formatting. An empty string discards the format string and passes
-the empty string.
+is the template with which to format a string.
 
 Fountain ELEMENTs:
 
@@ -2547,11 +2545,12 @@ Fountain ELEMENTs:
     synopsis            synopsis string, excluding syntax chars
     note                note string, excluding syntax chars
     center              center text string, excluding syntax chars
+    include             inclusion string
 
 The format of TEMPLATE can include replacement keys in the form
-`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
-`fountain-export-format-template' for how replacement strings are
-calculated."
+{{KEY}}. Each TEMPLATE should include the {{content}} key.
+
+If TEMPLATE is nil, the string is discarded."
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
