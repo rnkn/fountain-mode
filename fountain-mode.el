@@ -1677,16 +1677,16 @@ Passed to `format' with export format as single variable."
   'fountain-export-include-elements "3.0.0")
 
 (defcustom fountain-export-page-size
-  'letter
+  "letter"
   "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4))
+  :type '(radio (const :tag "US Letter" "letter")
+                (const :tag "A4" "a4"))
   :group 'fountain-export)
 
 (defcustom fountain-export-font
-  '("Courier" "Courier New" "monospace")
-  "List of font names to use when exporting, by priority."
-  :type '(repeat (string :tag "Font"))
+  "Courier"
+  "Font to use when exporting."
+  :type '(string :tag "Font"))
   :group 'fountain-export)
 
 (defcustom fountain-export-contact-align-right
@@ -1793,15 +1793,23 @@ Takes the form:
   :type '(list
           (group (const :tag "Document" document)
                  (choice string (const nil)))
+          (group (const :tag "Section" section)
+                 (choice string (const nil)))
           (group (const :tag "Section Heading" section-heading)
+                 (choice string (const nil)))
+          (group (const :tag "Scene" scene)
                  (choice string (const nil)))
           (group (const :tag "Scene Heading" scene-heading)
                  (choice string (const nil)))
-          (group (const :tag "Character" character)
+          (group (const :tag "Dual Dialogue" dual-dialog)
                  (choice string (const nil)))
           (group (const :tag "Dialogue" dialog)
                  (choice string (const nil)))
+          (group (const :tag "Character" character)
+                 (choice string (const nil)))
           (group (const :tag "Parenthetical" paren)
+                 (choice string (const nil)))
+          (group (const :tag "Lines" lines)
                  (choice string (const nil)))
           (group (const :tag "Transition" trans)
                  (choice string (const nil)))
@@ -1814,6 +1822,8 @@ Takes the form:
           (group (const :tag "Note" note)
                  (choice string (const nil)))
           (group (const :tag "Center Text" center)
+                 (choice string (const nil)))
+          (group (const :tag "Included Files" include)
                  (choice string (const nil)))))
 
 (defun fountain-export-include-element-p (elt)
@@ -1828,10 +1838,9 @@ Takes the form:
   "If buffer is visiting a file, concat file name base and FORMAT.
 Otherwise return `fountain-export-buffer' formatted with export
 format tag."
-  (let ((tag (plist-get (cdr (assoc format fountain-export-formats))
-                        :tag))
-        (ext (plist-get (cdr (assoc format fountain-export-formats))
-                        :ext)))
+  (let* ((alist (alist-get format fountain-export-formats))
+         (tag (plist-get alist :tag))
+         (ext (plist-get alist :ext)))
     (with-current-buffer (or buffer (current-buffer))
       (cond (fountain-export-use-title-as-filename
              (concat (plist-get (fountain-read-metadata) 'title) "." ext))
@@ -1859,170 +1868,122 @@ whitespace is converted to dashes. e.g.
 (defun fountain-export-format-string (string format)
   "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
   (let ((alist (symbol-value
-                (plist-get (cdr (assoc format fountain-export-formats))
+                (plist-get (alist-get format fountain-export-formats)
                            :replace))))
   (dolist (var alist string)
     (setq string (replace-regexp-in-string
-                  (car var) (cadr var) string t)))))
+                  (car var) (cadr var) string t t)))))
 
-(defconst fountain-export-element-translations
-  '((emacs-version)
-    (fountain-version)
-    (dual-dialog
-     (fountain
-      (character
-       (dual
-        (right . " ^"))))
-     (html
-      (character
-       (dual
-        (left . " dual-left")
-        (right . " dual-right")))))
-    (page-size
-     (html . fountain-export-page-size))
-    (forced
-     (fountain
-      (scene-heading
-       (forced . "."))
-      (character
-       (forced . "@"))
-      (trans
-       (forced . "> "))
-      (action
-       (forced . "!"))))))
+(defconst fountain-export-conditional-replacements
+  '((fdx
+     (starts-new-page
+      (t (t "Yes") (nil "No"))))
+    (fountain
+     (forced
+      (scene-heading (t "."))
+      (character (t "@"))
+      (trans (t "> "))
+      (action (t "!")))
+     (dual-dialog
+      (character (right " ^"))))))
 
-(defconst fountain-export-element-rules
-  '((cons "emacs-version"
-          emacs-version)
-    (cons "fountain-version"
-          (concat "Fountain Mode " fountain-version))
-    (cons "contd"
-          fountain-continued-dialog-string)
-    (cons "more"
-          fountain-export-more-dialog-string)
-    (cons "slugify"
-          (fountain-slugify string))
-    (cons "title-template"
-          (fountain-export-format-string fountain-export-title-template format))
-    (cons "contact-template"
-          (fountain-export-format-string fountain-export-contact-template format))
-    (cons "new-page"
-          (cond ((eq format 'fdx)
-                 (if (plist-get plist 'new-page)
-                     " StartsNewPage=\"Yes\""))))
-    (cons "forced"
-          (cond ((eq format 'fountain)
-                 (if (plist-get plist 'forced)
-                     (cond ((eq type 'scene-heading) ".")
-                           ((eq type 'character) "@")
-                           ((eq type 'trans) "> ")
-                           ((eq type 'action) "!"))))))
-    (cons "dual-dialog"
-          (cond ((eq format 'fountain)
-                 (if (eq (plist-get plist 'dual) 'right) " ^"))
-                ((eq format 'html)
-                 (cond ((eq (plist-get plist 'dual) 'left) " dual-left")
-                       ((eq (plist-get plist 'dual) 'right) " dual-right")))))
-    (cons "page-size"
-          (cond ((eq format 'html)
-                 (symbol-name fountain-export-page-size))
-                ((eq format 'tex)
-                 (if (eq fountain-export-page-size 'letter)
-                     "letterpaper" "a4paper"))))
-    (cons "font"
-          (cond ((eq format 'html)
-                 (mapconcat (lambda (font) (concat "\"" font "\""))
-                            fountain-export-font ", "))
-                ((eq format 'tex)
-                 (car fountain-export-font))))
-    (cons "scene-heading-bold"
-          (cond ((eq format 'html)
-                 (if (memq 'bold fountain-export-scene-heading-format)
-                     "bold" "normal"))
-                ((eq format 'tex)
-                 (if (memq 'bold fountain-export-scene-heading-format)
-                     "true" "false"))))
-    (cons "scene-heading-spacing"
-          (cond ((eq format 'html)
-                 (if (memq 'double-space fountain-export-scene-heading-format)
-                     "2em" "1em"))
-                ((eq format 'tex)
-                 (if (memq 'double-space fountain-export-scene-heading-format)
-                     "true" "false"))))
-    (cons "scene-heading-underline"
-          (cond ((eq format 'html)
-                 (if (memq 'underline fountain-export-scene-heading-format)
-                     "underline" "none"))
-                ((eq format 'tex)
-                 (if (memq 'underline fountain-export-scene-heading-format)
-                     "true" "false"))))
-    (cons "title-contact-align"
-          (cond ((eq format 'html) "FIXME")
-                ((eq format 'tex)
-                 (if fountain-export-contact-align-right "true" "false"))))
-    (cons "include-scene-numbers" "false")
-    (cons "number-first-page" "false")))
+(defconst fountain-export-replacements
+  '((html
+     (emacs-version . emacs-version)
+     (fountain-version . fountain-version)
+     (page-size . fountain-export-page-size)
+     (font . fountain-export-font)
+     (more . fountain-export-more-dialog-string)
+     (contd . fountain-continued-dialog-string))))
 
 (defun fountain-export-element (element format)
   "Return a formatted string from ELEMENT according to FORMAT.
 
-Break ELEMENT into TYPE, PLIST and STRING.
+Break ELEMENT into TYPE, PLIST and CONTENT.
+
+If CONTENT is a string and PLIST property 'export is non-nil:
+
+Check if TYPE corresponds to a TEMPLATE in
+`fountain-export-templates'
 
 If PLIST property `export' is non-nil, check if TYPE corresponds
 to a TEMPLATE in `fountain-export-templates' for FORMAT. If so,
 replace matches of `fountain-template-key-regexp' in the
 following order:
 
-    1. {{content}} is replaced with STRING.
+    1. {{content}} is replaced with CONTENT.
     2. If KEY corresponds to a string property in PLIST then {{KEY}} is
        replaced with that string.
     3. If KEY corresponds with remaining replacement conditions then {{KEY}} is
        replaced with that string.
     4. If none of the above, {{KEY}} is replaced with an empty string."
+  ;; Break ELEMENT into TYPE, PLIST and CONTENT.
   (let ((type (car element))
         (plist (nth 1 element))
-        (string (nth 2 element))
-        template)
-    (if (stringp string)
-        (setq string (fountain-export-format-string string format)))
-    (setq template
-          (cadr (assq type
-                      (symbol-value
-                       (plist-get (alist-get format
-                                             fountain-export-formats)
-                                  :template)))))
-    (if (and template (plist-get plist 'export))
-        (while (string-match fountain-template-key-regexp template)
-          (setq template
-                (replace-regexp-in-string
-                 fountain-template-key-regexp
-                 (lambda (match)
-                   (let* ((key (match-string 1 match))
-                          (value (plist-get plist (intern key))))
-                     (cond ((string= key "content")
-                            string)
-                           ((stringp value)
-                            (fountain-export-format-string value format))
-                           ((eval (alist-get key fountain-export-element-rules) t))
-                           (t ""))))
-                 template))))))
-
-        ;; (with-temp-buffer
-        ;;   (insert template)
-        ;;   (goto-char (point-min))
-        ;;   (while (re-search-forward fountain-template-key-regexp nil t)
-        ;;     (let* ((key (match-string 1))
-        ;;            (value (plist-get plist (intern key))))
-        ;;       (replace-match
-        ;;        (cond ((string= key "content")
-        ;;               string)
-        ;;              ((stringp value)
-        ;;               (fountain-export-format-string value format))
-        ;;              ((eval (alist-get key fountain-export-element-rules) t))
-        ;;              (t ""))
-        ;;        t t))
-        ;;     (goto-char (point-min)))
-        ;;   (buffer-string)))))
+        (content (nth 2 element))
+        string template)
+    (cond
+     ;; If CONTENT is a string, simply format and set it to STRING.
+     ((stringp content)
+      (setq string (fountain-export-format-string content format)))
+     ;; If CONTENT is a list, work through the list binding each ELEMENT and
+     ;; recursively calling this function.
+     ((listp content)
+      (dolist (element content)
+        (setq string
+              (concat string
+                      (fountain-export-element element format))))))
+    ;; Set export template.
+    (let ((template-alist
+           (symbol-value
+            (plist-get (alist-get format fountain-export-formats)
+                       :template))))
+      (setq template (car (alist-get type template-alist))))
+    ;; If a template exists and the 'export property is non-nil, create a
+    ;; temporary buffer and insert template.
+    (if (plist-get plist 'export)
+        (if template
+            (progn
+              (while (string-match fountain-template-key-regexp template)
+                (setq template
+                      (replace-regexp-in-string
+                       fountain-template-key-regexp
+                       (lambda (match)
+                         ;; Find KEY and corresponding VALUE.
+                         (let* ((key (match-string 1 match))
+                                (value (plist-get plist (intern key))))
+                           (cond
+                            ;; If KEY is "content", replace with STRING.
+                            ((string= key "content")
+                             string)
+                            ;; If KEY's VALUE is a string, format and replace
+                            ;; with VALUE.
+                            ((stringp value)
+                             (fountain-export-format-string value format))
+                            ;; If there is a KEY, attempt conditional
+                            ;; replacement.
+                            (key
+                             (let* ((format-alist
+                                     (alist-get format fountain-export-conditional-replacements))
+                                    (key-alist
+                                     (alist-get (intern key) format-alist))
+                                    (type-alist
+                                     (or (alist-get type key-alist)
+                                         (alist-get t key-alist))))
+                               (or (car (alist-get value type-alist)) "")))
+                            ;; Otherwise, try for symbol replacements.
+                            (t
+                             (let* ((format-alist
+                                     (alist-get format fountain-export-replacements))
+                                    (replacement
+                                     (alist-get (intern key) format-alist)))
+                               ;; If a replacement is found, use its value,
+                               ;; otherwise insert and empty string.
+                               (if replacement (symbol-value replacement) ""))))))
+                       template t t)))
+              template)
+          ;; If there's no template, discard the string.
+          ""))))
 
 (defun fountain-export-region (beg end format &optional snippet)
   "Return an export string of region between BEG and END in FORMAT.
@@ -2038,27 +1999,34 @@ If exporting a standalone document, call
 included elements, otherwise walk the element tree calling
 `fountain-export-format-element' and concatenate the resulting
 strings."
-  ;; (fountain-outline-hide-level 0 t)
-  (let ((metadata (fountain-read-metadata))
-        (job (make-progress-reporter "Exporting..." 0 100))
-        list list-length string)
-    (setq end (save-excursion
-                (goto-char beg)
-                (if (re-search-forward fountain-script-end-regexp end t)
-                    (match-beginning 0)
-                  end))
-          list (fountain-parse-region beg end)
-          list-length (float (length list)))
-    ;; (push metadata list)
-    (while list
+  (let ((job (make-progress-reporter "Exporting..."))
+        tree string)
+    ;; Search for script end point and reset END.
+    (save-excursion
+      (goto-char beg)
+      (if (re-search-forward fountain-end-regexp end t)
+          (setq end (match-beginning 0))))
+    ;; Parse the region to TREE.
+    (save-excursion
+      (setq tree (fountain-parse-region beg end)))
+    ;; If exporting a standalone document, list TREE inside a document element.
+    (unless (or snippet (not fountain-export-standalone))
+      (setq tree
+            (list (list 'document
+                        (append
+                         (list 'begin beg
+                               'end end
+                               'export t)
+                               (fountain-read-metadata))
+                        tree))))
+    ;; Walk through TREE, concatenating exported elements to STRING.
+    (while tree
       (setq string
-            (concat string (fountain-export-element (pop list) format)))
-      (progress-reporter-update job (* (/ (- list-length
-                                             (length list))
-                                          list-length)
-                                       100)))
-      (progress-reporter-done job)
-      string))
+            (concat string (fountain-export-element (pop tree) format)))
+      (progress-reporter-update job))
+    (progress-reporter-done job)
+    ;; Return exported STRING.
+    string))
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   "Export current buffer or BUFFER to export format FORMAT.
