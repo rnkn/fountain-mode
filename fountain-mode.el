@@ -2477,6 +2477,28 @@ character codes, then format replacement is made."
 <Content>
 {{content}}\
 </Content>
+<TitlePage>
+<Content>
+<Paragraph Alignment=\"Center\">
+<Text>{{title}}</Text>
+</Paragraph>
+<Paragraph Alignment=\"Center\">
+<Text></Text>
+</Paragraph>
+<Paragraph Alignment=\"Center\">
+<Text>{{credit}}</Text>
+</Paragraph>
+<Paragraph Alignment=\"Center\">
+<Text></Text>
+</Paragraph>
+<Paragraph Alignment=\"Center\">
+<Text>{{author}}</Text>
+</Paragraph>
+<Paragraph Alignment=\"Left\">
+<Text>{{contact-template}}</Text>
+</Paragraph>
+</Content>
+</TitlePage>
 </FinalDraft>")
     (section "{{content}}")
     (section-heading nil)
