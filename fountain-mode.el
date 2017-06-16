@@ -1777,17 +1777,15 @@ specify a different filename."
      :tag "Fountain"
      :ext "fountain"
      :template fountain-export-fountain-template
-     :hook fountain-export-fountain-hook))
-    ;; (txt
-    ;;  :tag "plaintext"
-    ;;  :ext ".txt"
-    ;;  :template fountain-export-txt-template
-    ;;  :hook fountain-export-txt-hook)
-    ;; (ps
-    ;;  :tag "PostScript"
-    ;;  :ext ".ps"
-    ;;  :template fountain-export-ps-template
-    ;;  :hook fountain-export-ps-hook))
+     :hook fountain-export-fountain-hook)
+    (txt
+     :tag "plaintext"
+     :ext ".txt"
+     :hook fountain-export-txt-hook)
+    (ps
+     :tag "PostScript"
+     :ext ".ps"
+     :hook fountain-export-ps-hook))
   "Association list of export formats and their properties.
 Takes the form:
 
