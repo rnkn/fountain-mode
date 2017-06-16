@@ -3884,7 +3884,6 @@ keywords suitable for Font Lock."
     ;; exporting commands
     (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
     (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
-    (define-key map (kbd "C-c C-e l") #'fountain-export-buffer-to-latex)
     (define-key map (kbd "C-c C-e d") #'fountain-export-buffer-to-fdx)
     (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
     (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
@@ -4027,7 +4026,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      ["Default" fountain-export-default]
      "---"
      ["Buffer to HTML" fountain-export-buffer-to-html]
-     ["Buffer to LaTeX" fountain-export-buffer-to-latex]
      ["Buffer to Final Draft" fountain-export-buffer-to-fdx]
      ["Buffer to Fountain" fountain-export-buffer-to-fountain]
      "---"
