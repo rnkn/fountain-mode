@@ -1651,7 +1651,13 @@ Note that comments (boneyard) are never included."
 (defcustom fountain-export-standalone
   t
   "If non-nil, export a standalone document.
-Otherwise export a snippet."
+
+A standalone document is formatted with the export format's
+document template in `fountain-export-templates'.
+
+If nil, export snippet, which only formats each element. This is
+useful when exporting parts of a script for inclusion in another
+document."
   :type 'boolean
   :group 'fountain-export)
 
@@ -2716,7 +2722,7 @@ If POS is nil, use `point' instead."
     (goto-char insert-point)
     (if folded
         (outline-hide-subtree))
-    ;; remove temp newline
+    ;; Remove temporary newline.
     (if hanging-line
         (save-excursion
           (goto-char (point-max))
@@ -3219,13 +3225,11 @@ then make the changes desired."
   (interactive "P")
   (save-excursion
     (save-restriction
-      ;; first expand the region
       (widen)
       (let ((start (make-marker))
             (end (make-marker))
-            ;; create progress report
             (job (make-progress-reporter "Refreshing continued dialog...")))
-        ;; set START and END markers since buffer contents will change
+        ;; Set START and END markers since buffer contents will change.
         (set-marker start
                     (cond (arg (point-min))
                           ((use-region-p)
