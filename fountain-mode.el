@@ -2552,23 +2552,26 @@ credit: {{credit}}
 author: {{author}}
 date: {{date}}
 contact:
-    {{contact-template}}
+  {{contact-template}}
+
 
 {{content}}")
     (section "{{content}}")
-    (section-heading "{{content}}\n\n")
+    (section-heading "{{level}}{{content}}\n\n")
     (scene "{{content}}")
     (scene-heading "{{forced}}{{content}}\n\n")
+    (dual-dialog "{{content}}\n")
     (dialog "{{content}}\n")
     (character "{{forced}}{{content}}{{dual-dialog}}\n")
     (paren "{{content}}\n")
     (lines "{{content}}\n")
     (trans "{{forced}}{{content}}\n\n")
     (action "{{forced}}{{content}}\n\n")
-    (page-break "===\n\n")
+    (page-break "==={{content}}\n\n")
     (synopsis "= {{content}}\n\n")
     (note "[[ {{content}} ]]\n\n")
-    (center "> {{content}} <"))
+    (center "> {{content}} <")
+    (include "{{content}}"))
   "Association list of element templates for exporting to Fountain.
 Takes the form:
 
