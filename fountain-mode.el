@@ -1894,13 +1894,21 @@ whitespace is converted to dashes. e.g.
       (character (right " ^"))))))
 
 (defconst fountain-export-replacements
-  '((html
-     (emacs-version . emacs-version)
-     (fountain-version . fountain-version)
-     (page-size . fountain-export-page-size)
-     (font . fountain-export-font)
-     (more . fountain-export-more-dialog-string)
-     (contd . fountain-continued-dialog-string))))
+  '((ps
+     (title-template fountain-export-ps-title-template))
+    (fdx
+     (title-template fountain-export-fdx-title-template))
+    (html
+     (emacs-version emacs-version)
+     (fountain-version fountain-version)
+     (page-size (symbol-name fountain-export-page-size))
+     (font fountain-export-font)
+     (title-template fountain-export-html-title-template)
+     (scene-heading-spacing
+      (if (memq 'double-space fountain-export-scene-heading-format)
+          "2em" "1em"))
+     (more fountain-export-more-dialog-string)
+     (contd fountain-continued-dialog-string))))
 
 (defun fountain-export-element (element format)
   "Return a formatted string from ELEMENT according to FORMAT.
@@ -1957,6 +1965,7 @@ following order:
                        (lambda (match)
                          ;; Find KEY and corresponding VALUE.
                          (let* ((key (match-string 1 match))
+                                (key-in-plist (memq key plist))
                                 (value (plist-get plist (intern key))))
                            (cond
                             ;; If KEY is "content", replace with STRING.
@@ -1966,9 +1975,10 @@ following order:
                             ;; with VALUE.
                             ((stringp value)
                              (fountain-export-format-string value format))
-                            ;; If there is a KEY, attempt conditional
-                            ;; replacement.
-                            (key
+                            ;; If KEY's VALUE is not a string, but still in
+                            ;; PLIST, attempt conditional replacement based on
+                            ;; VALUE.
+                            (key-in-plist
                              (let* ((format-alist
                                      (alist-get format fountain-export-conditional-replacements))
                                     (key-alist
@@ -1976,16 +1986,17 @@ following order:
                                     (type-alist
                                      (or (alist-get type key-alist)
                                          (alist-get t key-alist))))
+                               ;; If KEY's VALUE is nil, insert an empty string.
                                (or (car (alist-get value type-alist)) "")))
-                            ;; Otherwise, try for symbol replacements.
+                            ;; Otherwise, attempt eval replacements.
                             (t
                              (let* ((format-alist
                                      (alist-get format fountain-export-replacements))
                                     (replacement
-                                     (alist-get (intern key) format-alist)))
+                                     (car (alist-get (intern key) format-alist))))
                                ;; If a replacement is found, use its value,
                                ;; otherwise insert and empty string.
-                               (if replacement (symbol-value replacement) ""))))))
+                               (if replacement (eval replacement) ""))))))
                        template t t)))
               template)
           ;; If there's no template, discard the string.
