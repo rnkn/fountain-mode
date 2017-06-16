@@ -1683,10 +1683,10 @@ Passed to `format' with export format as single variable."
   'fountain-export-include-elements "3.0.0")
 
 (defcustom fountain-export-page-size
-  "letter"
+  'letter
   "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" "letter")
-                (const :tag "A4" "a4"))
+  :type '(radio (const :tag "US Letter" 'letter)
+                (const :tag "A4" 'a4))
   :group 'fountain-export)
 
 (defcustom fountain-export-font
