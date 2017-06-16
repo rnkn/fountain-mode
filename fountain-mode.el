@@ -2375,18 +2375,23 @@ Command acts on current buffer or BUFFER."
 <div class=\"menu\">Aa</div>
 </section>
 </body>")
-     (section-heading "<a href=\"#{{slugify}}\"><p class=\"section-heading\" id=\"{{slugify}}\">{{content}}</p></a>\n")
-     (scene-heading "<a href=\"#{{scene-number}}\"><p class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</p></a>\n")
-     (character "<p class=\"character{{dual-dialog}}\">{{content}}</p>\n")
-     (dialog "<p class=\"dialog{{dual-dialog}}\">{{content}}</p>\n")
-     (paren "<p class=\"paren{{dual-dialog}}\">{{content}}</p>\n")
-     (trans "<p class=\"trans\">{{content}}</p>\n")
-     (action "<p class=\"action\">{{content}}</p>\n")
-     (page-break "<hr>\n")
-     (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
-     (note "<p class=\"note\">{{content}}</p>\n")
-     (center "<p class=\"center\">{{content}}</p>\n"))
-    "Association list of element templates for exporting to HTML.
+    (section "<section class=\"section\">\n{{content}}</section>\n")
+    (section-heading "<a href=\"#{{slugify}}\"><p class=\"section-heading\" id=\"{{slugify}}\">{{content}}</p></a>\n")
+    (scene "<section class=\"scene\">\n{{content}}</section>\n")
+    (scene-heading "<a href=\"#{{scene-number}}\"><p class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</p></a>\n")
+    (dual-dialog "<div class=\"dual-dialog\">\n{{content}}</div>\n")
+    (dialog "<div class=\"dialog\">\n{{content}}</div>\n")
+    (character "<p class=\"character\">{{content}}</p>\n")
+    (paren "<p class=\"paren\">{{content}}</p>\n")
+    (lines "<p class=\"lines\">{{content}}</p>\n")
+    (trans "<p class=\"trans\">{{content}}</p>\n")
+    (action "<p class=\"action\">{{content}}</p>\n")
+    (page-break "<a href=\"#p{{content}}\"><hr id=\"{{content}}\">\n<p class=\"page-number\">{{content}}</p></a>")
+    (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
+    (note "<p class=\"note\">{{content}}</p>\n")
+    (center "<p class=\"center\">{{content}}</p>\n")
+    (include "{{content}}"))
+  "Association list of element templates for exporting to HTML.
 Takes the form:
 
     ((ELEMENT TEMPLATE) ...)
