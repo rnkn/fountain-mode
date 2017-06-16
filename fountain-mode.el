@@ -1891,7 +1891,13 @@ whitespace is converted to dashes. e.g.
       (trans (t "> "))
       (action (t "!")))
      (dual-dialog
-      (character (right " ^"))))))
+      (character (right " ^")))
+     (level
+      (section-heading (1 "#")
+                       (2 "##")
+                       (3 "###")
+                       (4 "####")
+                       (5 "#####"))))))
 
 (defconst fountain-export-replacements
   '((ps
