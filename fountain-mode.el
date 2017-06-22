@@ -3158,7 +3158,7 @@ a scene heading."
   (if arg
       (save-excursion
         (forward-line 0)
-        (insert-char ?.)))
+        (insert ".")))
   (upcase-region (line-beginning-position) (line-end-position)))
 
 (defun fountain-upcase-line-and-newline (&optional arg)
@@ -3170,9 +3170,9 @@ a scene heading."
       (unless (fountain-match-scene-heading)
         (save-excursion
           (forward-line 0)
-          (insert-char ?.))))
+          (insert "."))))
   (upcase-region (line-beginning-position) (point))
-  (insert-char ?\n))
+  (newline))
 
 (defun fountain-delete-comments-in-region (beg end)
   "Delete comments in region between BEG and END."
@@ -3218,13 +3218,13 @@ a scene heading."
   (widen)
   (when (outline-back-to-heading)
     (forward-line 1)
-    (unless (bolp) (insert-char ?\n))
+    (or (bolp) (newline))
     (unless (and (fountain-blank-p)
                  (save-excursion
                    (forward-line 1)
                    (fountain-blank-p)))
       (save-excursion
-        (insert-char ?\n)))
+        (newline)))
     (insert "= ")
     (if (outline-invisible-p) (fountain-outline-cycle))))
 
@@ -3244,7 +3244,7 @@ ARG (\\[universal-argument]), only insert note delimiters."
                 (forward-line 1)
                 (fountain-blank-p))
         (save-excursion
-          (insert-char ?\n)))
+          (newline)))
       (comment-indent)
       (insert
        (replace-regexp-in-string
