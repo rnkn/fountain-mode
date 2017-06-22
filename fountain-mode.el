@@ -1699,7 +1699,7 @@ Passed to `format' with export format as single variable."
 (defcustom fountain-export-font
   "Courier"
   "Font to use when exporting."
-  :type '(string :tag "Font"))
+  :type '(string :tag "Font")
   :group 'fountain-export)
 
 (defcustom fountain-export-contact-align-right
