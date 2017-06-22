@@ -1326,7 +1326,7 @@ within left-side dual dialogue, and nil otherwise."
           (match-beginning 0)
         end))))
 
-(defun fountain-parse-section (match-data &optional export include-elements)
+(defun fountain-parse-section (match-data &optional export include-elements job)
   "Return an element list for matched section heading."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
@@ -1343,7 +1343,7 @@ within left-side dual dialogue, and nil otherwise."
          (end (fountain-parse-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 section-heading) 'end))
-    (setq content (fountain-parse-region (point) end include-elements))
+    (setq content (fountain-parse-region (point) end include-elements job))
     (list 'section
           (list 'begin beg
                 'end end
@@ -1351,7 +1351,7 @@ within left-side dual dialogue, and nil otherwise."
                 'export t)
           (cons section-heading content))))
 
-(defun fountain-parse-scene (match-data &optional export include-elements)
+(defun fountain-parse-scene (match-data &optional export include-elements job)
   "Return an element list for matched scene heading at point.
 Includes child elements."
   (set-match-data match-data)
@@ -1375,7 +1375,7 @@ Includes child elements."
          (end (fountain-parse-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 scene-heading) 'end))
-    (setq content (fountain-parse-region (point) end include-elements))
+    (setq content (fountain-parse-region (point) end include-elements job))
     (list 'scene
           (list 'begin beg
                 'end end
@@ -1384,7 +1384,7 @@ Includes child elements."
                 'export t)
           (cons scene-heading content))))
 
-(defun fountain-parse-dialog (match-data &optional export include-elements)
+(defun fountain-parse-dialog (match-data &optional export include-elements job)
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
@@ -1411,7 +1411,7 @@ Includes child elements."
                       'end end
                       'dual dual
                       'export t)
-                (cons character (fountain-parse-region (point) end include-elements))))
+                (cons character (fountain-parse-region (point) end include-elements job))))
     ;; If at the first (left) character of dual dialogue, parse a dual-dialogue
     ;; tree, containing dialogue trees.
     (if (eq dual 'left)
@@ -1543,7 +1543,7 @@ Includes child elements."
                 'starts-new-page (fountain-starts-new-page))
           string)))
 
-(defun fountain-parse-element (&optional include-elements)
+(defun fountain-parse-element (&optional include-elements job)
   "Call appropropriate element parsing function for matched element at point."
   (cond
    ((fountain-match-metadata)
@@ -1551,13 +1551,13 @@ Includes child elements."
      (match-data) (memq 'title-page include-elements)))
    ((fountain-match-section-heading)
     (fountain-parse-section
-     (match-data) (memq 'section-heading include-elements) include-elements))
+     (match-data) (memq 'section-heading include-elements) include-elements job))
    ((fountain-match-scene-heading)
     (fountain-parse-scene
-     (match-data) (memq 'scene-heading include-elements) include-elements))
+     (match-data) (memq 'scene-heading include-elements) include-elements job))
    ((fountain-match-character)
     (fountain-parse-dialog
-     (match-data) (memq 'character include-elements) include-elements))
+     (match-data) (memq 'character include-elements) include-elements job))
    ((fountain-match-dialog)
     (fountain-parse-lines
      (match-data) (memq 'lines include-elements)))
@@ -1604,19 +1604,21 @@ moves to property value \"end\" of element."
                     fountain-export-include-elements)
                    (car fountain-export-include-elements)))))
   (goto-char beg)
-  (unless job
-    (setq job (make-progress-reporter "Parsing...")))
-  (let (list)                      ; FIXME: make sure export funs parse metadata
+  (let (list job-working)
+    (if job
+        (setq job-working t)
+      (setq job (make-progress-reporter "Parsing...")))
     (while (< (point) (min end (point-max)))
       (while (or (looking-at "\n*\s?\n")
+                 (fountain-match-metadata)
                  (fountain-match-comment))
         (goto-char (match-end 0)))
-      (if (< (point) end)
-          (let ((element (fountain-parse-element include-elements)))
+      (if (< (point) (min end (point-max)))
+          (let ((element (fountain-parse-element include-elements job)))
             (push element list)
             (goto-char (plist-get (nth 1 element) 'end))))
       (progress-reporter-update job))
-    (progress-reporter-done job)
+    (unless job-working (progress-reporter-done job))
     (reverse list)))
 
 
