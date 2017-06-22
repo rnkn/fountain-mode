@@ -1616,7 +1616,7 @@ moves to property value \"end\" of element."
                  (fountain-match-metadata)
                  (fountain-match-comment))
         (goto-char (match-end 0)))
-      (if (< (point) (min end (point-max)))
+      (if (< (point) end)
           (let ((element (fountain-parse-element include-elements job)))
             (push element list)
             (goto-char (plist-get (nth 1 element) 'end))))
