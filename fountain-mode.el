@@ -1205,18 +1205,23 @@ comments."
       (forward-line 0)
       (looking-at fountain-include-regexp))))
 
-(defun fountain-include-find-file (&optional same-window noselect)
+(defun fountain-include-find-file (&optional arg)
+  "\\<fountain-mode-map>Find included file at point.
+
+If called with ARG (\\[universal-argument] \\[fountain-include-find-file]), find file in same window,
+otherwise find file in other window.
+
+If called noninteractively, find file without selecting window."
   (interactive "P")
   (if (and (fountain-match-include)
            (save-match-data
              (string-match "include:" (match-string 1))))
       (let ((filename (expand-file-name (match-string 2))))
-        (cond (same-window
-               (find-file filename))
-              (noselect
-               (find-file-noselect filename))
-              (t
-               (find-file-other-window filename))))))
+        (if (called-interactively-p)
+            (if arg
+                (find-file filename)
+              (find-file-other-window filename))
+          (find-file-noselect filename)))))
 
 
 ;;; Parsing
@@ -1508,7 +1513,7 @@ Includes child elements."
         (end (match-end 0))
         content)
     (goto-char beg)
-    (with-current-buffer (fountain-include-find-file nil t)
+    (with-current-buffer (fountain-include-find-file nil)
       (setq content (fountain-parse-region (point-min) (point-max))))
     (list 'include
           (list 'begin beg
