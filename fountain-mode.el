@@ -1329,19 +1329,19 @@ within left-side dual dialogue, and nil otherwise."
 (defun fountain-parse-section (match-data &optional export include-elements)
   "Return an element list for matched section heading."
   (set-match-data match-data)
-  (let ((section-heading
-         (list 'section-heading
-               (list 'begin (match-beginning 0)
-                     'end (match-end 0)
-                     'level (save-excursion
-                              (goto-char (match-beginning 0))
-                              (funcall outline-level))
-                     'export (if export t))
-               (match-string-no-properties 3)))
-        (beg (match-beginning 0))
-        (starts-new-page (fountain-starts-new-page))
-        (end (fountain-parse-end-of-subtree beg))
-        content)
+  (let* ((beg (match-beginning 0))
+         (starts-new-page (fountain-starts-new-page))
+         (section-heading
+          (list 'section-heading
+                (list 'begin (match-beginning 0)
+                      'end (match-end 0)
+                      'level (save-excursion
+                               (goto-char (match-beginning 0))
+                               (funcall outline-level))
+                      'export (if export t))
+                (match-string-no-properties 3)))
+         (end (fountain-parse-end-of-subtree beg))
+         content)
     (goto-char (plist-get (nth 1 section-heading) 'end))
     (setq content (fountain-parse-region (point) end include-elements))
     (list 'section
