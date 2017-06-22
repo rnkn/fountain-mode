@@ -1798,6 +1798,50 @@ Takes the form:
 
     (FORMAT KEYWORD PROPERTY)")
 
+(defvar fountain-elements
+  '((section-heading
+     :tag "Section Heading"
+     :fill fountain-fill-section-heading)
+    (scene-heading
+     :tag "Scene Heading"
+     :fill fountain-fill-scene-heading)
+    (action
+     :tag "Action"
+     :fill fountain-fill-action)
+    (character
+     :tag "Character Name"
+     :fill fountain-fill-character)
+    (lines
+     :tag "Dialogue"
+     :fill fountain-fill-dialog)
+    (paren
+     :tag "Parenthetical"
+     :fill fountain-fill-paren)
+    (trans
+     :tag: "Transition"
+     :fill fountain-fill-trans)
+    (center
+     :tag "Center Text"
+     :fill fountain-fill-action)
+    (page-break
+     :tage "Page Break")
+    (synopsis
+     :tag "Synopsis"
+     :fill fountain-fill-action)
+    (note
+     :tag "Note"
+     :fill fountain-fill-action)
+    (note
+     :tag "Note"
+     :fill fountain-fill-note))
+  "Association list of Fountain elements and their properties.
+Includes references to various functions and variables.
+
+Takes the form:
+
+    (ELEMENT KEYWORD PROPERTY)")
+
+
 (define-widget 'fountain-element-list-type 'lazy
   "Customize widget for Fountain templates."
   :offset 4
