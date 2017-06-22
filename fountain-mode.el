@@ -1788,12 +1788,16 @@ specify a different filename."
     (txt
      :tag "plaintext"
      :ext ".txt"
+     :fill t
+     :template fountain-export-txt-template
      :hook fountain-export-txt-hook)
     (ps
      :tag "PostScript"
      :ext ".ps"
+     :fill t
      :hook fountain-export-ps-hook))
   "Association list of export formats and their properties.
+
 Takes the form:
 
     (FORMAT KEYWORD PROPERTY)")
@@ -1965,20 +1969,20 @@ whitespace is converted to dashes. e.g.
      (more fountain-export-more-dialog-string)
      (contd fountain-continued-dialog-string))))
 
-(defun fountain-export-element (element format)
-  "Return a formatted string from ELEMENT according to FORMAT.
+(defun fountain-export-element (element-list format)
+  "Return a formatted string from ELEMENT-LIST according to FORMAT.
 
-Break ELEMENT into TYPE, PLIST and CONTENT.
+Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT.
 
 If CONTENT is a string and PLIST property 'export is non-nil:
 
-Check if TYPE corresponds to a TEMPLATE in
+Check if ELEMENT corresponds to a TEMPLATE in
 `fountain-export-templates'
 
-If PLIST property `export' is non-nil, check if TYPE corresponds
-to a TEMPLATE in `fountain-export-templates' for FORMAT. If so,
-replace matches of `fountain-template-key-regexp' in the
-following order:
+If PLIST property `export' is non-nil, check if ELEMENT
+corresponds to a TEMPLATE in `fountain-export-templates' for
+FORMAT. If so, replace matches of `fountain-template-key-regexp'
+in the following order:
 
     1. {{content}} is replaced with CONTENT.
     2. If KEY corresponds to a string property in PLIST then {{KEY}} is
@@ -1986,76 +1990,102 @@ following order:
     3. If KEY corresponds with remaining replacement conditions then {{KEY}} is
        replaced with that string.
     4. If none of the above, {{KEY}} is replaced with an empty string."
-  ;; Break ELEMENT into TYPE, PLIST and CONTENT.
-  (let ((type (car element))
-        (plist (nth 1 element))
-        (content (nth 2 element))
-        string template)
+  ;; Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT. Find the FORMAT-PLIST.
+  (let ((element (car element-list))
+        (plist (nth 1 element-list))
+        (content (nth 2 element-list))
+        (format-plist (alist-get format fountain-export-formats))
+        template-alist template string)
     (cond
-     ;; If CONTENT is a string, simply format and set it to STRING.
-     ((stringp content)
-      (setq string (fountain-export-format-string content format)))
-     ;; If CONTENT is a list, work through the list binding each ELEMENT and
-     ;; recursively calling this function.
+     ;; If CONTENT is a string, and included in export, format STRING.
+     ((and (stringp content)
+           (plist-get plist 'export))
+      (setq string (fountain-export-format-string content format))
+      (when (plist-get format-plist :fill)
+        (with-temp-buffer
+          (insert string)
+          (let ((var (symbol-value
+                      (plist-get (alist-get element fountain-elements) :fill))))
+            (setq left-margin (car var)
+                  fill-column (+ left-margin (cdr var)))
+            ;; Replace emphasis syntax with face text propoerties (before performing fill).
+            ;;
+            ;; (dolist (var '((fountain-italic-regexp italic)
+            ;;                (fountain-bold-regexp bold)
+            ;;                (fountain-underline-regexp underline)))
+            ;;   (while (re-search-forward (symbol-value (car var)) nil t)
+            ;;     (put-text-property (match-beginning 3) (match-end 3) 'face (cadr var))
+            ;;     (delete-region (match-beginning 4) (match-end 4))
+            ;;     (delete-region (match-beginning 2) (match-end 2))))
+            ;;
+            ;; Fill the buffer and return it as a string.
+            (fill-region (point-min) (point-max)))
+          (setq string (buffer-string)))))
+     ;; If CONTENT is a list, work through the list binding each
+     ;; CHILD-ELEMENT-LIST and recursively calling this function.
      ((listp content)
-      (dolist (element content)
+      (dolist (child-element-list content)
         (setq string
               (concat string
-                      (fountain-export-element element format))))))
-    ;; Set export template.
-    (let ((template-alist
-           (symbol-value
-            (plist-get (alist-get format fountain-export-formats)
-                       :template))))
-      (setq template (car (alist-get type template-alist))))
-    ;; If a template exists and the 'export property is non-nil, create a
-    ;; temporary buffer and insert template.
-    (if (plist-get plist 'export)
-        (if template
-            (progn
-              (while (string-match fountain-template-key-regexp template)
-                (setq template
-                      (replace-regexp-in-string
-                       fountain-template-key-regexp
-                       (lambda (match)
-                         ;; Find KEY and corresponding VALUE.
-                         (let* ((key (match-string 1 match))
-                                (key-in-plist (memq key plist))
-                                (value (plist-get plist (intern key))))
-                           (cond
-                            ;; If KEY is "content", replace with STRING.
-                            ((string= key "content")
-                             string)
-                            ;; If KEY's VALUE is a string, format and replace
-                            ;; with VALUE.
-                            ((stringp value)
-                             (fountain-export-format-string value format))
-                            ;; If KEY's VALUE is not a string, but still in
-                            ;; PLIST, attempt conditional replacement based on
-                            ;; VALUE.
-                            (key-in-plist
-                             (let* ((format-alist
-                                     (alist-get format fountain-export-conditional-replacements))
-                                    (key-alist
-                                     (alist-get (intern key) format-alist))
-                                    (type-alist
-                                     (or (alist-get type key-alist)
-                                         (alist-get t key-alist))))
-                               ;; If KEY's VALUE is nil, insert an empty string.
-                               (or (car (alist-get value type-alist)) "")))
-                            ;; Otherwise, attempt eval replacements.
-                            (t
-                             (let* ((format-alist
-                                     (alist-get format fountain-export-replacements))
-                                    (replacement
-                                     (car (alist-get (intern key) format-alist))))
-                               ;; If a replacement is found, use its value,
-                               ;; otherwise insert and empty string.
-                               (if replacement (eval replacement) ""))))))
-                       template t t)))
-              template)
-          ;; If there's no template, discard the string.
-          ""))))
+                      (fountain-export-element child-element-list format)))))
+     (t
+      (setq string "")))
+    ;; Set the export template.
+    (setq template-alist (symbol-value
+                          (plist-get format-plist :template))
+          element-template (car (alist-get element template-alist)))
+    (cond
+     ;; If there is a TEMPLATE-ALIST and an ELEMENT-TEMPLATE, replace template
+     ;; keys in that template.
+     ((and template-alist element-template)
+      (while (string-match fountain-template-key-regexp element-template)
+        (setq element-template
+              (replace-regexp-in-string
+               fountain-template-key-regexp
+               (lambda (match)
+                 ;; Find KEY and corresponding VALUE.
+                 (let* ((key (match-string 1 match))
+                        (value (plist-get plist (intern key))))
+                   (cond
+                    ;; If KEY is "content", replace with STRING.
+                    ((string= key "content")
+                     string)
+                    ;; If KEY's VALUE is a string, format and replace
+                    ;; with VALUE.
+                    ((stringp value)
+                     (fountain-export-format-string value format))
+                    ;; If KEY's VALUE is not a string, but still in
+                    ;; PLIST, attempt conditional replacement based on
+                    ;; VALUE.
+                    ((memq key plist)
+                     (let* ((format-alist
+                             (alist-get format fountain-export-conditional-replacements))
+                            (key-alist
+                             (alist-get (intern key) format-alist))
+                            (type-alist
+                             (or (alist-get element key-alist)
+                                 (alist-get t key-alist))))
+                       ;; If KEY's VALUE corresponds to a replacement
+                       ;; string, insert that string, otherwise insert an
+                       ;; empty string.
+                       (or (car (alist-get value type-alist)) "")))
+                    ;; Otherwise, attempt expression replacements.
+                    (t
+                     (let* ((format-alist
+                             (alist-get format fountain-export-replacements))
+                            (replacement
+                             (car (alist-get (intern key) format-alist))))
+                       ;; If a replacement expression is found, evaluate it
+                       ;; for a string, otherwise insert an empty string.
+                       (if replacement (eval replacement) ""))))))
+               element-template t t)))
+      (setq string element-template))
+     ;; If there's no ELEMENT-TEMPLATE for element in TEMPLATE-ALIST, discard
+     ;; STRING.
+     (template-alist
+      (setq string "")))
+    ;; Return the string.
+    (or string "")))
 
 (defun fountain-export-region (beg end format &optional snippet)
   "Return an export string of region between BEG and END in FORMAT.
