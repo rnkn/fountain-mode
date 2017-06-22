@@ -1934,7 +1934,7 @@ whitespace is converted to dashes. e.g.
                            :replace))))
   (dolist (var alist string)
     (setq string (replace-regexp-in-string
-                  (car var) (cadr var) string)))))
+                  (car var) (cadr var) string t)))))
 
 (defconst fountain-export-conditional-replacements
   '((fdx
