@@ -1289,28 +1289,14 @@ within left-side dual dialogue, and nil otherwise."
                            (stringp (match-string 5))))
                'left))))))
 
-(defun fountain-starts-new-page (&optional limit)
+(defun fountain-starts-new-page (&optional limit) ; FIXME: implement LIMIT
   (save-excursion
     (save-match-data
       (save-restriction
         (widen)
         (forward-line 0)
         (skip-chars-backward "\n\s\t")
-        (fountain-match-page-break))))) ; FIXME: implement LIMIT
-
-(defun fountain-parse-metadata (match-data &optional export)
-  (let ((beg (match-beginning 0))
-        (metadata (fountain-read-metadata)))
-    (list 'metadata
-          (append
-           (list 'begin beg
-                 'end (save-excursion
-                        (goto-char beg)
-                        (re-search-forward fountain-blank-regexp nil 'move)
-                        (skip-chars-backward "\n\s\t")
-                        (point))
-                 'export (if export t))
-           metadata))))
+        (fountain-match-page-break)))))
 
 (defun fountain-parse-end-of-subtree (beg)
   (save-excursion
@@ -1546,9 +1532,6 @@ Includes child elements."
 (defun fountain-parse-element (&optional include-elements job)
   "Call appropropriate element parsing function for matched element at point."
   (cond
-   ((fountain-match-metadata)
-    (fountain-parse-metadata
-     (match-data) (memq 'title-page include-elements)))
    ((fountain-match-section-heading)
     (fountain-parse-section
      (match-data) include-elements job))
