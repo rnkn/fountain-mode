@@ -1771,18 +1771,18 @@ specify a different filename."
 (defvar fountain-export-formats
   '((html
      :tag "HTML"
-     :ext "html"
+     :ext ".html"
      :template fountain-export-html-template
      :replace fountain-export-html-replace-alist
      :hook fountain-export-html-hook)
     (fdx
      :tag "Final Draft"
-     :ext "fdx"
+     :ext ".fdx"
      :template fountain-export-fdx-template
      :hook fountain-export-fdx-hook)
     (fountain
      :tag "Fountain"
-     :ext "fountain"
+     :ext ".fountain"
      :template fountain-export-fountain-template
      :hook fountain-export-fountain-hook)
     (txt
@@ -1854,9 +1854,9 @@ format tag."
          (ext (plist-get alist :ext)))
     (with-current-buffer (or buffer (current-buffer))
       (cond (fountain-export-use-title-as-filename
-             (concat (plist-get (fountain-read-metadata) 'title) "." ext))
+             (concat (plist-get (fountain-read-metadata) 'title) ext))
             ((buffer-file-name)
-             (concat (file-name-base (buffer-file-name)) "." ext))
+             (concat (file-name-base (buffer-file-name)) ext))
             (t
              (format fountain-export-buffer-name tag))))))
 
