@@ -1326,7 +1326,7 @@ within left-side dual dialogue, and nil otherwise."
           (match-beginning 0)
         end))))
 
-(defun fountain-parse-section (match-data &optional export include-elements job)
+(defun fountain-parse-section (match-data &optional include-elements job)
   "Return an element list for matched section heading."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
@@ -1338,7 +1338,7 @@ within left-side dual dialogue, and nil otherwise."
                       'level (save-excursion
                                (goto-char (match-beginning 0))
                                (funcall outline-level))
-                      'export (if export t))
+                      'export t)
                 (match-string-no-properties 3)))
          (end (fountain-parse-end-of-subtree beg))
          content)
@@ -1351,7 +1351,7 @@ within left-side dual dialogue, and nil otherwise."
                 'export t)
           (cons section-heading content))))
 
-(defun fountain-parse-scene (match-data &optional export include-elements job)
+(defun fountain-parse-scene (match-data &optional include-elements job)
   "Return an element list for matched scene heading at point.
 Includes child elements."
   (set-match-data match-data)
@@ -1369,7 +1369,7 @@ Includes child elements."
                       'end (match-end 0)
                       'scene-number scene-number
                       'forced (stringp (match-string 2))
-                      'export (if export t)
+                      'export t
                       'starts-new-page starts-new-page)
                 (match-string-no-properties 3)))
          (end (fountain-parse-end-of-subtree beg))
@@ -1551,10 +1551,10 @@ Includes child elements."
      (match-data) (memq 'title-page include-elements)))
    ((fountain-match-section-heading)
     (fountain-parse-section
-     (match-data) (memq 'section-heading include-elements) include-elements job))
+     (match-data) include-elements job))
    ((fountain-match-scene-heading)
     (fountain-parse-scene
-     (match-data) (memq 'scene-heading include-elements) include-elements job))
+     (match-data) include-elements job))
    ((fountain-match-character)
     (fountain-parse-dialog
      (match-data) (memq 'character include-elements) include-elements job))
