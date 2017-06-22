@@ -1773,7 +1773,7 @@ specify a different filename."
      :tag "HTML"
      :ext ".html"
      :template fountain-export-html-template
-     :replace fountain-export-html-replace-alist
+     :replace fountain-export-html-replacements
      :hook fountain-export-html-hook)
     (fdx
      :tag "Final Draft"
@@ -2437,7 +2437,7 @@ calculated."
     :type 'fountain-element-list-type
     :group 'fountain-export)
 
-(defcustom fountain-export-html-replace-alist
+(defcustom fountain-export-html-replacements
   (backquote
    ((,fountain-comment-regexp "")
     ("&" "&amp;")
@@ -2800,13 +2800,13 @@ Display a message unless SILENT."
          (unless silent (message "Showing level %s headings" n))))
   (setq fountain-outline-cycle n))
 
-(defun fountain-outline-cycle (&optional arg)
+(defun fountain-outline-cycle (&optional arg) ; FIXME: document
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
     \\[fountain-outline-cycle]				If ARG is nil, cycle outline visibility of current
                     subtree and its children
     \\[universal-argument] \\[fountain-outline-cycle]			If ARG is 4, cycle outline visibility of buffer
-					(same as \\[fountain-outline-cycle-global])
+                    (same as \\[fountain-outline-cycle-global])
     \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		If ARG is 16, show all
     \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in
                     `fountain-outline-custom-level'"
