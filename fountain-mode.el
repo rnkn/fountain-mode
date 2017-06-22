@@ -1918,11 +1918,11 @@ whitespace is converted to dashes. e.g.
 
     Hello Wayne's World 2! -> hello-wanyes-world-2"
   (string-join
-    (split-string
-      (downcase
-        (replace-regexp-in-string "[^\.\n\s\t-_[:alnum:]]" "" string))
-      "[^[:alnum:]]+" t)
-    "-"))
+   (split-string
+    (downcase
+     (replace-regexp-in-string "[^\.\n\s\t-_[:alnum:]]" "" string))
+    "[^[:alnum:]]+" t)
+   "-"))
 
 (defun fountain-export-format-string (string format)
   "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
@@ -2028,6 +2028,8 @@ in the following order:
         (setq string
               (concat string
                       (fountain-export-element child-element-list format)))))
+     ;; Otherwise, CONTENT is either malformed, or not exported, then set and
+     ;; empty string.
      (t
       (setq string "")))
     ;; Set the export template.
@@ -2050,6 +2052,10 @@ in the following order:
                     ;; If KEY is "content", replace with STRING.
                     ((string= key "content")
                      string)
+                    ;; If KEY is "slugify", replace with slugified STRING.
+                    ((string= key "slugify")
+                     (save-match-data
+                       (fountain-slugify string)))
                     ;; If KEY's VALUE is a string, format and replace
                     ;; with VALUE.
                     ((stringp value)
