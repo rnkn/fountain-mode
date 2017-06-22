@@ -1557,7 +1557,10 @@ Includes child elements."
      (match-data) include-elements job))
    ((fountain-match-character)
     (fountain-parse-dialog
-     (match-data) (memq 'character include-elements) include-elements job))
+     (match-data) (or (memq 'character include-elements)
+                      (memq 'lines include-elements)
+                      (memq 'paren include-elements))
+     include-elements job))
    ((fountain-match-dialog)
     (fountain-parse-lines
      (match-data) (memq 'lines include-elements)))
