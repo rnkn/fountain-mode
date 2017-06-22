@@ -2172,6 +2172,64 @@ Command acts on current buffer or BUFFER."
 
 ;;; -> plaintext
 
+(defcustom fountain-export-txt-template
+  '((document "{{content}}")
+    (section "{{content}}")
+    (section-heading "{{content}}\n\n")
+    (scene "{{content}}")
+    (scene-heading "{{content}}\n\n")
+    (dual-dialog "{{content}}\n")
+    (dialog "{{content}}\n")
+    (character "{{content}}\n")
+    (paren "{{content}}\n")
+    (lines "{{content}}\n")
+    (trans "{{content}}\n\n")
+    (action "{{content}}\n\n")
+    (page-break "\n\n")
+    (synopsis "{{content}}\n\n")
+    (note "[ note: {{content}} ]\n\n")
+    (center "{{content}}")
+    (include "{{content}}"))
+  "Association list of element templates for exporting to Fountain.
+Takes the form:
+
+    ((ELEMENT TEMPLATE) ...)
+
+ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
+is the template with which to format the format string. If
+TEMPLATE is nil, the format string is passed as is without
+formatting. An empty string discards the format string and passes
+the empty string.
+
+Fountain ELEMENTs:
+
+    document            wrapper template for all content, see
+                        `fountain-export-standalone'
+    section             section string, including child elements
+    section-heading     section heading string, excluding syntax chars
+    scene               scene string, including child elements
+    scene-heading       scene heading string, excluing syntax chars
+    dialog              dialogue string, including child elements
+    dual-dialog         dual dialogue string, including child elements
+    character           character string, excluding syntax chars
+    paren               parenthetical string
+    lines               dialogue lines, up to end of dialogue block or
+                        next parenthetical
+    trans               transition string, excluding syntax chars
+    action              action string
+    page-break          page break, including forced page number
+    synopsis            synopsis string, excluding syntax chars
+    note                note string, excluding syntax chars
+    center              center text string, excluding syntax chars
+    include             inclusion string
+
+The format of TEMPLATE can include replacement keys in the form
+{{KEY}}. Each TEMPLATE should include the {{content}} key.
+
+If TEMPLATE is nil, the string is discarded."
+  :type 'fountain-element-list-type
+  :group 'fountain-export)
+
 (defcustom fountain-export-txt-hook
   nil
   "Hook run with export buffer on sucessful export to plaintext."
