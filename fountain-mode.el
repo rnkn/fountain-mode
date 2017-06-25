@@ -3321,21 +3321,25 @@ a scene heading."
     (while (re-search-forward fountain-comment-regexp end t)
       (delete-region (match-beginning 0) (match-end 0)))))
 
-;; (defun fountain-insert-alternate-character ()
-;;   "Insert the alternate character and newline.
-;; The alternate character is the second-last character within the
-;; scene."
-;;   (interactive)
-;;   (if (and (fountain-blank-p)
-;;            (save-excursion
-;;              (forward-line -1)
-;;              (fountain-blank-p)))
-;;       (let ((character (fountain-get-character -2 'scene)))
-;;         (if character
-;;             (insert character ?\n)
-;;           (message "No alternate character within scene")
-;;           (insert-char ?\n)))
-;;     (insert-char ?\n)))
+(defun fountain-insert-alternate-character ()
+  "Insert second-last character within the scene, and newline."
+  (interactive)
+  (let* ((n -1)
+         (character-1 (fountain-get-character n 'scene))
+         (character-2 character-1))
+    (while (and (stringp character-1)
+                (string= character-1 character-2))
+      (setq n (1- n)
+            character-2 (fountain-get-character n 'scene)))
+    (if character-2
+        (let ((x (save-excursion
+                   (skip-chars-backward "\s\n\t")
+                   (point))))
+          (delete-region x (point))
+          (newline 2)
+          (insert character-2))
+      (message "No alternate character within scene"))
+    (newline)))
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
