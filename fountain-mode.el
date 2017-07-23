@@ -4084,4 +4084,12 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
+
+;; Local Variables:
+;; coding: utf-8
+;; fill-column: 80
+;; indent-tabs-mode: nil
+;; require-final-newline: t
+;; End:
+
 ;;; fountain-mode.el ends here
