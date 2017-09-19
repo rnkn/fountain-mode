@@ -2557,9 +2557,9 @@ calculated."
     :type 'fountain-element-list-type
     :group 'fountain-export)
 
-(defcustom fountain-export-html-replacements
+(defvar fountain-export-html-replacements
   (backquote
-   ((,fountain-comment-regexp "")
+   ((,fountain-comment-regexp "")       ; FIXME: separate strip-comments fun?
     ("&" "&amp;")
     ("<" "&lt;")
     (">" "&gt;")
@@ -2585,9 +2585,7 @@ calculated."
 Replacements are made in sequential order. The sequence is
 important: first, characters that are special in the export
 format are sanitized, then escaped characters are converted to
-character codes, then format replacement is made."
-  :type '(repeat (group regexp (string :tag "Replacement")))
-  :group 'fountain-export)
+character codes, then format replacement is made.")
 
 (defcustom fountain-export-html-hook
   nil
