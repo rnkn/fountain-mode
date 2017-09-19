@@ -88,10 +88,6 @@ Bugs and Feature Requests
 
 Please raise an issue on [Issues](https://github.com/rnkn/fountain-mode/issues).
 
-- Emacs currently has a bug with `visual-line-mode` that produces erratic
-  navigation behavior when displaying very long lines. More information here:
-  <http://debbugs.gnu.org/cgi/bugreport.cgi?bug=23879>
-
 Roadmap
 -------
 
