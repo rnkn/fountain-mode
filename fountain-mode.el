@@ -1315,21 +1315,21 @@ within left-side dual dialogue, and nil otherwise."
         (skip-chars-backward "\n\s\t")
         (fountain-match-page-break)))))
 
-(defun fountain-parse-end-of-subtree (beg)
+(defun fountain-parse-goto-end-of-subtree (x)
   (save-excursion
-    (goto-char beg)
+    (goto-char x)
     (outline-end-of-subtree)
     (unless (eobp)
       (forward-char 1))
     (let ((end (point)))
-      (goto-char beg)
+      (goto-char x)
       (if (and (re-search-forward fountain-include-regexp end t)
                (save-match-data
                  (string-match "include:" (match-string 1))))
           (match-beginning 0)
         end))))
 
-(defun fountain-parse-section (match-data &optional include-elements job)
+(defun fountain-parse-section (match-data &optional export-elements job)
   "Return an element list for matched section heading."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
@@ -1343,10 +1343,10 @@ within left-side dual dialogue, and nil otherwise."
                                (funcall outline-level))
                       'export t)
                 (match-string-no-properties 3)))
-         (end (fountain-parse-end-of-subtree beg))
+         (end (fountain-parse-goto-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 section-heading) 'end))
-    (setq content (fountain-parse-region (point) end include-elements job))
+    (setq content (fountain-parse-region (point) end export-elements job))
     (list 'section
           (list 'begin beg
                 'end end
@@ -1354,7 +1354,7 @@ within left-side dual dialogue, and nil otherwise."
                 'export t)
           (cons section-heading content))))
 
-(defun fountain-parse-scene (match-data &optional include-elements job)
+(defun fountain-parse-scene (match-data &optional export-elements job)
   "Return an element list for matched scene heading at point.
 Includes child elements."
   (set-match-data match-data)
@@ -1375,10 +1375,10 @@ Includes child elements."
                       'export t
                       'starts-new-page starts-new-page)
                 (match-string-no-properties 3)))
-         (end (fountain-parse-end-of-subtree beg))
+         (end (fountain-parse-goto-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 scene-heading) 'end))
-    (setq content (fountain-parse-region (point) end include-elements job))
+    (setq content (fountain-parse-region (point) end export-elements job))
     (list 'scene
           (list 'begin beg
                 'end end
@@ -1387,7 +1387,7 @@ Includes child elements."
                 'export t)
           (cons scene-heading content))))
 
-(defun fountain-parse-dialog (match-data &optional export include-elements job)
+(defun fountain-parse-dialog (match-data &optional export export-elements job)
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
@@ -1414,7 +1414,7 @@ Includes child elements."
                       'end end
                       'dual dual
                       'export t)
-                (cons character (fountain-parse-region (point) end include-elements job))))
+                (cons character (fountain-parse-region (point) end export-elements job))))
     ;; If at the first (left) character of dual dialogue, parse a dual-dialogue
     ;; tree, containing dialogue trees.
     (if (eq dual 'left)
@@ -1436,7 +1436,7 @@ Includes child elements."
                 (cons first-dialog
                       ;; Parse the containing region.
                       (fountain-parse-region (plist-get (nth 1 first-dialog) 'end)
-                                             end include-elements))))
+                                             end export-elements job))))
       ;; Otherwise, return the first dialogue tree.
       first-dialog)))
 
@@ -1546,61 +1546,61 @@ Includes child elements."
                 'starts-new-page (fountain-starts-new-page))
           string)))
 
-(defun fountain-parse-element (&optional include-elements job)
+(defun fountain-parse-element (&optional export-elements job)
   "Call appropropriate element parsing function for matched element at point."
   (cond
    ((fountain-match-section-heading)
     (fountain-parse-section
-     (match-data) include-elements job))
+     (match-data) export-elements job))
    ((fountain-match-scene-heading)
     (fountain-parse-scene
-     (match-data) include-elements job))
+     (match-data) export-elements job))
    ((fountain-match-character)
     (fountain-parse-dialog
-     (match-data) (or (memq 'character include-elements)
-                      (memq 'lines include-elements)
-                      (memq 'paren include-elements))
-     include-elements job))
+     (match-data) (or (memq 'character export-elements)
+                      (memq 'lines export-elements)
+                      (memq 'paren export-elements))
+     export-elements job))
    ((fountain-match-dialog)
     (fountain-parse-lines
-     (match-data) (memq 'lines include-elements)))
+     (match-data) (memq 'lines export-elements)))
    ((fountain-match-paren)
     (fountain-parse-paren
-     (match-data) (memq 'paren include-elements)))
+     (match-data) (memq 'paren export-elements)))
    ((fountain-match-trans)
     (fountain-parse-trans
-     (match-data) (memq 'trans include-elements)))
+     (match-data) (memq 'trans export-elements)))
    ((fountain-match-center)
     (fountain-parse-center
-     (match-data) (memq 'center include-elements)))
+     (match-data) (memq 'center export-elements)))
    ((fountain-match-synopsis)
     (fountain-parse-synopsis
-     (match-data) (memq 'synopsis include-elements)))
+     (match-data) (memq 'synopsis export-elements)))
    ((fountain-match-note)
     (fountain-parse-note
-     (match-data) (memq 'note include-elements)))
+     (match-data) (memq 'note export-elements)))
    ((fountain-match-include)
     (fountain-parse-include
-     (match-data) (memq 'include include-elements)))
+     (match-data) (memq 'include export-elements)))
    ((fountain-match-page-break)
     (fountain-parse-page-break
-     (match-data) (memq 'page-break include-elements)))
+     (match-data) (memq 'page-break export-elements)))
    (t
     (fountain-match-action)
     (fountain-parse-action
-     (match-data) (memq 'action include-elements)))))
+     (match-data) (memq 'action export-elements)))))
 
-(defun fountain-parse-region (beg end &optional include-elements job)
+(defun fountain-parse-region (beg end &optional export-elements job) ; FIXME: needs temp buffer model
   "Return a list of parsed element lists in region between BEG and END.
 
-Use list INCLUDE-ELEMENTS to determine exported elements, or
+Use list EXPORT-ELEMENTS to determine exported elements, or
 create new list.
 
 Ignores blank lines, comments and metadata. Calls
 `fountain-parse-element' and adds element list to list, then
 moves to property value \"end\" of element."
-  (unless include-elements
-    (setq include-elements
+  (unless export-elements
+    (setq export-elements
           (cdr (or (assoc-string
                     (or (plist-get (fountain-read-metadata) 'format)
                         "screenplay")
@@ -1617,7 +1617,7 @@ moves to property value \"end\" of element."
                  (fountain-match-comment))
         (goto-char (match-end 0)))
       (if (< (point) end)
-          (let ((element (fountain-parse-element include-elements job)))
+          (let ((element (fountain-parse-element export-elements job)))
             (push element list)
             (goto-char (plist-get (nth 1 element) 'end))))
       (progress-reporter-update job))
