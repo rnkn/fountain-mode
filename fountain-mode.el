@@ -1267,6 +1267,27 @@ Value string remains a string. e.g.
                                      value)))))
         list))))
 
+(defun fountain-count-lines (beg end &optional element)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char beg)
+      (let ((x (point))
+            (line-count 0)
+            (line-width
+             (cdr (symbol-value
+                   (plist-get (alist-get (or element (fountain-element))
+                                         fountain-elements)
+                              :fill)))))
+        (while (< (point) end)
+          (while (< (point) (+ x line-width))
+            (forward-word 1))
+          (if (< (+ x line-width) (point))
+              (forward-word -1))
+          (setq x (point)
+                line-count (1+ line-count)))
+        line-count))))
+
 (defun fountain-dual-dialog (&optional x)
   "Non-nil if X, or point, is within dual dialogue.
 Returns \"right\" if within right-side dual dialogue, \"left\" if
