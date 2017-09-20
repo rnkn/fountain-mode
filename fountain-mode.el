@@ -790,27 +790,27 @@ To switch between these levels, customize the value of
   :group 'fountain-faces)
 
 (defface fountain-metadata-key
-  '((t (:inherit font-lock-type-face)))
+  '((t (:inherit font-lock-constant-face)))
   "Default face for metadata keys."
   :group 'fountain-faces)
 
 (defface fountain-metadata-value
-  '((t (:inherit font-lock-constant-face)))
+  '((t (:inherit font-lock-keyword-face)))
   "Default face for metadata values."
   :group 'fountain-faces)
 
 (defface fountain-page-break
-  '((t (:inherit fountain-comment)))
+  '((t (:inherit font-lock-constant-face)))
   "Default face for page breaks."
   :group 'fountain-faces)
 
 (defface fountain-page-number
-  '((t (:inherit font-lock-function-name-face)))
+  '((t (:inherit font-lock-warning-face)))
   "Default face for page numbers."
   :group 'fountain-faces)
 
 (defface fountain-scene-heading
-  '((t (:inherit font-lock-keyword-face)))
+  '((t (:inherit font-lock-function-name-face)))
   "Default face for scene headings."
   :group 'fountain-faces)
 
@@ -830,12 +830,12 @@ To switch between these levels, customize the value of
   :group 'fountain-faces)
 
 (defface fountain-section-heading
-  '((t (:inherit font-lock-function-name-face)))
+  '((t (:inherit font-lock-keyword-face)))
   "Default face for section headings."
   :group 'fountain-faces)
 
 (defface fountain-synopsis
-  '((t (:inherit font-lock-preprocessor-face)))
+  '((t (:inherit font-lock-type-face)))
   "Default face for synopses."
   :group 'fountain-faces)
 
