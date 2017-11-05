@@ -92,7 +92,7 @@ Bugs and Feature Requests
 
 Please raise an issue on [Issues](https://github.com/rnkn/fountain-mode/issues).
 
-- Emacs version prior to 26.1 have a bug with `visual-line-mode` that produces erratic
+- Emacs versions prior to 26.1 have a bug with `visual-line-mode` that produces erratic
   navigation behavior when displaying very long lines. More information here:
   <https://debbugs.gnu.org/23879>
 
