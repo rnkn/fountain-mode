@@ -11,8 +11,8 @@ format, visit <http://fountain.io>.
 
 ![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
 
-Pictured: *Big Fish* by John August in Fountain Mode (using [imenu-list][] and
-[Olivetti][] minor modes)
+Pictured: *Big Fish* by John August in Fountain Mode (using [imenu-list] and
+[Olivetti] minor modes)
 
 [imenu-list]: https://github.com/bmag/imenu-list "imenu-list"
 [olivetti]: https://github.com/rnkn/olivetti "Olivetti"
@@ -62,31 +62,39 @@ Installation
 ------------
 
 *For users on OS X with no experience with Emacs, see the
-[Absolute Beginner's Guide (OS X)][guide].*
+[Absolute Beginner's Guide (macOS)][guide].*
 
 The latest stable release of Fountain Mode is available via
 [MELPA-stable](http://stable.melpa.org/#/fountain-mode).
 
-Alternately, download the [latest release][], move the files into your
+Alternately, download the [latest release], move the files into your
 `load-path` and add the following line to your `.emacs` or `init.el` file:
 
     (require 'fountain-mode)
 
 If you prefer the latest but perhaps unstable version, install via
-[MELPA][], or clone the repository into your `load-path` and require as
+[MELPA], or clone the repository into your `load-path` and require as
 above:
 
     git clone https://github.com/rnkn/fountain-mode.git
 
-[guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(OS-X) "Absolute Beginner's Guide (OS X)"
-[melpa]: http://melpa.org/#/fountain-mode "MELPA"
-[melpa-stable]: http://stable.melpa.org/#/fountain-mode "MELPA-stable"
+Users of Debian ≥10 or Ubuntu ≥18.04 can install Fountain Mode with the following command:
+
+    sudo apt install elpa-fountain-mode
+
+[guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(macOS) "Absolute Beginner's Guide (macOS)"
+[melpa]: https://melpa.org/#/fountain-mode "MELPA"
+[melpa-stable]: https://stable.melpa.org/#/fountain-mode "MELPA-stable"
 [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
 Bugs and Feature Requests
 -------------------------
 
 Please raise an issue on [Issues](https://github.com/rnkn/fountain-mode/issues).
+
+- Emacs versions prior to 26.1 have a bug with `visual-line-mode` that produces erratic
+  navigation behavior when displaying very long lines. More information here:
+  <https://debbugs.gnu.org/23879>
 
 Roadmap
 -------
