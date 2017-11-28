@@ -1368,6 +1368,25 @@ If called noninteractively, find file without selecting window."
               (find-file-other-window filename))
           (find-file-noselect filename)))))
 
+(defun fountain-include-replace-in-region (start end)
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char end)
+      (setq end (point-marker))
+      (goto-char start)
+      (while (< (point) (min end (point-max)))
+        (when (fountain-match-include)
+          (replace-match
+            (save-match-data
+              (with-current-buffer (fountain-include-find-file)
+                (save-restriction
+                  (widen)
+                  (buffer-substring-no-properties (point-min) (point-max)))))
+           t t))
+        (forward-line 1)))))
+
 
 ;;; Parsing
 
