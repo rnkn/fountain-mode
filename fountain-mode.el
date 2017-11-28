@@ -1444,7 +1444,7 @@ Value string remains a string. e.g.
             (line-count 0)
             (line-width
              (cdr (symbol-value
-                   (plist-get (alist-get (or element (fountain-element))
+                   (plist-get (alist-get (or element (fountain-get-element))
                                          fountain-elements)
                               :fill)))))
         (while (< (point) end)
