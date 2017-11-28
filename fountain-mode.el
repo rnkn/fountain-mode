@@ -1456,15 +1456,15 @@ Value string remains a string. e.g.
                 line-count (1+ line-count)))
         line-count))))
 
-(defun fountain-dual-dialog (&optional x)
-  "Non-nil if point or X is within dual dialogue.
+(defun fountain-dual-dialog (&optional pos)
+  "Non-nil if point or POS is within dual dialogue.
 Returns \"right\" if within right-side dual dialogue, \"left\" if
 within left-side dual dialogue, and nil otherwise."
   (save-excursion
     (save-match-data
       (save-restriction
         (widen)
-        (if x (goto-char x))
+        (if pos (goto-char pos))
         (cond ((progn (fountain-forward-character 0 'dialog)
                       (and (fountain-match-character)
                            (stringp (match-string 5))))
@@ -1483,14 +1483,15 @@ within left-side dual dialogue, and nil otherwise."
         (skip-chars-backward "\n\r\s\t")
         (fountain-match-page-break)))))
 
-(defun fountain-parse-goto-end-of-subtree (x)
+(defun fountain-parse-end-of-subtree (&optional pos)
   (save-excursion
-    (goto-char x)
+    (f pos (goto-char pos))
     (outline-end-of-subtree)
     (unless (eobp)
       (forward-char 1))
     (let ((end (point)))
-      (goto-char x)
+      (goto-char pos)
+      ;; FIXME: kludge
       (if (and (re-search-forward fountain-include-regexp end t)
                (save-match-data
                  (string-match "include:" (match-string 1))))
