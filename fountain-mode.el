@@ -1770,6 +1770,89 @@ moves to property value \"end\" of element."
     (reverse list)))
 
 
+;;; Filling
+
+(defgroup fountain-fill ()
+  "Options for filling elements.
+
+Filling elements is used in exporting to text and PostScript, and
+in calculating page length for page locking and export."
+  :prefix "fountain-fill-"
+  :group 'fountain)
+
+(defcustom fountain-fill-section-heading
+  (cons 0 61)
+  "Cons cell of integers for indenting and filling section headings.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-scene-heading
+  (cons 0 61)
+  "Cons cell of integers for indenting and filling scene headings.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-action
+  (cons 0 61)
+  "Cons cell of integers for indenting and filling action.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-character
+  (cons 20 38)
+  "Cons cell of integers for indenting and filling character.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-paren
+  (cons 15 26)
+  "Cons cell of integers for indenting and filling parenthetical.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-dialog
+  (cons 10 35)
+  "Cons cell of integers for indenting and filling dialogue.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-trans
+  (cons 42 16)
+  "Cons cell of integers for indenting and filling transition.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-synopsis
+  (cons 0 61)
+  "Cons cell of integers for indenting and filling synopses.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+(defcustom fountain-fill-note
+  (cons 0 61)
+  "Cons cell of integers for indenting and filling notes.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width"))
+  :group 'fountain-fill)
+
+
 ;;; Exporting
 
 (defgroup fountain-export ()
