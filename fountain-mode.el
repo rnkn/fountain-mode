@@ -1201,6 +1201,142 @@ comments."
    (t 'action)))
 
 
+;;; Pages
+
+(defcustom fountain-page-max-lines
+  '((letter . 55) (a4 . 60))
+  "Integer representing maximum number of lines on a page.
+
+WARNING: if you change this option after locking pages in a
+script, you may get incorrect output."
+  :type '(choice integer
+                 (list (cons (const :tag "US Letter" letter) integer)
+                       (cons (const :tag "A4" a4) integer)))
+  :group 'fountain-page)
+
+(defun fountain-insert-page-break (&optional number)
+  "Insert a page break at appropriate place preceding point.
+NUMBER is an optional string to force the page number."
+  (interactive "sPage number (RET for none): ")
+  ;; Save a marker where we are.
+  (let ((pos (point-marker)))
+    (skip-chars-forward "\n\r\s\t")
+    (cond
+     ;; Check first if we're at a scene heading, and if so we can safely break
+     ;; before.
+     ((fountain-match-scene-heading)
+      (forward-line 0)
+      (insert-before-markers
+       (concat "==="
+               (if (< 0 (string-width number)) (concat "\s" number))
+               "\n\n")))
+     ;; If we're at a blank line, check for hanging transitions or center text
+     ;; and call recursively on those elements. Otherwise break page before.
+     ((fountain-blank-p)
+      (let ((x (point)))
+        (skip-chars-forward "\n\r\s\t")
+        (if (or (fountain-match-trans)
+                (fountain-match-center)
+                (fountain-match-synopsis))
+            (fountain-insert-page-break number)
+          (goto-char x)
+          (insert-before-markers
+           (concat "\n==="
+                   (if (< 0 (string-width number)) (concat "\s" number))
+                   "\n")))))
+     ;; If we're at a character, we can safely break before.
+     ((fountain-match-character)
+      (forward-line 0)
+      (insert-before-markers
+       (concat "==="
+               (if (< 0 (string-width number)) (concat "\s" number))
+               "\n\n")))
+     ;; If we're at a parenthetical, check if the previous line is a character.
+     ;; and if so call recursively on that element.
+     ((fountain-match-paren)
+      (forward-line 0)
+      (let ((x (point)))
+        (forward-char -1)
+        (if (fountain-match-character)
+            (fountain-insert-page-break number)
+          ;; Otherwise parenthetical is mid-dialogue, so get character name
+          ;; and break at this element.
+          (goto-char x)
+          (let ((name (fountain-get-character -1)))
+            (insert-before-markers
+             (concat
+              (unless (bolp) "\n")
+              fountain-export-more-dialog-string
+              "\n\n==="
+              (if (< 0 (string-width number)) (concat "\s" number))
+              "\n\n"
+              ;; Insert character name and continued dialogue string.
+              name "\s" fountain-continued-dialog-string "\n"))))))
+     ;; If we're at dialogue, skip over spaces then go to the beginning of the
+     ;; current sentence. This may move to character element, or back within
+     ;; dialogue. If previous line is a character or parenthetical, call
+     ;; recursively on that element. Otherwise, get character name and break
+     ;; page here.
+     ((fountain-match-dialog)
+      (skip-chars-forward "\s")
+      (if (not (looking-back (sentence-end) (save-excursion
+                                              (fountain-forward-character -1)
+                                              (point))))
+          (progn
+            (forward-sentence -1)
+            (fountain-insert-page-break number))
+        (let ((x (point)))
+          (forward-char -1)
+          (if (or (fountain-match-character)
+                  (fountain-match-paren))
+              (fountain-insert-page-break number))
+          (goto-char x)
+          (let ((name (fountain-get-character -1)))
+            (insert-before-markers
+             (concat
+              (unless (bolp) "\n")
+              fountain-export-more-dialog-string
+              "\n\n==="
+              (if (< 0 (string-width number)) (concat "\s" number))
+              "\n\n"
+              ;; Insert character name and continued dialogue string.
+              name "\s" fountain-continued-dialog-string "\n"))))))
+     ;; If we're at a transition or center text, skip backwards to previous
+     ;; element and call recursively on that element.
+     ((or (fountain-match-trans)
+          (fountain-match-center))
+      (skip-chars-backward "\n\r\s\t")
+      (forward-line 0)
+      (fountain-insert-page-break number))
+     ;; If we're at action, skip over spaces then go to the beginning of the
+     ;; current sentence. Then, try to skip back to the previous element and
+     ;; if it is a scene heading, call recursively on that element. Otherwise,
+     ;; break page here.
+     ((fountain-match-action)
+      (skip-chars-forward "\s\t")
+      (unless (looking-back (sentence-end) nil)
+        (forward-sentence -1))
+      (let ((x (point)))
+        (skip-chars-backward "\n\r\s\t")
+        (forward-line 0)
+        (if (fountain-match-scene-heading)
+            (fountain-insert-page-break number)
+          (goto-char x)
+          (unless (save-excursion
+                    (forward-char -1)
+                    (fountain-blank-p))
+            (insert-before-markers "\n\n"))
+          (insert-before-markers
+           (concat "==="
+                   (if (< 0 (string-width number)) (concat "\s" number))))
+          (unless (save-excursion
+                    (forward-char 1)
+                    (fountain-blank-p))
+            (insert-before-markers "\n\n"))))))
+    ;; Finally return to where we were.
+    (goto-char pos)))
+
+
 ;;; Inclusions
 
 (defvar fountain-include-regexp
