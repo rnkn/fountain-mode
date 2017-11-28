@@ -1051,7 +1051,7 @@ comments."
           (let ((x (point)))
             (when (re-search-backward fountain-blank-regexp nil t)
               (goto-char (match-end 0))
-              (skip-chars-forward "\n\s\t"))
+              (skip-chars-forward "\n\r\s\t"))
             (and (looking-at fountain-note-regexp)
                  (< x (match-end 0))))))))
 
@@ -1325,7 +1325,7 @@ within left-side dual dialogue, and nil otherwise."
       (save-restriction
         (widen)
         (forward-line 0)
-        (skip-chars-backward "\n\s\t")
+        (skip-chars-backward "\n\r\s\t")
         (fountain-match-page-break)))))
 
 (defun fountain-parse-goto-end-of-subtree (x)
@@ -1416,7 +1416,7 @@ Includes child elements."
          (end
           (save-excursion
             (fountain-forward-character 1 'dialog)
-            (skip-chars-backward "\n\s\t")
+            (skip-chars-backward "\n\r\s\t")
             (point)))
          first-dialog)
     (goto-char (plist-get (nth 1 character) 'end))
@@ -1436,7 +1436,7 @@ Includes child elements."
                (save-excursion
                  (while (fountain-dual-dialog)
                    (fountain-forward-character 1 'dialog))
-                 (skip-chars-backward "\n\s\t")
+                 (skip-chars-backward "\n\r\s\t")
                  (point))))
           ;; Return the dual-dialogue tree.
           (list 'dual-dialog
@@ -1546,7 +1546,7 @@ Includes child elements."
            (save-match-data
              (goto-char (match-beginning 0))
              (re-search-forward fountain-blank-regexp nil 'move)
-             (skip-chars-backward "\n\s\t")
+             (skip-chars-backward "\n\r\s\t")
              (point))))
         string)
     (setq string (buffer-substring-no-properties (match-beginning 2) end)
