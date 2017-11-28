@@ -2057,13 +2057,15 @@ Takes the form:
           (group (const :tag "Included Files" include)
                  (choice string (const nil)))))
 
-(defun fountain-export-include-element-p (elt)
-  "Returns non-nil if exporting ELT current format."
-  (memq elt (cdr (assoc-string
-                  (or (plist-get (fountain-read-metadata)
-                                 'format)
-                      "screenplay")
-                  fountain-export-include-elements))))
+(defun fountain-get-export-elements (&optional format)
+  "Returns list of elements exported in current format.
+Format defaults to \"screenplay\"."
+  (cdr (or (assoc-string
+            (or format
+                (plist-get (fountain-read-metadata) 'format)
+                "screenplay")
+            fountain-export-include-elements)
+           (car fountain-export-include-elements))))
 
 (defun fountain-export-get-filename (format &optional buffer)
   "If buffer is visiting a file, concat file name base and FORMAT.
@@ -4442,7 +4444,7 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      "---"
      ["Include Title Page" fountain-toggle-export-title-page
       :style toggle
-      :selected (fountain-export-include-element-p 'title-page)]
+      :selected (memq 'title-page (fountain-get-export-elements))]
      ["Bold Scene Headings"
       (fountain-toggle-custom-variable
        'fountain-export-scene-heading-format 'bold)
