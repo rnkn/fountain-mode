@@ -1717,50 +1717,26 @@ Includes child elements."
 
 (defun fountain-parse-element (&optional export-elements job)
   "Call appropropriate element parsing function for matched element at point."
-  (cond
-   ((fountain-match-section-heading)
-    (fountain-parse-section
-     (match-data) export-elements job))
-   ((fountain-match-scene-heading)
-    (fountain-parse-scene
-     (match-data) export-elements job))
-   ((fountain-match-character)
-    (fountain-parse-dialog
-     (match-data) (or (memq 'character export-elements)
-                      (memq 'lines export-elements)
-                      (memq 'paren export-elements))
-     export-elements job))
-   ((fountain-match-dialog)
-    (fountain-parse-lines
-     (match-data) (memq 'lines export-elements)))
-   ((fountain-match-paren)
-    (fountain-parse-paren
-     (match-data) (memq 'paren export-elements)))
-   ((fountain-match-trans)
-    (fountain-parse-trans
-     (match-data) (memq 'trans export-elements)))
-   ((fountain-match-center)
-    (fountain-parse-center
-     (match-data) (memq 'center export-elements)))
-   ((fountain-match-synopsis)
-    (fountain-parse-synopsis
-     (match-data) (memq 'synopsis export-elements)))
-   ((fountain-match-note)
-    (fountain-parse-note
-     (match-data) (memq 'note export-elements)))
-   ((fountain-match-include)
-    (fountain-parse-include
-     (match-data) (memq 'include export-elements)))
-   ((fountain-match-page-break)
-    (fountain-parse-page-break
-     (match-data) (memq 'page-break export-elements)))
-   (t
-    (fountain-match-action)
-    (fountain-parse-action
-     (match-data) (memq 'action export-elements)))))
+  (let ((parser
+         (plist-get (alist-get (fountain-get-element)
+                               fountain-elements)
+                    :parser)))
+    (funcall parser (match-data) export-elements)))
 
-(defun fountain-parse-region (beg end &optional export-elements job) ; FIXME: needs temp buffer model
-  "Return a list of parsed element lists in region between BEG and END.
+(defun fountain-parse-prepared-region (start end export-elements job) ; FIXME: incomplete
+  (goto-char start)
+  (let (list)
+    (while (< (point) (min end (point-max)))
+      (skip-chars-forward "\n\r\s\t")
+      (let ((element (fountain-parse-element export-elements job)))
+        (setq list (cons element list))
+        (goto-char (plist-get (nth 1 element) 'end)))
+      (progress-reporter-update job))
+    (progress-reporter-done job)
+    (reverse list)))
+
+(defun fountain-parse-region (start end &optional job) ; FIXME: needs temp buffer model
+  "Return a list of parsed element lists in region between START and END.
 
 Use list EXPORT-ELEMENTS to determine exported elements, or
 create new list.
@@ -1977,38 +1953,49 @@ Takes the form:
 (defvar fountain-elements
   '((section-heading
      :tag "Section Heading"
+     :matcher fountain-section-heading-regexp
+     :parser: fountain-parse-section
      :fill fountain-fill-section-heading)
     (scene-heading
      :tag "Scene Heading"
+     :parser fountain-parse-scene
      :fill fountain-fill-scene-heading)
     (action
      :tag "Action"
+     :parser fountain-parse-action
      :fill fountain-fill-action)
     (character
      :tag "Character Name"
+     :parser fountain-parse-dialog
      :fill fountain-fill-character)
     (lines
      :tag "Dialogue"
+     :parser fountain-parse-lines
      :fill fountain-fill-dialog)
     (paren
      :tag "Parenthetical"
+     :parser fountain-parse-paren
      :fill fountain-fill-paren)
     (trans
      :tag: "Transition"
+     :parser fountain-parse-trans
      :fill fountain-fill-trans)
     (center
      :tag "Center Text"
+     :matcher fountain-center-regexp
+     :parser fountain-parse-center
      :fill fountain-fill-action)
     (page-break
-     :tage "Page Break")
+     :tage "Page Break"
+     :parser fountain-parse-page-break
+     :matcher fountain-page-break-regexp)
     (synopsis
      :tag "Synopsis"
+     :parser fountain-parse-synopsis
      :fill fountain-fill-action)
     (note
      :tag "Note"
-     :fill fountain-fill-action)
-    (note
-     :tag "Note"
+     :parser fountain-parse-note
      :fill fountain-fill-note))
   "Association list of Fountain elements and their properties.
 Includes references to various functions and variables.
