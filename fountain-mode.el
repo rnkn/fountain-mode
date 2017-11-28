@@ -294,8 +294,8 @@ Call `fountain-mode' again for changes to take effect."
 When non-nil, append `fountain-continued-dialog-string' to
 successively speaking characters with `fountain-continued-dialog-refresh'.
 
- When nil, remove `fountain-continued-dialog-string' with
- `fountain-continued-dialog-refresh'."
+When nil, remove `fountain-continued-dialog-string' with
+`fountain-continued-dialog-refresh'."
   :type 'boolean
   :group 'fountain)
 
@@ -1185,7 +1185,7 @@ comments."
                (looking-at fountain-action-regexp))))))
 
 (defun fountain-get-element ()
-  "Return element at point as a symbol"
+  "Return element at point as a symbol."
   (cond
    ((fountain-match-metadata) 'metadata)
    ((fountain-match-section-heading) 'section-heading)
@@ -1302,7 +1302,7 @@ Value string remains a string. e.g.
         line-count))))
 
 (defun fountain-dual-dialog (&optional x)
-  "Non-nil if X, or point, is within dual dialogue.
+  "Non-nil if point or X is within dual dialogue.
 Returns \"right\" if within right-side dual dialogue, \"left\" if
 within left-side dual dialogue, and nil otherwise."
   (save-excursion
