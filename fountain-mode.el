@@ -3327,27 +3327,24 @@ a scene heading."
   (upcase-region (line-beginning-position) (point))
   (newline))
 
-(defun fountain-delete-comments-in-region (beg end)
-  "Delete comments in region between BEG and END."
-  (let ((beg
-         (save-excursion
-           (goto-char beg)
-           (if (and (search-forward "*/" end t)
-                    (not (search-backward "/*" beg t))
-                    (search-backward "/*" nil t))
-               (match-beginning 0)
-             beg)))
-        (end
-         (save-excursion
-           (goto-char end)
-           (if (and (search-backward "/*" beg t)
-                    (not (search-forward "*/" end t))
-                    (search-forward "*/" nil t))
-               (match-end 0)
-             end))))
-    (goto-char beg)
-    (while (re-search-forward fountain-comment-regexp end t)
-      (delete-region (match-beginning 0) (match-end 0)))))
+(defun fountain-delete-comments-in-region (start end)
+  "Delete comments in region between START and END."
+  (save-excursion
+    (goto-char start)
+    (if (and (search-forward "*/" end t)
+             (not (search-backward "/*" start t))
+             (search-backward "/*" nil t))
+        (setq start (point)))
+    (goto-char end)
+    (if (and (search-backward "/*" start t)
+             (not (search-forward "*/" end t))
+             (search-forward "*/" nil t))
+        (setq end (point))))
+  (goto-char start)
+  (while (re-search-forward fountain-comment-regexp end t)
+    (goto-char (match-beginning 0))
+    (skip-chars-backward "\s\t")
+    (delete-region (point) (match-end 0))))
 
 (defun fountain-insert-alternate-character ()
   "Insert second-last character within the scene, and newline."
