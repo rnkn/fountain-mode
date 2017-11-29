@@ -1985,7 +1985,7 @@ _{{title}}_
   :group 'fountain-export)
 
 (defcustom fountain-export-contact-template
-  "{{contact}}"
+  "{{date}}\n\n{{contact}}"
   "Template for creating title page left block."
   :type 'string
   :group 'fountain-export)
