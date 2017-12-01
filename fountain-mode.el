@@ -1163,26 +1163,14 @@ comments."
       (looking-at fountain-center-regexp))))
 
 (defun fountain-match-action ()
-  "Match action text if point is at action, nil otherwise."
+  "Match action text if point is at action, nil otherwise.
+Assumes that all other element matching has been done."
   (save-excursion
     (save-restriction
       (widen)
       (forward-line 0)
-      (or (and (looking-at fountain-action-regexp)
-               (match-string 1))
-          (and (not (or (fountain-blank-p)
-                        (fountain-match-comment)
-                        (fountain-match-metadata)
-                        (fountain-match-section-heading)
-                        (fountain-match-scene-heading)
-                        (fountain-match-character)
-                        (fountain-match-dialog)
-                        (fountain-match-paren)
-                        (fountain-match-trans)
-                        (fountain-match-center)
-                        (fountain-match-synopsis)
-                        (fountain-match-note)))
-               (looking-at fountain-action-regexp))))))
+      (and (looking-at fountain-action-regexp)
+           (match-string 1)))))
 
 (defun fountain-get-element ()
   "Return element at point as a symbol."
@@ -1198,7 +1186,7 @@ comments."
    ((fountain-match-synopsis) 'synopsis)
    ((fountain-match-note) 'note)
    ((fountain-match-page-break) 'page-break)
-   (t 'action)))
+   (t (fountain-match-action) 'action)))
 
 
 ;;; Pages
