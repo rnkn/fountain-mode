@@ -1512,7 +1512,7 @@ within left-side dual dialogue, and nil otherwise."
                                (funcall outline-level))
                       'export t)
                 (match-string-no-properties 3)))
-         (end (fountain-parse-goto-end-of-subtree beg))
+         (end (fountain-parse-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 section-heading) 'end))
     (setq content (fountain-parse-region (point) end export-elements job))
@@ -1544,7 +1544,7 @@ Includes child elements."
                       'export t
                       'starts-new-page starts-new-page)
                 (match-string-no-properties 3)))
-         (end (fountain-parse-goto-end-of-subtree beg))
+         (end (fountain-parse-end-of-subtree beg))
          content)
     (goto-char (plist-get (nth 1 scene-heading) 'end))
     (setq content (fountain-parse-region (point) end export-elements job))
@@ -2816,8 +2816,8 @@ The format of TEMPLATE can include replacement keys in the form
 `{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
 `fountain-export-format-template' for how replacement strings are
 calculated."
-    :type 'fountain-element-list-type
-    :group 'fountain-export)
+  :type 'fountain-element-list-type
+  :group 'fountain-export)
 
 (defvar fountain-export-html-replacements
   (backquote
@@ -3762,27 +3762,28 @@ then make the changes desired."
 
 (defcustom fountain-prefix-revised-scene-numbers
   nil
-  "If non-nil, prefix revision letters to new scene numbers.
+  "If non-nil, new scene numbers get prefixed revision characters.
 
 If nil, when inserting new scene headings after numbering
-existing scene headings, revised scene numbers work as follows:
+existing scene headings, revised scene number format works as
+follows:
 
     10
     10A <- new scene
     11
 
-If non-nil, revised scene numbers work as follows:
+If non-nil, revised scene number format works as follows:
 
     10
     A11 <- new scene
     11
 
-WARNING: Using conflicting revised scene numbers in the same
-script may result in errors in output."
+WARNING: Using conflicting revised scene number format in the
+same script may result in errors in output."
   :type 'boolean
   :group 'fountain)
 
-(defun fountain-scene-number-to-list (string)
+(defun fountain-scene-number-to-list (string) ; FIXME: alternate separators and starting char
   "Read scene number STRING and return a list.
 
 If `fountain-prefix-revised-scene-numbers' is non-nil:
