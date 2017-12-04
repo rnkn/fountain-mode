@@ -2987,9 +2987,9 @@ If TEMPLATE is nil, the string is discarded."
 
 (require 'outline)
 
-(defvar-local fountain-outline-cycle
+(defvar-local fountain--outline-cycle
   0
-  "Integer representing global outline cycling status.
+  "Internal local integer representing global outline cycling status.
 
     0: Show all
     1: Show level 1 section headings
@@ -3001,9 +3001,10 @@ If TEMPLATE is nil, the string is discarded."
 
 Used by `fountain-outline-cycle'.")
 
-(defvar-local fountain-outline-cycle-subtree
+(defvar-local fountain--outline-cycle-subtree
   0
-  "Integer representing subtree outline cycling status.
+  "Internal local integer representing subtree outline cycling status.
+
 Used by `fountain-outline-cycle'.")
 
 (defcustom fountain-outline-startup-level
@@ -3123,7 +3124,7 @@ Display a message unless SILENT."
         (t
          (outline-hide-sublevels n)
          (unless silent (message "Showing level %s headings" n))))
-  (setq fountain-outline-cycle n))
+  (setq fountain--outline-cycle n))
 
 (defun fountain-outline-cycle (&optional arg) ; FIXME: document
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
@@ -3160,11 +3161,11 @@ Display a message unless SILENT."
              level))))
     (cond ((eq arg 4)
            (cond
-            ((and (= fountain-outline-cycle 1) custom-level)
+            ((and (= fountain--outline-cycle 1) custom-level)
              (fountain-outline-hide-level custom-level))
-            ((< 0 fountain-outline-cycle 6)
+            ((< 0 fountain--outline-cycle 6)
              (fountain-outline-hide-level 6))
-            ((= fountain-outline-cycle 6)
+            ((= fountain--outline-cycle 6)
              (fountain-outline-hide-level 0))
             ((= highest-level 6)
              (fountain-outline-hide-level 6))
@@ -3173,7 +3174,7 @@ Display a message unless SILENT."
           ((eq arg 16)
            (outline-show-all)
            (message "Showing all")
-           (setq fountain-outline-cycle 0))
+           (setq fountain--outline-cycle 0))
           ((and (eq arg 64) custom-level)
            (fountain-outline-hide-level custom-level))
           (t
@@ -3204,22 +3205,22 @@ Display a message unless SILENT."
                (cond
                 ((= eos eoh)
                  (message "Empty heading")
-                 (setq fountain-outline-cycle-subtree 0))
+                 (setq fountain--outline-cycle-subtree 0))
                 ((and (<= eos eol)
                       children)
                  (outline-show-entry)
                  (outline-show-children)
                  (message "Showing headings")
-                 (setq fountain-outline-cycle-subtree 2))
+                 (setq fountain--outline-cycle-subtree 2))
                 ((or (<= eos eol)
-                     (= fountain-outline-cycle-subtree 2))
+                     (= fountain--outline-cycle-subtree 2))
                  (outline-show-subtree)
                  (message "Showing contents")
-                 (setq fountain-outline-cycle-subtree 3))
+                 (setq fountain--outline-cycle-subtree 3))
                 (t
                  (outline-hide-subtree)
                  (message "Hiding contents")
-                 (setq fountain-outline-cycle-subtree 1)))))))))
+                 (setq fountain--outline-cycle-subtree 1)))))))))
 
 (defun fountain-outline-cycle-global ()
   "Globally cycle outline visibility.
