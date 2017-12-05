@@ -3045,7 +3045,7 @@ This can be set on a per-file basis by including in metadata:
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
-(when (version< emacs-version "25")
+(when (< emacs-major-version 25)
   (defalias 'outline-show-all 'show-all)
   (defalias 'outline-show-entry 'show-entry)
   (defalias 'outline-show-subtree 'show-subtree)
