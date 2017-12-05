@@ -4258,7 +4258,7 @@ keywords suitable for Font Lock."
 
 (defun fountain-redisplay-scene-numbers (start end)
   (goto-char start)
-  (while (< (point) end)
+  (while (< (point) (min end (point-max)))
     (if (fountain-match-scene-heading)
         (if (and fountain-display-scene-numbers-in-margin
                  (match-string 6))
