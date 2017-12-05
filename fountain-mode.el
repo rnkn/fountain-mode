@@ -250,7 +250,7 @@
   'fountain-trans-suffix-list "2.2.2")
 
 (make-obsolete-variable 'fountain-switch-comment-syntax
-                        "use the standard comment syntax" "2.4.0")
+                        "use the standard comment syntax instead." "2.4.0")
 
 
 ;;; Customization
