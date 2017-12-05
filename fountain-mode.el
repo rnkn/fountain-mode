@@ -1434,7 +1434,7 @@ within left-side dual dialogue, and nil otherwise."
          content)
     (goto-char (plist-get (nth 1 section-heading) 'end))
     (setq content
-          (fountain-parse-prepared-region (point) end export-elements job))
+          (fountain-parse-region (point) end export-elements job))
     (list 'section
           (list 'begin beg
                 'end end
@@ -1467,7 +1467,7 @@ Includes child elements."
          content)
     (goto-char (plist-get (nth 1 scene-heading) 'end))
     (setq content
-          (fountain-parse-prepared-region (point) end export-elements job))
+          (fountain-parse-region (point) end export-elements job))
     (list 'scene
           (list 'begin beg
                 'end end
@@ -1507,7 +1507,7 @@ Includes child elements."
                       'dual dual
                       'export t)
                 (cons character
-                      (fountain-parse-prepared-region (point) end export-elements job))))
+                      (fountain-parse-region (point) end export-elements job))))
     ;; If at the first (left) character of dual dialogue, parse a dual-dialogue
     ;; tree, containing dialogue trees.
     (if (eq dual 'left)
@@ -1523,12 +1523,15 @@ Includes child elements."
                 (list 'begin beg
                       'end end
                       'starts-new-page starts-new-page
-                      'export (if export t))
+                      'export (if (or (memq 'character export-elements)
+                                      (memq 'lines export-elements)
+                                      (memq 'paren export-elements))
+                                  t))
                 ;; Add the first dialogue block to the head of the dual-dialogue
                 ;; tree.
                 (cons first-dialog
                       ;; Parse the containing region.
-                      (fountain-parse-prepared-region
+                      (fountain-parse-region
                        (plist-get (nth 1 first-dialog) 'end)
                        end export-elements job))))
       ;; Otherwise, return the first dialogue tree.
@@ -1632,7 +1635,8 @@ Includes child elements."
                            :parser)))
     (if parser (funcall parser (match-data) export-elements job))))
 
-(defun fountain-parse-prepared-region (start end export-elements job)
+(defun fountain-parse-region (start end export-elements job)
+  "Return a list of parsed element lists in region between START and END."
   (goto-char start)
   (setq end (min end (point-max)))
   (let (list)
@@ -1646,8 +1650,8 @@ Includes child elements."
       (if job (progress-reporter-update job)))
     (reverse list)))
 
-(defun fountain-parse-region (start end)
-  "Return a list of parsed element lists in region between START and END."
+(defun fountain-prep-and-parse-region (start end)
+  "Prepare and parse region between START and END."
   (let ((buffer (current-buffer))
         (export-elements (fountain-get-export-elements))
         (job (make-progress-reporter "Parsing...")))
@@ -1663,7 +1667,7 @@ Includes child elements."
             (forward-line 1))
           (delete-region (point-min) (point))
           (fountain-delete-comments-in-region (point-min) (point-max))
-          (fountain-parse-prepared-region (point-min) (point-max) export-elements job))
+          (fountain-parse-region (point-min) (point-max) export-elements job))
       (progress-reporter-done job))))
 
 
