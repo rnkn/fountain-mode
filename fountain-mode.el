@@ -1938,7 +1938,7 @@ Takes the form:
   '((section-heading
      :tag "Section Heading"
      :matcher fountain-section-heading-regexp
-     :parser: fountain-parse-section
+     :parser fountain-parse-section
      :fill fountain-fill-section-heading)
     (scene-heading
      :tag "Scene Heading"
