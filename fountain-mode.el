@@ -1643,7 +1643,7 @@ Includes child elements."
             (push element list)
             ;; FIXME: better to use a forward-block function
             (goto-char (plist-get (nth 1 element) 'end))))
-      (progress-reporter-update job))
+      (if job (progress-reporter-update job)))
     (reverse list)))
 
 (defun fountain-parse-region (start end)
