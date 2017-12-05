@@ -1911,6 +1911,7 @@ specify a different filename."
      :tag "Final Draft"
      :ext ".fdx"
      :template fountain-export-fdx-template
+     :replace fountain-export-fdx-replacements
      :hook fountain-export-fdx-hook)
     (fountain
      :tag "Fountain"
