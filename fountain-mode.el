@@ -1922,12 +1922,7 @@ specify a different filename."
      :ext ".txt"
      :fill t
      :template fountain-export-txt-template
-     :hook fountain-export-txt-hook)
-    (ps
-     :tag "PostScript"
-     :ext ".ps"
-     :fill t
-     :hook fountain-export-ps-hook))
+     :hook fountain-export-txt-hook))
   "Association list of export formats and their properties.
 
 Takes the form:
@@ -1987,7 +1982,6 @@ Includes references to various functions and variables.
 Takes the form:
 
     (ELEMENT KEYWORD PROPERTY)")
-
 
 (define-widget 'fountain-element-list-type 'lazy
   "Customize widget for Fountain templates."
@@ -2463,16 +2457,23 @@ If TEMPLATE is nil, the string is discarded."
 
 ;;; -> PostScript
 
-(defcustom fountain-export-ps-hook
-  nil
-  "Hook run with export buffer on sucessful export to PostScript."
-  :type 'hook
-  :group 'fountain-export)
+;; (defcustom fountain-export-ps-hook
+;;   nil
+;;   "Hook run with export buffer on sucessful export to PostScript."
+;;   :type 'hook
+;;   :group 'fountain-export)
 
-(defun fountain-export-buffer-to-ps ()
-  "Convenience function for exporting buffer to PostScript."
-  (interactive)
-  (fountain-export-buffer 'ps))
+;; (defun fountain-export-buffer-to-ps ()
+;;   "Convenience function for exporting buffer to PostScript."
+;;   (interactive)
+;;   (let ((ps-paper-type fountain-export-page-size)
+;;         (ps-left-margin (* fountain-export-left-margin 72))
+;;         (ps-top-margin (* fountain-export-top-margin 72))
+;;         (ps-font-size 12)
+;;         ps-print-color-p
+;;         ps-print-header)
+;;     (ps-print-buffer (fountain-export-get-filename 'ps))))
+;; (fountain-export-buffer 'ps))
 
 
 ;;; -> HTML
