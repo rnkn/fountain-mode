@@ -4268,7 +4268,7 @@ keywords suitable for Font Lock."
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
-    ;; editing commands
+    ;; Editing commands:
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
@@ -4279,17 +4279,19 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
+    ;; FIXME: include-find-file feels like it should be C-c C-c...
     (define-key map (kbd "C-c C-o") #'fountain-include-find-file)
-    ;; navigation commands
-    (define-key map (kbd "C-M-n") #'fountain-forward-scene)
-    (define-key map (kbd "C-M-p") #'fountain-backward-scene)
-    (define-key map (kbd "C-M-a") #'fountain-beginning-of-scene)
-    (define-key map (kbd "C-M-e") #'fountain-end-of-scene)
-    (define-key map (kbd "C-M-h") #'fountain-mark-scene)
+    ;; Navigation commands:
+    (define-key map [remap forward-list] #'fountain-forward-scene)
+    (define-key map [remap backward-list] #'fountain-backward-scene)
+    (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
+    (define-key map [remap end-of-defun] #'fountain-end-of-scene)
+    (define-key map [remap forward-page]  #'fountain-forward-page)
+    (define-key map [remap mark-defun] #'fountain-mark-scene)
     (define-key map (kbd "M-g s") #'fountain-goto-scene)
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
-    ;; outline commands
+    ;; Outline commands:
     (define-key map (kbd "C-c C-n") #'fountain-outline-next)
     (define-key map (kbd "C-c C-p") #'fountain-outline-previous)
     (define-key map (kbd "C-c C-f") #'fountain-outline-forward)
@@ -4301,15 +4303,15 @@ keywords suitable for Font Lock."
     (define-key map (kbd "TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
-    ;; endnotes
+    ;; Endnotes:
     (define-key map (kbd "M-s e") #'fountain-show-or-hide-endnotes)
-    ;; exporting commands
+    ;; Exporting commands:
     (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
     (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e d") #'fountain-export-buffer-to-fdx)
     (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
     (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
-    ;; view commands
+    ;; View commands:
     (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-syntax-chars) ; FIXME ??
     (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-delim) ; FIXME ??
     map)
