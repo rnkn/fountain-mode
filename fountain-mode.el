@@ -1321,14 +1321,14 @@ If called noninteractively, find file without selecting window."
               (find-file-other-window filename))
           (find-file-noselect filename)))))
 
-(defun fountain-include-replace-in-region (beg end)
+(defun fountain-include-replace-in-region (start end)
   (interactive "r")
   (save-excursion
     (save-restriction
       (widen)
       (goto-char end)
       (setq end (point-marker))
-      (goto-char beg)
+      (goto-char start)
       (while (< (point) (min end (point-max)))
         (when (fountain-match-include)
           (replace-match
@@ -2294,18 +2294,18 @@ strings."
         tree string)
     ;; Search for script end point and reset END.
     (save-excursion
-      (goto-char beg)
+      (goto-char start)
       (if (re-search-forward fountain-end-regexp end t)
           (setq end (match-beginning 0))))
     ;; Parse the region to TREE.
     (save-excursion
-      (setq tree (fountain-parse-region beg end)))
+      (setq tree (fountain-prep-and-parse-region start end)))
     ;; If exporting a standalone document, list TREE inside a document element.
     (unless (or snippet (not fountain-export-standalone))
       (setq tree
             (list (list 'document
                         (append
-                         (list 'begin beg
+                         (list 'begin start
                                'end end
                                'export t)
                                (fountain-read-metadata))
