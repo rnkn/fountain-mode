@@ -47,7 +47,6 @@
 ;; - Navigation by section, scene, character name, or page
 ;; - 3 levels of element syntax highlighting
 ;; - Automatic loading for `*.fountain` files
-;; - Support for both official and legacy commenting (boneyard) syntax
 ;; - Include or omit a title page
 ;; - Emphasis (bold, italic, underlined text)
 ;; - Toggle visibility of emphasis delimiters and syntax characters
@@ -250,6 +249,9 @@
 (define-obsolete-variable-alias 'fountain-trans-list
   'fountain-trans-suffix-list "2.2.2")
 
+(make-obsolete-variable 'fountain-switch-comment-syntax
+                        "use the standard comment syntax" "2.4.0")
+
 
 ;;; Customization
 
@@ -323,22 +325,6 @@ Sometimes `font-lock-mode' can hang if asked for fontify a very
 large block of unbroken text. If you experience performance
 issues, consider reducing this value."
   :type 'integer
-  :group 'fountain)
-
-(defcustom fountain-switch-comment-syntax
-  nil
-  "\\<fountain-mode-map>If non-nil, use `//' as default comment syntax (boneyard).
-Two syntaxes are supported:
-
-    /* this text is a comment */
-
-    // this text is
-    // also a comment
-
-Both syntax will be recognized as comments. This option changes
-the behavior of \\[comment-dwim]. The default is the former but
-if you prefer the latter, set this option to non-nil."
-  :type 'boolean
   :group 'fountain)
 
 (defcustom fountain-hide-emphasis-delim
@@ -4346,16 +4332,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
   (interactive)
   (fountain-toggle-hide-element "syntax-chars"))
 
-(defun fountain-toggle-comment-syntax ()
-  "Toggle `fountain-switch-comment-syntax'."
-  (interactive)
-  (customize-set-variable 'fountain-switch-comment-syntax
-                          (not fountain-switch-comment-syntax))
-  (fountain-init-comment-syntax)
-  (message "Fountain Default Comment Syntax is now: %s"
-           (if fountain-switch-comment-syntax
-               "\"// COMMENT\"" "\"/* COMMENT */\"")))
-
 (defun fountain-save-options ()
   "Save `fountain-mode' options with `customize'."
   (interactive)
@@ -4498,9 +4474,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 
 (defvar fountain-mode-syntax-table
   (let ((syntax (make-syntax-table)))
-    (modify-syntax-entry ?/ ". 124" syntax)
-    (modify-syntax-entry ?* ". 23b" syntax)
-    (modify-syntax-entry ?\n ">" syntax)
+    (modify-syntax-entry (string-to-char "/") ". 14" syntax)
+    (modify-syntax-entry (string-to-char "*") ". 23" syntax)
     syntax)
   "Syntax table for `fountain-mode'.")
 
