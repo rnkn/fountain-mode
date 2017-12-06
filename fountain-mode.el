@@ -902,20 +902,14 @@ regular expression."
          (list "Scene Headings" fountain-scene-heading-regexp 3)
          (list "Sections" fountain-section-heading-regexp 1))))
 
-(defun fountain-init-comment-syntax ()
-  "Set comment syntax according to `fountain-switch-comment-syntax'."
-  (setq-local comment-start
-              (if fountain-switch-comment-syntax "//" "/*"))
-  (setq-local comment-end
-              (if fountain-switch-comment-syntax "" "*/")))
-
 (defun fountain-init-vars ()
   "Initialize important variables.
 These are required for functions to operate with temporary buffers."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
-  (fountain-init-comment-syntax)
+  (setq-local comment-start "/*")
+  (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
