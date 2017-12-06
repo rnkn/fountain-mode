@@ -359,9 +359,14 @@ syntax.
 
 The default {{time}} - {{fullname}}: will insert something like:
 
-\[\[ 2014-20-01 - Alan Smithee: \]\]"
+    [[ 2014-20-01 - Alan Smithee: ]]"
   :type 'string
   :group 'fountain)
+;; FIXME:
+;; {{title}} from metadata
+;; {{author}} from metadata
+;; {{username}} `user-full-name'
+;; {{KEY}} arbitrary metadata
 
 
 ;;; Aligning
@@ -686,7 +691,7 @@ dialogue.")
 (defconst fountain-italic-regexp
   (concat "\\(^\\|[^\\\\*]\\)"
           "\\(\\*\\)"
-          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\r\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching italic text.")
 
@@ -1779,7 +1784,7 @@ Note that comments (boneyard) are never included."
   :group 'fountain-export)
 
 (define-obsolete-variable-alias 'fountain-export-include-elements-alist
-  'fountain-export-include-elements "3.0.0")
+  'fountain-export-include-elements "2.4.0")
 
 (defcustom fountain-export-standalone
   t
@@ -1813,7 +1818,7 @@ Passed to `format' with export format as single variable."
   :group 'fountain-export)
 
 (make-obsolete-variable 'fountain-export-include-title-page
-  'fountain-export-include-elements "3.0.0")
+  'fountain-export-include-elements "2.4.0")
 
 (defcustom fountain-export-page-size
   'letter
@@ -3949,8 +3954,7 @@ scene number from being auto-upcased."
 ;;; Font Lock
 
 (defvar fountain-font-lock-keywords-plist
-  (backquote
-   (;; Section Headings
+  `(;; Section Headings
     (,fountain-section-heading-regexp
      ((:level 2 :subexp 0 :face fountain-section-heading
               :invisible section-heading)
@@ -4119,7 +4123,7 @@ scene number from being auto-upcased."
               :invisible fountain-emphasis-delim
               :override append)
       (:level 1 :subexp 3 :face italic
-              :override append)))))
+              :override append))))
   "List of face properties to create element Font Lock keywords.
 Takes the format:
 
@@ -4220,8 +4224,11 @@ keywords suitable for Font Lock."
             (align (fountain-get-align (symbol-value (nth 2 var))))
             align-props facespec)
         (if (and align fountain-align-elements)
-            (setq align-props (backquote (line-prefix (space :align-to ,align)
-                                          wrap-prefix (space :align-to ,align)))))
+            (setq align-props
+                  `(line-prefix
+                    (space :align-to ,align)
+                    wrap-prefix
+                    (space :align-to ,align))))
         (dolist (var plist-list)
           (let ((subexp (plist-get var :subexp))
                 (face (if (<= (plist-get var :level) dec)
@@ -4232,11 +4239,11 @@ keywords suitable for Font Lock."
                 (setq invisible-props (list 'invisible invisible)))
             (setq facespec
                   (append facespec
-                          (list (backquote (,subexp '(face ,face
-                                                           ,@align-props
-                                                           ,@invisible-props)
-                                                    ,(plist-get var :override)
-                                                    ,(plist-get var :laxmatch))))))))
+                          (list `(,subexp '(face ,face
+                                                 ,@align-props
+                                                 ,@invisible-props)
+                                          ,(plist-get var :override)
+                                          ,(plist-get var :laxmatch)))))))
         (setq keywords
               (append keywords
                       (list (cons matcher facespec))))))))
