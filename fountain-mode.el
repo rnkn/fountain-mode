@@ -1154,8 +1154,20 @@ Assumes that all other element matching has been done."
     (save-restriction
       (widen)
       (forward-line 0)
-      (and (looking-at fountain-action-regexp)
-           (match-string 1)))))
+      (or (and (looking-at fountain-action-regexp)
+               (match-string 1))
+          (and (not (or (and (bolp) (eolp))
+                        (fountain-match-section-heading)
+                        (fountain-match-scene-heading)
+                        (fountain-match-character)
+                        (fountain-match-dialog)
+                        (fountain-match-paren)
+                        (fountain-match-trans)
+                        (fountain-match-center)
+                        (fountain-match-synopsis)
+                        (fountain-match-metadata)
+                        (fountain-match-note)))
+               (looking-at fountain-action-regexp))))))
 
 (defun fountain-get-element ()
   "Return element at point as a symbol."
@@ -1173,7 +1185,7 @@ Assumes that all other element matching has been done."
    ((fountain-match-synopsis) 'synopsis)
    ((fountain-match-note) 'note)
    ((fountain-match-page-break) 'page-break)
-   (t (fountain-match-action) 'action)))
+   (t (looking-at fountain-action-regexp) 'action)))
 
 
 ;;; Pages
