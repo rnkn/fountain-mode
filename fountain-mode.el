@@ -1649,6 +1649,7 @@ Includes child elements."
   (let (list)
     (while (< (point) end)
       (skip-chars-forward "\n\r\s\t")
+      (forward-line 0)
       (if (< (point) end)
           (let ((element (fountain-parse-element export-elements job)))
             (push element list)
