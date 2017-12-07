@@ -3574,21 +3574,14 @@ a scene heading."
 (defun fountain-delete-comments-in-region (start end)
   "Delete comments in region between START and END."
   (save-excursion
-    (goto-char start)
-    (if (and (search-forward "*/" end t)
-             (not (search-backward "/*" start t))
-             (search-backward "/*" nil t))
-        (setq start (point)))
     (goto-char end)
-    (if (and (search-backward "/*" start t)
-             (not (search-forward "*/" end t))
-             (search-forward "*/" nil t))
-        (setq end (point))))
-  (goto-char start)
-  (while (re-search-forward fountain-comment-regexp end t)
-    (goto-char (match-beginning 0))
-    (skip-chars-backward "\s\t")
-    (delete-region (point) (match-end 0))))
+    (setq end (point-marker))
+    (goto-char start)
+    (while (< (point) end)
+      (let ((x (point)))
+        (if (forward-comment 1)
+            (delete-region x (point))
+          (unless (eobp) (forward-char 1)))))))
 
 (defun fountain-insert-alternate-character ()
   "Insert second-last character within the scene, and newline."
