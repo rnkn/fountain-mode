@@ -582,10 +582,6 @@ Set with `fountain-init-trans-regexp'. Requires
     Group 1: match forced action mark
     Group 2: match trimmed whitespace (export group)")
 
-(defconst fountain-nbsp-regexp
-  "\\(?:^\\|[^\\]\\)\\(?1:\\(?2:\\\\\\)\s\\)"
-  "Regular expression for non-breaking space.")
-
 (defconst fountain-comment-regexp
   (concat "\\(?://[\s\t]*\\(?:.*\\)\\)"
           "\\|"
@@ -4084,11 +4080,6 @@ scene number from being auto-upcased."
               :override t
               :laxmatch t))
      fountain-align-action)
-    ;; Non-breaking space
-    (,fountain-nbsp-regexp
-     ((:level 1 :subexp 2 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override append)))
     ;; Underline text
     (,fountain-underline-regexp
      ((:level 1 :subexp 2 :face fountain-non-printing
