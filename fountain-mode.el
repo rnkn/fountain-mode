@@ -2495,8 +2495,8 @@ If TEMPLATE is nil, the string is discarded."
 </head>
 <body>
 <section class=\"screenplay\">
-{{title-template}}
 <section class=\"title-page\">
+{{title-template}}
 </section>
 {{content}}\
 </section>
