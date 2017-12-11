@@ -1315,7 +1315,7 @@ If called noninteractively, find file without selecting window."
               (find-file-other-window filename))
           (find-file-noselect filename)))))
 
-(defun fountain-include-replace-in-region (start end &optional delete)
+(defun fountain-include-in-region (start end &optional delete)
   "Replace inclusions between START and END with their file contents.
 
 If optional argument DELETE is non-nil (if prefix with \\[universal-argument]
@@ -1661,8 +1661,8 @@ Includes child elements."
           (fountain-init-vars)
           (insert-buffer-substring buffer start end)
           ;; FIXME: includes need to be erased if not exported
-          (fountain-include-replace-in-region (point-min) (point-max)
-                                              (not (memq 'include export-elements)))
+          (fountain-include-in-region (point-min) (point-max)
+                                      (not (memq 'include export-elements)))
           (goto-char (point-min))
           (while (fountain-match-metadata)
             (forward-line 1))
