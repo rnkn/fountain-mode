@@ -1315,8 +1315,12 @@ If called noninteractively, find file without selecting window."
               (find-file-other-window filename))
           (find-file-noselect filename)))))
 
-(defun fountain-include-replace-in-region (start end)
-  (interactive "r")
+(defun fountain-include-replace-in-region (start end &optional delete)
+  "Replace inclusions between START and END with their file contents.
+
+If optional argument DELETE is non-nil (if prefix with \\[universal-argument]
+when called interactively), delete instead."
+  (interactive "*r\nP")
   (save-excursion
     (save-restriction
       (widen)
@@ -1325,13 +1329,15 @@ If called noninteractively, find file without selecting window."
       (goto-char start)
       (while (< (point) (min end (point-max)))
         (when (fountain-match-include)
-          (replace-match
-           (save-match-data
-             (with-current-buffer (fountain-include-find-file)
-               (save-restriction
-                 (widen)
-                 (buffer-substring-no-properties (point-min) (point-max)))))
-           t t))
+          (if delete
+              (delete-region (match-beginning 0) (match-end 0))
+            (replace-match
+             (save-match-data
+               (with-current-buffer (fountain-include-find-file)
+                 (save-restriction
+                   (widen)
+                   (buffer-substring-no-properties (point-min) (point-max)))))
+             t t)))
         (forward-line 1)))))
 
 
@@ -1655,8 +1661,8 @@ Includes child elements."
           (fountain-init-vars)
           (insert-buffer-substring buffer start end)
           ;; FIXME: includes need to be erased if not exported
-          (if (memq 'include export-elements)
-              (fountain-include-replace-in-region (point-min) (point-max)))
+          (fountain-include-replace-in-region (point-min) (point-max)
+                                              (not (memq 'include export-elements)))
           (goto-char (point-min))
           (while (fountain-match-metadata)
             (forward-line 1))
