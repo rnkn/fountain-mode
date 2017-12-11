@@ -544,7 +544,7 @@ Set with `fountain-init-scene-heading-regexp'.
     Group 1: match trimmed whitespace
     Group 2: match leading . (for forced element)
     Group 3: match scene heading without scene number (export group)
-    Group 4: match space before scene number
+    Group 4: match space between heading and scene number
     Group 5: match first # delimiter
     Group 6: match scene number
     Group 7: match last # delimiter
@@ -2670,8 +2670,13 @@ calculated."
   text-align: center;
   white-space: pre-wrap;
 }"
-  "Stylesheet for HTML export"
+  "Stylesheet for HTML export.
+
+Screenplay content is wrapped in class \"screenplay\", which
+means all screenplay elements require the \".screenplay\" class
+parent."
   :type 'string
+  :link '(url-link "https://github.com/rnkn/mcqueen")
   :group 'fountain-export)
 
 (defcustom fountain-export-html-title-template
