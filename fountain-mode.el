@@ -2141,6 +2141,7 @@ A value of t represents all.")
     (html
      (emacs-version emacs-version)
      (fountain-version fountain-version)
+     (stylesheet fountain-export-html-stylesheet)
      (page-size (symbol-name fountain-export-page-size))
      (font fountain-export-font)
      (title-template fountain-export-html-title-template)
@@ -2485,225 +2486,19 @@ If TEMPLATE is nil, the string is discarded."
 <head>
 <meta charset=\"utf-8\">
 <meta name=\"author\" content=\"{{author}}\" />
-<meta name=\"generator\" content=\"Emacs {{emacs-version}} running {{fountain-version}}\" />
+<meta name=\"generator\" content=\"Emacs {{emacs-version}} running Fountain Mode {{fountain-version}}\" />
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
 <title>{{title}}</title>
 <style type=\"text/css\">
-@page screenplay, screenplay-title {
-  size: {{page-size}};
-  margin-top: 1in;
-  margin-right: 1in;
-  margin-bottom: 0.75in;
-  margin-left: 1.5in;
-}
-@page screenplay {
-  @top-right-corner {
-    font-family: {{font}};
-    font-size: 12pt;
-    content: counter(page) \".\";
-    vertical-align: bottom;
-    padding-bottom: 1em;
-  }
-}
-@page screenplay:first {
-  @top-right-corner {
-    content: normal;
-  }
-}
-.screenplay {
-  page: screenplay;
-  counter-reset: page;
-  font-family: {{font}};
-  font-size: 12pt;
-  line-height: 1;
-  max-width: 6in;
-  margin: 1em auto;
-  -webkit-text-size-adjust: none;
-}
-.screenplay .title-page {
-  display: {{include-title-page}};
-  page: screenplay-title;
-  page-break-after: always;
-  margin-top: 0;
-  margin-right: auto;
-  margin-bottom: 1em;
-  margin-left: auto;
-}
-.screenplay .title-page .title {
-  text-align: center;
-}
-@media print {
-  .screenplay .title-page .title {
-    margin-top: 3.5in;
-    margin-bottom: 4in;
-  }
-}
-.screenplay .title-page .title h1 {
-  text-transform: {{title-upcase}};
-  text-decoration: {{title-underline}};
-}
-.screenplay h1, .screenplay h2, .screenplay h3, .screenplay h4, .screenplay h5, .screenplay h6 {
-  font-weight: inherit;
-  font-size: inherit;
-}
-.screenplay a {
-  color: inherit;
-  text-decoration: none;
-}
-.screenplay hr {
-  page-break-after: always;
-}
-@media print {
-  .screenplay hr {
-    visibility: hidden;
-  }
-}
-.screenplay mark {
-  background-color: yellow;
-}
-.screenplay mark:before {
-  content: '*';
-  width: 0.5in;
-  position: absolute;
-  right: 0;
-}
-.screenplay del:before {
-  content: '*';
-  width: 0.5in;
-  position: absolute;
-  right: 0;
-}
-.screenplay .section-heading {
-  display: block;
-  text-align: center;
-  text-decoration: underline;
-}
-.screenplay .scene-heading {
-  margin-top: {{scene-heading-spacing}};
-  margin-bottom: 0;
-  clear: both;
-  page-break-after: avoid;
-}
-.screenplay .action {
-  margin-top: 1em;
-  margin-bottom: 0;
-  clear: both;
-  white-space: pre-wrap;
-  orphans: 2;
-  widows: 2;
-}
-.screenplay .character {
-  max-width: 4in;
-  margin-top: 1em;
-  margin-left: 33%;
-  margin-bottom: 0;
-  clear: both;
-}
-.screenplay .character.dual-left {
-  width: 33%;
-  margin-left: 0;
-  padding-left: 15%;
-  float: left;
-  clear: left;
-}
-.screenplay .character.dual-right {
-  width: 33%;
-  margin-left: 50%;
-  padding-left: 15%;
-  clear: right;
-}
-.screenplay .dialog {
-  max-width: 3.5in;
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 17%;
-  clear: both;
-  white-space: pre-wrap;
-  orphans: 2;
-  widows: 2;
-}
-.screenplay .dialog.dual-left {
-  width: 48%;
-  margin-left: 0;
-  float: left;
-  clear: left;
-}
-.screenplay .dialog.dual-right {
-  width: 48%;
-  margin-left: 50%;
-  clear: right;
-}
-.screenplay .paren {
-  max-width: 2in;
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 27%;
-  text-indent: -0.6em;
-  page-break-inside: avoid;
-  page-break-after: avoid;
-}
-.screenplay .paren.dual-left {
-  width: 38%;
-  margin-left: 0;
-  padding-left: 10%;
-  float: left;
-  clear: left;
-}
-.screenplay .paren.dual-right {
-  width: 38%;
-  margin-left: 50%;
-  padding-left: 10%;
-  clear: right;
-}
-.screenplay .trans {
-  max-width: 2in;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  margin-left: 63%;
-  clear: both;
-  page-break-before: avoid;
-}
-.screenplay .note {
-  display: block;
-  font-size: 11pt;
-  font-family: \"Comic Sans MS\", \"Helvetica\", \"Marker Felt\";
-  line-height: 1.5;
-  background-color: lightgoldenrodyellow;
-  padding: 1em;
-}
-.screenplay .synopsis {
-  display: block;
-  margin-top: 0;
-  color: grey;
-  font-style: italic;
-}
-.screenplay .center {
-  text-align: center;
-  width: 100%;
-  white-space: pre-wrap;
-}
-.screenplay .underline {
-  text-decoration: underline;
-}
-.screenplay .menu {
-  display: none;
-  position: fixed;
-  top: 0;
-  right: 0;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.25);
-  cursor: pointer;
-}
+{{stylesheet}}
 </style>
 </head>
 <body>
 <section class=\"screenplay\">
+{{title-template}}
 <section class=\"title-page\">
-<p class=\"title\">{{title-template}}</p>
-<p class=\"contact\">{{contact-template}}</p>
 </section>
 {{content}}\
-<div class=\"menu\">Aa</div>
 </section>
 </body>")
     (section "<section class=\"section\">\n{{content}}</section>\n")
@@ -2759,6 +2554,135 @@ The format of TEMPLATE can include replacement keys in the form
 `fountain-export-format-template' for how replacement strings are
 calculated."
   :type 'fountain-element-list-type
+  :group 'fountain-export)
+
+(defcustom fountain-export-html-stylesheet
+  "\
+.screenplay {
+  font-family: {{font}};
+  font-size: 12pt;
+  line-height: 1;
+  max-width: 6in;
+  margin: 1em auto;
+  -webkit-text-size-adjust: none;
+}
+.screenplay h1, h2, h3, h4, h5, h6 {
+  font-weight: inherit;
+  font-size: inherit;
+}
+.screenplay a {
+  color: inherit;
+  text-decoration: none;
+}
+.screenplay .underline {
+  text-decoration: underline;
+}
+.screenplay .title-page {
+  margin: 0 auto 1em;
+}
+.screenplay .title-page .title {
+  text-align: center;
+}
+.screenplay .title-page .title h1 {
+  text-transform: uppercase;
+}
+.screenplay .section-heading {
+  text-align: center;
+}
+.screenplay .section-heading:hover {
+  background-color: paleturquoise;
+}
+.screenplay .scene {
+  margin-top: 2em;
+}
+.screenplay .scene-heading {
+  margin-bottom: 0;
+}
+.screenplay .scene-heading:hover {
+  background-color: paleturquoise;
+}
+.screenplay .action {
+  margin: 1em 0;
+  white-space: pre-wrap;
+}
+.screenplay .dialog {
+  width: 75%;
+  max-width: 4in;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 17%;
+}
+.screenplay .dialog .character {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 25%;
+}
+.screenplay .dialog .lines {
+  max-width: 3.5in;
+  margin-top: 0;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+.screenplay .dialog .paren {
+  max-width: 2in;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 15%;
+  text-indent: -0.6em;
+  page-break-inside: avoid;
+  page-break-after: avoid;
+}
+.screenplay .dual-dialog {
+  width: 100%;
+  margin: 1em 0;
+}
+.screenplay .dual-dialog .dialog {
+  max-width: 50%;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+  float: left;
+  clear: none;
+}
+.screenplay .dual-dialog .dialog .lines {
+  width: 95%;
+}
+.screenplay .trans {
+  max-width: 2in;
+  margin-left: 63%;
+  clear: both;
+  page-break-before: avoid;
+}
+.screenplay .note {
+  display: block;
+  font-size: 11pt;
+  font-family: \"Comic Sans MS\", \"Marker Felt\", \"sans-serif\";
+  line-height: 1.5;
+  background-color: lightgoldenrodyellow;
+  padding: 1em;
+}
+.screenplay .synopsis {
+  margin-top: 0;
+  color: grey;
+  font-style: italic;
+}
+.screenplay .center {
+  text-align: center;
+  white-space: pre-wrap;
+}"
+  "Stylesheet for HTML export"
+  :type 'string
+  :group 'fountain-export)
+
+(defcustom fountain-export-html-title-template
+  "<div class=\"title\">{{title-template}}</div>
+<h1>{{title}}</h1>
+<p>{{credit}}</p>
+<p>{{author}}</p>
+<p class=\"contact\">{{contact-template}}</p>
+"
+  "HTML template for title page export."
+  :type 'string
   :group 'fountain-export)
 
 (defvar fountain-export-html-replacements
