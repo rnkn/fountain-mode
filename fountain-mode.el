@@ -2593,7 +2593,7 @@ calculated."
   background-color: paleturquoise;
 }
 .screenplay .scene {
-  margin-top: 2em;
+  margin-top: {{scene-spacing}};
 }
 .screenplay .scene-heading {
   margin-bottom: 0;
