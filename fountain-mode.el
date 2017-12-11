@@ -968,24 +968,26 @@ See <http://debbugs.gnu.org/24073>."
 
 ;;; Element Matching
 
-(defun fountain-blank-p ()
-  "Return non-nil if point is at a blank line."
+(defun fountain-blank-before-p ()
+  "Return non-nil if preceding line is blank or a comment."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
-      ;; don't modify match-data
-      (looking-at-p fountain-blank-regexp))))
+      (forward-line -1)
+      (or (bobp)
+          (and (bolp) (eolp))
+          (progn (end-of-line 1)
+                 (forward-comment -1))))))
 
-(defun fountain-tachyon-p ()
-  "Return non-nil if point is at a non-interfering element.
-These include blank lines, section headings, synopses, notes, and
-comments."
-  (or (fountain-blank-p)
-      (fountain-match-comment)
-      (fountain-match-section-heading) ; FIXME: what about stageplays?
-      (fountain-match-synopsis)
-      (fountain-match-note)))
+(defun fountain-blank-after-p ()
+  "Return non-nil if following line is blank or a comment."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (forward-line 1)
+      (or (eobp)
+          (and (bolp) (eolp))
+          (forward-comment 1)))))
 
 (defun fountain-match-metadata ()
   "Match metadata if point is at metadata, nil otherwise."
@@ -1061,10 +1063,7 @@ comments."
       (widen)
       (forward-line 0)
       (and (looking-at fountain-scene-heading-regexp)
-           (save-match-data
-             (forward-line -1)
-             (or (bobp)
-                 (fountain-tachyon-p)))))))
+           (fountain-blank-before-p)))))
 
 (defun fountain-match-character ()
   "Match character if point is at character, nil otherwise."
@@ -1078,17 +1077,15 @@ comments."
            (save-match-data
              (save-restriction
                (widen)
-               (and (save-excursion
-                      (forward-line -1)
-                      (fountain-tachyon-p))
+               (and (fountain-blank-before-p)
                     (save-excursion
                       (forward-line 1)
                       (unless (eobp)
-                        (not (fountain-tachyon-p)))))))))))
+                        (not (and (bolp) (eolp))))))))))))
 
 (defun fountain-match-dialog ()
   "Match dialog if point is at dialog, nil otherwise."
-  (unless (or (fountain-blank-p)
+  (unless (or (and (bolp) (eolp))
               (fountain-match-paren)
               (fountain-match-note))
     (save-excursion
@@ -1124,16 +1121,9 @@ comments."
       (forward-line 0)
       (and (let (case-fold-search)
              (looking-at fountain-trans-regexp))
+           (fountain-blank-before-p)
            (save-match-data
-             (save-excursion
-               (forward-line -1)
-               (or (bobp)
-                   (fountain-tachyon-p))))
-           (save-match-data
-             (save-excursion
-               (forward-line 1)
-               (or (eobp)
-                   (fountain-tachyon-p))))))))
+             (fountain-blank-after-p))))))
 
 (defun fountain-match-center ()
   "Match centered text if point is at centered text, nil otherwise."
@@ -1167,7 +1157,6 @@ Assumes that all other element matching has been done."
 
 (defun fountain-get-element ()
   "Return element at point as a symbol."
-  ;; FIXME: use fountain-blank-p
   (cond
    ((and (bolp) (eolp)) nil)
    ((fountain-match-metadata) 'metadata)
@@ -1288,9 +1277,7 @@ NUMBER is an optional string to force the page number."
         (if (fountain-match-scene-heading)
             (fountain-insert-page-break number)
           (goto-char x)
-          (unless (save-excursion
-                    (forward-char -1)
-                    (fountain-blank-p))
+          (unless (fountain-blank-before-p)
             (insert-before-markers "\n\n"))
           (fountain-insert-page-break-string number)))))
     ;; Finally return to where we were.
@@ -3084,9 +3071,7 @@ If POS is nil, use `point' instead."
                 (insert-char ?\n))
             ;; Temporary newline if only 1 at eof
             (when (and (eobp)
-                       (save-excursion
-                         (forward-line -1)
-                         (not (fountain-blank-p))))
+                       (not (fountain-blank-before-p)))
               (insert-char ?\n)
               (setq hanging-line t))
             ;; Avoid eobp signal.
@@ -3354,9 +3339,10 @@ halt at end of scene."
           (lambda ()
             (while (cond ((eq limit 'dialog)
                           (and (not (= (point) (buffer-end p)))
-                               (or (fountain-match-dialog)
-                                   (fountain-match-paren)
-                                   (fountain-tachyon-p))))
+                               (or (and (bolp) (eolp))
+                                   (forward-comment p)
+                                   (fountain-match-dialog)
+                                   (fountain-match-paren))))
                          ((eq limit 'scene)
                           (not (or (= (point) (buffer-end p))
                                    (fountain-match-character)
@@ -3610,10 +3596,8 @@ a scene heading."
   (when (outline-back-to-heading)
     (forward-line 1)
     (or (bolp) (newline))
-    (unless (and (fountain-blank-p)
-                 (save-excursion
-                   (forward-line 1)
-                   (fountain-blank-p)))
+    (unless (and (bolp) (eolp)
+                 (fountain-blank-after-p))
       (save-excursion
         (newline)))
     (insert "= ")
@@ -3629,11 +3613,9 @@ ARG (\\[universal-argument]), only insert note delimiters."
         (comment-end "]]"))
     (if (or arg (use-region-p))
         (comment-dwim nil)
-      (unless (fountain-blank-p)
+      (unless (and (bolp) (eolp))
         (re-search-forward "^[\s\t]*$" nil 'move))
-      (unless (save-excursion
-                (forward-line 1)
-                (fountain-blank-p))
+      (unless (fountain-blank-after-p)
         (save-excursion
           (newline)))
       (comment-indent)
