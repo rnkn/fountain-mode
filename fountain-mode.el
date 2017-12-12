@@ -3819,7 +3819,17 @@ scene number from being auto-upcased."
 ;;; Font Lock
 
 (defvar fountain-font-lock-keywords-plist
-  `(;; Section Headings
+  `(;; Action
+    ((lambda (limit)
+       (fountain-match-element 'fountain-match-action limit))
+     ((:level 1 :subexp 0 :face fountain-action
+              :invisible action)
+      (:level 2 :subexp 1 :face fountain-non-printing
+              :invisible fountain-syntax-chars
+              :override t
+              :laxmatch t))
+     fountain-align-action)
+    ;; Section Headings
     (,fountain-section-heading-regexp
      ((:level 2 :subexp 0 :face fountain-section-heading
               :invisible section-heading)
@@ -3927,16 +3937,6 @@ scene number from being auto-upcased."
       (:level 2 :subexp 3 :face fountain-metadata-value
               :override t
               :laxmatch t)))
-    ;; Action
-    ((lambda (limit)
-       (fountain-match-element 'fountain-match-action limit))
-     ((:level 1 :subexp 0 :face fountain-action
-              :invisible action)
-      (:level 1 :subexp 1 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t
-              :laxmatch t))
-     fountain-align-action)
     ;; Underline text
     (,fountain-underline-regexp
      ((:level 2 :subexp 2 :face fountain-non-printing
