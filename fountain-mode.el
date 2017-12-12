@@ -2380,7 +2380,7 @@ Command acts on current buffer or BUFFER."
     (section "{{content}}")
     (section-heading "{{content}}\n\n")
     (scene "{{content}}")
-    (scene-heading "{{content}}\n\n")
+    (scene-heading "{{scene-spacing}}{{content}}\n\n")
     (dual-dialog "{{content}}\n")
     (dialog "{{content}}\n")
     (character "{{content}}\n")
