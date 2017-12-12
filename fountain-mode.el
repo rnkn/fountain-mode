@@ -3843,20 +3843,20 @@ scene number from being auto-upcased."
               :invisible scene-heading)
       (:level 2 :subexp 2 :face fountain-non-printing
               :invisible fountain-syntax-chars
-              :override append
+              :override prepend
               :laxmatch t)
       (:level 2 :subexp 4
               :laxmatch t)
       (:level 2 :subexp 5 :face fountain-non-printing
               :invisible fountain-syntax-chars
-              :override append
+              :override prepend
               :laxmatch t)
       (:level 2 :subexp 6
-              :override append
+              :override prepend
               :laxmatch t)
       (:level 2 :subexp 7 :face fountain-non-printing
               :invisible fountain-syntax-chars
-              :override append
+              :override prepend
               :laxmatch t))
      fountain-align-scene-heading)
     ;; Character
