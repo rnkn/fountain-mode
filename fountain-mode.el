@@ -2813,7 +2813,7 @@ contact:
     (lines "{{content}}\n")
     (trans "{{forced}}{{content}}\n\n")
     (action "{{forced}}{{content}}\n\n")
-    (page-break "==={{content}}\n\n")
+    (page-break "=== {{content}} ===\n\n")
     (synopsis "= {{content}}\n\n")
     (note "[[ {{content}} ]]\n\n")
     (center "> {{content}} <")
