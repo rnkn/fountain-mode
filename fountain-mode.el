@@ -1906,24 +1906,75 @@ specify a different filename."
      :tag "HTML"
      :ext ".html"
      :template fountain-export-html-template
-     :replace fountain-export-html-replacements
+     :string-replace (("&" "&amp;")
+                      ("<" "&lt;")
+                      (">" "&gt;")
+                      ("\\\\\\*" "&#42;")
+                      ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "<strong><em>\\1</em></strong>")
+                      ("\\*\\*\\(.+?\\)\\*\\*" "<strong>\\1</strong>")
+                      ("\\*\\(.+?\\)\\*" "<em>\\1</em>")
+                      ("^~\s*\\(.+?\\)$" "<i>\\1</i>")
+                      ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
+                      ("\n\n+" "<br><br>")
+                      ("\n" "<br>"))
+     :eval-replace ((stylesheet fountain-export-html-stylesheet)
+                    (font fountain-export-font)
+                    (scene-spacing
+                     (if (memq 'double-space fountain-export-scene-heading-format)
+                         "2em" "1em")))
      :hook fountain-export-html-hook)
     (fdx
      :tag "Final Draft"
      :ext ".fdx"
      :template fountain-export-fdx-template
-     :replace fountain-export-fdx-replacements
+     :string-replace (("&" "&#38;")
+                      ("<" "&#60;")
+                      (">" "&#62;")
+                      ("\"" "&#34")
+                      ("'" "&#39;")
+                      ("\\\\_" "&#96;")
+                      ("\\\\\\*" "&#42;")
+                      ("_\\*\\*\\*\\(.+?\\)\\*\\*\\*_" "</Text><Text Style=\"Bold+Underline+Italic\">\\1</Text><Text>")
+                      ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "</Text><Text Style=\"Bold+Italic\">\\1</Text><Text>")
+                      ("_\\*\\*\\(.+?\\)\\*\\*_" "</Text><Text Style=\"Bold+Underline\">\\1</Text><Text>")
+                      ("_\\*\\(.+?\\)\\*_" "</Text><Text Style=\"Underline+Italic\">\\1</Text><Text>")
+                      ("\\*\\*\\(.+?\\)\\*\\*" "</Text><Text Style=\"Bold\">\\1</Text><Text>")
+                      ("\\*\\(.+?\\)\\*" "</Text><Text Style=\"Italic\">\\1</Text><Text>")
+                      ("^~\s*\\(.+?\\)$" "</Text><Text Style=\"Italic\">\\1</Text><Text>")
+                      ("_\\(.+?\\)_" "</Text><Text Style=\"Underline\">\\1</Text><Text>")
+                      ("\n\n+" "\n\n"))
+     :cond-replace ((t
+                     (starts-new-page
+                      (t "Yes") (nil "No"))))
      :hook fountain-export-fdx-hook)
     (fountain
      :tag "Fountain"
      :ext ".fountain"
      :template fountain-export-fountain-template
+     :cond-replace ((scene-heading
+                     (forced (t ".")))
+                    (character
+                     (dual (right " ^"))
+                     (forced (t "@")))
+                    (trans
+                     (forced (t "> ")))
+                    (action
+                     (forced (t "!")))
+                    (section-heading
+                     (level (1 "#")
+                             (2 "##")
+                             (3 "###")
+                             (4 "####")
+                             (5 "#####"))))
      :hook fountain-export-fountain-hook)
     (txt
      :tag "plaintext"
      :ext ".txt"
      :fill t
      :template fountain-export-txt-template
+     :eval-replace ((scene-spacing
+                     (if (memq 'double-space fountain-export-scene-heading-format)
+                         "\n")))
      :hook fountain-export-txt-hook))
   "Association list of export formats and their properties.
 
@@ -2085,71 +2136,37 @@ whitespace is converted to dashes. e.g.
           (delete-region (match-beginning 4) (match-end 4))
           (delete-region (match-beginning 2) (match-end 2))))
       ;; Fill the buffer and return it as a string.
-      ;; (adaptive-fill-mode 0)
       (fill-region (point-min) (point-max)))
     (buffer-string)))
 
 (defun fountain-export-replace-in-string (string format)
-  "Replace matches in STRING for FORMAT alist in `fountain-export-format-replace-alist'."
   (let ((replace-alist
-         (symbol-value
-          (plist-get (alist-get format fountain-export-formats)
-                     :replace))))
+         (plist-get (alist-get format fountain-export-formats)
+                    :string-replace)))
   (dolist (replacement replace-alist string)
     (setq string (replace-regexp-in-string
                   (car replacement) (cadr replacement) string t nil)))))
 
-(defconst fountain-export-conditional-replacements
-  '((fdx
-     (t
-      (starts-new-page
-       (t "Yes") (nil "No"))))
-    (fountain
-     (scene-heading
-      (forced (t ".")))
-     (character
-      (dual (right " ^"))
-      (forced (t "@")))
-     (trans
-      (forced (t "> ")))
-     (action
-      (forced (t "!")))
-     (section-heading
-      (level (1 "#")
-             (2 "##")
-             (3 "###")
-             (4 "####")
-             (5 "#####")))))
-  "Conditional replacements dependent on element properties.
-Used by `fountain-export-element'.
+(defun fountain-export-get-cond-replacement (format element key value)
+  (let ((replace-alist
+         (plist-get (alist-get format
+                               fountain-export-formats)
+                    :cond-replace)))
+    (car
+     (alist-get value
+                (alist-get key
+                           (or (alist-get element replace-alist)
+                               (alist-get t replace-alist)))))))
 
-Takes the form:
-
-    (FORMAT
-     (ELEMENT
-      (PROP-KEY
-       (PROP-VALUE \"REPLACEMENT\")
-        ...)))
-
-A value of t represents all.")
-
-(defconst fountain-export-replacements
-  '((ps
-     (title-template fountain-export-ps-title-template))
-    (fdx
-     (title-template fountain-export-fdx-title-template))
-    (html
-     (emacs-version emacs-version)
-     (fountain-version fountain-version)
-     (stylesheet fountain-export-html-stylesheet)
-     (page-size (symbol-name fountain-export-page-size))
-     (font fountain-export-font)
-     (title-template fountain-export-html-title-template)
-     (scene-heading-spacing
-      (if (memq 'double-space fountain-export-scene-heading-format)
-          "2em" "1em"))
-     (more fountain-export-more-dialog-string)
-     (contd fountain-continued-dialog-string))))
+(defun fountain-export-get-eval-replacement (key format)
+  (let ((replacement
+         (car (alist-get key
+                         (plist-get (alist-get format fountain-export-formats)
+                                    :eval-replace))))
+        string)
+    (unwind-protect
+        (setq string (eval replacement))
+      (if (stringp string) string))))
 
 (defun fountain-export-element (element-list format)
   "Return a formatted string from ELEMENT-LIST according to FORMAT.
@@ -2240,28 +2257,10 @@ and set ELEMENT-TEMPLATE. If so, replace matches of
                           ;; attempt conditional replacement based on KEY's
                           ;; VALUE.
                           ((memq key plist)
-                           (let* ((format-alist
-                                   (alist-get format fountain-export-conditional-replacements))
-                                  (element-alist
-                                   (or (alist-get element format-alist)
-                                       (alist-get t format-alist)))
-                                  (key-alist
-                                   (alist-get (intern key) element-alist)))
-                             (or (car (alist-get value key-alist)) "")))
+                           (fountain-export-get-cond-replacement format element key value))
                           ;; Otherwise, attempt expression replacements.
-                          (t
-                           (let* ((format-alist
-                                   (alist-get format fountain-export-replacements))
-                                  (replacement
-                                   (car (alist-get (intern key) format-alist))))
-                             ;; If a replacement expression is found, evaluate
-                             ;; it to get a string, and if it is a string, use
-                             ;; it, otherwise insert an empty string.
-                             (if replacement
-                                 (let ((replacement-string (eval replacement)))
-                                   (if (stringp replacement-string)
-                                       replacement-string ""))
-                               ""))))))
+                          ((fountain-export-get-eval-replacement (intern key) format))
+                          (t ""))))
                      element-template t t)))
             (setq string element-template))
            ;; If there's no ELEMENT-TEMPLATE for element in FORMAT-TEMPLATE, set
@@ -2690,24 +2689,6 @@ parent."
   :type 'string
   :group 'fountain-export)
 
-(defvar fountain-export-html-replacements
-  '(("&" "&amp;")
-    ("<" "&lt;")
-    (">" "&gt;")
-    ("\\\\\\*" "&#42;")
-    ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "<strong><em>\\1</em></strong>")
-    ("\\*\\*\\(.+?\\)\\*\\*" "<strong>\\1</strong>")
-    ("\\*\\(.+?\\)\\*" "<em>\\1</em>")
-    ("^~\s*\\(.+?\\)$" "<i>\\1</i>")
-    ("_\\(.+?\\)_" "<span class=\"underline\">\\1</span>")
-    ("\n\n+" "<br><br>")
-    ("\n" "<br>"))
-  "Association list of regular expression export replacements.
-Replacements are made in sequential order. The sequence is
-important: first, characters that are special in the export
-format are sanitized, then escaped characters are converted to
-character codes, then format replacement is made.")
-
 (defcustom fountain-export-html-hook
   nil
   "Hook run with export buffer on sucessful export to HTML."
@@ -2804,29 +2785,6 @@ The format of TEMPLATE can include replacement keys in the form
 If TEMPLATE is nil, the string is discarded."
   :type 'fountain-element-list-type
   :group 'fountain-export)
-
-(defvar fountain-export-fdx-replacements
-  '(("&" "&#38;")
-    ("<" "&#60;")
-    (">" "&#62;")
-    ("\"" "&#34")
-    ("'" "&#39;")
-    ("\\\\_" "&#96;")
-    ("\\\\\\*" "&#42;")
-    ("_\\*\\*\\*\\(.+?\\)\\*\\*\\*_" "</Text><Text Style=\"Bold+Underline+Italic\">\\1</Text><Text>")
-    ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "</Text><Text Style=\"Bold+Italic\">\\1</Text><Text>")
-    ("_\\*\\*\\(.+?\\)\\*\\*_" "</Text><Text Style=\"Bold+Underline\">\\1</Text><Text>")
-    ("_\\*\\(.+?\\)\\*_" "</Text><Text Style=\"Underline+Italic\">\\1</Text><Text>")
-    ("\\*\\*\\(.+?\\)\\*\\*" "</Text><Text Style=\"Bold\">\\1</Text><Text>")
-    ("\\*\\(.+?\\)\\*" "</Text><Text Style=\"Italic\">\\1</Text><Text>")
-    ("^~\s*\\(.+?\\)$" "</Text><Text Style=\"Italic\">\\1</Text><Text>")
-    ("_\\(.+?\\)_" "</Text><Text Style=\"Underline\">\\1</Text><Text>")
-    ("\n\n+" "\n\n"))
-  "Association list of regular expression export replacements.
-Replacements are made in sequential order. The sequence is
-important: first, characters that are special in the export
-format are sanitized, then escaped characters are converted to
-character codes, then format replacement is made.")
 
 (defcustom fountain-export-fdx-hook
   nil
