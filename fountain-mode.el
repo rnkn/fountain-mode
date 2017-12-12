@@ -1954,6 +1954,9 @@ specify a different filename."
                              (3 "###")
                              (4 "####")
                              (5 "#####"))))
+     :eval-replace ((scene-spacing
+                     (if (memq 'double-space fountain-export-scene-heading-format)
+                         "\n")))
      :hook fountain-export-fountain-hook)
     (txt
      :tag "plaintext"
@@ -2802,7 +2805,7 @@ contact:
     (section "{{content}}")
     (section-heading "{{level}}{{content}}\n\n")
     (scene "{{content}}")
-    (scene-heading "{{forced}}{{content}}\n\n")
+    (scene-heading "{{scene-spacing}}{{forced}}{{content}}\n\n")
     (dual-dialog "{{content}}\n")
     (dialog "{{content}}\n")
     (character "{{forced}}{{content}}{{dual-dialog}}\n")
