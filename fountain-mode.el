@@ -3603,6 +3603,19 @@ same script may result in errors in output."
   :type 'boolean
   :group 'fountain)
 
+(defcustom fountain-scene-number-first-revision
+  ?A
+  "Character to start revised scene numbers."
+  :type 'character
+  :group 'fountain-scene-number)
+
+(defcustom fountain-scene-number-separator
+  nil
+  "character to separate scene numbers."
+  :type '(choice (const nil)
+                 (character ?-))
+  :group 'fountain-scene-number)
+
 (defun fountain-scene-number-to-list (string) ; FIXME: alternate separators and starting char
   "Read scene number STRING and return a list.
 
@@ -3628,29 +3641,37 @@ Or if nil:
       (setq revision (mapcar #'(lambda (n) (- (upcase n) 64)) revision))
       (cons number revision))))
 
-(defun fountain-scene-number-to-string (list)
-  "Read scene number LIST and return a string.
+(defun fountain-scene-number-to-string (scene-num-list)
+  "Read scene number SCENE-NUM-LIST and return a string.
 
 If `fountain-prefix-revised-scene-numbers' is non-nil:
 
     (10) -> \"10\"
-    (9 1 1) -> \"AA10\"
+    (9 1 2) -> \"AB10\"
 
 Or, if nil:
 
     (10) -> \"10\"
-    (9 1 1) -> \"9AA\""
-  (when (listp list)
-    (let ((number (car list))
-          (revision (mapconcat #'(lambda (char) (char-to-string (+ char 64)))
-                               (cdr list) nil)))
-      (if fountain-prefix-revised-scene-numbers
-          (progn
-            (unless (string-empty-p revision) (setq number (1+ number)))
-            (concat revision (number-to-string number)))
-        (concat (number-to-string number) revision)))))
+    (9 1 2) -> \"9AB\""
+  (let* ((number (car scene-num-list))
+         separator revision)
+    (if (< 1 (list-length scene-num-list))
+        (setq separator
+              (if fountain-scene-number-separator
+                  (char-to-string fountain-scene-number-separator)
+                "")
+              revision
+              (mapconcat #'(lambda (char)
+                             (char-to-string
+                              (+ (1- char) fountain-scene-number-first-revision)))
+                         (cdr scene-num-list) separator)))
+    (if fountain-prefix-revised-scene-numbers
+        (progn
+          (unless (string-empty-p revision) (setq number (1+ number)))
+          (concat revision separator (number-to-string number)))
+      (concat (number-to-string number) separator revision))))
 
-(defun fountain-get-scene-number (&optional n)
+(defun fountain-get-scene-number (&optional n) ; FIXME: inclusions break scene numbers
   "Return the scene number of the Nth next scene as a list.
 Return Nth previous if N is negative."
   (unless n (setq n 0))
