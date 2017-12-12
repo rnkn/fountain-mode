@@ -3939,42 +3939,42 @@ scene number from being auto-upcased."
      fountain-align-action)
     ;; Underline text
     (,fountain-underline-regexp
-     ((:level 1 :subexp 2 :face fountain-non-printing
+     ((:level 2 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)
       (:level 1 :subexp 3 :face underline
               :override append)
-      (:level 1 :subexp 4 :face fountain-non-printing
+      (:level 2 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)))
     ;; Italic text
     (,fountain-italic-regexp
-     ((:level 1 :subexp 2 :face fountain-non-printing
+     ((:level 2 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)
       (:level 1 :subexp 3 :face italic
               :override append)
-      (:level 1 :subexp 4 :face fountain-non-printing
+      (:level 2 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)))
     ;; Bold text
     (,fountain-bold-regexp
-     ((:level 1 :subexp 2 :face fountain-non-printing
+     ((:level 2 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)
       (:level 1 :subexp 3 :face bold
               :override append)
-      (:level 1 :subexp 4 :face fountain-non-printing
+      (:level 2 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)))
     ;; Bold-Italic text
     (,fountain-bold-italic-regexp
-     ((:level 1 :subexp 2 :face fountain-non-printing
+     ((:level 2 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)
       (:level 1 :subexp 3 :face bold-italic
               :override append)
-      (:level 1 :subexp 4 :face fountain-non-printing
+      (:level 2 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)))
     ;; Lyrics
