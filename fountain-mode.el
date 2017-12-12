@@ -1856,18 +1856,6 @@ Options are: bold, double-space, underline."
   :type 'string
   :group 'fountain-export)
 
-;; (defcustom fountain-export-convert-quotes
-;;   nil
-;;   "If non-nil, replace TeX-style quotes with \"smart-quotes\".
-
-;;     \`\`HAL\'\'
-
-;; will be exported as
-
-;;     “HAL”"
-;;   :type 'boolean
-;;   :group 'fountain-export)
-
 (defcustom fountain-export-shell-command
   "afterwriting --source %s --pdf --overwrite"
   "Shell command string to convert Fountain source to ouput.
