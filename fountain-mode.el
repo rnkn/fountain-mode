@@ -1856,6 +1856,18 @@ Passed to `format' with export format as single variable."
   :type 'boolean
   :group 'fountain-export)
 
+(defcustom fountain-export-number-first-page
+  nil
+  "If non-nil, add a page number to the first page."
+  :type 'boolean
+  :group 'fountain-export)
+
+(defcustom fountain-export-include-scene-numbers
+  nil
+  "if non-nil, include scene numbers in export."
+  :type 'boolean
+  :group 'fountain-export)
+
 (defcustom fountain-export-scene-heading-format
   '(double-space)
   "List of format options applied when exporting scene headings.
@@ -1949,6 +1961,15 @@ specify a different filename."
                          "true" "false"))
                     (scene-heading-bold
                      (if (memq 'bold fountain-export-scene-heading-format)
+                         "true" "false"))
+                    (title-contact-align
+                     (if fountain-export-contact-align-right
+                         "true" "false"))
+                    (number-first-page
+                     (if fountain-export-number-first-page
+                         "true" "false"))
+                    (include-scene-numbers
+                     (if fountain-export-include-scene-numbers
                          "true" "false")))
      :hook fountain-export-tex-hook)
     (fdx
@@ -3015,7 +3036,7 @@ character codes, then format replacement is made."
 <Text>{{author}}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Left\">
-<Text>{{contact-template}}</Text>
+<Text>{{contact}}</Text>
 </Paragraph>
 </Content>
 </TitlePage>
