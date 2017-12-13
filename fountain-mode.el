@@ -2351,11 +2351,11 @@ and set ELEMENT-TEMPLATE. If so, replace matches of
                           ;; VALUE.
                           ((stringp value)
                            (fountain-export-replace-in-string value format))
-                          ;; If KEY's VALUE is not a string, but still in PLIST,
+                          ;; If KEY's VALUE is not a string but still non-nil
                           ;; attempt conditional replacement based on KEY's
                           ;; VALUE.
-                          ((memq key plist)
-                           (fountain-export-get-cond-replacement format element key value))
+                          (value
+                           (fountain-export-get-cond-replacement format element (intern key) value))
                           ;; Otherwise, attempt expression replacements.
                           ((fountain-export-get-eval-replacement (intern key) format))
                           (t ""))))
