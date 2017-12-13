@@ -2934,11 +2934,11 @@ parent."
 % tex-command: \"xelatex\"
 % TeX-engine: xetex
 % End:")
-    (section "{{content}}\n")
+    (section "{{content}}")
     (section-heading "\\sectionheading{{{content}}}\n\n")
-    (scene "{{content}}\n")
+    (scene "{{content}}")
     (scene-heading "\\sceneheading{{{content}}}\n\n")
-    (dual-dualog nil)
+    (dual-dialog "")
     (dialog "\\begin{dialog}{{content}}\\end{dialog}\n\n")
     (character "{{{content}}}\n")
     (paren "\\paren{{{content}}}\n")
@@ -2946,8 +2946,8 @@ parent."
     (trans "\\trans{{{content}}}\n\n")
     (action "{{content}}\n\n")
     (page-break "\\clearpage\n\n")
-    (synopsis nil)
-    (note nil)
+    (synopsis "")
+    (note "")
     (center "\\centertext{{{content}}}\n\n"))
   "Association list of element templates for exporting to LaTeX.
 Takes the form:
