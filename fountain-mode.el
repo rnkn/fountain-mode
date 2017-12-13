@@ -1501,10 +1501,7 @@ Includes child elements."
                 (list 'begin (match-beginning 0)
                       'end (match-end 0)
                       'forced (stringp (match-string 2))
-                      'export (if (or (memq 'character export-elements)
-                                      (memq 'lines export-elements)
-                                      (memq 'paren export-elements))
-                                  t)
+                      'export (if (memq 'character export-elements) t)
                       'starts-new-page (unless (eq dual 'left) starts-new-page))
                 (match-string-no-properties 3)))
          (end
@@ -1520,7 +1517,10 @@ Includes child elements."
                 (list 'begin beg
                       'end end
                       'dual dual
-                      'export t)
+                      'export (if (or (memq 'character export-elements)
+                                      (memq 'lines export-elements)
+                                      (memq 'paren export-elements))
+                                  t))
                 (cons character
                       (fountain-parse-region (point) end export-elements job))))
     ;; If at the first (left) character of dual dialogue, parse a dual-dialogue
