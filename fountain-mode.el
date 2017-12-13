@@ -4531,6 +4531,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e l") #'fountain-export-buffer-to-latex)
     (define-key map (kbd "C-c C-e d") #'fountain-export-buffer-to-fdx)
+    (define-key map (kbd "C-c C-e t") #'fountain-export-buffer-to-txt)
     (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
     (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
     ;; View commands:
