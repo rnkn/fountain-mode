@@ -2084,6 +2084,54 @@ Takes the form:
 
     (ELEMENT KEYWORD PROPERTY)")
 
+(defun define-fountain-export-template-docstring (format)
+  (let ((tag (plist-get (alist-get format fountain-export-formats)
+                        :tag)))
+    (format
+     "Association list of element templates for exporting to %s.
+Takes the form:
+
+    ((ELEMENT TEMPLATE)
+      ...)
+
+ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
+is the template with which to format the format string. If
+TEMPLATE is nil, the format string is discarded.
+
+Fountain ELEMENTs:
+
+    document            wrapper template for all content, see
+                        `fountain-export-standalone'
+    section             string of section, including child elements
+    section-heading     string of section heading, excluding syntax chars
+    scene               string of scene, including child elements
+    scene-heading       string of scene heading, excluing syntax chars
+    dual-dialog         string of dual-dialogue block, including child dialog
+                        block elements
+    dialog              string of dialogue block, including child elements
+    character           string of character name, excluding syntax chars
+    paren               string of parenthetical
+    lines               string of dialogue lines, up to end of dialogue block or
+                        next parenthetical
+    trans               string of transition, excluding syntax chars
+    action              string of action block
+    synopsis            string of synopsis, excluding syntax chars
+    note                string of note, excluding syntax chars
+    center              string of center text, excluding syntax chars
+
+Each TEMPLATE should include the replacement key `{{content}}'.
+Templates may use any metadata keys (e.g. `{{title}}', `{{author}}',
+etc.) as well as keys defined in `fountain-export-formats'." tag)))
+
+;; The %s template also uses the following keys:
+
+;; %s" tag tag
+;;     (mapconcat #'(lambda (var)
+;;                    (concat "    {{" (symbol-name (car var)) "}}"))
+;;                (plist-get (alist-get format fountain-export-formats)
+;;                           :eval-replace)
+;;                "\n"))))
+
 (define-widget 'fountain-element-list-type 'lazy
   "Customize widget for Fountain templates."
   :offset 4
@@ -2450,43 +2498,7 @@ Command acts on current buffer or BUFFER."
     (synopsis "{{content}}\n\n")
     (note "[ note: {{content}} ]\n\n")
     (center "{{content}}"))
-  "Association list of element templates for exporting to Fountain.
-Takes the form:
-
-    ((ELEMENT TEMPLATE) ...)
-
-ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
-is the template with which to format the format string. If
-TEMPLATE is nil, the format string is passed as is without
-formatting. An empty string discards the format string and passes
-the empty string.
-
-Fountain ELEMENTs:
-
-    document            wrapper template for all content, see
-                        `fountain-export-standalone'
-    section             section string, including child elements
-    section-heading     section heading string, excluding syntax chars
-    scene               scene string, including child elements
-    scene-heading       scene heading string, excluing syntax chars
-    dialog              dialogue string, including child elements
-    dual-dialog         dual dialogue string, including child elements
-    character           character string, excluding syntax chars
-    paren               parenthetical string
-    lines               dialogue lines, up to end of dialogue block or
-                        next parenthetical
-    trans               transition string, excluding syntax chars
-    action              action string
-    page-break          page break, including forced page number
-    synopsis            synopsis string, excluding syntax chars
-    note                note string, excluding syntax chars
-    center              center text string, excluding syntax chars
-    include             inclusion string
-
-The format of TEMPLATE can include replacement keys in the form
-{{KEY}}. Each TEMPLATE should include the {{content}} key.
-
-If TEMPLATE is nil, the string is discarded."
+  (define-fountain-export-template-docstring 'txt)
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
@@ -2560,42 +2572,7 @@ If TEMPLATE is nil, the string is discarded."
     (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
     (note "<p class=\"note\">{{content}}</p>\n")
     (center "<p class=\"center\">{{content}}</p>\n"))
-  "Association list of element templates for exporting to HTML.
-Takes the form:
-
-    ((ELEMENT TEMPLATE) ...)
-
-ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
-is the template with which to format the format string. If
-TEMPLATE is nil, the format string is passed as is without
-formatting. An empty string discards the format string and passes
-the empty string.
-
-Fountain ELEMENTs:
-
-    document            wrapper template for all content, see
-                        `fountain-export-standalone'
-    section             section string, including child elements
-    section-heading     section heading string, excluding syntax chars
-    scene               scene string, including child elements
-    scene-heading       scene heading string, excluing syntax chars
-    dialog              dialogue string, including child elements
-    dual-dialog         dual dialogue string, including child elements
-    character           character string, excluding syntax chars
-    paren               parenthetical string
-    lines               dialogue lines, up to end of dialogue block or
-                        next parenthetical
-    trans               transition string, excluding syntax chars
-    action              action string
-    page-break          page break, including forced page number
-    synopsis            synopsis string, excluding syntax chars
-    note                note string, excluding syntax chars
-    center              center text string, excluding syntax chars
-
-The format of TEMPLATE can include replacement keys in the form
-`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
-`fountain-export-format-template' for how replacement strings are
-calculated."
+  (define-fountain-export-template-docstring 'html)
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
@@ -2949,40 +2926,7 @@ parent."
     (synopsis "")
     (note "")
     (center "\\centertext{{{content}}}\n\n"))
-  "Association list of element templates for exporting to LaTeX.
-Takes the form:
-
-    ((ELEMENT TEMPLATE) ...)
-
-ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
-is the template with which to format the format string. If
-TEMPLATE is nil, the format string is passed as is without
-formatting. An empty string discards the format string and passes
-the empty string.
-
-Fountain ELEMENTs:
-
-    document            wrapper template for all content, see
-                        `fountain-export-standalone'
-    section             string of section, including child elements
-    section-heading     string of section heading, excluding syntax chars
-    scene               string of scene, including child elements
-    scene-heading       string of scene heading, excluing syntax chars
-    dialog              string of dialogue block, including child elements
-    character           string of character name, excluding syntax chars
-    paren               string of parenthetical
-    lines               string of dialogue lines, up to end of dialogue block or
-                        next parenthetical
-    trans               string of transition, excluding syntax chars
-    action              string of action block
-    synopsis            string of synopsis, excluding syntax chars
-    note                string of note, excluding syntax chars
-    center              string of center text, excluding syntax chars
-
-The format of TEMPLATE can include replacement keys in the form
-`{{KEY}}'. Each TEMPLATE should include the {{content}} key. See
-`fountain-export-format-template' for how replacement strings are
-calculated."
+  (define-fountain-export-template-docstring 'tex)
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
@@ -3065,40 +3009,7 @@ character codes, then format replacement is made."
     (synopsis nil)
     (note nil)
     (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
-  "Association list of element templates for exporting to Final Draft.
-Takes the form:
-
-    ((ELEMENT TEMPLATE) ...)
-
-ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
-is the template with which to format a string.
-
-Fountain ELEMENTs:
-
-    document            wrapper template for all content, see
-                        `fountain-export-standalone'
-    section             section string, including child elements
-    section-heading     section heading string, excluding syntax chars
-    scene               scene string, including child elements
-    scene-heading       scene heading string, excluing syntax chars
-    dialog              dialogue string, including child elements
-    dual-dialog         dual dialogue string, including child elements
-    character           character string, excluding syntax chars
-    paren               parenthetical string
-    lines               dialogue lines, up to end of dialogue block or
-                        next parenthetical
-    trans               transition string, excluding syntax chars
-    action              action string
-    page-break          page break, including forced page number
-    synopsis            synopsis string, excluding syntax chars
-    note                note string, excluding syntax chars
-    center              center text string, excluding syntax chars
-    include             inclusion string
-
-The format of TEMPLATE can include replacement keys in the form
-{{KEY}}. Each TEMPLATE should include the {{content}} key.
-
-If TEMPLATE is nil, the string is discarded."
+  (define-fountain-export-template-docstring 'fdx)
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
@@ -3142,43 +3053,7 @@ contact:
     (synopsis "= {{content}}\n\n")
     (note "[[ {{content}} ]]\n\n")
     (center "> {{content}} <"))
-  "Association list of element templates for exporting to Fountain.
-Takes the form:
-
-    ((ELEMENT TEMPLATE) ...)
-
-ELEMENT is the Fountain element, a symbol (see below). TEMPLATE
-is the template with which to format the format string. If
-TEMPLATE is nil, the format string is passed as is without
-formatting. An empty string discards the format string and passes
-the empty string.
-
-Fountain ELEMENTs:
-
-    document            wrapper template for all content, see
-                        `fountain-export-standalone'
-    section             section string, including child elements
-    section-heading     section heading string, excluding syntax chars
-    scene               scene string, including child elements
-    scene-heading       scene heading string, excluing syntax chars
-    dialog              dialogue string, including child elements
-    dual-dialog         dual dialogue string, including child elements
-    character           character string, excluding syntax chars
-    paren               parenthetical string
-    lines               dialogue lines, up to end of dialogue block or
-                        next parenthetical
-    trans               transition string, excluding syntax chars
-    action              action string
-    page-break          page break, including forced page number
-    synopsis            synopsis string, excluding syntax chars
-    note                note string, excluding syntax chars
-    center              center text string, excluding syntax chars
-    include             inclusion string
-
-The format of TEMPLATE can include replacement keys in the form
-{{KEY}}. Each TEMPLATE should include the {{content}} key.
-
-If TEMPLATE is nil, the string is discarded."
+  (define-fountain-export-template-docstring 'fountain)
   :type 'fountain-element-list-type
   :group 'fountain-export)
 
