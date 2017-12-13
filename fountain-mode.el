@@ -3572,15 +3572,19 @@ halt at end of scene."
   (setq n (or n 1))
   (fountain-forward-character (- n)))
 
-(defun fountain-forward-page (&optional n)
-  "Move forward N pages, or backward if N is negative."
-  (interactive)
-  ;; If we're at a page break, move to its end.
-  (if (fountain-match-page-break)
-      (goto-char (match-end 0)))
-  ;; Pages don't begin with blank space, so skip over any at point. Start
-  ;; counting lines.
+(defun fountain-forward-page ()
+  "Move point forward by an approximate page.
+
+Moves forward from point, which is unlikely to correspond to
+final exported pages and so probably should not be used
+interactively."
+  ;; Pages don't begin with blank space, so skip over any at point.
   (skip-chars-forward "\n\r\s\t")
+  ;; If we're at a page break, move to its end and skip over whitespace.
+  (when (fountain-match-page-break)
+    (goto-char (match-end 0))
+    (skip-chars-forward "\n\r\s\t"))
+  ;; Start counting lines.
   (let ((line-count 0))
     ;; Begin the main loop, which only halts if we reach the end of buffer, a
     ;; forced page break, or after the maximum lines in a page.
@@ -3625,7 +3629,8 @@ halt at end of scene."
             ;; Element is not exported, so skip it without incrementing
             ;; line-count.
             (goto-char (line-end-position))
-            (skip-chars-forward "\n\r\s\t"))))))))
+            (skip-chars-forward "\n\r\s\t")))))))
+  (skip-chars-forward "\n\r\s\t"))
 
 
 ;;; Endnotes
@@ -4502,7 +4507,6 @@ keywords suitable for Font Lock."
     (define-key map [remap backward-list] #'fountain-backward-scene)
     (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
     (define-key map [remap end-of-defun] #'fountain-end-of-scene)
-    (define-key map [remap forward-page]  #'fountain-forward-page)
     (define-key map [remap mark-defun] #'fountain-mark-scene)
     (define-key map (kbd "M-g s") #'fountain-goto-scene)
     (define-key map (kbd "M-n") #'fountain-forward-character)
