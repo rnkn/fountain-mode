@@ -1890,23 +1890,6 @@ Options are: bold, double-space, underline."
   :type 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-title-template
-  "\
-_{{title}}_
-
-{{credit}}
-
-{{author}}"
-  "Template for creating title page title block."
-  :type 'string
-  :group 'fountain-export)
-
-(defcustom fountain-export-contact-template
-  "{{date}}\n\n{{contact}}"
-  "Template for creating title page left block."
-  :type 'string
-  :group 'fountain-export)
-
 (defcustom fountain-export-use-title-as-filename
   nil
   "If non-nil, use title metadata as export filename.
@@ -2589,7 +2572,12 @@ Command acts on current buffer or BUFFER."
 <body>
 <section class=\"screenplay\">
 <section class=\"title-page\">
-{{title-template}}
+<div class=\"title\">
+<h1>{{title}}</h1>
+<p>{{credit}}</p>
+<p>{{author}}</p>
+</div>
+<p class=\"contact\">{{contact}}</p>
 </section>
 {{content}}\
 </section>
@@ -2831,24 +2819,38 @@ parent."
 \\author{{{author}}}
 \\date{{{date}}}
 \\newcommand{\\credit}{{{credit}}}
-\\newcommand{\\titletemplate}{{{title-template}}}
-\\newcommand{\\contacttemplate}{{{contact-template}}}
+\\newcommand{\\contact}{{{contact}}}
 
 \\newcommand{\\maketitlepage}{
   \\thispagestyle{empty}
   \\vspace*{3in}
 
+  \\iftoggle{boldtitle}{%
+    \\let\\BFtmp\\thetitle
+    \\renewcommand{\\thetitle}{\\textbf{\\BFtmp}}%
+  }{}
+  \\iftoggle{underlinetitle}{%
+    \\let\\ULtmp\\thetitle
+    \\renewcommand{\\thetitle}{\\uline{\\ULtmp}}%
+  }{}%
+
   \\begin{center}
-    \\titletemplate\\par
+    \\iftoggle{uppercasetitle}{%
+      \\begin{MakeUppercase}
+        \\thetitle
+      \\end{MakeUppercase}
+    }{\\thetitle}\\par
+    \\credit\\par
+    \\theauthor\\par
   \\end{center}
 
   \\vspace{3in}
   \\iftoggle{contactalignright}{%
     \\begin{flushright}
-      \\contacttemplate
+      \\contact
     \\end{flushright}
   }{%
-    \\contacttemplate
+    \\contact
   }\\par
   \\clearpage
 }
@@ -3065,13 +3067,12 @@ title: {{title}}
 credit: {{credit}}
 author: {{author}}
 date: {{date}}
-contact:
-  {{contact-template}}
+contact: {{contact}}
 
 
 {{content}}")
     (section "{{content}}")
-    (section-heading "{{level}}{{content}}\n\n")
+    (section-heading "{{level}} {{content}}\n\n")
     (scene "{{content}}")
     (scene-heading "{{scene-heading-spacing}}{{forced}}{{content}}\n\n")
     (dual-dialog "{{content}}\n")
