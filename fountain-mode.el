@@ -1190,15 +1190,23 @@ script, you may get incorrect output."
                        (cons (const :tag "A4" a4) integer)))
   :group 'fountain-page)
 
-(defun fountain-insert-page-break-string (&optional number)
-  (insert-before-markers
-   (concat "==="
-           (if (< 0 (string-width number)) (concat "\s" number "\s==="))
-           "\n\n")))
+(defun fountain-insert-page-break-string (&optional string)
+  (let ((page-break
+         (concat "==="
+                 (if (< 0 (string-width string))
+                     (concat "\s" string "\s===")))))
+  (if (save-excursion
+        (save-restriction
+          (widen)
+          (skip-chars-backward "\n\r\s\t")
+          (fountain-match-page-break)))
+      (replace-match page-break t t)
+    (insert page-break "\n\n"))))
 
-(defun fountain-insert-page-break (&optional number)
+(defun fountain-insert-page-break (&optional string)
   "Insert a page break at appropriate place preceding point.
-NUMBER is an optional string to force the page number."
+STRING is an optional page number string to force the page
+number."
   (interactive "sPage number (RET for none): ")
   ;; Save a marker where we are.
   (let ((pos (point-marker))
@@ -1210,7 +1218,7 @@ NUMBER is an optional string to force the page number."
      ;; safely break before.
      ((memq element '(section-heading scene-heading character))
       (forward-line 0)
-      (fountain-insert-page-break-string number))
+      (fountain-insert-page-break-string string))
      ;; If we're at a parenthetical, check if the previous line is a character.
      ;; and if so call recursively on that element.
      ((eq element 'paren)
@@ -1220,7 +1228,7 @@ NUMBER is an optional string to force the page number."
         (if (fountain-match-character)
             (progn
               (forward-line 0)
-              (fountain-insert-page-break number))
+              (fountain-insert-page-break string))
           ;; Otherwise parenthetical is mid-dialogue, so get character name
           ;; and break at this element.
           (goto-char x)
@@ -1229,7 +1237,7 @@ NUMBER is an optional string to force the page number."
              (concat
               (unless (bolp) "\n")
               fountain-export-more-dialog-string "\n\n"))
-            (fountain-insert-page-break-string number)
+            (fountain-insert-page-break-string string)
             ;; Insert character name and continued dialogue string.
             (insert-before-markers
              (concat name "\s" fountain-continued-dialog-string "\n"))))))
@@ -1246,19 +1254,19 @@ NUMBER is an optional string to force the page number."
                                (point))))
           (progn
             (forward-sentence -1)
-            (fountain-insert-page-break number))
+            (fountain-insert-page-break string))
         (let ((x (point)))
           (forward-char -1)
           (if (or (fountain-match-character)
                   (fountain-match-paren))
-              (fountain-insert-page-break number))
+              (fountain-insert-page-break string))
           (goto-char x)
           (let ((name (fountain-get-character -1)))
             (insert-before-markers
              (concat
               (unless (bolp) "\n")
               fountain-export-more-dialog-string "\n\n"))
-            (fountain-insert-page-break-string number)
+            (fountain-insert-page-break-string string)
             ;; Insert character name and continued dialogue string.
             (insert-before-markers
              (concat name "\s" fountain-continued-dialog-string "\n"))))))
@@ -1267,7 +1275,7 @@ NUMBER is an optional string to force the page number."
      ((memq element '(trans center))
       (skip-chars-backward "\n\r\s\t")
       (forward-line 0)
-      (fountain-insert-page-break number))
+      (fountain-insert-page-break string))
      ;; If we're at action, skip over spaces then go to the beginning of the
      ;; current sentence. Then, try to skip back to the previous element and
      ;; if it is a scene heading, call recursively on that element. Otherwise,
@@ -1281,11 +1289,11 @@ NUMBER is an optional string to force the page number."
         (skip-chars-backward "\n\r\s\t")
         (forward-line 0)
         (if (fountain-match-scene-heading)
-            (fountain-insert-page-break number)
+            (fountain-insert-page-break string)
           (goto-char x)
           (unless (fountain-blank-before-p)
             (insert-before-markers "\n\n"))
-          (fountain-insert-page-break-string number)))))
+          (fountain-insert-page-break-string string)))))
     ;; Finally return to where we were.
     (goto-char pos)))
 
