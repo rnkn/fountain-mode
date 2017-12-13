@@ -2092,8 +2092,6 @@ Takes the form:
           (group (const :tag "Note" note)
                  (choice string (const nil)))
           (group (const :tag "Center Text" center)
-                 (choice string (const nil)))
-          (group (const :tag "Included Files" include)
                  (choice string (const nil)))))
 
 (defun fountain-get-export-elements (&optional format)
@@ -2424,8 +2422,7 @@ Command acts on current buffer or BUFFER."
     (page-break "\n\n")
     (synopsis "{{content}}\n\n")
     (note "[ note: {{content}} ]\n\n")
-    (center "{{content}}")
-    (include "{{content}}"))
+    (center "{{content}}"))
   "Association list of element templates for exporting to Fountain.
 Takes the form:
 
@@ -2535,8 +2532,7 @@ If TEMPLATE is nil, the string is discarded."
     (page-break "<a href=\"#p{{content}}\"><hr id=\"{{content}}\">\n<p class=\"page-number\">{{content}}</p></a>")
     (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
     (note "<p class=\"note\">{{content}}</p>\n")
-    (center "<p class=\"center\">{{content}}</p>\n")
-    (include "{{content}}"))
+    (center "<p class=\"center\">{{content}}</p>\n"))
   "Association list of element templates for exporting to HTML.
 Takes the form:
 
@@ -3040,8 +3036,7 @@ character codes, then format replacement is made."
     (page-break nil)
     (synopsis nil)
     (note nil)
-    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (include "{{content}}"))
+    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
   "Association list of element templates for exporting to Final Draft.
 Takes the form:
 
@@ -3118,8 +3113,7 @@ contact:
     (page-break "=== {{content}} ===\n\n")
     (synopsis "= {{content}}\n\n")
     (note "[[ {{content}} ]]\n\n")
-    (center "> {{content}} <")
-    (include "{{content}}"))
+    (center "> {{content}} <"))
   "Association list of element templates for exporting to Fountain.
 Takes the form:
 
