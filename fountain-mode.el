@@ -2970,26 +2970,6 @@ parent."
     (center "\\centertext{{{content}}}\n\n"))
   (define-fountain-export-template-docstring 'tex)
   :type 'fountain-element-list-type
-
-(defcustom fountain-export-tex-replace-alist
-  '(("%" "\\\\%")
-    ("\\$" "\\\\$")
-    ("&" "\\\\&")
-    ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "\\\\textbf{\\\\emph{\\1}}")
-    ("\\*\\*\\(.+?\\)\\*\\*" "\\\\textbf{\\1}")
-    ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
-    ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
-    ("_\\(.+?\\)_" "\\\\uline{\\1}")
-    ("^\s\s$" "\\\\vspace{\\\\baselineskip}\s\\\\\\\\")
-    ("\n\n+" "\s\\\\par\s")
-    ("\n" "\s\\\\protecting{\\\\\\\\}\s"))
-  "Association list of regular expression export replacements.
-Replacements are made in sequential order. The sequence is
-important: first, characters that are special in the export
-format are sanitized, then escaped characters are converted to
-character codes, then format replacement is made."
-  :type '(repeat (group regexp (string :tag "Replacement")))
-  :group 'fountain-export)
   :group 'fountain-latex-export)
 
 (defcustom fountain-export-tex-hook
