@@ -1691,10 +1691,10 @@ Includes child elements."
 (defgroup fountain-fill ()
   "Options for filling elements.
 
-Filling elements is used in exporting to text and PostScript, and
-in calculating page length for page locking and export."
+Filling elements is used in exporting to plaintext and
+PostScript, and in calculating page length for page locking."
   :prefix "fountain-fill-"
-  :group 'fountain)
+  :group 'fountain-export)
 
 (defcustom fountain-fill-section-heading
   (cons 0 61)
@@ -1841,24 +1841,6 @@ Passed to `format' with export format as single variable."
   "Paper size to use on export."
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4))
-  :group 'fountain-export)
-
-(defcustom fountain-export-top-margin
-  1.0
-  "Float representing top page margin in inches.
-
-There is no corresponding bottom margin option, as page length
-is calculated using `fountain-page-max-lines'."
-  :type 'float
-  :group 'fountain-export)
-
-(defcustom fountain-export-left-margin
-  1.5
-  "Float representing left page margin in inches.
-
-There is no corresponding right margin option, as text width
-is calculated using `fountain-fill'."
-  :type 'float
   :group 'fountain-export)
 
 (defcustom fountain-export-font
@@ -2481,6 +2463,11 @@ Command acts on current buffer or BUFFER."
 
 ;;; -> plaintext
 
+(defgroup fountain-plaintext-export ()
+  "Options for exporting Fountain files to plaintext."
+  :prefix "fountain-export-txt-"
+  :group 'fountain-export)
+
 (defcustom fountain-export-txt-template
   '((document "{{content}}")
     (section "{{content}}")
@@ -2500,13 +2487,13 @@ Command acts on current buffer or BUFFER."
     (center "{{content}}"))
   (define-fountain-export-template-docstring 'txt)
   :type 'fountain-element-list-type
-  :group 'fountain-export)
+  :group 'fountain-plaintext-export)
 
 (defcustom fountain-export-txt-hook
   nil
   "Hook run with export buffer on sucessful export to plaintext."
   :type 'hook
-  :group 'fountain-export)
+  :group 'fountain-plaintext-export)
 
 (defun fountain-export-buffer-to-txt ()
   "Convenience function for exporting buffer to plaintext."
@@ -2515,6 +2502,29 @@ Command acts on current buffer or BUFFER."
 
 
 ;;; -> PostScript
+
+;; (defgroup fountain-postscript-export ()
+;;   "Options for exporting Fountain files to PostScript."
+;;   :prefix 'fountain-export-ps-
+;;   :group 'fountain-export)
+
+;; (defcustom fountain-export-ps-top-margin
+;;   1.0
+;;   "Float representing top page margin in inches.
+
+;; There is no corresponding bottom margin option, as page length
+;; is calculated using `fountain-page-max-lines'."
+;;   :type 'float
+;;   :group 'fountain-export)
+
+;; (defcustom fountain-export-ps-left-margin
+;;   1.5
+;;   "Float representing left page margin in inches.
+
+;; There is no corresponding right margin option, as text width
+;; is calculated using `fountain-fill'."
+;;   :type 'float
+;;   :group 'fountain-export)
 
 ;; (defcustom fountain-export-ps-hook
 ;;   nil
@@ -2536,6 +2546,11 @@ Command acts on current buffer or BUFFER."
 
 
 ;;; -> HTML
+
+(defgroup fountain-html-export ()
+  "Options for export Fountain files to HTML."
+  :prefix "foutnain-export-html-"
+  :group 'fountain-export)
 
 (defcustom fountain-export-html-template
   '((document "\
@@ -2574,7 +2589,7 @@ Command acts on current buffer or BUFFER."
     (center "<p class=\"center\">{{content}}</p>\n"))
   (define-fountain-export-template-docstring 'html)
   :type 'fountain-element-list-type
-  :group 'fountain-export)
+  :group 'fountain-html-export)
 
 (defcustom fountain-export-html-stylesheet
   "\
@@ -2697,7 +2712,7 @@ means all screenplay elements require the \".screenplay\" class
 parent."
   :type 'string
   :link '(url-link "https://github.com/rnkn/mcqueen")
-  :group 'fountain-export)
+  :group 'fountain-html-export)
 
 (defcustom fountain-export-html-title-template
   "<div class=\"title\">{{title-template}}</div>
@@ -2708,13 +2723,13 @@ parent."
 "
   "HTML template for title page export."
   :type 'string
-  :group 'fountain-export)
+  :group 'fountain-html-export)
 
 (defcustom fountain-export-html-hook
   nil
   "Hook run with export buffer on sucessful export to HTML."
   :type 'hook
-  :group 'fountain-export)
+  :group 'fountain-html-export)
 
 (defun fountain-export-buffer-to-html ()
   "Convenience function for exporting buffer to HTML."
@@ -2723,6 +2738,11 @@ parent."
 
 
 ;;; -> LaTeX
+
+(defgroup fountain-latex-export ()
+  "Options for exporting Fountain files to LaTeX."
+  :prefix "fountain-export-tex-"
+  :group 'fountain-export)
 
 (defcustom fountain-export-tex-template
   '((document "\
@@ -2928,7 +2948,6 @@ parent."
     (center "\\centertext{{{content}}}\n\n"))
   (define-fountain-export-template-docstring 'tex)
   :type 'fountain-element-list-type
-  :group 'fountain-export)
 
 (defcustom fountain-export-tex-replace-alist
   '(("%" "\\\\%")
@@ -2949,12 +2968,13 @@ format are sanitized, then escaped characters are converted to
 character codes, then format replacement is made."
   :type '(repeat (group regexp (string :tag "Replacement")))
   :group 'fountain-export)
+  :group 'fountain-latex-export)
 
 (defcustom fountain-export-tex-hook
   nil
   "Hook run with export buffer on sucessful export to LaTeX."
   :type 'hook
-  :group 'fountain-export)
+  :group 'fountain-latex-export)
 
 (defun fountain-export-buffer-to-latex ()
   "Convenience function for exporting buffer to LaTeX."
@@ -2963,6 +2983,11 @@ character codes, then format replacement is made."
 
 
 ;;; -> FDX
+
+(defgroup fountain-final-draft-export ()
+  "Options for exporting Fountain files to Final Draft."
+  :prefix "fountain-export-fdx-"
+  :group 'fountain-export)
 
 (defcustom fountain-export-fdx-template
   '((document "\
@@ -3011,13 +3036,13 @@ character codes, then format replacement is made."
     (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
   (define-fountain-export-template-docstring 'fdx)
   :type 'fountain-element-list-type
-  :group 'fountain-export)
+  :group 'fountain-final-draft-export)
 
 (defcustom fountain-export-fdx-hook
   nil
   "Hook run with export buffer on sucessful export to Final Draft."
   :type 'hook
-  :group 'fountain-export)
+  :group 'fountain-final-draft-export)
 
 (defun fountain-export-buffer-to-fdx ()
   "Convenience function for exporting buffer to Final Draft."
@@ -3026,6 +3051,11 @@ character codes, then format replacement is made."
 
 
 ;;; -> Fountain
+
+(defgroup fountain-fountain-export ()
+  "Options for exporting Fountain files to Fountain."
+  :prefix "fountain-export-fountain-"
+  :group 'fountain-export)
 
 (defcustom fountain-export-fountain-template
   '((document "\
@@ -3055,13 +3085,13 @@ contact:
     (center "> {{content}} <"))
   (define-fountain-export-template-docstring 'fountain)
   :type 'fountain-element-list-type
-  :group 'fountain-export)
+  :group 'fountain-fountain-export)
 
 (defcustom fountain-export-fountain-hook
   nil
   "Hook run with export buffer on sucessful export to Fountain."
   :type 'hook
-  :group 'fountain-export)
+  :group 'fountain-fountain-export)
 
 (defun fountain-export-buffer-to-fountain ()
   "Convenience function for exporting buffer to Fountain."
