@@ -1931,7 +1931,7 @@ specify a different filename."
                       ("\n" "<br>"))
      :eval-replace ((stylesheet fountain-export-html-stylesheet)
                     (font fountain-export-font)
-                    (scene-spacing
+                    (scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
                          "2em" "1em")))
      :hook fountain-export-html-hook)
@@ -1980,11 +1980,11 @@ specify a different filename."
                      (forced (t "!")))
                     (section-heading
                      (level (1 "#")
-                             (2 "##")
-                             (3 "###")
-                             (4 "####")
-                             (5 "#####"))))
-     :eval-replace ((scene-spacing
+                            (2 "##")
+                            (3 "###")
+                            (4 "####")
+                            (5 "#####"))))
+     :eval-replace ((scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
                          "\n")))
      :hook fountain-export-fountain-hook)
@@ -1993,7 +1993,7 @@ specify a different filename."
      :ext ".txt"
      :fill t
      :template fountain-export-txt-template
-     :eval-replace ((scene-spacing
+     :eval-replace ((scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
                          "\n")))
      :hook fountain-export-txt-hook))
@@ -2411,7 +2411,7 @@ Command acts on current buffer or BUFFER."
     (section "{{content}}")
     (section-heading "{{content}}\n\n")
     (scene "{{content}}")
-    (scene-heading "{{scene-spacing}}{{content}}\n\n")
+    (scene-heading "{{scene-heading-spacing}}{{content}}\n\n")
     (dual-dialog "{{content}}\n")
     (dialog "{{content}}\n")
     (character "{{content}}\n")
@@ -2609,7 +2609,7 @@ calculated."
   background-color: paleturquoise;
 }
 .screenplay .scene {
-  margin-top: {{scene-spacing}};
+  margin-top: {{scene-heading-spacing}};
 }
 .screenplay .scene-heading {
   margin-bottom: 0;
@@ -3103,7 +3103,7 @@ contact:
     (section "{{content}}")
     (section-heading "{{level}}{{content}}\n\n")
     (scene "{{content}}")
-    (scene-heading "{{scene-spacing}}{{forced}}{{content}}\n\n")
+    (scene-heading "{{scene-heading-spacing}}{{forced}}{{content}}\n\n")
     (dual-dialog "{{content}}\n")
     (dialog "{{content}}\n")
     (character "{{forced}}{{content}}{{dual-dialog}}\n")
