@@ -1937,9 +1937,27 @@ specify a different filename."
      :hook fountain-export-html-hook)
     (tex
      :tag "LaTeX"
-     :ext "tex"
+     :ext ".tex"
      :template fountain-export-tex-template
-     :replace fountain-export-tex-replace-alist
+     :string-replace (("%" "\\\\%")
+                      ("&" "\\\\&")
+                      ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "\\\\textbf{\\\\emph{\\1}}")
+                      ("\\*\\*\\(.+?\\)\\*\\*" "\\\\textbf{\\1}")
+                      ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
+                      ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
+                      ("_\\(.+?\\)_" "\\\\uline{\\1}")
+                      ("\n\n+" "\s\\\\par\s")
+                      ("\n" "\s\\\\protecting{\\\\\\\\}\s"))
+     :eval-replace ((font fountain-export-font)
+                    (scene-heading-spacing
+                     (if (memq 'double-space fountain-export-scene-heading-format)
+                         "true" "false"))
+                    (scene-heading-underline
+                     (if (memq 'underline fountain-export-scene-heading-format)
+                         "true" "false"))
+                    (scene-heading-bold
+                     (if (memq 'bold fountain-export-scene-heading-format)
+                         "true" "false")))
      :hook fountain-export-tex-hook)
     (fdx
      :tag "Final Draft"
