@@ -345,7 +345,8 @@ issues, consider reducing this value."
 
 (defcustom fountain-time-format
   "%F"
-  "Format of date and time. See `format-time-string'."
+  "Format of date and time used when inserting `{{time}}'.
+See `format-time-string'."
   :type 'string
   :group 'fountain)
 
@@ -2007,10 +2008,10 @@ specify a different filename."
                          "\n")))
      :hook fountain-export-txt-hook))
   "Association list of export formats and their properties.
-
 Takes the form:
 
-    (FORMAT KEYWORD PROPERTY)")
+    ((FORMAT KEYWORD PROPERTY)
+      ...)")
 
 (defvar fountain-elements
   '((section-heading
