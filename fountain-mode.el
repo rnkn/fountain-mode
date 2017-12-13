@@ -2633,7 +2633,7 @@ calculated."
   text-align: center;
 }
 .screenplay .section-heading:hover {
-  background-color: paleturquoise;
+  background-color: lightyellow;
 }
 .screenplay .scene {
   margin-top: {{scene-heading-spacing}};
@@ -2642,7 +2642,7 @@ calculated."
   margin-bottom: 0;
 }
 .screenplay .scene-heading:hover {
-  background-color: paleturquoise;
+  background-color: lightyellow;
 }
 .screenplay .action {
   margin: 1em 0;
