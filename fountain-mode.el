@@ -1218,7 +1218,9 @@ NUMBER is an optional string to force the page number."
       (let ((x (point)))
         (forward-char -1)
         (if (fountain-match-character)
-            (fountain-insert-page-break number)
+            (progn
+              (forward-line 0)
+              (fountain-insert-page-break number))
           ;; Otherwise parenthetical is mid-dialogue, so get character name
           ;; and break at this element.
           (goto-char x)
