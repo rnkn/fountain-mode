@@ -1869,13 +1869,15 @@ Passed to `format' with export format as single variable."
 
 (defcustom fountain-export-number-first-page
   nil
-  "If non-nil, add a page number to the first page."
+  "If non-nil, add a page number to the first page.
+
+Traditionally, screenplays omit a page number on the first page."
   :type 'boolean
   :group 'fountain-export)
 
 (defcustom fountain-export-include-scene-numbers
   nil
-  "if non-nil, include scene numbers in export."
+  "If non-nil, include scene numbers in export."
   :type 'boolean
   :group 'fountain-export)
 
