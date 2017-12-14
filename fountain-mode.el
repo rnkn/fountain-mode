@@ -1033,10 +1033,8 @@ See <http://debbugs.gnu.org/24073>."
       (forward-line 0)
       (or (looking-at fountain-note-regexp)
           (let ((x (point)))
-            (when (re-search-backward fountain-blank-regexp nil t)
-              (goto-char (match-end 0))
-              (skip-chars-forward "\n\r\s\t"))
-            (and (looking-at fountain-note-regexp)
+            (and (re-search-backward "\\[\\[" nil t)
+                 (looking-at fountain-note-regexp)
                  (< x (match-end 0))))))))
 
 (defun fountain-match-comment ()            ; FIXME: does not see "//" comments
