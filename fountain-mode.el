@@ -758,7 +758,7 @@ To switch between these levels, customize the value of
 `font-lock-maximum-decoration'. This can be set with
 \\[fountain-set-font-lock-decoration]."
   :prefix "fountain-"
-  :link '(info-link "(emacs)Font Lock")
+  :link '(info-link "(emacs) Font Lock")
   :group 'fountain)
 
 (defface fountain-action
@@ -1202,6 +1202,8 @@ script, you may get incorrect output."
   "Insert a page break at appropriate place preceding point.
 STRING is an optional page number string to force the page
 number."
+  ;; FIXME: break this into fountain-goto-page-break-point and
+  ;; fountain-insert-page-break
   (interactive "sPage number (RET for none): ")
   ;; Save a marker where we are.
   (let ((pos (point-marker))
@@ -3772,6 +3774,7 @@ call this function, strings matching the previous value will not
 be recognized. Before changing that variable, first make sure to
 set `fountain-add-continued-dialog' to nil and run this function,
 then make the changes desired."
+  ;; FIXME: now fast enough to do whole buffer by default
   (interactive "P")
   (save-excursion
     (save-restriction
@@ -4412,6 +4415,7 @@ keywords suitable for Font Lock."
     ;; Endnotes:
     (define-key map (kbd "M-s e") #'fountain-show-or-hide-endnotes)
     ;; Exporting commands:
+    (define-key map (kbd "C-c C-e e") #'fountain-export-buffer)
     (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
     (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
     (define-key map (kbd "C-c C-e l") #'fountain-export-buffer-to-latex)
@@ -4521,16 +4525,18 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
      ["Add Scene Numbers" fountain-add-scene-numbers]
      ["Remove Scene Numbers" fountain-remove-scene-numbers])
     "---"
-    ["Insert Metadata" auto-insert]
+    ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    ["Add/Remove Continued Dialog" fountain-continued-dialog-refresh]
+    ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     "---"
     ("Exporting"
+     ["Export buffer..." fountain-export-buffer]
      ["Default" fountain-export-default]
      "---"
-     ["Buffer to HTML" fountain-export-buffer-to-html]
+     ["Buffer to plain text" fountain-export-buffer-to-txt]
      ["Buffer to LaTeX" fountain-export-buffer-to-latex]
+     ["Buffer to HTML" fountain-export-buffer-to-html]
      ["Buffer to Final Draft" fountain-export-buffer-to-fdx]
      ["Buffer to Fountain" fountain-export-buffer-to-fountain]
      "---"
