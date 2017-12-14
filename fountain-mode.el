@@ -145,11 +145,11 @@
 (define-obsolete-variable-alias 'fountain-hide-escapes
   'fountain-hide-syntax-chars "1.3.0")
 
-(define-obsolete-variable-alias 'fountain-export-inline-style
-  'fountain-export-html-use-inline-style "2.0.0")
+(make-obsolete-variable 'fountain-export-inline-style
+                        "use inline style instead." "2.1.0")
 
 (define-obsolete-variable-alias 'fountain-export-style-template
-  'fountain-export-html-style-template "2.0.0")
+  'fountain-export-html-stylesheet "2.4.0")
 
 (define-obsolete-function-alias 'fountain-toggle-hide-escapes
   'fountain-toggle-hide-syntax-chars "1.3.0")
@@ -188,13 +188,13 @@
   'fountain-section-heading "1.4.1")
 
 (make-obsolete-variable 'fountain-export-title-page-left-template
-                        'fountain-export-contact-template "2.0.0")
+                        "edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-title-page-right-template
-                        'fountain-export-contact-template "2.0.0")
+                        "edit individual export templates instead." "2.4.0")
 
 (make-obsolete 'fountain-export-buffer-to-pdf-via-html
-               'fountain-export-to-latex "2.0.0")
+               'fountain-export-buffer-to-tex "2.4.0")
 
 (make-obsolete-variable 'fountain-export-pdf-via-html-command
                         'fountain-export-shell-command "2.0.0")
@@ -212,22 +212,22 @@
                         'fountain-export-scene-heading-format "2.0.0")
 
 (make-obsolete-variable 'fountain-export-bold-title
-                        'fountain-export-title-format "2.0.0")
+                        "edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-underline-title
-                        'fountain-export-title-format "2.0.0")
+                        "edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-upcase-title
-                        'fountain-export-title-format "2.0.0")
+                        "edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-html-head-template
-                        'fountain-export-templates "2.0.0")
+                        'fountain-export-html-template "2.4.0")
 
 (make-obsolete-variable 'fountain-export-html-use-inline-style
-                        "use inline style instead." "2.1.0") ; FIXME: make this customizable
+                        "use inline style instead." "2.1.0")
 
 (make-obsolete-variable 'fountain-additional-template-replace-functions
-                        'fountain-export-format-template "2.1.0")
+                        "see `fountain-export-formats'." "2.4.0")
 
 (make-obsolete 'fountain-insert-metadata
                'auto-insert "2.1.2")
@@ -245,10 +245,10 @@
                         "use individual export templates instead." "2.1.4")
 
 (make-obsolete-variable 'fountain-export-format-replace-alist
-                        "use individual export replace alists instead." "2.1.4")
+                        "see `fountain-export-formats'." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-title-format
-                        "edit `fountain-export-title-template' instead." "2.1.4")
+                        "edit individual export templates instead." "2.4.0")
 
 (define-obsolete-variable-alias 'fountain-trans-list
   'fountain-trans-suffix-list "2.2.2")
