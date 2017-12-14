@@ -259,6 +259,9 @@
 (define-obsolete-variable-alias 'fountain-export-standalone
   'fountain-export-make-standalone "2.4.0")
 
+(define-obsolete-variable-alias 'fountain-export-buffer-name
+  'fountain-export-tmp-buffer-name "2.4.0")
+
 
 ;;; Customization
 
@@ -1818,7 +1821,7 @@ document."
   :type 'boolean
   :group 'fountain-export)
 
-(defcustom fountain-export-buffer-name
+(defcustom fountain-export-tmp-buffer-name
   "*Fountain %s Export*"
   "Name of export buffer when source buffer is not visiting a file.
 Passed to `format' with export format as single variable."
@@ -2190,7 +2193,7 @@ format tag."
             ((buffer-file-name)
              (concat (file-name-base (buffer-file-name)) ext))
             (t
-             (format fountain-export-buffer-name tag))))))
+             (format fountain-export-tmp-buffer-name tag))))))
 
 (require 'subr-x)
 
