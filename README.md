@@ -9,7 +9,7 @@ Fountain Mode is a complete screenwriting environment for GNU Emacs
 using the Fountain markup format. For more information on the Fountain markup
 format, visit <http://fountain.io>.
 
-![screenshot](http://files.paulwrankin.com/fountain-mode/screenshot.png)
+![screenshot](https://github.com/rnkn/fountain-mode/raw/master/screenshots/01.png)
 
 Pictured: *Big Fish* by John August in Fountain Mode (using [imenu-list] and
 [Olivetti] minor modes)
