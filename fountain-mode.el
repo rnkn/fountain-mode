@@ -1037,24 +1037,6 @@ See <http://debbugs.gnu.org/24073>."
                  (looking-at fountain-note-regexp)
                  (< x (match-end 0))))))))
 
-(defun fountain-match-comment ()            ; FIXME: does not see "//" comments
-  "Match comment if point is at a comment, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (if (eq (char-before) ?*) (forward-char -1))
-      (let ((x (point))
-            beg end)
-        (search-forward "*/" nil t)
-        (setq end (point-marker))
-        (if (and (forward-comment -1)
-                 (setq beg (point-marker))
-                 (<= beg x end))
-            (progn (set-match-data (list beg end) t)
-                   t))))))
-
-(defalias 'fountain-match-boneyard 'fountain-match-comment)
-
 (defun fountain-match-scene-heading ()
   "Match scene heading if point is at a scene heading, nil otherwise."
   (save-excursion
