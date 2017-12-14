@@ -256,6 +256,9 @@
 (make-obsolete-variable 'fountain-switch-comment-syntax
                         "use the standard comment syntax instead." "2.4.0")
 
+(define-obsolete-variable-alias 'fountain-export-standalone
+  'fountain-export-make-standalone "2.4.0")
+
 
 ;;; Customization
 
@@ -1778,14 +1781,13 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain)
 
 (defcustom fountain-export-include-elements
-  '(("screenplay" title-page scene-heading action character lines paren trans center page-break include)
-    ("teleplay" title-page section-heading scene-heading action character lines paren trans center page-break include)
-    ("stageplay" title-page section-heading scene-heading action character lines paren trans center page-break include))
+  '(("screenplay" scene-heading action character lines paren trans center page-break include)
+    ("teleplay" section-heading scene-heading action character lines paren trans center page-break include)
+    ("stageplay" section-heading scene-heading action character lines paren trans center page-break include))
   "Association list of elements to include when exporting.
 Note that comments (boneyard) are never included."
   :type '(alist :key-type (string :tag "Format")
                 :value-type (set :tag "Elements"
-                                 (const :tag "Title Page" title-page)
                                  (const :tag "Section Headings" section-heading)
                                  (const :tag "Scene Headings" scene-heading)
                                  (const :tag "Action" action)
@@ -1803,7 +1805,7 @@ Note that comments (boneyard) are never included."
 (define-obsolete-variable-alias 'fountain-export-include-elements-alist
   'fountain-export-include-elements "2.4.0")
 
-(defcustom fountain-export-standalone
+(defcustom fountain-export-make-standalone
   t
   "If non-nil, export a standalone document.
 
@@ -1848,6 +1850,12 @@ Passed to `format' with export format as single variable."
   "Courier"
   "Font to use when exporting."
   :type '(string :tag "Font")
+  :group 'fountain-export)
+
+(defcustom fountain-export-include-title-page
+  t
+  "If non-nil, include a title page in export."
+  :type 'boolean
   :group 'fountain-export)
 
 (defcustom fountain-export-contact-align-right
@@ -1944,6 +1952,9 @@ specify a different filename."
                          "true" "false"))
                     (scene-heading-bold
                      (if (memq 'bold fountain-export-scene-heading-format)
+                         "true" "false"))
+                    (include-title-page
+                     (if fountain-export-include-title-page
                          "true" "false"))
                     (title-contact-align
                      (if fountain-export-contact-align-right
@@ -2088,7 +2099,7 @@ TEMPLATE is nil, the format string is discarded.
 Fountain ELEMENTs:
 
     document            wrapper template for all content, see
-                        `fountain-export-standalone'
+                        `fountain-export-make-standalone'
     section             string of section, including child elements
     section-heading     string of section heading, excluding syntax chars
     scene               string of scene, including child elements
@@ -2378,7 +2389,7 @@ strings."
     (save-excursion
       (setq tree (fountain-prep-and-parse-region start end)))
     ;; If exporting a standalone document, list TREE inside a document element.
-    (unless (or snippet (not fountain-export-standalone))
+    (unless (or snippet (not fountain-export-make-standalone))
       (setq tree
             (list (list 'document
                         (append
@@ -4468,24 +4479,6 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
            (custom-unlispify-tag-name var)
            (symbol-value var)))
 
-(defun fountain-toggle-export-title-page ()
-  "Toggle title-page in `fountain-export-include-elements'."
-  (interactive)
-  (let* ((var fountain-export-include-elements)
-         (format (or (plist-get (fountain-read-metadata)
-                                'format)
-                     "screenplay"))
-         (list (cdr (assoc-string format var))))
-    (setq list
-          (if (memq 'title-page list)
-              (delq 'title-page list)
-            (cons 'title-page list)))
-    (setq var (delq (assoc-string format var) var))
-    (customize-set-variable 'fountain-export-include-elements
-                            (cons (cons format list) var))
-    (message "Title page export is now %s"
-             (if (memq 'title-page list) "enabled" "disabled"))))
-
 (defun fountain-toggle-hide-element (element)
   "Toggle visibility of fountain-ELEMENT, using S for feedback.
 Toggles the value of fountain-hide-ELEMENT, then, if
@@ -4584,9 +4577,10 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :style radio
       :selected (eq fountain-export-page-size 'a4)]
      "---"
-     ["Include Title Page" fountain-toggle-export-title-page
+     ["Include Title Page"
+      (fountain-toggle-custom-variable 'fountain-export-include-title-page)
       :style toggle
-      :selected (memq 'title-page (fountain-get-export-elements))]
+      :selected fountain-export-include-title-page]
      ["Bold Scene Headings"
       (fountain-toggle-custom-variable
        'fountain-export-scene-heading-format 'bold)
