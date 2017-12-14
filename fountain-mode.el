@@ -326,17 +326,6 @@ changes desired."
   :type 'string
   :group 'fountain)
 
-(defcustom fountain-block-limit
-  10000
-  "Integer to limit fontification block in characters.
-Used by `fountain-font-lock-extend-region'.
-
-Sometimes `font-lock-mode' can hang if asked for fontify a very
-large block of unbroken text. If you experience performance
-issues, consider reducing this value."
-  :type 'integer
-  :group 'fountain)
-
 (defcustom fountain-hide-emphasis-delim
   nil
   "If non-nil, make emphasis delimiters invisible."
@@ -923,6 +912,7 @@ These are required for functions to operate with temporary buffers."
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
+  (setq font-lock-multiline 'undecided)
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline))
@@ -4321,33 +4311,6 @@ assigning the following keywords:
                           (point-max)))
     (user-error "Decoration must be an integer 1-3")))
 
-(defun fountain-font-lock-extend-region ()
-  "Extend region for fontification to text block."
-  (defvar font-lock-beg nil)
-  (defvar font-lock-end nil)
-  (let ((beg
-         (save-excursion
-           (goto-char font-lock-beg)
-           (re-search-backward "^[\s\t]*$"
-                               (- (point) fountain-block-limit) 'move)
-           (point)))
-        (end
-         (save-excursion
-           (goto-char font-lock-end)
-           (re-search-forward "^[\s\t]*$"
-                              (+ (point) fountain-block-limit) 'move)
-           (point)))
-        changed)
-    (goto-char font-lock-beg)
-    (unless (or (bobp)
-                (eq beg font-lock-beg))
-      (setq font-lock-beg beg changed t))
-    (goto-char font-lock-end)
-    (unless (or (eobp)
-                (eq end font-lock-end))
-      (setq font-lock-end end changed t))
-    changed))
-
 (defun fountain-create-font-lock-keywords ()
   "Return a new list of `font-lock-mode' keywords.
 Uses `fountain-font-lock-keywords-plist' to create a list of
@@ -4689,8 +4652,6 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
                     (min (string-to-number n) 6))))
   (add-hook 'post-self-insert-hook
             #'fountain-auto-upcase t t)
-  (add-hook 'font-lock-extend-region-functions
-            #'fountain-font-lock-extend-region t t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers t)
   (fountain-outline-hide-level fountain-outline-startup-level t))
