@@ -3793,55 +3793,43 @@ ARG (\\[universal-argument]), only insert note delimiters."
                                      (cons 'email user-mail-address))))))
         fountain-note-template)))))
 
-(defun fountain-continued-dialog-refresh (&optional arg)
-  "Add or remove continued dialog on characters speaking in succession.
+(defun fountain-continued-dialog-refresh ()
+  "Add or remove continued dialog in buffer.
+
 If `fountain-add-continued-dialog' is non-nil, add
 `fountain-continued-dialog-string' on characters speaking in
 succession, otherwise remove all occurences.
 
-If region is active, act on region, otherwise act on current
-scene. If prefixed with ARG (\\[universal-argument]), act on
-whole buffer (this can take a while).
-
-WARNING: if you change `fountain-continued-dialog-string' then
-call this function, strings matching the previous value will not
-be recognized. Before changing that variable, first make sure to
-set `fountain-add-continued-dialog' to nil and run this function,
-then make the changes desired."
-  ;; FIXME: now fast enough to do whole buffer by default
-  (interactive "P")
+If `fountain-continued-dialog-string' has changed, also attempt
+to remove previous string first."
+  (interactive)
   (save-excursion
     (save-restriction
       (widen)
-      (let ((start (make-marker))
-            (end (make-marker))
-            (job (make-progress-reporter "Refreshing continued dialog...")))
-        ;; Set START and END markers since buffer contents will change.
-        (set-marker start
-                    (cond (arg (point-min))
-                          ((use-region-p)
-                           (region-beginning))
-                          (t
-                           (fountain-forward-scene 0)
-                           (point))))
-        (set-marker end
-                    (cond (arg (point-max))
-                          ((use-region-p)
-                           (region-end))
-                          (t
-                           (fountain-forward-scene 1)
-                           (point))))
-        ;; Delete all matches in region.
-        ;; FIXME: should this check character elements?
-        (goto-char start)
-        (while (re-search-forward
-                (concat "\s*" fountain-continued-dialog-string) end t)
-          (replace-match "")
-          (progress-reporter-update job))
-        ;; When FOUNTAIN-ADD-CONTINUED-DIALOG, add string where appropriate.
+      (let ((job (make-progress-reporter "Refreshing continued dialog..."))
+            (backup (car (get 'fountain-continued-dialog-string
+                              'backup-value)))
+            (replace-fun
+             (lambda (string job)
+               (goto-char (point-min))
+               (while (re-search-forward
+                       (concat "\s*" string) nil t)
+                 (let ((inhibit-changing-match-data t))
+                   (when (fountain-match-character)
+                     (delete-region (match-beginning 0) (match-end 0))))
+                 (progress-reporter-update job))))
+            case-fold-search)
+        (if (string= fountain-continued-dialog-string backup)
+            (setq backup (eval (car (get 'fountain-continued-dialog-string
+                                         'standard-value)))))
+        ;; Delete all matches of backup string.
+        (funcall replace-fun backup job)
+        ;; Delete all matches of current string.
+        (funcall replace-fun fountain-continued-dialog-string job)
+        ;; When fountain-add-continued-dialog, add string where appropriate.
         (when fountain-add-continued-dialog
-          (goto-char start)
-          (while (< (point) end)
+          (goto-char (point-min))
+          (while (< (point) (point-max))
             (when (and (not (looking-at-p
                              (concat ".*" fountain-continued-dialog-string "$")))
                        (fountain-match-character)
@@ -3851,8 +3839,6 @@ then make the changes desired."
               (replace-match (concat "\s" fountain-continued-dialog-string)))
             (forward-line 1)
             (progress-reporter-update job)))
-        (set-marker start nil)
-        (set-marker end nil)
         (progress-reporter-done job)))))
 
 
