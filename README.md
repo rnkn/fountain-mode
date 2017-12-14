@@ -11,7 +11,7 @@ format, visit <http://fountain.io>.
 
 ![screenshot](https://github.com/rnkn/fountain-mode/raw/master/screenshots/01.png)
 
-Pictured: *Big Fish* by John August in Fountain Mode (using [imenu-list] and
+Pictured: *The Abductors* by Paul W. Rankin in Fountain Mode (using [imenu-list] and
 [Olivetti] minor modes)
 
 [imenu-list]: https://github.com/bmag/imenu-list "imenu-list"
