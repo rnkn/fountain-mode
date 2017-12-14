@@ -2493,16 +2493,11 @@ Command acts on current buffer or BUFFER."
 
 (defcustom fountain-export-txt-title-page-template
   "\
-> _{{title}}_ <
-
-> {{credit}} <
-
-> {{author}} <
-
-
+{{title}}\n
+{{credit}}\n
+{{author}}\n\n
 {{contact}}
-{{date}}
-\n\n"
+{{date}}\n\n"
   "Template for plaintext title page."
   :type 'string
   :group 'fountain-plaintext-export)
@@ -2670,6 +2665,7 @@ Command acts on current buffer or BUFFER."
 }
 .screenplay .title-page .title h1 {
   text-transform: uppercase;
+  text-decoration: underline;
 }
 .screenplay .section-heading {
   text-align: center;
