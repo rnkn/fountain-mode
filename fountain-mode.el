@@ -1922,7 +1922,10 @@ specify a different filename."
                     (font fountain-export-font)
                     (scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
-                         "2em" "1em")))
+                         "2em" "1em"))
+                    (title-page
+                     (if fountain-export-include-title-page
+                         fountain-export-html-title-page-template)))
      :hook fountain-export-html-hook)
     (tex
      :tag "LaTeX"
@@ -1948,9 +1951,9 @@ specify a different filename."
                     (scene-heading-bold
                      (if (memq 'bold fountain-export-scene-heading-format)
                          "true" "false"))
-                    (include-title-page
+                    (title-page
                      (if fountain-export-include-title-page
-                         "true" "false"))
+                         fountain-export-tex-title-page-template))
                     (title-contact-align
                      (if fountain-export-contact-align-right
                          "true" "false"))
@@ -1984,6 +1987,9 @@ specify a different filename."
      :cond-replace ((t
                      (starts-new-page
                       (t "Yes") (nil "No"))))
+     :eval-replace ((title-page
+                     (if fountain-export-include-title-page
+                         fountain-export-fdx-title-page-template)))
      :hook fountain-export-fdx-hook)
     (fountain
      :tag "Fountain"
@@ -2004,7 +2010,10 @@ specify a different filename."
                             (3 "###")
                             (4 "####")
                             (5 "#####"))))
-     :eval-replace ((scene-heading-spacing
+     :eval-replace ((title-page
+                     (if fountain-export-include-title-page
+                         fountain-export-fountain-title-page-template))
+                    (scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
                          "\n")))
      :hook fountain-export-fountain-hook)
@@ -2015,7 +2024,10 @@ specify a different filename."
      :template fountain-export-txt-template
      :eval-replace ((scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
-                         "\n")))
+                         "\n"))
+                    (title-page
+                     (if fountain-export-include-title-page
+                         fountain-export-txt-title-page-template)))
      :hook fountain-export-txt-hook))
   "Association list of export formats and their properties.
 Takes the form:
@@ -2479,8 +2491,24 @@ Command acts on current buffer or BUFFER."
   :prefix "fountain-export-txt-"
   :group 'fountain-export)
 
+(defcustom fountain-export-txt-title-page-template
+  "\
+> _{{title}}_ <
+
+> {{credit}} <
+
+> {{author}} <
+
+
+{{contact}}
+{{date}}
+\n\n"
+  "Template for plaintext title page."
+  :type 'string
+  :group 'fountain-plaintext-export)
+
 (defcustom fountain-export-txt-template
-  '((document "{{content}}")
+  '((document "{{title-page}}{{content}}")
     (section "{{content}}")
     (section-heading "{{content}}\n\n")
     (scene "{{content}}")
@@ -2563,6 +2591,19 @@ Command acts on current buffer or BUFFER."
   :prefix "foutnain-export-html-"
   :group 'fountain-export)
 
+(defcustom fountain-export-html-title-page-template
+  "<section class=\"title-page\">
+<div class=\"title\">
+<h1>{{title}}</h1>
+<p>{{credit}}</p>
+<p>{{author}}</p>
+</div>
+<p class=\"contact\">{{contact}}</p>
+</section>"
+  "Template for HTML title page."
+  :type 'string
+  :group 'fountain-html-export)
+
 (defcustom fountain-export-html-template
   '((document "\
 <head>
@@ -2577,14 +2618,7 @@ Command acts on current buffer or BUFFER."
 </head>
 <body>
 <section class=\"screenplay\">
-<section class=\"title-page\">
-<div class=\"title\">
-<h1>{{title}}</h1>
-<p>{{credit}}</p>
-<p>{{author}}</p>
-</div>
-<p class=\"contact\">{{contact}}</p>
-</section>
+{{title-page}}
 {{content}}\
 </section>
 </body>")
@@ -2760,13 +2794,42 @@ parent."
   :prefix "fountain-export-tex-"
   :group 'fountain-export)
 
+(defcustom fountain-export-tex-title-page-template
+  "\
+\\title{{{title}}}
+\\author{{{author}}}
+\\date{{{date}}}
+\\newcommand{\\credit}{{{credit}}}
+\\newcommand{\\contact}{{{contact}}}
+
+\\thispagestyle{empty}
+\\vspace*{3in}
+
+\\begin{center}
+  \\uline{\\begin{MakeUppercase}\\thetitle\\end{MakeUppercase}}\\par
+  \\credit\\par
+  \\theauthor\\par
+\\end{center}
+
+\\vspace{3in}
+\\iftoggle{contactalignright}{%
+  \\begin{flushright}
+    {{contact}}
+  \\end{flushright}
+}{%
+  {{contact}}
+}\\par
+\\clearpage"
+  "Template for LaTeX title page."
+  :type 'string
+  :group 'fountain-latex-export)
+
 (defcustom fountain-export-tex-template
   '((document "\
 \\documentclass[12pt,{{page-size}}]{article}
 
 % Conditionals
 \\usepackage{etoolbox}
-\\newtoggle{includetitlepage}
 \\newtoggle{contactalignright}
 \\newtoggle{doublespacesceneheadings}
 \\newtoggle{underlinesceneheadings}
@@ -2774,7 +2837,6 @@ parent."
 \\newtoggle{includescenenumbers}
 \\newtoggle{numberfirstpage}
 
-\\settoggle{includetitlepage}{{{include-title-page}}}
 \\settoggle{contactalignright}{{{title-contact-align}}}
 \\settoggle{doublespacesceneheadings}{{{scene-heading-spacing}}}
 \\settoggle{underlinesceneheadings}{{{scene-heading-underline}}}
@@ -2817,49 +2879,6 @@ parent."
 % Margin Settings
 \\usepackage{marginnote}
 \\renewcommand*{\\raggedleftmarginnote}{\\hspace{0.2in}}
-
-% Title Page
-\\usepackage{titling}
-
-\\title{{{title}}}
-\\author{{{author}}}
-\\date{{{date}}}
-\\newcommand{\\credit}{{{credit}}}
-\\newcommand{\\contact}{{{contact}}}
-
-\\newcommand{\\maketitlepage}{
-  \\thispagestyle{empty}
-  \\vspace*{3in}
-
-  \\iftoggle{boldtitle}{%
-    \\let\\BFtmp\\thetitle
-    \\renewcommand{\\thetitle}{\\textbf{\\BFtmp}}%
-  }{}
-  \\iftoggle{underlinetitle}{%
-    \\let\\ULtmp\\thetitle
-    \\renewcommand{\\thetitle}{\\uline{\\ULtmp}}%
-  }{}%
-
-  \\begin{center}
-    \\iftoggle{uppercasetitle}{%
-      \\begin{MakeUppercase}
-        \\thetitle
-      \\end{MakeUppercase}
-    }{\\thetitle}\\par
-    \\credit\\par
-    \\theauthor\\par
-  \\end{center}
-
-  \\vspace{3in}
-  \\iftoggle{contactalignright}{%
-    \\begin{flushright}
-      \\contact
-    \\end{flushright}
-  }{%
-    \\contact
-  }\\par
-  \\clearpage
-}
 
 % Section Headings
 \\newcommand{\\sectionheading}[1]{%
@@ -2947,10 +2966,13 @@ parent."
   \\fi%
 }
 
+% Title Page
+\\usepackage{titling}
+
 % Document
 \\begin{document}
 
-\\iftoggle{includetitlepage}{\\maketitlepage}{}
+{{title-page}}
 
 \\setcounter{page}{1}
 \\iftoggle{numberfirstpage}{}{\\thispagestyle{empty}}
@@ -2965,7 +2987,7 @@ parent."
     (section-heading "\\sectionheading{{{content}}}\n\n")
     (scene "{{content}}")
     (scene-heading "\\sceneheading{{{content}}}\n\n")
-    (dual-dialog "")
+    (dual-dialog "{{content}}")
     (dialog "\\begin{dialog}{{content}}\\end{dialog}\n\n")
     (character "{{{content}}}\n")
     (paren "\\paren{{{content}}}\n")
@@ -2973,8 +2995,8 @@ parent."
     (trans "\\trans{{{content}}}\n\n")
     (action "{{content}}\n\n")
     (page-break "\\clearpage\n\n")
-    (synopsis "")
-    (note "")
+    (synopsis nil)
+    (note nil)
     (center "\\centertext{{{content}}}\n\n"))
   (define-fountain-export-template-docstring 'tex)
   :type 'fountain-element-list-type
@@ -2999,13 +3021,8 @@ parent."
   :prefix "fountain-export-fdx-"
   :group 'fountain-export)
 
-(defcustom fountain-export-fdx-template
-  '((document "\
-<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>
-<FinalDraft DocumentType=\"Script\" Template=\"No\" Version=\"1\">
-<Content>
-{{content}}\
-</Content>
+(defcustom fountain-export-fdx-title-page-template
+  "\
 <TitlePage>
 <Content>
 <Paragraph Alignment=\"Center\">
@@ -3027,7 +3044,19 @@ parent."
 <Text>{{contact}}</Text>
 </Paragraph>
 </Content>
-</TitlePage>
+</TitlePage>"
+  "Template for Final Draft title page."
+  :type 'string
+  :group 'fountain-final-draft-export)
+
+(defcustom fountain-export-fdx-template
+  '((document "\
+<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>
+<FinalDraft DocumentType=\"Script\" Template=\"No\" Version=\"1\">
+<Content>
+{{content}}\
+</Content>
+{{title-page}}
 </FinalDraft>")
     (section "{{content}}")
     (section-heading nil)
@@ -3067,14 +3096,21 @@ parent."
   :prefix "fountain-export-fountain-"
   :group 'fountain-export)
 
-(defcustom fountain-export-fountain-template
-  '((document "\
+(defcustom fountain-export-fountain-title-page-template
+  "\
 title: {{title}}
 credit: {{credit}}
 author: {{author}}
 date: {{date}}
-contact: {{contact}}
+contact: {{contact}}"
+  "Template for Fountain title page.
+This just adds the current metadata to the exported file."
+  :type 'string
+  :group 'fountain-fountain-export)
 
+(defcustom fountain-export-fountain-template
+  '((document "\
+{{title-page}}
 
 {{content}}")
     (section "{{content}}")
