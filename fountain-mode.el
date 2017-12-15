@@ -5,7 +5,7 @@
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
 ;; Version: 2.4.0
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
@@ -68,7 +68,7 @@
 ;; Requirements
 ;; ------------
 
-;; - Emacs 24.4
+;; - Emacs 24.5
 ;; - LaTeX packages for PDF export: geometry fontspec titling fancyhdr
 ;;   marginnote ulem xstring oberdiek
 

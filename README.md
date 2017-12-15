@@ -53,7 +53,7 @@ For more, see the [Wiki](https://github.com/rnkn/fountain-mode/wiki).
 Requirements
 ------------
 
-- Emacs 24.4
+- Emacs 24.5
 - LaTeX packages for PDF export: `geometry` `fontspec` `titling` `fancyhdr`
   `marginnote` `ulem` `xstring` `oberdiek`
 
