@@ -1931,8 +1931,8 @@ specify a different filename."
                       ("\\*\\(.+?\\)\\*" "\\\\emph{\\1}")
                       ("^~\s*\\(.+?\\)$\\*\\*" "\\\\textit{\\1}")
                       ("_\\(.+?\\)_" "\\\\uline{\\1}")
-                      ("\n\n+" "\s\\\\par\s")
-                      ("\n" "\s\\\\protecting{\\\\\\\\}\s"))
+                      ("\n[\s\t]*\n+" "\\\\par")
+                      ("\n" "\\\\protecting{\\\\\\\\}"))
      :eval-replace ((font fountain-export-font)
                     (scene-heading-spacing
                      (if (memq 'double-space fountain-export-scene-heading-format)
@@ -2802,11 +2802,11 @@ parent."
 \\vspace{3in}
 \\iftoggle{contactalignright}{%
   \\begin{flushright}
-    {{contact}}
+    \\contact
   \\end{flushright}
 }{%
-  {{contact}}
-}\\par
+  \\contact
+}
 \\clearpage"
   "Template for LaTeX title page."
   :type 'string
