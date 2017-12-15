@@ -3907,9 +3907,9 @@ Or, if nil:
 
     (10) -> \"10\"
     (9 1 2) -> \"9AB\""
-  (let* ((number (car scene-num-list))
-         separator revision)
-    (if (< 1 (list-length scene-num-list))
+  (let ((number (car scene-num-list))
+        separator revision)
+    (if (< 1 (length scene-num-list))
         (setq separator
               (if fountain-scene-number-separator
                   (char-to-string fountain-scene-number-separator)
