@@ -3813,7 +3813,7 @@ to remove previous string first."
             (setq backup (eval (car (get 'fountain-continued-dialog-string
                                          'standard-value)))))
         ;; Delete all matches of backup string.
-        (funcall replace-fun backup job)
+        (if (stringp backup) (funcall replace-fun backup job))
         ;; Delete all matches of current string.
         (funcall replace-fun fountain-continued-dialog-string job)
         ;; When fountain-add-continued-dialog, add string where appropriate.
