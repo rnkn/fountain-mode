@@ -855,6 +855,11 @@ To switch between these levels, customize the value of
   "Default face for file inclusions."
   :group 'fountain-faces)
 
+(defface fountain-auto-upcase-highlight
+  '((t (:inherit highlight)))
+  "Default face for highlighting line for auto-upcasing."
+  :group 'fountain-faces)
+
 
 ;;; Initializing
 
@@ -3690,7 +3695,7 @@ If nil, auto-upcase is deactivated.")
   (setq fountain--auto-upcase-overlay
         (make-overlay (line-beginning-position 1)
                       (line-beginning-position 2)))
-  (overlay-put fountain--auto-upcase-overlay 'face 'highlight))
+  (overlay-put fountain--auto-upcase-overlay 'face 'fountain-auto-upcase-highlight))
 
 (defun fountain-auto-upcase-deactivate-maybe (&optional arg)
   (when (or arg
