@@ -3677,12 +3677,54 @@ persist even when calling \\[delete-other-windows]."
   :type 'boolean
   :group 'fountain)
 
+(defvar-local fountain--auto-upcase-line
+  nil
+  "Integer of line number to auto-upcase.
+If nil, auto-upcase is deactivated.")
+
+(defvar-local fountain--auto-upcase-overlay
+  nil
+  "Overlay used for auto-upcasing current line.")
+
+(defun fountain-auto-upcase-make-overlay ()
+  (setq fountain--auto-upcase-overlay
+        (make-overlay (line-beginning-position 1)
+                      (line-beginning-position 2)))
+  (overlay-put fountain--auto-upcase-overlay 'face 'highlight))
+
+(defun fountain-auto-upcase-deactivate-maybe (&optional arg)
+  (when (or arg
+            (and (integerp fountain--auto-upcase-line)
+                 (not (= fountain--auto-upcase-line
+                         (count-lines (point-min) (line-beginning-position))))))
+    (setq fountain--auto-upcase-line nil)
+    (delete-overlay fountain--auto-upcase-overlay)))
+
 (defun fountain-auto-upcase ()
-  (if (and fountain-auto-upcase-scene-headings
-           (fountain-match-scene-heading))
-      (upcase-region (line-beginning-position)
-                     (or (match-end 3)
-                         (point)))))
+  (cond ((and fountain-auto-upcase-scene-headings
+              (fountain-match-scene-heading))
+         (upcase-region (line-beginning-position)
+                        (or (match-end 3)
+                            (point))))
+        ((and fountain--auto-upcase-line
+              (= fountain--auto-upcase-line
+                 (count-lines (point-min) (line-beginning-position))))
+         (fountain-upcase-line))))
+
+(defun fountain-dwim (&optional arg)
+  (interactive)
+  (cond (arg
+         (fountain-outline-cycle))
+        ((or (fountain-match-section-heading)
+             (fountain-match-scene-heading))
+         (fountain-outline-cycle))
+        (fountain--auto-upcase-line
+         (fountain-auto-upcase-deactivate-maybe t))
+        (t
+         (setq fountain--auto-upcase-line
+               (count-lines (point-min) (line-beginning-position)))
+         (fountain-upcase-line)
+         (fountain-auto-upcase-make-overlay))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
@@ -4419,7 +4461,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-^") #'fountain-outline-shift-up)
     (define-key map (kbd "C-c C-v") #'fountain-outline-shift-down)
     (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
-    (define-key map (kbd "TAB") #'fountain-outline-cycle)
+    (define-key map (kbd "TAB") #'fountain-dwim)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
     ;; Endnotes:
@@ -4666,6 +4708,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
                     (min (string-to-number n) 6))))
   (add-hook 'post-self-insert-hook
             #'fountain-auto-upcase t t)
+  (add-hook 'post-command-hook
+            #'fountain-auto-upcase-deactivate-maybe t t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers t)
   (fountain-outline-hide-level fountain-outline-startup-level t))
