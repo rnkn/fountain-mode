@@ -1306,23 +1306,19 @@ number."
       (forward-line 0)
       (looking-at fountain-include-regexp))))
 
-(defun fountain-include-find-file (&optional arg)
-  "\\<fountain-mode-map>Find included file at point.
+(defun fountain-include-find-file (&optional no-select)
+  "Find included file at point.
 
-If called with ARG (\\[universal-argument] \\[fountain-include-find-file]), find file in same window,
-otherwise find file in other window.
-
-If called noninteractively, find file without selecting window."
-  (interactive "P")
+Optional argument NO-SELECT will find file without selecting
+window."
+  (interactive)
   (if (and (fountain-match-include)
            (save-match-data
              (string-match "include:" (match-string 1))))
       (let ((filename (expand-file-name (match-string 2))))
-        (if (called-interactively-p)
-            (if arg
-                (find-file filename)
-              (find-file-other-window filename))
-          (find-file-noselect filename)))))
+        (if no-select
+            (find-file-noselect filename)
+          (find-file filename)))))
 
 (defun fountain-include-in-region (start end &optional delete)
   "Replace inclusions between START and END with their file contents.
@@ -3717,12 +3713,14 @@ If nil, auto-upcase is deactivated.")
          (fountain-upcase-line))))
 
 (defun fountain-dwim (&optional arg)
-  (interactive)
+  (interactive "P")
   (cond (arg
          (fountain-outline-cycle))
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading))
          (fountain-outline-cycle))
+        ((fountain-match-include)
+         (fountain-include-find-file))
         (fountain--auto-upcase-line
          (fountain-auto-upcase-deactivate-maybe t))
         (t
