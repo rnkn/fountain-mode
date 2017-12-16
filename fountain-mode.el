@@ -856,7 +856,7 @@ To switch between these levels, customize the value of
   :group 'fountain-faces)
 
 (defface fountain-auto-upcase-highlight
-  '((t (:inherit highlight)))
+  '((t (:inherit hi-yellow)))
   "Default face for highlighting line for auto-upcasing."
   :group 'fountain-faces)
 
