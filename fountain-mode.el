@@ -983,11 +983,12 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line -1)
+      (forward-line 0)
       (or (bobp)
-          (and (bolp) (eolp))
-          (progn (end-of-line 1)
-                 (forward-comment -1))))))
+          (progn (forward-line -1)
+                 (or (and (bolp) (eolp))
+                     (progn (end-of-line 1)
+                            (forward-comment -1))))))))
 
 (defun fountain-blank-after-p ()
   "Return non-nil if following line is blank or a comment."
