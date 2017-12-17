@@ -3695,13 +3695,15 @@ If nil, auto-upcase is deactivated.")
                       (line-beginning-position 2) nil nil t))
   (overlay-put fountain--auto-upcase-overlay 'face 'fountain-auto-upcase-highlight))
 
-(defun fountain-auto-upcase-deactivate-maybe (&optional arg)
-  (when (or arg
+(defun fountain-auto-upcase-deactivate-maybe (&optional deactivate)
+  (when (or deactivate
+            (not fountain--auto-upcase-line)
             (and (integerp fountain--auto-upcase-line)
-                 (not (= fountain--auto-upcase-line
-                         (count-lines (point-min) (line-beginning-position))))))
+                 (/= fountain--auto-upcase-line
+                     (count-lines (point-min) (line-beginning-position)))))
     (setq fountain--auto-upcase-line nil)
-    (delete-overlay fountain--auto-upcase-overlay)))
+    (if (overlayp fountain--auto-upcase-overlay)
+        (delete-overlay fountain--auto-upcase-overlay))))
 
 (defun fountain-auto-upcase ()
   (cond ((and fountain-auto-upcase-scene-headings
