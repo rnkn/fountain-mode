@@ -3688,6 +3688,8 @@ If nil, auto-upcase is deactivated.")
   "Overlay used for auto-upcasing current line.")
 
 (defun fountain-auto-upcase-make-overlay ()
+  (if (overlayp fountain--auto-upcase-overlay)
+      (delete-overlay fountain--auto-upcase-overlay))
   (setq fountain--auto-upcase-overlay
         (make-overlay (line-beginning-position 1)
                       (line-beginning-position 2) nil nil t))
