@@ -3778,8 +3778,8 @@ Added as hook to `post-self-insert-hook'."
         (t
          (setq fountain--auto-upcase-line
                (count-lines (point-min) (line-beginning-position)))
-         (fountain-upcase-line)
-         (fountain-auto-upcase-make-overlay))))
+         (fountain-auto-upcase-make-overlay)
+         (fountain-upcase-line))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
@@ -4486,6 +4486,7 @@ keywords suitable for Font Lock."
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Editing commands:
+    (define-key map (kbd "TAB") #'fountain-dwim)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
@@ -4497,7 +4498,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     ;; FIXME: include-find-file feels like it should be C-c C-c...
-    (define-key map (kbd "C-c C-o") #'fountain-include-find-file)
+    ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
     (define-key map [remap forward-list] #'fountain-forward-scene)
     (define-key map [remap backward-list] #'fountain-backward-scene)
@@ -4516,7 +4517,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-^") #'fountain-outline-shift-up)
     (define-key map (kbd "C-c C-v") #'fountain-outline-shift-down)
     (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
-    (define-key map (kbd "TAB") #'fountain-dwim)
+    (define-key map (kbd "C-c C-o") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
     ;; Endnotes:
