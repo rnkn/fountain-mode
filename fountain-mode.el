@@ -2268,26 +2268,33 @@ Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT.
 If PLIST property \"export\" is non-nil, proceed, otherwise
 return an empty string.
 
-If CONTENT is a string, format with `fountain-export-replace-in-string'
-and if format it filled, fill with `fountain-export-fill-string'.
+If CONTENT is a string, format with
+`fountain-export-replace-in-string' and if format it filled, fill
+with `fountain-export-fill-string'.
 
 If CONTENT is a list, recursively call this function on each
 element of the list.
 
-Check if ELEMENT corresponds to a template in `fountain-export-templates'
-and set ELEMENT-TEMPLATE. If so, replace matches of
-`fountain-template-key-regexp' in the following order:
+Check if ELEMENT corresponds to a template in
+`fountain-export-templates' and set ELEMENT-TEMPLATE. If so,
+replace matches of `fountain-template-key-regexp' in the
+following order:
 
-    1. {{content}} is replaced with CONTENT.
-    2. If {{KEY}} corresponds to a string property in PLIST, it is replaced with
-       that string.
-    3. If {{KEY}} corresponds to the value of the key of ELEMENT of FORMAT in
-       `fountain-export-conditional-replacements', it is replaced with that
-       string.
-    4. If {{KEY}} corresponds with a cdr of FORMAT in
-       `fountain-export-replacements', it is evaluated using `eval' and replaced
-       with that string.
-    5. If none of the above, {{KEY}} is replaced with an empty string."
+1. {{content}} is replaced with CONTENT.
+
+2. If {{KEY}} corresponds to a string property in PLIST, it is
+   replaced with that string.
+
+3. If {{KEY}} corresponds to the value of the key of ELEMENT of
+   FORMAT in `fountain-export-conditional-replacements', it is
+   replaced with that string.
+
+4. If {{KEY}} corresponds with a cdr of FORMAT in
+   `fountain-export-replacements', it is evaluated using `eval'
+   and replaced with that string.
+
+5. If none of the above, {{KEY}} is replaced with an empty
+   string."
   ;; Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT.
   (let ((element (car element-list))
         (plist (nth 1 element-list))
@@ -3926,9 +3933,12 @@ Or, if nil:
           (concat revision separator (number-to-string number)))
       (concat (number-to-string number) separator revision))))
 
-(defun fountain-get-scene-number (&optional n) ; FIXME: inclusions break scene numbers
+(defun fountain-get-scene-number (&optional n)
   "Return the scene number of the Nth next scene as a list.
-Return Nth previous if N is negative."
+Return Nth previous if N is negative.
+
+Scene numbers will not be accurate if buffer contains directives
+to include external files."
   (unless n (setq n 0))
   (save-excursion
     (save-restriction
@@ -4435,8 +4445,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
     (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
     ;; View commands:
-    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-syntax-chars) ; FIXME ??
-    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-delim) ; FIXME ??
+    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-syntax-chars)
+    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-delim)
     map)
   "Mode map for `fountain-mode'.")
 
@@ -4465,6 +4475,7 @@ otherwise, if ELT is provided, toggle the presence of ELT in VAR."
 Toggles the value of fountain-hide-ELEMENT, then, if
 fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
 `buffer-invisibility-spec', otherwise removes it."
+  ;; FIXME: make a macro
   (let* ((option (intern (concat "fountain-hide-" element)))
          (symbol (intern (concat "fountain-" element))))
     (customize-set-variable option
