@@ -3746,9 +3746,6 @@ Added as hook to `post-self-insert-hook'."
          (fountain-upcase-line))))
 
 (defun fountain-dwim (&optional arg)
-  (interactive "P")
-  (cond (arg
-         (fountain-outline-cycle))
   "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
 
 1. If point is at a scene heading or section heading, or if
@@ -3768,6 +3765,9 @@ Added as hook to `post-self-insert-hook'."
    flexible style of entering character names. You may press
    \\[fountain-dwim] before, during or after typing the name to
    get the same result."
+  (interactive "p")
+  (cond ((< 1 arg)
+         (fountain-outline-cycle arg))
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading))
          (fountain-outline-cycle))
