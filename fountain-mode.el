@@ -3690,7 +3690,7 @@ If nil, auto-upcase is deactivated.")
 (defun fountain-auto-upcase-make-overlay ()
   (setq fountain--auto-upcase-overlay
         (make-overlay (line-beginning-position 1)
-                      (line-beginning-position 2)))
+                      (line-beginning-position 2) nil nil t))
   (overlay-put fountain--auto-upcase-overlay 'face 'fountain-auto-upcase-highlight))
 
 (defun fountain-auto-upcase-deactivate-maybe (&optional arg)
