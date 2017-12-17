@@ -3277,13 +3277,16 @@ Display a message unless SILENT."
 (defun fountain-outline-cycle (&optional arg) ; FIXME: document
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
-    \\[fountain-outline-cycle]				If ARG is nil, cycle outline visibility of current
-                    subtree and its children
-    \\[universal-argument] \\[fountain-outline-cycle]			If ARG is 4, cycle outline visibility of buffer
-                    (same as \\[fountain-outline-cycle-global])
-    \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]		If ARG is 16, show all
-    \\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]	If ARG is 64, show outline visibility set in
-                    `fountain-outline-custom-level'"
+1. If ARG is nil, cycle outline visibility of current subtree and
+   its children (\\[fountain-outline-cycle]).
+
+2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-outline-cycle],
+   same as \\[fountain-outline-cycle-global]).
+
+3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]).
+
+4. If ARG is 64, show outline visibility set in
+   `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle])."
   (interactive "p")
   (let ((custom-level
          (if fountain-outline-custom-level
@@ -3376,10 +3379,13 @@ Display a message unless SILENT."
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-    1: Top-level section headings
-    2: Value of `fountain-outline-custom-level'
-    3: All section headings and scene headings
-    4: Everything"
+1. Top-level section headings
+
+2. Value of `fountain-outline-custom-level'
+
+3. All section headings and scene headings
+
+4. Everything"
   (interactive)
   (fountain-outline-cycle 4))
 
@@ -3688,6 +3694,13 @@ If nil, auto-upcase is deactivated.")
   "Overlay used for auto-upcasing current line.")
 
 (defun fountain-auto-upcase-make-overlay ()
+  "Make the auto-upcase overlay on current line.
+
+If overlay `fountain--auto-upcase-overlay' already exists, delete
+it first.
+
+Make the overlay and add the face
+`fountain-auto-upcase-highlight'."
   (if (overlayp fountain--auto-upcase-overlay)
       (delete-overlay fountain--auto-upcase-overlay))
   (setq fountain--auto-upcase-overlay
@@ -3696,6 +3709,10 @@ If nil, auto-upcase is deactivated.")
   (overlay-put fountain--auto-upcase-overlay 'face 'fountain-auto-upcase-highlight))
 
 (defun fountain-auto-upcase-deactivate-maybe (&optional deactivate)
+  "Maybe deactivate auto-upcasing.
+Always deactivate if optional argument DEACTIVATE is non-nil.
+
+Added as hook to `post-command-hook'."
   (when (or deactivate
             (not fountain--auto-upcase-line)
             (and (integerp fountain--auto-upcase-line)
@@ -3706,6 +3723,15 @@ If nil, auto-upcase is deactivated.")
         (delete-overlay fountain--auto-upcase-overlay))))
 
 (defun fountain-auto-upcase ()
+  "Upcase all or part of the current line contextually.
+
+If `fountain-auto-upcase-scene-headings' is non-nil and point is
+at a scene heading, activate auto upcasing for beginning of line
+to scene number or point.
+
+Otherwise, activate auto-upcasing for the whole line.
+
+Added as hook to `post-self-insert-hook'."
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
          (setq fountain--auto-upcase-line
@@ -3723,6 +3749,25 @@ If nil, auto-upcase is deactivated.")
   (interactive "P")
   (cond (arg
          (fountain-outline-cycle))
+  "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
+
+1. If point is at a scene heading or section heading, or if
+   prefixed with ARG (\\[universal-argument] \\[fountain-dwim]) call `fountain-outline-cycle'
+   and pass ARG, e.g. \\[universal-argument] \\[universal-argument] \\[fountain-dwim] is the same as
+   \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle].
+
+2. If point is at an directive to an included file, call
+   `fountain-include-find-file'.
+
+3. Otherwise, upcase the current line and active auto-upcasing.
+   This highlights the current line with face
+   `fountain-auto-upcase-highlight' and will continue to upcase
+   inserted characters until the command is called again
+   (\\[fountain-dwim]) or point moves to a different line (either
+   by inserting a newline or point motion). This allows a
+   flexible style of entering character names. You may press
+   \\[fountain-dwim] before, during or after typing the name to
+   get the same result."
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading))
          (fountain-outline-cycle))
