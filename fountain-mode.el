@@ -3708,10 +3708,13 @@ If nil, auto-upcase is deactivated.")
 (defun fountain-auto-upcase ()
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
+         (setq fountain--auto-upcase-line
+               (count-lines (point-min) (line-beginning-position)))
+         (fountain-auto-upcase-make-overlay)
          (upcase-region (line-beginning-position)
                         (or (match-end 3)
                             (point))))
-        ((and fountain--auto-upcase-line
+        ((and (integerp fountain--auto-upcase-line)
               (= fountain--auto-upcase-line
                  (count-lines (point-min) (line-beginning-position))))
          (fountain-upcase-line))))
