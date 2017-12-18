@@ -4053,6 +4053,7 @@ to include external files."
             found)
         ;; First, check if there are any scene numbers already. If not we can
         ;; save a lot of work.
+        ;; FIXME: this is just extra work since we're doing for each scene heading
         (save-match-data
           (goto-char (point-min))
           (while (not (or found (eobp)))
@@ -4776,9 +4777,9 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
   (add-hook 'post-self-insert-hook
-            #'fountain-auto-upcase t t)
+            #'fountain-auto-upcase nil t)
   (add-hook 'post-command-hook
-            #'fountain-auto-upcase-deactivate-maybe t t)
+            #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers t)
   (fountain-outline-hide-level fountain-outline-startup-level t))
