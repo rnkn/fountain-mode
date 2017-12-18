@@ -3722,13 +3722,13 @@ Always deactivate if optional argument DEACTIVATE is non-nil.
 
 Added as hook to `post-command-hook'."
   (when (or deactivate
-            (not fountain--auto-upcase-line)
             (and (integerp fountain--auto-upcase-line)
                  (/= fountain--auto-upcase-line
                      (count-lines (point-min) (line-beginning-position)))))
     (setq fountain--auto-upcase-line nil)
     (if (overlayp fountain--auto-upcase-overlay)
-        (delete-overlay fountain--auto-upcase-overlay))))
+        (delete-overlay fountain--auto-upcase-overlay))
+    (message "Auto-upcasing disabled")))
 
 (defun fountain-auto-upcase ()
   "Upcase all or part of the current line contextually.
@@ -3787,7 +3787,8 @@ Added as hook to `post-self-insert-hook'."
          (setq fountain--auto-upcase-line
                (count-lines (point-min) (line-beginning-position)))
          (fountain-auto-upcase-make-overlay)
-         (fountain-upcase-line))))
+         (fountain-upcase-line)
+         (message "Auto-upcasing enabled"))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
