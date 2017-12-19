@@ -1196,6 +1196,19 @@ script, you may get incorrect output."
                  (const :tag "Show with automatic update" timer))
   :group 'fountain-pages)
 
+(defvar fountain-page-count-timer
+  nil)
+
+(defvar-local fountain-show-page-count
+  nil)
+
+(defvar-local fountain-page-count-string
+  nil)
+
+(defcustom fountain-page-count-delay
+  5.0
+  "Idle time in seconds before calculating page count."
+  :type 'float
   :group 'fountain-pages)
 
 (defun fountain-insert-page-break-string (&optional string)
