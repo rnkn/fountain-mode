@@ -1173,6 +1173,10 @@ Assumes that all other element matching has been done."
 
 ;;; Pages
 
+(defgroup fountain-pages ()
+  "Options for calculating page length."
+  :group 'fountain)
+
 (defcustom fountain-page-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
@@ -1182,7 +1186,17 @@ script, you may get incorrect output."
   :type '(choice integer
                  (list (cons (const :tag "US Letter" letter) integer)
                        (cons (const :tag "A4" a4) integer)))
-  :group 'fountain-page)
+  :group 'fountain-pages)
+
+(defcustom fountain-show-page-count-in-mode-line
+  nil
+  "If non-nil show current page of total pages in mode-line."
+  :type '(choice (const :tag "Don't show page count" nil)
+                 (const :tag "Show with manual update" force)
+                 (const :tag "Show with automatic update" timer))
+  :group 'fountain-pages)
+
+  :group 'fountain-pages)
 
 (defun fountain-insert-page-break-string (&optional string)
   (let ((page-break
