@@ -4632,6 +4632,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-o") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
+    ;; Pages
+    (define-key map (kbd "C-c C-x p") #'fountain-update-page-count)
     ;; Endnotes:
     (define-key map (kbd "M-s e") #'fountain-show-or-hide-endnotes)
     ;; Exporting commands:
