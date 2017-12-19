@@ -923,6 +923,7 @@ These are required for functions to operate with temporary buffers."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
+  (setq fountain-show-page-count fountain-show-page-count-in-mode-line)
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
@@ -1319,6 +1320,77 @@ number."
           (fountain-insert-page-break-string string)))))
     ;; Finally return to where we were.
     (goto-char pos)))
+
+(defun fountain-get-page-count (start end &optional report)
+  (let ((x (point))
+        (total 0)
+        (current 1)
+        (job (if report (make-progress-reporter "Paginating...")))
+        found)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char start)
+        (setq end (min end (point-max)))
+        (if (re-search-forward fountain-end-regexp end t)
+            (setq end (match-beginning 0)))
+        (goto-char start)
+        (while (< (point) end)
+          (fountain-forward-page)
+          (setq total (1+ total))
+          (if (and (not found) (<= x (point))) (setq current total found t))
+          (if job (progress-reporter-update job)))
+        (if job (progress-reporter-done job))
+        (cons current total)))))
+
+(defun fountain-update-page-count ()
+  (interactive)
+  (if fountain-show-page-count
+      (progn
+        (setq fountain-page-count-string "[-/-] ")
+        (force-mode-line-update)
+        (redisplay))
+    (setq fountain-page-count-string nil)
+    (force-mode-line-update))
+  (let ((page-count (fountain-get-page-count (point-min) (point-max)
+                                             (called-interactively-p))))
+    (when (called-interactively-p)
+      (message "Page %d of %d" (car page-count) (cdr page-count)))
+    (when fountain-show-page-count
+      (setq fountain-page-count-string
+            (format "[%d/%d] " (car page-count) (cdr page-count)))
+      (force-mode-line-update))))
+
+(defun fountain-update-page-count-all ()
+  (while-no-input
+    (redisplay)
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (if (eq fountain-show-page-count 'timer)
+            (fountain-update-page-count))))))
+
+(defun fountain-init-mode-line ()
+  (let ((tail (cdr (memq 'mode-line-modes mode-line-format))))
+    (setq mode-line-format
+          (append
+           (butlast mode-line-format (length tail))
+           (cons 'fountain-page-count-string tail)))))
+
+(defun fountain-cancel-page-count-timer ()
+  (if (timerp fountain-page-count-timer)
+      (cancel-timer fountain-page-count-timer))
+  (setq fountain-page-count-timer nil))
+
+(defun fountain-restart-page-count-timer ()
+  (fountain-cancel-page-count-timer)
+  (setq fountain-page-count-timer
+        (run-with-idle-timer fountain-page-count-delay t
+                             #'fountain-update-page-count-all)))
+
+(defun fountain-toggle-show-page-count ()
+  (interactive)
+  (setq fountain-show-page-count (not fountain-show-page-count))
+  (fountain-update-page-count))
 
 
 ;;; Inclusions
@@ -4809,6 +4881,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
             #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers t)
+  (fountain-init-mode-line)
+  (fountain-restart-page-count-timer)
   (fountain-outline-hide-level fountain-outline-startup-level t))
 
 (provide 'fountain-mode)
