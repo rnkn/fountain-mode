@@ -3721,6 +3721,12 @@ Ignores revised scene numbers scenes.
           (setq scene (or (car (fountain-scene-number-to-list (match-string 6)))
                           (1+ scene)))))))
 
+(defun fountain-goto-page (n)
+  "Move point to Nth appropropriate page in current buffer."
+  (interactive "NGoto page: ")
+  (goto-char (point-min))
+  (fountain-forward-page n (fountain-get-export-elements)))
+
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
 If LIMIT is 'dialog, halt at end of dialog. If LIMIT is 'scene,
@@ -4691,6 +4697,7 @@ keywords suitable for Font Lock."
     (define-key map [remap end-of-defun] #'fountain-end-of-scene)
     (define-key map [remap mark-defun] #'fountain-mark-scene)
     (define-key map (kbd "M-g s") #'fountain-goto-scene)
+    (define-key map (kbd "M-g p") #'fountain-goto-page)
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
     ;; Outline commands:
