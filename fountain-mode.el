@@ -1225,6 +1225,70 @@ script, you may get incorrect output."
       (replace-match page-break t t)
     (insert page-break "\n\n"))))
 
+(defun fountain-goto-page-break-point ()
+  "Move point to appropriate place to break a page.
+This is usually before point, but may be after if only skipping
+over whitespace."
+  (skip-chars-forward "\n\r\s\t")
+  (let ((element (fountain-get-element)))
+    (cond
+     ;; If we're are a section heading, scene heading or character, we can
+     ;; safely break before.
+     ((memq element '(section-heading scene-heading character))
+      (forward-line 0))
+     ;; If we're at a parenthetical, check if the previous line is a character.
+     ;; and if so call recursively on that element.
+     ((eq element 'paren)
+      (forward-line 0)
+      (let ((x (point)))
+        (forward-char -1)
+        (if (fountain-match-character)
+            (progn
+              (forward-line 0)
+              (fountain-goto-page-break-point))
+          ;; Otherwise parenthetical is mid-dialogue, so get character name
+          ;; and break at this element.
+          (goto-char x))))
+     ;; If we're at dialogue, skip over spaces then go to the beginning of the
+     ;; current sentence.
+     ((eq element 'lines)
+      (skip-chars-forward "\s\t")
+      (if (not (looking-back (sentence-end)
+                             (save-excursion
+                               (fountain-forward-character -1)
+                               (point))))
+          (forward-sentence -1)
+        ;; This may move to character element, or back within dialogue. If
+        ;; previous line is a character or parenthetical, call recursively on
+        ;; that element. Otherwise, get character name and break page here.
+        (let ((x (point)))
+          (forward-char -1)
+          (if (or (fountain-match-character)
+                  (fountain-match-paren))
+              (fountain-goto-page-break-point)
+            (goto-char x)))))
+     ;; If we're at a transition or center text, skip backwards to previous
+     ;; element and call recursively on that element.
+     ((memq element '(trans center))
+      (skip-chars-backward "\n\r\s\t")
+      (forward-line 0)
+      (fountain-goto-page-break-point))
+     ;; If we're at action, skip over spaces then go to the beginning of the
+     ;; current sentence.
+     ((eq element 'action)
+      (skip-chars-forward "\s\t")
+      (unless (or (bolp)
+                  (looking-back (sentence-end) nil))
+        (forward-sentence -1))
+      ;; Then, try to skip back to the previous element. If it is a scene
+      ;; heading, call recursively on that element. Otherwise, break page here.
+      (let ((x (point)))
+        (skip-chars-backward "\n\r\s\t")
+        (forward-line 0)
+        (if (fountain-match-scene-heading)
+            (fountain-goto-page-break-point)
+          (goto-char x)))))))
+
 (defun fountain-forward-page (&optional n export-elements)
   "Move point forward by an approximate page.
 
