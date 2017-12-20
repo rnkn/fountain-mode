@@ -1225,6 +1225,75 @@ script, you may get incorrect output."
       (replace-match page-break t t)
     (insert page-break "\n\n"))))
 
+(defun fountain-forward-page (&optional n export-elements)
+  "Move point forward by an approximate page.
+
+Moves forward from point, which is unlikely to correspond to
+final exported pages and so probably should not be used
+interactively.
+
+To considerably speed up this function, supply EXPORT-ELEMENTS
+with `fountain-get-export-elements'."
+  (unless n (setq n 1))
+  (if (< n 0) (error "N must be positive"))
+  (while (< 0 n)
+  ;; Pages don't begin with blank space, so skip over any at point.
+  (skip-chars-forward "\n\r\s\t")
+  ;; If we're at a page break, move to its end and skip over whitespace.
+  (when (fountain-match-page-break)
+    (goto-char (match-end 0))
+    (skip-chars-forward "\n\r\s\t"))
+  ;; Start counting lines.
+  (let ((line-count 0))
+    ;; Begin the main loop, which only halts if we reach the end of buffer, a
+    ;; forced page break, or after the maximum lines in a page.
+    (while (and (< (point) (point-max))
+                (not (fountain-match-page-break))
+                (< line-count (cdr (assq fountain-export-page-size
+                                         fountain-page-max-lines))))
+      (cond
+       ;; If we're at the end of a line (but not also the beginning, i.e. not a
+       ;; blank line) then move forward a line and increment line-count.
+       ((and (eolp) (not (bolp)))
+        (forward-line 1)
+        (setq line-count (1+ line-count)))
+       ;; If we're looking at blank space, skip over any and increment
+       ;; line-count.
+       ((looking-at "\n*\s*\t*\n")      ; FIXME: \r ?
+        (goto-char (match-end 0))
+        (setq line-count (1+ line-count)))
+       ;; We are at an element. Find what kind of element. If it is not included
+       ;; in export, skip over without incrementing line-count (implement with
+       ;; block bounds). Get the line width.
+       (t
+        (let ((x (point))
+              (element (fountain-get-element)))
+          (if (memq element (or export-elements
+                                (fountain-get-export-elements)))
+              (let ((line-width
+                     (cdr (symbol-value
+                           (plist-get (cdr (assq element fountain-elements))
+                                      :fill)))))
+                ;; If scene headings are double-spaced, add an extra line to
+                ;; line-count already.
+                ;; (if (and (eq element 'scene-heading)
+                ;;          (memq 'double-space fountain-export-scene-heading-format))
+                ;;     (setq line-count (1+ line-count)))
+                ;;
+                ;; Move to the line-width column
+                (move-to-column (+ (current-column) line-width))
+                (skip-chars-forward "\s\t")
+                (if (eolp) (forward-line 1))
+                (fill-move-to-break-point (line-beginning-position))
+                (setq line-count (1+ line-count)))
+            ;; Element is not exported, so skip it without incrementing
+            ;; line-count.
+            (goto-char (line-end-position))
+            (skip-chars-forward "\n\r\s\t")))))))
+  (skip-chars-forward "\n\r\s\t")
+  (fountain-goto-page-break-point)
+  (setq n (1- n))))
+
 (defun fountain-insert-page-break (&optional string)
   "Insert a page break at appropriate place preceding point.
 STRING is an optional page number string to force the page
@@ -3624,66 +3693,6 @@ halt at end of scene."
   (interactive "^p")
   (setq n (or n 1))
   (fountain-forward-character (- n)))
-
-(defun fountain-forward-page ()
-  "Move point forward by an approximate page.
-
-Moves forward from point, which is unlikely to correspond to
-final exported pages and so probably should not be used
-interactively."
-  ;; Pages don't begin with blank space, so skip over any at point.
-  (skip-chars-forward "\n\r\s\t")
-  ;; If we're at a page break, move to its end and skip over whitespace.
-  (when (fountain-match-page-break)
-    (goto-char (match-end 0))
-    (skip-chars-forward "\n\r\s\t"))
-  ;; Start counting lines.
-  (let ((line-count 0))
-    ;; Begin the main loop, which only halts if we reach the end of buffer, a
-    ;; forced page break, or after the maximum lines in a page.
-    (while (and (< (point) (point-max))
-                (not (fountain-match-page-break))
-                (< line-count (cdr (assq fountain-export-page-size
-                                         fountain-page-max-lines))))
-      (cond
-       ;; If we're at the end of a line (but not also the beginning, i.e. not a
-       ;; blank line) then move forward a line and increment line-count.
-       ((and (eolp) (not (bolp)))
-        (forward-line 1)
-        (setq line-count (1+ line-count)))
-       ;; If we're looking at blank space, skip over any and increment
-       ;; line-count.
-       ((looking-at "\n*\s*\t*\n")      ; FIXME: \r ?
-        (goto-char (match-end 0))
-        (setq line-count (1+ line-count)))
-       ;; We are at an element. Find what kind of element. If it is not included
-       ;; in export, skip over without incrementing line-count (implement with
-       ;; block bounds). Get the line width.
-       (t
-        (let ((x (point))
-              (element (fountain-get-element)))
-          (if (memq element (fountain-get-export-elements))
-              (let ((line-width
-                     (cdr (symbol-value
-                           (plist-get (cdr (assq element fountain-elements))
-                                      :fill)))))
-                ;; If scene headings are double-spaced, add an extra line to
-                ;; line-count already.
-                ;; (if (and (eq element 'scene-heading)
-                ;;          (memq 'double-space fountain-export-scene-heading-format))
-                ;;     (setq line-count (1+ line-count)))
-                ;;
-                ;; Move to the line-width column
-                (move-to-column (+ (current-column) line-width))
-                (skip-chars-forward "\s\t")
-                (if (eolp) (forward-line 1))
-                (fill-move-to-break-point (line-beginning-position))
-                (setq line-count (1+ line-count)))
-            ;; Element is not exported, so skip it without incrementing
-            ;; line-count.
-            (goto-char (line-end-position))
-            (skip-chars-forward "\n\r\s\t")))))))
-  (skip-chars-forward "\n\r\s\t"))
 
 
 ;;; Endnotes
