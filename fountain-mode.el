@@ -923,7 +923,6 @@ These are required for functions to operate with temporary buffers."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
-  (setq fountain-show-page-count fountain-show-page-count-in-mode-line)
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
@@ -1207,7 +1206,7 @@ script, you may get incorrect output."
   nil)
 
 (defcustom fountain-page-count-delay
-  5.0
+  2.0
   "Idle time in seconds before calculating page count."
   :type 'float
   :group 'fountain-pages)
@@ -1454,53 +1453,54 @@ number."
     ;; Finally return to where we were.
     (goto-char pos)))
 
-(defun fountain-get-page-count (start end &optional report)
+(defun fountain-get-page-count ()
   (let ((x (point))
         (total 0)
-        (current 1)
-        (job (if report (make-progress-reporter "Paginating...")))
+        (current 0)
+        (end (point-max))
+        (export-element (fountain-get-export-elements))
         found)
     (save-excursion
       (save-restriction
         (widen)
-        (goto-char start)
-        (setq end (min end (point-max)))
-        (if (re-search-forward fountain-end-regexp end t)
+        (goto-char (point-min))
+        (if (re-search-forward fountain-end-regexp nil t)
             (setq end (match-beginning 0)))
-        (goto-char start)
+        (goto-char (point-min))
         (while (< (point) end)
-          (fountain-forward-page)
+          (fountain-forward-page 1 export-element)
           (setq total (1+ total))
-          (if (and (not found) (<= x (point))) (setq current total found t))
-          (if job (progress-reporter-update job)))
-        (if job (progress-reporter-done job))
+          (if (and (not found) (<= x (point))) (setq current total found t)))
         (cons current total)))))
 
-(defun fountain-update-page-count ()
-  (interactive)
-  (if fountain-show-page-count
-      (progn
-        (setq fountain-page-count-string "[-/-] ")
-        (force-mode-line-update)
-        (redisplay))
-    (setq fountain-page-count-string nil)
-    (force-mode-line-update))
-  (let ((page-count (fountain-get-page-count (point-min) (point-max)
-                                             (called-interactively-p))))
-    (when (called-interactively-p)
-      (message "Page %d of %d" (car page-count) (cdr page-count)))
-    (when fountain-show-page-count
-      (setq fountain-page-count-string
-            (format "[%d/%d] " (car page-count) (cdr page-count)))
-      (force-mode-line-update))))
 
-(defun fountain-update-page-count-all ()
+(defun fountain-count-pages ()
+  "Return the approximate current page of total pages in current buffer.
+
+If called interactively, print message in echo area.
+
+If point is beyond script end break, page number is returned as
+0."
+  (interactive)
+  (let ((pages (fountain-get-page-count)))
+    (fountain-update-page-count (car pages) (cdr pages))
+    (if (called-interactively-p)
+        (message "Page %d of %d" (car pages) (cdr pages)))))
+
+(defun fountain-update-page-count (current total)
+  (if fountain-show-page-count-in-mode-line
+      (setq fountain-page-count-string (format "[%d/%d] " current total))
+    (setq fountain-page-count-string nil))
+  (force-mode-line-update))
+
+(defun fountain-count-pages-all ()
   (while-no-input
     (redisplay)
     (dolist (buffer (buffer-list))
       (with-current-buffer buffer
-        (if (eq fountain-show-page-count 'timer)
-            (fountain-update-page-count))))))
+        (when (and (eq major-mode 'fountain-mode)
+                   (eq fountain-show-page-count-in-mode-line 'timer))
+          (fountain-count-pages))))))
 
 (defun fountain-init-mode-line ()
   (let ((tail (cdr (memq 'mode-line-modes mode-line-format))))
@@ -1518,12 +1518,7 @@ number."
   (fountain-cancel-page-count-timer)
   (setq fountain-page-count-timer
         (run-with-idle-timer fountain-page-count-delay t
-                             #'fountain-update-page-count-all)))
-
-(defun fountain-toggle-show-page-count ()
-  (interactive)
-  (setq fountain-show-page-count (not fountain-show-page-count))
-  (fountain-update-page-count))
+                             #'fountain-count-pages-all)))
 
 
 ;;; Inclusions
@@ -4713,7 +4708,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
     ;; Pages
-    (define-key map (kbd "C-c C-x p") #'fountain-update-page-count)
+    (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
     ;; Endnotes:
     (define-key map (kbd "M-s e") #'fountain-show-or-hide-endnotes)
     ;; Exporting commands:
