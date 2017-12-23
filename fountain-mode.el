@@ -3694,6 +3694,7 @@ Ignores revised scene numbers scenes.
     10B = 10
     A10 =  9"
   (interactive "NGoto scene: ")
+  (push-mark)
   (goto-char (point-min))
   (let ((scene (if (fountain-match-scene-heading)
                    (car (fountain-scene-number-to-list (match-string 6)))
@@ -3708,6 +3709,7 @@ Ignores revised scene numbers scenes.
 (defun fountain-goto-page (n)
   "Move point to Nth appropropriate page in current buffer."
   (interactive "NGoto page: ")
+  (push-mark)
   (goto-char (point-min))
   (fountain-forward-page n (fountain-get-export-elements)))
 
