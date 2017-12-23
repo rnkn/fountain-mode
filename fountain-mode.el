@@ -4789,13 +4789,14 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
   "Menu for `fountain-mode'."
   '("Fountain"
     ("Navigation"
-     ["Go to Scene Heading..." fountain-goto-scene]
-     "---"
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene]
      "---"
      ["Next Character" fountain-forward-character]
-     ["Previous Character" fountain-backward-character])
+     ["Previous Character" fountain-backward-character]
+     "---"
+     ["Go to Scene Heading..." fountain-goto-scene]
+     ["Go to Page..." fountain-goto-page])
     ("Outlining"
      ["Cycle Scene/Section Visibility" fountain-outline-cycle]
      ["Cycle Global Visibility" fountain-outline-cycle-global]
