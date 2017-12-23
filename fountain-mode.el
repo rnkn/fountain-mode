@@ -944,19 +944,10 @@ See function `fountain-patch-emacs-bugs'."
 (defun fountain-patch-emacs-bugs ()
   "Attempt to patch known bugs in Emacs.
 
-Disable `show-paren-mode' in local buffers.
-See <https://debbugs.gnu.org/29381>
-
 In Emacs versions prior to 26, adds advice to override
 `outline-invisible-p' to return non-nil only if the character
 after POS or point has invisible text property eq to 'outline.
 See <http://debbugs.gnu.org/24073>."
-  ;; `show-paren-mode' is erroneously created as a global minor mode, treating
-  ;; all text like code. This is not what sane people want. Make it buffer-local
-  ;; and set to nil.
-  (unless (assq 'show-paren-mode (buffer-local-variables (current-buffer)))
-    (setq-local show-paren-mode nil)
-    (message "fountain-mode: `show-paren-mode' disabled in current buffer"))
   ;; In Emacs version prior to 26, `outline-invisible-p' returns non-nil for ANY
   ;; invisible property of text at point:
   ;;
@@ -4654,10 +4645,9 @@ keywords suitable for Font Lock."
     (if (fountain-match-scene-heading)
         (if (and fountain-display-scene-numbers-in-margin
                  (match-string 6))
-            (progn
-              (put-text-property (match-beginning 4) (match-end 7)
-                                 'display (list '(margin right-margin)
-                                                (match-string-no-properties 6))))
+            (put-text-property (match-beginning 4) (match-end 7)
+                               'display (list '(margin right-margin)
+                                              (match-string-no-properties 6)))
           (remove-text-properties (match-beginning 0) (match-end 0)
                                   '(display))))
     (forward-line 1)))
