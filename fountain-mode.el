@@ -1192,14 +1192,11 @@ script, you may get incorrect output."
   nil
   "If non-nil show current page of total pages in mode-line."
   :type '(choice (const :tag "Don't show page count" nil)
-                 (const :tag "Show with manual update" force)
-                 (const :tag "Show with automatic update" timer))
+                 (const :tag "Show with automatic update" timer)
+                 (const :tag "Show with manual update" force))
   :group 'fountain-pages)
 
 (defvar fountain-page-count-timer
-  nil)
-
-(defvar-local fountain-show-page-count
   nil)
 
 (defvar-local fountain-page-count-string
@@ -1472,7 +1469,6 @@ number."
           (setq total (1+ total))
           (if (and (not found) (<= x (point))) (setq current total found t)))
         (cons current total)))))
-
 
 (defun fountain-count-pages ()
   "Return the approximate current page of total pages in current buffer.
