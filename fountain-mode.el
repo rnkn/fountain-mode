@@ -4485,10 +4485,9 @@ keywords suitable for Font Lock."
     (if (fountain-match-scene-heading)
         (if (and fountain-display-scene-numbers-in-margin
                  (match-string 6))
-            (progn
-              (put-text-property (match-beginning 4) (match-end 7)
-                                 'display (list '(margin right-margin)
-                                                (match-string-no-properties 6))))
+            (put-text-property (match-beginning 4) (match-end 7)
+                               'display (list '(margin right-margin)
+                                              (match-string-no-properties 6)))
           (remove-text-properties (match-beginning 0) (match-end 0)
                                   '(display))))
     (forward-line 1)))
