@@ -281,18 +281,24 @@
   :group 'fountain)
 
 (defcustom fountain-scene-heading-prefix-list
-  '("INT" "EXT" "EST" "INT/EXT" "I/E")
+  '("INT" "EXT" "INT/EXT" "I/E")
   "List of scene heading prefixes (case insensitive).
 Any scene heading prefix can be followed by a dot and/or a space,
 so the following are equivalent:
 
     INT HOUSE - DAY
 
-    INT. HOUSE - DAY
-
-Call `fountain-mode' again for changes to take effect."
+    INT. HOUSE - DAY"
   :type '(repeat (string :tag "Prefix"))
-  :group 'fountain)
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (fountain-init-scene-heading-regexp)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (fountain-init-outline-regexp)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-trans-suffix-list
   '("TO:" "WITH:" "FADE OUT" "TO BLACK")
@@ -302,11 +308,16 @@ e.g. `TO:' will match both the following:
 
     CUT TO:
 
-    DISSOLVE TO:
-
-Call `fountain-mode' again for changes to take effect."
+    DISSOLVE TO:"
   :type '(repeat (string :tag "Suffix"))
-  :group 'fountain)
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (fountain-init-trans-regexp)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-add-continued-dialog
   t
