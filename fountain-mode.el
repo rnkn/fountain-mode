@@ -4589,70 +4589,6 @@ keywords suitable for Font Lock."
   "Mode map for `fountain-mode'.")
 
 
-;;; Settings
-
-(defun fountain-toggle-custom-variable (var &optional elt)
-  "Toggle variable VAR using `customize'.
-
-If VAR's custom type is boolean, toggle the value of VAR,
-otherwise, if ELT is provided, toggle the presence of ELT in VAR."
-  (cond ((eq (get var 'custom-type) 'boolean)
-         (customize-set-variable var (not (symbol-value var))))
-        ((and elt
-              (listp (eval (car (get var 'standard-value)))))
-         (if (memq elt (symbol-value var))
-             (customize-set-variable var (delq elt (symbol-value var)))
-           (customize-set-variable var (cons elt (symbol-value var))))))
-  (font-lock-refresh-defaults)
-  (message "%s is now: %s"
-           (custom-unlispify-tag-name var)
-           (symbol-value var)))
-
-(defun fountain-toggle-hide-element (element)
-  "Toggle visibility of fountain-ELEMENT, using S for feedback.
-Toggles the value of fountain-hide-ELEMENT, then, if
-fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
-`buffer-invisibility-spec', otherwise removes it."
-  ;; FIXME: make a macro
-  (let* ((option (intern (concat "fountain-hide-" element)))
-         (symbol (intern (concat "fountain-" element))))
-    (customize-set-variable option
-                            (not (symbol-value option)))
-    (if (symbol-value option)
-        (add-to-invisibility-spec symbol)
-      (remove-from-invisibility-spec symbol))
-    (font-lock-refresh-defaults)
-    (message "%s are now: %s"
-             (custom-unlispify-tag-name symbol)
-             (if (symbol-value option)
-                 "invisible" "visible"))))
-
-(defun fountain-toggle-hide-emphasis-delim ()
-  "Toggle `fountain-hide-emphasis-delim'."
-  (interactive)
-  (fountain-toggle-hide-element "emphasis-delim"))
-
-(defun fountain-toggle-hide-syntax-chars ()
-  "Toggle `fountain-hide-syntax-chars'."
-  (interactive)
-  (fountain-toggle-hide-element "syntax-chars"))
-
-(defun fountain-save-options ()
-  "Save `fountain-mode' options with `customize'."
-  (interactive)
-  (let (unsaved)
-    (dolist (option '(fountain-align-elements
-                      fountain-add-continued-dialog
-                      fountain-hide-emphasis-delim
-                      fountain-hide-syntax-chars
-                      fountain-display-scene-numbers-in-margin
-                      fountain-export-scene-heading-format
-                      font-lock-maximum-decoration))
-      (if (customize-mark-to-save option)
-          (setq unsaved t)))
-    (if unsaved (custom-save-all))))
-
-
 ;;; Menu
 
 (require 'easymenu)
@@ -4791,6 +4727,21 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
+
+(defun fountain-save-options ()
+  "Save `fountain-mode' options with `customize'."
+  (interactive)
+  (let (unsaved)
+    (dolist (option '(fountain-align-elements
+                      fountain-add-continued-dialog
+                      fountain-hide-emphasis-delim
+                      fountain-hide-syntax-chars
+                      fountain-display-scene-numbers-in-margin
+                      fountain-export-scene-heading-format
+                      font-lock-maximum-decoration))
+      (if (customize-mark-to-save option)
+          (setq unsaved t)))
+    (if unsaved (custom-save-all))))
 
 
 ;;; Syntax Table
