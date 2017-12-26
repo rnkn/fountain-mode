@@ -4673,7 +4673,8 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :selected (eq fountain-export-page-size 'a4)]
      "---"
      ["Include Title Page"
-      (fountain-toggle-custom-variable 'fountain-export-include-title-page)
+      (customize-set-variable 'fountain-export-include-title-page
+                              (not fountain-export-include-title-page))
       :style toggle
       :selected fountain-export-include-title-page]
      ["Bold Scene Headings"
@@ -4696,23 +4697,23 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       (customize-group 'fountain-export)])
     "---"
     ["Display Elements Auto-Aligned"
-     (fountain-toggle-custom-variable
-      'fountain-align-elements)
+     (customize-set-variable 'fountain-align-elements
+                             (not fountain-align-elements))
      :style toggle
      :selected fountain-align-elements]
     ["Display Scene Numbers in Margin"
-     (fountain-toggle-custom-variable
-      'fountain-display-scene-numbers-in-margin)
+     (customize-set-variable 'fountain-display-scene-numbers-in-margin
+                             (not fountain-display-scene-numbers-in-margin))
      :style toggle
      :selected fountain-display-scene-numbers-in-margin]
     ["Auto-Upcase Scene Headings"
-     (fountain-toggle-custom-variable
-      'fountain-auto-upcase-scene-headings)
+     (customize-set-variable 'fountain-auto-upcase-scene-headings
+                             (not fountain-auto-upcase-scene-headings))
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
     ["Add Continued Dialog"
-     (fountain-toggle-custom-variable
-      'fountain-add-continued-dialog)
+     (customize-set-variable 'fountain-add-continued-dialog
+                             (not fountain-add-continued-dialog))
      :style toggle
      :selected fountain-add-continued-dialog]
     "---"
@@ -4730,10 +4731,14 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 3)])
     ("Show/Hide"
-     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+     ["Hide Emphasis Delimiters"
+      (customize-set-variable 'fountain-hide-emphasis-delim
+                              (not fountain-hide-emphasis-delim))
       :style toggle
       :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
+     ["Hide Syntax Characters"
+      (customize-set-variable 'fountain-hide-syntax-chars
+                              (not fountain-hide-syntax-chars))
       :style toggle
       :selected fountain-hide-syntax-chars])
     "---"
