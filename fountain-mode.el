@@ -280,45 +280,6 @@
   :type 'hook
   :group 'fountain)
 
-(defcustom fountain-scene-heading-prefix-list
-  '("INT" "EXT" "INT/EXT" "I/E")
-  "List of scene heading prefixes (case insensitive).
-Any scene heading prefix can be followed by a dot and/or a space,
-so the following are equivalent:
-
-    INT HOUSE - DAY
-
-    INT. HOUSE - DAY"
-  :type '(repeat (string :tag "Prefix"))
-  :group 'fountain
-  :set (lambda (symbol value)
-         (set-default symbol value)
-         (fountain-init-scene-heading-regexp)
-         (dolist (buffer (buffer-list))
-           (with-current-buffer buffer
-             (when (eq major-mode 'fountain-mode)
-               (fountain-init-outline-regexp)
-               (font-lock-refresh-defaults))))))
-
-(defcustom fountain-trans-suffix-list
-  '("TO:" "WITH:" "FADE OUT" "TO BLACK")
-  "List of transition suffixes (case insensitive).
-This list is used to match the endings of transitions,
-e.g. `TO:' will match both the following:
-
-    CUT TO:
-
-    DISSOLVE TO:"
-  :type '(repeat (string :tag "Suffix"))
-  :group 'fountain
-  :set (lambda (symbol value)
-         (set-default symbol value)
-         (fountain-init-trans-regexp)
-         (dolist (buffer (buffer-list))
-           (with-current-buffer buffer
-             (when (eq major-mode 'fountain-mode)
-               (font-lock-refresh-defaults))))))
-
 (defcustom fountain-add-continued-dialog
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
@@ -350,13 +311,31 @@ changes desired."
   nil
   "If non-nil, make emphasis delimiters invisible."
   :type 'boolean
-  :group 'fountain)
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+                   (if fountain-hide-emphasis-delim
+                       (add-to-invisibility-spec 'fountain-emphasis-delim)
+                     (remove-from-invisibility-spec 'fountain-emphasis-delim))
+                   (font-lock-refresh-defaults))))))
 
 (defcustom fountain-hide-syntax-chars
   nil
   "If non-nil, make syntax characters invisible."
   :type 'boolean
-  :group 'fountain)
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+                   (if fountain-hide-syntax-chars
+                       (add-to-invisibility-spec 'fountain-syntax-chars)
+                     (remove-from-invisibility-spec 'fountain-syntax-chars))
+                   (font-lock-refresh-defaults))))))
 
 (defcustom fountain-time-format
   "%F"
@@ -412,7 +391,13 @@ To disable element alignment, see `fountain-align-element'."
   "If non-nil, elements will be displayed auto-aligned.
 This option does not affect file contents."
   :type 'boolean
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+                   (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-section-heading
   '(("screenplay" 0)
@@ -521,7 +506,13 @@ If nil, do not change scene number display.
 
 This option does affect file contents."
   :type 'boolean
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (define-obsolete-variable-alias 'fountain-align-scene-number
   'fountain-display-scene-numbers-in-margin "2.3.0")
@@ -941,6 +932,46 @@ These are required for functions to operate with temporary buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline))
+
+
+(defcustom fountain-scene-heading-prefix-list
+  '("INT" "EXT" "INT/EXT" "I/E")
+  "List of scene heading prefixes (case insensitive).
+Any scene heading prefix can be followed by a dot and/or a space,
+so the following are equivalent:
+
+    INT HOUSE - DAY
+
+    INT. HOUSE - DAY"
+  :type '(repeat (string :tag "Prefix"))
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (fountain-init-scene-heading-regexp)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (fountain-init-outline-regexp)
+               (font-lock-refresh-defaults))))))
+
+(defcustom fountain-trans-suffix-list
+  '("TO:" "WITH:" "FADE OUT" "TO BLACK")
+  "List of transition suffixes (case insensitive).
+This list is used to match the endings of transitions,
+e.g. `TO:' will match both the following:
+
+    CUT TO:
+
+    DISSOLVE TO:"
+  :type '(repeat (string :tag "Suffix"))
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (fountain-init-trans-regexp)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 
 ;;; Emacs Bugs
@@ -1845,7 +1876,13 @@ Passed to `format' with export format as single variable."
   t
   "If non-nil, include a title page in export."
   :type 'boolean
-  :group 'fountain-export)
+  :group 'fountain-export
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-export-contact-align-right
   nil
