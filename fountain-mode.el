@@ -1201,19 +1201,6 @@ script, you may get incorrect output."
   :type 'float
   :group 'fountain-pages)
 
-(defun fountain-insert-page-break-string (&optional string)
-  (let ((page-break
-         (concat "==="
-                 (if (< 0 (string-width string))
-                     (concat "\s" string "\s===")))))
-  (if (save-excursion
-        (save-restriction
-          (widen)
-          (skip-chars-backward "\n\r\s\t")
-          (fountain-match-page-break)))
-      (replace-match page-break t t)
-    (insert page-break "\n\n"))))
-
 (defun fountain-goto-page-break-point ()
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
