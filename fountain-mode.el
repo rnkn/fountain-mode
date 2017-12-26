@@ -4825,12 +4825,26 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 3)])
     ("Show/Hide"
-     ["Hide Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+     ("Page Numbers"
+      ["Don't Show in Mode Line"
+       (customize-set-variable 'fountain-show-page-count-in-mode-line nil)
+       :style radio
+       :selected (not fountain-show-page-count-in-mode-line)]
+      ["In Mode Lne with Automatic Update"
+       (customize-set-variable 'fountain-show-page-count-in-mode-line 'timer)
+       :style radio
+       :selected (eq fountain-show-page-count-in-mode-line 'timer)]
+      ["In Mode Line with Manual Update"
+       (customize-set-variable 'fountain-show-page-count-in-mode-line 'force)
+       :style radio
+       :selected (eq fountain-show-page-count-in-mode-line 'force)]
+      )
+     ["Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
       :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters" fountain-toggle-hide-syntax-chars
+      :selected (not fountain-hide-emphasis-delim)]
+     ["Syntax Characters" fountain-toggle-hide-syntax-chars
       :style toggle
-      :selected fountain-hide-syntax-chars])
+      :selected (not fountain-hide-syntax-chars)])
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
