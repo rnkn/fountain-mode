@@ -4678,18 +4678,27 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :style toggle
       :selected fountain-export-include-title-page]
      ["Bold Scene Headings"
-      (fountain-toggle-custom-variable
-       'fountain-export-scene-heading-format 'bold)
+      (if (memq 'bold fountain-export-scene-heading-format)
+          (customize-set-variable 'fountain-export-scene-heading-format
+                                  (remq 'bold fountain-export-scene-heading-format))
+        (customize-set-variable 'fountain-export-scene-heading-format
+                                (cons 'bold fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'bold fountain-export-scene-heading-format)]
      ["Double-Space Scene Headings"
-      (fountain-toggle-custom-variable
-       'fountain-export-scene-heading-format 'double-space)
+      (if (memq 'double-space fountain-export-scene-heading-format)
+          (customize-set-variable 'fountain-export-scene-heading-format
+                                  (remq 'double-space fountain-export-scene-heading-format))
+        (customize-set-variable 'fountain-export-scene-heading-format
+                                (cons 'double-space fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'double-space fountain-export-scene-heading-format)]
      ["Underline Scene Headings"
-      (fountain-toggle-custom-variable
-       'fountain-export-scene-heading-format 'underline)
+      (if (memq 'underline fountain-export-scene-heading-format)
+          (customize-set-variable 'fountain-export-scene-heading-format
+                                  (remq 'underline fountain-export-scene-heading-format))
+        (customize-set-variable 'fountain-export-scene-heading-format
+                                (cons 'underline fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'underline fountain-export-scene-heading-format)]
      "---"
