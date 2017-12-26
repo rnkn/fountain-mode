@@ -1351,97 +1351,39 @@ with `fountain-get-export-elements'."
   "Insert a page break at appropriate place preceding point.
 STRING is an optional page number string to force the page
 number."
-  ;; FIXME: break this into fountain-goto-page-break-point and
-  ;; fountain-insert-page-break
   (interactive "sPage number (RET for none): ")
   ;; Save a marker where we are.
-  (let ((pos (point-marker))
+  (let ((x (point-marker))
+        (page-break
+         (concat "===" (if (< 0 (string-width string))
+                           (concat "\s" string "\s==="))))
         element)
-    (skip-chars-forward "\n\r\s\t")
+    ;; Move point to appropriate place to break page.
+    (fountain-goto-page-break-point)
     (setq element (fountain-get-element))
-    (cond
-     ;; If we're are a section heading, scene heading or character, we can
-     ;; safely break before.
-     ((memq element '(section-heading scene-heading character))
-      (forward-line 0)
-      (fountain-insert-page-break-string string))
-     ;; If we're at a parenthetical, check if the previous line is a character.
-     ;; and if so call recursively on that element.
-     ((eq element 'paren)
-      (forward-line 0)
-      (let ((x (point)))
-        (forward-char -1)
-        (if (fountain-match-character)
-            (progn
-              (forward-line 0)
-              (fountain-insert-page-break string))
-          ;; Otherwise parenthetical is mid-dialogue, so get character name
-          ;; and break at this element.
-          (goto-char x)
-          (let ((name (fountain-get-character -1)))
-            (insert-before-markers
-             (concat
-              (unless (bolp) "\n")
-              fountain-export-more-dialog-string "\n\n"))
-            (fountain-insert-page-break-string string)
-            ;; Insert character name and continued dialogue string.
-            (insert-before-markers
-             (concat name "\s" fountain-continued-dialog-string "\n"))))))
-     ;; If we're at dialogue, skip over spaces then go to the beginning of the
-     ;; current sentence. This may move to character element, or back within
-     ;; dialogue. If previous line is a character or parenthetical, call
-     ;; recursively on that element. Otherwise, get character name and break
-     ;; page here.
-     ((eq element 'lines)
-      (skip-chars-forward "\s")
-      (if (not (looking-back (sentence-end)
-                             (save-excursion
-                               (fountain-forward-character -1)
-                               (point))))
-          (progn
-            (forward-sentence -1)
-            (fountain-insert-page-break string))
-        (let ((x (point)))
-          (forward-char -1)
-          (if (or (fountain-match-character)
-                  (fountain-match-paren))
-              (fountain-insert-page-break string))
-          (goto-char x)
-          (let ((name (fountain-get-character -1)))
-            (insert-before-markers
-             (concat
-              (unless (bolp) "\n")
-              fountain-export-more-dialog-string "\n\n"))
-            (fountain-insert-page-break-string string)
-            ;; Insert character name and continued dialogue string.
-            (insert-before-markers
-             (concat name "\s" fountain-continued-dialog-string "\n"))))))
-     ;; If we're at a transition or center text, skip backwards to previous
-     ;; element and call recursively on that element.
-     ((memq element '(trans center))
-      (skip-chars-backward "\n\r\s\t")
-      (forward-line 0)
-      (fountain-insert-page-break string))
-     ;; If we're at action, skip over spaces then go to the beginning of the
-     ;; current sentence. Then, try to skip back to the previous element and
-     ;; if it is a scene heading, call recursively on that element. Otherwise,
-     ;; break page here.
-     ((eq element 'action)
-      (skip-chars-forward "\s\t")
-      (unless (or (bolp)
-                  (looking-back (sentence-end) nil))
-        (forward-sentence -1))
-      (let ((x (point)))
-        (skip-chars-backward "\n\r\s\t")
-        (forward-line 0)
-        (if (fountain-match-scene-heading)
-            (fountain-insert-page-break string)
-          (goto-char x)
-          (unless (fountain-blank-before-p)
-            (insert-before-markers "\n\n"))
-          (fountain-insert-page-break-string string)))))
-    ;; Finally return to where we were.
-    (goto-char pos)))
+    ;; At this point, element can only be: section-heading, scene-heading,
+    ;; character, action, paren or lines. Only paren and lines require special
+    ;; treatment.
+    (if (memq element '(lines paren))
+        (let ((name (fountain-get-character -1)))
+          (insert (concat
+                   fountain-export-more-dialog-string "\n\n"
+                   page-break "\n\n"
+                   name "\s" fountain-continued-dialog-string "\n")))
+      ;; Otherwise, insert the page break where we are. If the preceding element
+      ;; is a page break, only replace the page number, otherwise, insert the
+      ;; page break.
+      (if (save-excursion
+            (save-restriction
+              (widen)
+              (skip-chars-backward "\n\r\s\t")
+              (fountain-match-page-break)))
+          (replace-match page-break t t)
+        (delete-horizontal-space)
+        (unless (bolp) (insert "\n\n"))
+        (insert-before-markers page-break "\n\n")))
+    ;; Return to where we were.
+    (goto-char x)))
 
 (defun fountain-get-page-count ()
   (let ((x (point))
