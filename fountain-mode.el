@@ -280,34 +280,6 @@
   :type 'hook
   :group 'fountain)
 
-(defcustom fountain-scene-heading-prefix-list
-  '("INT" "EXT" "EST" "INT/EXT" "I/E")
-  "List of scene heading prefixes (case insensitive).
-Any scene heading prefix can be followed by a dot and/or a space,
-so the following are equivalent:
-
-    INT HOUSE - DAY
-
-    INT. HOUSE - DAY
-
-Call `fountain-mode' again for changes to take effect."
-  :type '(repeat (string :tag "Prefix"))
-  :group 'fountain)
-
-(defcustom fountain-trans-suffix-list
-  '("TO:" "WITH:" "FADE OUT" "TO BLACK")
-  "List of transition suffixes (case insensitive).
-This list is used to match the endings of transitions,
-e.g. `TO:' will match both the following:
-
-    CUT TO:
-
-    DISSOLVE TO:
-
-Call `fountain-mode' again for changes to take effect."
-  :type '(repeat (string :tag "Suffix"))
-  :group 'fountain)
-
 (defcustom fountain-add-continued-dialog
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
@@ -339,13 +311,31 @@ changes desired."
   nil
   "If non-nil, make emphasis delimiters invisible."
   :type 'boolean
-  :group 'fountain)
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+                   (if fountain-hide-emphasis-delim
+                       (add-to-invisibility-spec 'fountain-emphasis-delim)
+                     (remove-from-invisibility-spec 'fountain-emphasis-delim))
+                   (font-lock-refresh-defaults))))))
 
 (defcustom fountain-hide-syntax-chars
   nil
   "If non-nil, make syntax characters invisible."
   :type 'boolean
-  :group 'fountain)
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+                   (if fountain-hide-syntax-chars
+                       (add-to-invisibility-spec 'fountain-syntax-chars)
+                     (remove-from-invisibility-spec 'fountain-syntax-chars))
+                   (font-lock-refresh-defaults))))))
 
 (defcustom fountain-time-format
   "%F"
@@ -401,7 +391,13 @@ To disable element alignment, see `fountain-align-element'."
   "If non-nil, elements will be displayed auto-aligned.
 This option does not affect file contents."
   :type 'boolean
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+                   (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-section-heading
   '(("screenplay" 0)
@@ -510,7 +506,13 @@ If nil, do not change scene number display.
 
 This option does affect file contents."
   :type 'boolean
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (define-obsolete-variable-alias 'fountain-align-scene-number
   'fountain-display-scene-numbers-in-margin "2.3.0")
@@ -930,6 +932,46 @@ These are required for functions to operate with temporary buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline))
+
+
+(defcustom fountain-scene-heading-prefix-list
+  '("INT" "EXT" "INT/EXT" "I/E")
+  "List of scene heading prefixes (case insensitive).
+Any scene heading prefix can be followed by a dot and/or a space,
+so the following are equivalent:
+
+    INT HOUSE - DAY
+
+    INT. HOUSE - DAY"
+  :type '(repeat (string :tag "Prefix"))
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (fountain-init-scene-heading-regexp)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (fountain-init-outline-regexp)
+               (font-lock-refresh-defaults))))))
+
+(defcustom fountain-trans-suffix-list
+  '("TO:" "WITH:" "FADE OUT" "TO BLACK")
+  "List of transition suffixes (case insensitive).
+This list is used to match the endings of transitions,
+e.g. `TO:' will match both the following:
+
+    CUT TO:
+
+    DISSOLVE TO:"
+  :type '(repeat (string :tag "Suffix"))
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (fountain-init-trans-regexp)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 
 ;;; Emacs Bugs
@@ -1988,7 +2030,13 @@ Passed to `format' with export format as single variable."
   t
   "If non-nil, include a title page in export."
   :type 'boolean
-  :group 'fountain-export)
+  :group 'fountain-export
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-export-contact-align-right
   nil
@@ -4623,7 +4671,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-^") #'fountain-outline-shift-up)
     (define-key map (kbd "C-c C-v") #'fountain-outline-shift-down)
     (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
-    (define-key map (kbd "C-c C-o") #'fountain-outline-cycle)
+    (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
     ;; Pages
@@ -4644,70 +4692,6 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-delim)
     map)
   "Mode map for `fountain-mode'.")
-
-
-;;; Settings
-
-(defun fountain-toggle-custom-variable (var &optional elt)
-  "Toggle variable VAR using `customize'.
-
-If VAR's custom type is boolean, toggle the value of VAR,
-otherwise, if ELT is provided, toggle the presence of ELT in VAR."
-  (cond ((eq (get var 'custom-type) 'boolean)
-         (customize-set-variable var (not (symbol-value var))))
-        ((and elt
-              (listp (eval (car (get var 'standard-value)))))
-         (if (memq elt (symbol-value var))
-             (customize-set-variable var (delq elt (symbol-value var)))
-           (customize-set-variable var (cons elt (symbol-value var))))))
-  (font-lock-refresh-defaults)
-  (message "%s is now: %s"
-           (custom-unlispify-tag-name var)
-           (symbol-value var)))
-
-(defun fountain-toggle-hide-element (element)
-  "Toggle visibility of fountain-ELEMENT, using S for feedback.
-Toggles the value of fountain-hide-ELEMENT, then, if
-fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
-`buffer-invisibility-spec', otherwise removes it."
-  ;; FIXME: make a macro
-  (let* ((option (intern (concat "fountain-hide-" element)))
-         (symbol (intern (concat "fountain-" element))))
-    (customize-set-variable option
-                            (not (symbol-value option)))
-    (if (symbol-value option)
-        (add-to-invisibility-spec symbol)
-      (remove-from-invisibility-spec symbol))
-    (font-lock-refresh-defaults)
-    (message "%s are now: %s"
-             (custom-unlispify-tag-name symbol)
-             (if (symbol-value option)
-                 "invisible" "visible"))))
-
-(defun fountain-toggle-hide-emphasis-delim ()
-  "Toggle `fountain-hide-emphasis-delim'."
-  (interactive)
-  (fountain-toggle-hide-element "emphasis-delim"))
-
-(defun fountain-toggle-hide-syntax-chars ()
-  "Toggle `fountain-hide-syntax-chars'."
-  (interactive)
-  (fountain-toggle-hide-element "syntax-chars"))
-
-(defun fountain-save-options ()
-  "Save `fountain-mode' options with `customize'."
-  (interactive)
-  (let (unsaved)
-    (dolist (option '(fountain-align-elements
-                      fountain-add-continued-dialog
-                      fountain-hide-emphasis-delim
-                      fountain-hide-syntax-chars
-                      fountain-display-scene-numbers-in-margin
-                      fountain-export-scene-heading-format
-                      font-lock-maximum-decoration))
-      (if (customize-mark-to-save option)
-          (setq unsaved t)))
-    (if unsaved (custom-save-all))))
 
 
 ;;; Menu
@@ -4768,22 +4752,32 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       :selected (eq fountain-export-page-size 'a4)]
      "---"
      ["Include Title Page"
-      (fountain-toggle-custom-variable 'fountain-export-include-title-page)
+      (customize-set-variable 'fountain-export-include-title-page
+                              (not fountain-export-include-title-page))
       :style toggle
       :selected fountain-export-include-title-page]
      ["Bold Scene Headings"
-      (fountain-toggle-custom-variable
-       'fountain-export-scene-heading-format 'bold)
+      (if (memq 'bold fountain-export-scene-heading-format)
+          (customize-set-variable 'fountain-export-scene-heading-format
+                                  (remq 'bold fountain-export-scene-heading-format))
+        (customize-set-variable 'fountain-export-scene-heading-format
+                                (cons 'bold fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'bold fountain-export-scene-heading-format)]
      ["Double-Space Scene Headings"
-      (fountain-toggle-custom-variable
-       'fountain-export-scene-heading-format 'double-space)
+      (if (memq 'double-space fountain-export-scene-heading-format)
+          (customize-set-variable 'fountain-export-scene-heading-format
+                                  (remq 'double-space fountain-export-scene-heading-format))
+        (customize-set-variable 'fountain-export-scene-heading-format
+                                (cons 'double-space fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'double-space fountain-export-scene-heading-format)]
      ["Underline Scene Headings"
-      (fountain-toggle-custom-variable
-       'fountain-export-scene-heading-format 'underline)
+      (if (memq 'underline fountain-export-scene-heading-format)
+          (customize-set-variable 'fountain-export-scene-heading-format
+                                  (remq 'underline fountain-export-scene-heading-format))
+        (customize-set-variable 'fountain-export-scene-heading-format
+                                (cons 'underline fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'underline fountain-export-scene-heading-format)]
      "---"
@@ -4791,23 +4785,23 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       (customize-group 'fountain-export)])
     "---"
     ["Display Elements Auto-Aligned"
-     (fountain-toggle-custom-variable
-      'fountain-align-elements)
+     (customize-set-variable 'fountain-align-elements
+                             (not fountain-align-elements))
      :style toggle
      :selected fountain-align-elements]
     ["Display Scene Numbers in Margin"
-     (fountain-toggle-custom-variable
-      'fountain-display-scene-numbers-in-margin)
+     (customize-set-variable 'fountain-display-scene-numbers-in-margin
+                             (not fountain-display-scene-numbers-in-margin))
      :style toggle
      :selected fountain-display-scene-numbers-in-margin]
     ["Auto-Upcase Scene Headings"
-     (fountain-toggle-custom-variable
-      'fountain-auto-upcase-scene-headings)
+     (customize-set-variable 'fountain-auto-upcase-scene-headings
+                             (not fountain-auto-upcase-scene-headings))
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
     ["Add Continued Dialog"
-     (fountain-toggle-custom-variable
-      'fountain-add-continued-dialog)
+     (customize-set-variable 'fountain-add-continued-dialog
+                             (not fountain-add-continued-dialog))
      :style toggle
      :selected fountain-add-continued-dialog]
     "---"
@@ -4837,18 +4831,36 @@ fountain-hide-ELEMENT is non-nil, adds fountain-ELEMENT to
       ["In Mode Line with Manual Update"
        (customize-set-variable 'fountain-show-page-count-in-mode-line 'force)
        :style radio
-       :selected (eq fountain-show-page-count-in-mode-line 'force)]
-      )
-     ["Emphasis Delimiters" fountain-toggle-hide-emphasis-delim
+       :selected (eq fountain-show-page-count-in-mode-line 'force)])
+     ["Emphasis Delimiters"
+      (customize-set-variable 'fountain-hide-emphasis-delim
+                              (not fountain-hide-emphasis-delim))
       :style toggle
       :selected (not fountain-hide-emphasis-delim)]
-     ["Syntax Characters" fountain-toggle-hide-syntax-chars
+     ["Syntax Characters"
+      (customize-set-variable 'fountain-hide-syntax-chars
+                              (not fountain-hide-syntax-chars))
       :style toggle
       :selected (not fountain-hide-syntax-chars)])
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
     ["Customize Faces" (customize-group 'fountain-faces)]))
+
+(defun fountain-save-options ()
+  "Save `fountain-mode' options with `customize'."
+  (interactive)
+  (let (unsaved)
+    (dolist (option '(fountain-align-elements
+                      fountain-add-continued-dialog
+                      fountain-hide-emphasis-delim
+                      fountain-hide-syntax-chars
+                      fountain-display-scene-numbers-in-margin
+                      fountain-export-scene-heading-format
+                      font-lock-maximum-decoration))
+      (if (customize-mark-to-save option)
+          (setq unsaved t)))
+    (if unsaved (custom-save-all))))
 
 
 ;;; Syntax Table
