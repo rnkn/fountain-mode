@@ -1222,14 +1222,6 @@ script, you may get incorrect output."
                        (cons (const :tag "A4" a4) integer)))
   :group 'fountain-pages)
 
-(defcustom fountain-show-page-count-in-mode-line
-  nil
-  "If non-nil show current page of total pages in mode-line."
-  :type '(choice (const :tag "Don't show page count" nil)
-                 (const :tag "Show with automatic update" timer)
-                 (const :tag "Show with manual update" force))
-  :group 'fountain-pages)
-
 ;; FIXME: timer can be used for things other than page count, e.g. automatically
 ;; adding continued dialogue string.
 (defvar fountain-page-count-timer
@@ -1480,6 +1472,19 @@ If point is beyond script end break, page number is returned as
   (setq fountain-page-count-timer
         (run-with-idle-timer fountain-pages-count-delay t
                              #'fountain-count-pages-maybe)))
+
+(defcustom fountain-pages-show-in-mode-line
+  nil
+  "If non-nil show current page of total pages in mode-line."
+  :type '(choice (const :tag "No page count" nil)
+                 (const :tag "Show with manual update" force)
+                 (const :tag "Show with automatic update" timer))
+  :group 'fountain-pages
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (fountain-count-pages-maybe value)))))
 
 
 ;;; Inclusions
