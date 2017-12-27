@@ -1310,7 +1310,6 @@ interactively.
 To considerably speed up this function, supply EXPORT-ELEMENTS
 with `fountain-get-export-elements'."
   (unless n (setq n 1))
-  (if (< n 0) (error "N must be positive"))
   (while (< 0 n)
   ;; Pages don't begin with blank space, so skip over any at point.
   (skip-chars-forward "\n\r\s\t")
