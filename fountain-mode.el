@@ -4663,6 +4663,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
+    (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     ;; FIXME: include-find-file feels like it should be C-c C-c...
     ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
