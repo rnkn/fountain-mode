@@ -1208,9 +1208,10 @@ Assumes that all other element matching has been done."
 
 (defgroup fountain-pages ()
   "Options for calculating page length."
-  :group 'fountain)
+  :group 'fountain
+  :prefix "fountain-pages-")
 
-(defcustom fountain-page-max-lines
+(defcustom fountain-pages-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
 
@@ -1237,7 +1238,7 @@ script, you may get incorrect output."
 (defvar-local fountain-page-count-string
   nil)
 
-(defcustom fountain-page-count-delay
+(defcustom fountain-pages-count-delay
   2.0
   "Idle time in seconds before calculating page count."
   :type 'float
@@ -1332,7 +1333,7 @@ with `fountain-get-export-elements'."
     (while (and (< (point) (point-max))
                 (not (fountain-match-page-break))
                 (< line-count (cdr (assq fountain-export-page-size
-                                         fountain-page-max-lines))))
+                                         fountain-pages-max-lines))))
       (cond
        ;; If we're at the end of a line (but not also the beginning, i.e. not a
        ;; blank line) then move forward a line and increment line-count.
@@ -1477,7 +1478,7 @@ If point is beyond script end break, page number is returned as
 (defun fountain-restart-page-count-timer ()
   (fountain-cancel-page-count-timer)
   (setq fountain-page-count-timer
-        (run-with-idle-timer fountain-page-count-delay t
+        (run-with-idle-timer fountain-pages-count-delay t
                              #'fountain-count-pages-maybe)))
 
 
@@ -2741,7 +2742,7 @@ Command acts on current buffer or BUFFER."
 ;;   "Float representing top page margin in inches.
 
 ;; There is no corresponding bottom margin option, as page length
-;; is calculated using `fountain-page-max-lines'."
+;; is calculated using `fountain-pages-max-lines'."
 ;;   :type 'float
 ;;   :group 'fountain-export)
 
