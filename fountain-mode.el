@@ -1432,28 +1432,36 @@ number."
 
 If called interactively, print message in echo area.
 
-If point is beyond script end break, page number is returned as
-0."
+If point is beyond script end break, current page number is
+returned as 0."
   (interactive)
-  (setq fountain-page-count-string
-        (if fountain-show-page-count-in-mode-line "[-/-] " nil))
-  (force-mode-line-update)
+  (fountain-pages-update-mode-line)
   (redisplay)
   (let ((pages (fountain-get-page-count)))
-    (setq fountain-page-count-string
-          (if fountain-show-page-count-in-mode-line
-              (format "[%d/%d] " (car pages) (cdr pages))
-            nil))
-    (force-mode-line-update)
+    (fountain-pages-update-mode-line (car pages) (cdr pages))
     (if (called-interactively-p)
         (message "Page %d of %d" (car pages) (cdr pages)))))
 
-(defun fountain-count-pages-maybe ()
+(defun fountain-pages-update-mode-line (&optional current total)
+  (setq fountain-page-count-string
+        (if fountain-pages-show-in-mode-line
+            (if (and current total)
+                (format "[%d/%d] " current total)
+              "[-/-] ")
+          nil))
+  (force-mode-line-update))
+
+(defun fountain-count-pages-maybe (&optional force)
   (while-no-input
     (redisplay)
-    (if (and (eq major-mode 'fountain-mode)
-             (eq fountain-show-page-count-in-mode-line 'timer))
-        (fountain-count-pages))))
+    (if (eq major-mode 'fountain-mode)
+        (cond (force
+               (fountain-count-pages))
+              ((eq fountain-pages-show-in-mode-line 'timer)
+               (fountain-count-pages))
+              ((and fountain-page-count-string
+                    (not fountain-pages-show-in-mode-line))
+               (fountain-pages-update-mode-line))))))
 
 (defun fountain-init-mode-line ()
   (let ((tail (cdr (memq 'mode-line-modes mode-line-format))))
