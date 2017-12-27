@@ -4715,7 +4715,7 @@ keywords suitable for Font Lock."
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
-    ("Navigation"
+    ("Navigate"
      ["Next Scene Heading" fountain-forward-scene]
      ["Previous Scene Heading" fountain-backward-scene]
      "---"
@@ -4724,7 +4724,7 @@ keywords suitable for Font Lock."
      "---"
      ["Go to Scene Heading..." fountain-goto-scene]
      ["Go to Page..." fountain-goto-page])
-    ("Outlining"
+    ("Outline"
      ["Cycle Scene/Section Visibility" fountain-outline-cycle]
      ["Cycle Global Visibility" fountain-outline-cycle-global]
      "---"
@@ -4737,16 +4737,64 @@ keywords suitable for Font Lock."
      ["Mark Section/Scene" fountain-outline-mark]
      ["Shift Section/Scene Up" fountain-outline-shift-up]
      ["Shift Section/Scene Down" fountain-outline-shift-down])
-    ("Locking"
+    ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
-     ["Remove Scene Numbers" fountain-remove-scene-numbers])
+     ["Remove Scene Numbers" fountain-remove-scene-numbers]
+     "---"
+     ["Display Scene Numbers in Margin"
+     (customize-set-variable 'fountain-display-scene-numbers-in-margin
+                             (not fountain-display-scene-numbers-in-margin))
+     :style toggle
+     :selected fountain-display-scene-numbers-in-margin])
+    ("Page Numbers"
+     ["Count Pages" fountain-count-pages]
+     "---"
+     ["Don't Show in Mode Line"
+      (customize-set-variable 'fountain-pages-show-in-mode-line nil)
+      :style radio
+      :selected (not fountain-pages-show-in-mode-line)]
+     ["In Mode Line with Manual Update"
+      (customize-set-variable 'fountain-pages-show-in-mode-line 'force)
+      :style radio
+      :selected (eq fountain-pages-show-in-mode-line 'force)]
+     ["In Mode Line with Automatic Update"
+      (customize-set-variable 'fountain-pages-show-in-mode-line 'timer)
+      :style radio
+      :selected (eq fountain-pages-show-in-mode-line 'timer)])
     "---"
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
+    ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     "---"
-    ("Exporting"
+    ("Show/Hide"
+     ["Endnotes" fountain-show-or-hide-endnotes]
+     ["Emphasis Delimiters"
+      (customize-set-variable 'fountain-hide-emphasis-delim
+                              (not fountain-hide-emphasis-delim))
+      :style toggle
+      :selected (not fountain-hide-emphasis-delim)]
+     ["Syntax Characters"
+      (customize-set-variable 'fountain-hide-syntax-chars
+                              (not fountain-hide-syntax-chars))
+      :style toggle
+      :selected (not fountain-hide-syntax-chars)])
+    ("Syntax Highlighting"
+     ["Minimum"
+      (fountain-set-font-lock-decoration 1)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 1)]
+     ["Default"
+      (fountain-set-font-lock-decoration 2)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 2)]
+     ["Maximum"
+      (fountain-set-font-lock-decoration 3)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 3)])
+    "---"
+    ("Export"
      ["Export buffer..." fountain-export-buffer]
      ["Default" fountain-export-default]
      "---"
@@ -4798,31 +4846,11 @@ keywords suitable for Font Lock."
      ["Customize Export"
       (customize-group 'fountain-export)])
     "---"
-    ("Page Numbers"
-     ["Count Pages" fountain-count-pages]
-     "---"
-     ["Don't Show in Mode Line"
-      (customize-set-variable 'fountain-pages-show-in-mode-line nil)
-      :style radio
-      :selected (not fountain-pages-show-in-mode-line)]
-     ["In Mode Line with Manual Update"
-      (customize-set-variable 'fountain-pages-show-in-mode-line 'force)
-      :style radio
-      :selected (eq fountain-pages-show-in-mode-line 'force)]
-     ["In Mode Line with Automatic Update"
-      (customize-set-variable 'fountain-pages-show-in-mode-line 'timer)
-      :style radio
-      :selected (eq fountain-pages-show-in-mode-line 'timer)])
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
      :style toggle
      :selected fountain-align-elements]
-    ["Display Scene Numbers in Margin"
-     (customize-set-variable 'fountain-display-scene-numbers-in-margin
-                             (not fountain-display-scene-numbers-in-margin))
-     :style toggle
-     :selected fountain-display-scene-numbers-in-margin]
     ["Auto-Upcase Scene Headings"
      (customize-set-variable 'fountain-auto-upcase-scene-headings
                              (not fountain-auto-upcase-scene-headings))
@@ -4833,31 +4861,6 @@ keywords suitable for Font Lock."
                              (not fountain-add-continued-dialog))
      :style toggle
      :selected fountain-add-continued-dialog]
-    "---"
-    ("Syntax Highlighting"
-     ["Minimum"
-      (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 1)]
-     ["Default"
-      (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 2)]
-     ["Maximum"
-      (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)])
-    ("Show/Hide"
-     ["Emphasis Delimiters"
-      (customize-set-variable 'fountain-hide-emphasis-delim
-                              (not fountain-hide-emphasis-delim))
-      :style toggle
-      :selected (not fountain-hide-emphasis-delim)]
-     ["Syntax Characters"
-      (customize-set-variable 'fountain-hide-syntax-chars
-                              (not fountain-hide-syntax-chars))
-      :style toggle
-      :selected (not fountain-hide-syntax-chars)])
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
