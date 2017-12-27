@@ -4797,6 +4797,21 @@ keywords suitable for Font Lock."
      ["Customize Export"
       (customize-group 'fountain-export)])
     "---"
+    ("Page Numbers"
+     ["Count Pages" fountain-count-pages]
+     "---"
+     ["Don't Show in Mode Line"
+      (customize-set-variable 'fountain-pages-show-in-mode-line nil)
+      :style radio
+      :selected (not fountain-pages-show-in-mode-line)]
+     ["In Mode Line with Manual Update"
+      (customize-set-variable 'fountain-pages-show-in-mode-line 'force)
+      :style radio
+      :selected (eq fountain-pages-show-in-mode-line 'force)]
+     ["In Mode Line with Automatic Update"
+      (customize-set-variable 'fountain-pages-show-in-mode-line 'timer)
+      :style radio
+      :selected (eq fountain-pages-show-in-mode-line 'timer)])
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
@@ -4832,19 +4847,6 @@ keywords suitable for Font Lock."
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 3)])
     ("Show/Hide"
-     ("Page Numbers"
-      ["Don't Show in Mode Line"
-       (customize-set-variable 'fountain-show-page-count-in-mode-line nil)
-       :style radio
-       :selected (not fountain-show-page-count-in-mode-line)]
-      ["In Mode Lne with Automatic Update"
-       (customize-set-variable 'fountain-show-page-count-in-mode-line 'timer)
-       :style radio
-       :selected (eq fountain-show-page-count-in-mode-line 'timer)]
-      ["In Mode Line with Manual Update"
-       (customize-set-variable 'fountain-show-page-count-in-mode-line 'force)
-       :style radio
-       :selected (eq fountain-show-page-count-in-mode-line 'force)])
      ["Emphasis Delimiters"
       (customize-set-variable 'fountain-hide-emphasis-delim
                               (not fountain-hide-emphasis-delim))
