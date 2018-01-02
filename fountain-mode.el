@@ -1882,11 +1882,15 @@ Includes child elements."
           (insert-buffer-substring buffer start end)
           (fountain-include-in-region (point-min) (point-max)
                                       (not (memq 'include export-elements)))
+          (fountain-delete-comments-in-region (point-min) (point-max))
+          ;; Delete metadata.
           (goto-char (point-min))
           (while (fountain-match-metadata)
             (forward-line 1))
           (delete-region (point-min) (point))
-          (fountain-delete-comments-in-region (point-min) (point-max))
+          ;; Search for script end point and delete beyond.
+          (if (re-search-forward fountain-end-regexp nil t)
+              (del-region (match-beginning 0) (point-max)))
           (fountain-parse-region (point-min) (point-max) export-elements job))
       (progress-reporter-done job))))
 
@@ -2611,11 +2615,6 @@ included elements, otherwise walk the element tree calling
 strings."
   (let ((job (make-progress-reporter "Exporting..."))
         tree string)
-    ;; Search for script end point and reset END.
-    (save-excursion
-      (goto-char start)
-      (if (re-search-forward fountain-end-regexp end t)
-          (setq end (match-beginning 0))))
     ;; Parse the region to TREE.
     (save-excursion
       (setq tree (fountain-prep-and-parse-region start end)))
