@@ -1790,8 +1790,7 @@ Includes child elements."
         (list 'begin (match-beginning 0)
               'end (match-end 0)
               'export (if (memq 'page-break export-elements) t))
-        (or (match-string-no-properties 2)
-            "")))
+        (match-string-no-properties 2)))
 
 (defun fountain-parse-synopsis (match-data &optional export-elements job)
   "Return an element list for matched synopsis."
