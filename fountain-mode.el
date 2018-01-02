@@ -2515,6 +2515,9 @@ following order:
         (let ((export-format-plist (cdr (assq format fountain-export-formats)))
               format-template element-template string)
           (cond
+           ;; If CONTENT is nil, set STRING as an empty string.
+           ((not content)
+            (setq string ""))
            ;; If CONTENT is a string, format CONTENT and set as STRING.
            ((stringp content)
             (setq string (fountain-export-replace-in-string content format))
