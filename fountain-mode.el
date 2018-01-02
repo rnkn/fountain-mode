@@ -921,18 +921,32 @@ regular expression."
 
 (defun fountain-init-vars ()
   "Initialize important variables.
-These are required for functions to operate with temporary buffers."
+Needs to be called for every Fountain buffer because some
+variatbles are required for functions to operate with temporary
+buffers."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
+  (fountain-init-imenu-generic-expression)
+  (modify-syntax-entry (string-to-char "/") ". 14" nil)
+  (modify-syntax-entry (string-to-char "*") ". 23" nil)
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
-  (setq font-lock-multiline 'undecided)
+  (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
-  (setq-local require-final-newline mode-require-final-newline))
-
+  (setq-local require-final-newline mode-require-final-newline)
+  (setq-local font-lock-extra-managed-props
+              '(line-prefix wrap-prefix invisible))
+  (setq font-lock-multiline 'undecided)
+  (setq font-lock-defaults
+        '(fountain-create-font-lock-keywords nil t))
+  (add-to-invisibility-spec (cons 'outline t))
+  (if fountain-hide-emphasis-delim
+      (add-to-invisibility-spec 'fountain-emphasis-delim))
+  (if fountain-hide-syntax-chars
+      (add-to-invisibility-spec 'fountain-syntax-chars)))
 
 (defcustom fountain-scene-heading-prefix-list
   '("INT" "EXT" "INT/EXT" "I/E")
@@ -4888,10 +4902,7 @@ keywords suitable for Font Lock."
 ;;; Syntax Table
 
 (defvar fountain-mode-syntax-table
-  (let ((syntax (make-syntax-table)))
-    (modify-syntax-entry (string-to-char "/") ". 14" syntax)
-    (modify-syntax-entry (string-to-char "*") ". 23" syntax)
-    syntax)
+  (make-syntax-table)
   "Syntax table for `fountain-mode'.")
 
 
@@ -4905,17 +4916,6 @@ keywords suitable for Font Lock."
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (fountain-init-vars)
-  (fountain-init-imenu-generic-expression)
-  (setq font-lock-defaults
-        '(fountain-create-font-lock-keywords nil t))
-  (add-to-invisibility-spec (cons 'outline t))
-  (if fountain-hide-emphasis-delim
-      (add-to-invisibility-spec 'fountain-emphasis-delim))
-  (if fountain-hide-syntax-chars
-      (add-to-invisibility-spec 'fountain-syntax-chars))
-  (setq-local font-lock-comment-face 'fountain-comment)
-  (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible))
   (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
     (if (stringp n)
         (setq-local fountain-outline-startup-level
