@@ -1900,7 +1900,7 @@ Includes child elements."
           (delete-region (point-min) (point))
           ;; Search for script end point and delete beyond.
           (if (re-search-forward fountain-end-regexp nil t)
-              (del-region (match-beginning 0) (point-max)))
+              (delete-region (match-beginning 0) (point-max)))
           (fountain-parse-region (point-min) (point-max) export-elements job))
       (progress-reporter-done job))))
 
