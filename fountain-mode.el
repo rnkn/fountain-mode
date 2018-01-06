@@ -4727,9 +4727,6 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-e t") #'fountain-export-buffer-to-txt)
     (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
     (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
-    ;; View commands:
-    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-syntax-chars)
-    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-delim)
     map)
   "Mode map for `fountain-mode'.")
 
