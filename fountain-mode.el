@@ -368,7 +368,7 @@ syntax.
 
 The default {{time}} - {{fullname}}: will insert something like:
 
-    [[ 2014-20-01 - Alan Smithee: ]]"
+    [[ 2017-12-31 - Alan Smithee: ]]"
   :type 'string
   :group 'fountain)
 ;; FIXME:
