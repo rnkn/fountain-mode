@@ -1139,6 +1139,7 @@ See <http://debbugs.gnu.org/24073>."
 (defun fountain-match-dialog ()
   "Match dialog if point is at dialog, nil otherwise."
   (unless (or (and (bolp) (eolp))
+              (save-excursion (and (forward-comment 1) (eolp)))
               (fountain-match-paren)
               (fountain-match-note))
     (save-excursion
