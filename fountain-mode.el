@@ -1298,7 +1298,7 @@ Assumes that all other element matching has been done."
 (defun fountain-reset-autocomplete ()
   (interactive)
   (setq fountain-scene-heading-candidates nil
-        fountain-characters-candidates nil))
+        fountain-character-candidates nil))
 
 
 ;;; Pages
