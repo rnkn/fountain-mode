@@ -947,6 +947,8 @@ buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline)
+  (setq-local completion-at-point-functions
+              '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible))
   (setq font-lock-multiline 'undecided)
@@ -1227,6 +1229,76 @@ Assumes that all other element matching has been done."
    ((fountain-match-note) 'note)
    ((fountain-match-page-break) 'page-break)
    (t (looking-at fountain-action-regexp) 'action)))
+
+
+;;; Autocomplete
+
+(defvar-local fountain-scene-heading-candidates
+  nil
+  "List of scene headings in the current buffer.")
+
+(defvar-local fountain-character-candidates
+  nil
+  "List of character names in the current buffer.")
+
+(defun fountain-update-scene-heading-candidates (start end)
+  (let ((x (line-number-at-pos)))
+    (save-excursion
+      (goto-char end)
+      (if (fountain-match-scene-heading)
+          (forward-line 1)
+        (fountain-forward-scene 1))
+      (setq end (point))
+      (goto-char start)
+      (while (< (point) end)
+        (if (and (/= (line-number-at-pos) x)
+                 (fountain-match-scene-heading))
+            (let ((scene-heading (match-string-no-properties 3)))
+              (unless (member scene-heading fountain-scene-heading-candidates)
+                (push scene-heading fountain-scene-heading-candidates))))
+        (fountain-forward-scene 1)))))
+
+(defun fountain-update-character-candidates (start end)
+  (let ((x (line-number-at-pos)))
+    (goto-char end)
+    (if (fountain-match-scene-heading)
+        (forward-line 1)
+      (fountain-forward-scene 1))
+    (setq end (point))
+    (goto-char start)
+    (fountain-forward-scene 0)
+    (while (< (point) end)
+      (if (and (/= (line-number-at-pos) x)
+               (fountain-match-character))
+          (let ((character (match-string-no-properties 4)))
+            (unless (member character fountain-character-candidates)
+              (push character fountain-character-candidates))))
+      (fountain-forward-character 1))))
+
+(defun fountain-completion-at-point ()
+  (let ((completion-ignore-case t))
+    (list (line-beginning-position)
+          (point)
+          (completion-table-dynamic
+           (lambda (string)
+             (cond
+              ((fountain-match-scene-heading)
+               fountain-scene-heading-candidates)
+              ((fountain-blank-before-p)
+               fountain-character-candidates)))))))
+
+(defun fountain-update-autocomplete ()
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (fountain-update-scene-heading-candidates (point-min) (point-max))
+      (fountain-update-character-candidates (point-min) (point-max)))))
+
+(defun fountain-reset-autocomplete ()
+  (interactive)
+  (setq fountain-scene-heading-candidates nil
+        fountain-characters-candidates nil))
 
 
 ;;; Pages
@@ -4932,7 +5004,9 @@ keywords suitable for Font Lock."
   (add-hook 'post-command-hook
             #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
-  (jit-lock-register #'fountain-redisplay-scene-numbers t)
+  (jit-lock-register #'fountain-redisplay-scene-numbers)
+  (jit-lock-register #'fountain-update-scene-heading-candidates)
+  (jit-lock-register #'fountain-update-character-candidates)
   (fountain-init-mode-line)
   (fountain-restart-page-count-timer)
   (fountain-outline-hide-level fountain-outline-startup-level t))
