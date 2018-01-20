@@ -4086,19 +4086,19 @@ a scene heading."
   "Insert second-last character within the scene, and newline."
   (interactive)
   (let* ((n -1)
-         (character-1 (fountain-get-character n 'scene))
-         (character-2 character-1))
-    (while (and (stringp character-1)
-                (string= character-1 character-2))
+         (contd-character (fountain-get-character n 'scene))
+         (alt-character contd-character))
+    (while (and (stringp contd-character)
+                (string= contd-character alt-character))
       (setq n (1- n)
-            character-2 (fountain-get-character n 'scene)))
-    (if character-2
+            alt-character (fountain-get-character n 'scene)))
+    (if alt-character
         (let ((x (save-excursion
                    (skip-chars-backward "\s\n\t")
                    (point))))
           (delete-region x (point))
           (newline 2)
-          (insert character-2))
+          (insert alt-character))
       (message "No alternate character within scene"))
     (newline)))
 
