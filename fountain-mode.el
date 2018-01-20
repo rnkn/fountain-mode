@@ -4082,24 +4082,35 @@ a scene heading."
             (delete-region x (point))
           (unless (eobp) (forward-char 1)))))))
 
-(defun fountain-insert-alternate-character ()
-  "Insert second-last character within the scene, and newline."
-  (interactive)
-  (let* ((n -1)
-         (contd-character (fountain-get-character n 'scene))
-         (alt-character contd-character))
-    (while (and (stringp contd-character)
-                (string= contd-character alt-character))
-      (setq n (1- n)
-            alt-character (fountain-get-character n 'scene)))
-    (if alt-character
-        (let ((x (save-excursion
-                   (skip-chars-backward "\s\n\t")
-                   (point))))
-          (delete-region x (point))
-          (newline 2)
-          (insert alt-character))
-      (message "No alternate character within scene"))
+(defun fountain-insert-alternate-character (&optional arg)
+  "Insert alternate speaking character within scene, and newline.
+If prefixed with ARG, insert same character instead and append
+`fountain-continued-dialog-string'."
+  (interactive "P")
+  (let ((contd-character (fountain-get-character -1 'scene))
+        (insert-fun
+         (lambda (character)
+           (let ((x (save-excursion
+                      (skip-chars-backward "\s\n\t")
+                      (point))))
+             (delete-region x (point))
+             (newline 2)
+             (insert character)))))
+    (if arg
+        (if (stringp contd-character)
+            (progn
+              (funcall insert-fun contd-character)
+              (insert (concat "\s" fountain-continued-dialog-string)))
+          (message "No character within scene"))
+      (let ((n -2)
+            (alt-character contd-character))
+        (while (and (stringp contd-character)
+                    (string= contd-character alt-character))
+          (setq alt-character (fountain-get-character n 'scene)
+                n (1- n)))
+        (if (stringp alt-character)
+            (funcall insert-fun alt-character)
+          (message "No alternate character within scene"))))
     (newline)))
 
 (defun fountain-insert-synopsis ()
