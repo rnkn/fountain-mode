@@ -1242,50 +1242,49 @@ Assumes that all other element matching has been done."
   "List of character names in the current buffer.")
 
 (defun fountain-update-scene-heading-candidates (start end)
-  (let ((x (line-number-at-pos)))
-    (save-excursion
-      (goto-char end)
-      (if (fountain-match-scene-heading)
-          (forward-line 1)
-        (fountain-forward-scene 1))
-      (setq end (point))
-      (goto-char start)
-      (while (< (point) end)
-        (if (and (/= (line-number-at-pos) x)
-                 (fountain-match-scene-heading))
-            (let ((scene-heading (match-string-no-properties 3)))
-              (unless (member scene-heading fountain-scene-heading-candidates)
-                (push scene-heading fountain-scene-heading-candidates))))
-        (fountain-forward-scene 1)))))
+  (goto-char end)
+  (unless (fountain-match-scene-heading)
+    (fountain-forward-scene 1))
+  (setq end (point))
+  (goto-char start)
+  (fountain-forward-scene 0)
+  (while (< (point) end)
+    (if (and (/= fountain--edit-line
+                 (count-lines (point-min) (line-beginning-position)))
+             (fountain-match-scene-heading))
+        (let ((scene-heading (match-string-no-properties 3)))
+          (unless (member scene-heading fountain-scene-heading-candidates)
+            (push scene-heading fountain-scene-heading-candidates))))
+    (fountain-forward-scene 1)))
 
 (defun fountain-update-character-candidates (start end)
-  (let ((x (line-number-at-pos)))
-    (goto-char end)
-    (if (fountain-match-scene-heading)
-        (forward-line 1)
-      (fountain-forward-scene 1))
-    (setq end (point))
-    (goto-char start)
-    (fountain-forward-scene 0)
-    (while (< (point) end)
-      (if (and (/= (line-number-at-pos) x)
-               (fountain-match-character))
-          (let ((character (match-string-no-properties 4)))
-            (unless (member character fountain-character-candidates)
-              (push character fountain-character-candidates))))
-      (fountain-forward-character 1))))
+  (goto-char end)
+  (if (fountain-match-scene-heading)
+      (forward-line 1)
+    (fountain-forward-scene 1))
+  (setq end (point))
+  (goto-char start)
+  (fountain-forward-scene 0)
+  (while (< (point) end)
+    (if (and (/= fountain--edit-line
+                 (count-lines (point-min) (line-beginning-position)))
+             (fountain-match-character))
+        (let ((character (match-string-no-properties 4)))
+          (unless (member character fountain-character-candidates)
+            (push character fountain-character-candidates))))
+    (fountain-forward-character 1)))
 
 (defun fountain-completion-at-point ()
-  (let ((completion-ignore-case t))
-    (list (line-beginning-position)
-          (point)
-          (completion-table-dynamic
-           (lambda (string)
-             (cond
-              ((fountain-match-scene-heading)
-               fountain-scene-heading-candidates)
-              ((fountain-blank-before-p)
-               fountain-character-candidates)))))))
+  (setq fountain--edit-line
+        (count-lines (point-min) (line-beginning-position)))
+  (list (line-beginning-position)
+        (point)
+        (completion-table-case-fold
+         (cond
+          ((fountain-match-scene-heading)
+           fountain-scene-heading-candidates)
+          ((fountain-blank-before-p)
+           fountain-character-candidates)))))
 
 (defun fountain-update-autocomplete ()
   (interactive)
@@ -3945,10 +3944,9 @@ persist even when calling \\[delete-other-windows]."
   :type 'boolean
   :group 'fountain)
 
-(defvar-local fountain--auto-upcase-line
+(defvar-local fountain--edit-line
   nil
-  "Integer of line number to auto-upcase.
-If nil, auto-upcase is deactivated.")
+  "Integer of line number currently editing.")
 
 (defvar-local fountain--auto-upcase-overlay
   nil
@@ -3975,10 +3973,10 @@ Always deactivate if optional argument DEACTIVATE is non-nil.
 
 Added as hook to `post-command-hook'."
   (when (or deactivate
-            (and (integerp fountain--auto-upcase-line)
-                 (/= fountain--auto-upcase-line
+            (and (integerp fountain--edit-line)
+                 (/= fountain--edit-line
                      (count-lines (point-min) (line-beginning-position)))))
-    (setq fountain--auto-upcase-line nil)
+    (setq fountain--edit-line nil)
     (if (overlayp fountain--auto-upcase-overlay)
         (delete-overlay fountain--auto-upcase-overlay))
     (message "Auto-upcasing disabled")))
@@ -3995,14 +3993,14 @@ Otherwise, activate auto-upcasing for the whole line.
 Added as hook to `post-self-insert-hook'."
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
-         (setq fountain--auto-upcase-line
+         (setq fountain--edit-line
                (count-lines (point-min) (line-beginning-position)))
          (fountain-auto-upcase-make-overlay)
          (upcase-region (line-beginning-position)
                         (or (match-end 3)
                             (point))))
-        ((and (integerp fountain--auto-upcase-line)
-              (= fountain--auto-upcase-line
+        ((and (integerp fountain--edit-line)
+              (= fountain--edit-line
                  (count-lines (point-min) (line-beginning-position))))
          (fountain-upcase-line))))
 
@@ -4034,10 +4032,10 @@ Added as hook to `post-self-insert-hook'."
          (fountain-outline-cycle))
         ((fountain-match-include)
          (fountain-include-find-file))
-        (fountain--auto-upcase-line
+        (fountain--edit-line
          (fountain-auto-upcase-deactivate-maybe t))
         (t
-         (setq fountain--auto-upcase-line
+         (setq fountain--edit-line
                (count-lines (point-min) (line-beginning-position)))
          (fountain-auto-upcase-make-overlay)
          (fountain-upcase-line)
