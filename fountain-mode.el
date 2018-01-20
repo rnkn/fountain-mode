@@ -4874,6 +4874,8 @@ keywords suitable for Font Lock."
       :style radio
       :selected (eq fountain-pages-show-in-mode-line 'timer)])
     ("Autocomplete"
+     ["Insert Alternate Character" fountain-insert-alternate-character]
+     "---"
      ["Update Autocomplete" fountain-update-autocomplete]
      ["Reset Autocomplete" fountain-reset-autocomplete])
     "---"
