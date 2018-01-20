@@ -3944,9 +3944,10 @@ persist even when calling \\[delete-other-windows]."
   :type 'boolean
   :group 'fountain)
 
-(defvar-local fountain--edit-line
+(defvar-local fountain--auto-upcase-line
   nil
-  "Integer of line number currently editing.")
+  "Integer of line number to auto-upcase.
+If nil, auto-upcase is deactivated.")
 
 (defvar-local fountain--auto-upcase-overlay
   nil
@@ -3973,10 +3974,10 @@ Always deactivate if optional argument DEACTIVATE is non-nil.
 
 Added as hook to `post-command-hook'."
   (when (or deactivate
-            (and (integerp fountain--edit-line)
-                 (/= fountain--edit-line
+            (and (integerp fountain--auto-upcase-line)
+                 (/= fountain--auto-upcase-line
                      (count-lines (point-min) (line-beginning-position)))))
-    (setq fountain--edit-line nil)
+    (setq fountain--auto-upcase-line nil)
     (if (overlayp fountain--auto-upcase-overlay)
         (delete-overlay fountain--auto-upcase-overlay))
     (message "Auto-upcasing disabled")))
@@ -3993,14 +3994,14 @@ Otherwise, activate auto-upcasing for the whole line.
 Added as hook to `post-self-insert-hook'."
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
-         (setq fountain--edit-line
+         (setq fountain--auto-upcase-line
                (count-lines (point-min) (line-beginning-position)))
          (fountain-auto-upcase-make-overlay)
          (upcase-region (line-beginning-position)
                         (or (match-end 3)
                             (point))))
-        ((and (integerp fountain--edit-line)
-              (= fountain--edit-line
+        ((and (integerp fountain--auto-upcase-line)
+              (= fountain--auto-upcase-line
                  (count-lines (point-min) (line-beginning-position))))
          (fountain-upcase-line))))
 
@@ -4032,10 +4033,10 @@ Added as hook to `post-self-insert-hook'."
          (fountain-outline-cycle))
         ((fountain-match-include)
          (fountain-include-find-file))
-        (fountain--edit-line
+        (fountain--auto-upcase-line
          (fountain-auto-upcase-deactivate-maybe t))
         (t
-         (setq fountain--edit-line
+         (setq fountain--auto-upcase-line
                (count-lines (point-min) (line-beginning-position)))
          (fountain-auto-upcase-make-overlay)
          (fountain-upcase-line)
