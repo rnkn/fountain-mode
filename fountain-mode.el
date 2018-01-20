@@ -1241,6 +1241,9 @@ Assumes that all other element matching has been done."
   nil
   "List of character names in the current buffer.")
 
+(defvar-local fountain--completion-line
+  nil)
+
 (defun fountain-update-scene-heading-candidates (start end)
   (goto-char end)
   (unless (fountain-match-scene-heading)
@@ -1249,7 +1252,7 @@ Assumes that all other element matching has been done."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (if (and (/= fountain--edit-line
+    (if (and (/= fountain--completion-line
                  (count-lines (point-min) (line-beginning-position)))
              (fountain-match-scene-heading))
         (let ((scene-heading (match-string-no-properties 3)))
@@ -1266,7 +1269,7 @@ Assumes that all other element matching has been done."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (if (and (/= fountain--edit-line
+    (if (and (/= fountain--completion-line
                  (count-lines (point-min) (line-beginning-position)))
              (fountain-match-character))
         (let ((character (match-string-no-properties 4)))
@@ -1275,7 +1278,7 @@ Assumes that all other element matching has been done."
     (fountain-forward-character 1)))
 
 (defun fountain-completion-at-point ()
-  (setq fountain--edit-line
+  (setq fountain--completion-line
         (count-lines (point-min) (line-beginning-position)))
   (list (line-beginning-position)
         (point)
