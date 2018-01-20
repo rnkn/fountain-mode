@@ -1292,6 +1292,7 @@ Assumes that all other element matching has been done."
 
 (defun fountain-update-autocomplete ()
   (interactive)
+  (fountain-reset-autocomplete)
   (save-excursion
     (save-restriction
       (widen)
@@ -4876,8 +4877,7 @@ keywords suitable for Font Lock."
     ("Autocomplete"
      ["Insert Alternate Character" fountain-insert-alternate-character]
      "---"
-     ["Update Autocomplete" fountain-update-autocomplete]
-     ["Reset Autocomplete" fountain-reset-autocomplete])
+     ["Update Autocomplete" fountain-update-autocomplete])
     "---"
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
