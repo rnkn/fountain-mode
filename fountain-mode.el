@@ -1293,17 +1293,13 @@ Assumes that all other element matching has been done."
 
 (defun fountain-update-autocomplete ()
   (interactive)
-  (fountain-reset-autocomplete)
+  (setq fountain-scene-heading-candidates nil
+        fountain-character-candidates nil)
   (save-excursion
     (save-restriction
       (widen)
       (fountain-update-scene-heading-candidates (point-min) (point-max))
       (fountain-update-character-candidates (point-min) (point-max)))))
-
-(defun fountain-reset-autocomplete ()
-  (interactive)
-  (setq fountain-scene-heading-candidates nil
-        fountain-character-candidates nil))
 
 
 ;;; Pages
