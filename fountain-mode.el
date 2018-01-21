@@ -1253,8 +1253,9 @@ Assumes that all other element matching has been done."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (if (and (/= fountain--completion-line
-                 (count-lines (point-min) (line-beginning-position)))
+    (if (and (not (and (integerp fountain--completion-line)
+                       (= fountain--completion-line
+                          (count-lines (point-min) (line-beginning-position)))))
              (fountain-match-scene-heading))
         (let ((scene-heading (match-string-no-properties 3)))
           (unless (member scene-heading fountain-scene-heading-candidates)
@@ -1263,15 +1264,15 @@ Assumes that all other element matching has been done."
 
 (defun fountain-update-character-candidates (start end)
   (goto-char end)
-  (if (fountain-match-scene-heading)
-      (forward-line 1)
+  (unless (fountain-match-scene-heading)
     (fountain-forward-scene 1))
   (setq end (point))
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (if (and (/= fountain--completion-line
-                 (count-lines (point-min) (line-beginning-position)))
+    (if (and (not (and (integerp fountain--completion-line)
+                       (= fountain--completion-line
+                          (count-lines (point-min) (line-beginning-position)))))
              (fountain-match-character))
         (let ((character (match-string-no-properties 4)))
           (unless (member character fountain-character-candidates)
