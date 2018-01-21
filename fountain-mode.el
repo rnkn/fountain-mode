@@ -1243,9 +1243,15 @@ Assumes that all other element matching has been done."
   "List of character names in the current buffer.")
 
 (defvar-local fountain--completion-line
-  nil)
+  nil
+  "Integer of line number when performing completion.
+
+Prevents incomplete strings added to candidates.")
 
 (defun fountain-update-scene-heading-candidates (start end)
+  "Update `fountain-scene-heading-candidates' between START and END.
+
+Added to `jit-lock-functions'."
   (goto-char end)
   (unless (fountain-match-scene-heading)
     (fountain-forward-scene 1))
@@ -1263,6 +1269,9 @@ Assumes that all other element matching has been done."
     (fountain-forward-scene 1)))
 
 (defun fountain-update-character-candidates (start end)
+  "Update `fountain-character-candidates' between START and END.
+
+Added to `jit-lock-functions'."
   (goto-char end)
   (unless (fountain-match-scene-heading)
     (fountain-forward-scene 1))
@@ -1327,6 +1336,13 @@ Added to `completion-at-point-functions'."
                                            fountain-character-candidates)))))))))
 
 (defun fountain-update-autocomplete ()
+  "Create new completion candidates for current buffer.
+
+Completion candidates are usually updated automatically with
+`jit-lock-mode', however this command will add completion
+candidates for the entire buffer.
+
+Add to `fountain-mode-hook'"
   (interactive)
   (setq fountain-scene-heading-candidates nil
         fountain-character-candidates nil)
