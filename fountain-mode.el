@@ -1279,18 +1279,52 @@ Assumes that all other element matching has been done."
             (push character fountain-character-candidates))))
     (fountain-forward-character 1)))
 
+(defun fountain-completion-table (candidates)
+  (lambda (string pred action)
+    (if (eq action 'metadata)
+        (list 'metadata
+              (cons 'display-sort-function 'identity)
+              (cons 'cycle-sort-function 'identity))
+      (complete-with-action action candidates string pred))))
+
 (defun fountain-completion-at-point ()
-  (setq fountain--completion-line
-        (count-lines (point-min) (line-beginning-position))
-        completion-in-region-mode-map nil)
-  (list (line-beginning-position)
-        (point)
-        (completion-table-case-fold
-         (cond
-          ((fountain-match-scene-heading)
-           fountain-scene-heading-candidates)
-          ((fountain-blank-before-p)
-           fountain-character-candidates)))))
+  "Return completion table for entity at point.
+Trigger completion with `completion-at-point' (\\[completion-at-point]).
+
+Always delimits entity from beginning of line to point; if at a
+scene heading, return `fountain-scene-heading-candidates', or if
+previous line is blank, return `fountain-character-candidates'.
+
+Set `completion-in-region-mode-map' to nil to retain TAB
+keybinding.
+
+Added to `completion-at-point-functions'."
+  (let (completion-in-region-mode-map jit-lock-mode)
+    (setq fountain--completion-line
+          (count-lines (point-min) (line-beginning-position)))
+    (list (line-beginning-position)
+          (point)
+          (completion-table-case-fold
+           (cond
+            ((fountain-match-scene-heading)
+             fountain-scene-heading-candidates)
+            ((fountain-blank-before-p)
+             (let (priority-candidates)
+               (save-excursion
+                 (save-restriction
+                   (widen)
+                   (fountain-forward-character 0)
+                   (fountain-forward-character -1)
+                   (while (not (or (fountain-match-scene-heading)
+                                   (bobp)))
+                     (if (fountain-match-character)
+                         (let ((character (match-string-no-properties 4)))
+                           (unless (member character priority-candidates)
+                             (push character priority-candidates))))
+                     (fountain-forward-character -1 'scene))))
+               (fountain-completion-table (append
+                                           (reverse priority-candidates)
+                                           fountain-character-candidates)))))))))
 
 (defun fountain-update-autocomplete ()
   (interactive)
