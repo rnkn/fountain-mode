@@ -1280,7 +1280,8 @@ Assumes that all other element matching has been done."
 
 (defun fountain-completion-at-point ()
   (setq fountain--completion-line
-        (count-lines (point-min) (line-beginning-position)))
+        (count-lines (point-min) (line-beginning-position))
+        completion-in-region-mode-map nil)
   (list (line-beginning-position)
         (point)
         (completion-table-case-fold
