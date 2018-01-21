@@ -4779,8 +4779,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
-    (define-key map (kbd "M-RET") #'fountain-insert-alternate-character)
     (define-key map (kbd "M-TAB") #'completion-at-point)
+    (define-key map (kbd "C-c C-x a") #'fountain-update-autocomplete)
     ;; FIXME: include-find-file feels like it should be C-c C-c...
     ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
@@ -4875,16 +4875,13 @@ keywords suitable for Font Lock."
       (customize-set-variable 'fountain-pages-show-in-mode-line 'timer)
       :style radio
       :selected (eq fountain-pages-show-in-mode-line 'timer)])
-    ("Autocomplete"
-     ["Insert Alternate Character" fountain-insert-alternate-character]
-     "---"
-     ["Update Autocomplete" fountain-update-autocomplete])
     "---"
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
     ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
+    ["Update Autocomplete" fountain-update-autocomplete]
     "---"
     ("Show/Hide"
      ["Endnotes" fountain-show-or-hide-endnotes]
