@@ -1350,7 +1350,8 @@ Add to `fountain-mode-hook'"
     (save-restriction
       (widen)
       (fountain-update-scene-heading-candidates (point-min) (point-max))
-      (fountain-update-character-candidates (point-min) (point-max)))))
+      (fountain-update-character-candidates (point-min) (point-max))))
+  (message "Completion candidates updated"))
 
 
 ;;; Pages
