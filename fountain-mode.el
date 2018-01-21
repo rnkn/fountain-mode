@@ -1290,7 +1290,10 @@ Added to `jit-lock-functions'."
 
 (defun fountain-completion-get-character-candidates ()
   "Return candidates for completing character.
-Ensures priority sort order."
+
+First, return second-last speaking character, followed by each
+previously speaking character within scene. After that, return
+characters from `fountain-character-candidates'."
   (lambda (string pred action)
     (let (candidates)
       (save-excursion
@@ -1317,9 +1320,10 @@ Ensures priority sort order."
   "Return completion table for entity at point.
 Trigger completion with `completion-at-point' (\\[completion-at-point]).
 
-Always delimits entity from beginning of line to point; if at a
-scene heading, return `fountain-scene-heading-candidates', or if
-previous line is blank, return `fountain-character-candidates'.
+Always delimits entity from beginning of line to point. If at a
+scene heading, return `fountain-scene-heading-candidates'. If
+previous line is blank, return result of
+`fountain-completion-get-character-candidates'.
 
 Set `completion-in-region-mode-map' to nil to retain TAB
 keybinding.
