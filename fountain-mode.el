@@ -1234,11 +1234,11 @@ Assumes that all other element matching has been done."
 
 ;;; Autocomplete
 
-(defvar-local fountain-scene-heading-candidates
+(defvar-local fountain-completion-scene-headings
   nil
   "List of scene headings in the current buffer.")
 
-(defvar-local fountain-character-candidates
+(defvar-local fountain-completion-characters
   nil
   "List of character names in the current buffer.")
 
@@ -1248,8 +1248,8 @@ Assumes that all other element matching has been done."
 
 Prevents incomplete strings added to candidates.")
 
-(defun fountain-update-scene-heading-candidates (start end)
-  "Update `fountain-scene-heading-candidates' between START and END.
+(defun fountain-completion-update-scene-headings (start end)
+  "Update `fountain-completion-scene-headings' between START and END.
 
 Added to `jit-lock-functions'."
   (goto-char end)
@@ -1264,12 +1264,12 @@ Added to `jit-lock-functions'."
                           (count-lines (point-min) (line-beginning-position)))))
              (fountain-match-scene-heading))
         (let ((scene-heading (match-string-no-properties 3)))
-          (unless (member scene-heading fountain-scene-heading-candidates)
-            (push scene-heading fountain-scene-heading-candidates))))
+          (unless (member scene-heading fountain-completion-scene-headings)
+            (push scene-heading fountain-completion-scene-headings))))
     (fountain-forward-scene 1)))
 
-(defun fountain-update-character-candidates (start end)
-  "Update `fountain-character-candidates' between START and END.
+(defun fountain-completion-update-characters (start end)
+  "Update `fountain-completion-characters' between START and END.
 
 Added to `jit-lock-functions'."
   (goto-char end)
@@ -1284,16 +1284,16 @@ Added to `jit-lock-functions'."
                           (count-lines (point-min) (line-beginning-position)))))
              (fountain-match-character))
         (let ((character (match-string-no-properties 4)))
-          (unless (member character fountain-character-candidates)
-            (push character fountain-character-candidates))))
+          (unless (member character fountain-completion-characters)
+            (push character fountain-completion-characters))))
     (fountain-forward-character 1)))
 
-(defun fountain-completion-get-character-candidates ()
+(defun fountain-completion-get-characters ()
   "Return candidates for completing character.
 
 First, return second-last speaking character, followed by each
 previously speaking character within scene. After that, return
-characters from `fountain-character-candidates'."
+characters from `fountain-completion-characters'."
   (lambda (string pred action)
     (let (candidates)
       (save-excursion
@@ -1309,7 +1309,7 @@ characters from `fountain-character-candidates'."
                     (push character candidates))))
             (fountain-forward-character -1 'scene))))
       (setq candidates (append (reverse candidates)
-                               fountain-character-candidates))
+                               fountain-completion-characters))
       (if (eq action 'metadata)
           (list 'metadata
                 (cons 'display-sort-function 'identity)
@@ -1323,7 +1323,7 @@ Trigger completion with `completion-at-point' (\\[completion-at-point]).
 Always delimits entity from beginning of line to point. If at a
 scene heading, return `fountain-scene-heading-candidates'. If
 previous line is blank, return result of
-`fountain-completion-get-character-candidates'.
+`fountain-completion-get-characters'.
 
 Set `completion-in-region-mode-map' to nil to retain TAB
 keybinding.
@@ -1337,26 +1337,26 @@ Added to `completion-at-point-functions'."
           (completion-table-case-fold
            (cond
             ((fountain-match-scene-heading)
-             fountain-scene-heading-candidates)
+             fountain-completion-scene-headings)
             ((fountain-blank-before-p)
-             (fountain-completion-get-character-candidates)))))))
+             (fountain-completion-get-characters)))))))
 
-(defun fountain-update-autocomplete ()
+(defun fountain-completion-update ()
   "Create new completion candidates for current buffer.
 
 Completion candidates are usually updated automatically with
 `jit-lock-mode', however this command will add completion
 candidates for the entire buffer.
 
-Add to `fountain-mode-hook'"
+Add to `fountain-mode-hook' to have full completion upon load."
   (interactive)
-  (setq fountain-scene-heading-candidates nil
-        fountain-character-candidates nil)
+  (setq fountain-completion-scene-headings nil
+        fountain-completion-characters nil)
   (save-excursion
     (save-restriction
       (widen)
-      (fountain-update-scene-heading-candidates (point-min) (point-max))
-      (fountain-update-character-candidates (point-min) (point-max))))
+      (fountain-completion-update-scene-headings (point-min) (point-max))
+      (fountain-completion-update-characters (point-min) (point-max))))
   (message "Completion candidates updated"))
 
 
@@ -4803,7 +4803,7 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     (define-key map (kbd "M-TAB") #'completion-at-point)
-    (define-key map (kbd "C-c C-x a") #'fountain-update-autocomplete)
+    (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
     ;; FIXME: include-find-file feels like it should be C-c C-c...
     ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
@@ -4904,7 +4904,7 @@ keywords suitable for Font Lock."
     ["Insert Note" fountain-insert-note]
     ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
-    ["Update Autocomplete" fountain-update-autocomplete]
+    ["Update Autocompletion" fountain-completion-update]
     "---"
     ("Show/Hide"
      ["Endnotes" fountain-show-or-hide-endnotes]
@@ -5047,8 +5047,8 @@ keywords suitable for Font Lock."
             #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers)
-  (jit-lock-register #'fountain-update-scene-heading-candidates)
-  (jit-lock-register #'fountain-update-character-candidates)
+  (jit-lock-register #'fountain-completion-update-scene-headings)
+  (jit-lock-register #'fountain-completion-update-characters)
   (fountain-init-mode-line)
   (fountain-restart-page-count-timer)
   (fountain-outline-hide-level fountain-outline-startup-level t))
