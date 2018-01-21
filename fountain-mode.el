@@ -1288,13 +1288,30 @@ Added to `jit-lock-functions'."
             (push character fountain-character-candidates))))
     (fountain-forward-character 1)))
 
-(defun fountain-completion-table (candidates)
+(defun fountain-completion-get-character-candidates ()
+  "Return candidates for completing character.
+Ensures priority sort order."
   (lambda (string pred action)
-    (if (eq action 'metadata)
-        (list 'metadata
-              (cons 'display-sort-function 'identity)
-              (cons 'cycle-sort-function 'identity))
-      (complete-with-action action candidates string pred))))
+    (let (candidates)
+      (save-excursion
+        (save-restriction
+          (widen)
+          (fountain-forward-character 0)
+          (fountain-forward-character -1)
+          (while (not (or (fountain-match-scene-heading)
+                          (bobp)))
+            (if (fountain-match-character)
+                (let ((character (match-string-no-properties 4)))
+                  (unless (member character candidates)
+                    (push character candidates))))
+            (fountain-forward-character -1 'scene))))
+      (setq candidates (append (reverse candidates)
+                               fountain-character-candidates))
+      (if (eq action 'metadata)
+          (list 'metadata
+                (cons 'display-sort-function 'identity)
+                (cons 'cycle-sort-function 'identity))
+        (complete-with-action action candidates string pred)))))
 
 (defun fountain-completion-at-point ()
   "Return completion table for entity at point.
@@ -1318,22 +1335,7 @@ Added to `completion-at-point-functions'."
             ((fountain-match-scene-heading)
              fountain-scene-heading-candidates)
             ((fountain-blank-before-p)
-             (let (priority-candidates)
-               (save-excursion
-                 (save-restriction
-                   (widen)
-                   (fountain-forward-character 0)
-                   (fountain-forward-character -1)
-                   (while (not (or (fountain-match-scene-heading)
-                                   (bobp)))
-                     (if (fountain-match-character)
-                         (let ((character (match-string-no-properties 4)))
-                           (unless (member character priority-candidates)
-                             (push character priority-candidates))))
-                     (fountain-forward-character -1 'scene))))
-               (fountain-completion-table (append
-                                           (reverse priority-candidates)
-                                           fountain-character-candidates)))))))))
+             (fountain-completion-get-character-candidates)))))))
 
 (defun fountain-update-autocomplete ()
   "Create new completion candidates for current buffer.
