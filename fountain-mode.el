@@ -139,7 +139,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.4.2")
+  "2.5.0")
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
