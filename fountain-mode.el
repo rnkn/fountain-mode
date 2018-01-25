@@ -3911,6 +3911,22 @@ Added as hook to `post-command-hook'."
         (delete-overlay fountain--auto-upcase-overlay))
     (message "Auto-upcasing disabled")))
 
+(defun fountain-toggle-auto-upcase ()
+  "Toggle line auto-upcasing.
+
+Upcase the current line, and continue to upcase inserted
+characters until either disabled, or point moves to a different
+line (by inserting a newline or by point motion).
+
+The auto-upcased line is highlighted with face
+`fountain-auto-upcase-highlight'"
+  (interactive)
+  (if fountain--auto-upcase-line
+      (fountain-auto-upcase-deactivate-maybe t)
+    (setq fountain--auto-upcase-line (line-number-at-pos))
+    (message "Auto-upcasing activated")
+    (fountain-auto-upcase)))
+
 (defun fountain-auto-upcase ()
   "Upcase all or part of the current line contextually.
 
