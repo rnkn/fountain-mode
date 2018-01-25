@@ -1283,10 +1283,18 @@ Added to `jit-lock-functions'."
                        (= fountain--completion-line
                           (count-lines (point-min) (line-beginning-position)))))
              (fountain-match-character))
-        (let ((character (match-string-no-properties 4)))
-          (unless (member character fountain-completion-characters)
-            (push character fountain-completion-characters))))
-    (fountain-forward-character 1)))
+        (let* ((character (match-string-no-properties 4))
+               (record (assoc-string character fountain-completion-characters))
+               (n (cdr record)))
+          (if (not n)
+              (push (cons character 1) fountain-completion-characters)
+            (setq fountain-completion-characters
+                  (delete record fountain-completion-characters))
+            (push (cons character (1+ n)) fountain-completion-characters))))
+    (fountain-forward-character 1))
+  (setq fountain-completion-characters
+        (sort fountain-completion-characters '(lambda (a b)
+                                                (< (cdr b) (cdr a))))))
 
 (defun fountain-completion-get-characters ()
   "Return candidates for completing character.
@@ -1306,7 +1314,7 @@ characters from `fountain-completion-characters'."
             (if (fountain-match-character)
                 (let ((character (match-string-no-properties 4)))
                   (unless (member character candidates)
-                    (push character candidates))))
+                    (push (list character) candidates))))
             (fountain-forward-character -1 'scene))))
       (setq candidates (append (reverse candidates)
                                fountain-completion-characters))
