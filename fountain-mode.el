@@ -1240,7 +1240,12 @@ Assumes that all other element matching has been done."
 
 (defvar-local fountain-completion-characters
   nil
-  "List of character names in the current buffer.")
+  "List of characters in the current buffer.
+Each element is a cons of the character name, a string, and the
+character's priority, an integer.
+
+The priority value does not equate to the number of lines the
+character has.")
 
 (defvar-local fountain--completion-line
   nil
