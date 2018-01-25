@@ -3953,22 +3953,12 @@ Added as hook to `post-self-insert-hook'."
   "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
 
 1. If point is at a scene heading or section heading, or if
-   prefixed with ARG (\\[universal-argument] \\[fountain-dwim]) call `fountain-outline-cycle'
-   and pass ARG, e.g. \\[universal-argument] \\[universal-argument] \\[fountain-dwim] is the same as
-   \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle].
+   prefixed with ARG call `fountain-outline-cycle' and pass ARG.
 
 2. If point is at an directive to an included file, call
    `fountain-include-find-file'.
 
-3. Otherwise, upcase the current line and active auto-upcasing.
-   This highlights the current line with face
-   `fountain-auto-upcase-highlight' and will continue to upcase
-   inserted characters until the command is called again
-   (\\[fountain-dwim]) or point moves to a different line (either
-   by inserting a newline or point motion). This allows a
-   flexible style of entering character names. You may press
-   \\[fountain-dwim] before, during or after typing the name to
-   get the same result."
+3. Otherwise, call `fountain-toggle-auto-upcase'."
   (interactive "p")
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
