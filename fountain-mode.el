@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp
-;; Version: 2.4.2
+;; Version: 2.5.0
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -139,7 +139,7 @@
 ;;; Code:
 
 (defconst fountain-version
-  "2.4.2")
+  "2.5.0")
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
@@ -947,6 +947,9 @@ buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline)
+  (setq-local completion-cycle-threshold t)
+  (setq-local completion-at-point-functions
+              '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible))
   (setq font-lock-multiline 'undecided)
@@ -1227,6 +1230,134 @@ Assumes that all other element matching has been done."
    ((fountain-match-note) 'note)
    ((fountain-match-page-break) 'page-break)
    (t (looking-at fountain-action-regexp) 'action)))
+
+
+;;; Autocomplete
+
+(defvar-local fountain-completion-scene-headings
+  nil
+  "List of scene headings in the current buffer.")
+
+(defvar-local fountain-completion-characters
+  nil
+  "List of character names in the current buffer.")
+
+(defvar-local fountain--completion-line
+  nil
+  "Integer of line number when performing completion.
+
+Prevents incomplete strings added to candidates.")
+
+(defun fountain-completion-update-scene-headings (start end)
+  "Update `fountain-completion-scene-headings' between START and END.
+
+Added to `jit-lock-functions'."
+  (goto-char end)
+  (unless (fountain-match-scene-heading)
+    (fountain-forward-scene 1))
+  (setq end (point))
+  (goto-char start)
+  (fountain-forward-scene 0)
+  (while (< (point) end)
+    (if (and (not (and (integerp fountain--completion-line)
+                       (= fountain--completion-line
+                          (count-lines (point-min) (line-beginning-position)))))
+             (fountain-match-scene-heading))
+        (let ((scene-heading (match-string-no-properties 3)))
+          (unless (member scene-heading fountain-completion-scene-headings)
+            (push scene-heading fountain-completion-scene-headings))))
+    (fountain-forward-scene 1)))
+
+(defun fountain-completion-update-characters (start end)
+  "Update `fountain-completion-characters' between START and END.
+
+Added to `jit-lock-functions'."
+  (goto-char end)
+  (unless (fountain-match-scene-heading)
+    (fountain-forward-scene 1))
+  (setq end (point))
+  (goto-char start)
+  (fountain-forward-scene 0)
+  (while (< (point) end)
+    (if (and (not (and (integerp fountain--completion-line)
+                       (= fountain--completion-line
+                          (count-lines (point-min) (line-beginning-position)))))
+             (fountain-match-character))
+        (let ((character (match-string-no-properties 4)))
+          (unless (member character fountain-completion-characters)
+            (push character fountain-completion-characters))))
+    (fountain-forward-character 1)))
+
+(defun fountain-completion-get-characters ()
+  "Return candidates for completing character.
+
+First, return second-last speaking character, followed by each
+previously speaking character within scene. After that, return
+characters from `fountain-completion-characters'."
+  (lambda (string pred action)
+    (let (candidates)
+      (save-excursion
+        (save-restriction
+          (widen)
+          (fountain-forward-character 0)
+          (fountain-forward-character -1)
+          (while (not (or (fountain-match-scene-heading)
+                          (bobp)))
+            (if (fountain-match-character)
+                (let ((character (match-string-no-properties 4)))
+                  (unless (member character candidates)
+                    (push character candidates))))
+            (fountain-forward-character -1 'scene))))
+      (setq candidates (append (reverse candidates)
+                               fountain-completion-characters))
+      (if (eq action 'metadata)
+          (list 'metadata
+                (cons 'display-sort-function 'identity)
+                (cons 'cycle-sort-function 'identity))
+        (complete-with-action action candidates string pred)))))
+
+(defun fountain-completion-at-point ()
+  "Return completion table for entity at point.
+Trigger completion with `completion-at-point' (\\[completion-at-point]).
+
+Always delimits entity from beginning of line to point. If at a
+scene heading, return `fountain-scene-heading-candidates'. If
+previous line is blank, return result of
+`fountain-completion-get-characters'.
+
+Set `completion-in-region-mode-map' to nil to retain TAB
+keybinding.
+
+Added to `completion-at-point-functions'."
+  (let (completion-in-region-mode-map jit-lock-mode)
+    (setq fountain--completion-line
+          (count-lines (point-min) (line-beginning-position)))
+    (list (line-beginning-position)
+          (point)
+          (completion-table-case-fold
+           (cond
+            ((fountain-match-scene-heading)
+             fountain-completion-scene-headings)
+            ((fountain-blank-before-p)
+             (fountain-completion-get-characters)))))))
+
+(defun fountain-completion-update ()
+  "Create new completion candidates for current buffer.
+
+Completion candidates are usually updated automatically with
+`jit-lock-mode', however this command will add completion
+candidates for the entire buffer.
+
+Add to `fountain-mode-hook' to have full completion upon load."
+  (interactive)
+  (setq fountain-completion-scene-headings nil
+        fountain-completion-characters nil)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (fountain-completion-update-scene-headings (point-min) (point-max))
+      (fountain-completion-update-characters (point-min) (point-max))))
+  (message "Completion candidates updated"))
 
 
 ;;; Pages
@@ -4020,26 +4151,6 @@ a scene heading."
             (delete-region x (point))
           (unless (eobp) (forward-char 1)))))))
 
-(defun fountain-insert-alternate-character ()
-  "Insert second-last character within the scene, and newline."
-  (interactive)
-  (let* ((n -1)
-         (character-1 (fountain-get-character n 'scene))
-         (character-2 character-1))
-    (while (and (stringp character-1)
-                (string= character-1 character-2))
-      (setq n (1- n)
-            character-2 (fountain-get-character n 'scene)))
-    (if character-2
-        (let ((x (save-excursion
-                   (skip-chars-backward "\s\n\t")
-                   (point))))
-          (delete-region x (point))
-          (newline 2)
-          (insert character-2))
-      (message "No alternate character within scene"))
-    (newline)))
-
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
   (interactive)
@@ -4704,6 +4815,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
+    (define-key map (kbd "M-TAB") #'completion-at-point)
+    (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
     ;; FIXME: include-find-file feels like it should be C-c C-c...
     ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
@@ -4804,6 +4917,7 @@ keywords suitable for Font Lock."
     ["Insert Note" fountain-insert-note]
     ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
+    ["Update Autocompletion" fountain-completion-update]
     "---"
     ("Show/Hide"
      ["Endnotes" fountain-show-or-hide-endnotes]
@@ -4958,7 +5072,9 @@ keywords suitable for Font Lock."
   (add-hook 'post-command-hook
             #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
-  (jit-lock-register #'fountain-redisplay-scene-numbers t)
+  (jit-lock-register #'fountain-redisplay-scene-numbers)
+  (jit-lock-register #'fountain-completion-update-scene-headings)
+  (jit-lock-register #'fountain-completion-update-characters)
   (fountain-init-mode-line)
   (fountain-restart-page-count-timer)
   (fountain-outline-hide-level fountain-outline-startup-level t))
