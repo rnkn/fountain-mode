@@ -3904,12 +3904,11 @@ Always deactivate if optional argument DEACTIVATE is non-nil.
 Added as hook to `post-command-hook'."
   (when (or deactivate
             (and (integerp fountain--auto-upcase-line)
-                 (/= fountain--auto-upcase-line
-                     (count-lines (point-min) (line-beginning-position)))))
+                 (/= fountain--auto-upcase-line (line-number-at-pos))))
     (setq fountain--auto-upcase-line nil)
     (if (overlayp fountain--auto-upcase-overlay)
         (delete-overlay fountain--auto-upcase-overlay))
-    (message "Auto-upcasing disabled")))
+    (message "Auto-upcasing deactivated")))
 
 (defun fountain-toggle-auto-upcase ()
   "Toggle line auto-upcasing.
@@ -3939,15 +3938,15 @@ Otherwise, activate auto-upcasing for the whole line.
 Added as hook to `post-self-insert-hook'."
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
-         (setq fountain--auto-upcase-line
-               (count-lines (point-min) (line-beginning-position)))
+         (unless (and (integerp fountain--auto-upcase-line)
+                      (= fountain--auto-upcase-line (line-number-at-pos)))
+           (setq fountain--auto-upcase-line (line-number-at-pos))
+           (message "Auto-upcasing activated"))
          (fountain-auto-upcase-make-overlay)
-         (upcase-region (line-beginning-position)
-                        (or (match-end 3)
-                            (point))))
+         (upcase-region (line-beginning-position) (or (match-end 3) (point))))
         ((and (integerp fountain--auto-upcase-line)
-              (= fountain--auto-upcase-line
-                 (count-lines (point-min) (line-beginning-position))))
+              (= fountain--auto-upcase-line (line-number-at-pos)))
+         (fountain-auto-upcase-make-overlay)
          (fountain-upcase-line))))
 
 (defun fountain-dwim (&optional arg)
@@ -3971,31 +3970,22 @@ Added as hook to `post-self-insert-hook'."
    \\[fountain-dwim] before, during or after typing the name to
    get the same result."
   (interactive "p")
-  (cond ((< 1 arg)
+  (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading))
          (fountain-outline-cycle))
         ((fountain-match-include)
          (fountain-include-find-file))
-        (fountain--auto-upcase-line
-         (fountain-auto-upcase-deactivate-maybe t))
         (t
-         (setq fountain--auto-upcase-line
-               (count-lines (point-min) (line-beginning-position)))
-         (fountain-auto-upcase-make-overlay)
-         (fountain-upcase-line)
-         (message "Auto-upcasing enabled"))))
+         (fountain-toggle-auto-upcase))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
 If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
-  (if arg
-      (save-excursion
-        (forward-line 0)
-        (insert ".")))
+  (if arg (save-excursion (forward-line 0) (insert ".")))
   (upcase-region (line-beginning-position) (line-end-position)))
 
 (defun fountain-upcase-line-and-newline (&optional arg)
