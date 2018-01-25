@@ -3867,6 +3867,8 @@ persist even when calling \\[delete-other-windows]."
 
 ;;; Editing
 
+(require 'help)
+
 (defcustom fountain-auto-upcase-scene-headings
   t
   "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
@@ -3881,6 +3883,21 @@ If nil, auto-upcase is deactivated.")
 (defvar-local fountain--auto-upcase-overlay
   nil
   "Overlay used for auto-upcasing current line.")
+
+(defcustom fountain-tab-function
+  'fountain-dwim
+  "Function to call when pressing the TAB key."
+  :type '(radio (function-item fountain-dwim)
+                (function-item fountain-outline-cycle)
+                (function-item fountain-toggle-auto-upcase)
+                (function-item completion-at-point))
+  :group 'fountain)
+
+(defun fountain-tab-action (&optional arg)
+  "Simply calls the value of variable `fountain-tab-function'."
+  (interactive "p")
+  (funcall fountain-tab-function
+           (if (help-function-arglist fountain-tab-function) arg)))
 
 (defun fountain-auto-upcase-make-overlay ()
   "Make the auto-upcase overlay on current line.
@@ -4675,7 +4692,7 @@ keywords suitable for Font Lock."
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Editing commands:
-    (define-key map (kbd "TAB") #'fountain-dwim)
+    (define-key map (kbd "TAB") #'fountain-tab-action)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
