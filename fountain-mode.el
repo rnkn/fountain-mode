@@ -4883,6 +4883,19 @@ keywords suitable for Font Lock."
      ["Customize Export"
       (customize-group 'fountain-export)])
     "---"
+    ("TAB Command"
+     ["Contextual (Do What I Mean)" (customize-set-variable 'fountain-tab-function 'fountain-dwim)
+      :style radio
+      :selected (eq fountain-tab-function 'fountain-dwim)]
+     ["Cycle Scene/Section Visibility" (customize-set-variable 'fountain-tab-function 'fountain-outline-cycle)
+      :style radio
+      :selected (eq fountain-tab-function 'fountain-outline-cycle)]
+     ["Toggle Auto-Upcasing" (customize-set-variable 'fountain-tab-function 'fountain-toggle-auto-upcase)
+      :style radio
+      :selected (eq fountain-tab-function 'fountain-toggle-auto-upcase)]
+     ["Auto-Complete" (customize-set-variable 'fountain-tab-function 'completion-at-point)
+      :style radio
+      :selected (eq fountain-tab-function 'completion-at-point)])
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
