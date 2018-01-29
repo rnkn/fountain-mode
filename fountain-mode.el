@@ -947,7 +947,7 @@ buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline)
-  (setq-local completion-cycle-threshold t)
+  (setq-local completion-cycle-threshold t) ; FIXME: make user option
   (setq-local completion-at-point-functions
               '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
@@ -1264,6 +1264,7 @@ Added to `jit-lock-functions'."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
+    ;; FIXME: this is still adding incomplete scene headings
     (if (and (not (and (integerp fountain--completion-line)
                        (= fountain--completion-line
                           (count-lines (point-min) (line-beginning-position)))))
