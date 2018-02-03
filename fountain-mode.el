@@ -1367,8 +1367,7 @@ with `fountain-get-export-elements'."
          ;; in export, skip over without incrementing line-count (implement with
          ;; block bounds). Get the line width.
          (t
-          (let ((x (point))
-                (element (fountain-get-element)))
+          (let ((element (fountain-get-element)))
             (if (memq element (or export-elements
                                   (fountain-get-export-elements)))
                 (progn
