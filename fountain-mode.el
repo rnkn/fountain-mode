@@ -1336,14 +1336,14 @@ To considerably speed up this function, supply EXPORT-ELEMENTS
 with `fountain-get-export-elements'."
   (unless n (setq n 1))
   (while (< 0 n)
+    ;; Pages don't begin with blank space, so skip over any at point.
+    (skip-chars-forward "\n\r\s\t")
+    (forward-line 0)
     ;; If we're at a page break, move to its end and skip over whitespace.
     (when (fountain-match-page-break)
       (goto-char (match-end 0))
       (skip-chars-forward "\n\r\s\t")
       (forward-line 0))
-    ;; Pages don't begin with blank space, so skip over any at point.
-    (skip-chars-forward "\n\r\s\t")
-    (forward-line 0)
     ;; Start counting lines.
     (let ((line-count 0))
       ;; Begin the main loop, which only halts if we reach the end of buffer, a
