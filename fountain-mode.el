@@ -1383,6 +1383,8 @@ with `fountain-get-export-elements'."
     (setq n (1- n))))
 
 (defun fountain-move-to-fill-width (element)
+  "Move point to column of ELEMENT fill limit suitable for breaking line.
+Skip over comments."
   (let ((fill-width
          (cdr (symbol-value
                (plist-get (cdr (assq element fountain-elements))
