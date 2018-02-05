@@ -4904,12 +4904,16 @@ keywords suitable for Font Lock."
   (interactive)
   (let (unsaved)
     (dolist (option '(fountain-align-elements
+                      fountain-auto-upcase-scene-headings
                       fountain-add-continued-dialog
+                      fountain-display-scene-numbers-in-margin
+                      fountain-pages-show-in-mode-line
                       fountain-hide-emphasis-delim
                       fountain-hide-syntax-chars
-                      fountain-display-scene-numbers-in-margin
-                      fountain-export-scene-heading-format
-                      font-lock-maximum-decoration))
+                      font-lock-maximum-decoration
+                      fountain-export-page-size
+                      fountain-export-include-title-page
+                      fountain-export-scene-heading-format))
       (if (customize-mark-to-save option)
           (setq unsaved t)))
     (if unsaved (custom-save-all))))
