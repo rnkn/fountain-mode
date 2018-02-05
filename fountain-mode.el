@@ -1232,7 +1232,7 @@ Assumes that all other element matching has been done."
    (t (looking-at fountain-action-regexp) 'action)))
 
 
-;;; Autocomplete
+;;; Auto-completion
 
 (defvar-local fountain-completion-scene-headings
   nil
@@ -4015,6 +4015,8 @@ persist even when calling \\[delete-other-windows]."
 
 ;;; Editing
 
+(require 'help)
+
 (defcustom fountain-auto-upcase-scene-headings
   t
   "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
@@ -4029,6 +4031,22 @@ If nil, auto-upcase is deactivated.")
 (defvar-local fountain--auto-upcase-overlay
   nil
   "Overlay used for auto-upcasing current line.")
+
+(defcustom fountain-tab-command
+  'fountain-dwim
+  "Command to call when pressing the TAB key."
+  :type '(radio (function-item fountain-dwim)
+                (function-item fountain-outline-cycle)
+                (function-item fountain-toggle-auto-upcase)
+                (function-item completion-at-point))
+  :group 'fountain)
+
+(defun fountain-tab-action (&optional arg)
+  "Simply calls the value of variable `fountain-tab-command'."
+  (interactive "p")
+  (if (help-function-arglist fountain-tab-command)
+      (funcall fountain-tab-command arg)
+    (funcall fountain-tab-command)))
 
 (defun fountain-auto-upcase-make-overlay ()
   "Make the auto-upcase overlay on current line.
@@ -4052,12 +4070,27 @@ Always deactivate if optional argument DEACTIVATE is non-nil.
 Added as hook to `post-command-hook'."
   (when (or deactivate
             (and (integerp fountain--auto-upcase-line)
-                 (/= fountain--auto-upcase-line
-                     (count-lines (point-min) (line-beginning-position)))))
+                 (/= fountain--auto-upcase-line (line-number-at-pos))))
     (setq fountain--auto-upcase-line nil)
     (if (overlayp fountain--auto-upcase-overlay)
         (delete-overlay fountain--auto-upcase-overlay))
-    (message "Auto-upcasing disabled")))
+    (message "Auto-upcasing deactivated")))
+
+(defun fountain-toggle-auto-upcase ()
+  "Toggle line auto-upcasing.
+
+Upcase the current line, and continue to upcase inserted
+characters until either disabled, or point moves to a different
+line (by inserting a newline or by point motion).
+
+The auto-upcased line is highlighted with face
+`fountain-auto-upcase-highlight'"
+  (interactive)
+  (if fountain--auto-upcase-line
+      (fountain-auto-upcase-deactivate-maybe t)
+    (setq fountain--auto-upcase-line (line-number-at-pos))
+    (message "Auto-upcasing activated")
+    (fountain-auto-upcase)))
 
 (defun fountain-auto-upcase ()
   "Upcase all or part of the current line contextually.
@@ -4071,61 +4104,44 @@ Otherwise, activate auto-upcasing for the whole line.
 Added as hook to `post-self-insert-hook'."
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
-         (setq fountain--auto-upcase-line (line-number-at-pos))
+         (unless (and (integerp fountain--auto-upcase-line)
+                      (= fountain--auto-upcase-line (line-number-at-pos)))
+           (setq fountain--auto-upcase-line (line-number-at-pos))
+           (message "Auto-upcasing activated"))
          (fountain-auto-upcase-make-overlay)
-         (upcase-region (line-beginning-position)
-                        (or (match-end 3)
-                            (point))))
+         (upcase-region (line-beginning-position) (or (match-end 3) (point))))
         ((and (integerp fountain--auto-upcase-line)
               (= fountain--auto-upcase-line (line-number-at-pos)))
+         (fountain-auto-upcase-make-overlay)
          (fountain-upcase-line))))
 
 (defun fountain-dwim (&optional arg)
   "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
 
 1. If point is at a scene heading or section heading, or if
-   prefixed with ARG (\\[universal-argument] \\[fountain-dwim]) call `fountain-outline-cycle'
-   and pass ARG, e.g. \\[universal-argument] \\[universal-argument] \\[fountain-dwim] is the same as
-   \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle].
+   prefixed with ARG call `fountain-outline-cycle' and pass ARG.
 
 2. If point is at an directive to an included file, call
    `fountain-include-find-file'.
 
-3. Otherwise, upcase the current line and active auto-upcasing.
-   This highlights the current line with face
-   `fountain-auto-upcase-highlight' and will continue to upcase
-   inserted characters until the command is called again
-   (\\[fountain-dwim]) or point moves to a different line (either
-   by inserting a newline or point motion). This allows a
-   flexible style of entering character names. You may press
-   \\[fountain-dwim] before, during or after typing the name to
-   get the same result."
+3. Otherwise, call `fountain-toggle-auto-upcase'."
   (interactive "p")
-  (cond ((< 1 arg)
+  (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading))
          (fountain-outline-cycle))
         ((fountain-match-include)
          (fountain-include-find-file))
-        (fountain--auto-upcase-line
-         (fountain-auto-upcase-deactivate-maybe t))
         (t
-         (setq fountain--auto-upcase-line
-               (count-lines (point-min) (line-beginning-position)))
-         (fountain-auto-upcase-make-overlay)
-         (fountain-upcase-line)
-         (message "Auto-upcasing enabled"))))
+         (fountain-toggle-auto-upcase))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
 If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
-  (if arg
-      (save-excursion
-        (forward-line 0)
-        (insert ".")))
+  (if arg (save-excursion (forward-line 0) (insert ".")))
   (upcase-region (line-beginning-position) (line-end-position)))
 
 (defun fountain-upcase-line-and-newline (&optional arg)
@@ -4805,7 +4821,7 @@ keywords suitable for Font Lock."
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Editing commands:
-    (define-key map (kbd "TAB") #'fountain-dwim)
+    (define-key map (kbd "TAB") #'fountain-tab-action)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
@@ -4999,6 +5015,19 @@ keywords suitable for Font Lock."
      ["Customize Export"
       (customize-group 'fountain-export)])
     "---"
+    ("TAB Command"
+     ["Contextual (Do What I Mean)" (customize-set-variable 'fountain-tab-command 'fountain-dwim)
+      :style radio
+      :selected (eq fountain-tab-command 'fountain-dwim)]
+     ["Cycle Scene/Section Visibility" (customize-set-variable 'fountain-tab-command 'fountain-outline-cycle)
+      :style radio
+      :selected (eq fountain-tab-command 'fountain-outline-cycle)]
+     ["Toggle Auto-Upcasing" (customize-set-variable 'fountain-tab-command 'fountain-toggle-auto-upcase)
+      :style radio
+      :selected (eq fountain-tab-command 'fountain-toggle-auto-upcase)]
+     ["Auto-Complete" (customize-set-variable 'fountain-tab-command 'completion-at-point)
+      :style radio
+      :selected (eq fountain-tab-command 'completion-at-point)])
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
