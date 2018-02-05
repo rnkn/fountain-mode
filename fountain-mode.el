@@ -1244,8 +1244,8 @@ Assumes that all other element matching has been done."
 Each element is a cons of the character name, a string, and the
 character's priority, an integer.
 
-The priority value does not equate to the number of lines the
-character has.")
+n.b. The priority value does not equate to the number of lines
+the character has.")
 
 (defvar-local fountain--completion-line
   nil
@@ -1266,8 +1266,7 @@ Added to `jit-lock-functions'."
   (while (< (point) end)
     ;; FIXME: this is still adding incomplete scene headings
     (if (and (not (and (integerp fountain--completion-line)
-                       (= fountain--completion-line
-                          (count-lines (point-min) (line-beginning-position)))))
+                       (= fountain--completion-line (line-number-at-pos))))
              (fountain-match-scene-heading))
         (let ((scene-heading (match-string-no-properties 3)))
           (unless (member scene-heading fountain-completion-scene-headings)
@@ -1279,23 +1278,23 @@ Added to `jit-lock-functions'."
 
 Added to `jit-lock-functions'."
   (goto-char end)
-  (unless (fountain-match-scene-heading)
+  (if (fountain-match-scene-heading)
+      (forward-line 1)
     (fountain-forward-scene 1))
   (setq end (point))
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
     (if (and (not (and (integerp fountain--completion-line)
-                       (= fountain--completion-line
-                          (count-lines (point-min) (line-beginning-position)))))
+                       (= fountain--completion-line (line-number-at-pos))))
              (fountain-match-character))
         (let* ((character (match-string-no-properties 4))
-               (record (assoc-string character fountain-completion-characters))
-               (n (cdr record)))
+               (candidate (assoc-string character fountain-completion-characters))
+               (n (cdr candidate)))
           (if (not n)
               (push (cons character 1) fountain-completion-characters)
             (setq fountain-completion-characters
-                  (delete record fountain-completion-characters))
+                  (delete candidate fountain-completion-characters))
             (push (cons character (1+ n)) fountain-completion-characters))))
     (fountain-forward-character 1))
   (setq fountain-completion-characters
