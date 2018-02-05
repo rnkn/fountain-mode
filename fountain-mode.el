@@ -4027,8 +4027,9 @@ If nil, auto-upcase is deactivated.")
 (defun fountain-tab-action (&optional arg)
   "Simply calls the value of variable `fountain-tab-command'."
   (interactive "p")
-  (funcall fountain-tab-function
-           (if (help-function-arglist fountain-tab-function) arg)))
+  (if (help-function-arglist fountain-tab-command)
+      (funcall fountain-tab-command arg)
+    (funcall fountain-tab-command)))
 
 (defun fountain-auto-upcase-make-overlay ()
   "Make the auto-upcase overlay on current line.
