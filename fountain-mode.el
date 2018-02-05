@@ -1314,7 +1314,6 @@ characters from `fountain-completion-characters'."
         (save-restriction
           (widen)
           (fountain-forward-character 0)
-          (fountain-forward-character -1)
           (while (not (or (fountain-match-scene-heading)
                           (bobp)))
             (if (fountain-match-character)
@@ -1322,7 +1321,12 @@ characters from `fountain-completion-characters'."
                   (unless (member character candidates)
                     (push (list character) candidates))))
             (fountain-forward-character -1 'scene))))
-      (setq candidates (append (reverse candidates)
+      (setq candidates (reverse candidates))
+      (let ((contd-character (list (car candidates)))
+            (alt-character (list (car (cdr candidates))))
+            (rest-characters (cdr (cdr candidates))))
+        (setq candidates (append alt-character contd-character rest-characters)))
+      (setq candidates (append candidates
                                fountain-completion-characters))
       (if (eq action 'metadata)
           (list 'metadata
