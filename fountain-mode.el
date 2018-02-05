@@ -1247,12 +1247,6 @@ character's priority, an integer.
 n.b. The priority value does not equate to the number of lines
 the character has.")
 
-(defvar-local fountain--completion-line
-  nil
-  "Integer of line number when performing completion.
-
-Prevents incomplete strings added to candidates.")
-
 (defun fountain-completion-update-scene-headings (start end)
   "Update `fountain-completion-scene-headings' between START and END.
 
@@ -1265,9 +1259,8 @@ Added to `jit-lock-functions'."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    ;; FIXME: this is still adding incomplete scene headings
-    (if (and (not (and (integerp fountain--completion-line)
-                       (= fountain--completion-line (line-number-at-pos))))
+    (if (and (not (and (integerp fountain--edit-line)
+                       (= fountain--edit-line (line-number-at-pos))))
              (fountain-match-scene-heading))
         (let ((scene-heading (match-string-no-properties 3)))
           (unless (member scene-heading fountain-completion-scene-headings)
@@ -1286,8 +1279,8 @@ Added to `jit-lock-functions'."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (if (and (not (and (integerp fountain--completion-line)
-                       (= fountain--completion-line (line-number-at-pos))))
+    (if (and (not (and (integerp fountain--edit-line)
+                       (= fountain--edit-line (line-number-at-pos))))
              (fountain-match-character))
         (let* ((character (match-string-no-properties 4))
                (candidate (assoc-string character fountain-completion-characters))
@@ -1348,7 +1341,6 @@ keybinding.
 
 Added to `completion-at-point-functions'."
   (let (completion-in-region-mode-map jit-lock-mode)
-    (setq fountain--completion-line (line-number-at-pos))
     (list (line-beginning-position)
           (point)
           (completion-table-case-fold
@@ -4017,6 +4009,17 @@ persist even when calling \\[delete-other-windows]."
 
 (require 'help)
 
+(defvar-local fountain--edit-line
+  nil
+  "Line number currently being edited.
+Prevents incomplete strings added to candidates.")
+
+(defun fountain-set-edit-line ()
+  "Set `fountain--edit-line' to current line.
+
+Added to `post-command-hook'."
+  (setq fountain--edit-line (line-number-at-pos)))
+
 (defcustom fountain-auto-upcase-scene-headings
   t
   "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
@@ -5085,6 +5088,7 @@ keywords suitable for Font Lock."
     (if (stringp n)
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
+  (add-hook 'post-command-hook #'fountain-set-edit-line nil t)
   (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
   (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
