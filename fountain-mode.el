@@ -1299,8 +1299,8 @@ Added to `jit-lock-functions'."
             (push (cons character (1+ n)) fountain-completion-characters))))
     (fountain-forward-character 1))
   (setq fountain-completion-characters
-        (sort fountain-completion-characters '(lambda (a b)
-                                                (< (cdr b) (cdr a))))))
+        (sort fountain-completion-characters #'(lambda (a b)
+                                                 (< (cdr b) (cdr a))))))
 
 (defun fountain-completion-get-characters ()
   "Return candidates for completing character.
