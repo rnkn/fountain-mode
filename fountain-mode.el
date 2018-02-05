@@ -1445,7 +1445,7 @@ number."
         (total 0)
         (current 0)
         (end (point-max))
-        (export-element (fountain-get-export-elements))
+        (export-elements (fountain-get-export-elements))
         found)
     (save-excursion
       (save-restriction
@@ -1455,7 +1455,7 @@ number."
             (setq end (match-beginning 0)))
         (goto-char (point-min))
         (while (< (point) end)
-          (fountain-forward-page 1 export-element)
+          (fountain-forward-page 1 export-elements)
           (setq total (1+ total))
           (if (and (not found) (<= x (point))) (setq current total found t)))
         (cons current total)))))
