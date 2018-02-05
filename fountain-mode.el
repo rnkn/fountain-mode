@@ -1347,8 +1347,7 @@ keybinding.
 
 Added to `completion-at-point-functions'."
   (let (completion-in-region-mode-map jit-lock-mode)
-    (setq fountain--completion-line
-          (count-lines (point-min) (line-beginning-position)))
+    (setq fountain--completion-line (line-number-at-pos))
     (list (line-beginning-position)
           (point)
           (completion-table-case-fold
@@ -4071,15 +4070,13 @@ Otherwise, activate auto-upcasing for the whole line.
 Added as hook to `post-self-insert-hook'."
   (cond ((and fountain-auto-upcase-scene-headings
               (fountain-match-scene-heading))
-         (setq fountain--auto-upcase-line
-               (count-lines (point-min) (line-beginning-position)))
+         (setq fountain--auto-upcase-line (line-number-at-pos))
          (fountain-auto-upcase-make-overlay)
          (upcase-region (line-beginning-position)
                         (or (match-end 3)
                             (point))))
         ((and (integerp fountain--auto-upcase-line)
-              (= fountain--auto-upcase-line
-                 (count-lines (point-min) (line-beginning-position))))
+              (= fountain--auto-upcase-line (line-number-at-pos)))
          (fountain-upcase-line))))
 
 (defun fountain-dwim (&optional arg)
