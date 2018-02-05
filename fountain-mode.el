@@ -5056,10 +5056,8 @@ keywords suitable for Font Lock."
     (if (stringp n)
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
-  (add-hook 'post-self-insert-hook
-            #'fountain-auto-upcase nil t)
-  (add-hook 'post-command-hook
-            #'fountain-auto-upcase-deactivate-maybe nil t)
+  (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
+  (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers)
   (jit-lock-register #'fountain-completion-update-scene-headings)
