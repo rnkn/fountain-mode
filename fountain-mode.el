@@ -4918,7 +4918,7 @@ keywords suitable for Font Lock."
     ["Insert Note" fountain-insert-note]
     ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
-    ["Update Autocompletion" fountain-completion-update]
+    ["Update Auto-Completion" fountain-completion-update]
     "---"
     ("Show/Hide"
      ["Endnotes" fountain-show-or-hide-endnotes]
