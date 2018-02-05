@@ -1258,7 +1258,8 @@ Prevents incomplete strings added to candidates.")
 
 Added to `jit-lock-functions'."
   (goto-char end)
-  (unless (fountain-match-scene-heading)
+  (if (fountain-match-scene-heading)
+      (forward-line 1)
     (fountain-forward-scene 1))
   (setq end (point))
   (goto-char start)
