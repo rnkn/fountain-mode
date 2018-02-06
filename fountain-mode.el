@@ -4952,16 +4952,16 @@ keywords suitable for Font Lock."
     "---"
     ("Show/Hide"
      ["Endnotes" fountain-show-or-hide-endnotes]
-     ["Emphasis Delimiters"
+     ["Hide Emphasis Delimiters"
       (customize-set-variable 'fountain-hide-emphasis-delim
                               (not fountain-hide-emphasis-delim))
       :style toggle
-      :selected (not fountain-hide-emphasis-delim)]
-     ["Syntax Characters"
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Syntax Characters"
       (customize-set-variable 'fountain-hide-syntax-chars
                               (not fountain-hide-syntax-chars))
       :style toggle
-      :selected (not fountain-hide-syntax-chars)])
+      :selected fountain-hide-syntax-chars])
     ("Syntax Highlighting"
      ["Minimum"
       (fountain-set-font-lock-decoration 1)
