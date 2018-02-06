@@ -4933,11 +4933,11 @@ keywords suitable for Font Lock."
       (customize-set-variable 'fountain-pages-show-in-mode-line nil)
       :style radio
       :selected (not fountain-pages-show-in-mode-line)]
-     ["In Mode Line with Manual Update"
+     ["Show in Mode Line with Manual Update"
       (customize-set-variable 'fountain-pages-show-in-mode-line 'force)
       :style radio
       :selected (eq fountain-pages-show-in-mode-line 'force)]
-     ["In Mode Line with Automatic Update"
+     ["Show in Mode Line with Automatic Update"
       (customize-set-variable 'fountain-pages-show-in-mode-line 'timer)
       :style radio
       :selected (eq fountain-pages-show-in-mode-line 'timer)])
