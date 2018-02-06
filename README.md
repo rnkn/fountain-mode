@@ -118,4 +118,5 @@ See [Releases](https://github.com/rnkn/fountain-mode/releases).
 Tips
 ----
 
+Ethereum address `0x209C60afd8aF6c61ac4Dbe340d81D4f789DF64D3`  
 Bitcoin Cash address `19gUvL8YUzDKr5GyiHpYeF31BfQm87xM9L`
