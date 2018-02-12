@@ -1479,7 +1479,7 @@ with `fountain-get-export-elements'."
   (while (< 0 n)
     ;; Pages don't begin with blank space, so skip over any at point.
     (skip-chars-forward "\n\r\s\t")
-    (forward-line 0)
+    (if (fountain-match-action) (forward-line 0))
     ;; If we're at a page break, move to its end and skip over whitespace.
     (when (fountain-match-page-break)
       (goto-char (match-end 0))
@@ -1491,8 +1491,8 @@ with `fountain-get-export-elements'."
       ;; forced page break, or after the maximum lines in a page.
       (while (and (< line-count (cdr (assq fountain-export-page-size
                                            fountain-pages-max-lines)))
-                  (not (or (eobp)
-                           (fountain-match-page-break))))
+                  (not (eobp))
+                  (not (fountain-match-page-break)))
         (cond
          ;; If we're at the end of a line (but not also the beginning, i.e. not a
          ;; blank line) then move forward a line and increment line-count.
@@ -1541,7 +1541,7 @@ Skip over comments."
                (setq i (1+ i))))))
     (skip-chars-forward "\s\t")
     (if (eolp) (forward-line 1))
-    (fill-move-to-break-point (line-beginning-position))))
+    (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-insert-page-break (&optional string)
   "Insert a page break at appropriate place preceding point.
