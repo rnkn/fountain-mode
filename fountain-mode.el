@@ -1406,7 +1406,8 @@ script, you may get incorrect output."
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
 over whitespace."
-  (skip-chars-forward "\n\r\s\t")
+  (if (looking-at "\n[\n\s\t]*\n")
+      (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
      ;; If we're are a section heading, scene heading or character, we can
@@ -1432,7 +1433,7 @@ over whitespace."
       (skip-chars-forward "\s\t")
       (if (not (looking-back (sentence-end)
                              (save-excursion
-                               (fountain-forward-character -1)
+                               (fountain-forward-character 0)
                                (point))))
           (forward-sentence -1)
         ;; This may move to character element, or back within dialogue. If
