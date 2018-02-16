@@ -123,7 +123,7 @@
 ;; Roadmap
 ;; -------
 
-;; See [Milestones](https://github.com/rnkn/fountain-mode/milestones).
+;; See [Roadmap](https://github.com/rnkn/fountain-mode/projects/2).
 
 ;; History
 ;; -------
