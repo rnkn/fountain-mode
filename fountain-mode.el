@@ -1406,6 +1406,7 @@ script, you may get incorrect output."
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
 over whitespace."
+  ;; FIXME: rewrite to account for non-exported elements
   (if (looking-at "\n[\n\s\t]*\n")
       (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
@@ -5108,8 +5109,8 @@ keywords suitable for Font Lock."
         (setq-local fountain-outline-startup-level
                     (min (string-to-number n) 6))))
   (add-hook 'post-command-hook #'fountain-set-edit-line nil t)
-  (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
   (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
+  (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
   (if fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers)
   (jit-lock-register #'fountain-completion-update-scene-headings)
