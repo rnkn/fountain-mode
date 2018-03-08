@@ -2318,6 +2318,7 @@ specify a different filename."
      :template fountain-export-tex-template
      :string-replace (("%" "\\\\%")
                       ("&" "\\\\&")
+                      ("#" "\\\\#")
                       ("\\$" "\\\\$")
                       ("\\*\\*\\*\\(.+?\\)\\*\\*\\*" "\\\\textbf{\\\\emph{\\1}}")
                       ("\\*\\*\\(.+?\\)\\*\\*" "\\\\textbf{\\1}")
