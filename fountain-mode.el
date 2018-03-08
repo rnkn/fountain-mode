@@ -5063,7 +5063,7 @@ keywords suitable for Font Lock."
      ["Toggle Auto-Upcasing" (customize-set-variable 'fountain-tab-command 'fountain-toggle-auto-upcase)
       :style radio
       :selected (eq fountain-tab-command 'fountain-toggle-auto-upcase)]
-     ["Auto-Complete" (customize-set-variable 'fountain-tab-command 'completion-at-point)
+     ["Auto-Completion" (customize-set-variable 'fountain-tab-command 'completion-at-point)
       :style radio
       :selected (eq fountain-tab-command 'completion-at-point)])
     ["Display Elements Auto-Aligned"
