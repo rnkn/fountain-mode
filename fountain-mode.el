@@ -282,6 +282,15 @@
 (define-obsolete-variable-alias 'fountain-export-buffer-name
   'fountain-export-tmp-buffer-name "2.4.0")
 
+(define-obsolete-variable-alias 'fountain-endnotes-buffer-name
+  'fountain-endnotes-buffer "2.5.1")
+
+(make-obsolete-variable 'fountain-endnotes-window-side
+                        'fountain-endnotes-display-alist "2.5.1")
+
+(make-obsolete-variable 'fountain-endnotes-window-size
+                        'fountain-endnotes-display-alist "2.5.1")
+
 
 ;;; Customization
 
