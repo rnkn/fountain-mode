@@ -3557,11 +3557,7 @@ Used by `fountain-outline-cycle'.")
 
 (defcustom fountain-outline-startup-level
   0
-  "Outline level to show when visiting a file.
-
-This can be set on a per-file basis by including in metadata:
-
-\tstartup-level: N"
+  "Outline level to show when visiting a file."
   :type '(choice (const :tag "Show all" 0)
                  (const :tag "Show top-level" 1)
                  (const :tag "Show scene headings" 6)
@@ -5123,10 +5119,7 @@ keywords suitable for Font Lock."
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (fountain-init-vars)
-  (let ((n (plist-get (fountain-read-metadata) 'startup-level)))
-    (if (stringp n)
-        (setq-local fountain-outline-startup-level
-                    (min (string-to-number n) 6))))
+  (hack-local-variables)
   (add-hook 'post-command-hook #'fountain-set-edit-line nil t)
   (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
   (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
