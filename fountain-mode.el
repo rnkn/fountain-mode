@@ -3955,7 +3955,7 @@ WARNING: if using other Fountain apps, check to make sure they
 support endnotes."
   :group 'fountain)
 
-(defcustom fountain-endnotes-buffer-name
+(defcustom fountain-endnotes-buffer
   "%s<endnotes>"
   "Name of buffer in which to display file endnotes.
 `%s' is replaced with `buffer-name'.
@@ -3964,45 +3964,28 @@ To hide this buffer from the buffer list, prefix with a space."
   :type 'string
   :group 'fountain-endnotes)
 
+(defcustom fountain-endnotes-display-alist
+  '((side . right)
+    (window-width . 40)
+    (slot . 1))
+  "Alist used to display endnotes buffer.
+
+See `display-buffer-in-side-window' for example options."
+  :type 'alist
+  :group 'fountain-endnotes)
+
 (defcustom fountain-endnotes-select-window
   nil
   "If non-nil, switch to endnotes window upon displaying it."
   :type 'boolean
   :group 'fountain-endnotes)
 
-(defcustom fountain-endnotes-window-side
-  'right
-  "Preferred side of frame to display endnotes window."
-  :type '(choice (const :tag "Left" left)
-                 (const :tag "Right" right)
-                 (const :tag "Top" top)
-                 (const :tag "Bottom" bottom))
-  :group 'fountain-endnotes)
-
-(defcustom fountain-endnotes-window-size
-  '(0.3 0.25)
-  "Height and width of the endnotes window as a fraction of root window."
-  :type '(list (float :tag "Height")
-               (float :tag "Width"))
-  :group 'fountain-endnotes)
-
-;; (defcustom fountain-endnotes-display-function
-;;   'display-buffer-pop-up-window
-;;   "Buffer display function used to display endnotes."
-;;   :type '(radio (const :tag "Pop-up new window" display-buffer-pop-up-window)
-;;                 (const :tag "Pop-up new frame" display-buffer-pop-up-frame)
-;;                 (const :tag "Show in same window" display-buffer-same-window))
-;;   :group 'fountain-endnotes)
-
 (defun fountain-show-or-hide-endnotes ()
   "Pop up a window containing endnotes of current buffer.
 
 Display a window containing an indirect clone of the current
 buffer, narrowed to the first endnotes page break to the end of
-buffer.
-
-The window displayed is a special \"side\" window, which will
-persist even when calling \\[delete-other-windows]."
+buffer."
   (interactive)
   (set-buffer (or (buffer-base-buffer) (current-buffer)))
   (save-excursion
@@ -4011,23 +3994,20 @@ persist even when calling \\[delete-other-windows]."
       (goto-char (point-min))
       (let ((beg (if (re-search-forward fountain-end-regexp nil t)
                      (point)))
-            (src (current-buffer))
-            (buf (format fountain-endnotes-buffer-name (buffer-name))))
+            (buffer (current-buffer))
+            (endnotes-buffer (format fountain-endnotes-buffer (buffer-name))))
         (if beg
-            (if (get-buffer-window buf (selected-frame))
-                (delete-windows-on buf (selected-frame))
+            (if (get-buffer-window endnotes-buffer (selected-frame))
+                (delete-windows-on endnotes-buffer (selected-frame))
               (display-buffer-in-side-window
-               (or (get-buffer buf)
-                   (make-indirect-buffer src buf t))
-               (list (cons 'inhibit-same-window t)
-                     (cons 'side fountain-endnotes-window-side)
-                     (cons 'window-height (car fountain-endnotes-window-size))
-                     (cons 'window-width (cadr fountain-endnotes-window-size))))
-              (with-current-buffer buf
+               (or (get-buffer endnotes-buffer)
+                   (make-indirect-buffer buffer endnotes-buffer t))
+               fountain-endnotes-display-alist)
+              (with-current-buffer endnotes-buffer
                 (narrow-to-region (1+ beg) (point-max)))
               (if fountain-endnotes-select-window
-                  (select-window (get-buffer-window buf (selected-frame))))
-              (message "Showing `%s' endnotes; %s to hide" src
+                  (select-window (get-buffer-window endnotes-buffer (selected-frame))))
+              (message "Showing `%s' endnotes; %s to hide" (buffer-name buffer)
                        (key-description (where-is-internal this-command
                                                            overriding-local-map t))))
           (user-error "Buffer `%s' does not contain endnotes" (buffer-name)))))))
