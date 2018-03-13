@@ -5102,14 +5102,11 @@ keywords suitable for Font Lock."
     (if unsaved (custom-save-all))))
 
 
-;;; Syntax Table
+;;; Mode Definition
 
 (defvar fountain-mode-syntax-table
   (make-syntax-table)
   "Syntax table for `fountain-mode'.")
-
-
-;;; Mode Definition
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
