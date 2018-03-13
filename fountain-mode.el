@@ -792,6 +792,11 @@ To switch between these levels, customize the value of
   :link '(info-link "(emacs) Font Lock")
   :group 'fountain)
 
+(defface fountain
+  '((t nil))
+  "Default base-level face for `fountain-mode' buffers."
+  :group 'fountain-faces)
+
 (defface fountain-action
   '((t nil))
   "Default face for action."
@@ -5106,6 +5111,7 @@ keywords suitable for Font Lock."
   :group 'fountain
   (fountain-init-vars)
   (hack-local-variables)
+  (face-remap-add-relative 'default 'fountain)
   (add-hook 'post-command-hook #'fountain-set-edit-line nil t)
   (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
   (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
