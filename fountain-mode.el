@@ -3842,7 +3842,7 @@ buffer windows are opened."
         (pop-to-buffer target-buffer)
       (clone-indirect-buffer target-buffer t)
       (outline-show-all))
-    (narrow-to-region beg end))))
+    (narrow-to-region beg end)))
 
 
 ;;; Navigation
