@@ -171,9 +171,6 @@
 (define-obsolete-variable-alias 'fountain-export-style-template
   'fountain-export-html-stylesheet "2.4.0")
 
-(define-obsolete-function-alias 'fountain-toggle-hide-escapes
-  'fountain-toggle-hide-syntax-chars "1.3.0")
-
 (define-obsolete-face-alias 'fountain-centered
   'fountain-center "1.1.0")
 
