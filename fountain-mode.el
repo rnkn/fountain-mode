@@ -1968,6 +1968,7 @@ Includes child elements."
 
 (defun fountain-parse-center (match-data &optional export-elements job)
   "Return an element list for matched center text."
+  (set-match-data match-data)
   (list 'center
         (list 'begin (match-beginning 0)
               'end (match-end 0)
