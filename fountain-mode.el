@@ -1802,7 +1802,7 @@ within left-side dual dialogue, and nil otherwise."
                            (stringp (match-string 5))))
                'left))))))
 
-(defun fountain-starts-new-page (&optional limit) ; FIXME: implement LIMIT
+(defun fountain-starts-new-page () ; FIXME: implement LIMIT
   (save-excursion
     (save-match-data
       (save-restriction
