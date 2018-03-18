@@ -1621,20 +1621,17 @@ number."
           (if (and (not found) (<= x (point))) (setq current total found t)))
         (cons current total)))))
 
-(defun fountain-count-pages ()
+(defun fountain-count-pages (&optional interactive)
   "Return the approximate current page of total pages in current buffer.
 
-If called interactively, print message in echo area.
-
-If point is beyond script end break, current page number is
-returned as 0."
-  (interactive)
+If called interactively, sets INTERACTIVE as non-nil
+unconditionally and prints a message in the echo area."
+  (interactive "p")
   (fountain-pages-update-mode-line)
   (redisplay)
   (let ((pages (fountain-get-page-count)))
     (fountain-pages-update-mode-line (car pages) (cdr pages))
-    (if (called-interactively-p)
-        (message "Page %d of %d" (car pages) (cdr pages)))))
+    (if interactive (message "Page %d of %d" (car pages) (cdr pages)))))
 
 (defun fountain-pages-update-mode-line (&optional current total)
   (setq fountain-page-count-string
