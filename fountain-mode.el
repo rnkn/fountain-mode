@@ -1728,7 +1728,7 @@ when called interactively), delete instead."
               (delete-region (match-beginning 0) (match-end 0))
             (replace-match
              (save-match-data
-               (with-current-buffer (fountain-include-find-file)
+               (with-current-buffer (fountain-include-find-file t)
                  (save-restriction
                    (widen)
                    (buffer-substring-no-properties (point-min) (point-max)))))
