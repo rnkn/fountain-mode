@@ -3567,23 +3567,17 @@ Used by `fountain-outline-cycle'.")
 
 Used by `fountain-outline-cycle'.")
 
-(defcustom fountain-outline-startup-level
-  0
-  "Outline level to show when visiting a file."
-  :type '(choice (const :tag "Show all" 0)
-                 (const :tag "Show top-level" 1)
-                 (const :tag "Show scene headings" 6)
-                 (integer :tag "Custom level"))
-  :group 'fountain)
+(make-obsolete-variable 'fountain-outline-startup-level
+  'fountain-outline-custom-level "2.5.4")
 
 (defcustom fountain-outline-custom-level
   nil
   "Additional section headings to include in outline cycling."
   :type '(choice (const :tag "Only top-level" nil)
-                 (const :tag "Include level 2" 2)
-                 (const :tag "Include level 3" 3)
-                 (const :tag "Include level 4" 4)
-                 (const :tag "Include level 5" 5))
+                 (const :tag "Level 2" 2)
+                 (const :tag "Level 3" 3)
+                 (const :tag "Level 4" 4)
+                 (const :tag "Level 5" 5))
   :group 'fountain)
 
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
