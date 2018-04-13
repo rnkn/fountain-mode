@@ -3,7 +3,7 @@
 ;; Copyright (c) 2014-2018 Paul Rankin
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
-;; Keywords: wp
+;; Keywords: text
 ;; Version: 2.5.3
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://github.com/rnkn/fountain-mode
