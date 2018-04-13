@@ -292,9 +292,12 @@
 ;;; Customization
 
 (defcustom fountain-mode-hook
-  '(turn-on-visual-line-mode)
+  '(turn-on-visual-line-mode fountain-outline-hide-custom-level)
   "Mode hook for `fountain-mode', run after the mode is turned on."
   :type 'hook
+  :options '(turn-on-visual-line-mode
+             fountain-outline-hide-custom-level
+             turn-on-flyspell)
   :group 'fountain)
 
 (defcustom fountain-add-continued-dialog
@@ -3677,6 +3680,10 @@ Display a message unless SILENT."
          (unless silent (message "Showing level %s headings" n))))
   (setq fountain--outline-cycle n))
 
+(defun fountain-outline-hide-custom-level ()
+  "Set the outline visibilty to `fountain-outline-custom-level'."
+  (fountain-outline-hide-level fountain-outline-custom-level t))
+
 (defun fountain-outline-cycle (&optional arg) ; FIXME: document
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
@@ -5127,7 +5134,6 @@ keywords suitable for Font Lock."
   "Major mode for screenwriting in Fountain markup."
   :group 'fountain
   (fountain-init-vars)
-  (hack-local-variables)
   (face-remap-add-relative 'default 'fountain)
   (add-hook 'post-command-hook #'fountain-set-edit-line nil t)
   (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
@@ -5137,8 +5143,7 @@ keywords suitable for Font Lock."
   (jit-lock-register #'fountain-completion-update-scene-headings)
   (jit-lock-register #'fountain-completion-update-characters)
   (fountain-init-mode-line)
-  (fountain-restart-page-count-timer)
-  (fountain-outline-hide-level fountain-outline-startup-level t))
+  (fountain-restart-page-count-timer))
 
 (provide 'fountain-mode)
 
