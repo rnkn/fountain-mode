@@ -3676,7 +3676,8 @@ Display a message unless SILENT."
 
 (defun fountain-outline-hide-custom-level ()
   "Set the outline visibilty to `fountain-outline-custom-level'."
-  (fountain-outline-hide-level fountain-outline-custom-level t))
+  (if fountain-outline-custom-level
+      (fountain-outline-hide-level fountain-outline-custom-level t)))
 
 (defun fountain-outline-cycle (&optional arg) ; FIXME: document
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
