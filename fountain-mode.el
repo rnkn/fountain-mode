@@ -2921,7 +2921,7 @@ Command acts on current buffer or BUFFER."
     (page-break "\n\n")
     (synopsis "{{content}}\n\n")
     (note "[ note: {{content}} ]\n\n")
-    (center "{{content}}"))
+    (center "{{content}}\n\n"))
   (define-fountain-export-template-docstring 'txt)
   :type 'fountain-element-list-type
   :group 'fountain-plaintext-export)
