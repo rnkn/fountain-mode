@@ -4790,7 +4790,6 @@ assigning the following keywords:
   "Return a new list of `font-lock-mode' keywords.
 Uses `fountain-font-lock-keywords-plist' to create a list of
 keywords suitable for Font Lock."
-  (fountain-init-vars)
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
     (dolist (var fountain-font-lock-keywords-plist keywords)
