@@ -1713,7 +1713,7 @@ window."
             (find-file-noselect filename)
           (find-file filename)))))
 
-(defun fountain-include-in-region (start end &optional delete)
+(defun fountain-include-replace-in-region (start end &optional delete)
   "Replace inclusions between START and END with their file contents.
 
 If optional argument DELETE is non-nil (if prefix with \\[universal-argument]
@@ -2059,8 +2059,8 @@ Includes child elements."
         (with-temp-buffer
           (fountain-init-vars)
           (insert-buffer-substring buffer start end)
-          (fountain-include-in-region (point-min) (point-max)
-                                      (not (memq 'include export-elements)))
+          (fountain-include-replace-in-region
+           (point-min) (point-max) (not (memq 'include export-elements)))
           (fountain-delete-comments-in-region (point-min) (point-max))
           ;; Delete metadata.
           (goto-char (point-min))
