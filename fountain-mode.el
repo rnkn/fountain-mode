@@ -977,7 +977,7 @@ buffers."
       (add-to-invisibility-spec 'fountain-syntax-chars)))
 
 (defcustom fountain-scene-heading-prefix-list
-  '("INT" "EXT" "INT/EXT" "I/E")
+  '("INT" "EXT" "EST" "INT./EXT." "INT/EXT" "I/E")
   "List of scene heading prefixes (case insensitive).
 Any scene heading prefix can be followed by a dot and/or a space,
 so the following are equivalent:
