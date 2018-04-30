@@ -676,12 +676,11 @@ dialogue.")
     Group 2: note (export group)")
 
 (defconst fountain-section-heading-regexp
-  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\(?3:[^#\n].*?\\)\\)[\s\t]*$"
+  "^\\(?1:#\\{1,5\\}\\)[\s\t]*\\(?2:[^#\n].*?\\)[\s\t]*$"
   "Regular expression for matching section headings.
 
-    Group 1: match trimmed whitespace
-    Group 2: match leading #'s
-    Group 3: match heading (export group)")
+    Group 1: match leading #'s
+    Group 2: match heading")
 
 (defconst fountain-synopsis-regexp
   "^\\(\\(=[\s\t]*\\)\\([^=\n].+?\\)\\)[\s\t]*$"
@@ -952,7 +951,7 @@ regular expression."
         (list
          (list "Notes" fountain-note-regexp 2)
          (list "Scene Headings" fountain-scene-heading-regexp 3)
-         (list "Sections" fountain-section-heading-regexp 1))))
+         (list "Sections" fountain-section-heading-regexp 0))))
 
 (defun fountain-init-vars ()
   "Initialize important variables.
@@ -3811,7 +3810,7 @@ data reflects `outline-regexp'."
   (cond ((string-match fountain-end-regexp (match-string 0))
          1)
         ((string-prefix-p "#" (match-string 0))
-         (string-width (match-string 2)))
+         (string-width (match-string 1)))
         (t 6)))
 
 (defcustom fountain-pop-up-indirect-windows
@@ -4596,7 +4595,7 @@ scene number from being auto-upcased."
     ;; Section Headings
     (,fountain-section-heading-regexp
      ((:level 2 :subexp 0 :face fountain-section-heading)
-      (:level 2 :subexp 2 :face fountain-non-printing
+      (:level 2 :subexp 1 :face fountain-non-printing
               :override t))
      fountain-align-scene-heading)
     ;; Scene Headings
