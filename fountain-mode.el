@@ -1291,7 +1291,7 @@ Added to `jit-lock-functions'."
     (if (and (not (and (integerp fountain--edit-line)
                        (= fountain--edit-line (line-number-at-pos))))
              (fountain-match-scene-heading))
-        (let ((scene-heading (match-string-no-properties 3)))
+        (let ((scene-heading (match-string-no-properties 2)))
           (unless (member scene-heading fountain-completion-scene-headings)
             (push scene-heading fountain-completion-scene-headings))))
     (fountain-forward-scene 1)))
