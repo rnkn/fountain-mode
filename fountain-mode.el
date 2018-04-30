@@ -583,15 +583,6 @@ This option does affect file contents."
 
 Requires `fountain-match-scene-heading' for preceding blank line.")
 
-(defvar fountain-scene-number-regexp
-  "\\(?4:[\s\t]+\\)\\(?5:#\\)\\(?6:[a-z0-9\\.-]+\\)\\(?7:#\\)"
-  "Regular expression for matching scene numbers.
-
-    Group 4: match space before scene number
-    Group 5: match first # delimiter
-    Group 6: match scene number
-    Group 7: match last # delimiter")
-
 (defvar fountain-trans-regexp
   nil
   "Regular expression for matching transitions.
