@@ -587,9 +587,8 @@ Requires `fountain-match-scene-heading' for preceding blank line.")
   nil
   "Regular expression for matching transitions.
 
-    Group 1: match trimmed whitespace
-    Group 2: match forced transition mark
-    Group 3: match transition (export group)
+    Group 1: match forced transition mark
+    Group 2: match transition
 
 Set with `fountain-init-trans-regexp'. Requires
 `fountain-match-trans' for preceding and succeeding blank lines.")
@@ -928,13 +927,19 @@ Uses `fountain-trans-suffix-list' to create non-forced tranistion
 regular expression."
   (setq fountain-trans-regexp
         (concat
-         ;; First match forced transition.
-         "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:[^<>\n]*?\\)\\)[\s\t]*$"
-         ;; Or match regular transition.
+         "^\\(?:[\s\t]*"
+         ;; Match forced transition
+         ;; Group 1: match forced transition mark
+         "\\(?1:>\\)[\s\t]*"
+         ;; Group 2: match transition
+         "\\(?2:[^<>\n]*?\\)"
          "\\|"
-         "^[\s\t]*\\(?1:\\(?3:[[:upper:]\s\t]*"
+         ;; Match normal transition
+         ;; Group 2: match transition
+         "\\(?2:[[:upper:]\s\t]*"
          (upcase (regexp-opt fountain-trans-suffix-list))
-         "\\)\\)[\s\t]*$")))
+         "\\)"
+         "\\)[\s\t]*$")))
 
 (defun fountain-init-outline-regexp ()
   "Initialize `outline-regexp'."
@@ -4640,7 +4645,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element 'fountain-match-trans limit))
      ((:level 3 :subexp 0 :face fountain-trans)
-      (:level 2 :subexp 2 :face fountain-comment
+      (:level 2 :subexp 1 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
