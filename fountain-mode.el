@@ -891,7 +891,7 @@ scene heading regular expression."
          ;; Group 1: match leading . (for forced scene heading)
          "\\(?1:\\.\\)"
          ;; Group 2: match scene heading without scene number
-         "\\(?2:"
+         "\\(?2:\\<"
          ;; Group 4: match location
          "\\(?4:.+?\\)[\s\t]*"
          ;; Group 5: match time of day
