@@ -955,7 +955,7 @@ regular expression."
   (setq imenu-generic-expression
         (list
          (list "Notes" fountain-note-regexp 2)
-         (list "Scene Headings" fountain-scene-heading-regexp 3)
+         (list "Scene Headings" fountain-scene-heading-regexp 2)
          (list "Sections" fountain-section-heading-regexp 0))))
 
 (defun fountain-init-vars ()
