@@ -3691,16 +3691,13 @@ Display a message unless SILENT."
 (defun fountain-outline-cycle (&optional arg) ; FIXME: document
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
-1. If ARG is nil, cycle outline visibility of current subtree and
-   its children (\\[fountain-outline-cycle]).
-
-2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-outline-cycle],
-   same as \\[fountain-outline-cycle-global]).
-
-3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]).
-
-4. If ARG is 64, show outline visibility set in
-   `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle])."
+    1. If ARG is nil, cycle outline visibility of current subtree and
+       its children (\\[fountain-outline-cycle]).
+    2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-outline-cycle],
+       same as \\[fountain-outline-cycle-global]).
+    3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]).
+    4. If ARG is 64, show outline visibility set in
+       `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle])."
   (interactive "p")
   (let ((custom-level
          (if fountain-outline-custom-level
@@ -3793,13 +3790,10 @@ Display a message unless SILENT."
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-1. Top-level section headings
-
-2. Value of `fountain-outline-custom-level'
-
-3. All section headings and scene headings
-
-4. Everything"
+    1. Top-level section headings
+    2. Value of `fountain-outline-custom-level'
+    3. All section headings and scene headings
+    4. Everything"
   (interactive)
   (fountain-outline-cycle 4))
 
