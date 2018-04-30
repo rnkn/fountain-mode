@@ -570,15 +570,16 @@ This option does affect file contents."
 (defvar fountain-scene-heading-regexp
   nil
   "Regular expression for matching scene headings.
-Set with `fountain-init-scene-heading-regexp'.
 
-    Group 1: match trimmed whitespace
-    Group 2: match leading . (for forced element)
-    Group 3: match scene heading without scene number (export group)
-    Group 4: match space between heading and scene number
-    Group 5: match first # delimiter
-    Group 6: match scene number
-    Group 7: match last # delimiter
+    Group 1: match leading . (for forced scene heading)
+    Group 2: match whole scene heading without scene number
+    Group 3: match INT/EXT
+    Group 4: match location
+    Group 5: match time of day
+    Group 6: match space between scene heading and scene number
+    Group 7: match first # delimiter
+    Group 8: match scene number
+    Group 9: match last # delimiter
 
 Requires `fountain-match-scene-heading' for preceding blank line.")
 
@@ -896,22 +897,40 @@ Uses `fountain-scene-heading-prefix-list' to create non-forced
 scene heading regular expression."
   (setq fountain-scene-heading-regexp
         (concat
-         ;; First match forced scene heading.
-         "^\\(?1:\\(?2:\\.\\)\\(?3:\\<.*?\\)"
-         "\\(?:" fountain-scene-number-regexp "\\)?"
-         "\\)[\s\t]*$"
-         ;; Or match omitted scene.
-         "\\|"
-         "^\\(?1:\\(?3:OMIT\\(?:TED\\)?\\)"
-         "\\(?:" fountain-scene-number-regexp "\\)?"
-         "\\)[\s\t]*$"
-         ;; Or match regular scene heading.
-         "\\|"
-         "^\\(?1:\\(?3:"
+         "^\\(?:"
+         ;;; Match forced scene heading
+         ;; Group 1: match leading . (for forced scene heading)
+         "\\(?1:\\.\\)"
+         ;; Group 2: match scene heading without scene number
+         "\\(?2:"
+         ;; Group 4: match location
+         "\\(?4:.+?\\)[\s\t]*"
+         ;; Group 5: match time of day
+         "\\(?:--?[\s\t]*\\(?5:.+?\\)\\)?"
+         "\\)\\|"
+         ;;; Match normal scene heading
+         ;; Group 2: match scene heading without scene number
+         "^\\(?2:"
+         ;; Group 3: match INT/EXT
+         "\\(?3:"
          (regexp-opt fountain-scene-heading-prefix-list)
-         "[.\s\t].*?\\)"
-         "\\(?:" fountain-scene-number-regexp "\\)?"
-         "\\)[\s\t]*$")))
+         "\\)[.\s\t][\s\t]*"
+         ;; Group 4: match location
+         "\\(?4:.+?\\)[\s\t]*"
+         ;; Group 5: match time of day
+         "\\(?:--?[\s\t]*\\(?5:.+?\\)\\)?"
+         "\\)\\)"
+         ;;; Match scene number
+         "\\(?:"
+         ;; Group 6: match space between scene heading and scene number
+         "\\(?6:[\s\t]+\\)"
+         ;; Group 7: match first # delimiter
+         "\\(?7:#\\)"
+         ;; Group 8: match scene number
+         "\\(?8:[0-9a-z\\.-]+\\)"
+         ;; Group 9: match last # delimiter
+         "\\(?9:#\\)\\)?"
+         "[\s\t]*$")))
 
 (defun fountain-init-trans-regexp ()
   "Initialize transition regular expression.
@@ -3826,7 +3845,7 @@ buffer windows are opened."
         (setq beg (point))
         (when (or (fountain-match-section-heading)
                   (fountain-match-scene-heading))
-          (setq heading-name (match-string-no-properties 3)
+          (setq heading-name (match-string-no-properties 2)
                 target-buffer (concat base-buffer "-" heading-name))
           (outline-end-of-subtree)
           (setq end (point)))))
@@ -3835,7 +3854,7 @@ buffer windows are opened."
                (goto-char beg)
                (and (or (fountain-match-section-heading)
                         (fountain-match-scene-heading))
-                    (string= heading-name (match-string-no-properties 3)))))
+                    (string= heading-name (match-string-no-properties 2)))))
         (pop-to-buffer target-buffer)
       (clone-indirect-buffer target-buffer t)
       (outline-show-all))
@@ -3915,13 +3934,13 @@ Ignores revised scene numbers scenes.
   (push-mark)
   (goto-char (point-min))
   (let ((scene (if (fountain-match-scene-heading)
-                   (car (fountain-scene-number-to-list (match-string 6)))
+                   (car (fountain-scene-number-to-list (match-string 8)))
                  0)))
     (while (and (< scene n)
                 (< (point) (point-max)))
       (fountain-forward-scene 1)
       (if (fountain-match-scene-heading)
-          (setq scene (or (car (fountain-scene-number-to-list (match-string 6)))
+          (setq scene (or (car (fountain-scene-number-to-list (match-string 8)))
                           (1+ scene)))))))
 
 (defun fountain-goto-page (n)
@@ -4153,7 +4172,7 @@ Added as hook to `post-self-insert-hook'."
            (setq fountain--auto-upcase-line (line-number-at-pos))
            (message "Auto-upcasing activated"))
          (fountain-auto-upcase-make-overlay)
-         (upcase-region (line-beginning-position) (or (match-end 3) (point))))
+         (upcase-region (line-beginning-position) (or (match-end 2) (point))))
         ((and (integerp fountain--auto-upcase-line)
               (= fountain--auto-upcase-line (line-number-at-pos)))
          (fountain-auto-upcase-make-overlay)
@@ -4425,7 +4444,7 @@ to include external files."
           (goto-char (point-min))
           (while (not (or found (eobp)))
             (if (and (re-search-forward fountain-scene-heading-regexp nil 'move)
-                     (match-string 6))
+                     (match-string 8))
                 (setq found t))))
         (if found
             ;; There are scene numbers, so this scene number needs to be
@@ -4439,7 +4458,7 @@ to include external files."
               (while (not (or next-scene (eobp)))
                 (fountain-forward-scene 1)
                 (if (fountain-match-scene-heading)
-                    (setq next-scene (fountain-scene-number-to-list (match-string 6)))))
+                    (setq next-scene (fountain-scene-number-to-list (match-string 8)))))
               (cond
                ;; If there's both a NEXT-SCENE and CURRENT-SCENE, but NEXT-SCENE
                ;; is less or equal to CURRENT-SCENE, scene numbers are out of
@@ -4469,7 +4488,7 @@ to include external files."
                   (fountain-forward-scene 1)
                   (when (fountain-match-scene-heading)
                     (setq last-scene current-scene
-                          current-scene (or (fountain-scene-number-to-list (match-string 6))
+                          current-scene (or (fountain-scene-number-to-list (match-string 8))
                                             (list (1+ (car last-scene)))))
                     ;; However, this might make CURRENT-SCENE greater or equal
                     ;; to NEXT-SCENE (a problem), so if there is a NEXT-SCENE,
@@ -4520,9 +4539,9 @@ to include external files."
           (fountain-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (if (match-string 6)
-              (delete-region (match-beginning 4)
-                             (match-end 7)))
+          (if (match-string 8)
+              (delete-region (match-beginning 6)
+                             (match-end 9)))
           (fountain-forward-scene 1))))))
 
 (defun fountain-add-scene-numbers ()
@@ -4562,7 +4581,7 @@ scene number from being auto-upcased."
           (fountain-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (unless (match-string 6)
+          (unless (match-string 8)
             (end-of-line)
             (delete-horizontal-space t)
             (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
@@ -4593,20 +4612,20 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element 'fountain-match-scene-heading limit))
      ((:level 2 :subexp 0 :face fountain-scene-heading)
-      (:level 2 :subexp 2 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override prepend
-              :laxmatch t)
-      (:level 2 :subexp 4
-              :laxmatch t)
-      (:level 2 :subexp 5 :face fountain-non-printing
+      (:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t)
       (:level 2 :subexp 6
-              :override prepend
               :laxmatch t)
       (:level 2 :subexp 7 :face fountain-non-printing
+              :invisible fountain-syntax-chars
+              :override prepend
+              :laxmatch t)
+      (:level 2 :subexp 8
+              :override prepend
+              :laxmatch t)
+      (:level 2 :subexp 9 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t))
@@ -4837,10 +4856,10 @@ keywords suitable for Font Lock."
   (while (< (point) (min end (point-max)))
     (if (fountain-match-scene-heading)
         (if (and fountain-display-scene-numbers-in-margin
-                 (match-string 6))
-            (put-text-property (match-beginning 4) (match-end 7)
+                 (match-string 8))
+            (put-text-property (match-beginning 6) (match-end 9)
                                'display (list '(margin right-margin)
-                                              (match-string-no-properties 6)))
+                                              (match-string-no-properties 8)))
           (remove-text-properties (match-beginning 0) (match-end 0)
                                   '(display))))
     (forward-line 1)))
