@@ -2103,10 +2103,10 @@ Includes child elements."
       (skip-chars-forward "\n\r\s\t")
       (forward-line 0)
       (if (< (point) end)
-          (let ((element (fountain-parse-element export-elements job)))
+          (let ((bounds (fountain-get-element-bounds))
+                (element (fountain-parse-element export-elements job)))
             (push element list)
-            ;; FIXME: better to use a forward-block function
-            (goto-char (plist-get (nth 1 element) 'end))))
+            (goto-char (cdr bounds))))
       (if job (progress-reporter-update job)))
     (reverse list)))
 
