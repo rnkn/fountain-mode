@@ -4971,6 +4971,11 @@ keywords suitable for Font Lock."
     (define-key map (kbd "M-g p") #'fountain-goto-page)
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
+    ;; Block editing commands:
+    (define-key map (kbd "<M-down>") #'fountain-shift-block-down)
+    (define-key map (kbd "ESC <down>") #'fountain-shift-block-down)
+    (define-key map (kbd "<M-up>") #'fountain-shift-block-up)
+    (define-key map (kbd "ESC <up>") #'fountain-shift-block-up)
     ;; Outline commands:
     (define-key map (kbd "C-c C-n") #'fountain-outline-next)
     (define-key map (kbd "C-c C-p") #'fountain-outline-previous)
