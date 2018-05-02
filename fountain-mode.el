@@ -2057,10 +2057,9 @@ Includes child elements."
       (skip-chars-forward "\n\r\s\t")
       (forward-line 0)
       (if (< (point) end)
-          (let ((bounds (fountain-get-block-bounds))
-                (element (fountain-parse-element export-elements job)))
+          (let ((element (fountain-parse-element export-elements job)))
             (push element list)
-            (goto-char (cdr bounds))))
+            (goto-char (plist-get (nth 1 element) 'end))))
       (if job (progress-reporter-update job)))
     (reverse list)))
 
