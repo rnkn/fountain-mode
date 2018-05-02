@@ -1766,13 +1766,13 @@ character if N is negative, otherwise return nil. If N is nil or
 
 If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 'dialog, halt at next non-dialog element."
-  (let ((n (or n 0)))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (fountain-forward-character n limit)
-        (if (fountain-match-character)
-            (match-string-no-properties 4))))))
+  (unless n (setq n 0))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (fountain-forward-character n limit)
+      (if (fountain-match-character)
+          (match-string-no-properties 4)))))
 
 (defun fountain-read-metadata ()
   "Read metadata of current buffer and return as a property list.
@@ -3961,7 +3961,7 @@ If N is 0, move to beginning of scene."
 (defun fountain-backward-scene (&optional n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
-  (or n (setq n 1))
+  (unless n (setq n 1))
   (fountain-forward-scene (- n)))
 
 (defun fountain-beginning-of-scene ()   ; FIXME: needed?
@@ -4059,7 +4059,7 @@ halt at end of scene."
 (defun fountain-backward-character (&optional n)
   "Move backward N character (foward if N is negative)."
   (interactive "^p")
-  (setq n (or n 1))
+  (unless n (setq n 1))
   (fountain-forward-character (- n)))
 
 
