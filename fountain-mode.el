@@ -1871,10 +1871,10 @@ Includes child elements."
                 (list 'begin (match-beginning 0)
                       'end (match-end 0)
                       'scene-number scene-number
-                      'forced (stringp (match-string 2))
+                      'forced (stringp (match-string 1))
                       'export (if (memq 'scene-heading export-elements) t)
                       'starts-new-page starts-new-page)
-                (match-string-no-properties 3)))
+                (match-string-no-properties 2)))
          (end (save-excursion (outline-end-of-subtree) (point)))
          content)
     (goto-char (plist-get (nth 1 scene-heading) 'end))
