@@ -4962,11 +4962,8 @@ keywords suitable for Font Lock."
     ;; FIXME: include-find-file feels like it should be C-c C-c...
     ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
-    (define-key map [remap forward-list] #'fountain-forward-scene)
-    (define-key map [remap backward-list] #'fountain-backward-scene)
     (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
     (define-key map [remap end-of-defun] #'fountain-end-of-scene)
-    (define-key map [remap mark-defun] #'fountain-mark-scene)
     (define-key map (kbd "M-g s") #'fountain-goto-scene)
     (define-key map (kbd "M-g p") #'fountain-goto-page)
     (define-key map (kbd "M-n") #'fountain-forward-character)
@@ -4977,14 +4974,12 @@ keywords suitable for Font Lock."
     (define-key map (kbd "<M-up>") #'fountain-shift-block-up)
     (define-key map (kbd "ESC <up>") #'fountain-shift-block-up)
     ;; Outline commands:
-    (define-key map (kbd "C-c C-n") #'fountain-outline-next)
-    (define-key map (kbd "C-c C-p") #'fountain-outline-previous)
-    (define-key map (kbd "C-c C-f") #'fountain-outline-forward)
-    (define-key map (kbd "C-c C-b") #'fountain-outline-backward)
-    (define-key map (kbd "C-c C-u") #'fountain-outline-up)
-    (define-key map (kbd "C-c C-^") #'fountain-outline-shift-up)
-    (define-key map (kbd "C-c C-v") #'fountain-outline-shift-down)
-    (define-key map (kbd "C-c C-SPC") #'fountain-outline-mark)
+    (define-key map [remap forward-list] #'fountain-outline-next)
+    (define-key map [remap backward-list] #'fountain-outline-previous)
+    (define-key map [remap forward-sexp] #'fountain-outline-forward)
+    (define-key map [remap backward-sexp] #'fountain-outline-backward)
+    (define-key map [remap backward-up-list] #'fountain-outline-up)
+    (define-key map [remap mark-defun] #'fountain-outline-mark)
     (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
@@ -5014,8 +5009,11 @@ keywords suitable for Font Lock."
   "Menu for `fountain-mode'."
   '("Fountain"
     ("Navigate"
-     ["Next Scene Heading" fountain-forward-scene]
-     ["Previous Scene Heading" fountain-backward-scene]
+     ["Next Heading" fountain-outline-next]
+     ["Previous Heading" fountain-outline-previous]
+     ["Up Heading" fountain-outline-up]
+     ["Forward Heading" fountain-outline-forward]
+     ["Backward Heading" fountain-outline-backward]
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
@@ -5026,17 +5024,11 @@ keywords suitable for Font Lock."
      ["Cycle Scene/Section Visibility" fountain-outline-cycle]
      ["Cycle Global Visibility" fountain-outline-cycle-global]
      "---"
-     ["Open Scene/Section in Indirect Buffer" fountain-outline-to-indirect-buffer]
-     "---"
-     ["Up Heading" fountain-outline-up]
-     ["Next Heading" fountain-outline-next]
-     ["Previous Heading" fountain-outline-previous]
-     ["Forward Heading" fountain-outline-forward]
-     ["Backward Heading" fountain-outline-backward]
-     "---"
      ["Mark Section/Scene" fountain-outline-mark]
-     ["Shift Section/Scene Up" fountain-outline-shift-up]
-     ["Shift Section/Scene Down" fountain-outline-shift-down])
+     ["Shift Block Up" fountain-shift-block-up]
+     ["Shift Block Down" fountain-shift-block-down]
+     "---"
+     ["Open Scene/Section in Indirect Buffer" fountain-outline-to-indirect-buffer])
     ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
@@ -5070,7 +5062,6 @@ keywords suitable for Font Lock."
     ["Update Auto-Completion" fountain-completion-update]
     "---"
     ("Show/Hide"
-     ["Endnotes" fountain-show-or-hide-endnotes]
      ["Hide Emphasis Delimiters"
       (customize-set-variable 'fountain-hide-emphasis-delim
                               (not fountain-hide-emphasis-delim))
