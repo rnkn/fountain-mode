@@ -5006,11 +5006,11 @@ keywords suitable for Font Lock."
   "Menu for `fountain-mode'."
   '("Fountain"
     ("Navigate"
-     ["Next Heading" fountain-outline-next]
-     ["Previous Heading" fountain-outline-previous]
-     ["Up Heading" fountain-outline-up]
-     ["Forward Heading" fountain-outline-forward]
-     ["Backward Heading" fountain-outline-backward]
+     ["Next Scene/Section" fountain-outline-next]
+     ["Previous Scene/Section" fountain-outline-previous]
+     ["Up Scene/Section" fountain-outline-up]
+     ["Forward Scene/Section" fountain-outline-forward]
+     ["Backward Scene/Section" fountain-outline-backward]
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
