@@ -2022,19 +2022,17 @@ Includes child elements."
 (defun fountain-parse-action (match-data &optional export-elements job)
   "Return an element list for matched action."
   (set-match-data match-data)
-  (let ((beg (match-beginning 0))
-        (end
-         (save-excursion
-           (save-match-data
-             (goto-char (match-beginning 0))
-             (re-search-forward fountain-blank-regexp nil 'move)
-             (skip-chars-backward "\n\r\s\t")
-             (point))))
-        string)
-    (setq string (buffer-substring-no-properties (match-beginning 2) end)
+  (let ((bounds (fountain-get-block-bounds))
+        begin end string)
+    (setq begin (car bounds))
+    (save-excursion
+      (goto-char (cdr bounds))
+      (skip-chars-backward "\n\s\t")
+      (setq end (point)))
+    (setq string (buffer-substring-no-properties begin end)
           string (replace-regexp-in-string "^!" "" string))
     (list 'action
-          (list 'begin beg
+          (list 'begin begin
                 'end end
                 'forced (stringp (match-string 1))
                 'export (if (memq 'action export-elements) t)
