@@ -428,7 +428,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-scene-heading
   '(("screenplay" 0)
@@ -439,7 +445,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-synopsis
   '(("screenplay" 0)
@@ -450,7 +462,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-action
   '(("screenplay" 0)
@@ -461,7 +479,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-character
   '(("screenplay" 20)
@@ -472,7 +496,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-dialog
   '(("screenplay" 10)
@@ -483,7 +513,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-paren
   '(("screenplay" 15)
@@ -494,7 +530,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-trans
   '(("screenplay" 45)
@@ -505,7 +547,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-center
   '(("screenplay" 20)
@@ -516,7 +564,13 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align)
+  :group 'fountain-align
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (eq major-mode 'fountain-mode)
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-display-scene-numbers-in-margin
   nil
