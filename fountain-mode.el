@@ -2029,10 +2029,10 @@ Includes child elements."
   (list 'trans
         (list 'begin (match-beginning 0)
               'end (match-end 0)
-              'forced (stringp (match-string 2))
+              'forced (stringp (match-string 1))
               'export (if (memq 'trans export-elements) t)
               'starts-new-page (fountain-starts-new-page))
-        (match-string-no-properties 3)))
+        (match-string-no-properties 2)))
 
 (defun fountain-parse-center (match-data &optional export-elements job)
   "Return an element list for matched center text."
