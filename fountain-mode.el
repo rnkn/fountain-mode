@@ -159,14 +159,11 @@
 (define-obsolete-variable-alias 'fountain-align-centered
   'fountain-align-center "1.1.0")
 
-(define-obsolete-variable-alias 'fountain-export-title-page-template
-  'fountain-export-title-page-title-template "1.1.0")
-
 (define-obsolete-variable-alias 'fountain-hide-escapes
   'fountain-hide-syntax-chars "1.3.0")
 
 (make-obsolete-variable 'fountain-export-inline-style
-                        "use inline style instead." "2.1.0")
+                        "Use inline style instead." "2.1.0")
 
 (define-obsolete-variable-alias 'fountain-export-style-template
   'fountain-export-html-stylesheet "2.4.0")
@@ -205,19 +202,19 @@
   'fountain-section-heading "1.4.1")
 
 (make-obsolete-variable 'fountain-export-title-page-left-template
-                        "edit individual export templates instead." "2.4.0")
+                        "Edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-title-page-right-template
-                        "edit individual export templates instead." "2.4.0")
+                        "Edit individual export templates instead." "2.4.0")
 
 (make-obsolete 'fountain-export-buffer-to-pdf-via-html
-               'fountain-export-buffer-to-tex "2.4.0")
+               'fountain-export-buffer-to-latex "2.5.0")
 
 (make-obsolete-variable 'fountain-export-pdf-via-html-command
                         'fountain-export-shell-command "2.0.0")
 
 (make-obsolete-variable 'fountain-uuid-func
-                        "use a third-party package instead." "2.0.0")
+                        "Use a third-party package instead." "2.0.0")
 
 (make-obsolete-variable 'fountain-export-bold-scene-headings
                         'fountain-export-scene-heading-format "2.0.0")
@@ -229,22 +226,22 @@
                         'fountain-export-scene-heading-format "2.0.0")
 
 (make-obsolete-variable 'fountain-export-bold-title
-                        "edit individual export templates instead." "2.4.0")
+                        "Edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-underline-title
-                        "edit individual export templates instead." "2.4.0")
+                        "Edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-upcase-title
-                        "edit individual export templates instead." "2.4.0")
+                        "Edit individual export templates instead." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-html-head-template
                         'fountain-export-html-template "2.4.0")
 
 (make-obsolete-variable 'fountain-export-html-use-inline-style
-                        "use inline style instead." "2.1.0")
+                        "Use inline style instead." "2.1.0")
 
 (make-obsolete-variable 'fountain-additional-template-replace-functions
-                        "see `fountain-export-formats'." "2.4.0")
+                        "See `fountain-export-formats'." "2.4.0")
 
 (make-obsolete 'fountain-insert-metadata
                'auto-insert "2.1.2")
@@ -259,19 +256,19 @@
   'fountain-time-format "2.1.2")
 
 (make-obsolete-variable 'fountain-export-templates
-                        "use individual export templates instead." "2.1.4")
+                        "Use individual export templates instead." "2.1.4")
 
 (make-obsolete-variable 'fountain-export-format-replace-alist
-                        "see `fountain-export-formats'." "2.4.0")
+                        "See `fountain-export-formats'." "2.4.0")
 
 (make-obsolete-variable 'fountain-export-title-format
-                        "edit individual export templates instead." "2.4.0")
+                        "Edit individual export templates instead." "2.4.0")
 
 (define-obsolete-variable-alias 'fountain-trans-list
   'fountain-trans-suffix-list "2.2.2")
 
 (make-obsolete-variable 'fountain-switch-comment-syntax
-                        "use the standard comment syntax instead." "2.4.0")
+                        "Use the standard comment syntax instead." "2.4.0")
 
 (define-obsolete-variable-alias 'fountain-export-standalone
   'fountain-export-make-standalone "2.4.0")
@@ -279,14 +276,14 @@
 (define-obsolete-variable-alias 'fountain-export-buffer-name
   'fountain-export-tmp-buffer-name "2.4.0")
 
-(define-obsolete-variable-alias 'fountain-endnotes-buffer-name
-  'fountain-endnotes-buffer "2.5.1")
+(make-obsolete-variable 'fountain-endnotes-buffer
+                        "Use a third-party package instead" "2.6.0")
 
 (make-obsolete-variable 'fountain-endnotes-window-side
-                        'fountain-endnotes-display-alist "2.5.1")
+                        "Use a third-party package instead" "2.6.0")
 
 (make-obsolete-variable 'fountain-endnotes-window-size
-                        'fountain-endnotes-display-alist "2.5.1")
+                        "Use a third-party package instead" "2.6.0")
 
 
 ;;; Customization
