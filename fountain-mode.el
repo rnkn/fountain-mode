@@ -712,13 +712,6 @@ dialogue.")
     Group 1: leading ===
     Group 2: forced page number (export group)")
 
-(defconst fountain-end-regexp
-  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\(end\\)\\>.*$"
-  "Regular expression for matching script end break.
-
-    Group 1: leading ===
-    Group 2: end")
-
 (defconst fountain-note-regexp
   "\\(\\[\\[[\s\t]*\\(\\(?:.\n?\\)*?\\)[\s\t]*]]\\)"
   "Regular expression for matching notes.
@@ -996,9 +989,7 @@ regular expression."
 (defun fountain-init-outline-regexp ()
   "Initialize `outline-regexp'."
   (setq-local outline-regexp
-              (concat fountain-end-regexp
-                      "\\|"
-                      fountain-section-heading-regexp
+              (concat fountain-section-heading-regexp
                       "\\|"
                       fountain-scene-heading-regexp)))
 
@@ -1686,9 +1677,6 @@ number."
       (save-restriction
         (widen)
         (goto-char (point-min))
-        (if (re-search-forward fountain-end-regexp nil t)
-            (setq end (match-beginning 0)))
-        (goto-char (point-min))
         (while (< (point) end)
           (fountain-forward-page 1 export-elements)
           (setq total (1+ total))
@@ -2138,9 +2126,6 @@ Includes child elements."
           (while (fountain-match-metadata)
             (forward-line 1))
           (delete-region (point-min) (point))
-          ;; Search for script end point and delete beyond.
-          (if (re-search-forward fountain-end-regexp nil t)
-              (delete-region (match-beginning 0) (point-max)))
           (fountain-parse-region (point-min) (point-max) export-elements job))
       (progress-reporter-done job))))
 
@@ -3949,9 +3934,7 @@ outline visibility through the following states:
   "Return the heading's nesting level in the outline.
 Assumes that point is at the beginning of a heading and match
 data reflects `outline-regexp'."
-  (cond ((string-match fountain-end-regexp (match-string 0))
-         1)
-        ((string-prefix-p "#" (match-string 0))
+  (cond ((string-prefix-p "#" (match-string 0))
          (string-width (match-string 1)))
         (t 6)))
 
@@ -4118,83 +4101,6 @@ halt at end of scene."
   (interactive "^p")
   (unless n (setq n 1))
   (fountain-forward-character (- n)))
-
-
-;;; Endnotes
-
-(defgroup fountain-endnotes ()
-  "Options for displaying endnotes.
-
-Fountain endnotes are kept at the end of a script following an
-endotes page break, defined as three or more \"=\" and the word
-\"end\" (case-insensitive).
-
-    === end [===]
-
-The endnotes section is a good place to keep extensive notes or
-scenes you want to move out of the script, but still wish to
-reference. Endnotes are not exported.
-
-WARNING: if using other Fountain apps, check to make sure they
-support endnotes."
-  :group 'fountain)
-
-(defcustom fountain-endnotes-buffer
-  "%s<endnotes>"
-  "Name of buffer in which to display file endnotes.
-`%s' is replaced with `buffer-name'.
-
-To hide this buffer from the buffer list, prefix with a space."
-  :type 'string
-  :group 'fountain-endnotes)
-
-(defcustom fountain-endnotes-display-alist
-  '((side . right)
-    (window-width . 40)
-    (slot . 1))
-  "Alist used to display endnotes buffer.
-
-See `display-buffer-in-side-window' for example options."
-  :type 'alist
-  :group 'fountain-endnotes)
-
-(defcustom fountain-endnotes-select-window
-  nil
-  "If non-nil, switch to endnotes window upon displaying it."
-  :type 'boolean
-  :group 'fountain-endnotes)
-
-(defun fountain-show-or-hide-endnotes ()
-  "Pop up a window containing endnotes of current buffer.
-
-Display a window containing an indirect clone of the current
-buffer, narrowed to the first endnotes page break to the end of
-buffer."
-  (interactive)
-  (set-buffer (or (buffer-base-buffer) (current-buffer)))
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (let ((beg (if (re-search-forward fountain-end-regexp nil t)
-                     (point)))
-            (buffer (current-buffer))
-            (endnotes-buffer (format fountain-endnotes-buffer (buffer-name))))
-        (if beg
-            (if (get-buffer-window endnotes-buffer (selected-frame))
-                (delete-windows-on endnotes-buffer (selected-frame))
-              (display-buffer-in-side-window
-               (or (get-buffer endnotes-buffer)
-                   (make-indirect-buffer buffer endnotes-buffer t))
-               fountain-endnotes-display-alist)
-              (with-current-buffer endnotes-buffer
-                (narrow-to-region (1+ beg) (point-max)))
-              (if fountain-endnotes-select-window
-                  (select-window (get-buffer-window endnotes-buffer (selected-frame))))
-              (message "Showing `%s' endnotes; %s to hide" (buffer-name buffer)
-                       (key-description (where-is-internal this-command
-                                                           overriding-local-map t))))
-          (user-error "Buffer `%s' does not contain endnotes" (buffer-name)))))))
 
 
 ;;; Editing
@@ -4929,12 +4835,7 @@ assigning the following keywords:
                  (cond ((= n 1) "minimum")
                        ((= n 2) "default")
                        ((= n 3) "maximum")))
-        (font-lock-refresh-defaults)
-        (font-lock-ensure (save-excursion
-                            (goto-char (point-min))
-                            (re-search-forward fountain-end-regexp nil 'move)
-                            (point))
-                          (point-max)))
+        (font-lock-refresh-defaults))
     (user-error "Decoration must be an integer 1-3")))
 
 (defun fountain-create-font-lock-keywords ()
@@ -5043,8 +4944,6 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
     ;; Pages
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
-    ;; Endnotes:
-    (define-key map (kbd "M-s e") #'fountain-show-or-hide-endnotes)
     ;; Exporting commands:
     (define-key map (kbd "C-c C-e e") #'fountain-export-buffer)
     (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
