@@ -1402,9 +1402,15 @@ characters from `fountain-completion-characters'."
         (let ((alt-character (list (cadr scene-characters)))
               (contd-character (list (car scene-characters)))
               (rest-characters (cddr scene-characters)))
-          (setq fountain-completion-characters
-                (append alt-character contd-character rest-characters
-                        fountain-completion-characters))))
+          (when rest-characters
+            (setq fountain-completion-characters
+                  (append rest-characters fountain-completion-characters)))
+          (when contd-character
+            (setq fountain-completion-characters
+                  (append contd-character fountain-completion-characters)))
+          (when alt-character
+            (setq fountain-completion-characters
+                  (append alt-character fountain-completion-characters)))))
       (if (eq action 'metadata)
           (list 'metadata
                 (cons 'display-sort-function 'identity)
