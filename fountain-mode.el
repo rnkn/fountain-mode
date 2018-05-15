@@ -297,6 +297,7 @@
   :type 'hook
   :options '(turn-on-visual-line-mode
              fountain-outline-hide-custom-level
+             fountain-completion-update
              turn-on-flyspell)
   :group 'fountain)
 
