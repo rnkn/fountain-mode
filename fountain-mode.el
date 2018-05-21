@@ -1467,6 +1467,12 @@ script, you may get incorrect output."
                        (cons (const :tag "A4" a4) integer)))
   :group 'fountain-pages)
 
+(defcustom fountain-pages-ignore-narrowing
+  nil
+  "Non-nil if counting pages should ignore buffer narrowing."
+  :type 'boolean
+  :group 'fountain-pages)
+
 ;; FIXME: timer can be used for things other than page count, e.g. automatically
 ;; adding continued dialogue string.
 (defvar fountain-page-count-timer
@@ -1675,7 +1681,7 @@ number."
         found)
     (save-excursion
       (save-restriction
-        (widen)
+        (when fountain-pages-ignore-narrowing (widen))
         (goto-char (point-min))
         (while (< (point) end)
           (fountain-forward-page 1 export-elements)
