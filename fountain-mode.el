@@ -1374,11 +1374,11 @@ First, return second-last speaking character, followed by each
 previously speaking character within scene. After that, return
 characters from `fountain-completion-characters'."
   (lambda (string pred action)
-    (let (scene-characters)
+    (let (scene-characters alt-character contd-character rest-characters)
       (save-excursion
         (save-restriction
           (widen)
-          (fountain-forward-character 0)
+          (fountain-forward-character 0 'scene)
           (while (not (or (fountain-match-scene-heading)
                           (bobp)))
             (when (fountain-match-character)
@@ -1386,25 +1386,25 @@ characters from `fountain-completion-characters'."
                 (unless (member character scene-characters)
                   (push (list character) scene-characters))))
             (fountain-forward-character -1 'scene))))
-      (when scene-characters
-        (setq scene-characters (reverse scene-characters))
-        (let ((alt-character (list (cadr scene-characters)))
-              (contd-character (list (car scene-characters)))
-              (rest-characters (cddr scene-characters)))
-          (when rest-characters
-            (setq fountain-completion-characters
-                  (append rest-characters fountain-completion-characters)))
-          (when contd-character
-            (setq fountain-completion-characters
-                  (append contd-character fountain-completion-characters)))
-          (when alt-character
-            (setq fountain-completion-characters
-                  (append alt-character fountain-completion-characters)))))
+      (setq scene-characters (reverse scene-characters)
+            alt-character (cadr scene-characters)
+            contd-character (car scene-characters)
+            rest-characters (cddr scene-characters)
+            scene-characters nil)
+      (when rest-characters
+        (setq scene-characters rest-characters))
+      (when contd-character
+        (setq scene-characters
+              (cons contd-character scene-characters)))
+      (when alt-character
+        (setq scene-characters
+              (cons alt-character scene-characters)))
       (if (eq action 'metadata)
           (list 'metadata
                 (cons 'display-sort-function 'identity)
                 (cons 'cycle-sort-function 'identity))
-        (complete-with-action action fountain-completion-characters
+        (complete-with-action action
+                              (append scene-characters fountain-completion-characters)
                               string pred)))))
 
 (defun fountain-completion-at-point ()
