@@ -4493,7 +4493,7 @@ to include external files."
         (if found
             ;; There are scene numbers, so this scene number needs to be
             ;; calculated relative to those.
-            (let ((current-scene (fountain-scene-number-to-list (match-string 6)))
+            (let ((current-scene (fountain-scene-number-to-list (match-string 8)))
                   last-scene next-scene)
               ;; Check if scene heading is already numbered and if there is a
               ;; NEXT-SCENE. No previousscene number can be greater or equal to
@@ -4523,7 +4523,7 @@ to include external files."
                   (fountain-forward-scene 1))
                 (if (<= (point) x)
                     (setq current-scene
-                          (or (fountain-scene-number-to-list (match-string 6))
+                          (or (fountain-scene-number-to-list (match-string 8))
                               (list 1))))
                 ;; While before point X, go forward through each scene heading,
                 ;; setting LAST-SCENE to CURRENT-SCENE and CURRENT-SCENE to an
