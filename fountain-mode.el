@@ -603,14 +603,15 @@ This option does affect file contents."
              (when (eq major-mode 'fountain-mode)
                (font-lock-refresh-defaults))))))
 
-(defun fountain-get-align (element)
-  "Return ELEMENT align integer based on buffer format."
-  (if (integerp element) element
-    (let ((format (or (plist-get (fountain-read-metadata)
-                                 'format)
-                      "screenplay")))
-      (cadr (or (assoc format element)
-                (car element))))))
+(defun fountain-get-align (option)
+  "Return OPTION align integer based on buffer format."
+  (if (integerp option)
+      option
+    (cadr (or (assoc (or (plist-get (fountain-read-metadata)
+                                    'format)
+                         "screenplay")
+                     option)
+              (car option)))))
 
 
 ;;; Autoinsert
