@@ -1120,11 +1120,11 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (or (bobp)
           (progn (forward-line -1)
                  (or (and (bolp) (eolp))
-                     (progn (end-of-line 1)
+                     (progn (end-of-line)
                             (forward-comment -1))))))))
 
 (defun fountain-blank-after-p ()
@@ -1132,7 +1132,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 1)
+      (forward-line)
       (or (eobp)
           (and (bolp) (eolp))
           (forward-comment 1)))))
@@ -1142,7 +1142,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (and (looking-at fountain-metadata-regexp)
            (or (bobp)
                (save-match-data
@@ -1153,7 +1153,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (looking-at fountain-page-break-regexp))))
 
 (defun fountain-match-section-heading ()
@@ -1161,7 +1161,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (looking-at fountain-section-heading-regexp))))
 
 (defun fountain-match-synopsis ()
@@ -1169,7 +1169,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (looking-at fountain-synopsis-regexp))))
 
 (defun fountain-match-note ()
@@ -1177,7 +1177,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (or (looking-at fountain-note-regexp)
           (let ((x (point)))
             (and (re-search-backward "\\[\\[" nil t)
@@ -1189,7 +1189,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (and (looking-at fountain-scene-heading-regexp)
            (fountain-blank-before-p)))))
 
@@ -1197,7 +1197,7 @@ See <http://debbugs.gnu.org/24073>."
   "Match character if point is at character, nil otherwise."
   (unless (fountain-match-scene-heading)
     (save-excursion
-      (forward-line 0)
+      (beginning-of-line)
       (and (not (and (looking-at fountain-action-regexp)
                      (match-string 1)))
            (let ((case-fold-search nil))
@@ -1207,7 +1207,7 @@ See <http://debbugs.gnu.org/24073>."
                (widen)
                (and (fountain-blank-before-p)
                     (save-excursion
-                      (forward-line 1)
+                      (forward-line)
                       (unless (eobp)
                         (not (and (bolp) (eolp))))))))))))
 
@@ -1220,7 +1220,7 @@ See <http://debbugs.gnu.org/24073>."
     (save-excursion
       (save-restriction
         (widen)
-        (forward-line 0)
+        (beginning-of-line)
         (and (looking-at fountain-dialog-regexp)
              (save-match-data
                (unless (bobp)
@@ -1234,7 +1234,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (and (looking-at fountain-paren-regexp)
            (save-match-data
              (unless (bobp)
@@ -1247,7 +1247,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (and (let (case-fold-search)
              (looking-at fountain-trans-regexp))
            (fountain-blank-before-p)
@@ -1259,7 +1259,7 @@ See <http://debbugs.gnu.org/24073>."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (looking-at fountain-center-regexp))))
 
 (defun fountain-match-action ()
@@ -1268,7 +1268,7 @@ Assumes that all other element matching has been done."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (or (and (looking-at fountain-action-regexp)
                (match-string 1))
           (and (not (or (and (bolp) (eolp))
@@ -1325,7 +1325,7 @@ the character has.")
 Added to `jit-lock-functions'."
   (goto-char end)
   (if (fountain-match-scene-heading)
-      (forward-line 1)
+      (forward-line)
     (fountain-forward-scene 1))
   (setq end (point))
   (goto-char start)
@@ -1345,7 +1345,7 @@ Added to `jit-lock-functions'."
 Added to `jit-lock-functions'."
   (goto-char end)
   (if (fountain-match-scene-heading)
-      (forward-line 1)
+      (forward-line)
     (fountain-forward-scene 1))
   (setq end (point))
   (goto-char start)
@@ -1499,16 +1499,16 @@ over whitespace."
      ;; If we're are a section heading, scene heading or character, we can
      ;; safely break before.
      ((memq element '(section-heading scene-heading character))
-      (forward-line 0))
+      (beginning-of-line))
      ;; If we're at a parenthetical, check if the previous line is a character.
      ;; and if so call recursively on that element.
      ((eq element 'paren)
-      (forward-line 0)
+      (beginning-of-line)
       (let ((x (point)))
-        (forward-char -1)
+        (backward-char)
         (if (fountain-match-character)
             (progn
-              (forward-line 0)
+              (beginning-of-line)
               (fountain-goto-page-break-point))
           ;; Otherwise parenthetical is mid-dialogue, so get character name
           ;; and break at this element.
@@ -1526,7 +1526,7 @@ over whitespace."
         ;; previous line is a character or parenthetical, call recursively on
         ;; that element. Otherwise, get character name and break page here.
         (let ((x (point)))
-          (forward-char -1)
+          (backward-char)
           (if (or (fountain-match-character)
                   (fountain-match-paren))
               (fountain-goto-page-break-point)
@@ -1535,7 +1535,7 @@ over whitespace."
      ;; element and call recursively on that element.
      ((memq element '(trans center))
       (skip-chars-backward "\n\r\s\t")
-      (forward-line 0)
+      (beginning-of-line)
       (fountain-goto-page-break-point))
      ;; If we're at action, skip over spaces then go to the beginning of the
      ;; current sentence.
@@ -1548,7 +1548,7 @@ over whitespace."
       ;; heading, call recursively on that element. Otherwise, break page here.
       (let ((x (point)))
         (skip-chars-backward "\n\r\s\t")
-        (forward-line 0)
+        (beginning-of-line)
         (if (fountain-match-scene-heading)
             (fountain-goto-page-break-point)
           (goto-char x)))))))
@@ -1587,7 +1587,7 @@ with `fountain-get-export-elements'."
            ;; not a blank line) then move forward a line and increment
            ;; line-count.
            ((and (eolp) (not (bolp)))
-            (forward-line 1)
+            (forward-line)
             (setq line-count (1+ line-count)))
            ;; If we're looking at newline, skip over it and any whitespace and
            ;; increment line-count.
@@ -1631,7 +1631,7 @@ Skip over comments."
                (forward-char 1)
                (setq i (1+ i))))))
     (skip-chars-forward "\s\t")
-    (if (eolp) (forward-line 1))
+    (when (eolp) (forward-line))
     (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-insert-page-break (&optional string)
@@ -1764,7 +1764,7 @@ unconditionally and prints a message in the echo area."
   (save-excursion
     (save-restriction
       (widen)
-      (forward-line 0)
+      (beginning-of-line)
       (looking-at fountain-include-regexp))))
 
 (defun fountain-include-find-file (&optional no-select)
@@ -1804,7 +1804,7 @@ when called interactively), delete instead."
                    (widen)
                    (buffer-substring-no-properties (point-min) (point-max)))))
              t t)))
-        (forward-line 1)))))
+        (forward-line)))))
 
 
 ;;; Parsing
@@ -1843,13 +1843,13 @@ Value string remains a string. e.g.
         (while (fountain-match-metadata)
           (let ((key (match-string 2))
                 (value (match-string-no-properties 3)))
-            (forward-line 1)
+            (forward-line)
             (while (and (fountain-match-metadata)
                         (null (match-string 2)))
               (setq value
                     (concat value (if value "\n")
                             (match-string-no-properties 3)))
-              (forward-line 1))
+              (forward-line))
             (setq list
                   (append list (list (intern (fountain-slugify key))
                                      value)))))
@@ -1878,7 +1878,7 @@ within left-side dual dialogue, and nil otherwise."
     (save-match-data
       (save-restriction
         (widen)
-        (forward-line 0)
+        (beginning-of-line)
         (skip-chars-backward "\n\r\s\t")
         (fountain-match-page-break)))))
 
@@ -2107,7 +2107,7 @@ Includes child elements."
   (let (list)
     (while (< (point) end)
       (skip-chars-forward "\n\r\s\t")
-      (forward-line 0)
+      (beginning-of-line)
       (if (< (point) end)
           (let ((element (fountain-parse-element export-elements job)))
             (push element list)
@@ -2130,7 +2130,7 @@ Includes child elements."
           ;; Delete metadata.
           (goto-char (point-min))
           (while (fountain-match-metadata)
-            (forward-line 1))
+            (forward-line))
           (delete-region (point-min) (point))
           (fountain-parse-region (point-min) (point-max) export-elements job))
       (progress-reporter-done job))))
@@ -3692,17 +3692,17 @@ If POS is nil, use `point' instead."
                (save-excursion
                  (if (fountain-blank-before-p)
                      (setq begin (line-beginning-position))
-                   (forward-char -1)
+                   (backward-char)
                    (while (eq (fountain-get-element) 'action)
                      (forward-line -1))
                    (skip-chars-forward "\n\s\t")
-                   (forward-line 0)
+                   (beginning-of-line)
                    (setq begin (point))))
                (forward-line)
                (while (eq (fountain-get-element) 'action)
                  (forward-line))
                (skip-chars-forward "\n\s\t")
-               (forward-line 0)
+               (beginning-of-line)
                (setq end (point))))))
     (cons begin end)))
 
@@ -3732,7 +3732,7 @@ If POS is nil, use `point' instead."
             (if p
                 (goto-char (cdr block-bounds))
               (goto-char (car block-bounds))
-              (forward-char -1)
+              (backward-char)
               (skip-chars-backward "\n\s\t"))
             (setq next-block-bounds (fountain-get-block-bounds))
             (unless (< outline-begin (car next-block-bounds) outline-end)
@@ -3891,10 +3891,10 @@ Display a message unless SILENT."
                       (point)))
                    (eol
                     (save-excursion
-                      (forward-line 1)
+                      (forward-line)
                       (while (and (not (eobp))
                                   (get-char-property (1- (point)) 'invisible))
-                        (forward-line 1))
+                        (forward-line))
                       (point)))
                    (children
                     (save-excursion
@@ -4001,7 +4001,7 @@ If N is 0, move to beginning of scene."
               (forward-line p))
           (funcall move-fun)
           (setq n (- n p)))
-      (forward-line 0)
+      (beginning-of-line)
       (funcall move-fun))))
 
 (defun fountain-backward-scene (&optional n)
@@ -4020,7 +4020,7 @@ If N is 0, move to beginning of scene."
   (interactive "^")
   (fountain-forward-scene 1)
   (unless (eobp)
-    (forward-char -1)))
+    (backward-char)))
 
 (defun fountain-mark-scene ()           ; FIXME: extending region
   "Put mark at end of this scene, point at beginning."
@@ -4099,7 +4099,7 @@ halt at end of scene."
               (forward-line p))
           (funcall move-fun)
           (setq n (- n p)))
-      (forward-line 0)
+      (beginning-of-line)
       (funcall move-fun))))
 
 (defun fountain-backward-character (&optional n)
@@ -4248,7 +4248,7 @@ Added as hook to `post-self-insert-hook'."
 If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
   (interactive "P")
-  (if arg (save-excursion (forward-line 0) (insert ".")))
+  (when arg (save-excursion (beginning-of-line) (insert ".")))
   (upcase-region (line-beginning-position) (line-end-position)))
 
 (defun fountain-upcase-line-and-newline (&optional arg)
@@ -4259,7 +4259,7 @@ a scene heading."
   (if arg
       (unless (fountain-match-scene-heading)
         (save-excursion
-          (forward-line 0)
+          (beginning-of-line)
           (insert "."))))
   (upcase-region (line-beginning-position) (point))
   (newline))
@@ -4281,7 +4281,7 @@ a scene heading."
   (interactive)
   (widen)
   (when (outline-back-to-heading)
-    (forward-line 1)
+    (forward-line)
     (or (bolp) (newline))
     (unless (and (bolp) (eolp)
                  (fountain-blank-after-p))
@@ -4363,7 +4363,7 @@ to remove previous string first."
                                 (fountain-get-character -1 'scene)))
               (re-search-forward "\s*$" (line-end-position) t)
               (replace-match (concat "\s" fountain-continued-dialog-string)))
-            (forward-line 1)
+            (forward-line)
             (progress-reporter-update job)))
         (progress-reporter-done job)))))
 
@@ -4887,7 +4887,7 @@ keywords suitable for Font Lock."
                 (< (point) limit))
       (if (funcall fun)
           (setq match t))
-      (forward-line 1))
+      (forward-line))
     match))
 
 (defun fountain-redisplay-scene-numbers (start end)
@@ -4901,7 +4901,7 @@ keywords suitable for Font Lock."
                                               (match-string-no-properties 8)))
           (remove-text-properties (match-beginning 0) (match-end 0)
                                   '(display))))
-    (forward-line 1)))
+    (forward-line)))
 
 
 ;;; Key Bindings
