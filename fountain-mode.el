@@ -320,6 +320,7 @@ successively speaking characters with `fountain-continued-dialog-refresh'.
 When nil, remove `fountain-continued-dialog-string' with
 `fountain-continued-dialog-refresh'."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (defcustom fountain-continued-dialog-string
@@ -335,12 +336,14 @@ variable, first make sure to set `fountain-add-continued-dialog'
 to nil and run `fountain-continued-dialog-refresh', then make the
 changes desired."
   :type 'string
+  :safe 'stringp
   :group 'fountain)
 
 (defcustom fountain-hide-emphasis-delim
   nil
   "If non-nil, make emphasis delimiters invisible."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -356,6 +359,7 @@ changes desired."
   nil
   "If non-nil, make syntax characters invisible."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -372,6 +376,7 @@ changes desired."
   "Format of date and time used when inserting `{{time}}'.
 See `format-time-string'."
   :type 'string
+  :safe 'stringp
   :group 'fountain)
 
 (defcustom fountain-note-template
@@ -390,6 +395,7 @@ The default {{time}} - {{fullname}}: will insert something like:
 
     [[ 2017-12-31 - Alan Smithee: ]]"
   :type 'string
+  :safe 'stringp
   :group 'fountain)
 ;; FIXME:
 ;; {{title}} from metadata
@@ -421,6 +427,7 @@ To disable element alignment, see `fountain-align-element'."
   "If non-nil, elements will be displayed auto-aligned.
 This option does not affect file contents."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-align
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -590,6 +597,7 @@ If nil, do not change scene number display.
 
 This option does affect file contents."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-align
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -1089,6 +1097,7 @@ e.g. `TO:' will match both the following:
   "If non-nil, attempt to patch known bugs in Emacs.
 See function `fountain-patch-emacs-bugs'."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (defun fountain-patch-emacs-bugs ()
@@ -1480,6 +1489,7 @@ script, you may get incorrect output."
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-pages)
 
 ;; FIXME: timer can be used for things other than page count, e.g. automatically
@@ -1493,7 +1503,8 @@ script, you may get incorrect output."
 (defcustom fountain-pages-count-delay
   2.0
   "Idle time in seconds before calculating page count."
-  :type 'float
+  :type 'number
+  :safe 'numberp
   :group 'fountain-pages)
 
 (defun fountain-goto-page-break-point ()
@@ -1755,6 +1766,9 @@ unconditionally and prints a message in the echo area."
   :type '(choice (const :tag "No page count" nil)
                  (const :tag "Show with manual update" force)
                  (const :tag "Show with automatic update" timer))
+  :safe '(lambda (value)
+           (or (null value)
+               (memq value '(force timer))))
   :group 'fountain-pages
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -2268,6 +2282,7 @@ If nil, export snippet, which only formats each element. This is
 useful when exporting parts of a script for inclusion in another
 document."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-export)
 
 (defcustom fountain-export-tmp-buffer-name
@@ -2275,6 +2290,7 @@ document."
   "Name of export buffer when source buffer is not visiting a file.
 Passed to `format' with export format as single variable."
   :type 'string
+  :safe 'stringp
   :group 'fountain-export)
 
 (defcustom fountain-export-default-command
@@ -2299,12 +2315,14 @@ Passed to `format' with export format as single variable."
   "Courier"
   "Font to use when exporting."
   :type '(string :tag "Font")
+  :safe 'stringp
   :group 'fountain-export)
 
 (defcustom fountain-export-include-title-page
   t
   "If non-nil, include a title page in export."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-export
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -2317,6 +2335,7 @@ Passed to `format' with export format as single variable."
   nil
   "If non-nil, align title page contact block on the right."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-export)
 
 (defcustom fountain-export-number-first-page
@@ -2325,12 +2344,14 @@ Passed to `format' with export format as single variable."
 
 Traditionally, screenplays omit a page number on the first page."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-export)
 
 (defcustom fountain-export-include-scene-numbers
   nil
   "If non-nil, include scene numbers in export."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-export)
 
 (defcustom fountain-export-scene-heading-format
@@ -2346,6 +2367,7 @@ Options are: bold, double-space, underline."
   "(MORE)"
   "String to append to dialog when breaking across pages."
   :type 'string
+  :safe 'stringp
   :group 'fountain-export)
 
 (defcustom fountain-export-shell-command
@@ -2362,6 +2384,7 @@ Options are: bold, double-space, underline."
 This is useful if you are exporting to Fountain and need to
 specify a different filename."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain-export)
 
 (defvar fountain-export-formats
@@ -4391,12 +4414,14 @@ If non-nil, revised scene number format works as follows:
 WARNING: Using conflicting revised scene number format in the
 same script may result in errors in output."
   :type 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (defcustom fountain-scene-number-first-revision
   ?A
   "Character to start revised scene numbers."
   :type 'character
+  :safe 'characterp
   :group 'fountain-scene-number)
 
 (defcustom fountain-scene-number-separator
@@ -4404,6 +4429,9 @@ same script may result in errors in output."
   "character to separate scene numbers."
   :type '(choice (const nil)
                  (character ?-))
+  :safe '(lambda (value)
+           (or (null value)
+               (characterp value)))
   :group 'fountain-scene-number)
 
 (defun fountain-scene-number-to-list (string) ; FIXME: alternate separators and starting char
