@@ -258,6 +258,9 @@
 (make-obsolete-variable 'fountain-export-templates
                         "Use individual export templates instead." "2.1.4")
 
+(define-obsolete-variable-alias 'fountain-align-scene-number
+  'fountain-display-scene-numbers-in-margin "2.3.0")
+
 (make-obsolete-variable 'fountain-export-format-replace-alist
                         "See `fountain-export-formats'." "2.4.0")
 
@@ -270,11 +273,20 @@
 (make-obsolete-variable 'fountain-switch-comment-syntax
                         "Use the standard comment syntax instead." "2.4.0")
 
+(define-obsolete-variable-alias 'fountain-export-include-elements-alist
+  'fountain-export-include-elements "2.4.0")
+
+(make-obsolete-variable 'fountain-export-include-title-page
+  'fountain-export-include-elements "2.4.0")
+
 (define-obsolete-variable-alias 'fountain-export-standalone
   'fountain-export-make-standalone "2.4.0")
 
 (define-obsolete-variable-alias 'fountain-export-buffer-name
   'fountain-export-tmp-buffer-name "2.4.0")
+
+(make-obsolete-variable 'fountain-outline-startup-level
+  'fountain-outline-custom-level "2.5.4")
 
 (make-obsolete-variable 'fountain-endnotes-buffer
                         "Use a third-party package instead" "2.6.0")
@@ -585,9 +597,6 @@ This option does affect file contents."
            (with-current-buffer buffer
              (when (eq major-mode 'fountain-mode)
                (font-lock-refresh-defaults))))))
-
-(define-obsolete-variable-alias 'fountain-align-scene-number
-  'fountain-display-scene-numbers-in-margin "2.3.0")
 
 (defun fountain-get-align (element)
   "Return ELEMENT align integer based on buffer format."
@@ -2248,9 +2257,6 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Included Files" include)))
   :group 'fountain-export)
 
-(define-obsolete-variable-alias 'fountain-export-include-elements-alist
-  'fountain-export-include-elements "2.4.0")
-
 (defcustom fountain-export-make-standalone
   t
   "If non-nil, export a standalone document.
@@ -2281,9 +2287,6 @@ Passed to `format' with export format as single variable."
                 (function-item fountain-export-buffer-to-txt)
                 (function-item fountain-export-shell-command))
   :group 'fountain-export)
-
-(make-obsolete-variable 'fountain-export-include-title-page
-  'fountain-export-include-elements "2.4.0")
 
 (defcustom fountain-export-page-size
   'letter
@@ -3628,9 +3631,6 @@ Used by `fountain-outline-cycle'.")
   "Internal local integer representing subtree outline cycling status.
 
 Used by `fountain-outline-cycle'.")
-
-(make-obsolete-variable 'fountain-outline-startup-level
-  'fountain-outline-custom-level "2.5.4")
 
 (defcustom fountain-outline-custom-level
   nil
