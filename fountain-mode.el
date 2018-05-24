@@ -276,9 +276,6 @@
 (define-obsolete-variable-alias 'fountain-export-include-elements-alist
   'fountain-export-include-elements "2.4.0")
 
-(make-obsolete-variable 'fountain-export-include-title-page
-  'fountain-export-include-elements "2.4.0")
-
 (define-obsolete-variable-alias 'fountain-export-standalone
   'fountain-export-make-standalone "2.4.0")
 
