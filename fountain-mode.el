@@ -1211,7 +1211,8 @@ See <http://debbugs.gnu.org/24073>."
 
 (defun fountain-match-character ()
   "Match character if point is at character, nil otherwise."
-  (unless (fountain-match-scene-heading)
+  (unless (or (fountain-match-scene-heading)
+              (fountain-match-section-heading))
     (save-excursion
       (beginning-of-line)
       (and (not (and (looking-at fountain-action-regexp)
