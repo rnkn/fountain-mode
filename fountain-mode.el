@@ -3,7 +3,7 @@
 ;; Copyright (c) 2014-2018 Paul Rankin
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
-;; Keywords: text
+;; Keywords: wp, text
 ;; Version: 2.6.0
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://github.com/rnkn/fountain-mode
@@ -150,7 +150,7 @@
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
-  :group 'wp
+  :group 'text
   :link '(url-link "https://github.com/rnkn/fountain-mode"))
 
 
