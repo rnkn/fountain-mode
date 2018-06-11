@@ -660,10 +660,6 @@ Requires `fountain-match-scene-heading' for preceding blank line.")
 Set with `fountain-init-trans-regexp'. Requires
 `fountain-match-trans' for preceding and succeeding blank lines.")
 
-(defconst fountain-blank-regexp
-  "^\s?$"
-  "Regular expression for matching an empty line.")
-
 (defconst fountain-action-regexp
   "^\\(!\\)?\\(.*\\)[\s\t]*$"
   "Regular expression for forced action.
@@ -3697,7 +3693,7 @@ If POS is nil, use `point' instead."
                (fountain-forward-character 0)
                (setq begin (line-beginning-position))
                (while (not (or (eobp)
-                               (looking-at fountain-blank-regexp)
+                               (and (bolp) (eolp))
                                (fountain-match-note)))
                  (forward-line))
                (skip-chars-forward "\n\s\t")
