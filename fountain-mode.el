@@ -3725,8 +3725,8 @@ If POS is nil, use `point' instead."
                  (setq end (point))))))
       (cons begin end))))
 
-(defun fountain-shift-block-down (&optional n)
-  "Move the current block down past N blocks of same level."
+(defun fountain-shift-down (&optional n)
+  "Move the current element down past N blocks of same level."
   (interactive "p")
   (unless n (setq n 1))
   (if (outline-on-heading-p)
@@ -3764,11 +3764,11 @@ If POS is nil, use `point' instead."
              (delete-and-extract-region (car next-block-bounds)
                                         (cdr next-block-bounds)))))))))
 
-(defun fountain-shift-block-up (&optional n)
+(defun fountain-shift-up (&optional n)
   "Move the current block up past N element blocks of same level."
   (interactive "p")
   (unless n (setq n 1))
-  (fountain-shift-block-down (- n)))
+  (fountain-shift-down (- n)))
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
@@ -4949,10 +4949,10 @@ keywords suitable for Font Lock."
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
     ;; Block editing commands:
-    (define-key map (kbd "<M-down>") #'fountain-shift-block-down)
-    (define-key map (kbd "ESC <down>") #'fountain-shift-block-down)
-    (define-key map (kbd "<M-up>") #'fountain-shift-block-up)
-    (define-key map (kbd "ESC <up>") #'fountain-shift-block-up)
+    (define-key map (kbd "<M-down>") #'fountain-shift-down)
+    (define-key map (kbd "ESC <down>") #'fountain-shift-down)
+    (define-key map (kbd "<M-up>") #'fountain-shift-up)
+    (define-key map (kbd "ESC <up>") #'fountain-shift-up)
     ;; Outline commands:
     (define-key map [remap forward-list] #'fountain-outline-next)
     (define-key map [remap backward-list] #'fountain-outline-previous)
