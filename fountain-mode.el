@@ -3725,6 +3725,19 @@ If POS is nil, use `point' instead."
                  (setq end (point))))))
       (cons begin end))))
 
+(defun fountain-insert-hanging-line-maybe ()
+  "Insert a empty newline if needed.
+Return non-nil if empty newline was inserted."
+  (let (hanging-line)
+    (when (and (eobp) (/= (char-before) ?\n))
+      (insert "\n"))
+    (when (and (eobp) (not (fountain-blank-before-p)))
+      (insert "\n")
+      (setq hanging-line t))
+    (unless (eobp)
+      (forward-char 1))
+    hanging-line))
+
 (defun fountain-shift-down (&optional n)
   "Move the current element down past N blocks of same level."
   (interactive "p")
