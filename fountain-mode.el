@@ -3739,14 +3739,15 @@ Return non-nil if empty newline was inserted."
     hanging-line))
 
 (defun fountain-shift-down (&optional n)
-  "Move the current element down past N blocks of same level."
+  "Move the current element down past an element of the same level."
   (interactive "p")
   (unless n (setq n 1))
   (if (outline-on-heading-p)
       (fountain-outline-shift-down n)
-    (let ((p (< 0 n)))
+    (let ((forward (< 0 n))
+          hanging-line)
       (when (and (bolp) (eolp))
-        (funcall (if p 'skip-chars-forward 'skip-chars-backward)
+        (funcall (if forward 'skip-chars-forward 'skip-chars-backward)
                  "\n\s\t"))
       (save-excursion
         (save-restriction
@@ -3755,13 +3756,18 @@ Return non-nil if empty newline was inserted."
                 outline-begin outline-end next-block-bounds)
             (unless (and (car block-bounds)
                          (cdr block-bounds))
-              (user-error "Not at a moveable block"))
+              (user-error "Not at a moveable element"))
             (save-excursion
-              (outline-back-to-heading)
+              (when (not forward)
+                (goto-char (cdr block-bounds))
+                (when (setq hanging-line (fountain-insert-hanging-line-maybe))
+                  (setcdr block-bounds (point)))
+                (goto-char (car block-bounds)))
+              (outline-previous-heading)
               (setq outline-begin (point))
               (outline-next-heading)
               (setq outline-end (point)))
-            (if p
+            (if forward
                 (goto-char (cdr block-bounds))
               (goto-char (car block-bounds))
               (backward-char)
@@ -3770,15 +3776,22 @@ Return non-nil if empty newline was inserted."
             (unless (and (car next-block-bounds)
                          (cdr next-block-bounds))
               (user-error "Cannot shift element any further"))
+            (when forward
+              (goto-char (cdr next-block-bounds))
+              (when (setq hanging-line (fountain-insert-hanging-line-maybe))
+                (setcdr next-block-bounds (point))))
             (unless (< outline-begin (car next-block-bounds) outline-end)
               (user-error "Cannot shift past higher level"))
-            (goto-char (funcall (if p 'car 'cdr) block-bounds))
+            (goto-char (if forward (car block-bounds) (cdr block-bounds)))
             (insert-before-markers
              (delete-and-extract-region (car next-block-bounds)
-                                        (cdr next-block-bounds)))))))))
+                                        (cdr next-block-bounds))))
+          (when hanging-line
+            (goto-char (point-max))
+            (delete-char -1)))))))
 
 (defun fountain-shift-up (&optional n)
-  "Move the current block up past N element blocks of same level."
+  "Move the current element up past an element of the same level."
   (interactive "p")
   (unless n (setq n 1))
   (fountain-shift-down (- n)))
@@ -3795,17 +3808,7 @@ Return non-nil if empty newline was inserted."
          (end-point-fun
           (lambda ()
             (outline-end-of-subtree)
-            ;; Add newline if none at eof.
-            (when (and (eobp) (/= (char-before) ?\n))
-              (insert-char ?\n))
-            ;; Temporary newline if only 1 at eof
-            (when (and (eobp)
-                       (not (fountain-blank-before-p)))
-              (insert-char ?\n)
-              (setq hanging-line t))
-            ;; Avoid eobp signal.
-            (unless (eobp)
-              (forward-char 1))
+            (setq hanging-line (fountain-insert-hanging-line-maybe))
             (point)))
          (beg (point))
          (folded
@@ -3828,7 +3831,6 @@ Return non-nil if empty newline was inserted."
     (insert (delete-and-extract-region beg end))
     (goto-char insert-point)
     (when folded (outline-hide-subtree))
-    ;; Remove temporary newline.
     (when hanging-line
       (save-excursion
         (goto-char (point-max))
