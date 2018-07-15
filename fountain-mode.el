@@ -5001,25 +5001,38 @@ keywords suitable for Font Lock."
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
+    ("Show/Hide"
+     ["Cycle Outline Visibility" fountain-outline-cycle]
+     ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
+     ["Show All" outline-show-all]      ; FIXME: fountain-outline-show-all
+     "---"
+     ["Hide Emphasis Delimiters"
+      (customize-set-variable 'fountain-hide-emphasis-delim
+                              (not fountain-hide-emphasis-delim))
+      :style toggle
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Syntax Characters"
+      (customize-set-variable 'fountain-hide-syntax-chars
+                              (not fountain-hide-syntax-chars))
+      :style toggle
+      :selected fountain-hide-syntax-chars])
+    "---"
     ("Navigate"
-     ["Next Scene/Section" fountain-outline-next]
-     ["Previous Scene/Section" fountain-outline-previous]
-     ["Up Scene/Section" fountain-outline-up]
-     ["Forward Scene/Section" fountain-outline-forward]
-     ["Backward Scene/Section" fountain-outline-backward]
+     ["Up Heading" fountain-outline-up]
+     ["Next Heading" fountain-outline-next]
+     ["Previous Heading" fountain-outline-previous]
+     ["Forward Heading Same Level" fountain-outline-forward]
+     ["Backward Heading Same Level" fountain-outline-backward]
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
      "---"
      ["Go to Scene Heading..." fountain-goto-scene]
      ["Go to Page..." fountain-goto-page])
-    ("Outline"
-     ["Cycle Scene/Section Visibility" fountain-outline-cycle]
-     ["Cycle Global Visibility" fountain-outline-cycle-global]
-     "---"
+    ("Edit Structure"
      ["Mark Section/Scene" fountain-outline-mark]
-     ["Shift Block Up" fountain-shift-block-up]
-     ["Shift Block Down" fountain-shift-block-down]
+     ["Shift Up" fountain-shift-up]
+     ["Shift Down" fountain-shift-down]
      "---"
      ["Open Scene/Section in Indirect Buffer" fountain-outline-to-indirect-buffer])
     ("Scene Numbers"
@@ -5053,31 +5066,6 @@ keywords suitable for Font Lock."
     ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
-    "---"
-    ("Show/Hide"
-     ["Hide Emphasis Delimiters"
-      (customize-set-variable 'fountain-hide-emphasis-delim
-                              (not fountain-hide-emphasis-delim))
-      :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters"
-      (customize-set-variable 'fountain-hide-syntax-chars
-                              (not fountain-hide-syntax-chars))
-      :style toggle
-      :selected fountain-hide-syntax-chars])
-    ("Syntax Highlighting"
-     ["Minimum"
-      (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 1)]
-     ["Default"
-      (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 2)]
-     ["Maximum"
-      (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)])
     "---"
     ("Export"
      ["Export buffer..." fountain-export-buffer]
@@ -5135,7 +5123,7 @@ keywords suitable for Font Lock."
      ["Contextual (Do What I Mean)" (customize-set-variable 'fountain-tab-command 'fountain-dwim)
       :style radio
       :selected (eq fountain-tab-command 'fountain-dwim)]
-     ["Cycle Scene/Section Visibility" (customize-set-variable 'fountain-tab-command 'fountain-outline-cycle)
+     ["Cycle Outline Visibility" (customize-set-variable 'fountain-tab-command 'fountain-outline-cycle)
       :style radio
       :selected (eq fountain-tab-command 'fountain-outline-cycle)]
      ["Toggle Auto-Upcasing" (customize-set-variable 'fountain-tab-command 'fountain-toggle-auto-upcase)
@@ -5144,6 +5132,19 @@ keywords suitable for Font Lock."
      ["Auto-Completion" (customize-set-variable 'fountain-tab-command 'completion-at-point)
       :style radio
       :selected (eq fountain-tab-command 'completion-at-point)])
+    ("Syntax Highlighting"
+     ["Minimum"
+      (fountain-set-font-lock-decoration 1)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 1)]
+     ["Default"
+      (fountain-set-font-lock-decoration 2)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 2)]
+     ["Maximum"
+      (fountain-set-font-lock-decoration 3)
+      :style radio
+      :selected (= (fountain-get-font-lock-decoration) 3)])
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
