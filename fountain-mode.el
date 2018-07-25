@@ -307,6 +307,16 @@
              turn-on-flyspell)
   :group 'fountain)
 
+(defcustom fountain-script-format "screenplay"
+  "Default script format for editing and exporting.
+
+Can be overridden in metadata with, e.g.:
+
+  format: teleplay"
+  :type 'string
+  :safe 'string
+  :group 'fountain)
+
 (defcustom fountain-add-continued-dialog
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
@@ -604,12 +614,12 @@ This option does affect file contents."
                (font-lock-refresh-defaults))))))
 
 (defun fountain-get-align (option)
-  "Return OPTION align integer based on buffer format."
+  "Return OPTION align integer based on script format."
   (if (integerp option)
       option
     (cadr (or (assoc (or (plist-get (fountain-read-metadata)
                                     'format)
-                         "screenplay")
+                         fountain-script-format)
                      option)
               (car option)))))
 
@@ -623,7 +633,7 @@ This option does affect file contents."
     "title: " (skeleton-read "Title: " (file-name-base (buffer-name))) | -7 "\n"
     "credit: " (skeleton-read "Credit: " "written by") | -9 "\n"
     "author: " (skeleton-read "Author: " user-full-name) | -9 "\n"
-    "format: " (skeleton-read "Script format: " "screenplay") | -9 "\n"
+    "format: " (skeleton-read "Script format: " fountain-script-format) | -9 "\n"
     "source: " (skeleton-read "Source: ") | -9 "\n"
     "date: " (skeleton-read "Date: " (format-time-string fountain-time-format)) | -7 "\n"
     "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
@@ -2653,12 +2663,11 @@ etc.) as well as keys defined in `fountain-export-formats'." tag)))
                  (choice string (const nil)))))
 
 (defun fountain-get-export-elements (&optional format)
-  "Returns list of elements exported in current format.
-Format defaults to \"screenplay\"."
+  "Returns list of elements exported in current script format."
   (cdr (or (assoc-string
             (or format
                 (plist-get (fountain-read-metadata) 'format)
-                "screenplay")
+                fountain-script-format)
             fountain-export-include-elements)
            (car fountain-export-include-elements))))
 
