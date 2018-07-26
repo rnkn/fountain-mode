@@ -810,7 +810,7 @@ bold-italic delimiters together, e.g.
 ;;; Faces
 
 (defgroup fountain-faces ()
-  "Faces used in `fountain-mode'.
+  "\\<fountain-mode-map>Faces used in `fountain-mode'.
 There are three levels of `font-lock-mode' decoration:
 
     1 (minimum):
@@ -1428,8 +1428,8 @@ characters from `fountain-completion-characters'."
                               string pred)))))
 
 (defun fountain-completion-at-point ()
-  "Return completion table for entity at point.
-Trigger completion with `completion-at-point' (\\[completion-at-point]).
+  "\\<fountain-mode-map>Return completion table for entity at point.
+Trigger completion with \\[completion-at-point].
 
 Always delimits entity from beginning of line to point. If at a
 scene heading, return `fountain-scene-heading-candidates'. If
