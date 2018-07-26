@@ -283,7 +283,7 @@
   'fountain-export-tmp-buffer-name "2.4.0")
 
 (make-obsolete-variable 'fountain-outline-startup-level
-  'fountain-outline-custom-level "2.5.4")
+                        'fountain-outline-custom-level "2.5.4")
 
 (make-obsolete-variable 'fountain-endnotes-buffer
                         "Use a third-party package instead" "2.6.0")
@@ -310,9 +310,9 @@
 (defcustom fountain-script-format "screenplay"
   "Default script format for editing and exporting.
 
-Can be overridden in metadata with, e.g.:
+Can be overridden in metadata with, e.g.
 
-  format: teleplay"
+    format: teleplay"
   :type 'string
   :safe 'string
   :group 'fountain)
@@ -357,10 +357,10 @@ changes desired."
          (dolist (buffer (buffer-list))
            (with-current-buffer buffer
              (when (eq major-mode 'fountain-mode)
-                   (if fountain-hide-emphasis-delim
-                       (add-to-invisibility-spec 'fountain-emphasis-delim)
-                     (remove-from-invisibility-spec 'fountain-emphasis-delim))
-                   (font-lock-refresh-defaults))))))
+               (if fountain-hide-emphasis-delim
+                   (add-to-invisibility-spec 'fountain-emphasis-delim)
+                 (remove-from-invisibility-spec 'fountain-emphasis-delim))
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-hide-syntax-chars
   nil
@@ -373,10 +373,10 @@ changes desired."
          (dolist (buffer (buffer-list))
            (with-current-buffer buffer
              (when (eq major-mode 'fountain-mode)
-                   (if fountain-hide-syntax-chars
-                       (add-to-invisibility-spec 'fountain-syntax-chars)
-                     (remove-from-invisibility-spec 'fountain-syntax-chars))
-                   (font-lock-refresh-defaults))))))
+               (if fountain-hide-syntax-chars
+                   (add-to-invisibility-spec 'fountain-syntax-chars)
+                 (remove-from-invisibility-spec 'fountain-syntax-chars))
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-time-format
   "%F"
@@ -441,7 +441,7 @@ This option does not affect file contents."
          (dolist (buffer (buffer-list))
            (with-current-buffer buffer
              (when (eq major-mode 'fountain-mode)
-                   (font-lock-refresh-defaults))))))
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-align-section-heading
   '(("screenplay" 0)
@@ -1372,7 +1372,7 @@ Added to `jit-lock-functions'."
   (fountain-forward-scene 0)
   (while (< (point) end)
     (when (and (not (and (integerp fountain--edit-line)
-                       (= fountain--edit-line (line-number-at-pos))))
+                         (= fountain--edit-line (line-number-at-pos))))
                (fountain-match-character))
       (let* ((character (match-string-no-properties 4))
              (candidate (assoc-string character fountain-completion-characters))
@@ -1994,9 +1994,9 @@ Includes child elements."
                       'end end
                       'dual dual
                       'export (when (or (memq 'character export-elements)
-                                      (memq 'lines export-elements)
-                                      (memq 'paren export-elements))
-                                  t))
+                                        (memq 'lines export-elements)
+                                        (memq 'paren export-elements))
+                                t))
                 (cons character
                       (fountain-parse-region (point) end export-elements job))))
     ;; If at the first (left) character of dual dialogue, parse a dual-dialogue
@@ -2729,9 +2729,9 @@ whitespace is converted to dashes. e.g.
   (let ((replace-alist
          (plist-get (cdr (assq format fountain-export-formats))
                     :string-replace)))
-  (dolist (replacement replace-alist string)
-    (setq string (replace-regexp-in-string
-                  (car replacement) (cadr replacement) string t nil)))))
+    (dolist (replacement replace-alist string)
+      (setq string (replace-regexp-in-string
+                    (car replacement) (cadr replacement) string t nil)))))
 
 (defun fountain-export-get-cond-replacement (format element key value)
   (let ((replace-alist
@@ -2895,7 +2895,7 @@ strings."
                          (list 'begin start
                                'end end
                                'export t)
-                               (fountain-read-metadata))
+                         (fountain-read-metadata))
                         tree))))
     ;; Walk through TREE, concatenating exported elements to STRING.
     (while tree
@@ -4910,8 +4910,10 @@ keywords suitable for Font Lock."
             align-props facespec)
         (when (and align fountain-align-elements)
           (setq align-props
-                `(line-prefix (space :align-to ,align)
-                  wrap-prefix (space :align-to ,align))))
+                `(line-prefix
+                  (space :align-to ,align)
+                  wrap-prefix
+                  (space :align-to ,align))))
         (dolist (var plist-list)
           (let ((subexp (plist-get var :subexp))
                 (face (when (<= (plist-get var :level) dec)
@@ -4944,7 +4946,7 @@ keywords suitable for Font Lock."
   (while (< (point) (min end (point-max)))
     (when (fountain-match-scene-heading)
       (if (and fountain-display-scene-numbers-in-margin
-                 (match-string 8))
+               (match-string 8))
           (put-text-property (match-beginning 6) (match-end 9)
                              'display (list '(margin right-margin)
                                             (match-string-no-properties 8)))
@@ -5063,10 +5065,10 @@ keywords suitable for Font Lock."
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
      "---"
      ["Display Scene Numbers in Margin"
-     (customize-set-variable 'fountain-display-scene-numbers-in-margin
-                             (not fountain-display-scene-numbers-in-margin))
-     :style toggle
-     :selected fountain-display-scene-numbers-in-margin])
+      (customize-set-variable 'fountain-display-scene-numbers-in-margin
+                              (not fountain-display-scene-numbers-in-margin))
+      :style toggle
+      :selected fountain-display-scene-numbers-in-margin])
     ("Page Numbers"
      ["Count Pages" fountain-count-pages]
      "---"
