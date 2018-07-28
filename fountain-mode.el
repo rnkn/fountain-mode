@@ -802,10 +802,6 @@ bold-italic delimiters together, e.g.
           "\\(?3:.+\\)")
   "Regular expression for matching lyrics.")
 
-(defconst fountain-template-key-regexp
-  "{{\\([^{}\n]+?\\)}}"
-  "Regular expression key for making template replacements.")
-
 
 ;;; Faces
 
@@ -933,9 +929,9 @@ To switch between these levels, customize the value of
   "Default face for transitions."
   :group 'fountain-faces)
 
-(defface fountain-include
-  '((t (:inherit font-lock-warning-face)))
-  "Default face for file inclusions."
+(defface fountain-template
+  '((t (:inherit font-lock-preprocessor-face)))
+  "Default face for template keys."
   :group 'fountain-faces)
 
 (defface fountain-auto-upcase-highlight
@@ -1294,7 +1290,7 @@ Assumes that all other element matching has been done."
           (and (not (or (and (bolp) (eolp))
                         (fountain-match-section-heading)
                         (fountain-match-scene-heading)
-                        (fountain-match-include)
+                        (fountain-match-template)
                         (fountain-match-page-break)
                         (fountain-match-character)
                         (fountain-match-dialog)
@@ -1779,38 +1775,44 @@ unconditionally and prints a message in the echo area."
              (fountain-count-pages-maybe value)))))
 
 
-;;; Inclusions
+;;; Templating
 
-(defvar fountain-include-regexp
-  "^[\s\t]*{{[\s\t]*\\(?1:[^:\n]+:\\)?[\s\t]*\\(?2:.+?\\)[\s\t]*}}[\s\t]*")
+(defconst fountain-template-regexp
+  "{{[\s\t\n]*\\(?1:[.-a-z0-9]+\\)\\(?::[\s\t\n]*\\(?2:[^{}]+?\\)\\)?[\s\t\n]*}}"
+  "Regular expression for matching template keys.")
 
-(defun fountain-match-include ()
-  "Match inclusion if point is at inclusion, nil otherwise."
+(defun fountain-match-template ()
+  "Match template key if point is at template, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
-      (beginning-of-line)
-      (looking-at fountain-include-regexp))))
+      (or (looking-at fountain-template-regexp)
+          (let ((x (point)))
+            (and (re-search-backward "{{" nil t)
+                 (looking-at fountain-template-regexp)
+                 (< x (match-end 0))))))))
 
-(defun fountain-include-find-file (&optional no-select)
+(defun fountain-find-included-file (&optional no-select)
   "Find included file at point.
 
 Optional argument NO-SELECT will find file without selecting
 window."
   (interactive)
-  (when (and (fountain-match-include)
-             (save-match-data
-               (string-match "include:" (match-string 1))))
-    (let ((filename (expand-file-name (match-string 2))))
+  (when (and (fountain-match-template)
+             (string-match-p "include" (match-string 1)))
+    (let ((file (expand-file-name (match-string 2))))
       (if no-select
-          (find-file-noselect filename)
-        (find-file filename)))))
+          (find-file-noselect file)
+        (find-file file)))))
 
 (defun fountain-include-replace-in-region (start end &optional delete)
   "Replace inclusions between START and END with their file contents.
 
 If optional argument DELETE is non-nil (if prefix with \\[universal-argument]
-when called interactively), delete instead."
+when called interactively), delete instead.
+
+If specified file is missing or otherwise not readable, replace
+with empty string."
   (interactive "*r\nP")
   (save-excursion
     (save-restriction
@@ -1818,18 +1820,22 @@ when called interactively), delete instead."
       (goto-char end)
       (setq end (point-marker))
       (goto-char start)
-      (while (< (point) (min end (point-max)))
-        (when (fountain-match-include)
+      (while (re-search-forward fountain-template-regexp end t)
+        (when (string-match-p "include" (match-string 1))
           (if delete
               (delete-region (match-beginning 0) (match-end 0))
             (replace-match
-             (save-match-data
-               (with-current-buffer (fountain-include-find-file t)
-                 (save-restriction
-                   (widen)
-                   (buffer-substring-no-properties (point-min) (point-max)))))
-             t t)))
-        (forward-line)))))
+              (let ((file (match-string 2)))
+                (if (file-readable-p file)
+                    (save-match-data
+                      (with-current-buffer
+                          (find-file-noselect (expand-file-name (match-string 2)))
+                        (save-restriction
+                          (widen)
+                          (buffer-substring-no-properties (point-min) (point-max)))))
+                  ""))
+              t t))))
+      (set-marker end nil))))
 
 
 ;;; Parsing
@@ -4277,8 +4283,8 @@ Added as hook to `post-self-insert-hook'."
 1. If point is at a scene heading or section heading, or if
    prefixed with ARG call `fountain-outline-cycle' and pass ARG.
 
-2. If point is at an directive to an included file, call
-   `fountain-include-find-file'.
+2. If point is at a directive to an included file, call
+   `fountain-find-included-file'.
 
 3. Otherwise, call `fountain-toggle-auto-upcase'."
   (interactive "p")
@@ -4287,8 +4293,9 @@ Added as hook to `post-self-insert-hook'."
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading))
          (fountain-outline-cycle))
-        ((fountain-match-include)
-         (fountain-include-find-file))
+        ((and (fountain-match-template)
+              (string-match-p "include" (match-string 1)))
+         (fountain-find-included-file))
         (t
          (fountain-toggle-auto-upcase))))
 
@@ -4356,7 +4363,7 @@ ARG (\\[universal-argument]), only insert note delimiters."
       (comment-indent)
       (insert
        (replace-regexp-in-string
-        fountain-template-key-regexp
+        fountain-template-regexp
         (lambda (match)
           (let ((key (match-string 1 match)))
             (cdr
@@ -4784,9 +4791,9 @@ scene number from being auto-upcased."
     ;; Notes
     (,fountain-note-regexp
      ((:level 2 :subexp 0 :face fountain-note)))
-    ;; Inclusions
-    (,fountain-include-regexp
-     ((:level 2 :subexp 0 :face fountain-include)))
+    ;; Templates
+    (,fountain-template-regexp
+     ((:level 2 :subexp 0 :face fountain-template)))
     ;; Metedata
     ((lambda (limit)
        (fountain-match-element 'fountain-match-metadata limit))
