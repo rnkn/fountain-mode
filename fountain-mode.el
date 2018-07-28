@@ -614,7 +614,10 @@ This option does affect file contents."
                (font-lock-refresh-defaults))))))
 
 (defun fountain-get-align (option)
-  "Return OPTION align integer based on script format."
+  "Return OPTION align integer based on script format.
+e.g.
+
+    (fountain-get-align fountain-align-character) -> 20"
   (if (integerp option)
       option
     (cadr (or (assoc (or (plist-get (fountain-read-metadata)
@@ -2687,8 +2690,8 @@ format tag."
     (with-current-buffer (or buffer (current-buffer))
       (cond (fountain-export-use-title-as-filename
              (concat (plist-get (fountain-read-metadata) 'title) ext))
-            ((buffer-file-name)
-             (concat (file-name-base (buffer-file-name)) ext))
+            (buffer-file-name
+             (concat (file-name-base buffer-file-name) ext))
             (t
              (format fountain-export-tmp-buffer-name tag))))))
 
@@ -2709,15 +2712,15 @@ whitespace is converted to dashes. e.g.
       "[^[:alnum:]]+" t)
      "-")))
 
-(defun fountain-export-fill-string (string element)
+(defun fountain-export-fill-string (string element-type)
   (with-temp-buffer
     (insert string)
     (let (adaptive-fill-mode
-          (fill
-           (symbol-value
-            (plist-get (cdr (assq element fountain-elements)) :fill))))
-      (setq left-margin (car fill)
-            fill-column (+ left-margin (cdr fill)))
+          (fill-margins (symbol-value
+                 (plist-get (cdr (assq element-type fountain-elements))
+                            :fill))))
+      (setq left-margin (car fill-margins)
+            fill-column (+ left-margin (cdr fill-margins)))
       ;; Replace emphasis syntax with face text propoerties (before performing fill).
       (dolist (face '((fountain-italic-regexp . italic)
                       (fountain-bold-regexp . bold)
@@ -2927,7 +2930,7 @@ otherwise kill destination buffer."
           (completing-read "Export format: "
                            (mapcar #'car fountain-export-formats) nil t))
          (car current-prefix-arg)))
-  (setq buffer (or buffer (current-buffer)))
+  (unless buffer (setq buffer (current-buffer)))
   (let ((dest-buffer (get-buffer-create
                       (fountain-export-get-filename format buffer)))
         (hook (plist-get (cdr (assq format fountain-export-formats))
