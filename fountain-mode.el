@@ -5211,6 +5211,7 @@ keywords suitable for Font Lock."
                       fountain-pages-show-in-mode-line
                       fountain-hide-emphasis-delim
                       fountain-hide-syntax-chars
+                      fountain-shift-all-elements
                       font-lock-maximum-decoration
                       fountain-export-page-size
                       fountain-export-include-title-page
