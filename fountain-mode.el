@@ -4283,8 +4283,9 @@ Added as hook to `post-self-insert-hook'."
 (defun fountain-dwim (&optional arg)
   "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
 
-1. If point is at a scene heading or section heading, or if
-   prefixed with ARG call `fountain-outline-cycle' and pass ARG.
+1. If point is at a scene heading or section heading, or within a
+   folded scene or section, or if prefixed with ARG, call
+   `fountain-outline-cycle' and pass ARG.
 
 2. If point is at a directive to an included file, call
    `fountain-find-included-file'.
@@ -4294,7 +4295,8 @@ Added as hook to `post-self-insert-hook'."
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
         ((or (fountain-match-section-heading)
-             (fountain-match-scene-heading))
+             (fountain-match-scene-heading)
+             (eq (get-char-property (point) 'invisible) 'outline))
          (fountain-outline-cycle))
         ((and (fountain-match-template)
               (string-match-p "include" (match-string 1)))
