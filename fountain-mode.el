@@ -5033,28 +5033,16 @@ keywords suitable for Font Lock."
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
   '("Fountain"
-    ("Show/Hide"
+    ("Navigate"
+     ["Next Heading" fountain-outline-next]
+     ["Previous Heading" fountain-outline-previous]
+     ["Up Heading" fountain-outline-up]
+     ["Forward Heading Same Level" fountain-outline-forward]
+     ["Backward Heading Same Level" fountain-outline-backward]
+     "---"
      ["Cycle Outline Visibility" fountain-outline-cycle]
      ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
      ["Show All" outline-show-all]      ; FIXME: fountain-outline-show-all
-     "---"
-     ["Hide Emphasis Delimiters"
-      (customize-set-variable 'fountain-hide-emphasis-delim
-                              (not fountain-hide-emphasis-delim))
-      :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters"
-      (customize-set-variable 'fountain-hide-syntax-chars
-                              (not fountain-hide-syntax-chars))
-      :style toggle
-      :selected fountain-hide-syntax-chars])
-    "---"
-    ("Navigate"
-     ["Up Heading" fountain-outline-up]
-     ["Next Heading" fountain-outline-next]
-     ["Previous Heading" fountain-outline-previous]
-     ["Forward Heading Same Level" fountain-outline-forward]
-     ["Backward Heading Same Level" fountain-outline-backward]
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
@@ -5062,11 +5050,11 @@ keywords suitable for Font Lock."
      ["Go to Scene Heading..." fountain-goto-scene]
      ["Go to Page..." fountain-goto-page])
     ("Edit Structure"
-     ["Mark Section/Scene" fountain-outline-mark]
-     ["Shift Up" fountain-shift-up]
-     ["Shift Down" fountain-shift-down]
+     ["Mark Subtree" fountain-outline-mark]
+     ["Open Subtree in Indirect Buffer" fountain-outline-to-indirect-buffer]
      "---"
-     ["Open Scene/Section in Indirect Buffer" fountain-outline-to-indirect-buffer]
+     ["Shift Element Up" fountain-shift-up]
+     ["Shift Element Down" fountain-shift-down]
      "---"
      ["Shift All Elements" (customize-set-variable 'fountain-shift-all-elements
                                                    (not fountain-shift-all-elements))
@@ -5181,7 +5169,18 @@ keywords suitable for Font Lock."
      ["Maximum"
       (fountain-set-font-lock-decoration 3)
       :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)])
+      :selected (= (fountain-get-font-lock-decoration) 3)]
+     "---"
+     ["Hide Emphasis Delimiters"
+      (customize-set-variable 'fountain-hide-emphasis-delim
+                              (not fountain-hide-emphasis-delim))
+      :style toggle
+      :selected fountain-hide-emphasis-delim]
+     ["Hide Syntax Characters"
+      (customize-set-variable 'fountain-hide-syntax-chars
+                              (not fountain-hide-syntax-chars))
+      :style toggle
+      :selected fountain-hide-syntax-chars])
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
