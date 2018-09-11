@@ -2780,7 +2780,7 @@ element of the list.
 
 Check if ELEMENT corresponds to a template in
 `fountain-export-templates' and set ELEMENT-TEMPLATE. If so,
-replace matches of `fountain-template-key-regexp' in the
+replace matches of `fountain-template-regexp' in the
 following order:
 
 1. {{content}} is replaced with CONTENT.
@@ -2838,11 +2838,11 @@ following order:
            ;; If there is a FORMAT-TEMPLATE and an ELEMENT-TEMPLATE, replace
            ;; template keys in that template.
            ((and format-template element-template)
-            (while (string-match fountain-template-key-regexp element-template)
+            (while (string-match fountain-template-regexp element-template)
               (setq element-template
                     ;; FIXME: can this be better written with pcase?
                     (replace-regexp-in-string
-                     fountain-template-key-regexp
+                     fountain-template-regexp
                      (lambda (match)
                        ;; Find KEY and corresponding VALUE in PLIST.
                        (let* ((key (match-string 1 match))
