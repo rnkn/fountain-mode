@@ -1,6 +1,6 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2018 Paul Rankin
+;; Copyright (c) 2014-2018  Free Software Foundation, Inc.
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
