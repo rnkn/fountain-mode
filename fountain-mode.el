@@ -413,11 +413,6 @@ The default {{time}} - {{fullname}}: will insert something like:
   :type 'string
   :safe 'stringp
   :group 'fountain)
-;; FIXME:
-;; {{title}} from metadata
-;; {{author}} from metadata
-;; {{username}} `user-full-name'
-;; {{KEY}} arbitrary metadata
 
 
 ;;; Aligning
@@ -1012,8 +1007,10 @@ regular expression."
                       "\\|"
                       fountain-scene-heading-regexp)))
 
-(defun fountain-init-imenu-generic-expression () ; FIXME: allow user customize
+(defun fountain-init-imenu-generic-expression ()
   "Initialize `imenu-generic-expression'."
+  ;; FIXME: each of these should be a boolean user option to allow the user to
+  ;; choose which appear in the imenu list.
   (setq imenu-generic-expression
         (list
          (list "Notes" fountain-note-regexp 2)
@@ -1038,7 +1035,10 @@ buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline)
-  (setq-local completion-cycle-threshold t) ; FIXME: make user option
+  ;; FIXME: `completion-cycle-threshold' is a user option, so hard-coding it to
+  ;; non-nil is dubious. On the other hand, completion without cycling in
+  ;; screenwriting is weird.
+  (setq-local completion-cycle-threshold t)
   (setq-local completion-at-point-functions
               '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
@@ -1460,8 +1460,6 @@ script, you may get incorrect output."
   :safe 'booleanp
   :group 'fountain-pages)
 
-;; FIXME: timer can be used for things other than page count, e.g. automatically
-;; adding continued dialogue string.
 (defvar fountain-page-count-timer
   nil)
 
@@ -1553,7 +1551,9 @@ Takes the form:
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
 over whitespace."
-  ;; FIXME: rewrite to account for non-exported elements
+  ;; FIXME: currently does not account for elements not included in
+  ;; `fountain-export-include-elements' for current format. This will throw page
+  ;; off page counting in many cases.
   (when (looking-at "\n[\n\s\t]*\n") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
@@ -2807,7 +2807,6 @@ following order:
            ((and format-template element-template)
             (while (string-match fountain-template-regexp element-template)
               (setq element-template
-                    ;; FIXME: can this be better written with pcase?
                     (replace-regexp-in-string
                      fountain-template-regexp
                      (lambda (match)
@@ -2828,6 +2827,11 @@ following order:
                           ;; If KEY's VALUE is not a string but still non-nil
                           ;; attempt conditional replacement based on KEY's
                           ;; VALUE.
+                          ;;
+                          ;; FIXME: the following two functions are ugly/messy.
+                          ;; Some work has already been done to combine these
+                          ;; into just `fountain-export-get-eval-replacement' by
+                          ;; using template {{KEYS}} in the export templates.
                           (value
                            (fountain-export-get-cond-replacement format element (intern key) value))
                           ;; Otherwise, attempt expression replacements.
@@ -2942,11 +2946,14 @@ otherwise kill destination buffer."
 (defun fountain-export-shell-command (&optional buffer)
   "Call shell command defined in variable `fountain-export-shell-command'.
 Command acts on current buffer or BUFFER."
+  ;; FIXME: better to call ‘start-process’ directly, since it offers more
+  ;; control and does not impose the use of a shell (with its need to quote
+  ;; arguments).
   (interactive)
   (let* ((buffer (or buffer (current-buffer)))
          (file (buffer-file-name buffer)))
     (if file
-        (async-shell-command            ; FIXME use start-process
+        (async-shell-command
          (format fountain-export-shell-command (shell-quote-argument file))
          "*Fountain Export Process*")
       (user-error "Buffer `%s' is not visiting a file" buffer))))
@@ -3004,6 +3011,40 @@ Command acts on current buffer or BUFFER."
 
 
 ;;; -> PostScript
+
+;; FIXME: Exporting to PostScript requires some further work before it can be
+;; implemented. Exporting to PostScript is essentially the existing export to
+;; plain text functions, with the following additions:
+;;
+;; When calling `fountain-prep-and-parse-region' for exporting to PostScript,
+;; the preparation phase should add a while-loop that begins at point-min and
+;; calls `fountain-forward-page' to move through the temporary buffer, inserting
+;; manual page-breaks by calling `fountain-insert-page-break' with each
+;; iteration. However the function `fountain-goto-page-break-point' needs to be
+;; improved to test for existing page-breaks immediately before or after point,
+;; to prevent inserting multiple consecutive page-breaks creating blank pages.
+;; This should be its own function, e.g. `fountain-paginate-buffer'.
+;;
+;; Once page-breaks have been inserted, `fountain-prep-and-parse-region' will
+;; return a lisp data tree of the buffer with appropriate page-breaks.
+;; Page-breaks need to then be inserted as linefeed (^L) characters in the
+;; destination buffer, to signal a page-break to the PostScript typesetter.
+;;
+;; Additionally, a user option for headers and footer formatting is required,
+;; which should include the page number at the right-hand-side of the header. It
+;; is important that if the header or footer encroaches into the space of the
+;; page, then `fountain-forward-page' reacts accordingly. (However it would be
+;; more reasonable to limit the header and footer each to a single line.)
+;;
+;; Finally, the variables `ps-paper-type', `ps-left-margin', `ps-top-margin',
+;; `ps-font-size', `ps-print-color-p' and `ps-print-header' need to be set
+;; accordingly before calling `ps-print-buffer'. (See below.)
+;;
+;; This may seem like an odd way to calculate page length, but if implemented
+;; well, should allow for a script to have "locked pages" by calling the
+;; aforementioned `fountain-paginate-buffer'. For more information on locking
+;; pages in a script, see:
+;; https://en.wikipedia.org/wiki/Shooting_script#Preserving_scene_and_page_numbers
 
 ;; (defgroup fountain-postscript-export ()
 ;;   "Options for exporting Fountain files to PostScript."
@@ -4336,6 +4377,9 @@ ARG (\\[universal-argument]), only insert note delimiters."
         (lambda (match)
           (let ((key (match-string 1 match)))
             (cdr
+             ;; FIXME: rather than hard-code limited options, these could work
+             ;; better if reusing the key-value replacement code from
+             ;; `fountain-export-element'.
              (assoc-string key (list (cons 'title (file-name-base (buffer-name)))
                                      (cons 'time (format-time-string fountain-time-format))
                                      (cons 'fullname user-full-name)
@@ -4952,7 +4996,8 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     (define-key map (kbd "M-TAB") #'completion-at-point)
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
-    ;; FIXME: include-find-file feels like it should be C-c C-c...
+    ;; FIXME: `fountain-include-find-file' feels like it should be C-c C-c,
+    ;; (currently mapped to `fountain-upcase-line').
     ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
     (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
@@ -5008,7 +5053,9 @@ keywords suitable for Font Lock."
      "---"
      ["Cycle Outline Visibility" fountain-outline-cycle]
      ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
-     ["Show All" outline-show-all]      ; FIXME: fountain-outline-show-all
+     ;; FIXME: this would be better as an alias, i.e.
+     ;; `fountain-outline-show-all'
+     ["Show All" outline-show-all]
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
