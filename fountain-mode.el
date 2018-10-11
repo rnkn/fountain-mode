@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 2.6.0
+;; Version: 2.6.1
 ;; Package-Requires: ((emacs "24.5"))
 
 ;; This file is not part of GNU Emacs.
@@ -142,7 +142,7 @@
 (eval-when-compile (require 'cl-lib))
 
 (defconst fountain-version
-  "2.6.0")
+  "2.6.1")
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
@@ -152,8 +152,7 @@
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
-  :group 'text
-  :link '(url-link "https://github.com/rnkn/fountain-mode"))
+  :group 'text)
 
 
 ;;; Obsolete Warnings
@@ -1169,7 +1168,8 @@ See <http://debbugs.gnu.org/24073>."
   "Match scene heading if point is at a scene heading, nil otherwise."
   (save-excursion
     (save-restriction
-      (widen)                           ;FIXME: Why?
+      ;; Widen the restriction to ensure the previous line really is blank.
+      (widen)
       (beginning-of-line)
       (and (looking-at fountain-scene-heading-regexp)
            (fountain-blank-before-p)))))
@@ -4480,7 +4480,7 @@ same script may result in errors in output."
                (characterp value)))
   :group 'fountain-scene-number)
 
-(defun fountain-scene-number-to-list (string) ; FIXME: alternate separators and starting char
+(defun fountain-scene-number-to-list (string)
   "Read scene number STRING and return a list.
 
 If `fountain-prefix-revised-scene-numbers' is non-nil:
@@ -4492,6 +4492,8 @@ Or if nil:
 
     \"10\" -> (10)
     \"10AA\" -> (10 1 1)"
+  ;; FIXME: does not account for user option `fountain-scene-number-separator'
+  ;; or `fountain-scene-number-first-revision'.
   (let (number revision)
     (when (stringp string)
       (if fountain-prefix-revised-scene-numbers
