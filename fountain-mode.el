@@ -312,8 +312,7 @@
   :options '(turn-on-visual-line-mode
              fountain-outline-hide-custom-level
              fountain-completion-update
-             turn-on-flyspell)
-  :group 'fountain)
+             turn-on-flyspell))
 
 (defcustom fountain-script-format "screenplay"
   "Default script format for editing and exporting.
@@ -322,8 +321,7 @@ Can be overridden in metadata with, e.g.
 
     format: teleplay"
   :type 'string
-  :safe 'string
-  :group 'fountain)
+  :safe 'string)
 
 (defcustom fountain-add-continued-dialog
   t
@@ -335,8 +333,7 @@ successively speaking characters with `fountain-continued-dialog-refresh'.
 When nil, remove `fountain-continued-dialog-string' with
 `fountain-continued-dialog-refresh'."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain)
+  :safe 'booleanp)
 
 (defcustom fountain-continued-dialog-string
   "(CONT'D)"
@@ -351,15 +348,13 @@ variable, first make sure to set `fountain-add-continued-dialog'
 to nil and run `fountain-continued-dialog-refresh', then make the
 changes desired."
   :type 'string
-  :safe 'stringp
-  :group 'fountain)
+  :safe 'stringp)
 
 (defcustom fountain-hide-emphasis-delim
   nil
   "If non-nil, make emphasis delimiters invisible."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
          (dolist (buffer (buffer-list))
@@ -375,7 +370,6 @@ changes desired."
   "If non-nil, make syntax characters invisible."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
          (dolist (buffer (buffer-list))
@@ -391,8 +385,7 @@ changes desired."
   "Format of date and time used when inserting `{{time}}'.
 See `format-time-string'."
   :type 'string
-  :safe 'stringp
-  :group 'fountain)
+  :safe 'stringp)
 
 (defcustom fountain-note-template
   " {{time}} - {{fullname}}: "
@@ -410,8 +403,7 @@ The default {{time}} - {{fullname}}: will insert something like:
 
     [[ 2017-12-31 - Alan Smithee: ]]"
   :type 'string
-  :safe 'stringp
-  :group 'fountain)
+  :safe 'stringp)
 
 
 ;;; Aligning
@@ -438,7 +430,6 @@ To disable element alignment, see `fountain-align-element'."
 This option does not affect file contents."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-section-heading
@@ -450,7 +441,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-scene-heading
@@ -462,7 +452,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-synopsis
@@ -474,7 +463,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-action
@@ -486,7 +474,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-character
@@ -498,7 +485,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-dialog
@@ -510,7 +496,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-paren
@@ -522,7 +507,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-trans
@@ -534,7 +518,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-align-center
@@ -546,7 +529,6 @@ This option does not affect file contents."
 This option does not affect file contents."
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-display-scene-numbers-in-margin
@@ -558,7 +540,6 @@ If nil, do not change scene number display.
 This option does affect file contents."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain-align
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defun fountain-get-align (option)
@@ -797,98 +778,79 @@ To switch between these levels, customize the value of
 
 (defface fountain
   '((t nil))
-  "Default base-level face for `fountain-mode' buffers."
-  :group 'fountain-faces)
+  "Default base-level face for `fountain-mode' buffers.")
 
 (defface fountain-action
   '((t nil))
-  "Default face for action."
-  :group 'fountain-faces)
+  "Default face for action.")
 
 (defface fountain-comment
   '((t (:inherit shadow)))
-  "Default face for comments (boneyard)."
-  :group 'fountain-faces)
+  "Default face for comments (boneyard).")
 
 (defface fountain-non-printing
   '((t (:inherit fountain-comment)))
-  "Default face for emphasis delimiters and syntax characters."
-  :group 'fountain-faces)
+  "Default face for emphasis delimiters and syntax characters.")
 
 (defface fountain-metadata-key
   '((t (:inherit font-lock-constant-face)))
-  "Default face for metadata keys."
-  :group 'fountain-faces)
+  "Default face for metadata keys.")
 
 (defface fountain-metadata-value
   '((t (:inherit font-lock-keyword-face)))
-  "Default face for metadata values."
-  :group 'fountain-faces)
+  "Default face for metadata values.")
 
 (defface fountain-page-break
   '((t (:inherit font-lock-constant-face)))
-  "Default face for page breaks."
-  :group 'fountain-faces)
+  "Default face for page breaks.")
 
 (defface fountain-page-number
   '((t (:inherit font-lock-warning-face)))
-  "Default face for page numbers."
-  :group 'fountain-faces)
+  "Default face for page numbers.")
 
 (defface fountain-scene-heading
   '((t (:inherit font-lock-function-name-face)))
-  "Default face for scene headings."
-  :group 'fountain-faces)
+  "Default face for scene headings.")
 
 (defface fountain-paren
   '((t (:inherit font-lock-builtin-face)))
-  "Default face for parentheticals."
-  :group 'fountain-faces)
+  "Default face for parentheticals.")
 
 (defface fountain-center
   '((t nil))
-  "Default face for centered text."
-  :group 'fountain-faces)
+  "Default face for centered text.")
 
 (defface fountain-note
   '((t (:inherit font-lock-comment-face)))
-  "Default face for notes."
-  :group 'fountain-faces)
+  "Default face for notes.")
 
 (defface fountain-section-heading
   '((t (:inherit font-lock-keyword-face)))
-  "Default face for section headings."
-  :group 'fountain-faces)
+  "Default face for section headings.")
 
 (defface fountain-synopsis
   '((t (:inherit font-lock-type-face)))
-  "Default face for synopses."
-  :group 'fountain-faces)
+  "Default face for synopses.")
 
 (defface fountain-character
   '((t (:inherit font-lock-variable-name-face)))
-  "Default face for characters."
-  :group 'fountain-faces)
+  "Default face for characters.")
 
 (defface fountain-dialog
   '((t (:inherit font-lock-string-face)))
-  "Default face for dialog."
-  :group 'fountain-faces)
+  "Default face for dialog.")
 
 (defface fountain-trans
   '((t (:inherit font-lock-builtin-face)))
-  "Default face for transitions."
-  :group 'fountain-faces)
+  "Default face for transitions.")
 
 (defface fountain-template
   '((t (:inherit font-lock-preprocessor-face)))
-  "Default face for template keys."
-  :group 'fountain-faces)
+  "Default face for template keys.")
 
 (defface fountain-auto-upcase-highlight
   '((t (:inherit hi-yellow)))
-  "Default face for highlighting line for auto-upcasing."
-  :group 'fountain-faces)
+  "Default face for highlighting line for auto-upcasing.")
 
 
 ;;; Initializing
@@ -1450,15 +1412,13 @@ WARNING: if you change this option after locking pages in a
 script, you may get incorrect output."
   :type '(choice integer
                  (list (cons (const :tag "US Letter" letter) integer)
-                       (cons (const :tag "A4" a4) integer)))
-  :group 'fountain-pages)
+                       (cons (const :tag "A4" a4) integer))))
 
 (defcustom fountain-pages-ignore-narrowing
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-pages)
+  :safe 'booleanp)
 
 (defvar fountain-page-count-timer
   nil)
@@ -1470,8 +1430,7 @@ script, you may get incorrect output."
   2.0
   "Idle time in seconds before calculating page count."
   :type 'number
-  :safe 'numberp
-  :group 'fountain-pages)
+  :safe 'numberp)
 
 (defcustom fountain-pages-show-in-mode-line
   nil
@@ -1480,7 +1439,6 @@ script, you may get incorrect output."
                  (const :tag "Show with manual update" force)
                  (const :tag "Show with automatic update" timer))
   :safe (lambda (value) (memq value '(nil force timer)))
-  :group 'fountain-pages
   :set (lambda (symbol value)
          (set-default symbol value)
          ;; Don't call fountain-count-pages-maybe while in the middle of
@@ -2211,72 +2169,63 @@ PostScript, and in calculating page length for page locking."
   "Cons cell of integers for indenting and filling section headings.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-scene-heading
   '(0 . 61)
   "Cons cell of integers for indenting and filling scene headings.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-action
   '(0 . 61)
   "Cons cell of integers for indenting and filling action.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-character
   '(20 . 38)
   "Cons cell of integers for indenting and filling character.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-paren
   '(15 . 26)
   "Cons cell of integers for indenting and filling parenthetical.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-dialog
   '(10 . 35)
   "Cons cell of integers for indenting and filling dialogue.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-trans
   '(42 . 16)
   "Cons cell of integers for indenting and filling transition.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-synopsis
   '(0 . 61)
   "Cons cell of integers for indenting and filling synopses.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 (defcustom fountain-fill-note
   '(0 . 61)
   "Cons cell of integers for indenting and filling notes.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
-               (integer :tag "Width"))
-  :group 'fountain-fill)
+               (integer :tag "Width")))
 
 
 ;;; Exporting
@@ -2305,8 +2254,7 @@ Note that comments (boneyard) are never included."
                                  (const :tag "Page Breaks" page-break)
                                  (const :tag "Synopses" synopsis)
                                  (const :tag "Notes" note)
-                                 (const :tag "Included Files" include)))
-  :group 'fountain-export)
+                                 (const :tag "Included Files" include))))
 
 (defcustom fountain-export-make-standalone
   t
@@ -2319,16 +2267,14 @@ If nil, export snippet, which only formats each element. This is
 useful when exporting parts of a script for inclusion in another
 document."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
+  :safe 'booleanp)
 
 (defcustom fountain-export-tmp-buffer-name
   "*Fountain %s Export*"
   "Name of export buffer when source buffer is not visiting a file.
 Passed to `format' with export format as single variable."
   :type 'string
-  :safe 'stringp
-  :group 'fountain-export)
+  :safe 'stringp)
 
 (define-obsolete-variable-alias 'fountain-export-default-command
   'fountain-export-default-function "fountain-mode-2.7.0")
@@ -2340,37 +2286,32 @@ Passed to `format' with export format as single variable."
                 (function-item fountain-export-buffer-to-fdx)
                 (function-item fountain-export-buffer-to-fountain)
                 (function-item fountain-export-buffer-to-txt)
-                (function-item fountain-export-shell-command))
-  :group 'fountain-export)
+                (function-item fountain-export-shell-command)))
 
 (defcustom fountain-export-page-size
   'letter
   "Paper size to use on export."
   :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4))
-  :group 'fountain-export)
+                (const :tag "A4" a4)))
 
 (defcustom fountain-export-font
   "Courier"
   "Font to use when exporting."
   :type '(string :tag "Font")
-  :safe 'stringp
-  :group 'fountain-export)
+  :safe 'stringp)
 
 (defcustom fountain-export-include-title-page
   t
   "If non-nil, include a title page in export."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain-export
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-export-contact-align-right
   nil
   "If non-nil, align title page contact block on the right."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
+  :safe 'booleanp)
 
 (defcustom fountain-export-number-first-page
   nil
@@ -2378,15 +2319,13 @@ Passed to `format' with export format as single variable."
 
 Traditionally, screenplays omit a page number on the first page."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
+  :safe 'booleanp)
 
 (defcustom fountain-export-include-scene-numbers
   nil
   "If non-nil, include scene numbers in export."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
+  :safe 'booleanp)
 
 (defcustom fountain-export-scene-heading-format
   '(double-space)
@@ -2394,22 +2333,19 @@ Traditionally, screenplays omit a page number on the first page."
 Options are: bold, double-space, underline."
   :type '(set (const :tag "Bold" bold)
               (const :tag "Double-spaced" double-space)
-              (const :tag "Underlined" underline))
-  :group 'fountain-export)
+              (const :tag "Underlined" underline)))
 
 (defcustom fountain-export-more-dialog-string
   "(MORE)"
   "String to append to dialog when breaking across pages."
   :type 'string
-  :safe 'stringp
-  :group 'fountain-export)
+  :safe 'stringp)
 
 (defcustom fountain-export-shell-command
   "afterwriting --source %s --pdf --overwrite"
   "Shell command string to convert Fountain source to ouput.
 `%s' will be substituted with `buffer-file-name'"
-  :type 'string
-  :group 'fountain-export)
+  :type 'string)
 
 (defcustom fountain-export-use-title-as-filename
   nil
@@ -2418,8 +2354,7 @@ Options are: bold, double-space, underline."
 This is useful if you are exporting to Fountain and need to
 specify a different filename."
   :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
+  :safe 'booleanp)
 
 (defvar fountain-export-formats
   '((html
@@ -2974,8 +2909,7 @@ Command acts on current buffer or BUFFER."
 {{contact}}
 {{date}}\n\n"
   "Template for plaintext title page."
-  :type 'string
-  :group 'fountain-plaintext-export)
+  :type 'string)
 
 (defcustom fountain-export-txt-template
   '((document "{{title-page}}{{content}}")
@@ -2995,14 +2929,12 @@ Command acts on current buffer or BUFFER."
     (note "[ note: {{content}} ]\n\n")
     (center "{{content}}\n\n"))
   (define-fountain-export-template-docstring 'txt)
-  :type 'fountain-element-list-type
-  :group 'fountain-plaintext-export)
+  :type 'fountain-element-list-type)
 
 (defcustom fountain-export-txt-hook
   nil
   "Hook run with export buffer on sucessful export to plaintext."
-  :type 'hook
-  :group 'fountain-plaintext-export)
+  :type 'hook)
 
 (defun fountain-export-buffer-to-txt ()
   "Convenience function for exporting buffer to plaintext."
@@ -3105,8 +3037,7 @@ Command acts on current buffer or BUFFER."
 <p class=\"contact\">{{contact}}</p>
 </section>"
   "Template for HTML title page."
-  :type 'string
-  :group 'fountain-html-export)
+  :type 'string)
 
 (defcustom fountain-export-html-template
   '((document "\
@@ -3142,8 +3073,7 @@ Command acts on current buffer or BUFFER."
     (note "<p class=\"note\">{{content}}</p>\n")
     (center "<p class=\"center\">{{content}}</p>\n"))
   (define-fountain-export-template-docstring 'html)
-  :type 'fountain-element-list-type
-  :group 'fountain-html-export)
+  :type 'fountain-element-list-type)
 
 (defcustom fountain-export-html-stylesheet
   "\
@@ -3266,8 +3196,7 @@ Screenplay content is wrapped in class \"screenplay\", which
 means all screenplay elements require the \".screenplay\" class
 parent."
   :type 'string
-  :link '(url-link "https://github.com/rnkn/mcqueen")
-  :group 'fountain-html-export)
+  :link '(url-link "https://github.com/rnkn/mcqueen"))
 
 (defcustom fountain-export-html-title-template
   "<div class=\"title\">{{title-template}}</div>
@@ -3277,14 +3206,12 @@ parent."
 <p class=\"contact\">{{contact-template}}</p>
 "
   "HTML template for title page export."
-  :type 'string
-  :group 'fountain-html-export)
+  :type 'string)
 
 (defcustom fountain-export-html-hook
   nil
   "Hook run with export buffer on sucessful export to HTML."
-  :type 'hook
-  :group 'fountain-html-export)
+  :type 'hook)
 
 (defun fountain-export-buffer-to-html ()
   "Convenience function for exporting buffer to HTML."
@@ -3326,8 +3253,7 @@ parent."
 }
 \\clearpage"
   "Template for LaTeX title page."
-  :type 'string
-  :group 'fountain-latex-export)
+  :type 'string)
 
 (defcustom fountain-export-tex-template
   '((document "\
@@ -3504,14 +3430,12 @@ parent."
     (note nil)
     (center "\\centertext{{{content}}}\n\n"))
   (define-fountain-export-template-docstring 'tex)
-  :type 'fountain-element-list-type
-  :group 'fountain-latex-export)
+  :type 'fountain-element-list-type)
 
 (defcustom fountain-export-tex-hook
   nil
   "Hook run with export buffer on sucessful export to LaTeX."
-  :type 'hook
-  :group 'fountain-latex-export)
+  :type 'hook)
 
 (defun fountain-export-buffer-to-latex ()
   "Convenience function for exporting buffer to LaTeX."
@@ -3551,8 +3475,7 @@ parent."
 </Content>
 </TitlePage>"
   "Template for Final Draft title page."
-  :type 'string
-  :group 'fountain-final-draft-export)
+  :type 'string)
 
 (defcustom fountain-export-fdx-template
   '((document "\
@@ -3579,14 +3502,12 @@ parent."
     (note nil)
     (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
   (define-fountain-export-template-docstring 'fdx)
-  :type 'fountain-element-list-type
-  :group 'fountain-final-draft-export)
+  :type 'fountain-element-list-type)
 
 (defcustom fountain-export-fdx-hook
   nil
   "Hook run with export buffer on sucessful export to Final Draft."
-  :type 'hook
-  :group 'fountain-final-draft-export)
+  :type 'hook)
 
 (defun fountain-export-buffer-to-fdx ()
   "Convenience function for exporting buffer to Final Draft."
@@ -3610,8 +3531,7 @@ date: {{date}}
 contact: {{contact}}"
   "Template for Fountain title page.
 This just adds the current metadata to the exported file."
-  :type 'string
-  :group 'fountain-fountain-export)
+  :type 'string)
 
 (defcustom fountain-export-fountain-template
   '((document "\
@@ -3634,14 +3554,12 @@ This just adds the current metadata to the exported file."
     (note "[[ {{content}} ]]\n\n")
     (center "> {{content}} <"))
   (define-fountain-export-template-docstring 'fountain)
-  :type 'fountain-element-list-type
-  :group 'fountain-fountain-export)
+  :type 'fountain-element-list-type)
 
 (defcustom fountain-export-fountain-hook
   nil
   "Hook run with export buffer on sucessful export to Fountain."
-  :type 'hook
-  :group 'fountain-fountain-export)
+  :type 'hook)
 
 (defun fountain-export-buffer-to-fountain ()
   "Convenience function for exporting buffer to Fountain."
