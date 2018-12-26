@@ -7,8 +7,6 @@
 ;; Version: 2.6.1
 ;; Package-Requires: ((emacs "24.5"))
 
-;; This file is not part of GNU Emacs.
-
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or (at
@@ -27,9 +25,9 @@
 ;; Fountain Mode
 ;; =============
 
-;; Fountain Mode is a complete screenwriting environment for GNU Emacs
-;; using the Fountain markup format. For more information on the Fountain markup
-;; format, visit <http://fountain.io>.
+;; Fountain Mode is a screenwriting environment for GNU Emacs using the Fountain
+;; markup format. For more information on the Fountain markup format, visit
+;; <http://fountain.io>.
 
 ;; Features
 ;; --------
@@ -78,62 +76,20 @@
 ;; ------------
 
 ;; - Emacs 24.5
-;; - LaTeX packages for PDF export: `geometry` `fontspec` `titling` `fancyhdr`
-;;   `marginnote` `ulem` `xstring` `oberdiek`
+;; - LaTeX packages for PDF export: geometry fontspec titling fancyhdr
+;;   marginnote ulem xstring oberdiek
 
 ;; Installation
 ;; ------------
 
-;; For users on OS X with no experience with Emacs, see the
-;; [Absolute Beginner's Guide (macOS)][guide].
+;; Fountain Mode is now part of GNU ELPA and can be installed with `M-x
+;; package-install RET fountain-mode RET`.
 
-;; The latest stable release of Fountain Mode is available via
-;; [MELPA-stable](http://stable.melpa.org/#/fountain-mode).
+;; Reporting Bugs
+;; --------------
 
-;; Alternately, download the [latest release], move the files into your
-;; `load-path` and add the following line to your `.emacs` or `init.el` file:
-
-;;     (require 'fountain-mode)
-
-;; If you prefer the latest but perhaps unstable version, install via
-;; [MELPA], or clone the repository into your `load-path` and require as
-;; above:
-
-;;     git clone https://github.com/rnkn/fountain-mode.git
-
-;; Users of Debian ≥10 or Ubuntu ≥18.04 can install Fountain Mode with the following command:
-
-;;     sudo apt install elpa-fountain-mode
-
-;; [guide]: https://github.com/rnkn/fountain-mode/wiki/Absolute-Beginner's-Guide-(macOS) "Absolute Beginner's Guide (macOS)"
-;; [melpa]: https://melpa.org/#/fountain-mode "MELPA"
-;; [melpa-stable]: https://stable.melpa.org/#/fountain-mode "MELPA-stable"
-;; [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
-
-;; Bugs and Feature Requests
-;; -------------------------
-
-;; Please raise an issue on [Issues](https://github.com/rnkn/fountain-mode/issues).
-
-;; - Emacs versions prior to 26 have a bug with `visual-line-mode` that produces erratic
-;;   navigation behavior when displaying very long lines. More information here:
-;;   <https://debbugs.gnu.org/23879>
-
-;; Roadmap
-;; -------
-
-;; See [Roadmap](https://github.com/rnkn/fountain-mode/projects/2).
-
-;; History
-;; -------
-
-;; See [Releases](https://github.com/rnkn/fountain-mode/releases).
-
-;; Tips
-;; ----
-
-;; Ethereum address 0x209C60afd8aF6c61ac4Dbe340d81D4f789DF64D3
-;; Bitcoin Cash address qp0n3z88mmq06xv9mvkwuur9289qhnyg2gl45tlhxf
+;; To report bugs, please use `M-x report-emacs-bug RET` or send an email to
+;; <bug-gnu-emacs@gnu.org>
 
 
 ;;; Code:
