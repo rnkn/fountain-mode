@@ -1210,23 +1210,12 @@ Assumes that all other element matching has been done."
 (defvar-local fountain-completion-characters
   nil
   "List of characters in the current buffer.
-Each element is a cons (NAME . PRIORITY)  where NAME is a string, and
-PRIORITY is an integer.
+Each element is a cons (NAME . OCCUR) where NAME is a string, and
+OCCUR is an integer representing the character's number of
+occurrences. ")
 
-n.b. The priority value does not equate to the number of lines
-the character has.")
-
-(defvar-local fountain--edit-line
-  nil
-  "Line number currently being edited.
-Prevents incomplete strings added to candidates.")
-
-(defun fountain-completion-update-scene-headings (start end)
-  "Update `fountain-completion-scene-headings' between START and END.
-
-Added to `jit-lock-functions'."
-  ;; FIXME: Doing this within jit-lock is unreliable.  It should be done within
-  ;; *-change-functions instead!
+(defun fountain-completion-update-scene-headings (start end &optional length)
+  "Update `fountain-completion-scene-headings' between START and END."
   (goto-char end)
   (if (fountain-match-scene-heading)
       (forward-line)
@@ -1235,20 +1224,14 @@ Added to `jit-lock-functions'."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (when (and (not (and (integerp fountain--edit-line)
-                         (= fountain--edit-line (line-number-at-pos))))
-               (fountain-match-scene-heading))
+    (when (fountain-match-scene-heading)
       (let ((scene-heading (match-string-no-properties 2)))
         (unless (member scene-heading fountain-completion-scene-headings)
           (push scene-heading fountain-completion-scene-headings))))
     (fountain-forward-scene 1)))
 
-(defun fountain-completion-update-characters (start end)
-  "Update `fountain-completion-characters' between START and END.
-
-Added to `jit-lock-functions'."
-  ;; FIXME: Doing this within jit-lock is unreliable.  It should be done within
-  ;; *-change-functions instead!
+(defun fountain-completion-update-characters (start end &optional length)
+  "Update `fountain-completion-characters' between START and END."
   (goto-char end)
   (if (fountain-match-scene-heading)
       (forward-line)
@@ -1257,9 +1240,7 @@ Added to `jit-lock-functions'."
   (goto-char start)
   (fountain-forward-scene 0)
   (while (< (point) end)
-    (when (and (not (and (integerp fountain--edit-line)
-                         (= fountain--edit-line (line-number-at-pos))))
-               (fountain-match-character))
+    (when (fountain-match-character)
       (let* ((character (match-string-no-properties 4))
              (candidate (assoc-string character fountain-completion-characters))
              (n (cdr candidate)))
@@ -1320,26 +1301,18 @@ scene heading, return `fountain-scene-heading-candidates'. If
 previous line is blank, return result of
 `fountain-completion-get-characters'.
 
-Set `completion-in-region-mode-map' to nil to retain TAB
-keybinding.
-
 Added to `completion-at-point-functions'."
-  (let (completion-in-region-mode-map jit-lock-mode)
-    (list (line-beginning-position)
-          (point)
-          (completion-table-case-fold
-           (cond
-            ((fountain-match-scene-heading)
-             fountain-completion-scene-headings)
-            ((fountain-blank-before-p)
-             (fountain-completion-get-characters)))))))
+  (list (line-beginning-position)
+        (point)
+        (completion-table-case-fold
+         (cond
+          ((fountain-match-scene-heading)
+           fountain-completion-scene-headings)
+          ((fountain-blank-before-p)
+           (fountain-completion-get-characters))))))
 
 (defun fountain-completion-update ()
-  "Create new completion candidates for current buffer.
-
-Completion candidates are usually updated automatically with
-`jit-lock-mode', however this command will add completion
-candidates for the entire buffer.
+  "Update completion candidates for current buffer.
 
 Add to `fountain-mode-hook' to have full completion upon load."
   (interactive)
@@ -4092,50 +4065,6 @@ If nil, auto-upcase is deactivated.")
       (funcall fountain-tab-function arg)
     (wrong-number-of-arguments (funcall fountain-tab-function))))
 
-(defun fountain-auto-upcase-make-overlay ()
-  "Make the auto-upcase overlay on current line.
-
-If overlay `fountain--auto-upcase-overlay' already exists, delete
-it first.
-
-Make the overlay and add the face
-`fountain-auto-upcase-highlight'."
-  (when (overlayp fountain--auto-upcase-overlay)
-    (delete-overlay fountain--auto-upcase-overlay))
-  (setq fountain--auto-upcase-overlay
-        (make-overlay (line-beginning-position 1)
-                      (line-beginning-position 2) nil nil t))
-  (overlay-put fountain--auto-upcase-overlay 'face 'fountain-auto-upcase-highlight))
-
-(defun fountain-auto-upcase-deactivate-maybe (&optional deactivate)
-  "Maybe deactivate auto-upcasing.
-Always deactivate if optional argument DEACTIVATE is non-nil.
-
-Added as hook to `post-command-hook'."
-  (when (or deactivate
-            (and (integerp fountain--auto-upcase-line)
-                 (/= fountain--auto-upcase-line (line-number-at-pos))))
-    (setq fountain--auto-upcase-line nil)
-    (when (overlayp fountain--auto-upcase-overlay)
-      (delete-overlay fountain--auto-upcase-overlay))
-    (message "Auto-upcasing deactivated")))
-
-(defun fountain-toggle-auto-upcase ()
-  "Toggle line auto-upcasing.
-
-Upcase the current line, and continue to upcase inserted
-characters until either disabled, or point moves to a different
-line (by inserting a newline or by point motion).
-
-The auto-upcased line is highlighted with face
-`fountain-auto-upcase-highlight'"
-  (interactive)
-  (if fountain--auto-upcase-line
-      (fountain-auto-upcase-deactivate-maybe t)
-    (setq fountain--auto-upcase-line (line-number-at-pos))
-    (message "Auto-upcasing activated")
-    (fountain-auto-upcase)))
-
 (defun fountain-auto-upcase ()
   "Upcase all or part of the current line contextually.
 
@@ -4146,18 +4075,9 @@ to scene number or point.
 Otherwise, activate auto-upcasing for the whole line.
 
 Added as hook to `post-self-insert-hook'."
-  (cond ((and fountain-auto-upcase-scene-headings
-              (fountain-match-scene-heading))
-         (unless (and (integerp fountain--auto-upcase-line)
-                      (= fountain--auto-upcase-line (line-number-at-pos)))
-           (setq fountain--auto-upcase-line (line-number-at-pos))
-           (message "Auto-upcasing activated"))
-         (fountain-auto-upcase-make-overlay)
-         (upcase-region (line-beginning-position) (or (match-end 2) (point))))
-        ((and (integerp fountain--auto-upcase-line)
-              (= fountain--auto-upcase-line (line-number-at-pos)))
-         (fountain-auto-upcase-make-overlay)
-         (fountain-upcase-line))))
+  (when (and fountain-auto-upcase-scene-headings
+             (fountain-match-scene-heading))
+    (upcase-region (line-beginning-position) (or (match-end 2) (point)))))
 
 (defun fountain-dwim (&optional arg)
   "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
@@ -5121,17 +5041,11 @@ keywords suitable for Font Lock."
   :group 'fountain
   (fountain-init-vars)
   (face-remap-add-relative 'default 'fountain)
-  (add-hook 'post-command-hook #'fountain-set-edit-line nil t)
-  (add-hook 'post-command-hook #'fountain-auto-upcase-deactivate-maybe nil t)
   (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
   (when fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
-  (jit-lock-register #'fountain-redisplay-scene-numbers)
+  (jit-lock-register #'fountain-redisplay-scene-numbers))
   ;; FIXME: Merge those two functions into one (and move them to
   ;; *-change-functions)
-  (jit-lock-register #'fountain-completion-update-scene-headings)
-  (jit-lock-register #'fountain-completion-update-characters)
-  (fountain-init-mode-line)
-  (fountain-restart-page-count-timer))
 
 (provide 'fountain-mode)
 
