@@ -4802,7 +4802,7 @@ keywords suitable for Font Lock."
      ["Shift Element Down" fountain-shift-down]
      "---"
      ["Shift All Elements" (customize-set-variable 'fountain-shift-all-elements
-                                                   (not fountain-shift-all-elements))
+                                             (not fountain-shift-all-elements))
       :style toggle
       :selected fountain-shift-all-elements])
     ("Scene Numbers"
@@ -4835,10 +4835,12 @@ keywords suitable for Font Lock."
      "---"
      ["Run Shell Command" fountain-export-shell-command]
      "---"
-     ["US Letter Page Size" (customize-set-variable 'fountain-export-page-size 'letter)
+     ["US Letter Page Size" (customize-set-variable 'fountain-export-page-size
+                                                    'letter)
       :style radio
       :selected (eq fountain-export-page-size 'letter)]
-     ["A4 Page Size" (customize-set-variable 'fountain-export-page-size 'a4)
+     ["A4 Page Size" (customize-set-variable 'fountain-export-page-size
+                                             'a4)
       :style radio
       :selected (eq fountain-export-page-size 'a4)]
      "---"
@@ -4850,25 +4852,25 @@ keywords suitable for Font Lock."
      ["Bold Scene Headings"
       (if (memq 'bold fountain-export-scene-heading-format)
           (customize-set-variable 'fountain-export-scene-heading-format
-                                  (remq 'bold fountain-export-scene-heading-format))
+                             (remq 'bold fountain-export-scene-heading-format))
         (customize-set-variable 'fountain-export-scene-heading-format
-                                (cons 'bold fountain-export-scene-heading-format)))
+                            (cons 'bold fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'bold fountain-export-scene-heading-format)]
      ["Double-Space Scene Headings"
       (if (memq 'double-space fountain-export-scene-heading-format)
           (customize-set-variable 'fountain-export-scene-heading-format
-                                  (remq 'double-space fountain-export-scene-heading-format))
+                     (remq 'double-space fountain-export-scene-heading-format))
         (customize-set-variable 'fountain-export-scene-heading-format
-                                (cons 'double-space fountain-export-scene-heading-format)))
+                    (cons 'double-space fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'double-space fountain-export-scene-heading-format)]
      ["Underline Scene Headings"
       (if (memq 'underline fountain-export-scene-heading-format)
           (customize-set-variable 'fountain-export-scene-heading-format
-                                  (remq 'underline fountain-export-scene-heading-format))
+                        (remq 'underline fountain-export-scene-heading-format))
         (customize-set-variable 'fountain-export-scene-heading-format
-                                (cons 'underline fountain-export-scene-heading-format)))
+                       (cons 'underline fountain-export-scene-heading-format)))
       :style toggle
       :selected (memq 'underline fountain-export-scene-heading-format)]
      "---"
