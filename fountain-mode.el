@@ -804,10 +804,6 @@ To switch between these levels, customize the value of
   '((t (:inherit font-lock-preprocessor-face)))
   "Default face for template keys.")
 
-(defface fountain-auto-upcase-highlight
-  '((t (:inherit hi-yellow)))
-  "Default face for highlighting line for auto-upcasing.")
-
 
 ;;; Initializing
 
