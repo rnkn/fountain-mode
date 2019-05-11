@@ -1310,7 +1310,7 @@ Added to `completion-at-point-functions'."
 (defun fountain-completion-update ()
   "Update completion candidates for current buffer.
 
-Add to `fountain-mode-hook' to have full completion upon load."
+Add to `fountain-mode-hook' to have completion upon load."
   (interactive)
   (setq fountain-completion-scene-headings nil
         fountain-completion-characters nil)
@@ -2181,8 +2181,7 @@ Passed to `format' with export format as single variable."
   t
   "If non-nil, include a title page in export."
   :type 'boolean
-  :safe 'booleanp
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :safe 'booleanp)
 
 (defcustom fountain-export-contact-align-right
   nil
@@ -4164,14 +4163,14 @@ WARNING: Using conflicting revised scene number format in the
 same script may result in errors in output."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain)
+  :group 'fountain-scene-numbers)
 
 (defcustom fountain-scene-number-first-revision
   ?A
   "Character to start revised scene numbers."
   :type 'character
   :safe 'characterp
-  :group 'fountain-scene-number)
+  :group 'fountain-scene-numbers)
 
 (defcustom fountain-scene-number-separator
   nil
@@ -4181,7 +4180,7 @@ same script may result in errors in output."
   :safe '(lambda (value)
            (or (null value)
                (characterp value)))
-  :group 'fountain-scene-number)
+  :group 'fountain-scene-numbers)
 
 (defun fountain-scene-number-to-list (string)
   "Read scene number STRING and return a list.
@@ -4953,8 +4952,6 @@ keywords suitable for Font Lock."
   (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
   (when fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers))
-  ;; FIXME: Merge those two functions into one (and move them to
-  ;; *-change-functions)
 
 (provide 'fountain-mode)
 
