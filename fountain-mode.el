@@ -4814,25 +4814,11 @@ keywords suitable for Font Lock."
                               (not fountain-display-scene-numbers-in-margin))
       :style toggle
       :selected fountain-display-scene-numbers-in-margin])
-    ("Page Numbers"
-     ["Count Pages" fountain-count-pages]
-     "---"
-     ["Don't Show in Mode Line"
-      (customize-set-variable 'fountain-pages-show-in-mode-line nil)
-      :style radio
-      :selected (not fountain-pages-show-in-mode-line)]
-     ["Show in Mode Line with Manual Update"
-      (customize-set-variable 'fountain-pages-show-in-mode-line 'force)
-      :style radio
-      :selected (eq fountain-pages-show-in-mode-line 'force)]
-     ["Show in Mode Line with Automatic Update"
-      (customize-set-variable 'fountain-pages-show-in-mode-line 'timer)
-      :style radio
-      :selected (eq fountain-pages-show-in-mode-line 'timer)])
     "---"
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
+    ["Count Pages" fountain-count-pages]
     ["Insert Page Break..." fountain-insert-page-break]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
@@ -4954,7 +4940,6 @@ keywords suitable for Font Lock."
                       fountain-auto-upcase-scene-headings
                       fountain-add-continued-dialog
                       fountain-display-scene-numbers-in-margin
-                      fountain-pages-show-in-mode-line
                       fountain-hide-emphasis-delim
                       fountain-hide-syntax-chars
                       fountain-shift-all-elements
