@@ -4,7 +4,7 @@
 
 ;; Author: Paul Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 2.6.2
+;; Version: 2.7.0
 ;; Package-Requires: ((emacs "24.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -98,7 +98,7 @@
 (eval-when-compile (require 'cl-lib))
 
 (defconst fountain-version
-  "2.6.1")
+  "2.7.0")
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
