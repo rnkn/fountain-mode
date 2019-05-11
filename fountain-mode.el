@@ -3972,57 +3972,18 @@ halt at end of scene."
 
 ;;; Editing
 
-(require 'help)
-
-(defun fountain-set-edit-line ()
-  "Set `fountain--edit-line' to current line.
-
-Added to `post-command-hook'."
-  (setq fountain--edit-line (line-number-at-pos)))
-
 (defcustom fountain-auto-upcase-scene-headings
   t
   "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
   :type 'boolean
   :group 'fountain)
 
-(defvar-local fountain--auto-upcase-line
-  nil
-  "Integer of line number to auto-upcase.
-If nil, auto-upcase is deactivated.")
-
-(defvar-local fountain--auto-upcase-overlay
-  nil
-  "Overlay used for auto-upcasing current line.")
-
-(define-obsolete-variable-alias 'fountain-tab-command
-  'fountain-tab-function "fountain-mode-2.7.0")
-(defcustom fountain-tab-function
-  #'fountain-dwim
-  "Command to call when pressing the TAB key."
-  :type '(radio (function-item fountain-dwim)
-                (function-item fountain-outline-cycle)
-                (function-item fountain-toggle-auto-upcase)
-                (function-item completion-at-point))
-  :group 'fountain)
-
-(defun fountain-tab-action (&optional arg)
-  "Simply calls the value of variable `fountain-tab-function'."
-  (interactive "p")
-  (condition-case nil
-      (funcall fountain-tab-function arg)
-    (wrong-number-of-arguments (funcall fountain-tab-function))))
-
 (defun fountain-auto-upcase ()
   "Upcase all or part of the current line contextually.
 
 If `fountain-auto-upcase-scene-headings' is non-nil and point is
 at a scene heading, activate auto upcasing for beginning of line
-to scene number or point.
-
-Otherwise, activate auto-upcasing for the whole line.
-
-Added as hook to `post-self-insert-hook'."
+to scene number or point."
   (when (and fountain-auto-upcase-scene-headings
              (fountain-match-scene-heading))
     (upcase-region (line-beginning-position) (or (match-end 2) (point)))))
