@@ -1637,60 +1637,12 @@ number."
             (setq current total found t)))
         (cons current total)))))
 
-(defun fountain-count-pages (&optional interactive)
-  "Return the approximate current page of total pages in current buffer.
-
-If called interactively, sets INTERACTIVE as non-nil
-unconditionally and prints a message in the echo area."
-  (interactive "p")
-  (fountain-pages-update-mode-line)
-  (redisplay)
+(defun fountain-count-pages ()
+  "Message the current page of total pages in current buffer.
+n.b. This is an approximate calculation."
+  (interactive)
   (let ((pages (fountain-get-page-count)))
-    (fountain-pages-update-mode-line (car pages) (cdr pages))
-    (when interactive
-      (message "Page %d of %d" (car pages) (cdr pages)))))
-
-(defun fountain-pages-update-mode-line (&optional current total)
-  (setq fountain-page-count-string
-        (if fountain-pages-show-in-mode-line
-            (if (and current total)
-                (format "[%d/%d] " current total)
-              "[-/-] ")
-          nil))
-  (force-mode-line-update))
-
-(defun fountain-count-pages-maybe (&optional force)
-  (when (derived-mode-p 'fountain-mode)
-    (while-no-input
-      (redisplay)
-      (cond (force
-             (fountain-count-pages))
-            ((eq fountain-pages-show-in-mode-line 'timer)
-             (fountain-count-pages))
-            ((and fountain-page-count-string
-                  (not fountain-pages-show-in-mode-line))
-             (fountain-pages-update-mode-line))))))
-
-(defun fountain-init-mode-line ()
-  (let ((tail (cdr (memq 'mode-line-modes mode-line-format))))
-    (setq mode-line-format
-          (append
-           (butlast mode-line-format (length tail))
-           (cons 'fountain-page-count-string tail)))))
-
-(defun fountain-cancel-page-count-timer ()
-  (when (timerp fountain-page-count-timer)
-    (cancel-timer fountain-page-count-timer))
-  (setq fountain-page-count-timer nil))
-
-(defun fountain-restart-page-count-timer ()
-  (fountain-cancel-page-count-timer)
-  (setq fountain-page-count-timer
-        ;; FIXME: `fountain-count-pages-maybe' only operates in the "current"
-        ;; buffer, but that will be the buffer that happens to be current when
-        ;; the timer is run.
-        (run-with-idle-timer fountain-pages-count-delay t
-                             #'fountain-count-pages-maybe)))
+    (message "Page %d of %d" (car pages) (cdr pages))))
 
 
 ;;; Templating
