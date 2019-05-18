@@ -1318,7 +1318,7 @@ characters from `fountain-completion-characters'."
 
 (defun fountain-completion-at-point ()
   "\\<fountain-mode-map>Return completion table for entity at point.
-Trigger completion with \\[completion-at-point].
+Trigger completion with \\[fountain-dwim].
 
 Always delimits entity from beginning of line to point. If at a
 scene heading, return `fountain-scene-heading-candidates'. If
@@ -4714,13 +4714,14 @@ keywords suitable for Font Lock."
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Editing commands:
-    (define-key map (kbd "TAB") #'fountain-tab-action)
+    (define-key map (kbd "TAB") #'fountain-dwim)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
     (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
+    (define-key map (kbd "C-c C-o") #'fountain-include-find-file)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
@@ -4728,9 +4729,6 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     (define-key map (kbd "M-TAB") #'completion-at-point)
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
-    ;; FIXME: `fountain-include-find-file' feels like it should be C-c C-c,
-    ;; (currently mapped to `fountain-upcase-line').
-    ;; (define-key map (kbd "C-c C-c") #'fountain-include-find-file)
     ;; Navigation commands:
     (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
     (define-key map [remap end-of-defun] #'fountain-end-of-scene)
