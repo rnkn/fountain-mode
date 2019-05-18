@@ -576,6 +576,22 @@ e.g.
 
 Requires `fountain-match-scene-heading' for preceding blank line.")
 
+(defcustom fountain-scene-heading-suffix-sep
+  " - "
+  "String separating scene heading location from suffix."
+  :type 'string
+  :safe 'string
+  :set #'fountain--set-and-refresh-all-font-lock)
+
+(defcustom fountain-scene-heading-suffix-list
+  '("DAY" "NIGHT" "LATER" "MOMENTS LATER" "CONTINUOUS")
+  "List of scene heading suffixes (case insensitive).
+
+These are separated from scene heading locations with
+`fountain-scene-heading-suffix-sep'."
+  :type '(repeat (string :tag "Suffix"))
+  :set #'fountain--set-and-refresh-all-font-lock)
+
 (defvar fountain-trans-regexp
   nil
   "Regular expression for matching transitions.
@@ -893,33 +909,35 @@ scene heading regular expression."
          ;; Group 2: match scene heading without scene number
          "\\(?2:\\<"
          ;; Group 4: match location
-         "\\(?4:.+?\\)[\s\t]*"
-         ;; Group 5: match time of day
-         "\\(?:--?[\s\t]*\\(?5:.+?\\)\\)?"
+         "\\(?4:.+?\\)"
+         ;; Group 5: match suffix separator
+         "\\(?:\\(?5:" fountain-scene-heading-suffix-sep "\\)"
+         ;; Group 6: match suffix
+         "\\(?6:.+\\)?\\)?"
          "\\)\\|"
          ;;; Match normal scene heading
          ;; Group 2: match scene heading without scene number
          "^\\(?2:"
          ;; Group 3: match INT/EXT
-         "\\(?3:"
-         (regexp-opt fountain-scene-heading-prefix-list)
-         "\\)[.\s\t][\s\t]*"
+         "\\(?3:" (regexp-opt fountain-scene-heading-prefix-list) ".?\s+\\)"
          ;; Group 4: match location
-         "\\(?4:.+?\\)[\s\t]*"
-         ;; Group 5: match time of day
-         "\\(?:--?[\s\t]*\\(?5:.+?\\)\\)?"
+         "\\(?4:.+?\\)?"
+         ;; Group 5: match suffix separator
+         "\\(?:\\(?5:" fountain-scene-heading-suffix-sep "\\)"
+         ;; Group 6: match suffix
+         "\\(?6:.+\\)?\\)?"
          "\\)\\)"
          ;;; Match scene number
          "\\(?:"
-         ;; Group 6: match space between scene heading and scene number
-         "\\(?6:[\s\t]+\\)"
-         ;; Group 7: match first # delimiter
-         "\\(?7:#\\)"
-         ;; Group 8: match scene number
-         "\\(?8:[0-9a-z\\.-]+\\)"
-         ;; Group 9: match last # delimiter
-         "\\(?9:#\\)\\)?"
-         "[\s\t]*$")))
+         ;; Group 7: match space between scene heading and scene number
+         "\\(?7:\s+\\)"
+         ;; Group 8: match first # delimiter
+         "\\(?8:#\\)"
+         ;; Group 9: match scene number
+         "\\(?9:[0-9a-z\\.-]+\\)"
+         ;; Group 10: match last # delimiter
+         "\\(?10:#\\)\\)?"
+         "\s*$")))
 
 (defun fountain-init-trans-regexp ()
   "Initialize transition regular expression.
@@ -1249,7 +1267,7 @@ occurrences. ")
   (fountain-forward-scene 0)
   (while (< (point) end)
     (when (fountain-match-scene-heading)
-      (let ((scene-heading (match-string-no-properties 2)))
+      (let ((scene-heading (match-string-no-properties 4)))
         (unless (member scene-heading fountain-completion-scene-headings)
           (push scene-heading fountain-completion-scene-headings))))
     (fountain-forward-scene 1)))
@@ -1326,14 +1344,33 @@ previous line is blank, return result of
 `fountain-completion-get-characters'.
 
 Added to `completion-at-point-functions'."
-  (list (line-beginning-position)
-        (point)
-        (completion-table-case-fold
-         (cond
-          ((fountain-match-scene-heading)
-           fountain-completion-scene-headings)
-          ((fountain-blank-before-p)
-           (fountain-completion-get-characters))))))
+  (cond ((and (fountain-match-scene-heading)
+              (match-string 5))
+         ;; Return scene heading suffix completion
+         (list (match-end 5)
+               (point)
+               (completion-table-case-fold
+                fountain-scene-heading-suffix-list)))
+        ((and (fountain-match-scene-heading)
+              (match-string 3))
+         ;; Return scene location completion
+         (list (match-end 3)
+               (point)
+               (completion-table-case-fold
+                fountain-completion-scene-headings)))
+        ((and (fountain-match-scene-heading)
+              (match-string 1))
+         ;; Return scene location completion (forced)
+         (list (match-end 1)
+               (point)
+               (completion-table-case-fold
+                fountain-completion-scene-headings)))
+        ((fountain-blank-before-p)
+         ;; Return character completion
+         (list (line-beginning-position)
+               (point)
+               (completion-table-case-fold
+                (fountain-completion-get-characters))))))
 
 (defun fountain-completion-update ()
   "Update completion candidates for current buffer.
