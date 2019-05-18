@@ -1373,34 +1373,6 @@ script, you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
-(defvar fountain-page-count-timer
-  nil)
-
-(defvar-local fountain-page-count-string
-  nil)
-
-(defcustom fountain-pages-count-delay
-  2.0
-  "Idle time in seconds before calculating page count."
-  :type 'number
-  :safe 'numberp)
-
-(defcustom fountain-pages-show-in-mode-line
-  nil
-  "If non-nil show current page of total pages in mode-line."
-  :type '(choice (const :tag "No page count" nil)
-                 (const :tag "Show with manual update" force)
-                 (const :tag "Show with automatic update" timer))
-  :safe (lambda (value) (memq value '(nil force timer)))
-  :set (lambda (symbol value)
-         (set-default symbol value)
-         ;; Don't call fountain-count-pages-maybe while in the middle of
-         ;; loading this file!
-         (when (featurep 'fountain-mode)
-           (dolist (buffer (buffer-list))
-             (with-current-buffer buffer
-               (fountain-count-pages-maybe value))))))
-
 (defvar fountain-elements
   '((section-heading
      :tag "Section Heading"
