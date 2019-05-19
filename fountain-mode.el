@@ -7,6 +7,8 @@
 ;; Version: 2.7.0
 ;; Package-Requires: ((emacs "24.5"))
 
+;; This file is part of GNU Emacs.
+
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or (at
@@ -89,7 +91,7 @@
 ;; --------------
 
 ;; To report bugs, please use `M-x report-emacs-bug RET` or send an email to
-;; <bug-gnu-emacs@gnu.org>
+;; <bug-gnu-emacs@gnu.org>. Please include "fountain" in the subject.
 
 
 ;;; Code:
@@ -1037,11 +1039,8 @@ In Emacs versions prior to 26, adds advice to override
 after POS or point has invisible text property eq to 'outline.
 See <http://debbugs.gnu.org/24073>."
   ;; In Emacs version prior to 26, `outline-invisible-p' returns non-nil for ANY
-  ;; invisible property of text at point:
-  ;;
-  ;; (get-char-property (or pos (point)) 'invisible))
-  ;;
-  ;; We want to only return non-nil if property is 'outline
+  ;; invisible property of text at point. We want to only return non-nil if
+  ;; property is 'outline
   (unless (or (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
               (<= 26 emacs-major-version))
     (advice-add 'outline-invisible-p :override #'fountain-outline-invisible-p)
