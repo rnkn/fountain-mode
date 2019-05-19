@@ -564,15 +564,16 @@ e.g.
   nil
   "Regular expression for matching scene headings.
 
-    Group 1: match leading . (for forced scene heading)
+    Group 1: match leading . for forced scene heading
     Group 2: match whole scene heading without scene number
     Group 3: match INT/EXT
     Group 4: match location
-    Group 5: match time of day
-    Group 6: match space between scene heading and scene number
-    Group 7: match first # delimiter
-    Group 8: match scene number
-    Group 9: match last # delimiter
+    Group 5: match suffix separator
+    Group 6: match suffix
+    Group 7: match space between scene heading and scene number
+    Group 8: match first # delimiter
+    Group 9: match scene number
+    Group 10: match last # delimiter
 
 Requires `fountain-match-scene-heading' for preceding blank line.")
 
@@ -925,7 +926,7 @@ scene heading regular expression."
          ;; Group 5: match suffix separator
          "\\(?:\\(?5:" fountain-scene-heading-suffix-sep "\\)"
          ;; Group 6: match suffix
-         "\\(?6:.+\\)?\\)?"
+         "\\(?6:.+?\\)?\\)?"
          "\\)\\)"
          ;;; Match scene number
          "\\(?:"
@@ -4475,16 +4476,16 @@ scene number from being auto-upcased."
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t)
-      (:level 2 :subexp 6
+      (:level 2 :subexp 7
               :laxmatch t)
-      (:level 2 :subexp 7 :face fountain-non-printing
+      (:level 2 :subexp 8 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t)
-      (:level 2 :subexp 8
+      (:level 2 :subexp 9
               :override prepend
               :laxmatch t)
-      (:level 2 :subexp 9 :face fountain-non-printing
+      (:level 2 :subexp 10 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t))
@@ -4709,10 +4710,10 @@ keywords suitable for Font Lock."
   (while (< (point) (min end (point-max)))
     (when (fountain-match-scene-heading)
       (if (and fountain-display-scene-numbers-in-margin
-               (match-string 8))
-          (put-text-property (match-beginning 6) (match-end 9)
+               (match-string 9))
+          (put-text-property (match-beginning 7) (match-end 10)
                              'display (list '(margin right-margin)
-                                            (match-string-no-properties 8)))
+                                            (match-string-no-properties 9)))
         (remove-text-properties (match-beginning 0) (match-end 0)
                                 '(display))))
     (forward-line)))
