@@ -579,16 +579,22 @@ Requires `fountain-match-scene-heading' for preceding blank line.")
 
 (defcustom fountain-scene-heading-suffix-sep
   " - "
-  "String separating scene heading location from suffix."
+  "String separating scene heading location from suffix.
+
+WARNING: If you change this any existing scene headings will no
+longer be parsed correctly."
   :type 'string
   :safe 'string
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-scene-heading-suffix-list
-  '("DAY" "NIGHT" "LATER" "MOMENTS LATER" "CONTINUOUS")
+  '("DAY" "NIGHT" "CONTINUOUS" "LATER" "MOMENTS LATER")
   "List of scene heading suffixes (case insensitive).
 
-These are separated from scene heading locations with
+These are only used for auto-completion. Any scene headings can
+have whatever suffix you like.
+
+Separated from scene heading locations with
 `fountain-scene-heading-suffix-sep'."
   :type '(repeat (string :tag "Suffix"))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -1246,9 +1252,9 @@ Assumes that all other element matching has been done."
 
 ;;; Auto-completion
 
-(defvar-local fountain-completion-scene-headings
+(defvar-local fountain-completion-locations
   nil
-  "List of scene headings in the current buffer.")
+  "List of scene locations in the current buffer.")
 
 (defvar-local fountain-completion-characters
   nil
@@ -1257,8 +1263,8 @@ Each element is a cons (NAME . OCCUR) where NAME is a string, and
 OCCUR is an integer representing the character's number of
 occurrences. ")
 
-(defun fountain-completion-update-scene-headings (start end &optional length)
-  "Update `fountain-completion-scene-headings' between START and END."
+(defun fountain-completion-update-locations (start end &optional length)
+  "Update `fountain-completion-locations' between START and END."
   (goto-char end)
   (if (fountain-match-scene-heading)
       (forward-line)
@@ -1268,13 +1274,13 @@ occurrences. ")
   (fountain-forward-scene 0)
   (while (< (point) end)
     (when (fountain-match-scene-heading)
-      (let ((scene-heading (match-string-no-properties 4)))
-        (unless (member scene-heading fountain-completion-scene-headings)
-          (push scene-heading fountain-completion-scene-headings))))
+      (let ((location (match-string-no-properties 4)))
+        (unless (member location fountain-completion-locations)
+          (push location fountain-completion-locations))))
     (fountain-forward-scene 1)))
 
 (defun fountain-completion-update-characters (start end &optional length)
-  "Update `fountain-completion-characters' between START and END."
+  "Update `fountain-completion-characters' in current buffer."
   (goto-char end)
   (if (fountain-match-scene-heading)
       (forward-line)
@@ -1358,14 +1364,14 @@ Added to `completion-at-point-functions'."
          (list (match-end 3)
                (point)
                (completion-table-case-fold
-                fountain-completion-scene-headings)))
+                fountain-completion-locations)))
         ((and (fountain-match-scene-heading)
               (match-string 1))
          ;; Return scene location completion (forced)
          (list (match-end 1)
                (point)
                (completion-table-case-fold
-                fountain-completion-scene-headings)))
+                fountain-completion-locations)))
         ((fountain-blank-before-p)
          ;; Return character completion
          (list (line-beginning-position)
@@ -1378,7 +1384,7 @@ Added to `completion-at-point-functions'."
 
 Add to `fountain-mode-hook' to have completion upon load."
   (interactive)
-  (setq fountain-completion-scene-headings nil
+  (setq fountain-completion-locations nil
         fountain-completion-characters nil)
   (save-excursion
     (save-restriction
