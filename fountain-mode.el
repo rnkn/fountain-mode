@@ -4032,28 +4032,24 @@ to scene number or point."
     (upcase-region (line-beginning-position) (or (match-end 2) (point)))))
 
 (defun fountain-dwim (&optional arg)
-  "\\<fountain-mode-map>Call a command based on context (Do What I Mean).
+  "Call a command based on context (Do What I Mean).
 
-1. If point is at a scene heading or section heading, or within a
-   folded scene or section, or if prefixed with ARG, call
-   `fountain-outline-cycle' and pass ARG.
+1. If prefixed with ARG, call `fountain-outline-cycle' and pass
+   ARG.
 
-2. If point is at a directive to an included file, call
-   `fountain-find-included-file'.
+2. If point is at the beginning of a scene heading or section
+   heading call `fountain-outline-cycle'.
 
-3. Otherwise, call `fountain-toggle-auto-upcase'."
+3. Otherwise, call `complation-at-point'."
   (interactive "p")
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
+        ((eolp)
+         (completion-at-point))
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading)
              (eq (get-char-property (point) 'invisible) 'outline))
-         (fountain-outline-cycle))
-        ((and (fountain-match-template)
-              (string-match-p "include" (match-string 1)))
-         (fountain-find-included-file))
-        (t
-         (fountain-toggle-auto-upcase))))
+         (fountain-outline-cycle))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
