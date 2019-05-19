@@ -69,8 +69,13 @@ Installation
 Fountain Mode is now part of GNU ELPA and can be installed with `M-x
 package-install RET fountain-mode RET`.
 
-Reporting Bugs
---------------
+History
+-------
+
+See: <https://git.sr.ht/~pwr/fountain-mode/refs>
+
+Contributing
+------------
 
 To report bugs, please use `M-x report-emacs-bug RET` or send an email to
-<bug-gnu-emacs@gnu.org>
+<bug-gnu-emacs@gnu.org>. Please include "fountain" in the subject.
