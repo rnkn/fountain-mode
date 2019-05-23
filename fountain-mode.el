@@ -1363,7 +1363,8 @@ Added to `completion-at-point-functions'."
                (point)
                (completion-table-case-fold
                 fountain-completion-locations)))
-        ((fountain-blank-before-p)
+        ((and (eolp)
+              (fountain-blank-before-p))
          ;; Return character completion
          (list (line-beginning-position)
                (point)
