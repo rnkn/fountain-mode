@@ -1380,7 +1380,7 @@ Add to `fountain-mode-hook' to have completion upon load."
   (save-excursion
     (save-restriction
       (widen)
-      (fountain-completion-update-scene-headings (point-min) (point-max))
+      (fountain-completion-update-locations (point-min) (point-max))
       (fountain-completion-update-characters (point-min) (point-max))))
   (message "Completion candidates updated"))
 
