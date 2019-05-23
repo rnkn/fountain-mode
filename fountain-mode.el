@@ -2,9 +2,9 @@
 
 ;; Copyright (c) 2014-2019 Free Software Foundation, Inc.
 
-;; Author: Paul Rankin <hello@paulwrankin.com>
+;; Author: Paul W. Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 2.7.0
+;; Version: 2.7.1
 ;; Package-Requires: ((emacs "24.5"))
 
 ;; This file is part of GNU Emacs.
@@ -92,7 +92,7 @@
 (eval-when-compile (require 'cl-lib))
 
 (defconst fountain-version
-  "2.7.0")
+  (lm-version))
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
