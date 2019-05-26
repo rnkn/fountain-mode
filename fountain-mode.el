@@ -3522,6 +3522,15 @@ Otherwise, only operate on section and scene headings."
   :safe 'boolean
   :group 'fountain)
 
+(defcustom fountain-fold-notes
+  t
+  "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling visibility.
+
+Note visibility can be cycled with \\[fountain-dwim]."
+  :type 'boolean
+  :safe 'boolean
+  :group 'fountain)
+
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
 (defalias 'fountain-outline-forward 'outline-forward-same-level)
@@ -3713,6 +3722,11 @@ Return non-nil if empty newline was inserted."
 Display a message unless SILENT."
   (cond ((= n 0)
          (outline-show-all)
+         (save-excursion
+           (goto-char (point-min))
+           (while (re-search-forward fountain-note-regexp nil 'move)
+             (outline-flag-region (match-beginning 2)
+                                  (match-end 2) fountain-fold-notes)))
          (unless silent (message "Showing all")))
         ((= n 6)
          (outline-hide-sublevels n)
@@ -3815,6 +3829,10 @@ Display a message unless SILENT."
                 ((or (<= eos eol)
                      (= fountain--outline-cycle-subtree 2))
                  (outline-show-subtree)
+                 (goto-char eoh)
+                 (while (re-search-forward fountain-note-regexp eos 'move)
+                   (outline-flag-region (match-beginning 2)
+                                        (match-end 2) fountain-fold-notes))
                  (message "Showing contents")
                  (setq fountain--outline-cycle-subtree 3))
                 (t
@@ -4030,13 +4048,18 @@ to scene number or point."
 1. If prefixed with ARG, call `fountain-outline-cycle' and pass
    ARG.
 
-2. If point is at the beginning of a scene heading or section
-   heading call `fountain-outline-cycle'.
+2. If point is at an appropriate point (i.e. eolp), call
+`completion-at-point'.
 
-3. Otherwise, call `complation-at-point'."
+3. If point is a scene heading or section heading call
+   `fountain-outline-cycle'. "
   (interactive "p")
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
+        ((fountain-match-note)
+         (outline-flag-region (match-beginning 2)
+                              (match-end 2)
+           (not (get-char-property (match-beginning 2) 'invisible))))
         ((eolp)
          (completion-at-point))
         ((or (fountain-match-section-heading)
