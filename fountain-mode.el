@@ -91,9 +91,9 @@
 (eval-when-compile (require 'subr-x))
 (eval-when-compile (require 'cl-lib))
 
-(eval-and-compile
+(eval-when-compile
   (defconst fountain-version
-    (lm-version)))
+    (lm-version load-file-name)))
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
