@@ -3745,12 +3745,12 @@ Display a message unless SILENT."
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
     1. If ARG is nil, cycle outline visibility of current subtree and
-       its children (\\[fountain-outline-cycle]).
-    2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-outline-cycle],
+       its children (\\[fountain-dwim]).
+    2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-dwim],
        same as \\[fountain-outline-cycle-global]).
-    3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle]).
+    3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
     4. If ARG is 64, show outline visibility set in
-       `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-outline-cycle])."
+       `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim])."
   (interactive "p")
   (let ((custom-level
          (when fountain-outline-custom-level
@@ -3789,8 +3789,10 @@ Display a message unless SILENT."
            (outline-show-all)
            (message "Showing all")
            (setq fountain--outline-cycle 0))
-          ((and (eq arg 64) custom-level)
-           (fountain-outline-hide-level custom-level))
+          ((eq arg 64)
+           (if custom-level
+               (fountain-outline-hide-level custom-level)
+             (outline-show-all)))
           (t
            (save-excursion
              (outline-back-to-heading)
