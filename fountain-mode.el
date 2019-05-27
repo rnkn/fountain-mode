@@ -92,7 +92,9 @@
 (eval-when-compile (require 'cl-lib))
 
 (defconst fountain-version
-  (eval-when-compile (lm-version load-file-name)))
+  (eval-when-compile
+    (require 'lisp-mnt)
+    (lm-version load-file-name)))
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
