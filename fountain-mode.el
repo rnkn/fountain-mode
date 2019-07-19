@@ -57,7 +57,7 @@
 
 ;; Check out the Nicholl Fellowship sample script exported from Fountain Mode to:
 
-;; - Plain text: https://paste.sr.ht/blob/930557283847c35cafbba81cf34f389980b35b3c
+;; - Plain text: https://f002.backblazeb2.com/file/pwr-share/Nicholl_Fellowship_sample.txt
 ;; - HTML: https://f002.backblazeb2.com/file/pwr-share/fountain-export.html
 ;; - Final Draft: https://f002.backblazeb2.com/file/pwr-share/fountain-export.fdx
 ;; - LaTeX: https://www.overleaf.com/project/54ed9180966959cb7fdbde8e
@@ -78,12 +78,13 @@
 
 ;; ## History ##
 
-;; See: https://git.sr.ht/~pwr/fountain-mode/refs
+;; See: https://github.com/rnkn/fountain-mode/releases
 
-;; ## Contributing ##
+;; ## Bugs ##
 
-;; To report bugs, please use M-x report-emacs-bug RET or send an email to
-;; <bug-gnu-emacs@gnu.org>. Please include "fountain" in the subject.
+;; To report bugs, use https://github.com/rnkn/fountain-mode/issues, or M-x
+;; report-emacs-bug RET or send an email to <bug-gnu-emacs@gnu.org> (please include
+;; "fountain" in the subject).
 
 
 ;;; Code:
