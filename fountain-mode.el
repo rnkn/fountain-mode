@@ -3573,6 +3573,7 @@ Otherwise, only operate on section and scene headings."
 (defalias 'fountain-outline-backward 'outline-backward-same-level)
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
+(defalias 'fountain-outline-show-all 'outline-show-all)
 
 (when (< emacs-major-version 25)
   (defalias 'outline-show-all 'show-all)
@@ -4842,9 +4843,7 @@ keywords suitable for Font Lock."
      "---"
      ["Cycle Outline Visibility" fountain-outline-cycle]
      ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
-     ;; FIXME: this would be better as an alias, i.e.
-     ;; `fountain-outline-show-all'
-     ["Show All" outline-show-all]
+     ["Show All" fountain-outline-show-all]
      "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
