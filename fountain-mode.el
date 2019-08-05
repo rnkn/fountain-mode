@@ -4,7 +4,7 @@
 
 ;; Author: Paul W. Rankin <pwr@sdf.org>
 ;; Keywords: wp, text
-;; Version: 2.7.2
+;; Version: 2.7.3
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://fountain-mode.org
 
@@ -643,9 +643,9 @@ Set with `fountain-init-trans-regexp'. Requires
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(?1:\\(?2:[^[{:\n]+\\):[\s\t]*\\(?3:.+\\)?\\)"
+  (concat "^\\(?1:\\(?2:[^:\n]+\\):[\s\t]*\\(?3:.+\\)?\\)[\s\t]*"
           "\\|"
-          "^[\s\t]+\\(?1:\\(?3:.+\\)\\)")
+          "^[\s\t]+\\(?1:\\(?3:.+\\)\\)[\s\t]*")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-match-metadata' for `bobp'.")
 
@@ -1799,8 +1799,9 @@ Value string remains a string. e.g.
       (widen)
       (goto-char (point-min))
       (let (list)
-        (while (fountain-match-metadata)
-          (let ((key (match-string 2))
+        (while (and (bolp)
+                    (fountain-match-metadata))
+          (let ((key (match-string-no-properties 2))
                 (value (match-string-no-properties 3)))
             (forward-line)
             (while (and (fountain-match-metadata)
