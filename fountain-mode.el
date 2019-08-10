@@ -1278,43 +1278,6 @@ Each element is a cons (NAME . OCCUR) where NAME is a string, and
 OCCUR is an integer representing the character's number of
 occurrences. ")
 
-(defun fountain-completion-update-locations (start end &optional length)
-  "Update `fountain-completion-locations' between START and END."
-  (goto-char end)
-  (if (fountain-match-scene-heading)
-      (forward-line)
-    (fountain-forward-scene 1))
-  (setq end (point))
-  (goto-char start)
-  (fountain-forward-scene 0)
-  (while (< (point) end)
-    (when (fountain-match-scene-heading)
-      (let ((location (match-string-no-properties 4)))
-        (unless (member location fountain-completion-locations)
-          (push location fountain-completion-locations))))
-    (fountain-forward-scene 1)))
-
-(defun fountain-completion-update-characters (start end &optional length)
-  "Update `fountain-completion-characters' in current buffer."
-  (goto-char end)
-  (if (fountain-match-scene-heading)
-      (forward-line)
-    (fountain-forward-scene 1))
-  (setq end (point))
-  (goto-char start)
-  (fountain-forward-scene 0)
-  (while (< (point) end)
-    (when (fountain-match-character)
-      (let* ((character (match-string-no-properties 4))
-             (candidate (assoc-string character fountain-completion-characters))
-             (n (cdr candidate)))
-        (if (not n)
-            (push (cons character 1) fountain-completion-characters)
-          (cl-incf (cdr candidate)))))
-    (fountain-forward-character 1))
-  (setq fountain-completion-characters
-        (sort fountain-completion-characters #'(lambda (a b)
-                                                 (< (cdr b) (cdr a))))))
 
 (defun fountain-completion-get-characters ()
   "Return candidates for completing character.
@@ -1405,8 +1368,28 @@ Add to `fountain-mode-hook' to have completion upon load."
   (save-excursion
     (save-restriction
       (widen)
-      (fountain-completion-update-locations (point-min) (point-max))
-      (fountain-completion-update-characters (point-min) (point-max))))
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+        (when (fountain-match-scene-heading)
+          (let ((location (match-string-no-properties 4)))
+            (unless (member location fountain-completion-locations)
+              (push location fountain-completion-locations))))
+        (fountain-forward-scene 1))
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+        (when (fountain-match-character)
+          (let ((character (match-string-no-properties 4))
+                candidate lines)
+            (setq candidate (assoc-string character
+                                          fountain-completion-characters)
+                  lines (cdr candidate))
+            (if (null lines)
+                (push (cons character 1) fountain-completion-characters)
+              (cl-incf (cdr candidate)))))
+        (fountain-forward-character 1))
+      (setq fountain-completion-characters
+            (sort fountain-completion-characters
+                  #'(lambda (a b) (< (cdr b) (cdr a)))))))
   (message "Completion candidates updated"))
 
 
