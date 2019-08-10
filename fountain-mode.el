@@ -1018,9 +1018,6 @@ buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline)
-  ;; FIXME: `completion-cycle-threshold' is a user option, so
-  ;; hard-coding it to non-nil is dubious. On the other hand,
-  ;; completion without cycling in screenwriting is weird.
   (setq-local completion-cycle-threshold t)
   (setq-local completion-at-point-functions
               '(fountain-completion-at-point))
@@ -1278,54 +1275,90 @@ Each element is a cons (NAME . OCCUR) where NAME is a string, and
 OCCUR is an integer representing the character's number of
 occurrences. ")
 
+(defcustom fountain-completion-additional-characters
+  nil
+  "List of additional characters to offer for completion.
+Case insensitive, all character names will be made uppercase.
+
+This is more useful when working with multiple files and set with
+`add-dir-local-variable'."
+  :type '(repeat (string :tag "Character"))
+  :safe '(lambda (value)
+           (and (listp value)
+                (seq-every-p 'stringp value))))
+
+(defcustom fountain-completion-additional-locations
+  nil
+  "List of additional locations to offer for completion.
+Case insensitive, all locations will be made uppercase.
+
+This is more useful when working with multiple files and set with
+`add-dir-local-variable'."
+  :type '(repeat (string :tag "Location"))
+  :safe '(lambda (value)
+           (and (listp value)
+                (seq-every-p 'stringp value))))
 
 (defun fountain-completion-get-characters ()
-  "Return candidates for completing character.
+  "Return a list of characters for completion.
 
 First, return second-last speaking character, followed by each
 previously speaking character within scene. After that, return
-characters from `fountain-completion-characters'."
-  (lambda (string pred action)
-    (let (scene-characters alt-character contd-character rest-characters)
-      (save-excursion
-        (save-restriction
-          (widen)
-          (fountain-forward-character 0 'scene)
-          (while (not (or (fountain-match-scene-heading)
-                          (bobp)))
-            (when (fountain-match-character)
-              (let ((character (match-string-no-properties 4)))
-                (unless (member character scene-characters)
-                  (push (list character) scene-characters))))
-            (fountain-forward-character -1 'scene))))
-      (setq scene-characters (reverse scene-characters)
-            alt-character (cadr scene-characters)
-            contd-character (car scene-characters)
-            rest-characters (cddr scene-characters)
-            scene-characters nil)
-      (when rest-characters
-        (setq scene-characters rest-characters))
-      (when contd-character
-        (setq scene-characters
-              (cons contd-character scene-characters)))
-      (when alt-character
-        (setq scene-characters
-              (cons alt-character scene-characters)))
-      (if (eq action 'metadata)
-          (list 'metadata
-                (cons 'display-sort-function 'identity)
-                (cons 'cycle-sort-function 'identity))
-        (complete-with-action action
-                              (append scene-characters fountain-completion-characters)
-                              string pred)))))
+characters from `fountain-completion-additional-characters' then
+`fountain-completion-characters'.
+
+n.b. `fountain-completion-additional-characters' are offered as
+candidates ahead of `fountain-completion-characters' because
+these need to be manually set, and so are considered more
+important."
+  (let (scene-characters
+        alt-character
+        contd-character
+        rest-characters)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (fountain-forward-character 0 'scene)
+        (while (not (or (bobp) (fountain-match-scene-heading)))
+          (when (fountain-match-character)
+            (let ((character (match-string-no-properties 4)))
+              (unless (member character scene-characters)
+                (push (list character) scene-characters))))
+          (fountain-forward-character -1 'scene))))
+    (setq scene-characters (reverse scene-characters)
+          alt-character (cadr scene-characters)
+          contd-character (car scene-characters)
+          rest-characters (cddr scene-characters)
+          scene-characters nil)
+    (when rest-characters
+      (setq scene-characters rest-characters))
+    (when contd-character
+      (setq scene-characters
+            (cons contd-character scene-characters)))
+    (when alt-character
+      (setq scene-characters
+            (cons alt-character scene-characters)))
+    (append scene-characters
+            (mapcar 'upcase fountain-completion-additional-characters)
+            fountain-completion-characters)))
 
 (defun fountain-completion-at-point ()
   "\\<fountain-mode-map>Return completion table for entity at point.
 Trigger completion with \\[fountain-dwim].
 
-Always delimits entity from beginning of line to point. If at a
-scene heading, return `fountain-scene-heading-candidates'. If
-previous line is blank, return result of
+1. If point is at a scene heading and matches
+`fountain-scene-heading-suffix-sep', offer completion candidates
+from `fountain-scene-heading-suffix-list'.
+
+2. If point is at a line matching
+`fountain-scene-heading-prefix-list', offer completion candidates
+from `fountain-completion-locations' and
+`fountain-completion-additional-locations'.
+
+3. If point is at beginning of line with a preceding blank line,
+offer completion candidates from `fountain-completion-characters'
+and `fountain-completion-additional-characters'. For more
+information of character completion sorting, see
 `fountain-completion-get-characters'.
 
 Added to `completion-at-point-functions'."
@@ -1342,24 +1375,41 @@ Added to `completion-at-point-functions'."
          (list (match-end 3)
                (point)
                (completion-table-case-fold
-                fountain-completion-locations)))
+                (append
+                 (mapcar 'upcase fountain-completion-additional-locations)
+                 fountain-completion-locations))))
         ((and (fountain-match-scene-heading)
               (match-string 1))
          ;; Return scene location completion (forced)
          (list (match-end 1)
                (point)
                (completion-table-case-fold
-                fountain-completion-locations)))
+                (append
+                 (mapcar 'upcase fountain-completion-additional-locations)
+                 fountain-completion-locations))))
         ((and (eolp)
               (fountain-blank-before-p))
          ;; Return character completion
          (list (line-beginning-position)
                (point)
                (completion-table-case-fold
-                (fountain-completion-get-characters))))))
+                (lambda (string pred action)
+                  (if (eq action 'metadata)
+                      (list 'metadata
+                            (cons 'display-sort-function 'identity)
+                            (cons 'cycle-sort-function 'identity))
+                    (complete-with-action
+                     action (fountain-completion-get-characters)
+                     string pred))))))))
 
 (defun fountain-completion-update ()
   "Update completion candidates for current buffer.
+
+While `fountain-completion-locations' are left unsorted for
+`completion-at-point' to perform sorting,
+`fountain-completion-characters' are sorted by number of lines.
+For more information on character completion sorting, see
+`fountain-completion-get-characters'.
 
 Add to `fountain-mode-hook' to have completion upon load."
   (interactive)
