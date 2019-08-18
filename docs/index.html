@@ -1,0 +1,290 @@
+<head>
+<meta charset="utf-8">
+<meta name="author" content="Paul W. Rankin" />
+<meta name="generator" content="Emacs  running Fountain Mode " />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Fountain Mode</title>
+<style type="text/css">
+.screenplay {
+  font-family: Courier Prime;
+  font-size: 12pt;
+  line-height: 1;
+  max-width: 6in;
+  margin: 1em auto;
+  -webkit-text-size-adjust: none;
+}
+.screenplay h1, h2, h3, h4, h5, h6 {
+  font-weight: inherit;
+  font-size: inherit;
+}
+.screenplay a {
+  color: inherit;
+  text-decoration: none;
+}
+.screenplay .underline {
+  text-decoration: underline;
+}
+.screenplay .title-page {
+  margin: 2em auto;
+}
+.screenplay .title-page .title {
+  text-align: center;
+}
+.screenplay .title-page .title h1 {
+  font-weight: bold;
+  text-transform: uppercase;
+  text-decoration: underline;
+}
+.screenplay .title-page .contact {
+  text-align: right;
+  margin-top: 2em;
+}
+.screenplay .section-heading {
+  text-align: center;
+}
+.screenplay .section-heading:hover {
+  background-color: lightyellow;
+}
+.screenplay .scene {
+  margin-top: 2em;
+}
+.screenplay .scene-heading {
+  margin-bottom: 0;
+}
+.screenplay .scene-heading:hover {
+  background-color: lightyellow;
+}
+.screenplay .action {
+  margin: 1em 0;
+  white-space: pre-wrap;
+}
+.screenplay .dialog {
+  width: 75%;
+  max-width: 4in;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 17%;
+}
+.screenplay .dialog .character {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 25%;
+}
+.screenplay .dialog .lines {
+  max-width: 3.5in;
+  margin-top: 0;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+}
+.screenplay .dialog .paren {
+  max-width: 2in;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 15%;
+  text-indent: -0.6em;
+  page-break-inside: avoid;
+  page-break-after: avoid;
+}
+.screenplay .dual-dialog {
+  width: 100%;
+  margin: 1em 0;
+}
+.screenplay .dual-dialog .dialog {
+  max-width: 50%;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+  float: left;
+  clear: none;
+}
+.screenplay .dual-dialog .dialog .lines {
+  width: 95%;
+}
+.screenplay .trans {
+  max-width: 2in;
+  margin-left: 63%;
+  clear: both;
+  page-break-before: avoid;
+}
+.screenplay .note {
+  display: block;
+  font-size: 11pt;
+  font-family: "Comic Sans MS", "Marker Felt", "sans-serif";
+  line-height: 1.5;
+  background-color: lightgoldenrodyellow;
+  padding: 1em;
+}
+.screenplay .synopsis {
+  margin-top: 0;
+  color: grey;
+  font-style: italic;
+}
+.screenplay .center {
+  text-align: center;
+  white-space: pre-wrap;
+}
+</style>
+</head>
+<body>
+<section class="screenplay">
+<section class="title-page">
+<div class="title">
+<h1>Fountain Mode</h1>
+<p>written by</p>
+<p>Paul W. Rankin</p>
+</div>
+<p class="contact">2019-08-18<br>
+    (c) Free Software Foundation, Inc.<br>
+    https://fountain-mode.org</p>
+</section>
+
+<section class="scene">
+<a href="#1"><p class="scene-heading" id="1">INT. ABOUT - DAY</p></a>
+<p class="action">Fountain Mode is a scriptwriting program for GNU Emacs using the fountain plain text markup format.</p>
+<div class="dialog">
+<p class="character">WRITER</p>
+<p class="lines">So I can write a screenplay in Emacs?</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">Yes! Or a stageplay if you want.</p>
+</div>
+<div class="dialog">
+<p class="character">WRITER</p>
+<p class="lines">But how?</p>
+<p class="paren">(sheepish)</p>
+<p class="lines">I only use Emacs for writing Ruby code...</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">Nobody's perfect. Just start writinfg and Fountain Mode will do the rest. The core concept is that if it looks like a script, it will be parsed as a script.</p>
+</div>
+<p class="note">Core Concept: if it looks like a script, it will be parsed as a script.</p>
+<div class="dialog">
+<p class="character">PAUL (CONT'D)</p>
+<p class="lines">There is very little markup - mostly it's just whether words are in CAPITALS or not.</p>
+</div>
+<p class="action">For more information on the fountain markup format, visit <a href="https://fountain.io">https://fountain.io</a>.</p>
+</section>
+<section class="scene">
+<a href="#2"><p class="scene-heading" id="2">INT/EXT. SCREENSHOTS - CONTINUOUS</p></a>
+<p class="action">The writer sits on a La-Z-Boy chair.</p>
+<div class="dialog">
+<p class="character">WRITER</p>
+<p class="lines">Okay. That's cool, but what does Fountain Mode look like?</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">A bit like this...</p>
+</div>
+<a href="https://f002.backblazeb2.com/file/pwr-share/fountain-mode.png"><img style="width:100%" src="https://f002.backblazeb2.com/file/pwr-share/fountain-mode.png" alt="Fountain Mode screenshots"></a>
+<p class="trans">CUT TO:</p>
+</section>
+<section class="scene">
+<a href="#3"><p class="scene-heading" id="3">INT/EXT. EXAMPLES - MOMENTS LATER</p></a>
+<p class="action">Paul moves to the wall. He places his hands on the floor and walks his feet up the wall until he is doing a kindof handstand.</p>
+<div class="dialog">
+<p class="character">WRITER</p>
+<p class="lines">What export options do I have when I'm done?</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">Check out the Nicholl Fellowship sample script exported from Fountain Mode to the following formats...</p>
+</div>
+<p class="action">PLAIN TEXT</p>
+<p class="action"><a href="https://f002.backblazeb2.com/file/pwr-share/Nicholl_Fellowship_sample.txt">https://f002.backblazeb2.com/file/pwr-share/Nicholl_Fellowship_sample.txt</a></p>
+<p class="action">HTML</p>
+<p class="action"><a href="https://f002.backblazeb2.com/file/pwr-share/fountain-export.html">https://f002.backblazeb2.com/file/pwr-share/fountain-export.html</a></p>
+<p class="action">FINAL DRAFT</p>
+<p class="action"><a href="https://f002.backblazeb2.com/file/pwr-share/fountain-export.fdx">https://f002.backblazeb2.com/file/pwr-share/fountain-export.fdx</a></p>
+<p class="action">LATEX</p>
+<p class="action"><a href="https://www.overleaf.com/project/54ed9180966959cb7fdbde8e">https://www.overleaf.com/project/54ed9180966959cb7fdbde8e</a></p>
+<div class="dialog">
+<p class="character">RICHARD STALLMAN</p>
+<p class="paren">(angry)</p>
+<p class="lines">Final Draft is <span class="underline">not free software</span>!</p>
+</div>
+<p class="trans">CUT TO:</p>
+</section>
+<section class="scene">
+<a href="#4"><p class="scene-heading" id="4">EXT. INSTALLATION - NIGHT</p></a>
+<p class="action">Fountain Mode is part of GNU ELPA and can be installed with:</p>
+<div class="dialog">
+<p class="character">EMACS</p>
+<p class="lines">M-x package-install RET fountain-mode RET</p>
+</div>
+<p class="action">You can manually download the latest release from<br><a href="https://elpa.gnu.org/packages/fountain-mode.html">https://elpa.gnu.org/packages/fountain-mode.html</a></p>
+<p class="note">Move this file into your load-path and add (require 'fountain-mode) to your .emacs/init.el file.</p>
+<p class="action">If you prefer the latest but perhaps unstable version clone the repository into your load-path and require as above:</p>
+<div class="dialog">
+<p class="character">SHELL</p>
+<p class="lines">git clone https://github.com/rnkn/fountain-mode.git</p>
+</div>
+<p class="action">Users of Debian &gt;=10 or Ubuntu &gt;=18.04 can install Fountain Mode with:</p>
+<div class="dialog">
+<p class="character">SHELL (CONT'D)</p>
+<p class="lines">sudo apt install elpa-fountain-mode</p>
+</div>
+</section>
+<section class="scene">
+<a href="#5"><p class="scene-heading" id="5">INT. REQUIREMENTS - CONTINUOUS</p></a>
+<p class="action">Fountain Mode should work on Emacs versions as early as 24.5.</p>
+<div class="dialog">
+<p class="character">DONALD KNUTH</p>
+<p class="lines">What about for exporting to PDF using LaTeX?</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">Okay for that you will need a TeX distribution with the following packages...</p>
+</div>
+<p class="action">geometry fontspec titling fancyhdr marginnote ulem xstring oberdiek</p>
+<div class="dialog">
+<p class="character">WRITER</p>
+<p class="lines">I really don't wanna install TeX. Surely there is another way to export my script to PDF?</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">Currently the best way is to use node.js and <span class="underline">afterwriting</span>. You can install it with...</p>
+</div>
+<div class="dialog">
+<p class="character">SHELL</p>
+<p class="lines">npm install -g afterwriting</p>
+</div>
+</section>
+<section class="scene">
+<a href="#6"><p class="scene-heading" id="6">EXT. HISTORY - DUSK</p></a>
+<p class="action">See <a href="https://github.com/rnkn/fountain-mode/releases">https://github.com/rnkn/fountain-mode/releases</a></p>
+<p class="trans">SMASH CUT TO:</p>
+</section>
+<section class="scene">
+<a href="#7"><p class="scene-heading" id="7">EXT. BUGS - EARLY MORNING</p></a>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">You can report bugs at...</p>
+</div>
+<p class="action"><a href="https://github.com/rnkn/fountain-mode/issues">https://github.com/rnkn/fountain-mode/issues</a></p>
+<div class="dialog">
+<p class="character">RICHARD STALLMAN</p>
+<p class="paren">(angry)</p>
+<p class="lines">I don't like GitHub or web browsers or puppies or anything non-GNU. I want you to use Emacs to report bugs!</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">No problem, you can report bugs with Emacs by using...</p>
+</div>
+<div class="dialog">
+<p class="character">EMACS</p>
+<p class="lines">M-x report-emacs-bugs RET</p>
+</div>
+<div class="dialog">
+<p class="character">PAUL</p>
+<p class="lines">Or send an email to</p>
+<p class="lines">bug-gnu-emacs@gnu.org</p>
+<p class="paren">(pause)</p>
+<p class="lines">Just include "fountain" in the subject line.</p>
+</div>
+<p class="trans">FADE OUT</p>
+<p class="center">THE END</p>
+</section>
+</section>
+</body>

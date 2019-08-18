@@ -1,0 +1,153 @@
+title: Fountain Mode
+credit: written by
+author: Paul W. Rankin
+date: 2019-08-10
+contact:
+  (c) Free Software Foundation, Inc.
+  https://fountain-mode.org
+
+
+INT. ABOUT - DAY
+
+Fountain Mode is a scriptwriting program for GNU Emacs using the fountain plain text markup format.
+
+WRITER
+So I can write a screenplay in Emacs?
+
+PAUL
+Yes! Or a stageplay if you want.
+
+WRITER
+But how?
+(sheepish)
+I only use Emacs for writing Ruby code...
+
+PAUL
+Nobody's perfect. Just start writinfg and Fountain Mode will do the rest. The core concept is that if it looks like a script, it will be parsed as a script.
+
+[[ Core Concept: if it looks like a script, it will be parsed as a script. ]]
+
+PAUL (CONT'D)
+There is very little markup - mostly it's just whether words are in CAPITALS or not.
+
+For more information on the fountain markup format, visit https://fountain.io.
+
+INT/EXT. SCREENSHOTS - CONTINUOUS
+
+The writer sits on a La-Z-Boy chair.
+
+WRITER
+Okay. That's cool, but what does Fountain Mode look like?
+
+PAUL
+A bit like this...
+
+CUT TO:
+
+INT/EXT. EXAMPLES - MOMENTS LATER
+
+Paul moves to the wall. He places his hands on the floor and walks his feet up the wall until he is doing a kindof handstand.
+
+WRITER
+What export options do I have when I'm done?
+
+PAUL
+Check out the Nicholl Fellowship sample script exported from Fountain Mode to the following formats...
+
+PLAIN TEXT
+
+https://f002.backblazeb2.com/file/pwr-share/Nicholl_Fellowship_sample.txt
+
+HTML
+
+https://f002.backblazeb2.com/file/pwr-share/fountain-export.html
+
+FINAL DRAFT
+
+https://f002.backblazeb2.com/file/pwr-share/fountain-export.fdx
+
+LATEX
+
+https://www.overleaf.com/project/54ed9180966959cb7fdbde8e
+
+RICHARD STALLMAN
+(angry)
+Final Draft is _not free software_!
+
+CUT TO:
+
+EXT. INSTALLATION - NIGHT
+
+Fountain Mode is part of GNU ELPA and can be installed with:
+
+EMACS
+M-x package-install RET fountain-mode RET
+
+You can manually download the latest release from
+https://elpa.gnu.org/packages/fountain-mode.html
+
+[[ Move this file into your load-path and add (require 'fountain-mode) to your .emacs/init.el file. ]]
+
+If you prefer the latest but perhaps unstable version clone the repository into your load-path and require as above:
+
+SHELL
+git clone https://github.com/rnkn/fountain-mode.git
+
+Users of Debian >=10 or Ubuntu >=18.04 can install Fountain Mode with:
+
+SHELL (CONT'D)
+sudo apt install elpa-fountain-mode
+
+INT. REQUIREMENTS - CONTINUOUS
+
+Fountain Mode should work on Emacs versions as early as 24.5.
+
+DONALD KNUTH
+What about for exporting to PDF using LaTeX?
+
+PAUL
+Okay for that you will need a TeX distribution with the following packages...
+
+geometry fontspec titling fancyhdr marginnote ulem xstring oberdiek
+
+WRITER
+I really don't wanna install TeX. Surely there is another way to export my script to PDF?
+
+PAUL
+Currently the best way is to use node.js and _afterwriting_. You can install it with...
+
+SHELL
+npm install -g afterwriting
+
+EXT. HISTORY - DUSK
+
+See https://github.com/rnkn/fountain-mode/releases
+
+SMASH CUT TO:
+
+EXT. BUGS - EARLY MORNING
+
+PAUL
+You can report bugs at...
+
+https://github.com/rnkn/fountain-mode/issues
+
+RICHARD STALLMAN
+(angry)
+I don't like GitHub or web browsers or puppies or anything non-GNU. I want you to use Emacs to report bugs!
+
+PAUL
+No problem, you can report bugs with Emacs by using...
+
+EMACS
+M-x report-emacs-bugs RET
+
+PAUL
+Or send an email to
+bug-gnu-emacs@gnu.org
+(pause)
+Just include "fountain" in the subject line.
+
+FADE OUT
+
+> THE END <
