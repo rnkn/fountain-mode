@@ -4719,9 +4719,12 @@ assigning the following keywords:
           (t 2))))
 
 (defun fountain-set-font-lock-decoration (n)
-  ;; FIXME: use read-char-choice instead
   "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
-  (interactive "NMaximum decoration (1-3): ")
+  (interactive
+   (list (or current-prefix-arg
+             (string-to-number (char-to-string
+               (read-char-choice "Maximum decoration (1-3): "
+                                 '(?1 ?2 ?3)))))))
   (if (and (integerp n)
            (<= 1 n 3))
       (let ((level (cond ((= n 1) 1)
