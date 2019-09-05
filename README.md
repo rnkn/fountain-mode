@@ -1,8 +1,10 @@
 # Fountain Mode #
 
-Fountain Mode is a screenwriting environment for GNU Emacs using the
-Fountain markup format. For more information on the Fountain markup
-format, visit <http://fountain.io>.
+Fountain Mode is a scriptwriting program for GNU Emacs using the
+Fountain plain text markup format.
+
+For more information on the fountain markup format, visit
+<https://fountain.io>.
 
 Screenshot: <https://f002.backblazeb2.com/file/pwr-share/fountain-mode.png>
 
@@ -50,31 +52,35 @@ functions and key-bindings, type C-h m.
 
 ## Installation ##
 
-Fountain Mode is now part of GNU ELPA and can be installed with M-x
-package-install RET fountain-mode RET.
+The latest stable release of Fountain Mode is available via
+[MELPA-stable] and can be installed with:
 
-You can manually download the latest release from
-<https://elpa.gnu.org/packages/fountain-mode.html>
+    M-x package-install RET fountain-mode RET
 
-Move this file into your load-path and add (require 'fountain-mode) to
-your .emacs/init.el file.
+Alternately, download the [latest release], move this file into your
+load-path and add to your .emacs/init.el file:
 
-If you prefer the latest but perhaps unstable version clone the
-repository into your load-path and require as above:
+    (require 'fountain-mode)
 
-git clone https://github.com/rnkn/fountain-mode.git
+If you prefer the latest but perhaps unstable version, install via
+[MELPA], or clone the repository into your load-path and require as
+above:
+
+    git clone https://github.com/rnkn/fountain-mode.git
 
 Users of Debian >=10 or Ubuntu >=18.04 can install Fountain Mode with:
 
-sudo apt install elpa-fountain-mode
+    sudo apt install elpa-fountain-mode
+
+[melpa]: https://melpa.org/#/fountain-mode "MELPA"
+[melpa-stable]: https://stable.melpa.org/#/fountain-mode "MELPA-stable"
+[latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
 ## History ##
 
 See: <https://github.com/rnkn/fountain-mode/releases>
 
-## Bugs ##
+## Bugs and Feature Requests ##
 
-To report bugs, either use <https://github.com/rnkn/fountain-mode/issues>
-or M-x report-emacs-bug RET or send an email to <bug-gnu-emacs@gnu.org>
-(please include "fountain" in the subject).
-
+To report bugs either use <https://github.com/rnkn/fountain-mode/issues>
+or send an email to <help@fountain-mode.org>.

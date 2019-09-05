@@ -3,13 +3,12 @@ credit: written by
 author: Paul W. Rankin
 date: 2019-08-10
 contact:
-  (c) Free Software Foundation, Inc.
-  https://fountain-mode.org
+  help@fountain-mode.org
 
 
-INT. ABOUT - DAY
+INT. ABOUT FOUNTAIN MODE - DAY
 
-Fountain Mode is a scriptwriting program for GNU Emacs using the fountain plain text markup format.
+Fountain Mode is a scriptwriting program for GNU Emacs using the Fountain plain text markup format.
 
 WRITER
 So I can write a screenplay in Emacs?
@@ -23,7 +22,7 @@ But how?
 I only use Emacs for writing Ruby code...
 
 PAUL
-Nobody's perfect. Just start writinfg and Fountain Mode will do the rest. The core concept is that if it looks like a script, it will be parsed as a script.
+Nobody's perfect. Just start writing and Fountain Mode will do the rest. The core concept is that if it looks like a script, it will be parsed as a script.
 
 [[ Core Concept: if it looks like a script, it will be parsed as a script. ]]
 
@@ -70,17 +69,18 @@ CUT TO:
 
 EXT. INSTALLATION - NIGHT
 
-Fountain Mode is part of GNU ELPA and can be installed with:
+The latest stable release of Fountain Mode is available via
+MELPA-stable and can be installed with:
 
 EMACS
 M-x package-install RET fountain-mode RET
 
-You can manually download the latest release from
-https://elpa.gnu.org/packages/fountain-mode.html
+Alternately, download the latest release from
+https://github.com/rnkn/fountain-mode/releases/latest
 
 [[ Move this file into your load-path and add (require 'fountain-mode) to your .emacs/init.el file. ]]
 
-If you prefer the latest but perhaps unstable version clone the repository into your load-path and require as above:
+If you prefer the latest but perhaps unstable version, install via MELPA, or clone the repository into your load-path and require as above:
 
 SHELL
 git clone https://github.com/rnkn/fountain-mode.git
@@ -123,22 +123,6 @@ PAUL
 You can report bugs at...
 
 https://github.com/rnkn/fountain-mode/issues
-
-RICHARD STALLMAN
-(angry)
-I don't like GitHub or web browsers or puppies or anything non-GNU. I want you to use Emacs to report bugs!
-
-PAUL
-No problem, you can report bugs with Emacs by using...
-
-EMACS
-M-x report-emacs-bugs RET
-
-PAUL
-Or send an email to
-bug-gnu-emacs@gnu.org
-(pause)
-Just include "fountain" in the subject line.
 
 FADE OUT
 
