@@ -1,15 +1,16 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2014-2019 Free Software Foundation, Inc.
+;; Copyright (c) 2019 Paul W. Rankin
 
 ;; Author: Paul W. Rankin <pwr@sdf.org>
-;; Maintainer: Paul W. Rankin <pwr@sdf.org>
 ;; Keywords: wp, text
-;; Version: 2.7.3
+;; Version: 2.7.4
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://fountain-mode.org
+;; git: https://github.com/rnkn/fountain-mode
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,9 +29,11 @@
 
 ;; # Fountain Mode #
 
-;; Fountain Mode is a screenwriting environment for GNU Emacs using the
-;; Fountain markup format. For more information on the Fountain markup
-;; format, visit <http://fountain.io>.
+;; Fountain Mode is a scriptwriting program for GNU Emacs using the
+;; Fountain plain text markup format.
+
+;; For more information on the fountain markup format, visit
+;; <https://fountain.io>.
 
 ;; Screenshot: <https://f002.backblazeb2.com/file/pwr-share/fountain-mode.png>
 
@@ -78,33 +81,38 @@
 
 ;; ## Installation ##
 
-;; Fountain Mode is now part of GNU ELPA and can be installed with M-x
-;; package-install RET fountain-mode RET.
+;; The latest stable release of Fountain Mode is available via
+;; [MELPA-stable] and can be installed with:
 
-;; You can manually download the latest release from
-;; <https://elpa.gnu.org/packages/fountain-mode.html>
+;;     M-x package-install RET fountain-mode RET
 
-;; Move this file into your load-path and add (require 'fountain-mode) to
-;; your .emacs/init.el file.
+;; Alternately, download the [latest release], move this file into your
+;; load-path and add to your .emacs/init.el file:
 
-;; If you prefer the latest but perhaps unstable version clone the
-;; repository into your load-path and require as above:
+;;     (require 'fountain-mode)
 
-;; git clone https://github.com/rnkn/fountain-mode.git
+;; If you prefer the latest but perhaps unstable version, install via
+;; [MELPA], or clone the repository into your load-path and require as
+;; above:
+
+;;     git clone https://github.com/rnkn/fountain-mode.git
 
 ;; Users of Debian >=10 or Ubuntu >=18.04 can install Fountain Mode with:
 
-;; sudo apt install elpa-fountain-mode
+;;     sudo apt install elpa-fountain-mode
+
+;; [melpa]: https://melpa.org/#/fountain-mode "MELPA"
+;; [melpa-stable]: https://stable.melpa.org/#/fountain-mode "MELPA-stable"
+;; [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
 
 ;; ## History ##
 
 ;; See: <https://github.com/rnkn/fountain-mode/releases>
 
-;; ## Bugs ##
+;; ## Bugs and Feature Requests ##
 
-;; To report bugs, either use <https://github.com/rnkn/fountain-mode/issues>
-;; or M-x report-emacs-bug RET or send an email to <bug-gnu-emacs@gnu.org>
-;; (please include "fountain" in the subject).
+;; To report bugs either use <https://github.com/rnkn/fountain-mode/issues>
+;; or send an email to <help@fountain-mode.org>.
 
 
 ;;; Code:
@@ -1108,6 +1116,7 @@ See <http://debbugs.gnu.org/24073>."
                  (fountain-match-metadata)))))))
 
 (defun fountain-match-page-break ()
+  "Match page break if point is at page break, nil otherwise."
   (save-excursion
     (save-restriction
       (widen)
@@ -1593,7 +1602,7 @@ over whitespace."
           (goto-char x)))))))
 
 (defun fountain-forward-page (&optional n export-elements)
-  "Move point forward by an approximate page.
+  "Move point forward by approximately N pages.
 
 Moves forward from point, which is unlikely to correspond to
 final exported pages and so probably should not be used
@@ -4293,7 +4302,7 @@ same script may result in errors in output."
 
 (defcustom fountain-scene-number-separator
   nil
-  "character to separate scene numbers."
+  "Character to separate scene numbers."
   :type '(choice (const nil)
                  (character ?-))
   :safe '(lambda (value)
@@ -4819,7 +4828,6 @@ keywords suitable for Font Lock."
     (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
-    (define-key map (kbd "C-c C-o") #'fountain-include-find-file)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
