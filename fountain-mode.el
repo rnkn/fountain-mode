@@ -4293,7 +4293,7 @@ to remove previous string first."
                (goto-char (point-min))
                (while (re-search-forward
                        (concat "\s*" string) nil t)
-                 (let ((inhibit-changing-match-data t))
+                 (save-match-data
                    (when (fountain-match-character)
                      (delete-region (match-beginning 0) (match-end 0))))
                  (progress-reporter-update job))))
