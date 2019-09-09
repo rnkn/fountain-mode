@@ -2529,11 +2529,9 @@ Takes the form:
       ...)")
 
 (defmacro define-fountain-export-template-docstring (format)
-  "Define docstring for export format FORMAT."
-  (let ((tag (plist-get (cdr (assq format fountain-export-formats))
-                        :tag)))
-    (format
-     "Association list of element templates for exporting to %s.
+  "Define docstring for export format template FORMAT."
+  `(format
+   "Association list of element templates for exporting to %s.
 Takes the form:
 
     ((ELEMENT TEMPLATE)
@@ -2566,7 +2564,8 @@ Fountain ELEMENTs:
 
 Each TEMPLATE should include the replacement key `{{content}}'.
 Templates may use any metadata keys (e.g. `{{title}}', `{{author}}',
-etc.) as well as keys defined in `fountain-export-formats'." tag)))
+etc.) as well as keys defined in `fountain-export-formats'."
+   (plist-get (cdr (assq ,format fountain-export-formats)) :tag)))
 
 ;; The %s template also uses the following keys:
 ;; %s" tag tag
