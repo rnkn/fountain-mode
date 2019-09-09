@@ -308,6 +308,10 @@
 ;;; Customization
 
 (defun fountain--set-and-refresh-all-font-lock (symbol value)
+  "Set SYMBOL to VALUE and refresh defaults.
+
+Cycle buffers and call `font-lock-refresh-defaults' when
+`fountain-mode' is active."
   (set-default symbol value)
   (dolist (buffer (buffer-list))
     (with-current-buffer buffer
@@ -405,10 +409,10 @@ To include an item in a template you must use the full {{KEY}}
 syntax.
 
     {{title}}    Buffer name without extension
-    {{time}}     Short date format (defined in `fountain-time-format')
-    {{fullname}} User full name (defined in `user-full-name')
-    {{nick}}     User first name (defined in `user-login-name')
-    {{email}}    User email (defined in `user-mail-address')
+    {{time}}     Short date format (defined in option `fountain-time-format')
+    {{fullname}} User full name (defined in option `user-full-name')
+    {{nick}}     User first name (defined in option `user-login-name')
+    {{email}}    User email (defined in option `user-mail-address')
 
 The default {{time}} - {{fullname}}: will insert something like:
 
@@ -1723,6 +1727,7 @@ number."
     (goto-char x)))
 
 (defun fountain-get-page-count ()
+  "Return a cons of the current page number and the total pages."
   (let ((x (point))
         (total 0)
         (current 0)
@@ -1878,6 +1883,7 @@ within left-side dual dialogue, and nil otherwise."
 
 ;; FIXME: implement LIMIT
 (defun fountain-starts-new-page ()
+  "Return non-nil if current element follows a page break."
   (save-excursion
     (save-match-data
       (save-restriction
@@ -1887,7 +1893,12 @@ within left-side dual dialogue, and nil otherwise."
         (fountain-match-page-break)))))
 
 (defun fountain-parse-section (match-data &optional export-elements job)
-  "Return an element list for matched section heading."
+  "Return an element list for matched section heading.
+
+Use MATCH-DATA for match data. When \"section-heading\" included
+in list argument EXPORT-ELEMENTS, parse element for export.
+
+Update JOB."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
@@ -1914,7 +1925,11 @@ within left-side dual dialogue, and nil otherwise."
 
 (defun fountain-parse-scene (match-data &optional export-elements job)
   "Return an element list for matched scene heading at point.
-Includes child elements."
+
+Use MATCH-DATA for match data. When \"scene-heading\" included
+in list argument EXPORT-ELEMENTS, parse element for export.
+
+Includes child elements. Update JOB."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
@@ -1947,6 +1962,13 @@ Includes child elements."
           (cons scene-heading content))))
 
 (defun fountain-parse-dialog (match-data &optional export-elements job)
+  "Return an element list for matched dialog.
+
+Use MATCH-DATA for match data. When \"character\", \"lines\" or
+\"paren\" included in list argument EXPORT-ELEMENTS, parse
+element for export.
+
+Update JOB."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
@@ -2009,7 +2031,10 @@ Includes child elements."
       first-dialog)))
 
 (defun fountain-parse-lines (match-data &optional export-elements _job)
-  "Return an element list for matched dialogue."
+  "Return an element list for matched dialogue.
+
+Use MATCH-DATA for match data. When \"lines\" included in list
+argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (let ((beg (match-beginning 0))
         (end (match-end 0)))
@@ -2020,7 +2045,10 @@ Includes child elements."
           (match-string-no-properties 1))))
 
 (defun fountain-parse-paren (match-data &optional export-elements _job)
-  "Return an element list for matched parenthetical."
+  "Return an element list for matched parenthetical.
+
+Use MATCH-DATA for match data. When \"paren\" included in list
+argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (list 'paren
         (list 'begin (match-beginning 0)
@@ -2029,7 +2057,10 @@ Includes child elements."
         (match-string-no-properties 1)))
 
 (defun fountain-parse-trans (match-data &optional export-elements _job)
-  "Return an element list for matched transition."
+  "Return an element list for matched transition.
+
+Use MATCH-DATA for match data. When \"trans\" included in list
+argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (list 'trans
         (list 'begin (match-beginning 0)
@@ -2040,7 +2071,10 @@ Includes child elements."
         (match-string-no-properties 2)))
 
 (defun fountain-parse-center (match-data &optional export-elements _job)
-  "Return an element list for matched center text."
+  "Return an element list for matched center text.
+
+Use MATCH-DATA for match data. When \"center\" included in list
+argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (list 'center
         (list 'begin (match-beginning 0)
@@ -2050,7 +2084,10 @@ Includes child elements."
         (match-string-no-properties 3)))
 
 (defun fountain-parse-page-break (match-data &optional export-elements _job)
-  "Return an element list for matched page break."
+  "Return an element list for matched page break.
+
+Use MATCH-DATA for match data. When \"page-break\" included in
+list argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (list 'page-break
         (list 'begin (match-beginning 0)
@@ -2059,7 +2096,10 @@ Includes child elements."
         (match-string-no-properties 2)))
 
 (defun fountain-parse-synopsis (match-data &optional export-elements _job)
-  "Return an element list for matched synopsis."
+  "Return an element list for matched synopsis.
+
+Use MATCH-DATA for match data. When \"synopsis\" included
+in list argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (list 'synopsis
         (list 'begin (match-beginning 0)
@@ -2069,7 +2109,10 @@ Includes child elements."
         (match-string-no-properties 3)))
 
 (defun fountain-parse-note (match-data &optional export-elements _job)
-  "Return an element list for matched note."
+  "Return an element list for matched note.
+
+Use MATCH-DATA for match data. When \"note\" included
+in list argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (list 'note
         (list 'begin (match-beginning 0)
@@ -2079,7 +2122,10 @@ Includes child elements."
         (match-string-no-properties 2)))
 
 (defun fountain-parse-action (match-data &optional export-elements _job)
-  "Return an element list for matched action."
+  "Return an element list for matched action.
+
+Use MATCH-DATA for match data. When \"action\" included
+in list argument EXPORT-ELEMENTS, parse element for export."
   (set-match-data match-data)
   (let ((bounds (fountain-get-block-bounds))
         begin end string)
@@ -2099,14 +2145,19 @@ Includes child elements."
           string)))
 
 (defun fountain-parse-element (&optional export-elements job)
-  "Call appropropriate element parsing function for matched element at point."
+  "Call appropropriate parsing function for matched element at point.
+
+Passes EXPORT-ELEMENTS for efficiency. Update JOB."
   (let ((parser (plist-get (cdr (assq (fountain-get-element)
                                       fountain-elements))
                            :parser)))
     (when parser (funcall parser (match-data) export-elements job))))
 
 (defun fountain-parse-region (start end export-elements job)
-  "Return a list of parsed element lists in region between START and END."
+  "Return a list of parsed element lists in region between START and END.
+Elements are parsed for export if included in list argument EXPORT-ELEMENTS.
+
+Update JOB as we go."
   (goto-char start)
   (setq end (min end (point-max)))
   (let (list)
@@ -2347,6 +2398,7 @@ specify a different filename."
      :tag "HTML"
      :ext ".html"
      :template fountain-export-html-template
+     ;; FIXME: this should use the regexp vars
      :string-replace (("&" "&amp;")
                       ("<" "&lt;")
                       (">" "&gt;")
@@ -2476,7 +2528,8 @@ Takes the form:
     ((FORMAT KEYWORD PROPERTY)
       ...)")
 
-(defun define-fountain-export-template-docstring (format)
+(defmacro define-fountain-export-template-docstring (format)
+  "Define docstring for export format FORMAT."
   (let ((tag (plist-get (cdr (assq format fountain-export-formats))
                         :tag)))
     (format
@@ -2561,7 +2614,7 @@ etc.) as well as keys defined in `fountain-export-formats'." tag)))
                  (choice string (const nil)))))
 
 (defun fountain-get-export-elements (&optional format)
-  "Returns list of elements exported in current script format."
+  "Return list of elements exported in current script format FORMAT."
   (cdr (or (assoc-string
             (or format
                 (plist-get (fountain-read-metadata) 'format)
@@ -2570,9 +2623,10 @@ etc.) as well as keys defined in `fountain-export-formats'." tag)))
            (car fountain-export-include-elements))))
 
 (defun fountain-export-get-filename (format &optional buffer)
-  "If buffer is visiting a file, concat file name base and FORMAT.
-Otherwise return `fountain-export-buffer' formatted with export
-format tag."
+  "Return appropriate filename for export.
+If current buffer or BUFFER is visiting a file, concat file name
+base and FORMAT. Otherwise return option `fountain-export-buffer'
+formatted with export format FORMAT tag."
   (let* ((alist (cdr (assq format fountain-export-formats)))
          (tag (plist-get alist :tag))
          (ext (plist-get alist :ext)))
@@ -2600,6 +2654,8 @@ whitespace is converted to dashes. e.g.
      "-")))
 
 (defun fountain-export-fill-string (string element-type)
+  "Fill STRING according to fill margins of ELEMENT-TYPE.
+Return filled string."
   (with-temp-buffer
     (insert string)
     (let (adaptive-fill-mode
@@ -2623,6 +2679,7 @@ whitespace is converted to dashes. e.g.
     (buffer-string)))
 
 (defun fountain-export-replace-in-string (string format)
+  "Perform export replacements in STRING according to FORMAT."
   (let ((replace-alist
          (plist-get (cdr (assq format fountain-export-formats))
                     :string-replace)))
@@ -2631,6 +2688,10 @@ whitespace is converted to dashes. e.g.
                     (car replacement) (cadr replacement) string t nil)))))
 
 (defun fountain-export-get-cond-replacement (format element key value)
+  "Return conditional replacements in export format FORMAT.
+Get conditional replacement alist from `fountain-export-formats'
+for FORMAT. Get alist associated with ELEMENT or t, then alist
+associated with KEY, and value associated with VALUE."
   (let ((replace-alist
          (plist-get (cdr (assq format fountain-export-formats))
                     :cond-replace)))
@@ -2641,6 +2702,7 @@ whitespace is converted to dashes. e.g.
                                (cdr (assq t replace-alist))))))))))
 
 (defun fountain-export-get-eval-replacement (key format)
+  "Return evaluated replacements for KEY in export format FORMAT."
   (let ((replacement
          (car (cdr (assq key
                          (plist-get (cdr (assq format
@@ -2660,9 +2722,8 @@ Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT.
 If PLIST property \"export\" is non-nil, proceed, otherwise
 return an empty string.
 
-If CONTENT is a string, format with
-`fountain-export-replace-in-string' and if format it filled, fill
-with `fountain-export-fill-string'.
+If CONTENT is a string, format with `fountain-export-replace-in-string'
+and if format it filled, fill with `fountain-export-fill-string'.
 
 If CONTENT is a list, recursively call this function on each
 element of the list.
@@ -2819,6 +2880,7 @@ strings."
 
 (defun fountain-export-buffer (format &optional snippet buffer)
   "Export current buffer or BUFFER to export format FORMAT.
+Pass argument SNIPPET to `fountain-export-region'.
 
 If destination buffer is not empty, ask to overwrite or generate
 a new buffer. If destination buffer is the same as source buffer,
@@ -3694,7 +3756,7 @@ Return non-nil if empty newline was inserted."
     hanging-line))
 
 (defun fountain-shift-down (&optional n)
-  "Move the current element down past an element of the same level."
+  "Move the current element down past N elements of the same level."
   (interactive "p")
   (unless n (setq n 1))
   (if (outline-on-heading-p)
@@ -3747,7 +3809,7 @@ Return non-nil if empty newline was inserted."
               (delete-char -1))))))))
 
 (defun fountain-shift-up (&optional n)
-  "Move the current element up past an element of the same level."
+  "Move the current element up past N elements of the same level."
   (interactive "p")
   (unless n (setq n 1))
   (fountain-shift-down (- n)))
@@ -4792,6 +4854,7 @@ keywords suitable for Font Lock."
               (append keywords
                       (list (cons matcher facespec))))))))
 
+;; FIXME: this onlys work for whole-line elements
 (defun fountain-match-element (fun limit)
   "If FUN returns non-nil before LIMIT, return non-nil."
   (let (match)
@@ -4802,6 +4865,11 @@ keywords suitable for Font Lock."
     match))
 
 (defun fountain-redisplay-scene-numbers (start end)
+  "Apply display text properties to scene numbers between START and END.
+
+If `fountain-display-scene-numbers-in-margin' is non-nil and
+scene heading has scene number, apply display text properties to
+redisplay in margin. Otherwise, remove display text properties."
   ;; FIXME: Why use jit-lock rather than font-lock?
   (goto-char start)
   (while (< (point) (min end (point-max)))
