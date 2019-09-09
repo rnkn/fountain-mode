@@ -1113,8 +1113,8 @@ See <http://debbugs.gnu.org/24073>."
            (save-restriction
              (widen)
              (or (bobp)
-                 (forward-line -1)
-                 (fountain-match-metadata)))))))
+                 (and (forward-line -1)
+                      (fountain-match-metadata))))))))
 
 (defun fountain-match-page-break ()
   "Match page break if point is at page break, nil otherwise."
