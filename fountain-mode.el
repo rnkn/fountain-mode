@@ -768,8 +768,7 @@ bold-italic delimiters together, e.g.
     This text is _***ridiculously important***_.")
 
 (defconst fountain-lyrics-regexp
-  (concat "^\\(?2:~\s*\\)"
-          "\\(?3:.+\\)")
+  "^\\(~[\s\t]*\\)\\(.+\\)"
   "Regular expression for matching lyrics.")
 
 
@@ -4747,10 +4746,10 @@ scene number from being auto-upcased."
               :override append)))
     ;; Lyrics
     (,fountain-lyrics-regexp
-     ((:level 1 :subexp 2 :face fountain-non-printing
+     ((:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-emphasis-delim
               :override append)
-      (:level 1 :subexp 3 :face italic
+      (:level 2 :subexp 2 :face italic
               :override append))))
   "List of face properties to create element Font Lock keywords.
 Takes the format:
