@@ -706,7 +706,7 @@ dialogue.")
     Group 2: forced page number (export group)")
 
 (defconst fountain-note-regexp
-  "\\(\\[\\[[\s\t]*\\(\\(?:.\n?\\)*?\\)[\s\t]*]]\\)"
+  "\\(\\[\\[[\s\t]*\\(\\(?:.\\|\n\\)*?\\)[\s\t]*]]\\)"
   "Regular expression for matching notes.
 
     Group 1: note including [[ ]] delimiters
