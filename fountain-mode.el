@@ -1110,46 +1110,40 @@ See <http://debbugs.gnu.org/24073>."
 (defun fountain-match-metadata ()
   "Match metadata if point is at metadata, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (and (looking-at fountain-metadata-regexp)
-           (or (bobp)
-               (save-match-data
+    (beginning-of-line)
+    (and (looking-at fountain-metadata-regexp)
+         (save-match-data
+           (save-restriction
+             (widen)
+             (or (bobp)
                  (forward-line -1)
                  (fountain-match-metadata)))))))
 
 (defun fountain-match-page-break ()
   "Match page break if point is at page break, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (looking-at fountain-page-break-regexp))))
+    (beginning-of-line)
+    (looking-at fountain-page-break-regexp)))
 
 (defun fountain-match-section-heading ()
   "Match section heading if point is at section heading, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (looking-at fountain-section-heading-regexp))))
+    (beginning-of-line)
+    (looking-at fountain-section-heading-regexp)))
 
 (defun fountain-match-synopsis ()
   "Match synopsis if point is at synopsis, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (looking-at fountain-synopsis-regexp))))
+    (beginning-of-line)
+    (looking-at fountain-synopsis-regexp)))
 
 (defun fountain-match-note ()
-  "Match note if point is at a note, nil otherwise."
+  "Match note if point is at note, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (or (looking-at fountain-note-regexp)
+    (beginning-of-line)
+    (or (looking-at fountain-note-regexp)
+        (save-restriction
+          (widen)
           (let ((x (point)))
             (and (re-search-backward "\\[\\[" nil t)
                  (looking-at fountain-note-regexp)
@@ -1158,42 +1152,31 @@ See <http://debbugs.gnu.org/24073>."
 (defun fountain-match-scene-heading ()
   "Match scene heading if point is at a scene heading, nil otherwise."
   (save-excursion
-    (save-restriction
-      ;; Widen the restriction to ensure the previous line really is
-      ;; blank.
-      (widen)
-      (beginning-of-line)
-      (and (looking-at fountain-scene-heading-regexp)
-           (fountain-blank-before-p)))))
+    (beginning-of-line)
+    (and (looking-at fountain-scene-heading-regexp)
+         (fountain-blank-before-p))))
 
 (defun fountain-match-character ()
   "Match character if point is at character, nil otherwise."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (beginning-of-line)
-      (and (let ((case-fold-search nil))
+      (and (let (case-fold-search)
              (looking-at fountain-character-regexp))
-           (save-match-data
-             (save-restriction
-               (widen)
-               (and (fountain-blank-before-p)
-                    (save-excursion
-                      (forward-line)
-                      (unless (eobp)
-                        (not (and (bolp) (eolp))))))))))))
+           (fountain-blank-before-p)
+           (not (fountain-blank-after-p))))))
 
 (defun fountain-match-dialog ()
   "Match dialog if point is at dialog, nil otherwise."
   (unless (or (and (bolp) (eolp))
-              (save-excursion (and (forward-comment 1) (eolp)))
               (fountain-match-paren)
               (fountain-match-note))
     (save-excursion
-      (save-restriction
-        (widen)
-        (beginning-of-line)
-        (and (looking-at fountain-dialog-regexp)
-             (save-match-data
+      (beginning-of-line)
+      (and (looking-at fountain-dialog-regexp)
+           (save-match-data
+             (save-restriction
+               (widen)
                (unless (bobp)
                  (forward-line -1)
                  (or (fountain-match-character)
@@ -1203,11 +1186,11 @@ See <http://debbugs.gnu.org/24073>."
 (defun fountain-match-paren ()
   "Match parenthetical if point is at a paranthetical, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (and (looking-at fountain-paren-regexp)
-           (save-match-data
+    (beginning-of-line)
+    (and (looking-at fountain-paren-regexp)
+         (save-match-data
+           (save-restriction
+             (widen)
              (unless (bobp)
                (forward-line -1)
                (or (fountain-match-character)
@@ -1216,23 +1199,19 @@ See <http://debbugs.gnu.org/24073>."
 (defun fountain-match-trans ()
   "Match transition if point is at a transition, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (and (let (case-fold-search)
-             (looking-at fountain-trans-regexp))
-           (fountain-blank-before-p)
-           (save-match-data
-             (fountain-blank-after-p))))))
+    (beginning-of-line)
+    (and (let (case-fold-search)
+           (looking-at fountain-trans-regexp))
+         (fountain-blank-before-p)
+         (fountain-blank-after-p))))
 
 (defun fountain-match-center ()
   "Match centered text if point is at centered text, nil otherwise."
   (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (looking-at fountain-center-regexp))))
+    (beginning-of-line)
+    (looking-at fountain-center-regexp)))
 
+;; FIXME: too expensive
 (defun fountain-match-action ()
   "Match action text if point is at action, nil otherwise.
 Assumes that all other element matching has been done."
@@ -1264,15 +1243,15 @@ Assumes that all other element matching has been done."
    ((fountain-match-metadata) 'metadata)
    ((fountain-match-section-heading) 'section-heading)
    ((fountain-match-scene-heading) 'scene-heading)
+   ((fountain-match-note) 'note)
    ((fountain-match-character) 'character)
    ((fountain-match-dialog) 'lines)
    ((fountain-match-paren) 'paren)
    ((fountain-match-trans) 'trans)
    ((fountain-match-center) 'center)
    ((fountain-match-synopsis) 'synopsis)
-   ((fountain-match-note) 'note)
    ((fountain-match-page-break) 'page-break)
-   (t (looking-at fountain-action-regexp) 'action)))
+   (t 'action)))
 
 
 ;;; Auto-completion
