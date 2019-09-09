@@ -656,9 +656,9 @@ Set with `fountain-init-trans-regexp'. Requires
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\(?1:\\(?2:[^:\n]+\\):[\s\t]*\\(?3:.+\\)?\\)[\s\t]*"
+  (concat "^\\([^:\s\t\n][^:\n]*\\):[\s\t]*\\(.+\\)?"
           "\\|"
-          "^[\s\t]+\\(?1:\\(?3:.+\\)\\)[\s\t]*")
+          "^[\s\t]+\\(?2:.+\\)")
   "Regular expression for matching multi-line metadata values.
 Requires `fountain-match-metadata' for `bobp'.")
 
@@ -1825,14 +1825,14 @@ Value string remains a string. e.g.
       (let (list)
         (while (and (bolp)
                     (fountain-match-metadata))
-          (let ((key (match-string-no-properties 2))
-                (value (match-string-no-properties 3)))
+          (let ((key (match-string-no-properties 1))
+                (value (match-string-no-properties 2)))
             (forward-line)
             (while (and (fountain-match-metadata)
-                        (null (match-string 2)))
+                        (null (match-string 1)))
               (setq value
                     (concat value (when value "\n")
-                            (match-string-no-properties 3)))
+                            (match-string-no-properties 2)))
               (forward-line))
             (setq list
                   (append list (list (intern (fountain-slugify key))
@@ -4699,9 +4699,9 @@ scene number from being auto-upcased."
     ;; Metedata
     ((lambda (limit)
        (fountain-match-element #'fountain-match-metadata limit))
-     ((:level 2 :subexp 0 :face fountain-metadata-key
+     ((:level 3 :subexp 0 :face fountain-metadata-key
               :laxmatch t)
-      (:level 2 :subexp 3 :face fountain-metadata-value
+      (:level 2 :subexp 2 :face fountain-metadata-value
               :override t
               :laxmatch t)))
     ;; Underline text
