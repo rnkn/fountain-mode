@@ -2576,41 +2576,57 @@ etc.) as well as keys defined in `fountain-export-formats'."
 ;;                "\n"))))
 
 (define-widget 'fountain-element-list-type 'lazy
-  "Customize widget for Fountain templates."
+  "Customize widget for Fountain export templates."
   :offset 4
   :type '(list
-          (group (const :tag "Document" document)
-                 (choice string (const nil)))
-          (group (const :tag "Section" section)
-                 (choice string (const nil)))
-          (group (const :tag "Section Heading" section-heading)
-                 (choice string (const nil)))
-          (group (const :tag "Scene" scene)
-                 (choice string (const nil)))
-          (group (const :tag "Scene Heading" scene-heading)
-                 (choice string (const nil)))
-          (group (const :tag "Dual Dialogue" dual-dialog)
-                 (choice string (const nil)))
-          (group (const :tag "Dialogue" dialog)
-                 (choice string (const nil)))
-          (group (const :tag "Character" character)
-                 (choice string (const nil)))
-          (group (const :tag "Parenthetical" paren)
-                 (choice string (const nil)))
-          (group (const :tag "Lines" lines)
-                 (choice string (const nil)))
-          (group (const :tag "Transition" trans)
-                 (choice string (const nil)))
-          (group (const :tag "Action" action)
-                 (choice string (const nil)))
-          (group (const :tag "Page Break" page-break)
-                 (choice string (const nil)))
-          (group (const :tag "Synopsis" synopsis)
-                 (choice string (const nil)))
-          (group (const :tag "Note" note)
-                 (choice string (const nil)))
-          (group (const :tag "Center Text" center)
-                 (choice string (const nil)))))
+          (list :tag "Element"
+                (const :tag "Document" document)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Section" section)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Section Heading" section-heading)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Scene" scene)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Scene Heading" scene-heading)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Dual Dialogue" dual-dialog)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Dialogue" dialog)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Character" character)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Parenthetical" paren)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Lines" lines)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Transition" trans)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Action" action)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Page Break" page-break)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Synopsis" synopsis)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Note" note)
+                (choice string (const nil)))
+          (list :tag "Element"
+                (const :tag "Center Text" center)
+                (choice string (const nil)))))
 
 (defun fountain-get-export-elements (&optional format)
   "Return list of elements exported in current script format FORMAT."
