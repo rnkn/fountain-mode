@@ -3992,9 +3992,9 @@ outline visibility through the following states:
   "Return the heading's nesting level in the outline.
 Assumes that point is at the beginning of a heading and match
 data reflects `outline-regexp'."
-  (cond ((string-prefix-p "#" (match-string 0))
-         (string-width (match-string 1)))
-        (t 6)))
+  (if (string-prefix-p "#" (match-string 0))
+      (string-width (match-string 1))
+    6))
 
 (defcustom fountain-pop-up-indirect-windows
   nil
