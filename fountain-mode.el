@@ -724,13 +724,12 @@ dialogue.")
     Group 2: synopsis (export group)")
 
 (defconst fountain-center-regexp
-  "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:.*?\\)\\(?4:[\s\t]*<\\)\\)[\s\t]*$"
+  "^[\s\t]*\\(>\\)[\s\t]*\\(.+?\\)[\s\t]*\\(<\\)[\s\t]*$"
   "Regular expression for matching centered text.
 
-    Group 1: match trimmed whitespace
-    Group 2: match leading > and whitespace
-    Group 3: match center text (export group)
-    Group 4: match trailing whitespace and <")
+    Group 1: match leading >
+    Group 2: match center text (export group)
+    Group 3: match trailing <")
 
 (defconst fountain-underline-regexp
   (concat "\\(^\\|[^\\]\\)"
@@ -2055,7 +2054,7 @@ argument EXPORT-ELEMENTS, parse element for export."
               'end (match-end 0)
               'export (when (memq 'center export-elements) t)
               'starts-new-page (fountain-starts-new-page))
-        (match-string-no-properties 3)))
+        (match-string-no-properties 2)))
 
 (defun fountain-parse-page-break (match-data &optional export-elements _job)
   "Return an element list for matched page break.
@@ -4667,11 +4666,11 @@ scene number from being auto-upcased."
      fountain-align-trans)
     ;; Center text
     (,fountain-center-regexp
-     ((:level 2 :subexp 2 :face fountain-comment
+     ((:level 2 :subexp 1 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t)
-      (:level 3 :subexp 3)
-      (:level 2 :subexp 4 :face fountain-comment
+      (:level 3 :subexp 2)
+      (:level 2 :subexp 3 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t))
      fountain-align-center)
