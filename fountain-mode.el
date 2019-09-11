@@ -3865,8 +3865,8 @@ Display a message unless SILENT."
          (save-excursion
            (goto-char (point-min))
            (while (re-search-forward fountain-note-regexp nil 'move)
-             (outline-flag-region (match-beginning 2)
-                                  (match-end 2) fountain-fold-notes)))
+             (outline-flag-region (match-beginning 1)
+                                  (match-end 1) fountain-fold-notes)))
          (unless silent (message "Showing all")))
         ((= n 6)
          (outline-hide-sublevels n)
@@ -3913,7 +3913,13 @@ Display a message unless SILENT."
                (outline-up-heading 1 t)
                (unless (bobp)
                  (setq level (funcall outline-level))))
-             level))))
+             level)))
+        (fold-notes-fun
+         (lambda (eohp eosp)
+           (goto-char eohp)
+           (while (re-search-forward fountain-note-regexp eosp 'move)
+             (outline-flag-region (match-beginning 1)
+                                  (match-end 1) fountain-fold-notes)))))
     (cond ((eq arg 4)
            (cond
             ((and (= fountain--outline-cycle 1) custom-level)
@@ -3937,15 +3943,15 @@ Display a message unless SILENT."
           (t
            (save-excursion
              (outline-back-to-heading)
-             (let ((eoh
+             (let ((eohp
                     (save-excursion
                       (outline-end-of-heading)
                       (point)))
-                   (eos
+                   (eosp
                     (save-excursion
                       (outline-end-of-subtree)
                       (point)))
-                   (eol
+                   (eolp
                     (save-excursion
                       (forward-line)
                       (while (and (not (eobp))
@@ -3960,22 +3966,21 @@ Display a message unless SILENT."
                         (and (outline-on-heading-p t)
                              (< level (funcall outline-level)))))))
                (cond
-                ((= eos eoh)
+                ((= eosp eohp)
                  (message "Empty heading")
                  (setq fountain--outline-cycle-subtree 0))
-                ((and (<= eos eol)
+                ((and (<= eosp eolp)
                       children)
                  (outline-show-entry)
                  (outline-show-children)
+                 (funcall fold-notes-fun eohp eosp)
                  (message "Showing headings")
                  (setq fountain--outline-cycle-subtree 2))
-                ((or (<= eos eol)
+                ((or (<= eosp eolp)
                      (= fountain--outline-cycle-subtree 2))
                  (outline-show-subtree)
-                 (goto-char eoh)
-                 (while (re-search-forward fountain-note-regexp eos 'move)
-                   (outline-flag-region (match-beginning 2)
-                                        (match-end 2) fountain-fold-notes))
+                 (goto-char eohp)
+                 (funcall fold-notes-fun eohp eosp)
                  (message "Showing contents")
                  (setq fountain--outline-cycle-subtree 3))
                 (t
@@ -4195,7 +4200,7 @@ to scene number or point."
    ARG.
 
 2. If point is at an appropriate point (i.e. eolp), call
-`completion-at-point'.
+   `completion-at-point'.
 
 3. If point is a scene heading or section heading call
    `fountain-outline-cycle'. "
@@ -4203,9 +4208,9 @@ to scene number or point."
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
         ((fountain-match-note)
-         (outline-flag-region (match-beginning 2)
-                              (match-end 2)
-           (not (get-char-property (match-beginning 2) 'invisible))))
+         (outline-flag-region (match-beginning 1)
+                              (match-end 1)
+           (not (get-char-property (match-beginning 1) 'invisible))))
         ((eolp)
          (completion-at-point))
         ((or (fountain-match-section-heading)
