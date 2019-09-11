@@ -690,10 +690,8 @@ Requires `fountain-match-dialog' for preceding character,
 parenthetical or dialogue.")
 
 (defconst fountain-paren-regexp
-  (concat "^[\s\t]*\\(([^)\n]*)\\)[\s\t]*$")
+  "^[\s\t]*([^)\n]*)[\s\t]*$"
   "Regular expression for matching parentheticals.
-
-    Group 1: match trimmed whitespace (export group)
 
 Requires `fountain-match-paren' for preceding character or
 dialogue.")
@@ -2032,7 +2030,7 @@ argument EXPORT-ELEMENTS, parse element for export."
         (list 'begin (match-beginning 0)
               'end (match-end 0)
               'export (when (memq 'paren export-elements) t))
-        (match-string-no-properties 1)))
+        (string-trim (match-string-no-properties 0))))
 
 (defun fountain-parse-trans (match-data &optional export-elements _job)
   "Return an element list for matched transition.
