@@ -608,7 +608,8 @@ e.g.
     Group 9: match scene number
     Group 10: match last # delimiter
 
-Requires `fountain-match-scene-heading' for preceding blank line.")
+Contructed with `fountain-init-scene-heading-regexp'. Requires
+`fountain-match-scene-heading' for preceding blank line.")
 
 (defcustom fountain-scene-heading-suffix-sep
   " - "
@@ -639,8 +640,9 @@ Separated from scene heading locations with
     Group 1: match forced transition mark
     Group 2: match transition
 
-Set with `fountain-init-trans-regexp'. Requires
-`fountain-match-trans' for preceding and succeeding blank lines.")
+Constructed with `fountain-init-trans-regexp'. Requires
+`fountain-match-trans' for preceding and succeeding blank
+lines.")
 
 (defconst fountain-action-regexp
   "^\\(!\\)?\\(.*\\)[\s\t]*$"
