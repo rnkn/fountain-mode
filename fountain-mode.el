@@ -704,11 +704,10 @@ dialogue.")
     Group 2: forced page number (export group)")
 
 (defconst fountain-note-regexp
-  "\\(\\[\\[[\s\t]*\\(\\(?:.\\|\n\\)*?\\)[\s\t]*]]\\)"
+  "\\[\\[[\s\t]*\\(\\(?:.\\|\n\\)*?\\)[\s\t]*]]"
   "Regular expression for matching notes.
 
-    Group 1: note including [[ ]] delimiters
-    Group 2: note (export group)")
+    Group 1: note contents (export group)")
 
 (defconst fountain-section-heading-regexp
   "^\\(?1:#\\{1,5\\}\\)[\s\t]*\\(?2:[^#\n].*?\\)[\s\t]*$"
@@ -2095,7 +2094,7 @@ in list argument EXPORT-ELEMENTS, parse element for export."
               'end (match-end 0)
               'export (when (memq 'note export-elements) t)
               'starts-new-page (fountain-starts-new-page))
-        (match-string-no-properties 2)))
+        (match-string-no-properties 1)))
 
 (defun fountain-parse-action (match-data &optional export-elements _job)
   "Return an element list for matched action.
