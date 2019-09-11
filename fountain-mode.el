@@ -2015,7 +2015,7 @@ argument EXPORT-ELEMENTS, parse element for export."
           (list 'begin beg
                 'end end
                 'export (when (memq 'lines export-elements) t))
-          (match-string-no-properties 1))))
+          (string-trim (match-string-no-properties 0)))))
 
 (defun fountain-parse-paren (match-data &optional export-elements _job)
   "Return an element list for matched parenthetical.
