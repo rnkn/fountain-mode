@@ -979,9 +979,9 @@ regular expression."
         (concat
          "^\\(?:[\s\t]*"
          ;; Group 1: match forced transition mark
-         "\\(?1:>\\)[\s\t]*"
-         ;; Group 2: match transition
-         "\\(?2:[^<>\n]*?\\)"
+         "\\(>\\)[\s\t]*"
+         ;; Group 2: match forced transition
+         "\\([^<>\n]*?\\)"
          "\\|"
          ;; Group 2: match transition
          "\\(?2:[[:upper:]\s\t]*"
