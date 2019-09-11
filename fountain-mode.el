@@ -717,12 +717,11 @@ dialogue.")
     Group 2: match heading")
 
 (defconst fountain-synopsis-regexp
-  "^\\(\\(=[\s\t]*\\)\\([^=\n].+?\\)\\)[\s\t]*$"
+  "^\\(=\\)[\s\t]*\\([^=\n].*?\\)$"
   "Regular expression for matching synopses.
 
-    Group 1: match trimmed whitespace
-    Group 2: leading =
-    Group 3: synopsis (export group)")
+    Group 1: leading =
+    Group 2: synopsis (export group)")
 
 (defconst fountain-center-regexp
   "^[\s\t]*\\(?1:\\(?2:>[\s\t]*\\)\\(?3:.*?\\)\\(?4:[\s\t]*<\\)\\)[\s\t]*$"
@@ -2081,7 +2080,7 @@ in list argument EXPORT-ELEMENTS, parse element for export."
               'end (match-end 0)
               'export (when (memq 'synopsis export-elements) t)
               'starts-new-page (fountain-starts-new-page))
-        (match-string-no-properties 3)))
+        (match-string-no-properties 2)))
 
 (defun fountain-parse-note (match-data &optional export-elements _job)
   "Return an element list for matched note.
@@ -4685,7 +4684,7 @@ scene number from being auto-upcased."
     ;; Synopses
     (,fountain-synopsis-regexp
      ((:level 2 :subexp 0 :face fountain-synopsis)
-      (:level 2 :subexp 2 :face fountain-comment
+      (:level 2 :subexp 1 :face fountain-comment
               :invisible fountain-syntax-chars
               :override t))
      fountain-align-synopsis)
