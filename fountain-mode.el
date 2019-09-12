@@ -1425,7 +1425,7 @@ Add to `fountain-mode-hook' to have completion upon load."
         (fountain-forward-character 1))
       (setq fountain-completion-characters
             (sort fountain-completion-characters
-                  #'(lambda (a b) (< (cdr b) (cdr a)))))))
+                  (lambda (a b) (< (cdr b) (cdr a)))))))
   (message "Completion candidates updated"))
 
 
@@ -1904,6 +1904,7 @@ in list argument EXPORT-ELEMENTS, parse element for export.
 
 Includes child elements. Update JOB."
   (set-match-data match-data)
+  ;; FIXME: use let
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
          (scene-number
@@ -4415,7 +4416,7 @@ Or if nil:
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string))
                 revision (match-string-no-properties 2 string))))
-      (setq revision (mapcar #'(lambda (n) (- (upcase n) 64)) revision))
+      (setq revision (mapcar (lambda (n) (- (upcase n) 64)) revision))
       (cons number revision))))
 
 (defun fountain-scene-number-to-string (scene-num-list)
@@ -4438,9 +4439,9 @@ Or, if nil:
                 (char-to-string fountain-scene-number-separator)
               "")
             revision
-            (mapconcat #'(lambda (char)
-                           (char-to-string
-                            (+ (1- char) fountain-scene-number-first-revision)))
+            (mapconcat (lambda (char)
+                         (char-to-string
+                          (+ (1- char) fountain-scene-number-first-revision)))
                        (cdr scene-num-list) separator)))
     (if fountain-prefix-revised-scene-numbers
         (progn
