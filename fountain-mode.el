@@ -363,6 +363,12 @@ changes desired."
   :type 'string
   :safe 'stringp)
 
+(defcustom fountain-more-dialog-string
+  "(MORE)"
+  "String to append to dialog when breaking across pages."
+  :type 'string
+  :safe 'stringp)
+
 (defcustom fountain-hide-emphasis-delim
   nil
   "If non-nil, make emphasis delimiters invisible."
@@ -1452,6 +1458,12 @@ script, you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
+(defcustom fountain-page-size
+  'letter
+  "Paper size to use on export."
+  :type '(radio (const :tag "US Letter" letter)
+                (const :tag "A4" a4)))
+
 (defvar fountain-elements
   '((section-heading
      :tag "Section Heading"
@@ -1505,9 +1517,6 @@ Includes references to various functions and variables.
 Takes the form:
 
     (ELEMENT KEYWORD PROPERTY)")
-
-(defvar fountain-export-page-size)
-(defvar fountain-export-more-dialog-string)
 
 (defun fountain-goto-page-break-point ()
   "Move point to appropriate place to break a page.
@@ -1604,7 +1613,7 @@ with `fountain-get-export-elements'."
         ;; Begin the main loop, which only halts if we reach the end
         ;; of buffer, a forced page break, or after the maximum lines
         ;; in a page.
-        (while (and (< line-count (cdr (assq fountain-export-page-size
+        (while (and (< line-count (cdr (assq fountain-page-size
                                              fountain-pages-max-lines)))
                     (not (eobp))
                     (not (fountain-match-page-break)))
@@ -1681,7 +1690,7 @@ number."
     (if (memq element '(lines paren))
         (let ((name (fountain-get-character -1)))
           (insert (concat
-                   fountain-export-more-dialog-string "\n\n"
+                   fountain-more-dialog-string "\n\n"
                    page-break "\n\n"
                    name "\s" fountain-continued-dialog-string "\n")))
       ;; Otherwise, insert the page break where we are. If the preceding
@@ -2299,12 +2308,6 @@ Passed to `format' with export format as single variable."
                 (function-item fountain-export-buffer-to-txt)
                 (function-item fountain-export-shell-command)))
 
-(defcustom fountain-export-page-size
-  'letter
-  "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4)))
-
 (defcustom fountain-export-font
   "Courier"
   "Font to use when exporting."
@@ -2344,12 +2347,6 @@ Options are: bold, double-space, underline."
   :type '(set (const :tag "Bold" bold)
               (const :tag "Double-spaced" double-space)
               (const :tag "Underlined" underline)))
-
-(defcustom fountain-export-more-dialog-string
-  "(MORE)"
-  "String to append to dialog when breaking across pages."
-  :type 'string
-  :safe 'stringp)
 
 (defcustom fountain-export-shell-command
   "afterwriting --source %s --pdf --overwrite"
@@ -3062,7 +3059,7 @@ Command acts on current buffer or BUFFER."
 ;; (defun fountain-export-buffer-to-ps ()
 ;;   "Convenience function for exporting buffer to PostScript."
 ;;   (interactive)
-;;   (let ((ps-paper-type fountain-export-page-size)
+;;   (let ((ps-paper-type fountain-page-size)
 ;;         (ps-left-margin (* fountain-export-left-margin 72))
 ;;         (ps-top-margin (* fountain-export-top-margin 72))
 ;;         (ps-font-size 12)
@@ -5023,14 +5020,14 @@ redisplay in margin. Otherwise, remove display text properties."
      "---"
      ["Run Shell Command" fountain-export-shell-command]
      "---"
-     ["US Letter Page Size" (customize-set-variable 'fountain-export-page-size
+     ["US Letter Page Size" (customize-set-variable 'fountain-page-size
                                                     'letter)
       :style radio
-      :selected (eq fountain-export-page-size 'letter)]
-     ["A4 Page Size" (customize-set-variable 'fountain-export-page-size
+      :selected (eq fountain-page-size 'letter)]
+     ["A4 Page Size" (customize-set-variable 'fountain-page-size
                                              'a4)
       :style radio
-      :selected (eq fountain-export-page-size 'a4)]
+      :selected (eq fountain-page-size 'a4)]
      "---"
      ["Include Title Page"
       (customize-set-variable 'fountain-export-include-title-page
@@ -5121,7 +5118,7 @@ redisplay in margin. Otherwise, remove display text properties."
                       fountain-hide-syntax-chars
                       fountain-shift-all-elements
                       font-lock-maximum-decoration
-                      fountain-export-page-size
+                      fountain-page-size
                       fountain-export-include-title-page
                       fountain-export-scene-heading-format))
       (when (customize-mark-to-save option) (setq unsaved t)))
