@@ -4316,11 +4316,13 @@ to remove previous string first."
             (replace-fun
              (lambda (string job)
                (goto-char (point-min))
-               (while (re-search-forward
-                       (concat "\s*" string) nil t)
-                 (save-match-data
-                   (when (fountain-match-character)
-                     (delete-region (match-beginning 0) (match-end 0))))
+               (unless (fountain-match-character)
+                 (fountain-forward-character))
+               (while (< (point) (point-max))
+                 (if (re-search-forward
+                      (concat "[\s\t]*" string) (line-end-position) t)
+                     (delete-region (match-beginning 0) (match-end 0)))
+                 (fountain-forward-character)
                  (progress-reporter-update job))))
             case-fold-search)
         (when (string= fountain-continued-dialog-string backup)
