@@ -4633,7 +4633,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-action limit))
      ((:level 1 :subexp 0 :face fountain-action)
-      (:level 2 :subexp 1 :face fountain-non-printing
+      (:level 3 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
@@ -4648,7 +4648,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-scene-heading limit))
      ((:level 2 :subexp 0 :face fountain-scene-heading)
-      (:level 2 :subexp 1 :face fountain-non-printing
+      (:level 3 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t)
@@ -4670,7 +4670,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-character limit))
      ((:level 3 :subexp 0 :face fountain-character)
-      (:level 3 :subexp 2
+      (:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)
@@ -4692,18 +4692,18 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-trans limit))
      ((:level 3 :subexp 0 :face fountain-trans)
-      (:level 2 :subexp 1 :face fountain-comment
+      (:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
      fountain-align-trans)
     ;; Center text
     (,fountain-center-regexp
-     ((:level 2 :subexp 1 :face fountain-comment
+     ((:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t)
       (:level 3 :subexp 2)
-      (:level 2 :subexp 3 :face fountain-comment
+      (:level 2 :subexp 3 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t))
      fountain-align-center)
@@ -4716,7 +4716,7 @@ scene number from being auto-upcased."
     ;; Synopses
     (,fountain-synopsis-regexp
      ((:level 2 :subexp 0 :face fountain-synopsis)
-      (:level 2 :subexp 1 :face fountain-comment
+      (:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t))
      fountain-align-synopsis)
@@ -4736,49 +4736,49 @@ scene number from being auto-upcased."
               :laxmatch t)))
     ;; Underline text
     (,fountain-underline-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face underline
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Italic text
     (,fountain-italic-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face italic
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Bold text
     (,fountain-bold-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face bold
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Bold-Italic text
     (,fountain-bold-italic-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face bold-italic
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Lyrics
     (,fountain-lyrics-regexp
-     ((:level 2 :subexp 1 :face fountain-non-printing
+     ((:level 3 :subexp 1 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 2 :subexp 2 :face italic
               :override append))))
   "List of face properties to create element Font Lock keywords.
