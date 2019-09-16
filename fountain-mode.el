@@ -1431,7 +1431,7 @@ Add to `fountain-mode-hook' to have completion upon load."
         (fountain-forward-character 1))
       (setq fountain-completion-characters
             (sort fountain-completion-characters
-                  #'(lambda (a b) (< (cdr b) (cdr a)))))))
+                  (lambda (a b) (< (cdr b) (cdr a)))))))
   (message "Completion candidates updated"))
 
 
@@ -1913,6 +1913,7 @@ in list argument EXPORT-ELEMENTS, parse element for export.
 
 Includes child elements. Update JOB."
   (set-match-data match-data)
+  ;; FIXME: use let
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
          (scene-number
@@ -4312,11 +4313,13 @@ to remove previous string first."
             (replace-fun
              (lambda (string job)
                (goto-char (point-min))
-               (while (re-search-forward
-                       (concat "\s*" string) nil t)
-                 (save-match-data
-                   (when (fountain-match-character)
-                     (delete-region (match-beginning 0) (match-end 0))))
+               (unless (fountain-match-character)
+                 (fountain-forward-character))
+               (while (< (point) (point-max))
+                 (if (re-search-forward
+                      (concat "[\s\t]*" string) (line-end-position) t)
+                     (delete-region (match-beginning 0) (match-end 0)))
+                 (fountain-forward-character)
                  (progress-reporter-update job))))
             case-fold-search)
         (when (string= fountain-continued-dialog-string backup)
@@ -4412,7 +4415,7 @@ Or if nil:
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string))
                 revision (match-string-no-properties 2 string))))
-      (setq revision (mapcar #'(lambda (n) (- (upcase n) 64)) revision))
+      (setq revision (mapcar (lambda (n) (- (upcase n) 64)) revision))
       (cons number revision))))
 
 (defun fountain-scene-number-to-string (scene-num-list)
@@ -4435,9 +4438,9 @@ Or, if nil:
                 (char-to-string fountain-scene-number-separator)
               "")
             revision
-            (mapconcat #'(lambda (char)
-                           (char-to-string
-                            (+ (1- char) fountain-scene-number-first-revision)))
+            (mapconcat (lambda (char)
+                         (char-to-string
+                          (+ (1- char) fountain-scene-number-first-revision)))
                        (cdr scene-num-list) separator)))
     (if fountain-prefix-revised-scene-numbers
         (progn
@@ -4627,7 +4630,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-action limit))
      ((:level 1 :subexp 0 :face fountain-action)
-      (:level 2 :subexp 1 :face fountain-non-printing
+      (:level 3 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
@@ -4642,7 +4645,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-scene-heading limit))
      ((:level 2 :subexp 0 :face fountain-scene-heading)
-      (:level 2 :subexp 1 :face fountain-non-printing
+      (:level 3 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override prepend
               :laxmatch t)
@@ -4664,7 +4667,7 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-character limit))
      ((:level 3 :subexp 0 :face fountain-character)
-      (:level 3 :subexp 2
+      (:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t)
@@ -4686,18 +4689,18 @@ scene number from being auto-upcased."
     ((lambda (limit)
        (fountain-match-element #'fountain-match-trans limit))
      ((:level 3 :subexp 0 :face fountain-trans)
-      (:level 2 :subexp 1 :face fountain-comment
+      (:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t
               :laxmatch t))
      fountain-align-trans)
     ;; Center text
     (,fountain-center-regexp
-     ((:level 2 :subexp 1 :face fountain-comment
+     ((:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t)
       (:level 3 :subexp 2)
-      (:level 2 :subexp 3 :face fountain-comment
+      (:level 2 :subexp 3 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t))
      fountain-align-center)
@@ -4710,7 +4713,7 @@ scene number from being auto-upcased."
     ;; Synopses
     (,fountain-synopsis-regexp
      ((:level 2 :subexp 0 :face fountain-synopsis)
-      (:level 2 :subexp 1 :face fountain-comment
+      (:level 2 :subexp 1 :face fountain-non-printing
               :invisible fountain-syntax-chars
               :override t))
      fountain-align-synopsis)
@@ -4730,49 +4733,49 @@ scene number from being auto-upcased."
               :laxmatch t)))
     ;; Underline text
     (,fountain-underline-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face underline
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Italic text
     (,fountain-italic-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face italic
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Bold text
     (,fountain-bold-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face bold
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Bold-Italic text
     (,fountain-bold-italic-regexp
-     ((:level 2 :subexp 2 :face fountain-non-printing
+     ((:level 3 :subexp 2 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 1 :subexp 3 :face bold-italic
               :override append)
-      (:level 2 :subexp 4 :face fountain-non-printing
+      (:level 3 :subexp 4 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)))
+              :override t)))
     ;; Lyrics
     (,fountain-lyrics-regexp
-     ((:level 2 :subexp 1 :face fountain-non-printing
+     ((:level 3 :subexp 1 :face fountain-non-printing
               :invisible fountain-emphasis-delim
-              :override append)
+              :override t)
       (:level 2 :subexp 2 :face italic
               :override append))))
   "List of face properties to create element Font Lock keywords.
