@@ -1738,7 +1738,7 @@ n.b. This is an approximate calculation."
 ;;; Templating
 
 (defconst fountain-template-regexp
-  "{{[\s\t\n]*\\(?1:[.-a-z0-9]+\\)\\(?::[\s\t\n]*\\(?2:[^{}]+?\\)\\)?[\s\t\n]*}}"
+  "{{[\s\t]*\\([.-a-z0-9]+\\)\\(?::[\s\t]+\\([^{}]+?\\)\\)?[\s\t]*}}"
   "Regular expression for matching template keys.")
 
 (defun fountain-match-template ()
