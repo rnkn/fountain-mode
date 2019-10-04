@@ -3468,22 +3468,22 @@ parent."
 <TitlePage>
 <Content>
 <Paragraph Alignment=\"Center\">
-<Text>{{title}}</Text>
+<Text>{{ title }}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
 <Text></Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
-<Text>{{credit}}</Text>
+<Text>{{ credit }}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
 <Text></Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
-<Text>{{author}}</Text>
+<Text>{{ author }}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Left\">
-<Text>{{contact}}</Text>
+<Text>{{ contact }}</Text>
 </Paragraph>
 </Content>
 </TitlePage>"
@@ -3495,25 +3495,25 @@ parent."
 <?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>
 <FinalDraft DocumentType=\"Script\" Template=\"No\" Version=\"1\">
 <Content>
-{{content}}\
+{{ content }}
 </Content>
 {{title-page}}
 </FinalDraft>")
-    (section "{{content}}")
+    (section "{{ content }}")
     (section-heading nil)
-    (scene "{{content}}")
-    (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (dual-dialog "<Paragraph StartsNewPage=\"{{starts-new-page}}\">\n<DualDialogue>\n{{content}}</DualDialogue>\n</DualDialogue>\n")
-    (dialog "{{content}}")
-    (character "<Paragraph Type=\"Character\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (paren "<Paragraph Type=\"Parenthetical\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (lines "<Paragraph Type=\"Dialogue\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (trans "<Paragraph Type=\"Transition\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (action "<Paragraph Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (scene "{{ content }}")
+    (scene-heading "<Paragraph Number=\"{{ scene-number }}\" Type=\"Scene Heading\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (dual-dialog "<Paragraph StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<DualDialogue>\n{{ content }}</DualDialogue>\n</DualDialogue>\n")
+    (dialog "{{ content }}")
+    (character "<Paragraph Type=\"Character\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (paren "<Paragraph Type=\"Parenthetical\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (lines "<Paragraph Type=\"Dialogue\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (trans "<Paragraph Type=\"Transition\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (action "<Paragraph Type=\"Action\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
     (page-break nil)
     (synopsis nil)
     (note nil)
-    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
+    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n"))
   (define-fountain-export-template-docstring 'fdx)
   :type 'fountain-element-list-type)
 
