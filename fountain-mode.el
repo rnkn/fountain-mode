@@ -3054,37 +3054,49 @@ Command acts on current buffer or BUFFER."
   '((document "\
 <head>
 <meta charset=\"utf-8\">
-<meta name=\"author\" content=\"{{author}}\" />
-<meta name=\"generator\" content=\"Emacs {{emacs-version}} running Fountain Mode {{fountain-version}}\" />
+<meta name=\"author\" content=\"{{ author }}\" />
+<meta name=\"generator\" content=\"Emacs {{ eval: emacs-version }} running Fountain Mode {{ eval: fountain-version }}\" />
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
-<title>{{title}}</title>
+<title>{{ title }}</title>
 <style type=\"text/css\">
-{{stylesheet}}
+{{ eval: fountain-export-html-stylesheet }}
 </style>
 </head>
 <body>
 <section class=\"screenplay\">
-{{title-page}}
-{{content}}\
+{{ eval: fountain-export-html-title-page-template }}
+{{ content }}
 </section>
 </body>")
-    (section "<section class=\"section\">\n{{content}}</section>\n")
-    (section-heading "<a href=\"#{{slugify}}\"><p class=\"section-heading\" id=\"{{slugify}}\">{{content}}</p></a>\n")
-    (scene "<section class=\"scene\">\n{{content}}</section>\n")
-    (scene-heading "<a href=\"#{{scene-number}}\"><p class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</p></a>\n")
-    (dual-dialog "<div class=\"dual-dialog\">\n{{content}}</div>\n")
-    (dialog "<div class=\"dialog\">\n{{content}}</div>\n")
-    (character "<p class=\"character\">{{content}}</p>\n")
-    (paren "<p class=\"paren\">{{content}}</p>\n")
-    (lines "<p class=\"lines\">{{content}}</p>\n")
-    (trans "<p class=\"trans\">{{content}}</p>\n")
-    (action "<p class=\"action\">{{content}}</p>\n")
-    (page-break "<a href=\"#p{{content}}\"><hr id=\"{{content}}\">\n<p class=\"page-number\">{{content}}</p></a>")
-    (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
-    (note "<p class=\"note\">{{content}}</p>\n")
-    (center "<p class=\"center\">{{content}}</p>\n"))
+    (section "<section class=\"section\">\n{{ content }}</section>\n")
+    (section-heading "<a href=\"#{{ eval: (fountain-slugify content) }}\"><p class=\"section-heading\" id=\"{{ eval: (fountain-slugify content) }}\">{{ content }}</p></a>\n")
+    (scene "<section class=\"scene\">\n{{ content }}</section>\n")
+    (scene-heading "<a href=\"#{{ scene-number }}\"><p class=\"scene-heading\" id=\"{{ scene-number }}\">{{ content }}</p></a>\n")
+    (dual-dialog "<div class=\"dual-dialog\">\n{{ content }}</div>\n")
+    (dialog "<div class=\"dialog\">\n{{ content }}</div>\n")
+    (character "<p class=\"character\">{{ content }}</p>\n")
+    (paren "<p class=\"paren\">{{ content }}</p>\n")
+    (lines "<p class=\"lines\">{{ content }}</p>\n")
+    (trans "<p class=\"trans\">{{ content }}</p>\n")
+    (action "<p class=\"action\">{{ content }}</p>\n")
+    (page-break "<a href=\"#p{{ content }}\"><hr id=\"{{ content }}\">\n<p class=\"page-number\">{{ content }}</p></a>")
+    (synopsis "<p class=\"synopsis\">{{ content }}</p>\n")
+    (note "<p class=\"note\">{{ content }}</p>\n")
+    (center "<p class=\"center\">{{ content }}</p>\n"))
   (define-fountain-export-template-docstring 'html)
   :type 'fountain-element-list-type)
+
+(defcustom fountain-export-html-title-page-template
+  "\
+<div class='title'>
+<h1>{{ title }}</h1>
+<p>{{ credit }}</p>
+<p>{{ author }}</p>
+<p class=\"contact\">{{ contact }}</p>
+</div>
+"
+  "HTML template for title page export."
+  :type 'string)
 
 (defcustom fountain-export-html-stylesheet
   "\
@@ -3124,7 +3136,7 @@ Command acts on current buffer or BUFFER."
   background-color: lightyellow;
 }
 .screenplay .scene {
-  margin-top: {{scene-heading-spacing}};
+  margin-top: {{ eval: (if (memq 'double-space fountain-export-scene-heading-format) \"2em\" \"1em\") }};
 }
 .screenplay .scene-heading {
   margin-bottom: 0;
@@ -3208,16 +3220,6 @@ means all screenplay elements require the \".screenplay\" class
 parent."
   :type 'string
   :link '(url-link "https://github.com/rnkn/mcqueen"))
-
-(defcustom fountain-export-html-title-template
-  "<div class=\"title\">{{title-template}}</div>
-<h1>{{title}}</h1>
-<p>{{credit}}</p>
-<p>{{author}}</p>
-<p class=\"contact\">{{contact-template}}</p>
-"
-  "HTML template for title page export."
-  :type 'string)
 
 (defcustom fountain-export-html-hook
   nil
