@@ -3101,7 +3101,7 @@ Command acts on current buffer or BUFFER."
 (defcustom fountain-export-html-stylesheet
   "\
 .screenplay {
-  font-family: {{font}};
+  font-family: \"Courier\";
   font-size: 12pt;
   line-height: 1;
   max-width: 6in;
@@ -3199,7 +3199,7 @@ Command acts on current buffer or BUFFER."
 .screenplay .note {
   display: block;
   font-size: 11pt;
-  font-family: \"Comic Sans MS\", \"Marker Felt\", \"sans-serif\";
+  font-family: \"Comic Sans MS\", \"Marker Felt\", sans-serif;
   line-height: 1.5;
   background-color: lightgoldenrodyellow;
   padding: 1em;
