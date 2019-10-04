@@ -3241,11 +3241,11 @@ parent."
 
 (defcustom fountain-export-tex-title-page-template
   "\
-\\title{{{title}}}
-\\author{{{author}}}
-\\date{{{date}}}
-\\newcommand{\\credit}{{{credit}}}
-\\newcommand{\\contact}{{{contact}}}
+\\title{{{ title }}}
+\\author{{{ author }}}
+\\date{{{ date }}}
+\\newcommand{\\credit}{{{ credit }}}
+\\newcommand{\\contact}{{{ contact }}}
 
 \\thispagestyle{empty}
 \\vspace*{3in}
@@ -3270,7 +3270,7 @@ parent."
 
 (defcustom fountain-export-tex-template
   '((document "\
-\\documentclass[12pt,{{page-size}}]{article}
+\\documentclass[12pt,{{ eval: fountain-page-size }}]{article}
 
 % Conditionals
 \\usepackage{etoolbox}
@@ -3281,19 +3281,19 @@ parent."
 \\newtoggle{includescenenumbers}
 \\newtoggle{numberfirstpage}
 
-\\settoggle{contactalignright}{{{title-contact-align}}}
-\\settoggle{doublespacesceneheadings}{{{scene-heading-spacing}}}
-\\settoggle{underlinesceneheadings}{{{scene-heading-underline}}}
-\\settoggle{boldsceneheadings}{{{scene-heading-bold}}}
-\\settoggle{includescenenumbers}{{{include-scene-numbers}}}
-\\settoggle{numberfirstpage}{{{number-first-page}}}
+\\settoggle{contactalignright}{{{ eval: fountain-export-contact-align-right }}}
+\\settoggle{doublespacesceneheadings}{{{ eval: (if (memq 'double-space fountain-export-scene-heading-format) \"true\" \"false\") }}}
+\\settoggle{underlinesceneheadings}{{{ eval: (if (memq 'underline-space fountain-export-scene-heading-format) \"true\" \"false\") }}}
+\\settoggle{boldsceneheadings}{{{ eval: (if (memq 'bold fountain-export-scene-heading-format) \"true\" \"false\") }}}
+\\settoggle{includescenenumbers}{{{ eval: (if fountain-export-include-scene-numbers \"true\" \"false\") }}}
+\\settoggle{numberfirstpage}{{{ eval: (if fountain-export-number-first-page \"true\" \"false\") }}}
 
 % Page Layout Settings
 \\usepackage[left=1.5in,right=1in,top=1in,bottom=0.75in]{geometry}
 
 % Font Settings
 \\usepackage{fontspec}
-\\setmonofont{{{font}}}
+\\setmonofont{Courier}
 \\renewcommand{\\familydefault}{\\ttdefault}
 
 % Text Settings
@@ -3353,8 +3353,8 @@ parent."
 
 % Dialogue
 \\usepackage{xstring}
-\\newcommand{\\contd}{{{contd}}}
-\\newcommand{\\more}{{{more}}}
+\\newcommand{\\contd}{{{ eval: fountain-continued-dialog-string }}}
+\\newcommand{\\more}{{{ eval: fountain-more-dialog-string }}}
 \\newlength{\\characterindent}
 \\newlength{\\characterwidth}
 \\newlength{\\dialogindent}
@@ -3416,32 +3416,32 @@ parent."
 % Document
 \\begin{document}
 
-{{title-page}}
+{{ eval: fountain-export-tex-title-page-template }}
 
 \\setcounter{page}{1}
 \\iftoggle{numberfirstpage}{}{\\thispagestyle{empty}}
-{{content}}\
+{{ content }}
 \\end{document}
 
 % Local Variables:
 % tex-command: \"xelatex\"
 % TeX-engine: xetex
 % End:")
-    (section "{{content}}")
-    (section-heading "\\sectionheading{{{content}}}\n\n")
-    (scene "{{content}}")
-    (scene-heading "\\sceneheading{{{content}}}\n\n")
-    (dual-dialog "{{content}}")
-    (dialog "\\begin{dialog}{{content}}\\end{dialog}\n\n")
-    (character "{{{content}}}\n")
-    (paren "\\paren{{{content}}}\n")
-    (lines "{{content}}\n")
-    (trans "\\trans{{{content}}}\n\n")
-    (action "{{content}}\n\n")
+    (section "{{ content }}")
+    (section-heading "\\sectionheading{{{ content }}}\n\n")
+    (scene "{{ content }}")
+    (scene-heading "\\sceneheading{{{ content }}}\n\n")
+    (dual-dialog "{{ content }}")
+    (dialog "\\begin{dialog}{{ content }}\\end{dialog}\n\n")
+    (character "{{{ content }}}\n")
+    (paren "\\paren{{{ content }}}\n")
+    (lines "{{ content }}\n")
+    (trans "\\trans{{{ content }}}\n\n")
+    (action "{{ content }}\n\n")
     (page-break "\\clearpage\n\n")
     (synopsis nil)
     (note nil)
-    (center "\\centertext{{{content}}}\n\n"))
+    (center "\\centertext{{{ content }}}\n\n"))
   (define-fountain-export-template-docstring 'tex)
   :type 'fountain-element-list-type)
 
