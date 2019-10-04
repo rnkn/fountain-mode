@@ -1002,7 +1002,7 @@ regular expression."
   ;; user to choose which appear in the imenu list.
   (setq imenu-generic-expression
         (list
-         (list "Notes" fountain-note-regexp 2)
+         (list "Notes" fountain-note-regexp 1)
          (list "Scene Headings" fountain-scene-heading-regexp 2)
          (list "Sections" fountain-section-heading-regexp 0))))
 
