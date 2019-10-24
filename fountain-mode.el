@@ -4010,6 +4010,27 @@ data reflects `outline-regexp'."
       (string-width (match-string 1))
     6))
 
+(defun fountain-outline-insert-section ()
+  "Insert an empty section heading at the current outline level."
+  (interactive)
+  (unless (and (bolp) (eolp))
+    (if (bolp)
+        (save-excursion (newline))
+      (end-of-line) (newline)))
+  (let (level)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (ignore-errors
+          (outline-back-to-heading t)
+          (if (= (funcall outline-level) 6)
+              (outline-up-heading 1)))
+        (setq level
+              (if (outline-on-heading-p)
+                  (funcall outline-level)
+                1))))
+    (insert (make-string level ?#) " ")))
+
 (defcustom fountain-pop-up-indirect-windows
   nil
   "Non-nil if opening indirect buffers should make a new window."
@@ -4946,6 +4967,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
+    (define-key map (kbd "M-RET") #'fountain-outline-insert-section)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
     ;; Pages
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
