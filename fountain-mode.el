@@ -2718,7 +2718,7 @@ Check if element corresponds to a template in
 `fountain-export-templates' If so, replace matches of
 `fountain-template-regexp' in the following order:
 
-1. {{ content }} is replaced with value of content.
+1. {{ content }} is replaced with value of ELEMENT content.
 
 2. If {{ KEY }} corresponds to a string property in plist,
    replace with that string.
@@ -2742,7 +2742,7 @@ Check if element corresponds to a template in
         ;; nil -> ignore
         ;; string -> perform minor replacements and maybe fill
         ;; list -> call this function recursively
-        (cond ((not content))
+        (cond ((not content) nil)
               ((stringp content)
                (setq string (fountain-export-replace-in-string content format))
                (when (plist-get export-format-plist :fill)
