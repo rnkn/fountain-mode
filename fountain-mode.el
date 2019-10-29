@@ -1578,6 +1578,26 @@ over whitespace."
             (fountain-goto-page-break-point)
           (goto-char x)))))))
 
+(defun fountain-move-to-fill-width (element)
+  "Move point to column of ELEMENT fill limit suitable for breaking line.
+Skip over comments."
+  (let ((fill-width
+         (cdr (symbol-value
+               (plist-get (cdr (assq element fountain-elements))
+                          :fill)))))
+    (let ((i 0))
+      (while (and (< i fill-width) (not (eolp)))
+        (cond ((= (syntax-class (syntax-after (point))) 0)
+               (forward-char 1)
+               (setq i (1+ i)))
+              ((forward-comment 1))
+              (t
+               (forward-char 1)
+               (setq i (1+ i))))))
+    (skip-chars-forward "\s\t")
+    (when (eolp) (forward-line))
+    (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
+
 (defun fountain-forward-page (&optional n export-elements)
   "Move point forward by approximately N pages.
 
@@ -1640,26 +1660,6 @@ with `fountain-get-export-elements'."
       (skip-chars-forward "\n\s\t")
       (fountain-goto-page-break-point)
       (setq n (1- n)))))
-
-(defun fountain-move-to-fill-width (element)
-  "Move point to column of ELEMENT fill limit suitable for breaking line.
-Skip over comments."
-  (let ((fill-width
-         (cdr (symbol-value
-               (plist-get (cdr (assq element fountain-elements))
-                          :fill)))))
-    (let ((i 0))
-      (while (and (< i fill-width) (not (eolp)))
-        (cond ((= (syntax-class (syntax-after (point))) 0)
-               (forward-char 1)
-               (setq i (1+ i)))
-              ((forward-comment 1))
-              (t
-               (forward-char 1)
-               (setq i (1+ i))))))
-    (skip-chars-forward "\s\t")
-    (when (eolp) (forward-line))
-    (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-insert-page-break (&optional string)
   "Insert a page break at appropriate place preceding point.
