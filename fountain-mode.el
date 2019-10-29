@@ -4010,7 +4010,7 @@ data reflects `outline-regexp'."
       (string-width (match-string 1))
     6))
 
-(defun fountain-outline-insert-section ()
+(defun fountain-insert-section-heading ()
   "Insert an empty section heading at the current outline level."
   (interactive)
   (unless (and (bolp) (eolp))
@@ -4967,7 +4967,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
-    (define-key map (kbd "M-RET") #'fountain-outline-insert-section)
+    (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
     ;; Pages
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
@@ -5008,6 +5008,7 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Go to Scene Heading..." fountain-goto-scene]
      ["Go to Page..." fountain-goto-page])
     ("Edit Structure"
+     ["Insert Section Heading" fountain-insert-section-heading]
      ["Mark Subtree" fountain-outline-mark]
      ["Open Subtree in Indirect Buffer" fountain-outline-to-indirect-buffer]
      "---"
