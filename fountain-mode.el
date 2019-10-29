@@ -1516,7 +1516,7 @@ over whitespace."
   ;; FIXME: currently does not account for elements not included in
   ;; `fountain-export-include-elements' for current format. This will
   ;; throw page off page counting in many cases.
-  (when (looking-at "\n[\n\s\t]*\n") (goto-char (match-end 0)))
+  (when (looking-at "\n[\n\s\t]*") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
      ;; If we're are a section heading, scene heading or character, we
