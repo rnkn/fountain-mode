@@ -612,13 +612,14 @@ Contructed with `fountain-init-scene-heading-regexp'. Requires
 `fountain-match-scene-heading' for preceding blank line.")
 
 (defcustom fountain-scene-heading-suffix-sep
-  " - "
-  "String separating scene heading location from suffix.
+  " --? "
+  "Regular expression separating scene heading location from suffix.
 
 WARNING: If you change this any existing scene headings will no
 longer be parsed correctly."
-  :type 'string
-  :safe 'string
+  :group 'fountain
+  :type 'regexp
+  :safe 'regexp
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (defcustom fountain-scene-heading-suffix-list
