@@ -327,7 +327,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              fountain-completion-update
              turn-on-flyspell))
 
-(defcustom fountain-script-format "screenplay"
+(defcustom fountain-default-script-format "screenplay"
   "Default script format for editing and exporting.
 
 Can be overridden in metadata with, e.g.
@@ -335,6 +335,8 @@ Can be overridden in metadata with, e.g.
     format: teleplay"
   :type 'string
   :safe 'string)
+(define-obsolete-variable-alias 'fountain-script-format
+  'fountain-default-script-format "fountain-mode-2.9.0")
 
 (defcustom fountain-add-continued-dialog
   t
@@ -568,7 +570,7 @@ e.g.
       option
     (cadr (or (assoc (or (plist-get (fountain-read-metadata)
                                     'format)
-                         fountain-script-format)
+                         fountain-default-script-format)
                      option)
               (car option)))))
 
@@ -582,7 +584,7 @@ e.g.
     "title: " (skeleton-read "Title: " (file-name-base (buffer-name))) | -7 "\n"
     "credit: " (skeleton-read "Credit: " "written by") | -9 "\n"
     "author: " (skeleton-read "Author: " user-full-name) | -9 "\n"
-    "format: " (skeleton-read "Script format: " fountain-script-format) | -9 "\n"
+    "format: " (skeleton-read "Script format: " fountain-default-script-format) | -9 "\n"
     "source: " (skeleton-read "Source: ") | -9 "\n"
     "date: " (skeleton-read "Date: " (format-time-string fountain-time-format)) | -7 "\n"
     "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
@@ -2604,7 +2606,7 @@ etc.) as well as keys defined in `fountain-export-formats'."
   (cdr (or (assoc-string
             (or format
                 (plist-get (fountain-read-metadata) 'format)
-                fountain-script-format)
+                fountain-default-script-format)
             fountain-export-include-elements)
            (car fountain-export-include-elements))))
 
