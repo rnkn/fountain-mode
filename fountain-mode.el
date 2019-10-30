@@ -1261,29 +1261,25 @@ Each element is a cons (NAME . OCCUR) where NAME is a string, and
 OCCUR is an integer representing the character's number of
 occurrences. ")
 
-(defcustom fountain-completion-additional-characters
+(defvar fountain-completion-additional-characters
   nil
-  "List of additional characters to offer for completion.
+  "List of additional character strings to offer for completion.
 Case insensitive, all character names will be made uppercase.
 
-This is more useful when working with multiple files and set with
-`add-dir-local-variable'."
-  :type '(repeat (string :tag "Character"))
-  :safe '(lambda (value)
-           (and (listp value)
-                (seq-every-p 'stringp value))))
+This is really only useful when working with multiple files and
+set as a per-directory local variable.
 
-(defcustom fountain-completion-additional-locations
+See (info \"(emacs) Directory Variables\")")
+
+(defvar fountain-completion-additional-locations
   nil
-  "List of additional locations to offer for completion.
+  "List of additional location strings to offer for completion.
 Case insensitive, all locations will be made uppercase.
 
-This is more useful when working with multiple files and set with
-`add-dir-local-variable'."
-  :type '(repeat (string :tag "Location"))
-  :safe '(lambda (value)
-           (and (listp value)
-                (seq-every-p 'stringp value))))
+This is really only useful when working with multiple files and
+set as a per-directory local variable.
+
+See (info \"(emacs) Directory Variables\")")
 
 (defun fountain-completion-get-characters ()
   "Return a list of characters for completion.
