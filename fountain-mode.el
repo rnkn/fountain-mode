@@ -1032,6 +1032,7 @@ buffers."
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
+  (setq-local paragraph-start ".*$")
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
@@ -1553,35 +1554,31 @@ Comments are assumed to be deleted."
         (if (fountain-match-character)
             (progn
               (beginning-of-line)
-              (fountain-goto-page-break-point))
+              (fountain-goto-page-break-point export-elements))
           ;; Otherwise parenthetical is mid-dialogue, so get character
           ;; name and break at this element.
           (goto-char x))))
-     ;; If we're at dialogue, skip over spaces then go to the
-     ;; beginning of the current sentence.
+     ;; If we're at dialogue, skip over spaces then go to the beginning
+     ;; of the current sentence. If previous line is a character or
+     ;; parenthetical, call recursively on that element. Otherwise,
+     ;; break page here.
      ((eq element 'lines)
       (skip-chars-forward "\s\t")
-      (if (not (looking-back (sentence-end)
-                             (save-excursion
-                               (fountain-forward-character 0)
-                               (point))))
-          (forward-sentence -1)
-        ;; This may move to character element, or back within
-        ;; dialogue. If previous line is a character or parenthetical,
-        ;; call recursively on that element. Otherwise, get character
-        ;; name and break page here.
-        (let ((x (point)))
-          (backward-char)
-          (if (or (fountain-match-character)
-                  (fountain-match-paren))
-              (fountain-goto-page-break-point)
-            (goto-char x)))))
+      (unless (or (bolp)
+                  (looking-back (sentence-end) nil))
+        (forward-sentence -1))
+      (let ((x (point)))
+        (forward-line -1)
+        (if (or (fountain-match-character)
+                (fountain-match-paren))
+            (fountain-goto-page-break-point export-elements)
+          (goto-char x))))
      ;; If we're at a transition or center text, skip backwards to
      ;; previous element and call recursively on that element.
      ((memq element '(trans center))
-      (skip-chars-backward "\n\r\s\t")
+      (skip-chars-backward "\n\s\t")
       (beginning-of-line)
-      (fountain-goto-page-break-point))
+      (fountain-goto-page-break-point export-elements))
      ;; If we're at action, skip over spaces then go to the beginning
      ;; of the current sentence.
      ((eq element 'action)
@@ -1593,10 +1590,10 @@ Comments are assumed to be deleted."
       ;; scene heading, call recursively on that element. Otherwise,
       ;; break page here.
       (let ((x (point)))
-        (skip-chars-backward "\n\r\s\t")
+        (skip-chars-backward "\n\s\t")
         (beginning-of-line)
         (if (fountain-match-scene-heading)
-            (fountain-goto-page-break-point)
+            (fountain-goto-page-break-point export-elements)
           (goto-char x)))))))
 
 (defun fountain-move-to-fill-width (element)
