@@ -1643,6 +1643,8 @@ with `fountain-get-export-elements'."
            (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0))))))
     (unless n (setq n 1))
     (while (< 0 n)
+      (while (fountain-match-metadata)
+        (forward-line 1))
       ;; Pages don't begin with blank space, so skip over any at point.
       (funcall skip-whitespace-fun)
       ;; If we're at a page break, move to its end and skip over
