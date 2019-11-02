@@ -1675,11 +1675,11 @@ with `fountain-get-export-elements'."
                 (funcall skip-whitespace-fun)))))))
       ;; We are not at the furthest point in a page. Skip over any
       ;; remaining whitespace, then go back to page-break point.
-      (skip-chars-forward "\n\s\t")
-      (fountain-goto-page-break-point)
+      (fountain-goto-page-break-point (or export-elements
+                                          (fountain-get-export-elements)))
       (setq n (1- n)))))
 
-(defun fountain-insert-page-break (&optional ask page-num)
+(defun fountain-insert-page-break (&optional ask page-num export-elements)
   "Insert a page break at appropriate place preceding point.
 When optional argument ASK is non-nil (if prefixed with
 \\[universal-argument] when called interactively), prompt for PAGE-NUM
@@ -1695,7 +1695,7 @@ as a string to force the page number."
                          (concat "\s" page-num "\s==="))))
         element)
     ;; Move point to appropriate place to break page.
-    (fountain-goto-page-break-point)
+    (fountain-goto-page-break-point export-elements)
     (setq element (fountain-get-element))
     ;; At this point, element can only be: section-heading,
     ;; scene-heading, character, action, paren or lines. Only paren and
