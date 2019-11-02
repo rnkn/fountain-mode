@@ -3672,9 +3672,9 @@ Otherwise, only operate on section and scene headings."
 
 (defcustom fountain-fold-notes
   t
-  "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling visibility.
+  "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling outline visibility.
 
-Note visibility can be cycled with \\[fountain-dwim]."
+Notes visibility can be cycled with \\[fountain-dwim]."
   :type 'boolean
   :safe 'boolean
   :group 'fountain)
