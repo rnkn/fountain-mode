@@ -1736,7 +1736,8 @@ as a string to force the page number."
         (unless (fountain-blank-before-p) (insert-before-markers "\n"))
         (insert-before-markers page-break "\n\n")))
     ;; Return to where we were.
-    (goto-char x)))
+    (goto-char x)
+    (set-marker x nil)))
 
 (defun fountain-get-page-count ()
   "Return a cons of the current page number and the total pages."
@@ -4276,7 +4277,8 @@ a scene heading."
       (let ((x (point)))
         (if (forward-comment 1)
             (delete-region x (point))
-          (unless (eobp) (forward-char 1)))))))
+          (unless (eobp) (forward-char 1)))))
+    (set-marker end nil)))
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
