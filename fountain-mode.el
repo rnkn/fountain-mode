@@ -1772,11 +1772,12 @@ n.b. This is an approximate calculation."
         (widen)
         (goto-char (point-min))
         (let ((page 1))
+          (fountain-forward-page 1 export-elements)
           (while (< (point) (point-max))
-            (fountain-forward-page 1 export-elements)
             (setq page (1+ page))
             (fountain-insert-page-break nil (number-to-string page)
                                         export-elements)
+            (fountain-forward-page 1 export-elements)
             (progress-reporter-update job))
           (progress-reporter-done job))))))
 
