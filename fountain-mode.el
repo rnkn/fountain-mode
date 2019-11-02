@@ -1713,8 +1713,8 @@ as a string to force the page number."
     ;; lines require special treatment.
     (if (memq element '(lines paren))
         (let ((name (fountain-get-character -1)))
-          (insert (concat
-                   fountain-more-dialog-string "\n\n"
+          (insert-before-markers
+           (concat fountain-more-dialog-string "\n\n"
                    page-break "\n\n"
                    name fountain-contd-dialog-string "\n")))
       ;; Otherwise, insert the page break where we are. If the preceding
