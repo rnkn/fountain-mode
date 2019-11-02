@@ -1620,8 +1620,7 @@ Skip over comments."
   "Move point forward by approximately N pages.
 
 Moves forward from point, which is unlikely to correspond to
-final exported pages and so probably should not be used
-interactively.
+final exported pages and so should not be used interactively.
 
 To considerably speed up this function, supply EXPORT-ELEMENTS
 with `fountain-get-export-elements'."
@@ -1780,7 +1779,7 @@ window."
 (defun fountain-include-replace-in-region (start end &optional delete)
   "Replace inclusions between START and END with their file contents.
 
-If optional argument DELETE is non-nil (if prefix with \\[universal-argument]
+If optional argument DELETE is non-nil (if prefixed with \\[universal-argument]
 when called interactively), delete instead.
 
 If specified file is missing or otherwise not readable, replace
