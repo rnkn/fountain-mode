@@ -1032,7 +1032,6 @@ buffers."
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
-  (setq-local paragraph-start ".*$")
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
