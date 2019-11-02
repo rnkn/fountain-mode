@@ -1868,7 +1868,7 @@ Value string remains a string. e.g.
                                      value)))))
         list))))
 
-(defun fountain-dual-dialog (&optional pos)
+(defun fountain-read-dual-dialog (&optional pos)
   "Non-nil if point or POS is within dual dialogue.
 Returns \"right\" if within right-side dual dialogue, \"left\" if
 within left-side dual dialogue, and nil otherwise."
@@ -1978,7 +1978,7 @@ Update JOB."
   (set-match-data match-data)
   (let* ((beg (match-beginning 0))
          (starts-new-page (fountain-starts-new-page))
-         (dual (fountain-dual-dialog))
+         (dual (fountain-read-dual-dialog))
          (character
           (list 'character
                 (list 'begin (match-beginning 0)
@@ -2013,7 +2013,7 @@ Update JOB."
         ;; Find the end of the dual-dialogue.
         (let ((end
                (save-excursion
-                 (while (fountain-dual-dialog)
+                 (while (fountain-read-dual-dialog)
                    (fountain-forward-character 1 'dialog))
                  (skip-chars-backward "\n\r\s\t")
                  (point))))
