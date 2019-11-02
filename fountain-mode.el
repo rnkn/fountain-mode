@@ -370,6 +370,12 @@ changes desired."
   :type 'string
   :safe 'stringp)
 
+(defcustom fountain-more-dialog-string
+  "(MORE)"
+  "String to append to dialog when breaking across pages."
+  :type 'string
+  :safe 'stringp)
+
 (defcustom fountain-hide-emphasis-delim
   nil
   "If non-nil, make emphasis delimiters invisible."
@@ -1473,6 +1479,12 @@ script, you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
+(defcustom fountain-page-size
+  'letter
+  "Paper size to use on export."
+  :type '(radio (const :tag "US Letter" letter)
+                (const :tag "A4" a4)))
+
 (defvar fountain-elements
   '((section-heading
      :tag "Section Heading"
@@ -1702,7 +1714,7 @@ as a string to force the page number."
     (if (memq element '(lines paren))
         (let ((name (fountain-get-character -1)))
           (insert (concat
-                   fountain-export-more-dialog-string "\n\n"
+                   fountain-more-dialog-string "\n\n"
                    page-break "\n\n"
                    name fountain-contd-dialog-string "\n")))
       ;; Otherwise, insert the page break where we are. If the preceding
@@ -1749,7 +1761,7 @@ n.b. This is an approximate calculation."
 ;;; Templating
 
 (defconst fountain-template-regexp
-  "{{[\s\t\n]*\\(?1:[.-a-z0-9]+\\)\\(?::[\s\t\n]*\\(?2:[^{}]+?\\)\\)?[\s\t\n]*}}"
+  "{{[\s\t]*\\([.-a-z0-9]+\\)\\(?::[\s\t]+\\([^{}]+?\\)\\)?[\s\t]*}}"
   "Regular expression for matching template keys.")
 
 (defun fountain-match-template ()
@@ -2360,12 +2372,6 @@ Options are: bold, double-space, underline."
               (const :tag "Double-spaced" double-space)
               (const :tag "Underlined" underline)))
 
-(defcustom fountain-export-more-dialog-string
-  "(MORE)"
-  "String to append to dialog when breaking across pages."
-  :type 'string
-  :safe 'stringp)
-
 (defcustom fountain-export-shell-command
   "afterwriting --source %s --pdf --overwrite"
   "Shell command string to convert Fountain source to ouput.
@@ -2717,84 +2723,67 @@ associated with KEY, and value associated with VALUE."
       (when (stringp string) string))))
 
 ;; FIXME: this function is too log and ugly
-(defun fountain-export-element (element-list format)
-  "Return a formatted string from ELEMENT-LIST according to FORMAT.
+(defun fountain-export-element (element format)
+  "Return a formatted string from ELEMENT according to FORMAT.
 
-Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT.
+Break ELEMENT into type, plist and content.
 
-If PLIST property \"export\" is non-nil, proceed, otherwise
+If plist property \"export\" is non-nil, proceed, otherwise
 return an empty string.
 
-If CONTENT is a string, format with `fountain-export-replace-in-string'
-and if format it filled, fill with `fountain-export-fill-string'.
+If content is a string, format with `fountain-export-replace-in-string'
+and if format is filled, fill with `fountain-export-fill-string'.
 
-If CONTENT is a list, recursively call this function on each
+If content is a list, recursively call this function on each
 element of the list.
 
-Check if ELEMENT corresponds to a template in
-`fountain-export-templates' and set ELEMENT-TEMPLATE. If so,
-replace matches of `fountain-template-regexp' in the
-following order:
+Check if element corresponds to a template in
+`fountain-export-templates' If so, replace matches of
+`fountain-template-regexp' in the following order:
 
-1. {{content}} is replaced with CONTENT.
+1. {{ content }} is replaced with value of ELEMENT content.
 
-2. If {{KEY}} corresponds to a string property in PLIST, it is
-   replaced with that string.
+2. If {{ KEY }} corresponds to a string property in plist,
+   replace with that string.
 
-3. If {{KEY}} corresponds to the value of the key of ELEMENT of
-   FORMAT in `fountain-export-conditional-replacements', it is
-   replaced with that string.
+3. If KEY in {{ KEY: VALUE }} is \"eval\", evaluate VALUE, and if
+   VALUE returns a string, replace with that string.
 
-4. If {{KEY}} corresponds with a cdr of FORMAT in
-   `fountain-export-replacements', it is evaluated using `eval'
-   and replaced with that string.
-
-5. If none of the above, {{KEY}} is replaced with an empty
-   string."
-  ;; Break ELEMENT-LIST into ELEMENT, PLIST and CONTENT.
-  (let ((element (car element-list))
-        (plist (nth 1 element-list))
-        (content (nth 2 element-list)))
-    ;; First, element must be included for export. Check if export
-    ;; property is non-nil.
-    (if (plist-get plist 'export)
-        ;; Set the ELEMENT-FORMAT-PLIST. STRING will return the final
-        ;; exported string.
-        (let ((export-format-plist (cdr (assq format fountain-export-formats)))
-              format-template element-template string)
-          (cond
-           ;; If CONTENT is nil, set STRING as an empty string.
-           ((not content)
-            (setq string ""))
-           ;; If CONTENT is a string, format CONTENT and set as STRING.
-           ((stringp content)
-            (setq string (fountain-export-replace-in-string content format))
-            ;; If the format is filled, fill STRING in temporary buffer
-            (when (plist-get export-format-plist :fill)
-              (setq string (fountain-export-fill-string string element))))
-           ;; If CONTENT is a list, work through the list setting each
-           ;; element as CHILD-ELEMENT-LIST and recursively calling this
-           ;; function.
-           ((listp content)
-            (dolist (child-element-list content)
-              (setq string
-                    (concat string
-                            (fountain-export-element child-element-list format)))))
-           ;; Otherwise, CONTENT is either not exported or malformed,
-           ;; then set an empty string.
-           (t
-            (setq string "")))
-          ;; Set the FORMAT-TEMPLATE, which is the big alist of template
-          ;; strings for each element. From this, get the
-          ;; ELEMENT-TEMPLATE.
-          (setq format-template (symbol-value (plist-get export-format-plist :template))
-                element-template (car (cdr (assq element format-template))))
-          (cond
-           ;; If there is a FORMAT-TEMPLATE and an ELEMENT-TEMPLATE,
-           ;; replace template keys in that template.
-           ((and format-template element-template)
-            (while (string-match fountain-template-regexp element-template)
-              (setq element-template
+4. If none of the above, return an empty string."
+  (let ((type (car element))
+        (plist (nth 1 element))
+        (content (nth 2 element))
+        (string ""))
+    ;; First, element's type must be included for export. Check if
+    ;; export property is non-nil.
+    (when (plist-get plist 'export)
+      ;; Set the export-format-plist.
+      (let ((export-format-plist (cdr (assq format fountain-export-formats)))
+            format-template template)
+        ;; What's next depends on the element's content:
+        ;;
+        ;; nil -> ignore
+        ;; string -> perform minor replacements and maybe fill
+        ;; list -> call this function recursively
+        (cond ((not content) nil)
+              ((stringp content)
+               (setq string (fountain-export-replace-in-string content format))
+               (when (plist-get export-format-plist :fill)
+                 (setq string (fountain-export-fill-string string element))))
+              ((listp content)
+               (dolist (child content)
+                 (setq string
+                       (concat string (fountain-export-element child format))))))
+        ;; Set the template-alist, which is the big alist of template
+        ;; strings for each element. From this, get each element
+        ;; template.
+        (setq format-template (symbol-value (plist-get export-format-plist :template))
+              template (car (cdr (assq type template-alist))))
+         ;; If there is a template-alist and an element template,
+         ;; replace template keys in that template.
+        (if template
+            (while (string-match fountain-template-regexp template)
+              (setq template
                     (replace-regexp-in-string
                      fountain-template-regexp
                      (lambda (match)
@@ -2802,45 +2791,23 @@ following order:
                        (let* ((key (match-string 1 match))
                               (value (plist-get plist (intern key))))
                          (cond
-                          ;; If KEY is "content", replace with STRING.
-                          ((string= key "content")
-                           string)
-                          ;; If KEY is "slugify", replace with slugified
-                          ;; STRING.
-                          ((string= key "slugify")
-                           (fountain-slugify string))
-                          ;; If KEY's VALUE is a string, format and
-                          ;; replace with VALUE.
+                          ;; If key is "content", replace with string.
+                          ((string= key "content") string)
+                          ;; If key's value is a string, format and
+                          ;; replace with value.
                           ((stringp value)
                            (fountain-export-replace-in-string value format))
-                          ;; If KEY's VALUE is not a string but still
+                          ;; If key's value is not a string but still
                           ;; non-nil attempt conditional replacement
-                          ;; based on KEY's VALUE.
-                          ;;
-                          ;; FIXME: the following two functions are
-                          ;; ugly/messy. Some work has already been done
-                          ;; to combine these into just
-                          ;; `fountain-export-get-eval-replacement' by
-                          ;; using template {{KEYS}} in the export
-                          ;; templates.
-                          (value
-                           (fountain-export-get-cond-replacement
-                            format element (intern key) value))
+                          ;; based on key's value.
                           ;; Otherwise, attempt expression
                           ;; replacements.
                           ((fountain-export-get-eval-replacement
                             (intern key) format))
                           (t ""))))
-                     element-template t t)))
-            (setq string element-template))
-           ;; If there's no ELEMENT-TEMPLATE for element in
-           ;; FORMAT-TEMPLATE, set an empty string
-           (format-template
-            (setq string "")))
-          ;; Return the string.
-          (or string ""))
-      ;; Element is not exported, return an empty string.
-      "")))
+                     template t t)))
+          (setq string template))))
+    string))
 
 (defun fountain-export-region (start end format &optional snippet)
   "Return an export string of region between START and END in FORMAT.
@@ -3110,42 +3077,54 @@ Command acts on current buffer or BUFFER."
   '((document "\
 <head>
 <meta charset=\"utf-8\">
-<meta name=\"author\" content=\"{{author}}\" />
-<meta name=\"generator\" content=\"Emacs {{emacs-version}} running Fountain Mode {{fountain-version}}\" />
+<meta name=\"author\" content=\"{{ author }}\" />
+<meta name=\"generator\" content=\"Emacs {{ eval: emacs-version }} running Fountain Mode {{ eval: fountain-version }}\" />
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
-<title>{{title}}</title>
+<title>{{ title }}</title>
 <style type=\"text/css\">
-{{stylesheet}}
+{{ eval: fountain-export-html-stylesheet }}
 </style>
 </head>
 <body>
 <section class=\"screenplay\">
-{{title-page}}
-{{content}}\
+{{ eval: fountain-export-html-title-page-template }}
+{{ content }}
 </section>
 </body>")
-    (section "<section class=\"section\">\n{{content}}</section>\n")
-    (section-heading "<a href=\"#{{slugify}}\"><p class=\"section-heading\" id=\"{{slugify}}\">{{content}}</p></a>\n")
-    (scene "<section class=\"scene\">\n{{content}}</section>\n")
-    (scene-heading "<a href=\"#{{scene-number}}\"><p class=\"scene-heading\" id=\"{{scene-number}}\">{{content}}</p></a>\n")
-    (dual-dialog "<div class=\"dual-dialog\">\n{{content}}</div>\n")
-    (dialog "<div class=\"dialog\">\n{{content}}</div>\n")
-    (character "<p class=\"character\">{{content}}</p>\n")
-    (paren "<p class=\"paren\">{{content}}</p>\n")
-    (lines "<p class=\"lines\">{{content}}</p>\n")
-    (trans "<p class=\"trans\">{{content}}</p>\n")
-    (action "<p class=\"action\">{{content}}</p>\n")
-    (page-break "<a href=\"#p{{content}}\"><hr id=\"{{content}}\">\n<p class=\"page-number\">{{content}}</p></a>")
-    (synopsis "<p class=\"synopsis\">{{content}}</p>\n")
-    (note "<p class=\"note\">{{content}}</p>\n")
-    (center "<p class=\"center\">{{content}}</p>\n"))
+    (section "<section class=\"section\">\n{{ content }}</section>\n")
+    (section-heading "<a href=\"#{{ eval: (fountain-slugify content) }}\"><p class=\"section-heading\" id=\"{{ eval: (fountain-slugify content) }}\">{{ content }}</p></a>\n")
+    (scene "<section class=\"scene\">\n{{ content }}</section>\n")
+    (scene-heading "<a href=\"#{{ scene-number }}\"><p class=\"scene-heading\" id=\"{{ scene-number }}\">{{ content }}</p></a>\n")
+    (dual-dialog "<div class=\"dual-dialog\">\n{{ content }}</div>\n")
+    (dialog "<div class=\"dialog\">\n{{ content }}</div>\n")
+    (character "<p class=\"character\">{{ content }}</p>\n")
+    (paren "<p class=\"paren\">{{ content }}</p>\n")
+    (lines "<p class=\"lines\">{{ content }}</p>\n")
+    (trans "<p class=\"trans\">{{ content }}</p>\n")
+    (action "<p class=\"action\">{{ content }}</p>\n")
+    (page-break "<a href=\"#p{{ content }}\"><hr id=\"{{ content }}\">\n<p class=\"page-number\">{{ content }}</p></a>")
+    (synopsis "<p class=\"synopsis\">{{ content }}</p>\n")
+    (note "<p class=\"note\">{{ content }}</p>\n")
+    (center "<p class=\"center\">{{ content }}</p>\n"))
   (define-fountain-export-template-docstring 'html)
   :type 'fountain-element-list-type)
+
+(defcustom fountain-export-html-title-page-template
+  "\
+<div class='title'>
+<h1>{{ title }}</h1>
+<p>{{ credit }}</p>
+<p>{{ author }}</p>
+<p class=\"contact\">{{ contact }}</p>
+</div>
+"
+  "HTML template for title page export."
+  :type 'string)
 
 (defcustom fountain-export-html-stylesheet
   "\
 .screenplay {
-  font-family: {{font}};
+  font-family: \"Courier\";
   font-size: 12pt;
   line-height: 1;
   max-width: 6in;
@@ -3180,7 +3159,7 @@ Command acts on current buffer or BUFFER."
   background-color: lightyellow;
 }
 .screenplay .scene {
-  margin-top: {{scene-heading-spacing}};
+  margin-top: {{ eval: (if (memq 'double-space fountain-export-scene-heading-format) \"2em\" \"1em\") }};
 }
 .screenplay .scene-heading {
   margin-bottom: 0;
@@ -3243,7 +3222,7 @@ Command acts on current buffer or BUFFER."
 .screenplay .note {
   display: block;
   font-size: 11pt;
-  font-family: \"Comic Sans MS\", \"Marker Felt\", \"sans-serif\";
+  font-family: \"Comic Sans MS\", \"Marker Felt\", sans-serif;
   line-height: 1.5;
   background-color: lightgoldenrodyellow;
   padding: 1em;
@@ -3265,16 +3244,6 @@ parent."
   :type 'string
   :link '(url-link "https://github.com/rnkn/mcqueen"))
 
-(defcustom fountain-export-html-title-template
-  "<div class=\"title\">{{title-template}}</div>
-<h1>{{title}}</h1>
-<p>{{credit}}</p>
-<p>{{author}}</p>
-<p class=\"contact\">{{contact-template}}</p>
-"
-  "HTML template for title page export."
-  :type 'string)
-
 (defcustom fountain-export-html-hook
   nil
   "Hook run with export buffer on sucessful export to HTML."
@@ -3295,11 +3264,11 @@ parent."
 
 (defcustom fountain-export-tex-title-page-template
   "\
-\\title{{{title}}}
-\\author{{{author}}}
-\\date{{{date}}}
-\\newcommand{\\credit}{{{credit}}}
-\\newcommand{\\contact}{{{contact}}}
+\\title{{{ title }}}
+\\author{{{ author }}}
+\\date{{{ date }}}
+\\newcommand{\\credit}{{{ credit }}}
+\\newcommand{\\contact}{{{ contact }}}
 
 \\thispagestyle{empty}
 \\vspace*{3in}
@@ -3324,7 +3293,7 @@ parent."
 
 (defcustom fountain-export-tex-template
   '((document "\
-\\documentclass[12pt,{{page-size}}]{article}
+\\documentclass[12pt,{{ eval: fountain-page-size }}]{article}
 
 % Conditionals
 \\usepackage{etoolbox}
@@ -3335,19 +3304,19 @@ parent."
 \\newtoggle{includescenenumbers}
 \\newtoggle{numberfirstpage}
 
-\\settoggle{contactalignright}{{{title-contact-align}}}
-\\settoggle{doublespacesceneheadings}{{{scene-heading-spacing}}}
-\\settoggle{underlinesceneheadings}{{{scene-heading-underline}}}
-\\settoggle{boldsceneheadings}{{{scene-heading-bold}}}
-\\settoggle{includescenenumbers}{{{include-scene-numbers}}}
-\\settoggle{numberfirstpage}{{{number-first-page}}}
+\\settoggle{contactalignright}{{{ eval: fountain-export-contact-align-right }}}
+\\settoggle{doublespacesceneheadings}{{{ eval: (if (memq 'double-space fountain-export-scene-heading-format) \"true\" \"false\") }}}
+\\settoggle{underlinesceneheadings}{{{ eval: (if (memq 'underline-space fountain-export-scene-heading-format) \"true\" \"false\") }}}
+\\settoggle{boldsceneheadings}{{{ eval: (if (memq 'bold fountain-export-scene-heading-format) \"true\" \"false\") }}}
+\\settoggle{includescenenumbers}{{{ eval: (if fountain-export-include-scene-numbers \"true\" \"false\") }}}
+\\settoggle{numberfirstpage}{{{ eval: (if fountain-export-number-first-page \"true\" \"false\") }}}
 
 % Page Layout Settings
 \\usepackage[left=1.5in,right=1in,top=1in,bottom=0.75in]{geometry}
 
 % Font Settings
 \\usepackage{fontspec}
-\\setmonofont{{{font}}}
+\\setmonofont{Courier}
 \\renewcommand{\\familydefault}{\\ttdefault}
 
 % Text Settings
@@ -3407,8 +3376,8 @@ parent."
 
 % Dialogue
 \\usepackage{xstring}
-\\newcommand{\\contd}{{{contd}}}
-\\newcommand{\\more}{{{more}}}
+\\newcommand{\\contd}{{{ eval: fountain-continued-dialog-string }}}
+\\newcommand{\\more}{{{ eval: fountain-more-dialog-string }}}
 \\newlength{\\characterindent}
 \\newlength{\\characterwidth}
 \\newlength{\\dialogindent}
@@ -3470,32 +3439,32 @@ parent."
 % Document
 \\begin{document}
 
-{{title-page}}
+{{ eval: fountain-export-tex-title-page-template }}
 
 \\setcounter{page}{1}
 \\iftoggle{numberfirstpage}{}{\\thispagestyle{empty}}
-{{content}}\
+{{ content }}
 \\end{document}
 
 % Local Variables:
 % tex-command: \"xelatex\"
 % TeX-engine: xetex
 % End:")
-    (section "{{content}}")
-    (section-heading "\\sectionheading{{{content}}}\n\n")
-    (scene "{{content}}")
-    (scene-heading "\\sceneheading{{{content}}}\n\n")
-    (dual-dialog "{{content}}")
-    (dialog "\\begin{dialog}{{content}}\\end{dialog}\n\n")
-    (character "{{{content}}}\n")
-    (paren "\\paren{{{content}}}\n")
-    (lines "{{content}}\n")
-    (trans "\\trans{{{content}}}\n\n")
-    (action "{{content}}\n\n")
+    (section "{{ content }}")
+    (section-heading "\\sectionheading{{{ content }}}\n\n")
+    (scene "{{ content }}")
+    (scene-heading "\\sceneheading{{{ content }}}\n\n")
+    (dual-dialog "{{ content }}")
+    (dialog "\\begin{dialog}{{ content }}\\end{dialog}\n\n")
+    (character "{{{ content }}}\n")
+    (paren "\\paren{{{ content }}}\n")
+    (lines "{{ content }}\n")
+    (trans "\\trans{{{ content }}}\n\n")
+    (action "{{ content }}\n\n")
     (page-break "\\clearpage\n\n")
     (synopsis nil)
     (note nil)
-    (center "\\centertext{{{content}}}\n\n"))
+    (center "\\centertext{{{ content }}}\n\n"))
   (define-fountain-export-template-docstring 'tex)
   :type 'fountain-element-list-type)
 
@@ -3522,22 +3491,22 @@ parent."
 <TitlePage>
 <Content>
 <Paragraph Alignment=\"Center\">
-<Text>{{title}}</Text>
+<Text>{{ title }}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
 <Text></Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
-<Text>{{credit}}</Text>
+<Text>{{ credit }}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
 <Text></Text>
 </Paragraph>
 <Paragraph Alignment=\"Center\">
-<Text>{{author}}</Text>
+<Text>{{ author }}</Text>
 </Paragraph>
 <Paragraph Alignment=\"Left\">
-<Text>{{contact}}</Text>
+<Text>{{ contact }}</Text>
 </Paragraph>
 </Content>
 </TitlePage>"
@@ -3549,25 +3518,25 @@ parent."
 <?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>
 <FinalDraft DocumentType=\"Script\" Template=\"No\" Version=\"1\">
 <Content>
-{{content}}\
+{{ content }}
 </Content>
 {{title-page}}
 </FinalDraft>")
-    (section "{{content}}")
+    (section "{{ content }}")
     (section-heading nil)
-    (scene "{{content}}")
-    (scene-heading "<Paragraph Number=\"{{scene-number}}\" Type=\"Scene Heading\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (dual-dialog "<Paragraph StartsNewPage=\"{{starts-new-page}}\">\n<DualDialogue>\n{{content}}</DualDialogue>\n</DualDialogue>\n")
-    (dialog "{{content}}")
-    (character "<Paragraph Type=\"Character\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (paren "<Paragraph Type=\"Parenthetical\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (lines "<Paragraph Type=\"Dialogue\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (trans "<Paragraph Type=\"Transition\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
-    (action "<Paragraph Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n")
+    (scene "{{ content }}")
+    (scene-heading "<Paragraph Number=\"{{ scene-number }}\" Type=\"Scene Heading\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (dual-dialog "<Paragraph StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<DualDialogue>\n{{ content }}</DualDialogue>\n</DualDialogue>\n")
+    (dialog "{{ content }}")
+    (character "<Paragraph Type=\"Character\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (paren "<Paragraph Type=\"Parenthetical\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (lines "<Paragraph Type=\"Dialogue\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (trans "<Paragraph Type=\"Transition\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
+    (action "<Paragraph Type=\"Action\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n")
     (page-break nil)
     (synopsis nil)
     (note nil)
-    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{starts-new-page}}\">\n<Text>{{content}}</Text>\n</Paragraph>\n"))
+    (center "<Paragraph Alignment=\"Center\" Type=\"Action\" StartsNewPage=\"{{ eval: (if starts-new-page \"Yes\" \"No\") }}\">\n<Text>{{ content }}</Text>\n</Paragraph>\n"))
   (define-fountain-export-template-docstring 'fdx)
   :type 'fountain-element-list-type)
 
