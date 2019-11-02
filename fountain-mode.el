@@ -1444,6 +1444,14 @@ Add to `fountain-mode-hook' to have completion upon load."
   :group 'fountain
   :prefix "fountain-pages-")
 
+(define-obsolete-variable-alias 'fountain-export-page-size
+  'fountain-page-size "fountain-mode-2.9.0")
+(defcustom fountain-page-size
+  'letter
+  "Paper size to use on export."
+  :type '(radio (const :tag "US Letter" letter)
+                (const :tag "A4" a4)))
+
 (defcustom fountain-pages-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
@@ -1513,9 +1521,6 @@ Includes references to various functions and variables.
 Takes the form:
 
     (ELEMENT KEYWORD PROPERTY)")
-
-(defvar fountain-export-page-size)
-(defvar fountain-export-more-dialog-string)
 
 (defun fountain-goto-page-break-point ()
   "Move point to appropriate place to break a page.
@@ -1632,7 +1637,7 @@ with `fountain-get-export-elements'."
         ;; Begin the main loop, which only halts if we reach the end
         ;; of buffer, a forced page break, or after the maximum lines
         ;; in a page.
-        (while (and (< line-count (cdr (assq fountain-export-page-size
+        (while (and (< line-count (cdr (assq fountain-page-size
                                              fountain-pages-max-lines)))
                     (not (eobp))
                     (not (fountain-match-page-break)))
@@ -2307,12 +2312,6 @@ Passed to `format' with export format as single variable."
                 (function-item fountain-export-buffer-to-fountain)
                 (function-item fountain-export-buffer-to-txt)
                 (function-item fountain-export-shell-command)))
-
-(defcustom fountain-export-page-size
-  'letter
-  "Paper size to use on export."
-  :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4)))
 
 (defcustom fountain-export-font
   "Courier"
@@ -3071,7 +3070,7 @@ Command acts on current buffer or BUFFER."
 ;; (defun fountain-export-buffer-to-ps ()
 ;;   "Convenience function for exporting buffer to PostScript."
 ;;   (interactive)
-;;   (let ((ps-paper-type fountain-export-page-size)
+;;   (let ((ps-paper-type fountain-page-size)
 ;;         (ps-left-margin (* fountain-export-left-margin 72))
 ;;         (ps-top-margin (* fountain-export-top-margin 72))
 ;;         (ps-font-size 12)
@@ -5089,14 +5088,14 @@ redisplay in margin. Otherwise, remove display text properties."
      "---"
      ["Run Shell Command" fountain-export-shell-command]
      "---"
-     ["US Letter Page Size" (customize-set-variable 'fountain-export-page-size
+     ["US Letter Page Size" (customize-set-variable 'fountain-page-size
                                                     'letter)
       :style radio
-      :selected (eq fountain-export-page-size 'letter)]
-     ["A4 Page Size" (customize-set-variable 'fountain-export-page-size
+      :selected (eq fountain-page-size 'letter)]
+     ["A4 Page Size" (customize-set-variable 'fountain-page-size
                                              'a4)
       :style radio
-      :selected (eq fountain-export-page-size 'a4)]
+      :selected (eq fountain-page-size 'a4)]
      "---"
      ["Include Title Page"
       (customize-set-variable 'fountain-export-include-title-page
@@ -5187,7 +5186,7 @@ redisplay in margin. Otherwise, remove display text properties."
                       fountain-hide-syntax-chars
                       fountain-shift-all-elements
                       font-lock-maximum-decoration
-                      fountain-export-page-size
+                      fountain-page-size
                       fountain-export-include-title-page
                       fountain-export-scene-heading-format))
       (when (customize-mark-to-save option) (setq unsaved t)))
