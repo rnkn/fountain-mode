@@ -321,22 +321,24 @@ Cycle buffers and call `font-lock-refresh-defaults' when
 (defcustom fountain-mode-hook
   '(turn-on-visual-line-mode fountain-outline-hide-custom-level)
   "Mode hook for `fountain-mode', run after the mode is turned on."
+  :group 'fountain
   :type 'hook
   :options '(turn-on-visual-line-mode
              fountain-outline-hide-custom-level
              fountain-completion-update
              turn-on-flyspell))
 
+(define-obsolete-variable-alias 'fountain-script-format
+  'fountain-default-script-format "fountain-mode-2.9.0")
 (defcustom fountain-default-script-format "screenplay"
   "Default script format for editing and exporting.
 
 Can be overridden in metadata with, e.g.
 
     format: teleplay"
+  :group 'fountain
   :type 'string
   :safe 'string)
-(define-obsolete-variable-alias 'fountain-script-format
-  'fountain-default-script-format "fountain-mode-2.9.0")
 
 (defcustom fountain-add-continued-dialog
   t
@@ -347,6 +349,7 @@ successively speaking characters with `fountain-continued-dialog-refresh'.
 
 When nil, remove `fountain-continued-dialog-string' with
 `fountain-continued-dialog-refresh'."
+  :group 'fountain
   :type 'boolean
   :safe 'booleanp)
 
@@ -362,12 +365,14 @@ previous value will not be recognized. Before changing this
 variable, first make sure to set `fountain-add-continued-dialog'
 to nil and run `fountain-continued-dialog-refresh', then make the
 changes desired."
+  :group 'fountain
   :type 'string
   :safe 'stringp)
 
 (defcustom fountain-hide-emphasis-delim
   nil
   "If non-nil, make emphasis delimiters invisible."
+  :group 'fountain
   :type 'boolean
   :safe 'booleanp
   :set (lambda (symbol value)
@@ -383,6 +388,7 @@ changes desired."
 (defcustom fountain-hide-syntax-chars
   nil
   "If non-nil, make syntax characters invisible."
+  :group 'fountain
   :type 'boolean
   :safe 'booleanp
   :set (lambda (symbol value)
@@ -401,6 +407,7 @@ changes desired."
   "%F"
   "Format of date and time used when inserting `{{time}}'.
 See `format-time-string'."
+  :group 'fountain
   :type 'string
   :safe 'stringp)
 
@@ -419,6 +426,7 @@ syntax.
 The default {{time}} - {{fullname}}: will insert something like:
 
     [[ 2017-12-31 - Alan Smithee: ]]"
+  :group 'fountain
   :type 'string
   :safe 'stringp)
 
@@ -445,6 +453,7 @@ To disable element alignment, see `fountain-align-element'."
   t
   "If non-nil, elements will be displayed auto-aligned.
 This option does not affect file contents."
+  :group 'fountain-align
   :type 'boolean
   :safe 'booleanp
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -456,6 +465,7 @@ This option does not affect file contents."
   "Column integer to which section headings should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -467,6 +477,7 @@ This option does not affect file contents."
   "Column integer to which scene headings should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -478,6 +489,7 @@ This option does not affect file contents."
   "Column integer to which synopses should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -489,6 +501,7 @@ This option does not affect file contents."
   "Column integer to which action should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -500,6 +513,7 @@ This option does not affect file contents."
   "Column integer to which characters names should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -511,6 +525,7 @@ This option does not affect file contents."
   "Column integer to which dialog should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -522,6 +537,7 @@ This option does not affect file contents."
   "Column integer to which parentheticals should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -533,6 +549,7 @@ This option does not affect file contents."
   "Column integer to which transitions should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -544,6 +561,7 @@ This option does not affect file contents."
   "Column integer to which centered text should be aligned.
 
 This option does not affect file contents."
+  :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -633,6 +651,7 @@ have whatever suffix you like.
 
 Separated from scene heading locations with
 `fountain-scene-heading-suffix-sep'."
+  :group 'fountain
   :type '(repeat (string :tag "Suffix"))
   :set #'fountain--set-and-refresh-all-font-lock)
 
