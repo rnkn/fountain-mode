@@ -1763,6 +1763,22 @@ n.b. This is an approximate calculation."
   (let ((pages (fountain-get-page-count)))
     (message "Page %d of %d" (car pages) (cdr pages))))
 
+(defun fountain-paginate-buffer (&optional export-elements)
+  (interactive)
+  (let ((job (make-progress-reporter "Paginating...")))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (let ((page 1))
+          (while (< (point) (point-max))
+            (fountain-forward-page 1 export-elements)
+            (setq page (1+ page))
+            (fountain-insert-page-break nil (number-to-string page)
+                                        export-elements)
+            (progress-reporter-update job))
+          (progress-reporter-done job))))))
+
 
 ;;; Templating
 
@@ -2183,7 +2199,7 @@ Update JOB as we go."
       (when job (progress-reporter-update job)))
     (reverse list)))
 
-(defun fountain-prep-and-parse-region (start end)
+(defun fountain-prep-and-parse-region (start end &optional paginate)
   "Prepare and parse region between START and END."
   (let ((buffer (current-buffer))
         (export-elements (fountain-get-export-elements))
@@ -2200,6 +2216,7 @@ Update JOB as we go."
           (while (fountain-match-metadata)
             (forward-line))
           (delete-region (point-min) (point))
+          (when paginate (fountain-paginate-buffer export-elements))
           (fountain-parse-region (point-min) (point-max) export-elements job))
       (progress-reporter-done job))))
 
