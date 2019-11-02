@@ -1526,16 +1526,20 @@ Takes the form:
 
     (ELEMENT KEYWORD PROPERTY)")
 
-(defun fountain-goto-page-break-point ()
+(defun fountain-goto-page-break-point (&optional export-elements)
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
-over whitespace."
-  ;; FIXME: currently does not account for elements not included in
-  ;; `fountain-export-include-elements' for current format. This will
-  ;; throw page off page counting in many cases.
-  (when (looking-at "\n[\n\s\t]*") (goto-char (match-end 0)))
+over whitespace.
+
+Comments are assumed to be deleted."
+  (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
+     ;; If element is not included in export, we can safely break
+     ;; before.
+     ((not (memq element (or export-elements
+                             (fountain-get-export-elements))))
+      (beginning-of-line))
      ;; If we're are a section heading, scene heading or character, we
      ;; can safely break before.
      ((memq element '(section-heading scene-heading character))
