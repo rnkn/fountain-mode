@@ -1580,10 +1580,12 @@ Comments are assumed to be deleted."
                   (looking-back (sentence-end) nil))
         (forward-sentence -1))
       (let ((x (point)))
-        (forward-line -1)
+        (backward-char)
         (if (or (fountain-match-character)
                 (fountain-match-paren))
-            (fountain-goto-page-break-point export-elements)
+            (progn
+              (beginning-of-line)
+              (fountain-goto-page-break-point export-elements))
           (goto-char x))))
      ;; If we're at a transition or center text, skip backwards to
      ;; previous element and call recursively on that element.
@@ -1713,6 +1715,7 @@ as a string to force the page number."
     ;; lines require special treatment.
     (if (memq element '(lines paren))
         (let ((name (fountain-get-character -1)))
+          (unless (bolp) (insert "\n"))
           (insert-before-markers
            (concat fountain-more-dialog-string "\n\n"
                    page-break "\n\n"
@@ -1727,7 +1730,8 @@ as a string to force the page number."
               (fountain-match-page-break)))
           (replace-match page-break t t)
         (delete-horizontal-space)
-        (unless (bolp) (insert "\n\n"))
+        (unless (bolp) (insert "\n"))
+        (unless (fountain-blank-before-p) (insert "\n"))
         (insert-before-markers page-break "\n\n")))
     ;; Return to where we were.
     (goto-char x)))
