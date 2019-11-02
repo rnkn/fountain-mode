@@ -337,30 +337,34 @@ Can be overridden in metadata with, e.g.
   :type 'string
   :safe 'string)
 
-(defcustom fountain-add-continued-dialog
+(define-obsolete-variable-alias 'fountain-add-continued-dialog
+  'fountain-add-contd-dialog "fountain-mode-2.9.0")
+(defcustom fountain-add-contd-dialog
   t
-  "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
+  "\\<fountain-mode-map>If non-nil, \\[fountain-contd-dialog-refresh] will mark continued dialogue.
 
-When non-nil, append `fountain-continued-dialog-string' to
-successively speaking characters with `fountain-continued-dialog-refresh'.
+When non-nil, append `fountain-contd-dialog-string' to
+successively speaking characters with `fountain-contd-dialog-refresh'.
 
-When nil, remove `fountain-continued-dialog-string' with
-`fountain-continued-dialog-refresh'."
+When nil, remove `fountain-contd-dialog-string' with
+`fountain-contd-dialog-refresh'."
   :group 'fountain
   :type 'boolean
   :safe 'booleanp)
 
-(defcustom fountain-continued-dialog-string
+(define-obsolete-variable-alias 'fountain-continued-dialog-string
+  'fountain-contd-dialog-string "fountain-mode-2.9.0")
+(defcustom fountain-contd-dialog-string
   " (CONT'D)"
   "String to append to character name speaking in succession.
-If `fountain-add-continued-dialog' is non-nil, append this string
+If `fountain-add-contd-dialog' is non-nil, append this string
 to character when speaking in succession.
 
 WARNING: if you change this variable then call
-`fountain-continued-dialog-refresh', strings matching the
+`fountain-contd-dialog-refresh', strings matching the
 previous value will not be recognized. Before changing this
-variable, first make sure to set `fountain-add-continued-dialog'
-to nil and run `fountain-continued-dialog-refresh', then make the
+variable, first make sure to set `fountain-add-contd-dialog'
+to nil and run `fountain-contd-dialog-refresh', then make the
 changes desired."
   :group 'fountain
   :type 'string
@@ -1687,7 +1691,7 @@ number."
           (insert (concat
                    fountain-export-more-dialog-string "\n\n"
                    page-break "\n\n"
-                   name fountain-continued-dialog-string "\n")))
+                   name fountain-contd-dialog-string "\n")))
       ;; Otherwise, insert the page break where we are. If the preceding
       ;; element is a page break, only replace the page number,
       ;; otherwise, insert the page break.
@@ -4322,21 +4326,23 @@ ARG (\\[universal-argument]), only insert note delimiters."
                                      (cons 'email user-mail-address))))))
         fountain-note-template)))))
 
-(defun fountain-continued-dialog-refresh ()
+(define-obsolete-function-alias 'fountain-continued-dialog-refresh
+  'fountain-contd-dialog-refresh "fountain-mode-2.9.0")
+(defun fountain-contd-dialog-refresh ()
   "Add or remove continued dialog in buffer.
 
-If `fountain-add-continued-dialog' is non-nil, add
-`fountain-continued-dialog-string' on characters speaking in
+If `fountain-add-contd-dialog' is non-nil, add
+`fountain-contd-dialog-string' on characters speaking in
 succession, otherwise remove all occurences.
 
-If `fountain-continued-dialog-string' has changed, also attempt
+If `fountain-contd-dialog-string' has changed, also attempt
 to remove previous string first."
   (interactive)
   (save-excursion
     (save-restriction
       (widen)
       (let ((job (make-progress-reporter "Refreshing continued dialog..."))
-            (backup (car (get 'fountain-continued-dialog-string
+            (backup (car (get 'fountain-contd-dialog-string
                               'backup-value)))
             (replace-fun
              (lambda (string job)
@@ -4350,26 +4356,26 @@ to remove previous string first."
                  (fountain-forward-character)
                  (progress-reporter-update job))))
             case-fold-search)
-        (when (string= fountain-continued-dialog-string backup)
-          (setq backup (eval (car (get 'fountain-continued-dialog-string
+        (when (string= fountain-contd-dialog-string backup)
+          (setq backup (eval (car (get 'fountain-contd-dialog-string
                                        'standard-value))
                              t)))
         ;; Delete all matches of backup string.
         (when (stringp backup) (funcall replace-fun backup job))
         ;; Delete all matches of current string.
-        (funcall replace-fun fountain-continued-dialog-string job)
-        ;; When `fountain-add-continued-dialog', add string where
+        (funcall replace-fun fountain-contd-dialog-string job)
+        ;; When `fountain-add-contd-dialog', add string where
         ;; appropriate.
-        (when fountain-add-continued-dialog
+        (when fountain-add-contd-dialog
           (goto-char (point-min))
           (while (< (point) (point-max))
             (when (and (not (looking-at-p
-                             (concat ".*" fountain-continued-dialog-string "$")))
+                             (concat ".*" fountain-contd-dialog-string "$")))
                        (fountain-match-character)
                        (string= (fountain-get-character 0)
                                 (fountain-get-character -1 'scene)))
               (re-search-forward "\s*$" (line-end-position) t)
-              (replace-match fountain-continued-dialog-string))
+              (replace-match fountain-contd-dialog-string))
             (forward-line)
             (progress-reporter-update job)))
         (progress-reporter-done job)))))
@@ -4969,7 +4975,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
-    (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
+    (define-key map (kbd "C-c C-d") #'fountain-contd-dialog-refresh)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
@@ -5068,7 +5074,7 @@ redisplay in margin. Otherwise, remove display text properties."
     ["Insert Note" fountain-insert-note]
     ["Count Pages" fountain-count-pages]
     ["Insert Page Break..." fountain-insert-page-break]
-    ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
+    ["Refresh Continued Dialog" fountain-contd-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
     "---"
     ("Export"
@@ -5160,10 +5166,10 @@ redisplay in margin. Otherwise, remove display text properties."
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
     ["Add Continued Dialog"
-     (customize-set-variable 'fountain-add-continued-dialog
-                             (not fountain-add-continued-dialog))
+     (customize-set-variable 'fountain-add-contd-dialog
+                             (not fountain-add-contd-dialog))
      :style toggle
-     :selected fountain-add-continued-dialog]
+     :selected fountain-add-contd-dialog]
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
@@ -5175,7 +5181,7 @@ redisplay in margin. Otherwise, remove display text properties."
   (let (unsaved)
     (dolist (option '(fountain-align-elements
                       fountain-auto-upcase-scene-headings
-                      fountain-add-continued-dialog
+                      fountain-add-contd-dialog
                       fountain-scene-numbers-display-in-margin
                       fountain-hide-emphasis-delim
                       fountain-hide-syntax-chars
