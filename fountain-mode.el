@@ -1726,17 +1726,16 @@ as a string to force the page number."
   (let ((x (point))
         (total 0)
         (current 0)
-        (end (point-max))
         (export-elements (fountain-get-export-elements))
         found)
     (save-excursion
       (save-restriction
         (when fountain-page-ignore-narrowing (widen))
         (goto-char (point-min))
-        (while (< (point) end)
+        (while (< (point) (point-max))
           (fountain-forward-page 1 export-elements)
           (setq total (1+ total))
-          (when (and (not found) (<= x (point)))
+          (when (and (not found) (< x (point)))
             (setq current total found t)))
         (cons current total)))))
 
