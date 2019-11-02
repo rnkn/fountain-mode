@@ -1442,7 +1442,7 @@ Add to `fountain-mode-hook' to have completion upon load."
 (defgroup fountain-pages ()
   "Options for calculating page length."
   :group 'fountain
-  :prefix "fountain-pages-")
+  :prefix "fountain-page-")
 
 (define-obsolete-variable-alias 'fountain-export-page-size
   'fountain-page-size "fountain-mode-2.9.0")
@@ -1452,7 +1452,9 @@ Add to `fountain-mode-hook' to have completion upon load."
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
-(defcustom fountain-pages-max-lines
+(define-obsolete-variable-alias 'fountain-pages-max-lines
+  'fountain-page-max-lines "fountain-mode-2.9.0")
+(defcustom fountain-page-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
 
@@ -1462,7 +1464,9 @@ script, you may get incorrect output."
                  (list (cons (const :tag "US Letter" letter) integer)
                        (cons (const :tag "A4" a4) integer))))
 
-(defcustom fountain-pages-ignore-narrowing
+(define-obsolete-variable-alias 'fountain-pages-ignore-narrowing
+  'fountain-page-ignore-narrowing "fountain-mode-2.9.0")
+(defcustom fountain-page-ignore-narrowing
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
   :type 'boolean
@@ -1638,7 +1642,7 @@ with `fountain-get-export-elements'."
         ;; of buffer, a forced page break, or after the maximum lines
         ;; in a page.
         (while (and (< line-count (cdr (assq fountain-page-size
-                                             fountain-pages-max-lines)))
+                                             fountain-page-max-lines)))
                     (not (eobp))
                     (not (fountain-match-page-break)))
           (cond
@@ -1722,7 +1726,7 @@ number."
         found)
     (save-excursion
       (save-restriction
-        (when fountain-pages-ignore-narrowing (widen))
+        (when fountain-page-ignore-narrowing (widen))
         (goto-char (point-min))
         (while (< (point) end)
           (fountain-forward-page 1 export-elements)
@@ -3048,7 +3052,7 @@ Command acts on current buffer or BUFFER."
 ;;   "Float representing top page margin in inches.
 
 ;; There is no corresponding bottom margin option, as page length
-;; is calculated using `fountain-pages-max-lines'."
+;; is calculated using `fountain-page-max-lines'."
 ;;   :type 'float
 ;;   :group 'fountain-export)
 
