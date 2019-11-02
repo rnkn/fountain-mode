@@ -257,9 +257,6 @@
                         "use individual export templates instead."
                         "fountain-mode-2.1.4")
 
-(define-obsolete-variable-alias 'fountain-align-scene-number
-  'fountain-display-scene-numbers-in-margin "fountain-mode-2.3.0")
-
 (make-obsolete-variable 'fountain-export-format-replace-alist
                         "see `fountain-export-formats'."
                         "fountain-mode-2.4.0")
@@ -564,17 +561,6 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
-
-(defcustom fountain-display-scene-numbers-in-margin
-  nil
-  "If non-nil, display scene numbers in the right margin.
-
-If nil, do not change scene number display.
-
-This option does affect file contents."
-  :type 'boolean
-  :safe 'booleanp
   :set #'fountain--set-and-refresh-all-font-lock)
 
 ;; FIXME: a cleaner way would be:
@@ -4391,9 +4377,34 @@ to remove previous string first."
 
 ;;; Scene Numbers
 
-(defcustom fountain-prefix-revised-scene-numbers
+(defgroup fountain-scene-numbers ()
+  "Options for scene numbers."
+  :prefix "fountain-scene-numbers-"
+  :group 'fountain)
+
+(define-obsolete-variable-alias 'fountain-align-scene-number
+  'fountain-scene-numbers-display-in-margin "fountain-mode-2.3.0")
+(define-obsolete-variable-alias   'fountain-display-scene-numbers-in-margin
+  'fountain-scene-numbers-display-in-margin "fountain-mode-2.9.0")
+
+(defcustom fountain-scene-numbers-display-in-margin
   nil
-  "If non-nil, new scene numbers get prefixed revision characters.
+  "If non-nil, display scene numbers in the right margin.
+
+If nil, do not change scene number display.
+
+This option does affect file contents."
+  :group 'fountain-scene-numbers
+  :type 'boolean
+  :safe 'booleanp
+  :set #'fountain--set-and-refresh-all-font-lock)
+
+(define-obsolete-variable-alias 'fountain-prefix-revised-scene-numbers
+  'fountain-scene-numbers-prefix-revised "fountain-mode-2.9.0")
+
+(defcustom fountain-scene-numbers-prefix-revised
+  nil
+  "If non-nil, revised scene numbers are prefixed.
 
 If nil, when inserting new scene headings after numbering
 existing scene headings, revised scene number format works as
@@ -4415,14 +4426,19 @@ same script may result in errors in output."
   :safe 'booleanp
   :group 'fountain-scene-numbers)
 
-(defcustom fountain-scene-number-first-revision
+(define-obsolete-variable-alias 'fountain-scene-number-first-revision
+  'fountain-scene-numbers-first-revision-char "fountain-mode-2.9.0")
+
+(defcustom fountain-scene-numbers-first-revision-char
   ?A
   "Character to start revised scene numbers."
   :type 'character
   :safe 'characterp
   :group 'fountain-scene-numbers)
 
-(defcustom fountain-scene-number-separator
+(define-obsolete-variable-alias 'fountain-scene-number-separator
+  'fountain-scene-numbers-separator "fountain-mode-2.9.0")
+(defcustom fountain-scene-numbers-separator
   nil
   "Character to separate scene numbers."
   :type '(choice (const nil)
@@ -4435,7 +4451,7 @@ same script may result in errors in output."
 (defun fountain-scene-number-to-list (string)
   "Read scene number STRING and return a list.
 
-If `fountain-prefix-revised-scene-numbers' is non-nil:
+If `fountain-scene-numbers-prefix-revised' is non-nil:
 
     \"10\" -> (10)
     \"AA10\" -> (9 1 1)
@@ -4445,11 +4461,11 @@ Or if nil:
     \"10\" -> (10)
     \"10AA\" -> (10 1 1)"
   ;; FIXME: does not account for user option
-  ;; `fountain-scene-number-separator' or
-  ;; `fountain-scene-number-first-revision'.
+  ;; `fountain-scene-numbers-separator' or
+  ;; `fountain-scene-numbers-first-revision-char'.
   (let (number revision)
     (when (stringp string)
-      (if fountain-prefix-revised-scene-numbers
+      (if fountain-scene-numbers-prefix-revised
           (when (string-match "\\([a-z]*\\)[\\.-]*\\([0-9]+\\)[\\.-]*" string)
             (setq number (string-to-number (match-string 2 string))
                   revision (match-string 1 string))
@@ -4463,7 +4479,7 @@ Or if nil:
 (defun fountain-scene-number-to-string (scene-num-list)
   "Read scene number SCENE-NUM-LIST and return a string.
 
-If `fountain-prefix-revised-scene-numbers' is non-nil:
+If `fountain-scene-numbers-prefix-revised' is non-nil:
 
     (10) -> \"10\"
     (9 1 2) -> \"AB10\"
@@ -4476,15 +4492,15 @@ Or, if nil:
         separator revision)
     (when (< 1 (length scene-num-list))
       (setq separator
-            (if fountain-scene-number-separator
-                (char-to-string fountain-scene-number-separator)
+            (if fountain-scene-numbers-separator
+                (char-to-string fountain-scene-numbers-separator)
               "")
             revision
             (mapconcat (lambda (char)
                          (char-to-string
-                          (+ (1- char) fountain-scene-number-first-revision)))
+                          (+ (1- char) fountain-scene-numbers-first-revision-char)))
                        (cdr scene-num-list) separator)))
-    (if fountain-prefix-revised-scene-numbers
+    (if fountain-scene-numbers-prefix-revised
         (progn
           (unless (string-empty-p revision) (setq number (1+ number)))
           (concat revision separator (number-to-string number)))
@@ -4624,7 +4640,7 @@ to include external files."
 
 Adding scene numbers to scene headings after numbering existing
 scene headings will use a prefix or suffix letter, depending on
-the value of `fountain-prefix-revised-scene-numbers':
+the value of `fountain-scene-numbers-prefix-revised':
 
     10
     10A <- new scene
@@ -4927,14 +4943,14 @@ keywords suitable for Font Lock."
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
 
-If `fountain-display-scene-numbers-in-margin' is non-nil and
+If `fountain-scene-numbers-display-in-margin' is non-nil and
 scene heading has scene number, apply display text properties to
 redisplay in margin. Otherwise, remove display text properties."
   ;; FIXME: Why use jit-lock rather than font-lock?
   (goto-char start)
   (while (< (point) (min end (point-max)))
     (when (fountain-match-scene-heading)
-      (if (and fountain-display-scene-numbers-in-margin
+      (if (and fountain-scene-numbers-display-in-margin
                (match-string 9))
           (put-text-property (match-beginning 7) (match-end 10)
                              'display (list '(margin right-margin)
@@ -5042,10 +5058,10 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
      "---"
      ["Display Scene Numbers in Margin"
-      (customize-set-variable 'fountain-display-scene-numbers-in-margin
-                              (not fountain-display-scene-numbers-in-margin))
+      (customize-set-variable 'fountain-scene-numbers-display-in-margin
+                              (not fountain-scene-numbers-display-in-margin))
       :style toggle
-      :selected fountain-display-scene-numbers-in-margin])
+      :selected fountain-scene-numbers-display-in-margin])
     "---"
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
@@ -5160,7 +5176,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (dolist (option '(fountain-align-elements
                       fountain-auto-upcase-scene-headings
                       fountain-add-continued-dialog
-                      fountain-display-scene-numbers-in-margin
+                      fountain-scene-numbers-display-in-margin
                       fountain-hide-emphasis-delim
                       fountain-hide-syntax-chars
                       fountain-shift-all-elements
