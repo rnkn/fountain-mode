@@ -351,7 +351,7 @@ When nil, remove `fountain-continued-dialog-string' with
   :safe 'booleanp)
 
 (defcustom fountain-continued-dialog-string
-  "(CONT'D)"
+  " (CONT'D)"
   "String to append to character name speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, append this string
 to character when speaking in succession.
@@ -1687,7 +1687,7 @@ number."
           (insert (concat
                    fountain-export-more-dialog-string "\n\n"
                    page-break "\n\n"
-                   name "\s" fountain-continued-dialog-string "\n")))
+                   name fountain-continued-dialog-string "\n")))
       ;; Otherwise, insert the page break where we are. If the preceding
       ;; element is a page break, only replace the page number,
       ;; otherwise, insert the page break.
@@ -4369,7 +4369,7 @@ to remove previous string first."
                        (string= (fountain-get-character 0)
                                 (fountain-get-character -1 'scene)))
               (re-search-forward "\s*$" (line-end-position) t)
-              (replace-match (concat "\s" fountain-continued-dialog-string)))
+              (replace-match fountain-continued-dialog-string))
             (forward-line)
             (progress-reporter-update job)))
         (progress-reporter-done job)))))
