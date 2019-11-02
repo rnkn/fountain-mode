@@ -1678,16 +1678,20 @@ with `fountain-get-export-elements'."
       (fountain-goto-page-break-point)
       (setq n (1- n)))))
 
-(defun fountain-insert-page-break (&optional string)
+(defun fountain-insert-page-break (&optional ask page-num)
   "Insert a page break at appropriate place preceding point.
-STRING is an optional page number string to force the page
-number."
-  (interactive "sPage number (RET for none): ")
+When optional argument ASK is non-nil (if prefixed with
+\\[universal-argument] when called interactively), prompt for PAGE-NUM
+as a string to force the page number."
+  (interactive "P")
+  (when ask
+    (setq page-num (read-string "Page number (RET for none): ")))
   ;; Save a marker where we are.
   (let ((x (point-marker))
         (page-break
-         (concat "===" (when (< 0 (string-width string))
-                         (concat "\s" string "\s==="))))
+         (concat "===" (when (and (stringp page-num)
+                                  (< 0 (string-width page-num)))
+                         (concat "\s" page-num "\s==="))))
         element)
     ;; Move point to appropriate place to break page.
     (fountain-goto-page-break-point)
@@ -1707,7 +1711,7 @@ number."
       (if (save-excursion
             (save-restriction
               (widen)
-              (skip-chars-backward "\n\r\s\t")
+              (skip-chars-backward "\n\s\t")
               (fountain-match-page-break)))
           (replace-match page-break t t)
         (delete-horizontal-space)
