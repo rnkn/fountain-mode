@@ -1716,7 +1716,8 @@ as a string to force the page number."
     ;; lines require special treatment.
     (if (memq element '(lines paren))
         (let ((name (fountain-get-character -1)))
-          (unless (bolp) (insert "\n"))
+          (delete-horizontal-space)
+          (unless (bolp) (insert-before-markers "\n"))
           (insert-before-markers
            (concat fountain-more-dialog-string "\n\n"
                    page-break "\n\n"
@@ -1731,8 +1732,8 @@ as a string to force the page number."
               (fountain-match-page-break)))
           (replace-match page-break t t)
         (delete-horizontal-space)
-        (unless (bolp) (insert "\n"))
-        (unless (fountain-blank-before-p) (insert "\n"))
+        (unless (bolp) (insert-before-markers "\n"))
+        (unless (fountain-blank-before-p) (insert-before-markers "\n"))
         (insert-before-markers page-break "\n\n")))
     ;; Return to where we were.
     (goto-char x)))
