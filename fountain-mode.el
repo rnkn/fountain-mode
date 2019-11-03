@@ -1630,69 +1630,67 @@ Skip over comments."
     (when (eolp) (forward-line))
     (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
 
-(defun fountain-forward-page (&optional n export-elements)
-  "Move point forward by approximately N pages.
+(defun fountain-forward-page (&optional export-elements)
+  "Move point forward by an approximately page.
 
 Moves forward from point, which is unlikely to correspond to
 final exported pages and so should not be used interactively.
 
-To considerably speed up this function, supply EXPORT-ELEMENTS
-with `fountain-get-export-elements'."
+To speed up this function, supply EXPORT-ELEMENTS with
+`fountain-get-export-elements'."
   (let ((skip-whitespace-fun
          (lambda ()
-           (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0))))))
-    (unless n (setq n 1))
-    (while (< 0 n)
-      (while (fountain-match-metadata)
-        (forward-line 1))
-      ;; Pages don't begin with blank space, so skip over any at point.
-      (funcall skip-whitespace-fun)
-      ;; If we're at a page break, move to its end and skip over
-      ;; whitespace.
-      (when (fountain-match-page-break)
-        (goto-char (match-end 0))
-        (funcall skip-whitespace-fun))
-      ;; Start counting lines.
-      (let ((line-count 0))
-        ;; Begin the main loop, which only halts if we reach the end
-        ;; of buffer, a forced page break, or after the maximum lines
-        ;; in a page.
-        (while (and (< line-count (cdr (assq fountain-page-size
-                                             fountain-page-max-lines)))
-                    (not (eobp))
-                    (not (fountain-match-page-break)))
-          (cond
-           ;; If we're at the end of a line (but not also the
-           ;; beginning, i.e. not a blank line) then move forward a
-           ;; line and increment line-count.
-           ((and (eolp) (not (bolp)))
-            (forward-line)
-            (setq line-count (1+ line-count)))
-           ;; If we're looking at newline, skip over it and any
-           ;; whitespace and increment line-count.
-           ((looking-at "[\n\s\t]*\n")
-            (goto-char (match-end 0))
-            (setq line-count (1+ line-count)))
-           ;; We are at an element. Find what kind of element. If it
-           ;; is not included in export, skip over without
-           ;; incrementing line-count (implement with block bounds).
-           ;; Get the line width.
-           (t
-            (let ((element (fountain-get-element)))
-              (if (memq element (or export-elements
-                                    (fountain-get-export-elements)))
-                  (progn
-                    (fountain-move-to-fill-width element)
-                    (setq line-count (1+ line-count)))
-                ;; Element is not exported, so skip it without
-                ;; incrementing line-count.
-                (end-of-line)
-                (funcall skip-whitespace-fun)))))))
-      ;; We are not at the furthest point in a page. Skip over any
-      ;; remaining whitespace, then go back to page-break point.
-      (fountain-goto-page-break-point (or export-elements
-                                          (fountain-get-export-elements)))
-      (setq n (1- n)))))
+           (when (looking-at "[\n\s\t]*\n")
+             (goto-char (match-end 0))))))
+    (unless export-elements
+      (setq export-elements (fountain-get-export-elements)))
+    (while (fountain-match-metadata)
+      (forward-line 1))
+    ;; Pages don't begin with blank space, so skip over any at point.
+    (funcall skip-whitespace-fun)
+    ;; If we're at a page break, move to its end and skip over
+    ;; whitespace.
+    (when (fountain-match-page-break)
+      (end-of-line)
+      (funcall skip-whitespace-fun))
+    ;; Start counting lines.
+    (let ((line-count 0))
+      ;; Begin the main loop, which only halts if we reach the end
+      ;; of buffer, a forced page break, or after the maximum lines
+      ;; in a page.
+      (while (and (< line-count (cdr (assq fountain-page-size
+                                           fountain-page-max-lines)))
+                  (not (eobp))
+                  (not (fountain-match-page-break)))
+        (cond
+         ;; If we're at the end of a line (but not also the
+         ;; beginning, i.e. not a blank line) then move forward a
+         ;; line and increment line-count.
+         ((and (eolp) (not (bolp)))
+          (forward-line)
+          (setq line-count (1+ line-count)))
+         ;; If we're looking at newline, skip over it and any
+         ;; whitespace and increment line-count.
+         ((funcall skip-whitespace-fun)
+          (setq line-count (1+ line-count)))
+         ;; We are at an element. Find what kind of element. If it
+         ;; is not included in export, skip over without
+         ;; incrementing line-count (implement with block bounds).
+         ;; Get the line width.
+         (t
+          (let ((element (fountain-get-element)))
+            (if (memq element export-elements)
+                (progn
+                  (fountain-move-to-fill-width element)
+                  (setq line-count (1+ line-count)))
+              ;; Element is not exported, so skip it without
+              ;; incrementing line-count.
+              (end-of-line)
+              (funcall skip-whitespace-fun)))))))
+    ;; We are not at the furthest point in a page. Skip over any
+    ;; remaining whitespace, then go back to page-break point.
+    (fountain-goto-page-break-point (or export-elements
+                                        (fountain-get-export-elements)))))
 
 (defun fountain-insert-page-break (&optional ask page-num export-elements)
   "Insert a page break at appropriate place preceding point.
@@ -1752,7 +1750,7 @@ as a string to force the page number."
         (when fountain-page-ignore-restriction (widen))
         (goto-char (point-min))
         (while (< (point) (point-max))
-          (fountain-forward-page 1 export-elements)
+          (fountain-forward-page export-elements)
           (setq total (1+ total))
           (when (and (not found) (< x (point)))
             (setq current total found t)))
@@ -1773,12 +1771,12 @@ n.b. This is an approximate calculation."
         (widen)
         (goto-char (point-min))
         (let ((page 1))
-          (fountain-forward-page 1 export-elements)
+          (fountain-forward-page export-elements)
           (while (< (point) (point-max))
             (setq page (1+ page))
             (fountain-insert-page-break nil (number-to-string page)
                                         export-elements)
-            (fountain-forward-page 1 export-elements)
+            (fountain-forward-page export-elements)
             (progress-reporter-update job))
           (progress-reporter-done job))))))
 
