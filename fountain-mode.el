@@ -1544,6 +1544,7 @@ This is usually before point, but may be after if only skipping
 over whitespace.
 
 Comments are assumed to be deleted."
+  (when (looking-at fountain-more-dialog-string) (forward-line))
   (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
