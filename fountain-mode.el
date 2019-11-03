@@ -1471,8 +1471,8 @@ script, you may get incorrect output."
                        (cons (const :tag "A4" a4) integer))))
 
 (define-obsolete-variable-alias 'fountain-pages-ignore-narrowing
-  'fountain-page-ignore-narrowing "fountain-mode-2.9.0")
-(defcustom fountain-page-ignore-narrowing
+  'fountain-page-ignore-restriction "fountain-mode-2.9.0")
+(defcustom fountain-page-ignore-restriction
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
   :type 'boolean
@@ -1748,7 +1748,7 @@ as a string to force the page number."
         found)
     (save-excursion
       (save-restriction
-        (when fountain-page-ignore-narrowing (widen))
+        (when fountain-page-ignore-restriction (widen))
         (goto-char (point-min))
         (while (< (point) (point-max))
           (fountain-forward-page 1 export-elements)
