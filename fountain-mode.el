@@ -1764,7 +1764,13 @@ n.b. This is an approximate calculation."
     (message "Page %d of %d" (car pages) (cdr pages))))
 
 (defun fountain-paginate-buffer (&optional export-elements)
+  "Add forced page breaks to buffer.
+
+Move through buffer with `fountain-forward-page' and call
+`fountain-insert-page-break'."
   (interactive)
+  (unless export-elements
+    (setq export-elements (fountain-get-export-elements)))
   (let ((job (make-progress-reporter "Paginating...")))
     (save-excursion
       (save-restriction
@@ -2212,7 +2218,6 @@ Update JOB as we go."
           (fountain-include-replace-in-region
            (point-min) (point-max) (not (memq 'include export-elements)))
           (fountain-delete-comments-in-region (point-min) (point-max))
-          ;; Delete metadata.
           (goto-char (point-min))
           (while (fountain-match-metadata)
             (forward-line))
