@@ -4163,9 +4163,18 @@ Ignores revised scene numbers scenes.
 (defun fountain-goto-page (n)
   "Move point to Nth appropropriate page in current buffer."
   (interactive "NGo to page: ")
+  (widen)
   (push-mark)
   (goto-char (point-min))
-  (fountain-forward-page n (fountain-get-export-elements)))
+  (let ((i n)
+        (export-elements (fountain-get-export-elements)))
+    (while (fountain-match-metadata) (forward-line))
+    (if (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
+    (while (< 1 i)
+      (if (and (fountain-match-page-break) (match-string 2))
+          (setq i (- n (string-to-number (match-string 2)))))
+      (fountain-forward-page export-elements)
+      (setq i (1- i)))))
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
