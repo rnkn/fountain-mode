@@ -4533,6 +4533,10 @@ Return Nth previous if N is negative.
 Scene numbers will not be accurate if buffer contains directives
 to include external files."
   (unless n (setq n 0))
+  ;; FIXME: the whole scene number (and page number) logic could be
+  ;; improved by first generating a list of existing numbers,
+  ;; e.g. '((4) (5) (5 1) (6))
+  ;; then only calculating revised scene when current = next.
   (save-excursion
     (save-restriction
       (widen)
@@ -4544,6 +4548,7 @@ to include external files."
       (unless (fountain-match-scene-heading)
         (user-error "Before first scene heading"))
       (let ((x (point))
+            ;; FIXME: scenes should never be treated as out of order.
             (err-order "Scene `%s' seems to be out of order")
             found)
         ;; First, check if there are any scene numbers already. If not
@@ -4554,12 +4559,12 @@ to include external files."
           (goto-char (point-min))
           (while (not (or found (eobp)))
             (when (and (re-search-forward fountain-scene-heading-regexp nil 'move)
-                       (match-string 8))
+                       (match-string 9))
               (setq found t))))
         (if found
             ;; There are scene numbers, so this scene number needs to be
             ;; calculated relative to those.
-            (let ((current-scene (fountain-scene-number-to-list (match-string 8)))
+            (let ((current-scene (fountain-scene-number-to-list (match-string 9)))
                   last-scene next-scene)
               ;; Check if scene heading is already numbered and if there
               ;; is a NEXT-SCENE. No previousscene number can be greater
@@ -4568,7 +4573,7 @@ to include external files."
               (while (not (or next-scene (eobp)))
                 (fountain-forward-scene 1)
                 (when (fountain-match-scene-heading)
-                  (setq next-scene (fountain-scene-number-to-list (match-string 8)))))
+                  (setq next-scene (fountain-scene-number-to-list (match-string 9)))))
               (cond
                ;; If there's both a NEXT-SCENE and CURRENT-SCENE, but
                ;; NEXT-SCENE is less or equal to CURRENT-SCENE, scene
@@ -4589,7 +4594,7 @@ to include external files."
                   (fountain-forward-scene 1))
                 (when (<= (point) x)
                   (setq current-scene
-                        (or (fountain-scene-number-to-list (match-string 8))
+                        (or (fountain-scene-number-to-list (match-string 9))
                             (list 1))))
                 ;; While before point X, go forward through each scene
                 ;; heading, setting LAST-SCENE to CURRENT-SCENE and
@@ -4598,7 +4603,7 @@ to include external files."
                   (fountain-forward-scene 1)
                   (when (fountain-match-scene-heading)
                     (setq last-scene current-scene
-                          current-scene (or (fountain-scene-number-to-list (match-string 8))
+                          current-scene (or (fountain-scene-number-to-list (match-string 9))
                                             (list (1+ (car last-scene)))))
                     ;; However, this might make CURRENT-SCENE greater or
                     ;; equal to NEXT-SCENE (a problem), so if there is a
