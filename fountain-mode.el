@@ -1048,8 +1048,7 @@ buffers."
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible))
   (setq font-lock-multiline 'undecided)
-  (setq font-lock-defaults
-        '(fountain-create-font-lock-keywords nil t))
+  (setq font-lock-defaults '(fountain-init-font-lock))
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-delim
     (add-to-invisibility-spec 'fountain-emphasis-delim))
@@ -1394,20 +1393,8 @@ Return non-nil if match occurs." func)))
      :tag "Metadata"
      :matcher (define-fountain-font-lock-matcher fountain-match-metadata)
      :highlight ((3 0 fountain-metadata-key nil t)
-                 (2 2 fountain-metadata-value t t))))
-  "Association list of Fountain elements and their properties.
-Includes references to various functions and variables.
-
-Takes the form:
-
-    (ELEMENT KEYWORD PROPERTY)
-
-:highlight keyword property takes the form:
-
-    (LEVEL SUBEXP FACENAME [OVERRIDE LAXMATCH INVISIBLE])")
-
-(defvar fountain-emph-list
-  '((underline
+                 (2 2 fountain-metadata-value t t)))
+    (underline
      :tag "Underline"
      :matcher fountain-underline-regexp
      :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
@@ -1435,7 +1422,17 @@ Takes the form:
      :tag "Lyrics"
      :matcher fountain-lyrics-regexp
      :highlight ((3 1 fountain-non-printing t nil fountain-emphasis-delim)
-                 (2 2 italic prepend)))))
+                 (2 2 italic prepend))))
+  "Association list of Fountain elements and their properties.
+Includes references to various functions and variables.
+
+Takes the form:
+
+    (ELEMENT KEYWORD PROPERTY)
+
+:highlight keyword property takes the form:
+
+    (LEVEL SUBEXP FACENAME [OVERRIDE LAXMATCH INVISIBLE])")
 
 
 ;;; Auto-completion
@@ -4876,40 +4873,41 @@ scene number from being auto-upcased."
         (font-lock-refresh-defaults))
     (user-error "Decoration must be an integer 1-3")))
 
-(defun fountain-create-font-lock-keywords ()
-  "Return a new list of `font-lock-mode' keywords.
-Uses `fountain-font-lock-keywords-plist' to create a list of
-keywords suitable for Font Lock."
+(defun fountain-init-font-lock ()
+  "Return a new list of `font-lock-mode' keywords for elements."
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
-    (dolist (var fountain-font-lock-keywords-plist keywords)
-      (let ((matcher (car var))
-            (plist-list (nth 1 var))
-            (align (fountain-get-align (symbol-value (nth 2 var))))
-            align-props facespec)
+    (dolist (element fountain-element-list keywords)
+      (let ((matcher (eval (plist-get (cdr element) :matcher)))
+            (align (eval (plist-get (cdr element) :align)))
+            subexp-highlighter)
         (when (and align fountain-align-elements)
-          (setq align-props
-                `(line-prefix
-                  (space :align-to ,align)
-                  wrap-prefix
-                  (space :align-to ,align))))
-        (dolist (var plist-list)
-          (let ((subexp (plist-get var :subexp))
-                (face (when (<= (plist-get var :level) dec)
-                        (plist-get var :face)))
-                (invisible (plist-get var :invisible))
-                invisible-props)
-            (when invisible (setq invisible-props (list 'invisible invisible)))
-            (setq facespec
-                  (append facespec
-                          (list `(,subexp '(face ,face
-                                                 ,@align-props
-                                                 ,@invisible-props)
-                                          ,(plist-get var :override)
-                                          ,(plist-get var :laxmatch)))))))
+          (unless (integerp align)
+            (setq align
+                  (cadr (or (assoc (or (plist-get (fountain-read-metadata)
+                                                  'format)
+                                       fountain-default-script-format)
+                                   align)
+                            (car align))))))
+        (dolist (hl (plist-get (cdr element) :highlight))
+          (let* ((subexp (nth 1 hl))
+                 (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
+                 (invisible (when (nth 5 hl) (list 'invisible (nth 5 hl))))
+                 (align-spec (when (integerp align)
+                               (list
+                                'line-prefix (list 'space :align-to align)
+                                'wrap-prefix (list 'space :align-to align))))
+                 (override (nth 3 hl))
+                 (laxmatch (nth 4 hl)))
+            (setq subexp-highlighter
+                  (append subexp-highlighter
+                          (list (list subexp
+                        (list 'quote (append (list 'face face)
+                                             invisible align-spec))
+                        override laxmatch))))))
         (setq keywords
               (append keywords
-                      (list (cons matcher facespec))))))))
+                      (list (cons matcher subexp-highlighter))))))))
 
 ;; FIXME: this onlys work for whole-line elements
 (defun fountain-match-element (fun limit)
