@@ -1265,6 +1265,178 @@ Assumes that all other element matching has been done."
    ((fountain-match-page-break) 'page-break)
    (t 'action)))
 
+(defmacro define-fountain-font-lock-matcher (func)
+  (let ((funcname (intern (format "%s-font-lock" func)))
+        (docstring (format "\
+Call `%s' on each line before LIMIT.
+Return non-nil if match occurs." func)))
+    `(defun ,funcname (limit)
+       ,docstring
+       (let (match)
+         (while (and (null match)
+                     (< (point) limit))
+           (when (,func) (setq match t))
+           (forward-line))
+         match))))
+
+(defvar fountain-element-list
+  '((section-heading
+     :tag "Section Heading"
+     :matcher fountain-section-heading-regexp
+     :highlight ((2 0 fountain-section-heading)
+                 (2 1 fountain-non-printing prepend))
+     :parser fountain-parse-section
+     :align fountain-align-section-heading
+     :fill fountain-fill-section-heading)
+    (scene-heading
+     :tag "Scene Heading"
+     :matcher (define-fountain-font-lock-matcher fountain-match-scene-heading)
+     :highlight ((2 0 fountain-scene-heading)
+                 (2 7 fountain-scene-heading nil t)
+                 (2 8 fountain-non-printing prepend t fountain-syntax-chars)
+                 (2 9 fountain-scene-heading prepend t)
+                 (2 10 fountain-non-printing prepend t fountain-syntax-chars)
+                 (3 1 fountain-non-printing prepend t))
+     :parser fountain-parse-scene
+     :align fountain-align-scene-heading
+     :fill fountain-fill-scene-heading)
+    (action
+     :tag "Action"
+     :matcher (define-fountain-font-lock-matcher fountain-match-action)
+     :highlight ((1 0 fountain-action)
+                 (3 1 fountain-non-printing t t fountain-syntax-chars))
+     :parser fountain-parse-action
+     :align fountain-align-action
+     :fill fountain-fill-action)
+    (character
+     :tag "Character Name"
+     :matcher (define-fountain-font-lock-matcher fountain-match-character)
+     :highlight ((3 0 fountain-character)
+                 (3 2 fountain-non-printing t t fountain-syntax-chars)
+                 (3 5 highlight prepend t))
+     :parser fountain-parse-dialog
+     :align fountain-align-character
+     :fill fountain-fill-character)
+    (character-dual
+     :tag "Dual-Dialogue Character Name"
+     :matcher (define-fountain-font-lock-matcher fountain-match-character)
+     :highlight ((3 0 fountain-character)
+                 (3 2 fountain-non-printing t t fountain-syntax-chars)
+                 (3 5 highlight prepend t))
+     :parser fountain-parse-dialog
+     :align fountain-align-character
+     :fill fountain-fill-dual-character)
+    (lines
+     :tag "Dialogue"
+     :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
+     :highlight ((3 0 fountain-dialog))
+     :parser fountain-parse-lines
+     :align fountain-align-dialog
+     :fill fountain-fill-dialog)
+    (lines-dual
+     :tag "Dual-Dialogue"
+     :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
+     :highlight ((3 0 fountain-dialog))
+     :parser fountain-parse-lines
+     :align fountain-align-dialog
+     :fill fountain-fill-dual-dialog)
+    (paren
+     :tag "Parenthetical"
+     :matcher (define-fountain-font-lock-matcher fountain-match-paren)
+     :highlight ((3 0 fountain-paren))
+     :parser fountain-parse-paren
+     :align fountain-align-paren
+     :fill fountain-fill-paren)
+    (paren-dual
+     :tag "Dual-Dialogue Parenthetical"
+     :matcher (define-fountain-font-lock-matcher fountain-match-paren)
+     :highlight ((3 0 fountain-paren))
+     :parser fountain-parse-paren
+     :align fountain-align-paren
+     :fill fountain-fill-dual-paren)
+    (trans
+     :tag: "Transition"
+     :matcher (define-fountain-font-lock-matcher fountain-match-trans)
+     :highlight ((3 0 fountain-trans)
+                 (2 1 fountain-non-printing t t fountain-syntax-chars))
+     :parser fountain-parse-trans
+     :align fountain-align-trans
+     :fill fountain-fill-trans)
+    (center
+     :tag "Center Text"
+     :matcher fountain-center-regexp
+     :highlight ((2 1 fountain-non-printing t nil fountain-syntax-chars)
+                 (2 3 fountain-non-printing t nil fountain-syntax-chars))
+     :parser fountain-parse-center
+     :align fountain-align-center
+     :fill fountain-fill-action)
+    (page-break
+     :tage "Page Break"
+     :matcher fountain-page-break-regexp
+     :highlight ((2 0 fountain-page-break)
+                 (2 2 fountain-page-number t t))
+     :parser fountain-parse-page-break)
+    (synopsis
+     :tag "Synopsis"
+     :matcher (define-fountain-font-lock-matcher fountain-match-synopsis)
+     :highlight ((2 0 fountain-synopsis)
+                 (2 1 fountain-non-printing t nil fountain-syntax-chars))
+     :parser fountain-parse-synopsis
+     :align fountain-align-synopsis
+     :fill fountain-fill-action)
+    (note
+     :tag "Note"
+     :matcher (define-fountain-font-lock-matcher fountain-match-note)
+     :highlight ((2 0 fountain-note))
+     :parser fountain-parse-note
+     :fill fountain-fill-note)
+    (metadata
+     :tag "Metadata"
+     :matcher (define-fountain-font-lock-matcher fountain-match-metadata)
+     :highlight ((3 0 fountain-metadata-key nil t)
+                 (2 2 fountain-metadata-value t t))))
+  "Association list of Fountain elements and their properties.
+Includes references to various functions and variables.
+
+Takes the form:
+
+    (ELEMENT KEYWORD PROPERTY)
+
+:highlight keyword property takes the form:
+
+    (LEVEL SUBEXP FACENAME [OVERRIDE LAXMATCH INVISIBLE])")
+
+(defvar fountain-emph-list
+  '((underline
+     :tag "Underline"
+     :matcher fountain-underline-regexp
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
+                 (1 0 underline prepend)
+                 (3 4 fountain-non-printing prepend nil fountain-emphasis-delim)))
+    (italic
+     :tag "Italics"
+     :matcher fountain-italic-regexp
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
+                 (1 3 italic prepend)
+                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+    (bold
+     :tag "Bold"
+     :matcher fountain-bold-regexp
+     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+                 (1 3 bold prepend)
+                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+    (bold-italic
+     :tag "Bold Italic"
+     :matcher fountain-bold-italic-regexp
+     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+                 (1 3 bold-italic prepend)
+                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+    (lyrics
+     :tag "Lyrics"
+     :matcher fountain-lyrics-regexp
+     :highlight ((3 1 fountain-non-printing t nil fountain-emphasis-delim)
+                 (2 2 italic prepend)))))
+
 
 ;;; Auto-completion
 
@@ -1484,60 +1656,6 @@ script, you may get incorrect output."
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
-(defvar fountain-elements
-  '((section-heading
-     :tag "Section Heading"
-     :matcher fountain-section-heading-regexp
-     :parser fountain-parse-section
-     :fill fountain-fill-section-heading)
-    (scene-heading
-     :tag "Scene Heading"
-     :parser fountain-parse-scene
-     :fill fountain-fill-scene-heading)
-    (action
-     :tag "Action"
-     :parser fountain-parse-action
-     :fill fountain-fill-action)
-    (character
-     :tag "Character Name"
-     :parser fountain-parse-dialog
-     :fill fountain-fill-character)
-    (lines
-     :tag "Dialogue"
-     :parser fountain-parse-lines
-     :fill fountain-fill-dialog)
-    (paren
-     :tag "Parenthetical"
-     :parser fountain-parse-paren
-     :fill fountain-fill-paren)
-    (trans
-     :tag: "Transition"
-     :parser fountain-parse-trans
-     :fill fountain-fill-trans)
-    (center
-     :tag "Center Text"
-     :matcher fountain-center-regexp
-     :parser fountain-parse-center
-     :fill fountain-fill-action)
-    (page-break
-     :tage "Page Break"
-     :parser fountain-parse-page-break
-     :matcher fountain-page-break-regexp)
-    (synopsis
-     :tag "Synopsis"
-     :parser fountain-parse-synopsis
-     :fill fountain-fill-action)
-    (note
-     :tag "Note"
-     :parser fountain-parse-note
-     :fill fountain-fill-note))
-  "Association list of Fountain elements and their properties.
-Includes references to various functions and variables.
-
-Takes the form:
-
-    (ELEMENT KEYWORD PROPERTY)")
-
 (defun fountain-goto-page-break-point (&optional export-elements)
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
@@ -1553,6 +1671,15 @@ Comments are assumed to be deleted."
      ((not (memq element (or export-elements
                              (fountain-get-export-elements))))
       (beginning-of-line))
+     ;; We cannot break page in dual dialogue. If we're at right dual
+     ;; dialogue, skip back to previous character.
+     ((and (memq element '(character-dd lines-dd paren-dd))
+           (eq (fountain-read-dual-dialog) 'right))
+      (fountain-forward-character 0)
+      (fountain-forward-character -1))
+     ;; If we're at left dual dialogue, break at character.
+     ((memq element '(character-dd lines-dd paren-dd))
+      (fountain-forward-character 0))
      ;; If we're are a section heading, scene heading or character, we
      ;; can safely break before.
      ((memq element '(section-heading scene-heading character))
@@ -1615,7 +1742,7 @@ Comments are assumed to be deleted."
 Skip over comments."
   (let ((fill-width
          (cdr (symbol-value
-               (plist-get (cdr (assq element fountain-elements))
+               (plist-get (cdr (assq element fountain-element-list))
                           :fill)))))
     (let ((i 0))
       (while (and (< i fill-width) (not (eolp)))
@@ -2184,7 +2311,7 @@ in list argument EXPORT-ELEMENTS, parse element for export."
 
 Passes EXPORT-ELEMENTS for efficiency. Update JOB."
   (let ((parser (plist-get (cdr (assq (fountain-get-element)
-                                      fountain-elements))
+                                      fountain-element-list))
                            :parser)))
     (when parser (funcall parser (match-data) export-elements job))))
 
@@ -2698,8 +2825,8 @@ Return filled string."
     (insert string)
     (let (adaptive-fill-mode
           (fill-margins (symbol-value
-                 (plist-get (cdr (assq element-type fountain-elements))
-                            :fill))))
+                (plist-get (cdr (assq element fountain-element-list))
+                           :fill))))
       (setq left-margin (car fill-margins)
             fill-column (+ left-margin (cdr fill-margins)))
       ;; Replace emphasis syntax with face text propoerties (before
@@ -4707,177 +4834,6 @@ scene number from being auto-upcased."
 
 
 ;;; Font Lock
-
-(defvar fountain-font-lock-keywords-plist
-  `(;; Action
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-action limit))
-     ((:level 1 :subexp 0 :face fountain-action)
-      (:level 3 :subexp 1 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t
-              :laxmatch t))
-     fountain-align-action)
-    ;; Section Headings
-    (,fountain-section-heading-regexp
-     ((:level 2 :subexp 0 :face fountain-section-heading)
-      (:level 2 :subexp 1 :face fountain-non-printing
-              :override t))
-     fountain-align-scene-heading)
-    ;; Scene Headings
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-scene-heading limit))
-     ((:level 2 :subexp 0 :face fountain-scene-heading)
-      (:level 3 :subexp 1 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override prepend
-              :laxmatch t)
-      (:level 2 :subexp 7
-              :laxmatch t)
-      (:level 2 :subexp 8 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override prepend
-              :laxmatch t)
-      (:level 2 :subexp 9
-              :override prepend
-              :laxmatch t)
-      (:level 2 :subexp 10 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override prepend
-              :laxmatch t))
-     fountain-align-scene-heading)
-    ;; Character
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-character limit))
-     ((:level 3 :subexp 0 :face fountain-character)
-      (:level 3 :subexp 2 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t
-              :laxmatch t)
-      (:level 3 :subexp 5 :face highlight
-              :override append
-              :laxmatch t))
-     fountain-align-character)
-    ;; Parenthetical
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-paren limit))
-     ((:level 3 :subexp 0 :face fountain-paren))
-     fountain-align-paren)
-    ;; Dialog
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-dialog limit))
-     ((:level 3 :subexp 0 :face fountain-dialog))
-     fountain-align-dialog)
-    ;; Transition
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-trans limit))
-     ((:level 3 :subexp 0 :face fountain-trans)
-      (:level 2 :subexp 1 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t
-              :laxmatch t))
-     fountain-align-trans)
-    ;; Center text
-    (,fountain-center-regexp
-     ((:level 2 :subexp 1 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t)
-      (:level 3 :subexp 2)
-      (:level 2 :subexp 3 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t))
-     fountain-align-center)
-    ;; Page-break
-    (,fountain-page-break-regexp
-     ((:level 2 :subexp 0 :face fountain-page-break)
-      (:level 2 :subexp 2 :face fountain-page-number
-              :override t
-              :laxmatch t)))
-    ;; Synopses
-    (,fountain-synopsis-regexp
-     ((:level 2 :subexp 0 :face fountain-synopsis)
-      (:level 2 :subexp 1 :face fountain-non-printing
-              :invisible fountain-syntax-chars
-              :override t))
-     fountain-align-synopsis)
-    ;; Notes
-    (,fountain-note-regexp
-     ((:level 2 :subexp 0 :face fountain-note)))
-    ;; Templates
-    (,fountain-template-regexp
-     ((:level 2 :subexp 0 :face fountain-template)))
-    ;; Metedata
-    ((lambda (limit)
-       (fountain-match-element #'fountain-match-metadata limit))
-     ((:level 3 :subexp 0 :face fountain-metadata-key
-              :laxmatch t)
-      (:level 2 :subexp 2 :face fountain-metadata-value
-              :override t
-              :laxmatch t)))
-    ;; Underline text
-    (,fountain-underline-regexp
-     ((:level 3 :subexp 2 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)
-      (:level 1 :subexp 3 :face underline
-              :override append)
-      (:level 3 :subexp 4 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)))
-    ;; Italic text
-    (,fountain-italic-regexp
-     ((:level 3 :subexp 2 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)
-      (:level 1 :subexp 3 :face italic
-              :override append)
-      (:level 3 :subexp 4 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)))
-    ;; Bold text
-    (,fountain-bold-regexp
-     ((:level 3 :subexp 2 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)
-      (:level 1 :subexp 3 :face bold
-              :override append)
-      (:level 3 :subexp 4 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)))
-    ;; Bold-Italic text
-    (,fountain-bold-italic-regexp
-     ((:level 3 :subexp 2 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)
-      (:level 1 :subexp 3 :face bold-italic
-              :override append)
-      (:level 3 :subexp 4 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)))
-    ;; Lyrics
-    (,fountain-lyrics-regexp
-     ((:level 3 :subexp 1 :face fountain-non-printing
-              :invisible fountain-emphasis-delim
-              :override t)
-      (:level 2 :subexp 2 :face italic
-              :override append))))
-  "List of face properties to create element Font Lock keywords.
-Takes the format:
-
-    (ELEMENT MATCHER SUB-PLIST)
-
-The first element, ELEMENT, is a string naming the element; if
-nil, this face is not considered an element. MATCHER is a regular
-expression or search function. SUB-PLIST is a list of plists,
-assigning the following keywords:
-
-    :level      integer representing level of `font-lock-maximum-decoration'
-                at which face is applied
-    :subexp     subexpression to match
-    :face       face name to apply
-    :invisible  if t, adds :face property to invisible text property
-    :override   as per `font-lock-keywords'
-    :laxmatch   as per `font-lock-keywords'")
 
 (defun fountain-get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration' for `fountain-mode'."
