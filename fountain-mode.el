@@ -752,28 +752,28 @@ dialogue.")
 (defconst fountain-underline-regexp
   (concat "\\(^\\|[^\\]\\)"
           "\\(_\\)"
-          "\\([^\s\t\n_]+?[^\n_]*?\\)"
+          "\\([^\n\s\t_]+?[^\n_]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching underlined text.")
 
 (defconst fountain-italic-regexp
   (concat "\\(^\\|[^\\\\*]\\)"
           "\\(\\*\\)"
-          "\\([^\n\r\s\t\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching italic text.")
 
 (defconst fountain-bold-regexp
   (concat "\\(^\\|[^\\]\\)"
           "\\(\\*\\{2\\}\\)"
-          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching bold text.")
 
 (defconst fountain-bold-italic-regexp
   (concat "\\(^\\|[^\\\\*]\\)"
           "\\(\\*\\{3\\}\\)"
-          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching bold-italic text.
 Due to the problematic nature of the syntax,
@@ -2056,7 +2056,7 @@ within left-side dual dialogue, and nil otherwise."
       (save-restriction
         (widen)
         (beginning-of-line)
-        (skip-chars-backward "\n\r\s\t")
+        (skip-chars-backward "\n\s\t")
         (fountain-match-page-break)))))
 
 (defun fountain-parse-section (match-data &optional export-elements job)
@@ -2152,7 +2152,7 @@ Update JOB."
          (end
           (save-excursion
             (fountain-forward-character 1 'dialog)
-            (skip-chars-backward "\n\r\s\t")
+            (skip-chars-backward "\n\s\t")
             (point)))
          first-dialog)
     (goto-char (plist-get (nth 1 character) 'end))
@@ -2177,7 +2177,7 @@ Update JOB."
                (save-excursion
                  (while (fountain-read-dual-dialog)
                    (fountain-forward-character 1 'dialog))
-                 (skip-chars-backward "\n\r\s\t")
+                 (skip-chars-backward "\n\s\t")
                  (point))))
           ;; Return the dual-dialogue tree.
           (list 'dual-dialog
@@ -2330,7 +2330,7 @@ Update JOB as we go."
   (setq end (min end (point-max)))
   (let (list)
     (while (< (point) end)
-      (skip-chars-forward "\n\r\s\t")
+      (skip-chars-forward "\n\s\t")
       (beginning-of-line)
       (when (< (point) end)
         (let ((element (fountain-parse-element export-elements job)))
@@ -2824,12 +2824,12 @@ whitespace is converted to dashes. e.g.
       "[^[:alnum:]]+" t)
      "-")))
 
-(defun fountain-export-fill-string (string element-type)
-  "Fill STRING according to fill margins of ELEMENT-TYPE.
+(defun fountain-export-fill-string (string element)
+  "Fill STRING according to fill margins of ELEMENT.
 Return filled string."
   (with-temp-buffer
     (insert string)
-    (let (adaptive-fill-mode
+    (let ((adaptive-fill-mode nil)
           (fill-margins (symbol-value
                 (plist-get (cdr (assq element fountain-element-list))
                            :fill))))
