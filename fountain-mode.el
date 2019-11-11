@@ -1325,7 +1325,7 @@ Return non-nil if match occurs." func)))
      :parser fountain-parse-dialog
      :align fountain-align-character
      :fill fountain-fill-character)
-    (character-dual
+    (character-dd
      :tag "Dual-Dialogue Character Name"
      :matcher (define-fountain-font-lock-matcher fountain-match-character)
      :highlight ((3 0 fountain-character)
@@ -1341,7 +1341,7 @@ Return non-nil if match occurs." func)))
      :parser fountain-parse-lines
      :align fountain-align-dialog
      :fill fountain-fill-dialog)
-    (lines-dual
+    (lines-dd
      :tag "Dual-Dialogue"
      :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
      :highlight ((3 0 fountain-dialog))
@@ -1355,7 +1355,7 @@ Return non-nil if match occurs." func)))
      :parser fountain-parse-paren
      :align fountain-align-paren
      :fill fountain-fill-paren)
-    (paren-dual
+    (paren-dd
      :tag "Dual-Dialogue Parenthetical"
      :matcher (define-fountain-font-lock-matcher fountain-match-paren)
      :highlight ((3 0 fountain-paren))
