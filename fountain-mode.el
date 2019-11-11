@@ -1787,12 +1787,16 @@ To speed up this function, supply EXPORT-ELEMENTS with
       (end-of-line)
       (funcall skip-whitespace-fun))
     ;; Start counting lines.
-    (let ((line-count 0))
+    (let ((page-lines
+           (cdr (assq fountain-page-size fountain-page-max-lines)))
+          (line-count 0)
+          (line-count-left 0)
+          (line-count-right 0)
+          element)
       ;; Begin the main loop, which only halts if we reach the end
       ;; of buffer, a forced page break, or after the maximum lines
       ;; in a page.
-      (while (and (< line-count (cdr (assq fountain-page-size
-                                           fountain-page-max-lines)))
+      (while (and (< line-count page-lines)
                   (not (eobp))
                   (not (fountain-match-page-break)))
         (cond
@@ -1806,20 +1810,34 @@ To speed up this function, supply EXPORT-ELEMENTS with
          ;; whitespace and increment line-count.
          ((funcall skip-whitespace-fun)
           (setq line-count (1+ line-count)))
-         ;; We are at an element. Find what kind of element. If it
-         ;; is not included in export, skip over without
-         ;; incrementing line-count (implement with block bounds).
-         ;; Get the line width.
+         ;; We are at an element. Find what kind of element. If it is
+         ;; not included in export, skip over without incrementing
+         ;; line-count. Otherwise move to fill-width and increment
+         ;; appropriate line-count: for dual-dialogue, increment either
+         ;; LINE-COUNT-LEFT/RIGHT, otherwise increment LINE-COUNT. Once
+         ;; we're at a blank line, add the greater of the former two to
+         ;; the latter.
+         ;; FIXME: using block-bounds here could benefit.
          (t
-          (let ((element (fountain-get-element)))
-            (if (memq element export-elements)
-                (progn
-                  (fountain-move-to-fill-width element)
-                  (setq line-count (1+ line-count)))
-              ;; Element is not exported, so skip it without
-              ;; incrementing line-count.
-              (end-of-line)
-              (funcall skip-whitespace-fun)))))))
+        (let ((element (fountain-get-element))
+              (dd (fountain-read-dual-dialog)))
+          (if (memq element export-elements)
+              (progn
+                (fountain-move-to-fill-width element)
+                (cond ((eq dd 'left)
+                       (setq line-count-left (1+ line-count-left)))
+                      ((eq dd 'right)
+                       (setq line-count-right (1+ line-count-right)))
+                      (t
+                       (setq line-count (1+ line-count))))
+                (when (and (eolp) (bolp)
+                           (< 0 line-count-left) (< 0 line-count-right))
+                  (setq line-count
+                        (+ line-count (max line-count-left line-count-right)))))
+            ;; Element is not exported, so skip it without
+            ;; incrementing line-count.
+            (end-of-line)
+            (funcall skip-whitespace-fun)))))))
     ;; We are not at the furthest point in a page. Skip over any
     ;; remaining whitespace, then go back to page-break point.
     (fountain-goto-page-break-point (or export-elements
