@@ -2416,6 +2416,13 @@ The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
+(defcustom fountain-fill-dual-character
+  '(10 . 28)
+  "Cons cell of integers for indenting and filling dual-dialogue character.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width")))
+
 (defcustom fountain-fill-paren
   '(15 . 26)
   "Cons cell of integers for indenting and filling parenthetical.
@@ -2423,9 +2430,23 @@ The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
+(defcustom fountain-fill-dual-paren
+  '(5 . 16)
+  "Cons cell of integers for indenting and filling dual-dialogue parenthetical.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width")))
+
 (defcustom fountain-fill-dialog
   '(10 . 35)
   "Cons cell of integers for indenting and filling dialogue.
+The car sets `left-margin' and cdr `fill-column'."
+  :type '(cons (integer :tag "Indent")
+               (integer :tag "Width")))
+
+(defcustom fountain-fill-dual-dialog
+  '(2 . 28)
+  "Cons cell of integers for indenting and filling dual-dialogue.
 The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
