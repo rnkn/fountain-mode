@@ -3889,7 +3889,7 @@ If POS is nil, use `point' instead."
                  (outline-end-of-subtree)
                  (skip-chars-forward "\n\s\t")
                  (setq end (point)))
-                ((memq element '(character paren lines))
+                ((memq element '(character character-dd lines lines-dd paren paren-dd))
                  (fountain-forward-character 0)
                  (setq begin (line-beginning-position))
                  (while (not (or (eobp)
