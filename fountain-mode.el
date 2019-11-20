@@ -729,11 +729,12 @@ dialogue.")
     Group 2: match heading")
 
 (defconst fountain-synopsis-regexp
-  "^\\(=\\)[\s\t]*\\([^=\n].*?\\)$"
+  "^\\(\\(=\\)[\s\t]*\\)\\([^=\n].*?\\)$"
   "Regular expression for matching synopses.
 
-    Group 1: leading =
-    Group 2: synopsis (export group)")
+    Group 1: leading = and whitespace
+    Group 2: leading =
+    Group 3: synopsis (export group)")
 
 (defconst fountain-center-regexp
   "^[\s\t]*\\(>\\)[\s\t]*\\(.+?\\)[\s\t]*\\(<\\)[\s\t]*$"
