@@ -5,7 +5,7 @@
 
 ;; Author: Paul W. Rankin <pwr@sdf.org>
 ;; Keywords: wp, text
-;; Version: 2.8.1
+;; Version: 2.8.2
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://fountain-mode.org
 ;; git: https://github.com/rnkn/fountain-mode
@@ -566,21 +566,6 @@ This option does not affect file contents."
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
 
-;; FIXME: a cleaner way would be:
-;;   (fountain-get-align 'character) -> 20
-(defun fountain-get-align (option)
-  "Return OPTION align integer based on script format.
-e.g.
-
-    (fountain-get-align fountain-align-character) -> 20"
-  (if (integerp option)
-      option
-    (cadr (or (assoc (or (plist-get (fountain-read-metadata)
-                                    'format)
-                         fountain-default-script-format)
-                     option)
-              (car option)))))
-
 
 ;;; Autoinsert
 
@@ -746,28 +731,28 @@ dialogue.")
 (defconst fountain-underline-regexp
   (concat "\\(^\\|[^\\]\\)"
           "\\(_\\)"
-          "\\([^\s\t\n_]+?[^\n_]*?\\)"
+          "\\([^\n\s\t_]+?[^\n_]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching underlined text.")
 
 (defconst fountain-italic-regexp
   (concat "\\(^\\|[^\\\\*]\\)"
           "\\(\\*\\)"
-          "\\([^\n\r\s\t\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching italic text.")
 
 (defconst fountain-bold-regexp
   (concat "\\(^\\|[^\\]\\)"
           "\\(\\*\\{2\\}\\)"
-          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching bold text.")
 
 (defconst fountain-bold-italic-regexp
   (concat "\\(^\\|[^\\\\*]\\)"
           "\\(\\*\\{3\\}\\)"
-          "\\([^\s\t\n\\*]+?[^\n\\*]*?\\)"
+          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
           "\\(\\2\\)")
   "Regular expression for matching bold-italic text.
 Due to the problematic nature of the syntax,
@@ -1042,8 +1027,7 @@ buffers."
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible))
   (setq font-lock-multiline 'undecided)
-  (setq font-lock-defaults
-        '(fountain-create-font-lock-keywords nil t))
+  (setq font-lock-defaults '(fountain-init-font-lock))
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-delim
     (add-to-invisibility-spec 'fountain-emphasis-delim))
@@ -1259,6 +1243,176 @@ Assumes that all other element matching has been done."
    ((fountain-match-page-break) 'page-break)
    (t 'action)))
 
+(defmacro define-fountain-font-lock-matcher (func)
+  (let ((funcname (intern (format "%s-font-lock" func)))
+        (docstring (format "\
+Call `%s' on each line before LIMIT.
+Return non-nil if match occurs." func)))
+    `(defun ,funcname (limit)
+       ,docstring
+       (let (match)
+         (while (and (null match)
+                     (< (point) limit))
+           (when (,func) (setq match t))
+           (forward-line))
+         match))))
+
+(defvar fountain-element-list
+  '((section-heading
+     :tag "Section Heading"
+     :matcher fountain-section-heading-regexp
+     :highlight ((2 0 fountain-section-heading)
+                 (2 1 fountain-non-printing prepend))
+     :parser fountain-parse-section
+     :align fountain-align-section-heading
+     :fill fountain-fill-section-heading)
+    (scene-heading
+     :tag "Scene Heading"
+     :matcher (define-fountain-font-lock-matcher fountain-match-scene-heading)
+     :highlight ((2 0 fountain-scene-heading)
+                 (2 7 fountain-scene-heading nil t)
+                 (2 8 fountain-non-printing prepend t fountain-syntax-chars)
+                 (2 9 fountain-scene-heading prepend t)
+                 (2 10 fountain-non-printing prepend t fountain-syntax-chars)
+                 (3 1 fountain-non-printing prepend t))
+     :parser fountain-parse-scene
+     :align fountain-align-scene-heading
+     :fill fountain-fill-scene-heading)
+    (action
+     :tag "Action"
+     :matcher (define-fountain-font-lock-matcher fountain-match-action)
+     :highlight ((1 0 fountain-action)
+                 (3 1 fountain-non-printing t t fountain-syntax-chars))
+     :parser fountain-parse-action
+     :align fountain-align-action
+     :fill fountain-fill-action)
+    (character
+     :tag "Character Name"
+     :matcher (define-fountain-font-lock-matcher fountain-match-character)
+     :highlight ((3 0 fountain-character)
+                 (3 2 fountain-non-printing t t fountain-syntax-chars)
+                 (3 5 highlight prepend t))
+     :parser fountain-parse-dialog
+     :align fountain-align-character
+     :fill fountain-fill-character)
+    (character-dd
+     :tag "Dual-Dialogue Character Name"
+     :matcher (define-fountain-font-lock-matcher fountain-match-character)
+     :highlight ((3 0 fountain-character)
+                 (3 2 fountain-non-printing t t fountain-syntax-chars)
+                 (3 5 highlight prepend t))
+     :parser fountain-parse-dialog
+     :align fountain-align-character
+     :fill fountain-fill-dual-character)
+    (lines
+     :tag "Dialogue"
+     :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
+     :highlight ((3 0 fountain-dialog))
+     :parser fountain-parse-lines
+     :align fountain-align-dialog
+     :fill fountain-fill-dialog)
+    (lines-dd
+     :tag "Dual-Dialogue"
+     :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
+     :highlight ((3 0 fountain-dialog))
+     :parser fountain-parse-lines
+     :align fountain-align-dialog
+     :fill fountain-fill-dual-dialog)
+    (paren
+     :tag "Parenthetical"
+     :matcher (define-fountain-font-lock-matcher fountain-match-paren)
+     :highlight ((3 0 fountain-paren))
+     :parser fountain-parse-paren
+     :align fountain-align-paren
+     :fill fountain-fill-paren)
+    (paren-dd
+     :tag "Dual-Dialogue Parenthetical"
+     :matcher (define-fountain-font-lock-matcher fountain-match-paren)
+     :highlight ((3 0 fountain-paren))
+     :parser fountain-parse-paren
+     :align fountain-align-paren
+     :fill fountain-fill-dual-paren)
+    (trans
+     :tag: "Transition"
+     :matcher (define-fountain-font-lock-matcher fountain-match-trans)
+     :highlight ((3 0 fountain-trans)
+                 (2 1 fountain-non-printing t t fountain-syntax-chars))
+     :parser fountain-parse-trans
+     :align fountain-align-trans
+     :fill fountain-fill-trans)
+    (center
+     :tag "Center Text"
+     :matcher fountain-center-regexp
+     :highlight ((2 1 fountain-non-printing t nil fountain-syntax-chars)
+                 (2 3 fountain-non-printing t nil fountain-syntax-chars))
+     :parser fountain-parse-center
+     :align fountain-align-center
+     :fill fountain-fill-action)
+    (page-break
+     :tage "Page Break"
+     :matcher fountain-page-break-regexp
+     :highlight ((2 0 fountain-page-break)
+                 (2 2 fountain-page-number t t))
+     :parser fountain-parse-page-break)
+    (synopsis
+     :tag "Synopsis"
+     :matcher (define-fountain-font-lock-matcher fountain-match-synopsis)
+     :highlight ((2 0 fountain-synopsis)
+                 (2 1 fountain-non-printing t nil fountain-syntax-chars))
+     :parser fountain-parse-synopsis
+     :align fountain-align-synopsis
+     :fill fountain-fill-action)
+    (note
+     :tag "Note"
+     :matcher (define-fountain-font-lock-matcher fountain-match-note)
+     :highlight ((2 0 fountain-note))
+     :parser fountain-parse-note
+     :fill fountain-fill-note)
+    (metadata
+     :tag "Metadata"
+     :matcher (define-fountain-font-lock-matcher fountain-match-metadata)
+     :highlight ((3 0 fountain-metadata-key nil t)
+                 (2 2 fountain-metadata-value t t)))
+    (underline
+     :tag "Underline"
+     :matcher fountain-underline-regexp
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
+                 (1 0 underline prepend)
+                 (3 4 fountain-non-printing prepend nil fountain-emphasis-delim)))
+    (italic
+     :tag "Italics"
+     :matcher fountain-italic-regexp
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
+                 (1 3 italic prepend)
+                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+    (bold
+     :tag "Bold"
+     :matcher fountain-bold-regexp
+     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+                 (1 3 bold prepend)
+                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+    (bold-italic
+     :tag "Bold Italic"
+     :matcher fountain-bold-italic-regexp
+     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+                 (1 3 bold-italic prepend)
+                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+    (lyrics
+     :tag "Lyrics"
+     :matcher fountain-lyrics-regexp
+     :highlight ((3 1 fountain-non-printing t nil fountain-emphasis-delim)
+                 (2 2 italic prepend))))
+  "Association list of Fountain elements and their properties.
+Includes references to various functions and variables.
+
+Takes the form:
+
+    (ELEMENT KEYWORD PROPERTY)
+
+:highlight keyword property takes the form:
+
+    (LEVEL SUBEXP FACENAME [OVERRIDE LAXMATCH INVISIBLE])")
+
 
 ;;; Auto-completion
 
@@ -1472,59 +1626,11 @@ script, you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
-(defvar fountain-elements
-  '((section-heading
-     :tag "Section Heading"
-     :matcher fountain-section-heading-regexp
-     :parser fountain-parse-section
-     :fill fountain-fill-section-heading)
-    (scene-heading
-     :tag "Scene Heading"
-     :parser fountain-parse-scene
-     :fill fountain-fill-scene-heading)
-    (action
-     :tag "Action"
-     :parser fountain-parse-action
-     :fill fountain-fill-action)
-    (character
-     :tag "Character Name"
-     :parser fountain-parse-dialog
-     :fill fountain-fill-character)
-    (lines
-     :tag "Dialogue"
-     :parser fountain-parse-lines
-     :fill fountain-fill-dialog)
-    (paren
-     :tag "Parenthetical"
-     :parser fountain-parse-paren
-     :fill fountain-fill-paren)
-    (trans
-     :tag: "Transition"
-     :parser fountain-parse-trans
-     :fill fountain-fill-trans)
-    (center
-     :tag "Center Text"
-     :matcher fountain-center-regexp
-     :parser fountain-parse-center
-     :fill fountain-fill-action)
-    (page-break
-     :tage "Page Break"
-     :parser fountain-parse-page-break
-     :matcher fountain-page-break-regexp)
-    (synopsis
-     :tag "Synopsis"
-     :parser fountain-parse-synopsis
-     :fill fountain-fill-action)
-    (note
-     :tag "Note"
-     :parser fountain-parse-note
-     :fill fountain-fill-note))
-  "Association list of Fountain elements and their properties.
-Includes references to various functions and variables.
-
-Takes the form:
-
-    (ELEMENT KEYWORD PROPERTY)")
+(defcustom fountain-page-size
+  'letter
+  "Paper size to use on export."
+  :type '(radio (const :tag "US Letter" letter)
+                (const :tag "A4" a4)))
 
 (defun fountain-goto-page-break-point (&optional export-elements)
   "Move point to appropriate place to break a page.
@@ -1600,7 +1706,7 @@ Comments are assumed to be deleted."
 Skip over comments."
   (let ((fill-width
          (cdr (symbol-value
-               (plist-get (cdr (assq element fountain-elements))
+               (plist-get (cdr (assq element fountain-element-list))
                           :fill)))))
     (let ((i 0))
       (while (and (< i fill-width) (not (eolp)))
@@ -1881,7 +1987,7 @@ within left-side dual dialogue, and nil otherwise."
       (save-restriction
         (widen)
         (beginning-of-line)
-        (skip-chars-backward "\n\r\s\t")
+        (skip-chars-backward "\n\s\t")
         (fountain-match-page-break)))))
 
 (defun fountain-parse-section (match-data &optional export-elements job)
@@ -1977,7 +2083,7 @@ Update JOB."
          (end
           (save-excursion
             (fountain-forward-character 1 'dialog)
-            (skip-chars-backward "\n\r\s\t")
+            (skip-chars-backward "\n\s\t")
             (point)))
          first-dialog)
     (goto-char (plist-get (nth 1 character) 'end))
@@ -2002,7 +2108,7 @@ Update JOB."
                (save-excursion
                  (while (fountain-dual-dialog)
                    (fountain-forward-character 1 'dialog))
-                 (skip-chars-backward "\n\r\s\t")
+                 (skip-chars-backward "\n\s\t")
                  (point))))
           ;; Return the dual-dialogue tree.
           (list 'dual-dialog
@@ -2142,7 +2248,7 @@ in list argument EXPORT-ELEMENTS, parse element for export."
 
 Passes EXPORT-ELEMENTS for efficiency. Update JOB."
   (let ((parser (plist-get (cdr (assq (fountain-get-element)
-                                      fountain-elements))
+                                      fountain-element-list))
                            :parser)))
     (when parser (funcall parser (match-data) export-elements job))))
 
@@ -2155,7 +2261,7 @@ Update JOB as we go."
   (setq end (min end (point-max)))
   (let (list)
     (while (< (point) end)
-      (skip-chars-forward "\n\r\s\t")
+      (skip-chars-forward "\n\s\t")
       (beginning-of-line)
       (when (< (point) end)
         (let ((element (fountain-parse-element export-elements job)))
@@ -2662,7 +2768,7 @@ Return filled string."
     (insert string)
     (let (adaptive-fill-mode
           (fill-margins (symbol-value
-                 (plist-get (cdr (assq element-type fountain-elements))
+                 (plist-get (cdr (assq element-type fountain-element-list))
                             :fill))))
       (setq left-margin (car fill-margins)
             fill-column (+ left-margin (cdr fill-margins)))
@@ -4911,50 +5017,41 @@ assigning the following keywords:
         (font-lock-refresh-defaults))
     (user-error "Decoration must be an integer 1-3")))
 
-(defun fountain-create-font-lock-keywords ()
-  "Return a new list of `font-lock-mode' keywords.
-Uses `fountain-font-lock-keywords-plist' to create a list of
-keywords suitable for Font Lock."
+(defun fountain-init-font-lock ()
+  "Return a new list of `font-lock-mode' keywords for elements."
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
-    (dolist (var fountain-font-lock-keywords-plist keywords)
-      (let ((matcher (car var))
-            (plist-list (nth 1 var))
-            (align (fountain-get-align (symbol-value (nth 2 var))))
-            align-props facespec)
+    (dolist (element fountain-element-list keywords)
+      (let ((matcher (eval (plist-get (cdr element) :matcher)))
+            (align (eval (plist-get (cdr element) :align)))
+            subexp-highlighter)
         (when (and align fountain-align-elements)
-          (setq align-props
-                `(line-prefix
-                  (space :align-to ,align)
-                  wrap-prefix
-                  (space :align-to ,align))))
-        (dolist (var plist-list)
-          (let ((subexp (plist-get var :subexp))
-                (face (when (<= (plist-get var :level) dec)
-                        (plist-get var :face)))
-                (invisible (plist-get var :invisible))
-                invisible-props)
-            (when invisible (setq invisible-props (list 'invisible invisible)))
-            (setq facespec
-                  (append facespec
-                          (list `(,subexp '(face ,face
-                                                 ,@align-props
-                                                 ,@invisible-props)
-                                          ,(plist-get var :override)
-                                          ,(plist-get var :laxmatch)))))))
+          (unless (integerp align)
+            (setq align
+                  (cadr (or (assoc (or (plist-get (fountain-read-metadata)
+                                                  'format)
+                                       fountain-default-script-format)
+                                   align)
+                            (car align))))))
+        (dolist (hl (plist-get (cdr element) :highlight))
+          (let* ((subexp (nth 1 hl))
+                 (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
+                 (invisible (when (nth 5 hl) (list 'invisible (nth 5 hl))))
+                 (align-spec (when (integerp align)
+                               (list
+                                'line-prefix (list 'space :align-to align)
+                                'wrap-prefix (list 'space :align-to align))))
+                 (override (nth 3 hl))
+                 (laxmatch (nth 4 hl)))
+            (setq subexp-highlighter
+                  (append subexp-highlighter
+                          (list (list subexp
+                        (list 'quote (append (list 'face face)
+                                             invisible align-spec))
+                        override laxmatch))))))
         (setq keywords
               (append keywords
-                      (list (cons matcher facespec))))))))
-
-;; FIXME: this onlys work for whole-line elements
-(defun fountain-match-element (fun limit)
-  "If FUN returns non-nil before LIMIT, return non-nil."
-  (let (match)
-    (while (and (null match)
-                (< (point) limit))
-      (when (funcall fun) (setq match t))
-      (forward-line))
-    match))
+                      (list (cons matcher subexp-highlighter))))))))
 
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
