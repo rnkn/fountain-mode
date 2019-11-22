@@ -573,21 +573,6 @@ This option does not affect file contents."
                  (repeat (group (string :tag "Format") integer)))
   :set #'fountain--set-and-refresh-all-font-lock)
 
-;; FIXME: a cleaner way would be:
-;;   (fountain-get-align 'character) -> 20
-(defun fountain-get-align (option)
-  "Return OPTION align integer based on script format.
-e.g.
-
-    (fountain-get-align fountain-align-character) -> 20"
-  (if (integerp option)
-      option
-    (cadr (or (assoc (or (plist-get (fountain-read-metadata)
-                                    'format)
-                         fountain-default-script-format)
-                     option)
-              (car option)))))
-
 
 ;;; Autoinsert
 
@@ -4955,16 +4940,6 @@ scene number from being auto-upcased."
         (setq keywords
               (append keywords
                       (list (cons matcher subexp-highlighter))))))))
-
-;; FIXME: this onlys work for whole-line elements
-(defun fountain-match-element (fun limit)
-  "If FUN returns non-nil before LIMIT, return non-nil."
-  (let (match)
-    (while (and (null match)
-                (< (point) limit))
-      (when (funcall fun) (setq match t))
-      (forward-line))
-    match))
 
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
