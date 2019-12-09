@@ -1372,25 +1372,25 @@ Return non-nil if match occurs." func)))
     (italic
      :tag "Italics"
      :matcher fountain-italic-regexp
-     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
                  (1 1 italic prepend)
-                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+                 (3 4 fountain-non-printing prepend nil fountain-emphasis-delim)))
     (bold
      :tag "Bold"
      :matcher fountain-bold-regexp
-     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
                  (1 1 bold prepend)
-                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+                 (3 4 fountain-non-printing prepend nil fountain-emphasis-delim)))
     (bold-italic
      :tag "Bold Italic"
      :matcher fountain-bold-italic-regexp
-     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
                  (1 1 bold-italic prepend)
-                 (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
+                 (3 4 fountain-non-printing prepend nil fountain-emphasis-delim)))
     (lyrics
      :tag "Lyrics"
      :matcher fountain-lyrics-regexp
-     :highlight ((3 1 fountain-non-printing t nil fountain-emphasis-delim)
+     :highlight ((3 1 fountain-non-printing prepend nil fountain-emphasis-delim)
                  (2 2 italic prepend))))
   "Association list of Fountain elements and their properties.
 Includes references to various functions and variables.
