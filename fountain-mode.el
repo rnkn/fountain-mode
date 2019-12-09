@@ -729,37 +729,27 @@ dialogue.")
     Group 3: match trailing <")
 
 (defconst fountain-underline-regexp
-  (concat "\\(^\\|[^\\]\\)"
-          "\\(_\\)"
-          "\\([^\n\s\t_]+?[^\n_]*?\\)"
-          "\\(\\2\\)")
+  "\\(?:^\\|[^\\]\\)\\(\\(_\\)\\([^\n\s\t_][^_\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching underlined text.")
 
 (defconst fountain-italic-regexp
-  (concat "\\(^\\|[^\\\\*]\\)"
-          "\\(\\*\\)"
-          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
-          "\\(\\2\\)")
+  "\\(?:^\\|[^\\*\\]\\)\\(\\(\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching italic text.")
 
 (defconst fountain-bold-regexp
-  (concat "\\(^\\|[^\\]\\)"
-          "\\(\\*\\{2\\}\\)"
-          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
-          "\\(\\2\\)")
+  "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching bold text.")
 
 (defconst fountain-bold-italic-regexp
-  (concat "\\(^\\|[^\\\\*]\\)"
-          "\\(\\*\\{3\\}\\)"
-          "\\([^\n\s\t\\*]+?[^\n\\*]*?\\)"
-          "\\(\\2\\)")
+  "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching bold-italic text.
+
 Due to the problematic nature of the syntax,
 bold-italic-underlined text must be specified with the
 bold-italic delimiters together, e.g.
 
-    This text is _***ridiculously important***_.")
+    This text is _***ridiculously important***_.
+    This text is ***_stupendously significant_***.")
 
 (defconst fountain-lyrics-regexp
   "^\\(~[\s\t]*\\)\\(.+\\)"
@@ -1274,7 +1264,7 @@ Return non-nil if match occurs." func)))
                  (2 8 fountain-non-printing prepend t fountain-syntax-chars)
                  (2 9 fountain-scene-heading prepend t)
                  (2 10 fountain-non-printing prepend t fountain-syntax-chars)
-                 (3 1 fountain-non-printing prepend t))
+                 (3 1 fountain-non-printing prepend t fountain-syntax-chars))
      :parser fountain-parse-scene
      :align fountain-align-scene-heading
      :fill fountain-fill-scene-heading)
@@ -1357,8 +1347,8 @@ Return non-nil if match occurs." func)))
     (synopsis
      :tag "Synopsis"
      :matcher (define-fountain-font-lock-matcher fountain-match-synopsis)
-     :highlight ((2 0 fountain-synopsis)
-                 (2 1 fountain-non-printing t nil fountain-syntax-chars))
+     :highlight ((2 0 fountain-synopsis nil nil fountain-synopsis)
+                 (2 1 fountain-non-printing prepend nil fountain-syntax-chars))
      :parser fountain-parse-synopsis
      :align fountain-align-synopsis
      :fill fountain-fill-action)
@@ -1377,25 +1367,25 @@ Return non-nil if match occurs." func)))
      :tag "Underline"
      :matcher fountain-underline-regexp
      :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
-                 (1 0 underline prepend)
+                 (1 1 underline prepend)
                  (3 4 fountain-non-printing prepend nil fountain-emphasis-delim)))
     (italic
      :tag "Italics"
      :matcher fountain-italic-regexp
-     :highlight ((3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
-                 (1 3 italic prepend)
+     :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
+                 (1 1 italic prepend)
                  (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
     (bold
      :tag "Bold"
      :matcher fountain-bold-regexp
      :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
-                 (1 3 bold prepend)
+                 (1 1 bold prepend)
                  (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
     (bold-italic
      :tag "Bold Italic"
      :matcher fountain-bold-italic-regexp
      :highlight ((3 2 fountain-non-printing t nil fountain-emphasis-delim)
-                 (1 3 bold-italic prepend)
+                 (1 1 bold-italic prepend)
                  (3 4 fountain-non-printing t nil fountain-emphasis-delim)))
     (lyrics
      :tag "Lyrics"
