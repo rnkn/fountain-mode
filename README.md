@@ -6,6 +6,10 @@ Fountain plain text markup format.
 For more information on the fountain markup format, visit
 <https://fountain.io>.
 
+**n.b. Exporting is depreciated and will be removed in the next major
+release. Several external tools are available that better export
+Fountain files.**
+
 Screenshot: <https://f002.backblazeb2.com/file/pwr-share/fountain-mode.png>
 
 ## Features ##
