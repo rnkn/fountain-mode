@@ -5,7 +5,7 @@
 
 ;; Author: Paul W. Rankin <code@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 2.8.3
+;; Version: 2.8.4
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://fountain-mode.org
 ;; git: https://github.com/rnkn/fountain-mode
@@ -2357,8 +2357,14 @@ The car sets `left-margin' and cdr `fill-column'."
 
 ;;; Exporting
 
+(defconst fountain-export-warning
+  "Exporting is depreciated and will be removed in the next major
+release. Several external tools are available that better export
+Fountain files.")
+
 (defgroup fountain-export ()
-  "Options for exporting Fountain files."
+  (concat "Options for exporting Fountain files.\n\n"
+          fountain-export-warning)
   :prefix "fountain-export-"
   :group 'fountain)
 
@@ -3027,7 +3033,8 @@ otherwise kill destination buffer."
           (run-hooks hook))
       ;; If export failed, kill DEST-BUFFER.
       (unless complete
-        (kill-buffer dest-buffer)))))
+        (kill-buffer dest-buffer))
+      (user-error fountain-export-warning))))
 
 (defun fountain-export-default ()
   "Call function defined in `fountain-export-default-function'."
