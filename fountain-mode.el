@@ -942,7 +942,7 @@ scene heading regular expression."
          ;; Group 2: match scene heading without scene number
          "^\\(?2:"
          ;; Group 3: match INT/EXT
-         "\\(?3:" (regexp-opt fountain-scene-heading-prefix-list) ".?\s+\\)"
+         "\\(?3:" (regexp-opt fountain-scene-heading-prefix-list) "\\.?\s+\\)"
          ;; Group 4: match location
          "\\(?4:.+?\\)?"
          ;; Group 5: match suffix separator
