@@ -1020,6 +1020,9 @@ buffers."
               '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible))
+  ;; This should be temporary. Feels better to ensure appropriate
+  ;; case-fold within each function.
+  (setq case-fold-search t)
   (setq font-lock-multiline 'undecided)
   (setq font-lock-defaults '(fountain-init-font-lock))
   (add-to-invisibility-spec (cons 'outline t))
