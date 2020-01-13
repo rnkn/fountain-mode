@@ -5,7 +5,7 @@
 
 ;; Author: Paul W. Rankin <code@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 2.8.4
+;; Version: 2.8.5
 ;; Package-Requires: ((emacs "24.5"))
 ;; URL: https://fountain-mode.org
 ;; git: https://github.com/rnkn/fountain-mode
