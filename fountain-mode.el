@@ -5065,60 +5065,6 @@ redisplay in margin. Otherwise, remove display text properties."
     ["Refresh Continued Dialog" fountain-contd-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
     "---"
-    ("Export"
-     ["Export buffer..." fountain-export-buffer]
-     ["Default" fountain-export-default]
-     "---"
-     ["Buffer to plain text" fountain-export-buffer-to-txt]
-     ["Buffer to LaTeX" fountain-export-buffer-to-latex]
-     ["Buffer to HTML" fountain-export-buffer-to-html]
-     ["Buffer to Final Draft" fountain-export-buffer-to-fdx]
-     ["Buffer to Fountain" fountain-export-buffer-to-fountain]
-     "---"
-     ["Run Shell Command" fountain-export-shell-command]
-     "---"
-     ["US Letter Page Size" (customize-set-variable 'fountain-page-size
-                                                    'letter)
-      :style radio
-      :selected (eq fountain-page-size 'letter)]
-     ["A4 Page Size" (customize-set-variable 'fountain-page-size
-                                             'a4)
-      :style radio
-      :selected (eq fountain-page-size 'a4)]
-     "---"
-     ["Include Title Page"
-      (customize-set-variable 'fountain-export-include-title-page
-                              (not fountain-export-include-title-page))
-      :style toggle
-      :selected fountain-export-include-title-page]
-     ["Bold Scene Headings"
-      (if (memq 'bold fountain-export-scene-heading-format)
-          (customize-set-variable 'fountain-export-scene-heading-format
-                             (remq 'bold fountain-export-scene-heading-format))
-        (customize-set-variable 'fountain-export-scene-heading-format
-                            (cons 'bold fountain-export-scene-heading-format)))
-      :style toggle
-      :selected (memq 'bold fountain-export-scene-heading-format)]
-     ["Double-Space Scene Headings"
-      (if (memq 'double-space fountain-export-scene-heading-format)
-          (customize-set-variable 'fountain-export-scene-heading-format
-                     (remq 'double-space fountain-export-scene-heading-format))
-        (customize-set-variable 'fountain-export-scene-heading-format
-                    (cons 'double-space fountain-export-scene-heading-format)))
-      :style toggle
-      :selected (memq 'double-space fountain-export-scene-heading-format)]
-     ["Underline Scene Headings"
-      (if (memq 'underline fountain-export-scene-heading-format)
-          (customize-set-variable 'fountain-export-scene-heading-format
-                        (remq 'underline fountain-export-scene-heading-format))
-        (customize-set-variable 'fountain-export-scene-heading-format
-                       (cons 'underline fountain-export-scene-heading-format)))
-      :style toggle
-      :selected (memq 'underline fountain-export-scene-heading-format)]
-     "---"
-     ["Customize Export"
-      (customize-group 'fountain-export)])
-    "---"
     ("Syntax Highlighting"
      ["Minimum"
       (fountain-set-font-lock-decoration 1)
@@ -5143,6 +5089,7 @@ redisplay in margin. Otherwise, remove display text properties."
                               (not fountain-hide-syntax-chars))
       :style toggle
       :selected fountain-hide-syntax-chars])
+    "---"
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
                              (not fountain-align-elements))
@@ -5158,6 +5105,8 @@ redisplay in margin. Otherwise, remove display text properties."
                              (not fountain-add-contd-dialog))
      :style toggle
      :selected fountain-add-contd-dialog]
+    "---"
+    ["Run Export Command" fountain-export-shell-command]
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
