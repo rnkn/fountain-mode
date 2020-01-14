@@ -4946,9 +4946,7 @@ redisplay in margin. Otherwise, remove display text properties."
                       fountain-hide-syntax-chars
                       fountain-shift-all-elements
                       font-lock-maximum-decoration
-                      fountain-page-size
-                      fountain-export-include-title-page
-                      fountain-export-scene-heading-format))
+                      fountain-page-size))
       (when (customize-mark-to-save option) (setq unsaved t)))
     (when unsaved (custom-save-all))))
 
