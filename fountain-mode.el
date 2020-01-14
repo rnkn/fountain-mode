@@ -4829,14 +4829,7 @@ redisplay in margin. Otherwise, remove display text properties."
     ;; Pages
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
     ;; Exporting commands:
-    (define-key map (kbd "C-c C-e e") #'fountain-export-buffer)
-    (define-key map (kbd "C-c C-e C-e") #'fountain-export-default)
-    (define-key map (kbd "C-c C-e h") #'fountain-export-buffer-to-html)
-    (define-key map (kbd "C-c C-e l") #'fountain-export-buffer-to-latex)
-    (define-key map (kbd "C-c C-e d") #'fountain-export-buffer-to-fdx)
-    (define-key map (kbd "C-c C-e t") #'fountain-export-buffer-to-txt)
-    (define-key map (kbd "C-c C-e f") #'fountain-export-buffer-to-fountain)
-    (define-key map (kbd "C-c C-e s") #'fountain-export-shell-command)
+    (define-key map (kbd "C-c C-e") #'fountain-export)
     map)
   "Mode map for `fountain-mode'.")
 
