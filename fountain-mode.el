@@ -159,9 +159,9 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              turn-on-flyspell))
 
 (define-obsolete-variable-alias 'fountain-script-format
-  'fountain-default-script-format "fountain-mode-2.9.0")
+  'fountain-default-script-format "3.0.0")
 (defcustom fountain-default-script-format "screenplay"
-  "Default script format for editing and exporting.
+  "Default script format.
 
 Can be overridden in metadata with, e.g.
 
@@ -171,7 +171,7 @@ Can be overridden in metadata with, e.g.
   :safe 'string)
 
 (define-obsolete-variable-alias 'fountain-add-continued-dialog
-  'fountain-add-contd-dialog "fountain-mode-2.9.0")
+  'fountain-add-contd-dialog "3.0.0")
 (defcustom fountain-add-contd-dialog
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-contd-dialog-refresh] will mark continued dialogue.
@@ -186,7 +186,7 @@ When nil, remove `fountain-contd-dialog-string' with
   :safe 'booleanp)
 
 (define-obsolete-variable-alias 'fountain-continued-dialog-string
-  'fountain-contd-dialog-string "fountain-mode-2.9.0")
+  'fountain-contd-dialog-string "3.0.0")
 (defcustom fountain-contd-dialog-string
   " (CONT'D)"
   "String to append to character name speaking in succession.
@@ -1441,7 +1441,7 @@ Add to `fountain-mode-hook' to have completion upon load."
   :prefix "fountain-page-")
 
 (define-obsolete-variable-alias 'fountain-export-page-size
-  'fountain-page-size "fountain-mode-2.9.0")
+  'fountain-page-size "3.0.0")
 (defcustom fountain-page-size
   'letter
   "Paper size to use on export."
@@ -1449,7 +1449,7 @@ Add to `fountain-mode-hook' to have completion upon load."
                 (const :tag "A4" a4)))
 
 (define-obsolete-variable-alias 'fountain-pages-max-lines
-  'fountain-page-max-lines "fountain-mode-2.9.0")
+  'fountain-page-max-lines "3.0.0")
 (defcustom fountain-page-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
@@ -1461,7 +1461,7 @@ script, you may get incorrect output."
                        (cons (const :tag "A4" a4) integer))))
 
 (define-obsolete-variable-alias 'fountain-pages-ignore-narrowing
-  'fountain-page-ignore-restriction "fountain-mode-2.9.0")
+  'fountain-page-ignore-restriction "3.0.0")
 (defcustom fountain-page-ignore-restriction
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
@@ -4324,7 +4324,7 @@ ARG (\\[universal-argument]), only insert note delimiters."
         fountain-note-template)))))
 
 (define-obsolete-function-alias 'fountain-continued-dialog-refresh
-  'fountain-contd-dialog-refresh "fountain-mode-2.9.0")
+  'fountain-contd-dialog-refresh "3.0.0")
 (defun fountain-contd-dialog-refresh ()
   "Add or remove continued dialog in buffer.
 
@@ -4385,11 +4385,8 @@ to remove previous string first."
   :prefix "fountain-scene-numbers-"
   :group 'fountain)
 
-(define-obsolete-variable-alias 'fountain-align-scene-number
-  'fountain-scene-numbers-display-in-margin "fountain-mode-2.3.0")
 (define-obsolete-variable-alias   'fountain-display-scene-numbers-in-margin
-  'fountain-scene-numbers-display-in-margin "fountain-mode-2.9.0")
-
+  'fountain-scene-numbers-display-in-margin "3.0.0")
 (defcustom fountain-scene-numbers-display-in-margin
   nil
   "If non-nil, display scene numbers in the right margin.
@@ -4403,8 +4400,7 @@ This option does affect file contents."
   :set #'fountain--set-and-refresh-all-font-lock)
 
 (define-obsolete-variable-alias 'fountain-prefix-revised-scene-numbers
-  'fountain-scene-numbers-prefix-revised "fountain-mode-2.9.0")
-
+  'fountain-scene-numbers-prefix-revised "3.0.0")
 (defcustom fountain-scene-numbers-prefix-revised
   nil
   "If non-nil, revised scene numbers are prefixed.
@@ -4430,8 +4426,7 @@ same script may result in errors in output."
   :group 'fountain-scene-numbers)
 
 (define-obsolete-variable-alias 'fountain-scene-number-first-revision
-  'fountain-scene-numbers-first-revision-char "fountain-mode-2.9.0")
-
+  'fountain-scene-numbers-first-revision-char "3.0.0")
 (defcustom fountain-scene-numbers-first-revision-char
   ?A
   "Character to start revised scene numbers."
@@ -4440,7 +4435,7 @@ same script may result in errors in output."
   :group 'fountain-scene-numbers)
 
 (define-obsolete-variable-alias 'fountain-scene-number-separator
-  'fountain-scene-numbers-separator "fountain-mode-2.9.0")
+  'fountain-scene-numbers-separator "3.0.0")
 (defcustom fountain-scene-numbers-separator
   nil
   "Character to separate scene numbers."
