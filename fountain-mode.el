@@ -1104,7 +1104,6 @@ Return non-nil if match occurs." func)))
      :matcher fountain-section-heading-regexp
      :highlight ((2 0 fountain-section-heading)
                  (2 1 fountain-non-printing prepend))
-     :parser fountain-parse-section
      :align fountain-align-section-heading
      :fill fountain-fill-section-heading)
     (scene-heading
@@ -1116,16 +1115,16 @@ Return non-nil if match occurs." func)))
                  (2 9 fountain-scene-heading prepend t)
                  (2 10 fountain-non-printing prepend t fountain-syntax-chars)
                  (3 1 fountain-non-printing prepend t fountain-syntax-chars))
-     :parser fountain-parse-scene
      :align fountain-align-scene-heading
+     :print t
      :fill fountain-fill-scene-heading)
     (action
      :tag "Action"
      :matcher (define-fountain-font-lock-matcher fountain-match-action)
      :highlight ((1 0 fountain-action)
                  (3 1 fountain-non-printing t t fountain-syntax-chars))
-     :parser fountain-parse-action
      :align fountain-align-action
+     :print t
      :fill fountain-fill-action)
     (character
      :tag "Character Name"
@@ -1133,8 +1132,8 @@ Return non-nil if match occurs." func)))
      :highlight ((3 0 fountain-character)
                  (3 2 fountain-non-printing t t fountain-syntax-chars)
                  (3 5 highlight prepend t))
-     :parser fountain-parse-dialog
      :align fountain-align-character
+     :print t
      :fill fountain-fill-character)
     (character-dd
      :tag "Dual-Dialogue Character Name"
@@ -1142,72 +1141,68 @@ Return non-nil if match occurs." func)))
      :highlight ((3 0 fountain-character)
                  (3 2 fountain-non-printing t t fountain-syntax-chars)
                  (3 5 highlight prepend t))
-     :parser fountain-parse-dialog
      :align fountain-align-character
+     :print t
      :fill fountain-fill-dual-character)
     (lines
      :tag "Dialogue"
      :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
      :highlight ((3 0 fountain-dialog))
-     :parser fountain-parse-lines
      :align fountain-align-dialog
+     :print t
      :fill fountain-fill-dialog)
     (lines-dd
      :tag "Dual-Dialogue"
      :matcher (define-fountain-font-lock-matcher fountain-match-dialog)
      :highlight ((3 0 fountain-dialog))
-     :parser fountain-parse-lines
      :align fountain-align-dialog
      :fill fountain-fill-dual-dialog)
     (paren
      :tag "Parenthetical"
      :matcher (define-fountain-font-lock-matcher fountain-match-paren)
      :highlight ((3 0 fountain-paren))
-     :parser fountain-parse-paren
      :align fountain-align-paren
+     :print t
      :fill fountain-fill-paren)
     (paren-dd
      :tag "Dual-Dialogue Parenthetical"
      :matcher (define-fountain-font-lock-matcher fountain-match-paren)
      :highlight ((3 0 fountain-paren))
-     :parser fountain-parse-paren
      :align fountain-align-paren
+     :print t
      :fill fountain-fill-dual-paren)
     (trans
      :tag: "Transition"
      :matcher (define-fountain-font-lock-matcher fountain-match-trans)
      :highlight ((3 0 fountain-trans)
                  (2 1 fountain-non-printing t t fountain-syntax-chars))
-     :parser fountain-parse-trans
      :align fountain-align-trans
+     :print t
      :fill fountain-fill-trans)
     (center
      :tag "Center Text"
      :matcher fountain-center-regexp
      :highlight ((2 1 fountain-non-printing t nil fountain-syntax-chars)
                  (2 3 fountain-non-printing t nil fountain-syntax-chars))
-     :parser fountain-parse-center
      :align fountain-align-center
+     :print t
      :fill fountain-fill-action)
     (page-break
      :tage "Page Break"
      :matcher fountain-page-break-regexp
      :highlight ((2 0 fountain-page-break)
-                 (2 2 fountain-page-number t t))
-     :parser fountain-parse-page-break)
+                 (2 2 fountain-page-number t t)))
     (synopsis
      :tag "Synopsis"
      :matcher (define-fountain-font-lock-matcher fountain-match-synopsis)
      :highlight ((2 0 fountain-synopsis nil nil fountain-synopsis)
                  (2 1 fountain-non-printing prepend nil fountain-syntax-chars))
-     :parser fountain-parse-synopsis
      :align fountain-align-synopsis
      :fill fountain-fill-action)
     (note
      :tag "Note"
      :matcher (define-fountain-font-lock-matcher fountain-match-note)
      :highlight ((2 0 fountain-note))
-     :parser fountain-parse-note
      :fill fountain-fill-note)
     (metadata
      :tag "Metadata"
@@ -1473,7 +1468,7 @@ script, you may get incorrect output."
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
-(defun fountain-goto-page-break-point (&optional export-elements)
+(defun fountain-goto-page-break-point ()
   "Move point to appropriate place to break a page.
 This is usually before point, but may be after if only skipping
 over whitespace.
@@ -1485,8 +1480,7 @@ Comments are assumed to be deleted."
     (cond
      ;; If element is not included in export, we can safely break
      ;; before.
-     ((not (memq element (or export-elements
-                             (fountain-get-export-elements))))
+     ((not (plist-get (cdr (assq element fountain-element-list)) :print))
       (beginning-of-line))
      ;; We cannot break page in dual dialogue. If we're at right dual
      ;; dialogue, skip back to previous character.
@@ -1510,7 +1504,7 @@ Comments are assumed to be deleted."
         (if (fountain-match-character)
             (progn
               (beginning-of-line)
-              (fountain-goto-page-break-point export-elements))
+              (fountain-goto-page-break-point))
           ;; Otherwise parenthetical is mid-dialogue, so get character
           ;; name and break at this element.
           (goto-char x))))
@@ -1529,14 +1523,14 @@ Comments are assumed to be deleted."
                 (fountain-match-paren))
             (progn
               (beginning-of-line)
-              (fountain-goto-page-break-point export-elements))
+              (fountain-goto-page-break-point))
           (goto-char x))))
      ;; If we're at a transition or center text, skip backwards to
      ;; previous element and call recursively on that element.
      ((memq element '(trans center))
       (skip-chars-backward "\n\s\t")
       (beginning-of-line)
-      (fountain-goto-page-break-point export-elements))
+      (fountain-goto-page-break-point))
      ;; If we're at action, skip over spaces then go to the beginning
      ;; of the current sentence.
      ((eq element 'action)
@@ -1551,7 +1545,7 @@ Comments are assumed to be deleted."
         (skip-chars-backward "\n\s\t")
         (beginning-of-line)
         (if (fountain-match-scene-heading)
-            (fountain-goto-page-break-point export-elements)
+            (fountain-goto-page-break-point)
           (goto-char x)))))))
 
 (defun fountain-move-to-fill-width (element)
@@ -1574,20 +1568,15 @@ Skip over comments."
     (when (eolp) (forward-line))
     (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
 
-(defun fountain-forward-page (&optional export-elements)
+(defun fountain-forward-page ()
   "Move point forward by an approximately page.
 
 Moves forward from point, which is unlikely to correspond to
-final exported pages and so should not be used interactively.
-
-To speed up this function, supply EXPORT-ELEMENTS with
-`fountain-get-export-elements'."
+final exported pages and so should not be used interactively."
   (let ((skip-whitespace-fun
          (lambda ()
            (when (looking-at "[\n\s\t]*\n")
              (goto-char (match-end 0))))))
-    (unless export-elements
-      (setq export-elements (fountain-get-export-elements)))
     (while (fountain-match-metadata)
       (forward-line 1))
     ;; Pages don't begin with blank space, so skip over any at point.
@@ -1602,8 +1591,7 @@ To speed up this function, supply EXPORT-ELEMENTS with
            (cdr (assq fountain-page-size fountain-page-max-lines)))
           (line-count 0)
           (line-count-left 0)
-          (line-count-right 0)
-          element)
+          (line-count-right 0))
       ;; Begin the main loop, which only halts if we reach the end
       ;; of buffer, a forced page break, or after the maximum lines
       ;; in a page.
@@ -1632,7 +1620,7 @@ To speed up this function, supply EXPORT-ELEMENTS with
          (t
         (let ((element (fountain-get-element))
               (dd (fountain-read-dual-dialog)))
-          (if (memq element export-elements)
+          (if (plist-get (cdr (assq element fountain-element-list)) :print)
               (progn
                 (fountain-move-to-fill-width element)
                 (cond ((eq dd 'left)
@@ -1651,10 +1639,9 @@ To speed up this function, supply EXPORT-ELEMENTS with
             (funcall skip-whitespace-fun)))))))
     ;; We are not at the furthest point in a page. Skip over any
     ;; remaining whitespace, then go back to page-break point.
-    (fountain-goto-page-break-point (or export-elements
-                                        (fountain-get-export-elements)))))
+    (fountain-goto-page-break-point)))
 
-(defun fountain-insert-page-break (&optional ask page-num export-elements)
+(defun fountain-insert-page-break (&optional ask page-num)
   "Insert a page break at appropriate place preceding point.
 When optional argument ASK is non-nil (if prefixed with
 \\[universal-argument] when called interactively), prompt for PAGE-NUM
@@ -1670,7 +1657,7 @@ as a string to force the page number."
                          (concat "\s" page-num "\s==="))))
         element)
     ;; Move point to appropriate place to break page.
-    (fountain-goto-page-break-point export-elements)
+    (fountain-goto-page-break-point)
     (setq element (fountain-get-element))
     ;; At this point, element can only be: section-heading,
     ;; scene-heading, character, action, paren or lines. Only paren and
@@ -1705,14 +1692,13 @@ as a string to force the page number."
   (let ((x (point))
         (total 0)
         (current 0)
-        (export-elements (fountain-get-export-elements))
         found)
     (save-excursion
       (save-restriction
         (when fountain-page-ignore-restriction (widen))
         (goto-char (point-min))
         (while (< (point) (point-max))
-          (fountain-forward-page export-elements)
+          (fountain-forward-page)
           (setq total (1+ total))
           (when (and (not found) (< x (point)))
             (setq current total found t)))
@@ -1725,26 +1711,23 @@ n.b. This is an approximate calculation."
   (let ((pages (fountain-get-page-count)))
     (message "Page %d of %d" (car pages) (cdr pages))))
 
-(defun fountain-paginate-buffer (&optional export-elements)
+(defun fountain-paginate-buffer ()
   "Add forced page breaks to buffer.
 
 Move through buffer with `fountain-forward-page' and call
 `fountain-insert-page-break'."
   (interactive)
-  (unless export-elements
-    (setq export-elements (fountain-get-export-elements)))
   (let ((job (make-progress-reporter "Paginating...")))
     (save-excursion
       (save-restriction
         (widen)
         (goto-char (point-min))
         (let ((page 1))
-          (fountain-forward-page export-elements)
+          (fountain-forward-page)
           (while (< (point) (point-max))
             (setq page (1+ page))
-            (fountain-insert-page-break nil (number-to-string page)
-                                        export-elements)
-            (fountain-forward-page export-elements)
+            (fountain-insert-page-break nil (number-to-string page))
+            (fountain-forward-page)
             (progress-reporter-update job))
           (progress-reporter-done job))))))
 
@@ -2538,14 +2521,13 @@ Ignores revised scene numbers scenes.
   (widen)
   (push-mark)
   (goto-char (point-min))
-  (let ((i n)
-        (export-elements (fountain-get-export-elements)))
+  (let ((i n))
     (while (fountain-match-metadata) (forward-line))
     (if (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
     (while (< 1 i)
       (if (and (fountain-match-page-break) (match-string 2))
           (setq i (- n (string-to-number (match-string 2)))))
-      (fountain-forward-page export-elements)
+      (fountain-forward-page)
       (setq i (1- i)))))
 
 (defun fountain-forward-character (&optional n limit)
