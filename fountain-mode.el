@@ -1047,7 +1047,6 @@ Assumes that all other element matching has been done."
           (and (not (or (and (bolp) (eolp))
                         (fountain-match-section-heading)
                         (fountain-match-scene-heading)
-                        (fountain-match-template)
                         (fountain-match-page-break)
                         (fountain-match-character)
                         (fountain-match-dialog)
