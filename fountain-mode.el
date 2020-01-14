@@ -1756,62 +1756,6 @@ Move through buffer with `fountain-forward-page' and call
   "{{[\s\t]*\\([.-a-z0-9]+\\)\\(?::[\s\t]+\\([^{}]+?\\)\\)?[\s\t]*}}"
   "Regular expression for matching template keys.")
 
-(defun fountain-match-template ()
-  "Match template key if point is at template, nil otherwise."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (or (looking-at fountain-template-regexp)
-          (let ((x (point)))
-            (and (re-search-backward "{{" nil t)
-                 (looking-at fountain-template-regexp)
-                 (< x (match-end 0))))))))
-
-(defun fountain-find-included-file (&optional no-select)
-  "Find included file at point.
-
-Optional argument NO-SELECT will find file without selecting
-window."
-  (interactive)
-  (when (and (fountain-match-template)
-             (string-match-p "include" (match-string 1)))
-    (let ((file (expand-file-name (match-string 2))))
-      (if no-select
-          (find-file-noselect file)
-        (find-file file)))))
-
-(defun fountain-include-replace-in-region (start end &optional delete)
-  "Replace inclusions between START and END with their file contents.
-
-If optional argument DELETE is non-nil (if prefixed with \\[universal-argument]
-when called interactively), delete instead.
-
-If specified file is missing or otherwise not readable, replace
-with empty string."
-  (interactive "*r\nP")
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char end)
-      (setq end (point-marker))
-      (goto-char start)
-      (while (re-search-forward fountain-template-regexp end t)
-        (when (string-match-p "include" (match-string 1))
-          (if delete
-              (delete-region (match-beginning 0) (match-end 0))
-            (replace-match
-              (let ((file (match-string 2)))
-                (if (file-readable-p file)
-                    (save-match-data
-                      (with-current-buffer
-                          (find-file-noselect (expand-file-name (match-string 2)))
-                        (save-restriction
-                          (widen)
-                          (buffer-substring-no-properties (point-min) (point-max)))))
-                  ""))
-              t t))))
-      (set-marker end nil))))
-
 
 ;;; Parsing
 
