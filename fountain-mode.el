@@ -1967,7 +1967,17 @@ Export profiles are defined in `fountain-export-profiles'."
            (append (list "fountain-export" fountain-export-buffer
                          program)
                    args (list buffer-file-name))))
-  (pop-to-buffer fountain-export-buffer))
+  (and (pop-to-buffer fountain-export-buffer)
+       (view-mode)))
+
+;; FIXME: make PROGRAM defcustom
+(defun fountain-export-view ()
+  (interactive)
+  (let ((program "open")
+        (file (concat (file-name-base (buffer-file-name)) ".pdf")))
+    (if (file-exists-p file)
+        (start-process "fountain-view-export" nil program file)
+      (user-error "File %S does not exist" file))))
 
 
 ;;; Outlining
@@ -3181,6 +3191,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
     ;; Exporting commands:
     (define-key map (kbd "C-c C-e") #'fountain-export)
+    (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
 
