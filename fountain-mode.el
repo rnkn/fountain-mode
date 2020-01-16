@@ -1962,7 +1962,7 @@ Export profiles are defined in `fountain-export-profiles'."
     (setq program (cadr profile)
           args (cddr profile))
     (unless buffer-file-name
-      (user-error "Buffer `%s' is not visiting a file" (current-buffer)))
+      (user-error "Buffer %S is not visiting a file" (current-buffer)))
     (apply 'start-process
            (append (list "fountain-export" fountain-export-buffer
                          program)
@@ -2888,7 +2888,7 @@ to include external files."
         (user-error "Before first scene heading"))
       (let ((x (point))
             ;; FIXME: scenes should never be treated as out of order.
-            (err-order "Scene `%s' seems to be out of order")
+            (err-order "Scene %S seems to be out of order")
             found)
         ;; First, check if there are any scene numbers already. If not
         ;; we can save a lot of work.
@@ -3081,7 +3081,7 @@ scene number from being auto-upcased."
                (customize-set-variable 'font-lock-maximum-decoration
                                        (list (cons 'fountain-mode level)
                                              (cons 't font-lock-maximum-decoration)))))
-        (message "Syntax highlighting is now: %s"
+        (message "Syntax highlighting is now: %S"
                  (cond ((= n 1) "minimum")
                        ((= n 2) "default")
                        ((= n 3) "maximum")))
