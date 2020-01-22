@@ -845,7 +845,7 @@ regular expression."
   (if (memq 'note fountain-imenu-elements)
       (push (list "Notes" fountain-note-regexp 1)
             imenu-generic-expression))
-  (imenu-update-menubar))
+  (when (featurep 'imenu) (imenu-update-menubar)))
 
 (defun fountain-init-vars ()
   "Initialize important variables.
