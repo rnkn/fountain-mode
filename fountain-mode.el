@@ -196,7 +196,9 @@ changes desired."
   :type 'string
   :safe 'stringp)
 
-(defcustom fountain-hide-emphasis-delim
+(define-obsolete-variable-alias 'fountain-hide-emphasis-delim
+  'fountain-hide-emphasis-markup "3.0.0")
+(defcustom fountain-hide-emphasis-markup
   nil
   "If non-nil, make emphasis delimiters invisible."
   :group 'fountain
@@ -207,12 +209,14 @@ changes desired."
          (dolist (buffer (buffer-list))
            (with-current-buffer buffer
              (when (derived-mode-p 'fountain-mode)
-               (if fountain-hide-emphasis-delim
+               (if fountain-hide-emphasis-markup
                    (add-to-invisibility-spec 'fountain-emphasis-delim)
                  (remove-from-invisibility-spec 'fountain-emphasis-delim))
                (font-lock-refresh-defaults))))))
 
-(defcustom fountain-hide-syntax-chars
+(define-obsolete-variable-alias 'fountain-hide-syntax-chars
+  'fountain-hide-element-markup "3.0.0")
+(defcustom fountain-hide-element-markup
   nil
   "If non-nil, make syntax characters invisible."
   :group 'fountain
@@ -223,7 +227,7 @@ changes desired."
          (dolist (buffer (buffer-list))
            (with-current-buffer buffer
              (when (derived-mode-p 'fountain-mode)
-               (if fountain-hide-syntax-chars
+               (if fountain-hide-element-markup
                    (add-to-invisibility-spec 'fountain-syntax-chars)
                  (remove-from-invisibility-spec 'fountain-syntax-chars))
                (font-lock-refresh-defaults))))))
@@ -874,9 +878,9 @@ buffers."
   (setq font-lock-defaults
         '(fountain-init-font-lock nil nil nil fountain-mark-scene))
   (add-to-invisibility-spec (cons 'outline t))
-  (when fountain-hide-emphasis-delim
+  (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-delim))
-  (when fountain-hide-syntax-chars
+  (when fountain-hide-element-markup
     (add-to-invisibility-spec 'fountain-syntax-chars)))
 
 
@@ -1953,13 +1957,13 @@ The car sets `left-margin' and cdr `fill-column'."
 
 Each profile takes the form:
 
-    (PROFILE-NAME (PROGRAM ARG ARG ...) REQUIRES-FILENAME)
+    (PROFILE-NAME (PROGRAM ARG ARG ...) REQUIRES-FILE-NAME)
 
 Where PROFILE-NAME is an arbitrary profile name string, PROGRAM
 is the program name string, and ARGs are the program argument
 strings.
 
-If REQUIRES-FILENAME is non-nil, `buffer-file-name' will be
+If REQUIRES-FILE-NAME is non-nil, `buffer-file-name' will be
 passed as last program argument.
 
 The first profile is considered default.
@@ -1981,6 +1985,7 @@ what you want, so these should be added as separate ARGs."
   :safe 'string
   :group 'fountain-export)
 
+;; FIXME: remove this
 (defun fountain-slugify (string)
   "Convert STRING to one suitable for slugs.
 
@@ -3328,16 +3333,16 @@ redisplay in margin. Otherwise, remove display text properties."
       :style radio
       :selected (= (fountain-get-font-lock-decoration) 3)]
      "---"
-     ["Hide Emphasis Delimiters"
-      (customize-set-variable 'fountain-hide-emphasis-delim
-                              (not fountain-hide-emphasis-delim))
+     ["Hide Emphasis Markup"
+      (customize-set-variable 'fountain-hide-emphasis-markup
+                              (not fountain-hide-emphasis-markup))
       :style toggle
-      :selected fountain-hide-emphasis-delim]
-     ["Hide Syntax Characters"
-      (customize-set-variable 'fountain-hide-syntax-chars
-                              (not fountain-hide-syntax-chars))
+      :selected fountain-hide-emphasis-markup]
+     ["Hide Element Markup"
+      (customize-set-variable 'fountain-hide-element-markup
+                              (not fountain-hide-element-markup))
       :style toggle
-      :selected fountain-hide-syntax-chars])
+      :selected fountain-hide-element-markup])
     "---"
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
@@ -3369,8 +3374,8 @@ redisplay in margin. Otherwise, remove display text properties."
                       fountain-auto-upcase-scene-headings
                       fountain-add-continued-dialog
                       fountain-scene-numbers-display-in-margin
-                      fountain-hide-emphasis-delim
-                      fountain-hide-syntax-chars
+                      fountain-hide-emphasis-markup
+                      fountain-hide-element-markup
                       fountain-shift-all-elements
                       font-lock-maximum-decoration
                       fountain-page-size))
