@@ -3152,15 +3152,15 @@ scene number from being auto-upcased."
                                    align)
                             (car align))))))
         (dolist (hl (plist-get (cdr element) :highlight))
-          (let* ((subexp (nth 1 hl))
-                 (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
-                 (invisible (when (nth 5 hl) (list 'invisible (nth 5 hl))))
-                 (align-spec (when (integerp align)
-                               (list
-                                'line-prefix (list 'space :align-to align)
-                                'wrap-prefix (list 'space :align-to align))))
-                 (override (nth 3 hl))
-                 (laxmatch (nth 4 hl)))
+          (let ((subexp (nth 1 hl))
+                (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
+                (invisible (when (nth 5 hl) (list 'invisible (nth 5 hl))))
+                (align-spec (when (integerp align)
+                              (list
+                               'line-prefix (list 'space :align-to align)
+                               'wrap-prefix (list 'space :align-to align))))
+                (override (nth 3 hl))
+                (laxmatch (nth 4 hl)))
             (setq subexp-highlighter
                   (append subexp-highlighter
                           (list (list subexp
