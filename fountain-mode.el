@@ -129,9 +129,8 @@
 
 ;;; Customization
 
-(defun fountain--set-and-refresh-all-font-lock (symbol value)
+(defun fountain--set-and-refresh-font-lock (symbol value)
   "Set SYMBOL to VALUE and refresh defaults.
-
 Cycle buffers and call `font-lock-refresh-defaults' when
 `fountain-mode' is active."
   (set-default symbol value)
@@ -285,7 +284,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type 'boolean
   :safe 'booleanp
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-section-heading
   '(("screenplay" 0)
@@ -297,7 +296,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-scene-heading
   '(("screenplay" 0)
@@ -309,7 +308,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-synopsis
   '(("screenplay" 0)
@@ -321,7 +320,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-action
   '(("screenplay" 0)
@@ -333,7 +332,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-character
   '(("screenplay" 20)
@@ -345,7 +344,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-dialog
   '(("screenplay" 10)
@@ -357,7 +356,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-paren
   '(("screenplay" 15)
@@ -369,7 +368,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-trans
   '(("screenplay" 45)
@@ -381,7 +380,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-center
   '(("screenplay" 20)
@@ -393,7 +392,7 @@ This option does not affect file contents."
   :group 'fountain-align
   :type '(choice integer
                  (repeat (group (string :tag "Format") integer)))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 
 ;;; Autoinsert
@@ -445,7 +444,7 @@ longer be parsed correctly."
   :group 'fountain
   :type 'regexp
   :safe 'regexp
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-scene-heading-suffix-list
   '("DAY" "NIGHT" "CONTINUOUS" "LATER" "MOMENTS LATER")
@@ -458,7 +457,7 @@ Separated from scene heading locations with
 `fountain-scene-heading-suffix-separator'."
   :group 'fountain
   :type '(repeat (string :tag "Suffix"))
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defvar fountain-trans-regexp
   nil
@@ -2806,7 +2805,7 @@ This option does affect file contents."
   :group 'fountain-scene-numbers
   :type 'boolean
   :safe 'booleanp
-  :set #'fountain--set-and-refresh-all-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (define-obsolete-variable-alias 'fountain-prefix-revised-scene-numbers
   'fountain-scene-numbers-prefix-revised "3.0.0")
