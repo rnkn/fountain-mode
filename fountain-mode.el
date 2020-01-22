@@ -1917,43 +1917,48 @@ The car sets `left-margin' and cdr `fill-column'."
 
 ;;; Exporting
 
-(defcustom fountain-export-profiles
-  '(("afterwriting-usletter-doublespace"
-     "afterwriting" "--pdf" "--overwrite"
-     "--setting"
-     "double_space_between_scenes=true"
-     "--setting"
-     "print_profile=usletter"
-     "--source")
-    ("afterwriting-a4-doublespace"
-     "afterwriting" "--pdf" "--overwrite"
-     "--setting"
-     "double_space_between_scenes=true"
-     "--setting"
-     "print_profile=a4"
-     "--source"))
+(defcustom fountain-export-command-profiles
+  '(("afterwriting-usletterpdf-doublespace"
+     ("afterwriting" "--pdf" "--overwrite"
+      "--setting" "double_space_between_scenes=true"
+      "--setting" "print_profile=usletter"
+      "--source")
+     t)
+    ("afterwriting-a4pdf-doublespace"
+     ("afterwriting" "--pdf" "--overwrite"
+      "--setting" "double_space_between_scenes=true"
+      "--setting" "print_profile=a4"
+      "--source")
+     t)
+    ("wrap-pdf-cprime"
+     ("wrap" "pdf" "--use-courier-prime"))
+    ("textplay-fdx"
+     ("textplay" "--fdx")))
   "Shell command profiles for exporting Fountain files.
 
 Each profile takes the form:
 
-    (PROFILE-NAME PROGRAM ARG ARG...)
+    (PROFILE-NAME (PROGRAM ARG ARG ...) REQUIRES-FILENAME)
 
 Where PROFILE-NAME is an arbitrary profile name string, PROGRAM
 is the program name string, and ARGs are the program argument
 strings.
 
-For each command `buffer-file-name' will be passed as last
-program argument. The first profile is considered default.
+If REQUIRES-FILENAME is non-nil, `buffer-file-name' will be
+passed as last program argument.
+
+The first profile is considered default.
 
 n.b. If an ARG includes whitespace, this will be escaped and
 passed to the program as a single argument. This is probably not
 what you want, so these should be added as separate ARGs."
-  :type '(repeat (cons :tag "Profile"
+  :type '(repeat (list :tag "Profile"
                        (string :tag "Profile Name")
                        (repeat :tag "Program Arguments"
-                               (string :tag "Argument")))))
+                               (string :tag "Argument"))
+                       (boolean :tag "Requires filename"))))
 
-(defcustom fountain-export-buffer
+(defcustom fountain-export-output-buffer
   "*Fountain Export*"
   "Buffer name for `fountain-export-command' output."
   :type 'string)
@@ -1975,34 +1980,47 @@ whitespace is converted to dashes. e.g.
 
 (defun fountain-export (profile-name)
   "Call export shell command for PROFILE-NAME.
-Export profiles are defined in `fountain-export-profiles'."
+Export profiles are defined in `fountain-export-command-profiles'."
   (interactive
-   (list (let ((default (caar fountain-export-profiles)))
+   (list (let ((default (caar fountain-export-command-profiles)))
            (completing-read (format "Export format [default %s]: " default)
-                            (mapcar #'car fountain-export-profiles)
+                            (mapcar #'car fountain-export-command-profiles)
                             nil t nil nil default))))
   (unless profile-name
-    (user-error "No `fountain-export-profiles' found"))
-  (let ((profile (assoc-string profile-name fountain-export-profiles))
+    (user-error "No `fountain-export-command-profiles' found"))
+  (if (buffer-live-p (get-buffer fountain-export-output-buffer))
+      (kill-buffer fountain-export-output-buffer))
+  (let ((profile (assoc-string profile-name fountain-export-command-profiles))
+        (start (if (use-region-p) (region-beginning) (point-min)))
+        (end   (if (use-region-p) (region-end) (point-max)))
         program args)
-    (setq program (cadr profile)
-          args (cddr profile))
-    (unless buffer-file-name
-      (user-error "Buffer %S is not visiting a file" (current-buffer)))
-    (apply 'start-process
-           (append (list "fountain-export" fountain-export-buffer
-                         program)
-                   args (list buffer-file-name))))
-  (and (pop-to-buffer fountain-export-buffer)
-       (view-mode)))
+    (setq program (car (nth 1 profile))
+          args (cdr (nth 1 profile)))
+    (if (nth 2 profile)
+        (progn
+          (unless buffer-file-name
+            (user-error "Buffer %S is not visiting a file" (current-buffer)))
+          (apply 'call-process
+                 (append (list program nil fountain-export-output-buffer nil)
+                         args (list buffer-file-name))))
+      (apply 'call-process-region
+             (append (list start end program
+                           nil fountain-export-output-buffer nil)
+                     args))))
+  (and (pop-to-buffer fountain-export-output-buffer)
+       (progn (set-auto-mode t)
+              (view-mode))))
 
-;; FIXME: make PROGRAM defcustom
+(require 'dired-x)
+
 (defun fountain-export-view ()
   (interactive)
-  (let ((program "open")
-        (file (concat (file-name-base (buffer-file-name)) ".pdf")))
+  (let ((file (concat (file-name-base (buffer-file-name))
+                      "." fountain-export-view-extension)))
     (if (file-exists-p file)
-        (start-process "fountain-view-export" nil program file)
+        (call-process
+         (dired-guess-default (list file))
+         nil nil nil file)
       (user-error "File %S does not exist" file))))
 
 
