@@ -148,6 +148,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
   :options '(turn-on-visual-line-mode
              fountain-outline-hide-custom-level
              fountain-completion-update
+             imenu-add-menubar-index
              turn-on-flyspell))
 
 (define-obsolete-variable-alias 'fountain-script-format
@@ -811,15 +812,36 @@ regular expression."
                       "\\|"
                       fountain-scene-heading-regexp)))
 
-(defun fountain-init-imenu-generic-expression ()
+(defcustom fountain-imenu-elements
+  '(section-heading scene-heading synopsis note)
+  "List of elements to include in `imenu'."
+  :type '(set (const :tag "Section Headings" section-heading)
+              (const :tag "Scene Headings" scene-heading)
+              (const :tag "Synopses" synopsis)
+              (const :tag "Notes" note))
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (derived-mode-p 'fountain-mode)
+               (fountain-init-imenu))))))
+
+(defun fountain-init-imenu ()
   "Initialize `imenu-generic-expression'."
-  ;; FIXME: each of these should be a boolean user option to allow the
-  ;; user to choose which appear in the imenu list.
-  (setq imenu-generic-expression
-        (list
-         (list "Notes" fountain-note-regexp 1)
-         (list "Scene Headings" fountain-scene-heading-regexp 2)
-         (list "Sections" fountain-section-heading-regexp 0))))
+  (setq imenu-generic-expression nil)
+  (if (memq 'section-heading fountain-imenu-elements)
+      (push (list "Section Headings" fountain-section-heading-regexp 2)
+            imenu-generic-expression))
+  (if (memq 'scene-heading fountain-imenu-elements)
+      (push (list "Scene Headings" fountain-scene-heading-regexp 2)
+            imenu-generic-expression))
+  (if (memq 'synopsis fountain-imenu-elements)
+      (push (list "Synopses" fountain-synopsis-regexp 3)
+            imenu-generic-expression))
+  (if (memq 'note fountain-imenu-elements)
+      (push (list "Notes" fountain-note-regexp 1)
+            imenu-generic-expression))
+  (imenu-update-menubar))
 
 (defun fountain-init-vars ()
   "Initialize important variables.
@@ -829,7 +851,7 @@ buffers."
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
-  (fountain-init-imenu-generic-expression)
+  (fountain-init-imenu)
   (modify-syntax-entry (string-to-char "/") ". 14" nil)
   (modify-syntax-entry (string-to-char "*") ". 23" nil)
   (setq-local comment-start "/*")
@@ -847,6 +869,7 @@ buffers."
   ;; This should be temporary. Feels better to ensure appropriate
   ;; case-fold within each function.
   (setq case-fold-search t)
+  (setq imenu-case-fold-search nil)
   (setq font-lock-multiline 'undecided)
   (setq font-lock-defaults '(fountain-init-font-lock))
   (add-to-invisibility-spec (cons 'outline t))
