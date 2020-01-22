@@ -44,7 +44,7 @@ handle exporting:
 
 - [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
 - [Wrap](https://github.com/Wraparound/wrap) (Go)
-- [screenplain](https://github.com/vilcans/screenplain) (Python)
+- [screenplain](https://github.com/vilcans/screenplain) (Python 2)
 - [Textplay](https://github.com/olivertaylor/Textplay) (Ruby, requires PrinceXML for PDF)
 
 ## Installation ##

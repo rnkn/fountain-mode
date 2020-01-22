@@ -7,7 +7,6 @@
 ;; Keywords: wp, text
 ;; Version: 3.0.0
 ;; Package-Requires: ((emacs "24.5"))
-;; URL: https://fountain-mode.org
 ;; git: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
@@ -68,7 +67,7 @@
 
 ;; - [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
 ;; - [Wrap](https://github.com/Wraparound/wrap) (Go)
-;; - [screenplain](https://github.com/vilcans/screenplain) (Python)
+;; - [screenplain](https://github.com/vilcans/screenplain) (Python 2)
 ;; - [Textplay](https://github.com/olivertaylor/Textplay) (Ruby, requires PrinceXML for PDF)
 
 ;; ## Installation ##
