@@ -434,7 +434,9 @@ This option does not affect file contents."
 Contructed with `fountain-init-scene-heading-regexp'. Requires
 `fountain-match-scene-heading' for preceding blank line.")
 
-(defcustom fountain-scene-heading-suffix-sep
+(define-obsolete-variable-alias 'fountain-scene-heading-suffix-sep
+  'fountain-scene-heading-suffix-separator)
+(defcustom fountain-scene-heading-suffix-separator
   " --? "
   "Regular expression separating scene heading location from suffix.
 
@@ -453,7 +455,7 @@ These are only used for auto-completion. Any scene headings can
 have whatever suffix you like.
 
 Separated from scene heading locations with
-`fountain-scene-heading-suffix-sep'."
+`fountain-scene-heading-suffix-separator'."
   :group 'fountain
   :type '(repeat (string :tag "Suffix"))
   :set #'fountain--set-and-refresh-all-font-lock)
@@ -760,7 +762,7 @@ scene heading regular expression."
          ;; Group 4: match location
          "\\(?4:.+?\\)"
          ;; Group 5: match suffix separator
-         "\\(?:\\(?5:" fountain-scene-heading-suffix-sep "\\)"
+         "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
          ;; Group 6: match suffix
          "\\(?6:.+\\)?\\)?"
          "\\)\\|"
@@ -771,7 +773,7 @@ scene heading regular expression."
          ;; Group 4: match location
          "\\(?4:.+?\\)?"
          ;; Group 5: match suffix separator
-         "\\(?:\\(?5:" fountain-scene-heading-suffix-sep "\\)"
+         "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
          ;; Group 6: match suffix
          "\\(?6:.+?\\)?\\)?"
          "\\)\\)"
@@ -1342,7 +1344,7 @@ important."
 Trigger completion with \\[fountain-dwim].
 
 1. If point is at a scene heading and matches
-`fountain-scene-heading-suffix-sep', offer completion candidates
+`fountain-scene-heading-suffix-separator', offer completion candidates
 from `fountain-scene-heading-suffix-list'.
 
 2. If point is at a line matching
@@ -2045,7 +2047,9 @@ Otherwise, only operate on section and scene headings."
   :safe 'boolean
   :group 'fountain)
 
-(defcustom fountain-fold-notes
+(define-obsolete-variable-alias 'fountain-fold-notes
+  'fountain-outline-fold-notes "3.0.0")
+(defcustom fountain-outline-fold-notes
   t
   "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling outline visibility.
 
@@ -2250,7 +2254,8 @@ Display a message unless SILENT."
            (goto-char (point-min))
            (while (re-search-forward fountain-note-regexp nil 'move)
              (outline-flag-region (match-beginning 1)
-                                  (match-end 1) fountain-fold-notes)))
+                                  (match-end 1)
+                                  fountain-outline-fold-notes)))
          (unless silent (message "Showing all")))
         ((= n 6)
          (outline-hide-sublevels n)
@@ -2303,7 +2308,8 @@ Display a message unless SILENT."
            (goto-char eohp)
            (while (re-search-forward fountain-note-regexp eosp 'move)
              (outline-flag-region (match-beginning 1)
-                                  (match-end 1) fountain-fold-notes)))))
+                                  (match-end 1)
+                                  fountain-outline-fold-notes)))))
     (cond ((eq arg 4)
            (cond
             ((and (= fountain--outline-cycle 1) custom-level)
