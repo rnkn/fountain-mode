@@ -3111,33 +3111,32 @@ scene number from being auto-upcased."
   (interactive
    (list (or current-prefix-arg
              (string-to-number (char-to-string
-               (read-char-choice "Maximum decoration (1-3): "
-                                 '(?1 ?2 ?3)))))))
-  (if (and (integerp n)
-           (<= 1 n 3))
-      (let ((level (cond ((= n 1) 1)
-                         ((= n 2) nil)
-                         ((= n 3) t))))
-        (cond ((listp font-lock-maximum-decoration)
-               (setq font-lock-maximum-decoration
-                     (assq-delete-all 'fountain-mode font-lock-maximum-decoration))
-               (customize-set-variable 'font-lock-maximum-decoration
-                                       (cons (cons 'fountain-mode level)
-                                             font-lock-maximum-decoration)))
-              ((or (booleanp font-lock-maximum-decoration)
-                   (integerp font-lock-maximum-decoration))
-               (customize-set-variable 'font-lock-maximum-decoration
-                                       (list (cons 'fountain-mode level)
-                                             (cons 't font-lock-maximum-decoration)))))
-        (message "Syntax highlighting is now: %S"
-                 (cond ((= n 1) "minimum")
-                       ((= n 2) "default")
-                       ((= n 3) "maximum")))
-        (font-lock-refresh-defaults))
-    (user-error "Decoration must be an integer 1-3")))
+                                (read-char-choice "Maximum decoration (1-3): "
+                                                  '(?1 ?2 ?3)))))))
+  (when (and (integerp n)
+             (<= 1 n 3))
+    (let ((level (cond ((= n 1) 1)
+                       ((= n 2) nil)
+                       ((= n 3) t))))
+      (cond ((listp font-lock-maximum-decoration)
+             (setq font-lock-maximum-decoration
+                   (assq-delete-all 'fountain-mode font-lock-maximum-decoration))
+             (customize-set-variable 'font-lock-maximum-decoration
+                                     (cons (cons 'fountain-mode level)
+                                           font-lock-maximum-decoration)))
+            ((or (booleanp font-lock-maximum-decoration)
+                 (integerp font-lock-maximum-decoration))
+             (customize-set-variable 'font-lock-maximum-decoration
+                                     (list (cons 'fountain-mode level)
+                                           (cons 't font-lock-maximum-decoration)))))
+      (message "Syntax highlighting is now: %s"
+               (cond ((= n 1) "minimum")
+                     ((= n 2) "default")
+                     ((= n 3) "maximum")))
+      (font-lock-refresh-defaults))))
 
 (defun fountain-init-font-lock ()
-  "Return a new list of `font-lock-mode' keywords for elements."
+  "Return a new list of `font-lock-keywords' for elements."
   (let ((dec (fountain-get-font-lock-decoration))
         keywords)
     (dolist (element fountain-element-list keywords)
