@@ -120,13 +120,13 @@
   (interactive)
   (message "Fountain Mode %s" fountain-version))
 
+
+;;; Customization
+
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
   :group 'text)
-
-
-;;; Customization
 
 (defun fountain--set-and-refresh-font-lock (symbol value)
   "Set SYMBOL to VALUE and refresh defaults.
@@ -1832,6 +1832,7 @@ PostScript, and in calculating page length for page locking."
   '(0 . 61)
   "Cons cell of integers for indenting and filling section headings.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1839,6 +1840,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(0 . 61)
   "Cons cell of integers for indenting and filling scene headings.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1846,6 +1848,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(0 . 61)
   "Cons cell of integers for indenting and filling action.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1853,6 +1856,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(20 . 38)
   "Cons cell of integers for indenting and filling character.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1860,6 +1864,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(10 . 28)
   "Cons cell of integers for indenting and filling dual-dialogue character.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1867,6 +1872,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(15 . 26)
   "Cons cell of integers for indenting and filling parenthetical.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1874,6 +1880,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(5 . 16)
   "Cons cell of integers for indenting and filling dual-dialogue parenthetical.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1881,6 +1888,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(10 . 35)
   "Cons cell of integers for indenting and filling dialogue.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1888,6 +1896,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(2 . 28)
   "Cons cell of integers for indenting and filling dual-dialogue.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1895,6 +1904,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(42 . 16)
   "Cons cell of integers for indenting and filling transition.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1902,6 +1912,7 @@ The car sets `left-margin' and cdr `fill-column'."
   '(0 . 61)
   "Cons cell of integers for indenting and filling synopses.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
@@ -1909,11 +1920,17 @@ The car sets `left-margin' and cdr `fill-column'."
   '(0 . 61)
   "Cons cell of integers for indenting and filling notes.
 The car sets `left-margin' and cdr `fill-column'."
+  :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
 
 ;;; Exporting
+
+(defgroup fountain-export ()
+  "Options for exporting Fountain files."
+  :prefix "fountain-export-"
+  :group 'fountain)
 
 (defcustom fountain-export-command-profiles
   '(("afterwriting-usletterpdf-doublespace"
@@ -1954,12 +1971,15 @@ what you want, so these should be added as separate ARGs."
                        (string :tag "Profile Name")
                        (repeat :tag "Program Arguments"
                                (string :tag "Argument"))
-                       (boolean :tag "Requires filename"))))
+                       (boolean :tag "Requires filename")))
+  :group 'fountain-export)
 
 (defcustom fountain-export-output-buffer
   "*Fountain Export*"
   "Buffer name for `fountain-export-command' output."
-  :type 'string)
+  :type 'string
+  :safe 'string
+  :group 'fountain-export)
 
 (defun fountain-slugify (string)
   "Convert STRING to one suitable for slugs.
