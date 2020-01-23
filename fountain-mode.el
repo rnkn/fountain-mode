@@ -1964,40 +1964,45 @@ what you want, so these should be added as separate ARGs."
                        (string :tag "Profile Name")
                        (repeat :tag "Program Arguments"
                                (string :tag "Argument"))
-                       (boolean :tag "Requires filename")))
+                       (boolean :tag "Requires input file")))
   :group 'fountain-export)
 
 (defcustom fountain-export-output-buffer
   "*Fountain Export*"
-  "Buffer name for `fountain-export-command' output."
+  "Buffer name for `fountain-export' output."
   :type 'string
   :safe 'string
   :group 'fountain-export)
 
-;; FIXME: remove this
-(defun fountain-slugify (string)
-  "Convert STRING to one suitable for slugs.
+(defcustom fountain-export-extension
+  "pdf"
+  "File-type extension used for guessing export file-name."
+  :type 'string
+  :safe 'string
+  :group 'fountain-export)
 
-STRING is downcased, non-alphanumeric characters are removed, and
-whitespace is converted to dashes. e.g.
+(defun fountain-export-get-output-file ()
+  (when (buffer-file-name)
+    (concat (file-name-base (buffer-file-name))
+            "." fountain-export-extension)))
 
-    Hello Wayne's World 2! -> hello-wanyes-world-2"
-  (save-match-data
-    (string-join
-     (split-string
-      (downcase
-       (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" string))
-      "[^[:alnum:]]+" t)
-     "-")))
-
-(defun fountain-export (profile-name)
+(defun fountain-export (profile-name &optional output-file)
   "Call export shell command for PROFILE-NAME.
-Export profiles are defined in `fountain-export-command-profiles'."
+When prefixed with \\[universal-argument], prompt for OUTPUT-FILE.
+
+Export command profiles are defined in
+`fountain-export-command-profiles'."
   (interactive
    (list (let ((default (caar fountain-export-command-profiles)))
-           (completing-read (format "Export format [default %s]: " default)
-                            (mapcar #'car fountain-export-command-profiles)
-                            nil t nil nil default))))
+           (completing-read-default
+            (format "Export format [default %s]: " default)
+            (mapcar #'car fountain-export-command-profiles)
+            nil t nil nil default))
+         (when current-prefix-arg
+           (completing-read-default
+            "Output file: "
+            (directory-files default-directory)
+            nil nil (fountain-export-get-output-file)))))
   (unless profile-name
     (user-error "No `fountain-export-command-profiles' found"))
   (if (buffer-live-p (get-buffer fountain-export-output-buffer))
@@ -2021,14 +2026,20 @@ Export profiles are defined in `fountain-export-command-profiles'."
                      args))))
   (and (pop-to-buffer fountain-export-output-buffer)
        (progn (set-auto-mode t)
-              (view-mode))))
+              (when (and (< 0 (string-width (buffer-string)))
+                         (y-or-n-p
+                          (format "Write %s to disk? " (or output-file
+                                                           (buffer-name)))))
+                (if output-file
+                    (write-file output-file t)
+                  (call-interactively #'write-file))))))
 
 (require 'dired-x)
 
 (defun fountain-export-view ()
   (interactive)
   (let ((file (concat (file-name-base (buffer-file-name))
-                      "." fountain-export-view-extension)))
+                      "." fountain-export-extension)))
     (if (file-exists-p file)
         (call-process
          (dired-guess-default (list file))
