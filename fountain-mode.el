@@ -232,29 +232,18 @@ changes desired."
                  (remove-from-invisibility-spec 'fountain-syntax-chars))
                (font-lock-refresh-defaults))))))
 
-;; FIXME: fountain-mode shouldn't be formatting time, better to farm
-;; this to something builtin.
-(defcustom fountain-time-format
-  "%F"
-  "Format of date and time used when inserting `{{time}}'.
-See `format-time-string'."
-  :group 'fountain
-  :type 'string
-  :safe 'stringp)
-
 (defcustom fountain-note-template
-  " {{time}} - {{fullname}}: "
+  " %F - %n: "
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
-To include an item in a template you must use the full {{KEY}}
-syntax.
+Passed to `format-spec' with the following keys:
 
-    {{title}}    Buffer name without extension
-    {{time}}     Short date format (defined in option `fountain-time-format')
-    {{fullname}} User full name (defined in option `user-full-name')
-    {{nick}}     User first name (defined in option `user-login-name')
-    {{email}}    User email (defined in option `user-mail-address')
+    %u  user-login-name
+    %n  user-full-name
+    %e  user-mail-address
+    %x  date in locale's preferred format
+    %F  date in ISO format
 
-The default {{time}} - {{fullname}}: will insert something like:
+The default \" %F - %n:\" inserts something like:
 
     [[ 2017-12-31 - Alan Smithee: ]]"
   :group 'fountain
@@ -2741,21 +2730,13 @@ ARG (\\[universal-argument]), only insert note delimiters."
         (save-excursion
           (newline)))
       (comment-indent)
-      (insert
-       (replace-regexp-in-string
-        fountain-template-regexp
-        (lambda (match)
-          (let ((key (match-string 1 match)))
-            (cdr
-             ;; FIXME: rather than hard-code limited options, these
-             ;; could work better if reusing the key-value replacement
-             ;; code from `fountain-export-element'.
-             (assoc-string key (list (cons 'title (file-name-base (buffer-name)))
-                                     (cons 'time (format-time-string fountain-time-format))
-                                     (cons 'fullname user-full-name)
-                                     (cons 'nick (capitalize user-login-name))
-                                     (cons 'email user-mail-address))))))
-        fountain-note-template)))))
+      (insert (format-spec fountain-note-template
+                           (list
+                            (cons ?u user-login-name)
+                            (cons ?n user-full-name)
+                            (cons ?e user-mail-address)
+                            (cons ?x (format-time-string "%x"))
+                            (cons ?F (format-time-string "%F"))))))))
 
 (defun fountain-continued-dialog-refresh ()
   "Add or remove continued dialog in buffer.
