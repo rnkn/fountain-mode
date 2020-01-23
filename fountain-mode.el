@@ -1819,7 +1819,7 @@ within left-side dual dialogue, and nil otherwise."
 Filling elements is used in exporting to plaintext and
 PostScript, and in calculating page length for page locking."
   :prefix "fountain-fill-"
-  :group 'fountain-export)
+  :group 'fountain)
 
 (defcustom fountain-fill-section-heading
   '(0 . 61)
@@ -1946,14 +1946,14 @@ The car sets `left-margin' and cdr `fill-column'."
 
 Each profile takes the form:
 
-    (PROFILE-NAME (PROGRAM ARG ARG ...) REQUIRES-FILE-NAME)
+    (PROFILE-NAME (PROGRAM ARG ARG ...) REQUIRES-INPUT-FILE)
 
 Where PROFILE-NAME is an arbitrary profile name string, PROGRAM
 is the program name string, and ARGs are the program argument
 strings.
 
-If REQUIRES-FILE-NAME is non-nil, `buffer-file-name' will be
-passed as last program argument.
+If REQUIRES-INPUT-FILE boolean is non-nil, `buffer-file-name'
+will be passed as last program argument.
 
 The first profile is considered default.
 
