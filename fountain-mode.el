@@ -1766,8 +1766,8 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 (defun fountain-read-metadata ()
   "Read metadata of current buffer and return as a property list.
 
-Key string is slugified using `fountain-slugify', and interned.
-Value string remains a string. e.g.
+Key string is slugified and interned. Value string remains a
+string. e.g.
 
     Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
   (save-excursion
@@ -1775,8 +1775,7 @@ Value string remains a string. e.g.
       (widen)
       (goto-char (point-min))
       (let (list)
-        (while (and (bolp)
-                    (fountain-match-metadata))
+        (while (and (bolp) (fountain-match-metadata))
           (let ((key (match-string-no-properties 1))
                 (value (match-string-no-properties 2)))
             (forward-line)
@@ -1786,9 +1785,10 @@ Value string remains a string. e.g.
                     (concat value (when value "\n")
                             (match-string-no-properties 2)))
               (forward-line))
-            (setq list
-                  (append list (list (intern (fountain-slugify key))
-                                     value)))))
+            (push (list (intern (string-join (split-string (downcase
+                (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
+                    "[^[:alnum:]]+" t) "-")) value)
+                  list)))
         list))))
 
 (defun fountain-read-dual-dialog (&optional pos)
