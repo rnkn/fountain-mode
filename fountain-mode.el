@@ -280,118 +280,126 @@ This option does not affect file contents."
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-section-heading
-  '(("screenplay" 0)
-    ("teleplay" 0)
-    ("stageplay" 30))
+  '(("screenplay" . 0)
+    ("teleplay" . 0)
+    ("stageplay" . 30))
   "Column integer to which section headings should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-scene-heading
-  '(("screenplay" 0)
-    ("teleplay" 0)
-    ("stageplay" 30))
+  '(("screenplay" . 0)
+    ("teleplay" . 0)
+    ("stageplay" . 30))
   "Column integer to which scene headings should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-synopsis
-  '(("screenplay" 0)
-    ("teleplay" 0)
-    ("stageplay" 30))
+  '(("screenplay" . 0)
+    ("teleplay" . 0)
+    ("stageplay" . 30))
   "Column integer to which synopses should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-action
-  '(("screenplay" 0)
-    ("teleplay" 0)
-    ("stageplay" 20))
+  '(("screenplay" . 0)
+    ("teleplay" . 0)
+    ("stageplay" . 20))
   "Column integer to which action should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-character
-  '(("screenplay" 20)
-    ("teleplay" 20)
-    ("stageplay" 30))
+  '(("screenplay" . 20)
+    ("teleplay" . 20)
+    ("stageplay" . 30))
   "Column integer to which characters names should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-dialog
-  '(("screenplay" 10)
-    ("teleplay" 10)
-    ("stageplay" 0))
+  '(("screenplay" . 10)
+    ("teleplay" . 10)
+    ("stageplay" . 0))
   "Column integer to which dialog should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-paren
-  '(("screenplay" 15)
-    ("teleplay" 15)
-    ("stageplay" 20))
+  '(("screenplay" . 15)
+    ("teleplay" . 15)
+    ("stageplay" . 20))
   "Column integer to which parentheticals should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-trans
-  '(("screenplay" 45)
-    ("teleplay" 45)
-    ("stageplay" 30))
+  '(("screenplay" . 45)
+    ("teleplay" . 45)
+    ("stageplay" . 30))
   "Column integer to which transitions should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-center
-  '(("screenplay" 20)
-    ("teleplay" 20)
-    ("stageplay" 20))
+  '(("screenplay" . 20)
+    ("teleplay" . 20)
+    ("stageplay" . 20))
   "Column integer to which centered text should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
-  :type '(choice integer
-                 (repeat (group (string :tag "Format") integer)))
+  :type '(choice (integer :tag "Column")
+                 (repeat (cons (string :tag "Format")
+                               (integer :tag "Column"))))
   :set #'fountain--set-and-refresh-font-lock)
 
 
 ;;; Autoinsert
 
-(require 'autoinsert)
-
+(eval-when-compile (require 'autoinsert))
 (defvar fountain-metadata-skeleton
   '(nil
     "title: " (skeleton-read "Title: " (file-name-base (buffer-name))) | -7 "\n"
@@ -3176,11 +3184,11 @@ scene number from being auto-upcased."
         (when (and align fountain-align-elements)
           (unless (integerp align)
             (setq align
-                  (cadr (or (assoc (or (plist-get (fountain-read-metadata)
-                                                  'format)
-                                       fountain-default-script-format)
-                                   align)
-                            (car align))))))
+                  (cdr (or (assoc (or (plist-get (fountain-read-metadata)
+                                                 'format)
+                                      fountain-default-script-format)
+                                  align)
+                           (car align))))))
         (dolist (hl (plist-get (cdr element) :highlight))
           (let ((subexp (nth 1 hl))
                 (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
