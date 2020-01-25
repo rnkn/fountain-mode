@@ -2052,7 +2052,7 @@ Export command profiles are defined in
 
 ;;; Outlining
 
-(require 'outline)
+(eval-when-compile (require 'outline))
 
 (defvar-local fountain--outline-cycle
   0
