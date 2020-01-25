@@ -34,7 +34,7 @@ functions and key-bindings, type `C-h m`.
 
 ## Requirements ##
 
-- Emacs 24.5
+- Emacs 25.3
 
 ## Exporting ##
 
