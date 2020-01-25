@@ -1756,13 +1756,6 @@ Move through buffer with `fountain-forward-page' and call
           (progress-reporter-done job))))))
 
 
-;;; Templating
-
-(defconst fountain-template-regexp
-  "{{[\s\t]*\\([.-a-z0-9]+\\)\\(?::[\s\t]+\\([^{}]+?\\)\\)?[\s\t]*}}"
-  "Regular expression for matching template keys.")
-
-
 ;;; Parsing
 
 (defun fountain-get-character (&optional n limit)
