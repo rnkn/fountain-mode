@@ -667,7 +667,7 @@ To switch between these levels, customize the value of
   "Default face for scene headings.")
 
 (defface fountain-paren
-  '((t (:inherit font-lock-builtin-face)))
+  '((t (:inherit font-lock-string-face)))
   "Default face for parentheticals.")
 
 (defface fountain-center
@@ -679,7 +679,7 @@ To switch between these levels, customize the value of
   "Default face for notes.")
 
 (defface fountain-section-heading
-  '((t (:inherit font-lock-keyword-face)))
+  '((t (:inherit outline-1)))
   "Default face for section headings.")
 
 (defface fountain-synopsis
@@ -695,12 +695,8 @@ To switch between these levels, customize the value of
   "Default face for dialog.")
 
 (defface fountain-trans
-  '((t (:inherit font-lock-builtin-face)))
+  '((t nil))
   "Default face for transitions.")
-
-(defface fountain-template
-  '((t (:inherit font-lock-preprocessor-face)))
-  "Default face for template keys.")
 
 
 ;;; Initializing
