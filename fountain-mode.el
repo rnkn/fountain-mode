@@ -234,9 +234,9 @@ this option."
                (font-lock-refresh-defaults))))))
 
 (defcustom fountain-note-template
-  " %F - %n: "
+  " %x - %n: "
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
-Passed to `format-spec' with the following keys:
+Passed to `format-spec' with the following specification:
 
     %u  user-login-name
     %n  user-full-name
