@@ -1951,14 +1951,17 @@ The car sets `left-margin' and cdr `fill-column'."
       "--source")
      t)
     ("wrap-pdf-cprime"
-     ("wrap" "pdf" "--use-courier-prime"))
+     ("wrap" "pdf" "--use-courier-prime")
+     nil "pdf")
     ("textplay-fdx"
-     ("textplay" "--fdx")))
+     ("textplay" "--fdx")
+     nil "fdx"))
   "Shell command profiles for exporting Fountain files.
 
 Each profile takes the form:
 
-    (PROFILE-NAME (PROGRAM ARG ARG ...) REQUIRES-INPUT-FILE)
+    (PROFILE-NAME (PROGRAM ARG ARG ...)
+     REQUIRES-INPUT-FILE OUTPUT-EXTENSION)
 
 Where PROFILE-NAME is an arbitrary profile name string, PROGRAM
 is the program name string, and ARGs are the program argument
@@ -1966,6 +1969,10 @@ strings.
 
 If REQUIRES-INPUT-FILE boolean is non-nil, `buffer-file-name'
 will be passed as last program argument.
+
+If OUTPUT-EXTENSION string is non-nil, `fountain-export' will
+write the output file. If nil, file output will be handled by the
+command program.
 
 The first profile is considered default.
 
@@ -1976,7 +1983,10 @@ what you want, so these should be added as separate ARGs."
                        (string :tag "Profile Name")
                        (repeat :tag "Program Arguments"
                                (string :tag "Argument"))
-                       (boolean :tag "Requires input file")))
+                       (boolean :tag "Requires input file")
+                       (choice :tag "Output file extension"
+                        (const :tag "Don't handle file output" nil)
+                        (string :tag "Extension"))))
   :group 'fountain-export)
 
 (defcustom fountain-export-output-buffer
@@ -1986,21 +1996,8 @@ what you want, so these should be added as separate ARGs."
   :safe 'string
   :group 'fountain-export)
 
-(defcustom fountain-export-extension
-  "pdf"
-  "File-type extension used for guessing export file-name."
-  :type 'string
-  :safe 'string
-  :group 'fountain-export)
-
-(defun fountain-export-get-output-file ()
-  (when (buffer-file-name)
-    (concat (file-name-base (buffer-file-name))
-            "." fountain-export-extension)))
-
-(defun fountain-export (profile-name &optional output-file)
+(defun fountain-export (profile-name)
   "Call export shell command for PROFILE-NAME.
-When prefixed with \\[universal-argument], prompt for OUTPUT-FILE.
 
 Export command profiles are defined in
 `fountain-export-command-profiles'."
@@ -2009,45 +2006,39 @@ Export command profiles are defined in
            (completing-read-default
             (format "Export format [default %s]: " default)
             (mapcar #'car fountain-export-command-profiles)
-            nil t nil nil default))
-         (when current-prefix-arg
-           (completing-read-default
-            "Output file: "
-            (directory-files default-directory)
-            nil nil (fountain-export-get-output-file)))))
+            nil t nil nil default))))
   (unless profile-name
     (user-error "No `fountain-export-command-profiles' found"))
   (if (buffer-live-p (get-buffer fountain-export-output-buffer))
       (kill-buffer fountain-export-output-buffer))
   (let ((profile (assoc-string profile-name fountain-export-command-profiles))
+        (base-name (if buffer-file-name (file-name-base buffer-file-name)))
         (start (if (use-region-p) (region-beginning) (point-min)))
         (end   (if (use-region-p) (region-end) (point-max)))
-        program args)
+        program args ext)
     (setq program (car (nth 1 profile))
-          args (cdr (nth 1 profile)))
+          args (cdr (nth 1 profile))
+          ext (nth 3 profile))
     (if (nth 2 profile)
         (progn
           (unless buffer-file-name
-            (user-error "Buffer %S is not visiting a file" (current-buffer)))
+            (user-error "Buffer %s is not visiting a file" (current-buffer)))
           (apply 'call-process
                  (append (list program nil fountain-export-output-buffer nil)
                          args (list buffer-file-name))))
       (apply 'call-process-region
              (append (list start end program
                            nil fountain-export-output-buffer nil)
-                     args))))
-  (and (pop-to-buffer fountain-export-output-buffer)
-       (progn (set-auto-mode t)
-              (when (and (< 0 (string-width (buffer-string)))
-                         (y-or-n-p
-                          (format "Write %s to disk? " (or output-file
-                                                           (buffer-name)))))
-                (if output-file
-                    (write-file output-file t)
-                  (call-interactively #'write-file))))))
+                     args)))
+    (and (pop-to-buffer fountain-export-output-buffer)
+         (unwind-protect
+             (when (and (< 0 (string-width (buffer-string))) (stringp ext))
+               (if (stringp base-name)
+                   (write-file (concat base-name "." ext) t)
+                 (call-interactively 'write-file)))
+           (set-auto-mode t)))))
 
-(require 'dired-x)
-
+(eval-when-compile (require 'dired-x))
 (defun fountain-export-view ()
   (interactive)
   (let ((file (concat (file-name-base (buffer-file-name))
