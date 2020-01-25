@@ -153,9 +153,9 @@ Cycle buffers and call `font-lock-refresh-defaults' when
 
 (define-obsolete-variable-alias 'fountain-script-format
   'fountain-default-script-format "3.0.0")
-(defcustom fountain-default-script-format "screenplay"
+(defcustom fountain-default-script-format
+  "screenplay"
   "Default script format.
-
 Can be overridden in metadata with, e.g.
 
     format: teleplay"
@@ -167,11 +167,9 @@ Can be overridden in metadata with, e.g.
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
 
-When non-nil, append `fountain-continued-dialog-string' to
-successively speaking characters with `fountain-continued-dialog-refresh'.
-
-When nil, remove `fountain-continued-dialog-string' with
-`fountain-continued-dialog-refresh'."
+When calling `fountain-continued-dialog-refresh', append
+`fountain-continued-dialog-string' to characters speaking in
+succession, or if nil, remove this string."
   :group 'fountain
   :type 'boolean
   :safe 'booleanp)
@@ -180,14 +178,15 @@ When nil, remove `fountain-continued-dialog-string' with
   " (CONT'D)"
   "String to append to character name speaking in succession.
 If `fountain-add-continued-dialog' is non-nil, append this string
-to character when speaking in succession.
+to characters speaking in succession when calling
+`fountain-continued-dialog-refresh'.
 
-WARNING: if you change this variable then call
+n.b. if you change this option then call
 `fountain-continued-dialog-refresh', strings matching the
-previous value will not be recognized. Before changing this
-variable, first make sure to set `fountain-add-continued-dialog'
-to nil and run `fountain-continued-dialog-refresh', then make the
-changes desired."
+previous value will not be recognized. First remove all instances
+in your script by setting `fountain-add-continued-dialog' to nil
+and calling `fountain-continued-dialog-refresh', then customize
+this option."
   :group 'fountain
   :type 'string
   :safe 'stringp)
@@ -433,8 +432,8 @@ Contructed with `fountain-init-scene-heading-regexp'. Requires
   " --? "
   "Regular expression separating scene heading location from suffix.
 
-WARNING: If you change this any existing scene headings will no
-longer be parsed correctly."
+n.b. If you change this any existing scene headings may not
+be parsed correctly."
   :group 'fountain
   :type 'regexp
   :safe 'regexp
@@ -573,6 +572,7 @@ bold-italic-underlined text must be specified with the
 bold-italic delimiters together, e.g.
 
     This text is _***ridiculously important***_.
+
     This text is ***_stupendously significant_***.")
 
 (defconst fountain-lyrics-regexp
@@ -584,24 +584,25 @@ bold-italic delimiters together, e.g.
 
 (defgroup fountain-faces ()
   "\\<fountain-mode-map>Faces used in `fountain-mode'.
-There are three levels of `font-lock-mode' decoration:
+There are three levels of decoration, each with different
+elements fontified:
 
-    1 (minimum):
+  1. Minimum:
         Comments
-        Syntax Characters
+        Emphasis
 
-    2 (default):
+  2. Default:
         Comments
-        Syntax Characters
-        Metadata
-        Scene Headings
+        Emphasis
+        Metadata Values
         Section Headings
+        Scene Headings
         Synopses
         Notes
 
-    3 (maximum):
+  3. Maximum:
         Comments
-        Syntax Characters
+        Emphasis
         Metadata Keys
         Metadata Values
         Section Headings
@@ -635,7 +636,7 @@ To switch between these levels, customize the value of
 
 (defface fountain-non-printing
   '((t (:inherit fountain-comment)))
-  "Default face for emphasis delimiters and syntax characters.")
+  "Default face for element and emphasis markup.")
 
 (defface fountain-metadata-key
   '((t (:inherit font-lock-constant-face)))
@@ -1454,6 +1455,7 @@ Add to `fountain-mode-hook' to have completion upon load."
 (defcustom fountain-page-size
   'letter
   "Paper size to use on export."
+  :group 'fountain-pages
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
@@ -1463,8 +1465,9 @@ Add to `fountain-mode-hook' to have completion upon load."
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
 
-WARNING: if you change this option after locking pages in a
-script, you may get incorrect output."
+n.b. If you change this option after locking pages in a script,
+you may get incorrect output."
+  :group 'fountain-pages
   :type '(choice integer
                  (list (cons (const :tag "US Letter" letter) integer)
                        (cons (const :tag "A4" a4) integer))))
@@ -1474,12 +1477,14 @@ script, you may get incorrect output."
 (defcustom fountain-page-ignore-restriction
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
+  :group 'fountain-pages
   :type 'boolean
   :safe 'booleanp)
 
 (defcustom fountain-page-size
   'letter
   "Paper size to use on export."
+  :group 'fountain-pages
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
@@ -2853,8 +2858,8 @@ If non-nil, revised scene number format works as follows:
     A11 <- new scene
     11
 
-WARNING: Using conflicting revised scene number format in the
-same script may result in errors in output."
+n.b. Using conflicting revised scene number format in the same
+script may result in errors in output."
   :type 'boolean
   :safe 'booleanp
   :group 'fountain-scene-numbers)
@@ -3404,7 +3409,7 @@ redisplay in margin. Otherwise, remove display text properties."
 
 ;; Local Variables:
 ;; coding: utf-8
-;; fill-column: 72
+;; fill-column: 80
 ;; indent-tabs-mode: nil
 ;; require-final-newline: t
 ;; End:
