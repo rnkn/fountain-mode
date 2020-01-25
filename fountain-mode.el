@@ -6,7 +6,7 @@
 ;; Author: Paul W. Rankin <code@paulwrankin.com>
 ;; Keywords: wp, text
 ;; Version: 3.0.0
-;; Package-Requires: ((emacs "24.5"))
+;; Package-Requires: ((emacs "25.3"))
 ;; git: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
@@ -57,7 +57,7 @@
 
 ;; ## Requirements ##
 
-;; - Emacs 24.5
+;; - Emacs 25.3
 
 ;; ## Exporting ##
 
@@ -108,7 +108,9 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'subr-x))
+(eval-when-compile
+  (require 'subr-x)
+  (require 'seq))
 
 (eval-when-compile
   (require 'lisp-mnt)
@@ -1266,27 +1268,35 @@ Takes the form:
   "List of characters in the current buffer.
 Each element is a cons (NAME . OCCUR) where NAME is a string, and
 OCCUR is an integer representing the character's number of
-occurrences. ")
+occurrences.")
 
-(defvar fountain-completion-additional-characters
+(defcustom fountain-completion-additional-characters
   nil
   "List of additional character strings to offer for completion.
 Case insensitive, all character names will be made uppercase.
 
 This is really only useful when working with multiple files and
-set as a per-directory local variable.
+set as a per-directory local variable."
+  :group 'fountain
+  :type '(repeat (string :tag "Character"))
+  :link '(info-link "(emacs) Directory Variables")
+  :safe '(lambda (value)
+           (and (listp value)
+                (seq-every-p 'stringp value))))
 
-See (info \"(emacs) Directory Variables\")")
-
-(defvar fountain-completion-additional-locations
+(defcustom fountain-completion-additional-locations
   nil
   "List of additional location strings to offer for completion.
 Case insensitive, all locations will be made uppercase.
 
 This is really only useful when working with multiple files and
-set as a per-directory local variable.
-
-See (info \"(emacs) Directory Variables\")")
+set as a per-directory local variable."
+  :group 'fountain
+  :type '(repeat (string :tag "Location"))
+  :link '(info-link "(emacs) Directory Variables")
+  :safe '(lambda (value)
+           (and (listp value)
+                (seq-every-p 'stringp value))))
 
 (defun fountain-completion-get-characters ()
   "Return a list of characters for completion.
