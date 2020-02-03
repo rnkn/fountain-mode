@@ -1797,7 +1797,7 @@ string. e.g.
                     (concat value (when value "\n")
                             (match-string-no-properties 2)))
               (forward-line))
-            (push (list (intern (string-join (split-string (downcase
+            (push (cons (intern (string-join (split-string (downcase
                 (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
                     "[^[:alnum:]]+" t) "-")) value)
                   list)))
@@ -1938,55 +1938,42 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain)
 
 (defcustom fountain-export-command-profiles
-  '(("afterwriting-usletterpdf-doublespace"
-     ("afterwriting" "--pdf" "--overwrite"
-      "--setting" "double_space_between_scenes=true"
-      "--setting" "print_profile=usletter"
-      "--source")
-     t)
-    ("afterwriting-a4pdf-doublespace"
-     ("afterwriting" "--pdf" "--overwrite"
-      "--setting" "double_space_between_scenes=true"
-      "--setting" "print_profile=a4"
-      "--source")
-     t)
-    ("wrap-pdf-cprime"
-     ("wrap" "pdf" "--use-courier-prime")
-     nil "pdf")
-    ("textplay-fdx"
-     ("textplay" "--fdx")
-     nil "fdx"))
+  '(("afterwriting-usletterpdf-doublespace" . "afterwriting \
+--source %b --pdf %B.pdf --overwrite \
+--setting double_space_between_scenes=true \
+--setting print_profile=usletter")
+    ("afterwriting-a4pdf-doublespace" . "afterwriting \
+--source %b --pdf %B.pdf --overwrite \
+--setting double_space_between_scenes=true \
+--setting print_profile=a4")
+    ("wrap-usletterpdf-cprime" . "wrap \
+pdf %b --use-courier-prime --out %B.pdf")
+    ("textplay-fdx" . "textplay --fdx < %b > %B.fdx"))
   "Shell command profiles for exporting Fountain files.
 
-Each profile takes the form:
+Each profile is a cons-cell of PROFILE-NAME string and the
+COMMAND string.
 
-    (PROFILE-NAME (PROGRAM ARG ARG ...)
-     REQUIRES-INPUT-FILE OUTPUT-EXTENSION)
+COMMAND is passed to `format-spec' and allows for interpolation
+of the following values:
 
-Where PROFILE-NAME is an arbitrary profile name string, PROGRAM
-is the program name string, and ARGs are the program argument
-strings.
+%b is the `buffer-file-name'
+%B is the `buffer-file-name' sans extension
+%n is the `user-full-name'
+%t is the title (from script metadata)
+%a is the author (from script metadata)
+%F is the current date in ISO format
+%x is the current date in your locale's \"preferred\" format
 
-If REQUIRES-INPUT-FILE boolean is non-nil, `buffer-file-name'
-will be passed as last program argument.
+If a command does not include %b, `fountain-export' will pass the
+buffer or active region to the command via stdin.
 
-If OUTPUT-EXTENSION string is non-nil, `fountain-export' will
-write the output file. If nil, file output will be handled by the
-command program.
+If a command outputs to stdout, this will be redirected to
+`fountain-export-output-buffer'.
 
-The first profile is considered default.
-
-n.b. If an ARG includes whitespace, this will be escaped and
-passed to the program as a single argument. This is probably not
-what you want, so these should be added as separate ARGs."
-  :type '(repeat (list :tag "Profile"
-                       (string :tag "Profile Name")
-                       (repeat :tag "Program Arguments"
-                               (string :tag "Argument"))
-                       (boolean :tag "Requires input file")
-                       (choice :tag "Output file extension"
-                        (const :tag "Don't handle file output" nil)
-                        (string :tag "Extension"))))
+The first profile is considered default."
+  :type '(repeat (cons (string :tag "Name")
+                       (string :tag "Shell command")))
   :group 'fountain-export)
 
 (defcustom fountain-export-output-buffer
@@ -1996,47 +1983,56 @@ what you want, so these should be added as separate ARGs."
   :safe 'string
   :group 'fountain-export)
 
-(defun fountain-export (profile-name)
+(defun fountain-export (profile-name &optional edit-command)
   "Call export shell command for PROFILE-NAME.
+
+If EDIT-COMMAND is non-nil (when prefixed with \\[universal-argument]) allow
+interactive editing of the command before running it.
 
 Export command profiles are defined in
 `fountain-export-command-profiles'."
   (interactive
    (list (let ((default (caar fountain-export-command-profiles)))
            (completing-read-default
-            (format "Export format [default %s]: " default)
+            (format "Export profile [default %s]: " default)
             (mapcar #'car fountain-export-command-profiles)
-            nil t nil nil default))))
+            nil t nil nil default))
+         current-prefix-arg))
   (unless profile-name
     (user-error "No `fountain-export-command-profiles' found"))
   (if (buffer-live-p (get-buffer fountain-export-output-buffer))
       (kill-buffer fountain-export-output-buffer))
-  (let ((profile (assoc-string profile-name fountain-export-command-profiles))
-        (base-name (if buffer-file-name (file-name-base buffer-file-name)))
+  (let ((command
+         (cdr (assoc-string profile-name fountain-export-command-profiles)))
+        (infile
+         (if buffer-file-name (file-name-nondirectory buffer-file-name)))
+        (infile-base
+         (if buffer-file-name (file-name-base buffer-file-name)))
         (start (if (use-region-p) (region-beginning) (point-min)))
         (end   (if (use-region-p) (region-end) (point-max)))
-        program args ext)
-    (setq program (car (nth 1 profile))
-          args (cdr (nth 1 profile))
-          ext (nth 3 profile))
-    (if (nth 2 profile)
-        (progn
-          (unless buffer-file-name
-            (user-error "Buffer %s is not visiting a file" (current-buffer)))
-          (apply 'call-process
-                 (append (list program nil fountain-export-output-buffer nil)
-                         args (list buffer-file-name))))
-      (apply 'call-process-region
-             (append (list start end program
-                           nil fountain-export-output-buffer nil)
-                     args)))
-    (and (pop-to-buffer fountain-export-output-buffer)
-         (unwind-protect
-             (when (and (< 0 (string-width (buffer-string))) (stringp ext))
-               (if (stringp base-name)
-                   (write-file (concat base-name "." ext) t)
-                 (call-interactively 'write-file)))
-           (set-auto-mode t)))))
+        (metadata (fountain-read-metadata))
+        title author use-stdin)
+    (setq title  (alist-get 'title metadata)
+          author (alist-get 'author metadata))
+    (unless (let (case-fold-search) (string-match "%b" command))
+      (setq use-stdin t))
+    (setq command (format-spec command
+        (format-spec-make
+         ?b (shell-quote-argument infile)
+         ?B (shell-quote-argument infile-base)
+         ?t (shell-quote-argument title)
+         ?a (shell-quote-argument author)
+         ?F (shell-quote-argument (format-time-string "%F"))
+         ?x (shell-quote-argument (format-time-string "%x")))))
+    (when edit-command
+      (setq command (read-shell-command "Shell command: " command)))
+    (unwind-protect
+        (if use-stdin
+            (shell-command-on-region start end command
+                                     fountain-export-output-buffer)
+          (shell-command command fountain-export-output-buffer))
+      (with-current-buffer fountain-export-output-buffer
+        (if (< 0 (string-width (buffer-string))) (set-auto-mode t))))))
 
 (eval-when-compile (require 'dired-x))
 (defun fountain-export-view ()
@@ -2745,12 +2741,11 @@ ARG (\\[universal-argument]), only insert note delimiters."
           (newline)))
       (comment-indent)
       (insert (format-spec fountain-note-template
-                           (list
-                            (cons ?u user-login-name)
-                            (cons ?n user-full-name)
-                            (cons ?e user-mail-address)
-                            (cons ?x (format-time-string "%x"))
-                            (cons ?F (format-time-string "%F"))))))))
+        (format-spec-make ?u user-login-name
+                          ?n user-full-name
+                          ?e user-mail-address
+                          ?F (format-time-string "%F")
+                          ?x (format-time-string "%x")))))))
 
 (defun fountain-continued-dialog-refresh ()
   "Add or remove continued dialog in buffer.
@@ -3164,11 +3159,11 @@ scene number from being auto-upcased."
         (when (and align fountain-align-elements)
           (unless (integerp align)
             (setq align
-                  (cdr (or (assoc (or (plist-get (fountain-read-metadata)
-                                                 'format)
-                                      fountain-default-script-format)
-                                  align)
-                           (car align))))))
+                (cdr (or (assoc
+                     (or (alist-get 'format (fountain-read-metadata))
+                         fountain-default-script-format)
+                     align)
+                         (car align))))))
         (dolist (hl (plist-get (cdr element) :highlight))
           (let ((subexp (nth 1 hl))
                 (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
@@ -3355,7 +3350,7 @@ redisplay in margin. Otherwise, remove display text properties."
      :style toggle
      :selected fountain-add-continued-dialog]
     "---"
-    ["Run Export Command" fountain-export-shell-command]
+    ["Run Export Command..." fountain-export]
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
