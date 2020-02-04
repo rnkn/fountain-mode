@@ -1443,8 +1443,8 @@ Add to `fountain-mode-hook' to have completion upon load."
               (cl-incf (cdr candidate)))))
         (fountain-forward-character 1))
       (setq fountain-completion-characters
-            (sort fountain-completion-characters
-                  (lambda (a b) (< (cdr b) (cdr a)))))))
+            (seq-sort (lambda (a b) (< (cdr b) (cdr a)))
+                      fountain-completion-characters))))
   (message "Completion candidates updated"))
 
 
