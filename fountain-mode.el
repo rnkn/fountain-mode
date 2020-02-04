@@ -2017,10 +2017,10 @@ Export command profiles are defined in
       (setq use-stdin t))
     (setq command (format-spec command
         (format-spec-make
-         ?b (shell-quote-argument infile)
-         ?B (shell-quote-argument infile-base)
-         ?t (shell-quote-argument title)
-         ?a (shell-quote-argument author)
+         ?b (shell-quote-argument (or infile ""))
+         ?B (shell-quote-argument (or infile-base ""))
+         ?t (shell-quote-argument (or title ""))
+         ?a (shell-quote-argument (or author ""))
          ?F (shell-quote-argument (format-time-string "%F"))
          ?x (shell-quote-argument (format-time-string "%x")))))
     (when edit-command
