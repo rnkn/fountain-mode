@@ -110,6 +110,7 @@
 
 (eval-when-compile
   (require 'subr-x)
+  (require 'cl-lib)
   (require 'seq))
 
 (eval-when-compile
@@ -1582,12 +1583,10 @@ Skip over comments."
     (let ((i 0))
       (while (and (< i fill-width) (not (eolp)))
         (cond ((= (syntax-class (syntax-after (point))) 0)
-               (forward-char 1)
-               (setq i (1+ i)))
+               (forward-char 1) (cl-incf i))
               ((forward-comment 1))
               (t
-               (forward-char 1)
-               (setq i (1+ i))))))
+               (forward-char 1) (cl-incf i)))))
     (skip-chars-forward "\s\t")
     (when (eolp) (forward-line))
     (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
@@ -1628,11 +1627,11 @@ final exported pages and so should not be used interactively."
          ;; line and increment line-count.
          ((and (eolp) (not (bolp)))
           (forward-line)
-          (setq line-count (1+ line-count)))
+          (cl-incf line-count))
          ;; If we're looking at newline, skip over it and any
          ;; whitespace and increment line-count.
          ((funcall skip-whitespace-fun)
-          (setq line-count (1+ line-count)))
+          (cl-incf line-count))
          ;; We are at an element. Find what kind of element. If it is
          ;; not included in export, skip over without incrementing
          ;; line-count. Otherwise move to fill-width and increment
@@ -1648,11 +1647,11 @@ final exported pages and so should not be used interactively."
               (progn
                 (fountain-move-to-fill-width element)
                 (cond ((eq dd 'left)
-                       (setq line-count-left (1+ line-count-left)))
+                       (cl-incf line-count-left))
                       ((eq dd 'right)
-                       (setq line-count-right (1+ line-count-right)))
+                       (cl-incf line-count-right))
                       (t
-                       (setq line-count (1+ line-count))))
+                       (cl-incf line-count)))
                 (when (and (eolp) (bolp)
                            (< 0 line-count-left) (< 0 line-count-right))
                   (setq line-count
@@ -1723,7 +1722,7 @@ as a string to force the page number."
         (goto-char (point-min))
         (while (< (point) (point-max))
           (fountain-forward-page)
-          (setq total (1+ total))
+          (cl-incf total)
           (when (and (not found) (< x (point)))
             (setq current total found t)))
         (cons current total)))))
@@ -1749,7 +1748,7 @@ Move through buffer with `fountain-forward-page' and call
         (let ((page 1))
           (fountain-forward-page)
           (while (< (point) (point-max))
-            (setq page (1+ page))
+            (cl-incf page)
             (fountain-insert-page-break nil (number-to-string page))
             (fountain-forward-page)
             (progress-reporter-update job))
@@ -2269,7 +2268,7 @@ Return non-nil if empty newline was inserted."
       (or (funcall move-fun)
           (progn (goto-char beg)
                  (message "Cannot shift past higher level")))
-      (setq i (1- i)))
+      (cl-decf i))
     (when (< 0 n) (funcall end-point-fun))
     (set-marker insert-point (point))
     (insert (delete-and-extract-region beg end))
@@ -2596,7 +2595,7 @@ Ignores revised scene numbers scenes.
       (if (and (fountain-match-page-break) (match-string 2))
           (setq i (- n (string-to-number (match-string 2)))))
       (fountain-forward-page)
-      (setq i (1- i)))))
+      (cl-decf i))))
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
@@ -2922,7 +2921,7 @@ Or, if nil:
                        (cdr scene-num-list) separator)))
     (if fountain-scene-numbers-prefix-revised
         (progn
-          (unless (string-empty-p revision) (setq number (1+ number)))
+          (unless (string-empty-p revision) (cl-incf number))
           (concat revision separator (number-to-string number)))
       (concat (number-to-string number) separator revision))))
 
@@ -3041,7 +3040,7 @@ to include external files."
             (while (< (point) x)
               (fountain-forward-scene 1)
               (when (fountain-match-scene-heading)
-                (setq current-scene (1+ current-scene))))
+                (cl-incf current-scene)))
             (list current-scene)))))))
 
 (defun fountain-remove-scene-numbers ()
