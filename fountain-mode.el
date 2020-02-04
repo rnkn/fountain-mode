@@ -2031,18 +2031,42 @@ Export command profiles are defined in
                                      fountain-export-output-buffer)
           (shell-command command fountain-export-output-buffer))
       (with-current-buffer fountain-export-output-buffer
-        (if (< 0 (string-width (buffer-string))) (set-auto-mode t))))))
+        (if (< 0 (string-width (buffer-string)))
+            (set-auto-mode t)
+          (kill-buffer))))))
 
 (eval-when-compile (require 'dired-x))
+
 (defun fountain-export-view ()
+  "Attempt to open the last exported output file.
+
+This works by finding the most recently modified file in the
+current directory matching the current file base-name (excluding
+the current file).
+
+The file is then passed to `dired-guess-default'."
   (interactive)
-  (let ((file (concat (file-name-base (buffer-file-name))
-                      "." fountain-export-extension)))
-    (if (file-exists-p file)
-        (call-process
-         (dired-guess-default (list file))
-         nil nil nil file)
-      (user-error "File %S does not exist" file))))
+  (let ((file-list
+         (directory-files-and-attributes
+          default-directory nil (file-name-base buffer-file-name) t))
+        file)
+    (setq file-list
+          (seq-remove
+           (lambda (f)
+             (string= (car f) (file-name-nondirectory buffer-file-name)))
+           file-list))
+    (unless file-list
+      (user-error "Could not find export file for %S"
+                  (file-name-nondirectory buffer-file-name)))
+    (setq file-list
+          (seq-sort
+           (lambda (a b) (time-less-p (nth 5 b) (nth 5 a)))
+           file-list))
+    (setq file (caar file-list))
+    (unless (file-exists-p file)
+      (user-error "File %S does not exist" file))
+    (call-process (dired-guess-default (list file))
+                  nil nil nil file)))
 
 
 ;;; Outlining
