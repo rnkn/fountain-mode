@@ -7,7 +7,7 @@
 ;; Keywords: wp, text
 ;; Version: 3.0.0
 ;; Package-Requires: ((emacs "25.3"))
-;; git: https://github.com/rnkn/fountain-mode
+;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
 
