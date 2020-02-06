@@ -108,10 +108,9 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'subr-x)
-  (require 'cl-lib)
-  (require 'seq))
+(eval-when-compile (require 'subr-x))
+(eval-when-compile (require 'cl-lib))
+(require 'seq)
 
 (eval-when-compile
   (require 'lisp-mnt)
@@ -812,6 +811,8 @@ regular expression."
               (concat fountain-section-heading-regexp
                       "\\|"
                       fountain-scene-heading-regexp)))
+
+(require 'imenu)
 
 (defcustom fountain-imenu-elements
   '(section-heading scene-heading synopsis note)
@@ -1982,7 +1983,9 @@ The first profile is considered default."
   :safe 'string
   :group 'fountain-export)
 
-(defun fountain-export (profile-name &optional edit-command)
+(require 'format-spec)
+
+(defun fountain-export-command (profile-name &optional edit-command)
   "Call export shell command for PROFILE-NAME.
 
 If EDIT-COMMAND is non-nil (when prefixed with \\[universal-argument]) allow
@@ -2035,7 +2038,7 @@ Export command profiles are defined in
             (set-auto-mode t)
           (kill-buffer))))))
 
-(eval-when-compile (require 'dired-x))
+(require 'dired-x)
 
 (defun fountain-export-view ()
   "Attempt to open the last exported output file.
@@ -2071,7 +2074,7 @@ The file is then passed to `dired-guess-default'."
 
 ;;; Outlining
 
-(eval-when-compile (require 'outline))
+(require 'outline)
 
 (defvar-local fountain--outline-cycle
   0
@@ -3273,7 +3276,7 @@ redisplay in margin. Otherwise, remove display text properties."
     ;; Pages
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
     ;; Exporting commands:
-    (define-key map (kbd "C-c C-e") #'fountain-export)
+    (define-key map (kbd "C-c C-e") #'fountain-export-command)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
