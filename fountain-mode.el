@@ -3364,7 +3364,8 @@ redisplay in margin. Otherwise, remove display text properties."
      :style toggle
      :selected fountain-add-continued-dialog]
     "---"
-    ["Run Export Command..." fountain-export]
+    ["Run Export Command..." fountain-export-command]
+    ["View Last Exported File" fountain-export-view]
     "---"
     ["Save Options" fountain-save-options]
     ["Customize Mode" (customize-group 'fountain)]
