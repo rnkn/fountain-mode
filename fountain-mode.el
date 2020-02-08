@@ -253,16 +253,16 @@ The default \" %F - %n:\" inserts something like:
 (defgroup fountain-align ()
   "Options for element alignment.
 
-For each Fountain element this group contains a variable that can
-be an integer representing align column for that element for all
-formats, or a list where each element takes the form:
+Each Fountain element align option can be an integer representing
+the align column for all formats, or a list where each element
+takes the form:
 
-    (FORMAT INT)
+    (FORMAT . INT)
 
-Where FORMAT is a string and INT is the align column for that
-format.
+Where FORMAT is a script format string and INT is the align
+column for that format.
 
-To disable element alignment, see `fountain-align-element'."
+To disable element alignment, see `fountain-align-elements'."
   :prefix "fountain-align-"
   :group 'fountain)
 
