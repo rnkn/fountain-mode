@@ -1254,11 +1254,11 @@ Takes the form:
 
 ;;; Auto-completion
 
-(defvar-local fountain-completion-locations
+(defvar-local fountain--completion-locations
   nil
   "List of scene locations in the current buffer.")
 
-(defvar-local fountain-completion-characters
+(defvar-local fountain--completion-characters
   nil
   "List of characters in the current buffer.
 Each element is a cons (NAME . OCCUR) where NAME is a string, and
@@ -1299,10 +1299,10 @@ set as a per-directory local variable."
 First, return second-last speaking character, followed by each
 previously speaking character within scene. After that, return
 characters from `fountain-completion-additional-characters' then
-`fountain-completion-characters'.
+`fountain--completion-characters'.
 
 n.b. `fountain-completion-additional-characters' are offered as
-candidates ahead of `fountain-completion-characters' because
+candidates ahead of `fountain--completion-characters' because
 these need to be manually set, and so are considered more
 important."
   (let (scene-characters
@@ -1334,7 +1334,7 @@ important."
             (cons alt-character scene-characters)))
     (append scene-characters
             (mapcar 'upcase fountain-completion-additional-characters)
-            fountain-completion-characters)))
+            fountain--completion-characters)))
 
 (defun fountain-completion-at-point ()
   "\\<fountain-mode-map>Return completion table for entity at point.
@@ -1346,11 +1346,11 @@ from `fountain-scene-heading-suffix-list'.
 
 2. If point is at a line matching
 `fountain-scene-heading-prefix-list', offer completion candidates
-from `fountain-completion-locations' and
+from `fountain--completion-locations' and
 `fountain-completion-additional-locations'.
 
 3. If point is at beginning of line with a preceding blank line,
-offer completion candidates from `fountain-completion-characters'
+offer completion candidates from `fountain--completion-characters'
 and `fountain-completion-additional-characters'. For more
 information of character completion sorting, see
 `fountain-completion-get-characters'.
@@ -1371,7 +1371,7 @@ Added to `completion-at-point-functions'."
                (completion-table-case-fold
                 (append
                  (mapcar 'upcase fountain-completion-additional-locations)
-                 fountain-completion-locations))))
+                 fountain--completion-locations))))
         ((and (fountain-match-scene-heading)
               (match-string 1))
          ;; Return scene location completion (forced)
@@ -1380,7 +1380,7 @@ Added to `completion-at-point-functions'."
                (completion-table-case-fold
                 (append
                  (mapcar 'upcase fountain-completion-additional-locations)
-                 fountain-completion-locations))))
+                 fountain--completion-locations))))
         ((and (eolp)
               (fountain-blank-before-p))
          ;; Return character completion
@@ -1399,16 +1399,16 @@ Added to `completion-at-point-functions'."
 (defun fountain-completion-update ()
   "Update completion candidates for current buffer.
 
-While `fountain-completion-locations' are left unsorted for
+While `fountain--completion-locations' are left unsorted for
 `completion-at-point' to perform sorting,
-`fountain-completion-characters' are sorted by number of lines.
+`fountain--completion-characters' are sorted by number of lines.
 For more information on character completion sorting, see
 `fountain-completion-get-characters'.
 
 Add to `fountain-mode-hook' to have completion upon load."
   (interactive)
-  (setq fountain-completion-locations nil
-        fountain-completion-characters nil)
+  (setq fountain--completion-locations nil
+        fountain--completion-characters nil)
   (save-excursion
     (save-restriction
       (widen)
@@ -1416,8 +1416,8 @@ Add to `fountain-mode-hook' to have completion upon load."
       (while (< (point) (point-max))
         (when (fountain-match-scene-heading)
           (let ((location (match-string-no-properties 4)))
-            (unless (member location fountain-completion-locations)
-              (push location fountain-completion-locations))))
+            (unless (member location fountain--completion-locations)
+              (push location fountain--completion-locations))))
         (fountain-forward-scene 1))
       (goto-char (point-min))
       (while (< (point) (point-max))
@@ -1425,15 +1425,15 @@ Add to `fountain-mode-hook' to have completion upon load."
           (let ((character (match-string-no-properties 4))
                 candidate lines)
             (setq candidate (assoc-string character
-                                          fountain-completion-characters)
+                                          fountain--completion-characters)
                   lines (cdr candidate))
             (if (null lines)
-                (push (cons character 1) fountain-completion-characters)
+                (push (cons character 1) fountain--completion-characters)
               (cl-incf (cdr candidate)))))
         (fountain-forward-character 1))
-      (setq fountain-completion-characters
+      (setq fountain--completion-characters
             (seq-sort (lambda (a b) (< (cdr b) (cdr a)))
-                      fountain-completion-characters))))
+                      fountain--completion-characters))))
   (message "Completion candidates updated"))
 
 
@@ -3174,11 +3174,10 @@ scene number from being auto-upcased."
         (when (and align fountain-align-elements)
           (unless (integerp align)
             (setq align
-                (cdr (or (assoc
-                     (or (alist-get 'format (fountain-read-metadata))
-                         fountain-default-script-format)
-                     align)
-                         (car align))))))
+        (cdr (or (assoc (or (alist-get 'format (fountain-read-metadata))
+                            fountain-default-script-format)
+                        align)
+                 (car align))))))
         (dolist (hl (plist-get (cdr element) :highlight))
           (let ((subexp (nth 1 hl))
                 (face (when (<= (nth 0 hl) dec) (nth 2 hl)))
