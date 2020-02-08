@@ -2044,7 +2044,8 @@ The file is then passed to `dired-guess-default'."
     (setq file-list
           (seq-remove
            (lambda (f)
-             (string= (car f) (file-name-nondirectory (buffer-file-name))))
+             (string-match (file-name-nondirectory (buffer-file-name))
+                           (car f)))
            file-list))
     (unless file-list
       (user-error "Could not find export file for %S"
