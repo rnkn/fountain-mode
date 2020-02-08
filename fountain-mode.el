@@ -386,7 +386,8 @@ This option does not affect file contents."
 
 ;;; Autoinsert
 
-(eval-when-compile (require 'autoinsert))
+(require 'autoinsert)
+
 (defvar fountain-metadata-skeleton
   '(nil
     "title: " (skeleton-read "Title: " (file-name-base (buffer-name))) | -7 "\n"
@@ -394,7 +395,7 @@ This option does not affect file contents."
     "author: " (skeleton-read "Author: " user-full-name) | -9 "\n"
     "format: " (skeleton-read "Script format: " fountain-default-script-format) | -9 "\n"
     "source: " (skeleton-read "Source: ") | -9 "\n"
-    "date: " (skeleton-read "Date: " (format-time-string fountain-time-format)) | -7 "\n"
+    "date: " (skeleton-read "Date: " (format-time-string "%x")) | -7 "\n"
     "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
 
 (define-auto-insert '(fountain-mode . "Fountain metadata skeleton")
