@@ -88,10 +88,6 @@
 
 ;;     git clone https://github.com/rnkn/fountain-mode.git
 
-;; Users of Debian >=10 or Ubuntu >=18.04 can install Fountain Mode with:
-
-;;     sudo apt install elpa-fountain-mode
-
 ;; [melpa]: https://melpa.org/#/fountain-mode "MELPA"
 ;; [melpa-stable]: https://stable.melpa.org/#/fountain-mode "MELPA-stable"
 ;; [latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
