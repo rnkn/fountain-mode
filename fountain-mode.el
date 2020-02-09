@@ -120,7 +120,7 @@
   (message "Fountain Mode %s" fountain-version))
 
 
-;;; Top-Level Customization
+;;; Top-Level Options
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
@@ -1023,6 +1023,7 @@ Assumes that all other element matching has been done."
                         (fountain-match-note)))
                (looking-at fountain-action-regexp))))))
 
+;; FIXME: is it even worth bothering with dual-dialog?
 (defun fountain-get-element ()
   "Return element at point as a symbol."
   (cond
@@ -1535,6 +1536,8 @@ Return non-nil if empty newline was inserted."
       (forward-char 1))
     hanging-line))
 
+;; FIXME: this implementation will wipe out any overlays on the next block of
+;; text that is deleted and reinserted. Must find a better way.
 (defun fountain-shift-down (&optional n)
   "Move the current element down past N elements of the same level."
   (interactive "p")
