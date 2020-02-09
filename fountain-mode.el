@@ -1231,10 +1231,11 @@ occurrences.")
 (defcustom fountain-completion-additional-characters
   nil
   "List of additional character strings to offer for completion.
-Case insensitive, all character names will be made uppercase.
+Case sensitive. Prefix character names with `@' to use lowercase.
 
-This is really only useful when working with multiple files and
-set as a per-directory local variable."
+Characters speaking in the current script are already populated
+with `fountain-completion-update', so this is usually better set
+as a directory variable."
   :group 'fountain
   :type '(repeat (string :tag "Character"))
   :link '(info-link "(emacs) Directory Variables")
@@ -1245,10 +1246,12 @@ set as a per-directory local variable."
 (defcustom fountain-completion-additional-locations
   nil
   "List of additional location strings to offer for completion.
-Case insensitive, all locations will be made uppercase.
+Case sensitive. Locations will be upcased if
+`fountain-auto-upcase-scene-headings' is non-nil.
 
-This is really only useful when working with multiple files and
-set as a per-directory local variable."
+Locations occuring in the current script are already populated
+with `fountain-completion-update', so this is usually better set
+as a directory variable."
   :group 'fountain
   :type '(repeat (string :tag "Location"))
   :link '(info-link "(emacs) Directory Variables")
@@ -1294,7 +1297,7 @@ important."
       (setq scene-characters
             (cons alt-character scene-characters)))
     (append scene-characters
-            (mapcar 'upcase fountain-completion-additional-characters)
+            fountain-completion-additional-characters
             fountain--completion-characters)))
 
 (defun fountain-completion-at-point ()
@@ -1331,7 +1334,7 @@ Added to `completion-at-point-functions'."
                (point)
                (completion-table-case-fold
                 (append
-                 (mapcar 'upcase fountain-completion-additional-locations)
+                 fountain-completion-additional-locations
                  fountain--completion-locations))))
         ((and (fountain-match-scene-heading)
               (match-string 1))
@@ -1340,7 +1343,7 @@ Added to `completion-at-point-functions'."
                (point)
                (completion-table-case-fold
                 (append
-                 (mapcar 'upcase fountain-completion-additional-locations)
+                 fountain-completion-additional-locations
                  fountain--completion-locations))))
         ((and (eolp)
               (fountain-blank-before-p))
