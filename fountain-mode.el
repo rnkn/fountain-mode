@@ -1991,6 +1991,72 @@ halt at end of scene."
   (fountain-forward-character (- n)))
 
 
+;;; Parsing
+
+(defun fountain-get-character (&optional n limit)
+  "Return Nth next character (or Nth previous if N is negative).
+
+If N is non-nil, return Nth next character or Nth previous
+character if N is negative, otherwise return nil. If N is nil or
+0, return character at point, otherwise return nil.
+
+If LIMIT is 'scene, halt at next scene heading. If LIMIT is
+'dialog, halt at next non-dialog element."
+  (unless n (setq n 0))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (fountain-forward-character n limit)
+      (when (fountain-match-character)
+        (match-string-no-properties 4)))))
+
+(defun fountain-read-metadata ()
+  "Read metadata of current buffer and return as a property list.
+
+Key string is slugified and interned. Value string remains a
+string. e.g.
+
+    Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (let (list)
+        (while (and (bolp) (fountain-match-metadata))
+          (let ((key (match-string-no-properties 1))
+                (value (match-string-no-properties 2)))
+            (forward-line)
+            (while (and (fountain-match-metadata)
+                        (null (match-string 1)))
+              (setq value
+                    (concat value (when value "\n")
+                            (match-string-no-properties 2)))
+              (forward-line))
+            (push (cons (intern (string-join (split-string (downcase
+                (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
+                    "[^[:alnum:]]+" t) "-")) value)
+                  list)))
+        list))))
+
+(defun fountain-read-dual-dialog (&optional pos)
+  "Non-nil if point or POS is within dual dialogue.
+Returns \"right\" if within right-side dual dialogue, \"left\" if
+within left-side dual dialogue, and nil otherwise."
+  (save-excursion
+    (save-match-data
+      (save-restriction
+        (widen)
+        (when pos (goto-char pos))
+        (cond ((progn (fountain-forward-character 0 'dialog)
+                      (and (fountain-match-character)
+                           (stringp (match-string 5))))
+               'right)
+              ((progn (fountain-forward-character 1 'dialog)
+                      (and (fountain-match-character)
+                           (stringp (match-string 5))))
+               'left))))))
+
+
 ;;; Editing
 
 (defcustom fountain-auto-upcase-scene-headings
@@ -2768,72 +2834,6 @@ Move through buffer with `fountain-forward-page' and call
             (fountain-forward-page)
             (progress-reporter-update job))
           (progress-reporter-done job))))))
-
-
-;;; Parsing
-
-(defun fountain-get-character (&optional n limit)
-  "Return Nth next character (or Nth previous if N is negative).
-
-If N is non-nil, return Nth next character or Nth previous
-character if N is negative, otherwise return nil. If N is nil or
-0, return character at point, otherwise return nil.
-
-If LIMIT is 'scene, halt at next scene heading. If LIMIT is
-'dialog, halt at next non-dialog element."
-  (unless n (setq n 0))
-  (save-excursion
-    (save-restriction
-      (widen)
-      (fountain-forward-character n limit)
-      (when (fountain-match-character)
-        (match-string-no-properties 4)))))
-
-(defun fountain-read-metadata ()
-  "Read metadata of current buffer and return as a property list.
-
-Key string is slugified and interned. Value string remains a
-string. e.g.
-
-    Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (let (list)
-        (while (and (bolp) (fountain-match-metadata))
-          (let ((key (match-string-no-properties 1))
-                (value (match-string-no-properties 2)))
-            (forward-line)
-            (while (and (fountain-match-metadata)
-                        (null (match-string 1)))
-              (setq value
-                    (concat value (when value "\n")
-                            (match-string-no-properties 2)))
-              (forward-line))
-            (push (cons (intern (string-join (split-string (downcase
-                (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
-                    "[^[:alnum:]]+" t) "-")) value)
-                  list)))
-        list))))
-
-(defun fountain-read-dual-dialog (&optional pos)
-  "Non-nil if point or POS is within dual dialogue.
-Returns \"right\" if within right-side dual dialogue, \"left\" if
-within left-side dual dialogue, and nil otherwise."
-  (save-excursion
-    (save-match-data
-      (save-restriction
-        (widen)
-        (when pos (goto-char pos))
-        (cond ((progn (fountain-forward-character 0 'dialog)
-                      (and (fountain-match-character)
-                           (stringp (match-string 5))))
-               'right)
-              ((progn (fountain-forward-character 1 'dialog)
-                      (and (fountain-match-character)
-                           (stringp (match-string 5))))
-               'left))))))
 
 
 ;;; Filling
