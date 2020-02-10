@@ -751,7 +751,7 @@ scene heading regular expression."
          ;; Group 5: match suffix separator
          "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
          ;; Group 6: match suffix
-         "\\(?6:.+\\)?\\)?"
+         "\\(?6:.+?\\)?\\)?"
          "\\)\\|"
          ;; Group 2: match scene heading without scene number
          "^\\(?2:"
