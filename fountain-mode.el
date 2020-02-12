@@ -235,15 +235,15 @@ this option."
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 Passed to `format-spec' with the following specification:
 
-    %u  user-login-name
-    %n  user-full-name
-    %e  user-mail-address
-    %x  date in locale's preferred format
-    %F  date in ISO format
+  %u  user-login-name
+  %n  user-full-name
+  %e  user-mail-address
+  %x  date in locale's preferred format
+  %F  date in ISO format
 
-The default \" %F - %n:\" inserts something like:
+The default \" %x - %n:\" inserts something like:
 
-    [[ 2017-12-31 - Alan Smithee: ]]"
+  [[ 12/31/2017 - Alan Smithee: ]]"
   :group 'fountain
   :type 'string
   :safe 'stringp)
@@ -251,42 +251,41 @@ The default \" %F - %n:\" inserts something like:
 
 ;;; Faces
 
+;; FIXME: better docstring formatting
 (defgroup fountain-faces ()
   "\\<fountain-mode-map>Faces used in `fountain-mode'.
 There are three levels of decoration, each with different
 elements fontified:
 
-  1. Minimum:
-        Comments
-        Emphasis
+  1. minimum:   comments
+                emphasis
 
-  2. Default:
-        Comments
-        Emphasis
-        Metadata Values
-        Section Headings
-        Scene Headings
-        Synopses
-        Notes
+  2. default:   comments
+                emphasis
+                element characters
+                section headings
+                scene headings
+                synopses
+                notes
+                metadata values
 
-  3. Maximum:
-        Comments
-        Emphasis
-        Metadata Keys
-        Metadata Values
-        Section Headings
-        Scene Headings
-        Synopses
-        Notes
-        Character Names
-        Parentheticals
-        Dialog
-        Transitions
-        Center Text
+  3. maximum:   comments
+                emphasis
+                element characters
+                section headings
+                scene headings
+                synopses
+                notes
+                metadata keys
+                metadata values
+                character names
+                parentheticals
+                dialog
+                transitions
+                center text
 
 To switch between these levels, customize the value of
-`font-lock-maximum-decoration'. This can be set with
-\\[fountain-set-font-lock-decoration]."
+`font-lock-maximum-decoration'. This can be set with \\[fountain-set-font-lock-decoration]."
   :prefix "fountain-"
   :link '(info-link "(emacs) Font Lock")
   :group 'fountain)
@@ -366,16 +365,16 @@ To switch between these levels, customize the value of
   nil
   "Regular expression for matching scene headings.
 
-    Group 1: match leading . for forced scene heading
-    Group 2: match whole scene heading without scene number
-    Group 3: match INT/EXT
-    Group 4: match location
-    Group 5: match suffix separator
-    Group 6: match suffix
-    Group 7: match space between scene heading and scene number
-    Group 8: match first # delimiter
-    Group 9: match scene number
-    Group 10: match last # delimiter
+  Group 1: match leading . for forced scene heading
+  Group 2: match whole scene heading without scene number
+  Group 3: match INT/EXT
+  Group 4: match location
+  Group 5: match suffix separator
+  Group 6: match suffix
+  Group 7: match space between scene heading and scene number
+  Group 8: match first # delimiter
+  Group 9: match scene number
+  Group 10: match last # delimiter
 
 Contructed with `fountain-init-scene-heading-regexp'. Requires
 `fountain-match-scene-heading' for preceding blank line.")
@@ -386,9 +385,9 @@ Contructed with `fountain-init-scene-heading-regexp'. Requires
 Any scene heading prefix can be followed by a dot and/or a space,
 so the following are equivalent:
 
-    INT HOUSE - DAY
+  INT HOUSE - DAY
 
-    INT. HOUSE - DAY"
+  INT. HOUSE - DAY"
   :type '(repeat (string :tag "Prefix"))
   :group 'fountain
   :set (lambda (symbol value)
@@ -446,9 +445,9 @@ lines.")
 This list is used to match the endings of transitions,
 e.g. `TO:' will match both the following:
 
-    CUT TO:
+  CUT TO:
 
-    DISSOLVE TO:"
+  DISSOLVE TO:"
   :type '(repeat (string :tag "Suffix"))
   :group 'fountain
   :set (lambda (symbol value)
@@ -466,8 +465,8 @@ e.g. `TO:' will match both the following:
   "^\\(!\\)?\\(.*\\)[\s\t]*$"
   "Regular expression for forced action.
 
-    Group 1: match forced action mark
-    Group 2: match trimmed whitespace (export group)")
+  Group 1: match forced action mark
+  Group 2: match trimmed whitespace")
 
 (defconst fountain-comment-regexp
   (concat "\\(?://[\s\t]*\\(?:.*\\)\\)"
@@ -490,11 +489,11 @@ Requires `fountain-match-metadata' for `bobp'.")
           "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
   "Regular expression for matching character names.
 
-    Group 1: match trimmed whitespace
-    Group 2: match leading @ (for forced element)
-    Group 3: match character name and parenthetical (export group)
-    Group 4: match character name only
-    Group 5: match trailing ^ (for dual dialog)
+  Group 1: match trimmed whitespace
+  Group 2: match leading @ for forced character
+  Group 3: match character name and parenthetical
+  Group 4: match character name only
+  Group 5: match trailing ^ for dual dialog
 
 Requires `fountain-match-character' for preceding blank line.")
 
@@ -502,7 +501,7 @@ Requires `fountain-match-character' for preceding blank line.")
   "^\\(\s\s\\)$\\|^[\s\t]*\\([^<>\n]+?\\)[\s\t]*$"
   "Regular expression for matching dialogue.
 
-    Group 1: match trimmed whitespace
+  Group 1: match trimmed whitespace
 
 Requires `fountain-match-dialog' for preceding character,
 parenthetical or dialogue.")
@@ -518,37 +517,38 @@ dialogue.")
   "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
   "Regular expression for matching page breaks.
 
-    Group 1: leading ===
-    Group 2: forced page number (export group)")
+  Group 1: leading ===
+  Group 2: forced page number")
 
 (defconst fountain-note-regexp
   "\\[\\[[\s\t]*\\(\\(?:.\\|\n\\)*?\\)[\s\t]*]]"
   "Regular expression for matching notes.
 
-    Group 1: note contents (export group)")
+  Group 1: note text")
 
 (defconst fountain-section-heading-regexp
-  "^\\(?1:#\\{1,5\\}\\)[\s\t]*\\(?2:[^#\n].*?\\)[\s\t]*$"
+  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:[^#\n].*?\\)[\s\t]*$"
   "Regular expression for matching section headings.
 
-    Group 1: match leading #'s
-    Group 2: match heading")
+  Group 1: match leading #'s and following whitespace
+  Group 2: match leading #'s
+  Group 3: match heading text")
 
 (defconst fountain-synopsis-regexp
   "^\\(\\(=\\)[\s\t]*\\)\\([^=\n].*?\\)$"
   "Regular expression for matching synopses.
 
-    Group 1: leading = and whitespace
-    Group 2: leading =
-    Group 3: synopsis (export group)")
+  Group 1: leading = and following whitespace
+  Group 2: leading =
+  Group 3: synopsis text")
 
 (defconst fountain-center-regexp
   "^[\s\t]*\\(>\\)[\s\t]*\\(.+?\\)[\s\t]*\\(<\\)[\s\t]*$"
   "Regular expression for matching centered text.
 
-    Group 1: match leading >
-    Group 2: match center text (export group)
-    Group 3: match trailing <")
+  Group 1: match leading >
+  Group 2: match center text
+  Group 3: match trailing <")
 
 (defconst fountain-underline-regexp
   "\\(?:^\\|[^\\]\\)\\(\\(_\\)\\([^\n\s\t_][^_\n]*?\\)\\(\\2\\)\\)"
@@ -566,13 +566,12 @@ dialogue.")
   "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching bold-italic text.
 
-Due to the problematic nature of the syntax,
-bold-italic-underlined text must be specified with the
-bold-italic delimiters together, e.g.
+Due to the nature of the syntax, bold-italic-underlined text must
+be specified with the bold-italic delimiters together, e.g.
 
-    This text is _***ridiculously important***_.
+  This text is _***ridiculously important***_.
 
-    This text is ***_stupendously significant_***.")
+  This text is ***_stupendously significant_***.")
 
 (defconst fountain-lyrics-regexp
   "^\\(~[\s\t]*\\)\\(.+\\)"
@@ -588,7 +587,7 @@ Each Fountain element align option can be an integer representing
 the align column for all formats, or a list where each element
 takes the form:
 
-    (FORMAT . INT)
+  (FORMAT . INT)
 
 Where FORMAT is a script format string and INT is the align
 column for that format.
@@ -1209,11 +1208,11 @@ Includes references to various functions and variables.
 
 Takes the form:
 
-    (ELEMENT KEYWORD PROPERTY)
+  (ELEMENT KEYWORD PROPERTY)
 
 :highlight keyword property takes the form:
 
-    (LEVEL SUBEXP FACENAME [OVERRIDE LAXMATCH INVISIBLE])")
+  (LEVEL SUBEXP FACENAME [OVERRIDE LAXMATCH INVISIBLE])")
 
 
 ;;; Auto-completion
@@ -2078,14 +2077,11 @@ to scene number or point."
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
 
-1. If prefixed with ARG, call `fountain-outline-cycle' and pass
-   ARG.
-
-2. If point is at an appropriate point (i.e. eolp), call
-   `completion-at-point'.
-
-3. If point is a scene heading or section heading call
-   `fountain-outline-cycle'. "
+  1. If prefixed with ARG, call `fountain-outline-cycle' and pass ARG.
+  2. If point is at a note, cycle visibility of that note.
+  3. If point is at the end of line, call `completion-at-point'.
+  4. If point is a scene heading or section heading cycle visibility of that
+     heading."
   (interactive "p")
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
@@ -2970,13 +2966,13 @@ COMMAND string.
 COMMAND is passed to `format-spec' and allows for interpolation
 of the following values:
 
-%b is the `buffer-file-name'
-%B is the `buffer-file-name' sans extension
-%n is the `user-full-name'
-%t is the title (from script metadata)
-%a is the author (from script metadata)
-%F is the current date in ISO format
-%x is the current date in your locale's \"preferred\" format
+  %b is the `buffer-file-name'
+  %B is the `buffer-file-name' sans extension
+  %n is the `user-full-name'
+  %t is the title (from script metadata)
+  %a is the author (from script metadata)
+  %F is the current date in ISO format
+  %x is the current date in your locale's \"preferred\" format
 
 If a command does not include %b, `fountain-export' will pass the
 buffer or active region to the command via stdin.
@@ -3337,7 +3333,7 @@ redisplay in margin. Otherwise, remove display text properties."
     ["Customize Faces" (customize-group 'fountain-faces)]))
 
 (defun fountain-save-options ()
-  "Save `fountain-mode' options with `customize'."
+  "Save `fountain-mode' menu options with `customize'."
   (interactive)
   (let (unsaved)
     (dolist (option '(fountain-align-elements
