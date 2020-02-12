@@ -1469,11 +1469,6 @@ Notes visibility can be cycled with \\[fountain-dwim]."
   (defalias 'outline-hide-subtree 'hide-subtree)
   (defalias 'outline-hide-sublevels 'hide-sublevels))
 
-(defun fountain-outline-invisible-p (&optional pos)
-  "Non-nil if the character after POS has outline invisible property.
-If POS is nil, use `point' instead."
-  (eq (get-char-property (or pos (point)) 'invisible) 'outline))
-
 (defun fountain-get-block-bounds ()
   "Return the beginning and end bounds of current element block."
   (let ((element (fountain-get-element))
@@ -3371,6 +3366,12 @@ See <http://debbugs.gnu.org/24073>."
   ;; property is 'outline
   (unless (or (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
               (<= 26 emacs-major-version))
+
+    (defun fountain-outline-invisible-p (&optional pos)
+      "Non-nil if the character after POS has outline invisible property.
+If POS is nil, use `point' instead."
+      (eq (get-char-property (or pos (point)) 'invisible) 'outline))
+
     (advice-add 'outline-invisible-p :override #'fountain-outline-invisible-p)
     ;; Because `outline-invisible-p' is an inline function, we need to
     ;; reevaluate those functions that called the original bugged version.
