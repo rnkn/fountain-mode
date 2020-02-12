@@ -820,7 +820,7 @@ regular expression."
   "Initialize `imenu-generic-expression'."
   (setq imenu-generic-expression nil)
   (if (memq 'section-heading fountain-imenu-elements)
-      (push (list "Section Headings" fountain-section-heading-regexp 2)
+      (push (list "Section Headings" fountain-section-heading-regexp 3)
             imenu-generic-expression))
   (if (memq 'scene-heading fountain-imenu-elements)
       (push (list "Scene Headings" fountain-scene-heading-regexp 2)
@@ -1788,7 +1788,7 @@ outline visibility through the following states:
 Assumes that point is at the beginning of a heading and match
 data reflects `outline-regexp'."
   (if (string-prefix-p "#" (match-string 0))
-      (string-width (match-string 1))
+      (string-width (match-string 2))
     6))
 
 (defun fountain-insert-section-heading ()
@@ -1834,16 +1834,15 @@ buffer windows are opened."
         (setq beg (point))
         (when (or (fountain-match-section-heading)
                   (fountain-match-scene-heading))
-          (setq heading-name (match-string-no-properties 2)
+          (setq heading-name (string-trim (match-string 0) "[#\s]+")
                 target-buffer (concat base-buffer "-" heading-name))
           (outline-end-of-subtree)
           (setq end (point)))))
     (if (and (get-buffer target-buffer)
              (with-current-buffer target-buffer
-               (goto-char beg)
-               (and (or (fountain-match-section-heading)
-                        (fountain-match-scene-heading))
-                    (string= heading-name (match-string-no-properties 2)))))
+               (goto-char (point-min))
+               (skip-chars-forward "\n\s\t")
+               (= (point) beg)))
         (pop-to-buffer target-buffer)
       (clone-indirect-buffer target-buffer t)
       (outline-show-all))
