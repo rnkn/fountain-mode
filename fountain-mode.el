@@ -1517,7 +1517,7 @@ Notes visibility can be cycled with \\[fountain-dwim]."
                  (setq end (point))))))
       (cons begin end))))
 
-(defun fountain-insert-hanging-line-maybe ()
+(defun fountain--insert-hanging-line-maybe ()
   "Insert a empty newline if needed.
 Return non-nil if empty newline was inserted."
   (let (hanging-line)
@@ -1555,7 +1555,7 @@ Return non-nil if empty newline was inserted."
               (save-excursion
                 (when (not forward)
                   (goto-char (cdr block-bounds))
-                  (when (setq hanging-line (fountain-insert-hanging-line-maybe))
+                  (when (setq hanging-line (fountain--insert-hanging-line-maybe))
                     (setcdr block-bounds (point)))
                   (goto-char (car block-bounds)))
                 (outline-previous-heading)
@@ -1573,7 +1573,7 @@ Return non-nil if empty newline was inserted."
                 (user-error "Cannot shift element any further"))
               (when forward
                 (goto-char (cdr next-block-bounds))
-                (when (setq hanging-line (fountain-insert-hanging-line-maybe))
+                (when (setq hanging-line (fountain--insert-hanging-line-maybe))
                   (setcdr next-block-bounds (point))))
               (unless (< outline-begin (car next-block-bounds) outline-end)
                 (user-error "Cannot shift past higher level"))
@@ -1603,7 +1603,7 @@ Return non-nil if empty newline was inserted."
          (end-point-fun
           (lambda ()
             (outline-end-of-subtree)
-            (setq hanging-line (fountain-insert-hanging-line-maybe))
+            (setq hanging-line (fountain--insert-hanging-line-maybe))
             (point)))
          (beg (point))
          (folded
@@ -3078,7 +3078,7 @@ The file is then passed to `dired-guess-default'."
 
 ;;; Font Lock
 
-(defun fountain-get-font-lock-decoration ()
+(defun fountain--get-font-lock-decoration ()
   "Return the value of `font-lock-maximum-decoration' for `fountain-mode'."
   (let ((n (if (listp font-lock-maximum-decoration)
                (cdr (or (assq 'fountain-mode font-lock-maximum-decoration)
@@ -3120,7 +3120,7 @@ The file is then passed to `dired-guess-default'."
 
 (defun fountain-init-font-lock ()
   "Return a new list of `font-lock-keywords' for elements."
-  (let ((dec (fountain-get-font-lock-decoration))
+  (let ((dec (fountain--get-font-lock-decoration))
         keywords)
     (dolist (element fountain-element-list keywords)
       (let ((matcher (eval (plist-get (cdr element) :matcher)))
@@ -3282,15 +3282,15 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Minimum"
       (fountain-set-font-lock-decoration 1)
       :style radio
-      :selected (= (fountain-get-font-lock-decoration) 1)]
+      :selected (= (fountain--get-font-lock-decoration) 1)]
      ["Default"
       (fountain-set-font-lock-decoration 2)
       :style radio
-      :selected (= (fountain-get-font-lock-decoration) 2)]
+      :selected (= (fountain--get-font-lock-decoration) 2)]
      ["Maximum"
       (fountain-set-font-lock-decoration 3)
       :style radio
-      :selected (= (fountain-get-font-lock-decoration) 3)]
+      :selected (= (fountain--get-font-lock-decoration) 3)]
      "---"
      ["Hide Emphasis Markup"
       (customize-set-variable 'fountain-hide-emphasis-markup
