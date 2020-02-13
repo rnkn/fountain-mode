@@ -155,7 +155,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
   "Default script format.
 Can be overridden in metadata with, e.g.
 
-    format: teleplay"
+  format: teleplay"
   :group 'fountain
   :type 'string
   :safe 'string)
@@ -255,7 +255,6 @@ The default \" %x - %n:\" inserts something like:
 
 ;;; Faces
 
-;; FIXME: better docstring formatting
 (defgroup fountain-faces ()
   "\\<fountain-mode-map>Faces used in `fountain-mode'.
 There are three levels of decoration, each with different
@@ -436,8 +435,8 @@ Separated from scene heading locations with
   nil
   "Regular expression for matching transitions.
 
-    Group 1: match forced transition mark
-    Group 2: match transition
+  Group 1: match forced transition mark
+  Group 2: match transition
 
 Constructed with `fountain-init-trans-regexp'. Requires
 `fountain-match-trans' for preceding and succeeding blank
@@ -1308,20 +1307,16 @@ important."
   "\\<fountain-mode-map>Return completion table for entity at point.
 Trigger completion with \\[fountain-dwim].
 
-1. If point is at a scene heading and matches
-`fountain-scene-heading-suffix-separator', offer completion candidates
-from `fountain-scene-heading-suffix-list'.
-
-2. If point is at a line matching
-`fountain-scene-heading-prefix-list', offer completion candidates
-from `fountain--completion-locations' and
-`fountain-completion-additional-locations'.
-
-3. If point is at beginning of line with a preceding blank line,
-offer completion candidates from `fountain--completion-characters'
-and `fountain-completion-additional-characters'. For more
-information of character completion sorting, see
-`fountain-completion-get-characters'.
+  1. If point is at a scene heading and matches
+     `fountain-scene-heading-suffix-separator', offer completion
+     candidates from `fountain-scene-heading-suffix-list'.
+  2. If point is at a line matching `fountain-scene-heading-prefix-list',
+     offer completion candidates from `fountain--completion-locations' and
+     `fountain-completion-additional-locations'.
+  3. If point is at beginning of line with a preceding blank line, offer
+     completion candidates from `fountain--completion-characters' and
+     `fountain-completion-additional-characters'. For more information of
+     character completion sorting, see `fountain-completion-get-characters'.
 
 Added to `completion-at-point-functions'."
   (cond ((and (fountain-match-scene-heading)
@@ -1412,13 +1407,13 @@ Add to `fountain-mode-hook' to have completion upon load."
   0
   "Internal local integer representing global outline cycling status.
 
-    0: Show all
-    1: Show level 1 section headings
-    2: Show level 2 section headings
-    3: Show level 3 section headings
-    4: Show level 4 section headings
-    5: Show level 5 section headings
-    6: Show scene headings
+  0: Show all
+  1: Show level 1 section headings
+  2: Show level 2 section headings
+  3: Show level 3 section headings
+  4: Show level 4 section headings
+  5: Show level 5 section headings
+  6: Show scene headings
 
 Used by `fountain-outline-cycle'.")
 
@@ -1669,13 +1664,13 @@ Display a message unless SILENT."
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
-    1. If ARG is nil, cycle outline visibility of current subtree and
-       its children (\\[fountain-dwim]).
-    2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-dwim],
-       same as \\[fountain-outline-cycle-global]).
-    3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
-    4. If ARG is 64, show outline visibility set in
-       `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim])."
+  1. If ARG is nil, cycle outline visibility of current subtree and
+     its children (\\[fountain-dwim]).
+  2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-dwim],
+     same as \\[fountain-outline-cycle-global]).
+  3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
+  4. If ARG is 64, show outline visibility set in
+     `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim])."
   (interactive "p")
   (let ((custom-level
          (when fountain-outline-custom-level
@@ -1779,10 +1774,10 @@ Display a message unless SILENT."
 Calls `fountain-outline-cycle' with argument 4 to cycle buffer
 outline visibility through the following states:
 
-    1. Top-level section headings
-    2. Value of `fountain-outline-custom-level'
-    3. All section headings and scene headings
-    4. Everything"
+  1. Top-level section headings
+  2. Value of `fountain-outline-custom-level'
+  3. All section headings and scene headings
+  4. Everything"
   (interactive)
   (fountain-outline-cycle 4))
 
@@ -1920,9 +1915,9 @@ If N is 0, move to beginning of scene."
 
 Ignores revised scene numbers scenes.
 
-    10  = 10
-    10B = 10
-    A10 =  9"
+  10  = 10
+  10B = 10
+  A10 =  9"
   (interactive "NGo to scene: ")
   (push-mark)
   (goto-char (point-min))
@@ -2012,7 +2007,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
 Key string is slugified and interned. Value string remains a
 string. e.g.
 
-    Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
+  Draft date: 2015-12-25 -> (draft-date \"2015-12-25\")"
   (save-excursion
     (save-restriction
       (widen)
@@ -2247,15 +2242,15 @@ If nil, when inserting new scene headings after numbering
 existing scene headings, revised scene number format works as
 follows:
 
-    10
-    10A <- new scene
-    11
+  10
+  10A <- new scene
+  11
 
 If non-nil, revised scene number format works as follows:
 
-    10
-    A11 <- new scene
-    11
+  10
+  A11 <- new scene
+  11
 
 n.b. Using conflicting revised scene number format in the same
 script may result in errors in output."
@@ -2289,13 +2284,13 @@ script may result in errors in output."
 
 If `fountain-scene-numbers-prefix-revised' is non-nil:
 
-    \"10\" -> (10)
-    \"AA10\" -> (9 1 1)
+  \"10\" -> (10)
+  \"AA10\" -> (9 1 1)
 
 Or if nil:
 
-    \"10\" -> (10)
-    \"10AA\" -> (10 1 1)"
+  \"10\" -> (10)
+  \"10AA\" -> (10 1 1)"
   ;; FIXME: does not account for user option
   ;; `fountain-scene-numbers-separator' or
   ;; `fountain-scene-numbers-first-revision-char'.
@@ -2483,18 +2478,18 @@ Adding scene numbers to scene headings after numbering existing
 scene headings will use a prefix or suffix letter, depending on
 the value of `fountain-scene-numbers-prefix-revised':
 
-    10
-    10A <- new scene
-    10B <- new scene
-    11
+  10
+  10A <- new scene
+  10B <- new scene
+  11
 
 If further scene headings are inserted:
 
-    10
-    10A
-    10AA <- new scene
-    10B
-    11
+  10
+  10A
+  10AA <- new scene
+  10B
+  11
 
 In this example, you can't automatically number a new scene
 between 10 and 10A (which might be numbered as 10aA). Instead,
@@ -3069,9 +3064,8 @@ The file is then passed to `dired-guess-default'."
       (user-error "Could not find export file for %S"
                   (file-name-nondirectory (buffer-file-name))))
     (setq file-list
-          (seq-sort
-           (lambda (a b) (time-less-p (nth 5 b) (nth 5 a)))
-           file-list))
+          (seq-sort (lambda (a b) (time-less-p (nth 5 b) (nth 5 a)))
+                    file-list))
     (setq file (caar file-list))
     (unless (file-exists-p file)
       (user-error "File %S does not exist" file))
