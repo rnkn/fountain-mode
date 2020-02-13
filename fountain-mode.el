@@ -3239,15 +3239,21 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Forward Heading Same Level" fountain-outline-forward]
      ["Backward Heading Same Level" fountain-outline-backward]
      "---"
-     ["Cycle Outline Visibility" fountain-outline-cycle]
-     ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
-     ["Show All" fountain-outline-show-all]
-     "---"
      ["Next Character" fountain-forward-character]
      ["Previous Character" fountain-backward-character]
      "---"
      ["Go to Scene Heading..." fountain-goto-scene]
-     ["Go to Page..." fountain-goto-page])
+     ["Go to Page..." fountain-goto-page]
+     "---"
+     ["Cycle Outline Visibility" fountain-outline-cycle]
+     ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
+     ["Show All" fountain-outline-show-all]
+     "---"
+     ["Fold Notes When Cycling"
+      (customize-set-variable 'fountain-outline-fold-notes
+                              (not fountain-outline-fold-notes))
+      :style toggle
+      :selected fountain-outline-fold-notes])
     ("Edit Structure"
      ["Insert Section Heading" fountain-insert-section-heading]
      ["Mark Subtree" fountain-outline-mark]
@@ -3269,6 +3275,10 @@ redisplay in margin. Otherwise, remove display text properties."
                               (not fountain-scene-numbers-display-in-margin))
       :style toggle
       :selected fountain-scene-numbers-display-in-margin])
+    "---"
+    ["Do What I Mean" fountain-dwim]
+    ["Upcase Line" fountain-upcase-line]
+    ["Upcase Line and Newline" fountain-upcase-line-and-newline]
     "---"
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
@@ -3337,6 +3347,7 @@ redisplay in margin. Otherwise, remove display text properties."
                       fountain-hide-emphasis-markup
                       fountain-hide-element-markup
                       fountain-shift-all-elements
+                      fountain-outline-fold-notes
                       font-lock-maximum-decoration
                       fountain-page-size))
       (when (customize-mark-to-save option) (setq unsaved t)))
