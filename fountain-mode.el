@@ -3379,6 +3379,7 @@ See <http://debbugs.gnu.org/24073>."
   ;; In Emacs version prior to 26, `outline-invisible-p' returns non-nil for ANY
   ;; invisible property of text at point. We want to only return non-nil if
   ;; property is 'outline
+  (declare-function fountain-outline-invisible-p "fountain-mode")
   (unless (or (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
               (<= 26 emacs-major-version))
 
