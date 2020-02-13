@@ -3094,8 +3094,7 @@ The file is then passed to `dired-guess-default'."
   (interactive
    (list (or current-prefix-arg
              (string-to-number (char-to-string
-                                (read-char-choice "Maximum decoration (1-3): "
-                                                  '(?1 ?2 ?3)))))))
+    (read-char-choice "Maximum decoration (1-3): " '(?1 ?2 ?3)))))))
   (when (and (integerp n)
              (<= 1 n 3))
     (let ((level (cond ((= n 1) 1)
@@ -3110,14 +3109,16 @@ The file is then passed to `dired-guess-default'."
             ((or (booleanp font-lock-maximum-decoration)
                  (integerp font-lock-maximum-decoration))
              (customize-set-variable 'font-lock-maximum-decoration
-                                     (list (cons 'fountain-mode level)
-                                           (cons 't font-lock-maximum-decoration)))))
+                (list (cons 'fountain-mode level)
+                      (cons 't font-lock-maximum-decoration)))))
       (message "Syntax highlighting is now: %s"
                (cond ((= n 1) "minimum")
                      ((= n 2) "default")
                      ((= n 3) "maximum")))
       (font-lock-refresh-defaults))))
 
+;; FIXME: doesn't allow for (eval . FORM) style font lock keywords, which
+;; prevents using staggered outline headings
 (defun fountain-init-font-lock ()
   "Return a new list of `font-lock-keywords' for elements."
   (let ((dec (fountain--get-font-lock-decoration))
@@ -3153,6 +3154,7 @@ The file is then passed to `dired-guess-default'."
               (append keywords
                       (list (cons matcher subexp-highlighter))))))))
 
+;; FIXME: make scene numbers display in both margins, like a real script.
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
 
