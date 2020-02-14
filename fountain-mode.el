@@ -3096,35 +3096,38 @@ Return non-nil if match occurs." fn)))
     (dolist (element fountain--font-lock-keywords)
       (let ((matcher (eval (cadr element)))
             (subexp-hl (cddr element))
-            highlight align)
-        (setq align (eval (intern-soft (format "fountain-align-%s"
-                                               (car element)))))
-        (when (and align fountain-align-elements)
-          (unless (integerp align)
-            (setq align
+            highlight align-col)
+        (setq align-col
+              (eval (intern-soft (format "fountain-align-%s" (car element)))))
+        (when (and align-col fountain-align-elements)
+          (unless (integerp align-col)
+            (setq align-col
         (cdr (or (assoc-string
                   (or (alist-get 'format (fountain-read-metadata))
                       fountain-default-script-format)
-                  align)
-                 (car align))))))
+                  align-col)
+                 (car align-col))))))
 
         (dolist (match-hl subexp-hl)
           (if (and (eq matcher 'eval)
                    (<= (car match-hl) dec))
               (setq highlight (cdr match-hl))
             (let ((subexp (nth 1 match-hl))
-                  facespec
+                  (face
+                   (when (<= (nth 0 match-hl) dec)
+                     (nth 2 match-hl)))
+                  (align
+                   (when (integerp align-col)
+                     `(line-prefix (space :align-to ,align-col)
+                       wrap-prefix (space :align-to ,align-col))))
+                  (invisible
+                   (when (nth 5 match-hl)
+                     `(invisible ,(nth 5 match-hl))))
                   (override (nth 3 match-hl))
                   (laxmatch (nth 4 match-hl)))
-              (setq facespec (list 'quote
-                (append (list 'face (when (<= (nth 0 match-hl) dec)
-                                      (nth 2 match-hl)))
-                        (when (integerp align)
-                          (list 'line-prefix (list 'space :align-to align)
-                                'wrap-prefix (list 'space :align-to align)))
-                        (when (nth 5 match-hl)
-                          (list 'invisible (nth 5 match-hl))))))
-              (push (list subexp facespec override laxmatch) highlight))))
+              (push (list subexp `(quote (face ,face ,@align ,@invisible))
+                          override laxmatch)
+                    highlight))))
 
         (push (cons matcher highlight) keywords)))
     (reverse keywords)))
