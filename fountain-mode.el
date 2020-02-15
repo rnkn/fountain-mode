@@ -2319,8 +2319,8 @@ to include external files."
           (fountain-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (when (match-string 8)
-            (delete-region (match-beginning 6) (match-end 9)))
+          (when (match-string 9)
+            (delete-region (match-beginning 7) (match-end 10)))
           (fountain-forward-scene 1))))))
 
 (defun fountain-add-scene-numbers ()
@@ -2994,8 +2994,8 @@ Return non-nil if match occurs." fn)))
 (defvar fountain--font-lock-keywords
   '((section-heading
      (quote eval)
-     (2 list fountain-section-heading-regexp 0
-        '(fountain--get-section-heading-face)))
+     (2 list fountain-section-heading-regexp
+        0 '(fountain--get-section-heading-face)))
 
     (section-heading
      fountain-section-heading-regexp
