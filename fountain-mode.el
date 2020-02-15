@@ -2360,7 +2360,7 @@ scene number from being auto-upcased."
           (fountain-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (unless (match-string 8)
+          (unless (match-string 9)
             (end-of-line)
             (delete-horizontal-space t)
             (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
