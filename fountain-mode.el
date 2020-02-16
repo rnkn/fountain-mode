@@ -3037,7 +3037,7 @@ Return non-nil if match occurs." fn)))
      (define-fountain-font-lock-matcher fountain-match-synopsis)
      (2 0 fountain-synopsis)
      (2 1 nil nil nil fountain-syntax-chars)
-     (2 2 fountain-non-printing override))
+     (2 2 fountain-non-printing prepend))
 
     (note
      (define-fountain-font-lock-matcher fountain-match-note)
@@ -3096,7 +3096,8 @@ Return non-nil if match occurs." fn)))
     (dolist (element fountain--font-lock-keywords)
       (let ((matcher (eval (cadr element)))
             (subexp-hl (cddr element))
-            highlight align-col)
+            highlight align-col use-form)
+        (when (eq matcher 'eval) (setq use-form t))
         (setq align-col
               (eval (intern-soft (format "fountain-align-%s" (car element)))))
         (when (and align-col fountain-align-elements)
@@ -3109,8 +3110,7 @@ Return non-nil if match occurs." fn)))
                  (car align-col))))))
 
         (dolist (match-hl subexp-hl)
-          (if (and (eq matcher 'eval)
-                   (<= (car match-hl) dec))
+          (if (and use-form (<= (car match-hl) dec))
               (setq highlight (cdr match-hl))
             (let ((subexp (nth 1 match-hl))
                   (face
@@ -3129,7 +3129,8 @@ Return non-nil if match occurs." fn)))
                           override laxmatch)
                     highlight))))
 
-        (push (cons matcher highlight) keywords)))
+        (push (cons matcher (if use-form highlight (reverse highlight)))
+              keywords)))
     (reverse keywords)))
 
 ;; FIXME: make scene numbers display in both margins, like a real script.
