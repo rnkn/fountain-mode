@@ -8,7 +8,7 @@ Fountain plain text markup format.
 
 For more information on the Fountain format, visit <https://fountain.io>.
 
-![screenshot](https://raw.githubusercontent.com/wiki/rnkn/fountain-mode/images/fountain-mode-1.png)
+![screenshot](https://user-images.githubusercontent.com/1256849/74600084-c1553900-50d7-11ea-9367-c9726e2bffee.png)
 
 ## Features ##
 
