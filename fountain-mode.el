@@ -57,7 +57,7 @@
 
 ;; ## Requirements ##
 
-;; - Emacs 25.3
+;; - Emacs 24.5
 
 ;; ## Exporting ##
 
