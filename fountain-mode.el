@@ -6,8 +6,8 @@
 
 ;; Author: Paul W. Rankin <code@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 3.0.1
-;; Package-Requires: ((emacs "25.3"))
+;; Version: 3.0.2
+;; Package-Requires: ((emacs "24.5") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
@@ -2867,8 +2867,8 @@ Export command profiles are defined in
         (end   (if (use-region-p) (region-end) (point-max)))
         (metadata (fountain-read-metadata))
         title author use-stdin)
-    (setq title  (alist-get 'title metadata)
-          author (alist-get 'author metadata))
+    (setq title  (cdr (assq 'title metadata))
+          author (cdr (assq 'author metadata)))
     (unless (let (case-fold-search) (string-match "%b" command))
       (setq use-stdin t))
     (setq command (format-spec command
@@ -3100,7 +3100,7 @@ Return non-nil if match occurs." fn)))
           (unless (integerp align-col)
             (setq align-col
         (cdr (or (assoc-string
-                  (or (alist-get 'format (fountain-read-metadata))
+                  (or (cdr (assq 'format (fountain-read-metadata)))
                       fountain-default-script-format)
                   align-col)
                  (car align-col))))))
