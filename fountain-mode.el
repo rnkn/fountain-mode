@@ -159,8 +159,6 @@ Can be overridden in metadata with, e.g.
   :type 'string
   :safe 'string)
 
-(define-obsolete-variable-alias 'fountain-add-contd-dialog
-  'fountain-add-continued-dialog "3.0.0")
 (defcustom fountain-add-continued-dialog
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
@@ -172,8 +170,6 @@ succession, or if nil, remove this string."
   :type 'boolean
   :safe 'booleanp)
 
-(define-obsolete-variable-alias 'fountain-contd-dialog-string
-  'fountain-continued-dialog-string "3.0.0")
 (defcustom fountain-continued-dialog-string
   "(CONT'D)"
   "String to append to character name speaking in succession.
