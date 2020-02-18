@@ -6,7 +6,7 @@
 
 ;; Author: Paul W. Rankin <code@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 3.0.2
+;; Version: 3.0.3
 ;; Package-Requires: ((emacs "24.5") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -877,8 +877,7 @@ buffers."
   (setq case-fold-search t)
   (setq imenu-case-fold-search nil)
   (setq font-lock-multiline 'undecided)
-  (setq font-lock-defaults
-        '(fountain-init-font-lock nil nil nil fountain-mark-scene))
+  (setq font-lock-defaults '(fountain-init-font-lock))
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-delim))
