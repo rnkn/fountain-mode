@@ -909,6 +909,17 @@ buffers."
           (and (bolp) (eolp))
           (forward-comment 1)))))
 
+(defun fountain-in-dialog-maybe ()
+  (save-excursion
+    (save-restriction
+      (widen)
+      (or (fountain-match-dialog)
+          (fountain-match-paren)
+          (and (forward-line -1)
+               (or (let (case-fold-search)
+                     (looking-at fountain-character-regexp))
+                   (fountain-match-dialog)))))))
+
 (defun fountain-match-metadata ()
   "Match metadata if point is at metadata, nil otherwise."
   (save-excursion
@@ -1490,8 +1501,7 @@ Display a message unless SILENT."
          (save-excursion
            (goto-char (point-min))
            (while (re-search-forward fountain-note-regexp nil 'move)
-             (outline-flag-region (match-beginning 1)
-                                  (match-end 1)
+             (outline-flag-region (match-beginning 1) (match-end 1)
                                   fountain-outline-fold-notes)))
          (unless silent (message "Showing all")))
         ((= n 6)
@@ -1544,8 +1554,7 @@ Display a message unless SILENT."
          (lambda (eohp eosp)
            (goto-char eohp)
            (while (re-search-forward fountain-note-regexp eosp 'move)
-             (outline-flag-region (match-beginning 1)
-                                  (match-end 1)
+             (outline-flag-region (match-beginning 1) (match-end 1)
                                   fountain-outline-fold-notes)))))
     (cond ((eq arg 4)
            (cond
@@ -1917,17 +1926,36 @@ to scene number or point."
   "Call a command based on context (Do What I Mean).
 
   1. If prefixed with ARG, call `fountain-outline-cycle' and pass ARG.
-  2. If point is at a note, cycle visibility of that note.
-  3. If point is at the end of line, call `completion-at-point'.
-  4. If point is a scene heading or section heading cycle visibility of that
+  2. If point is inside an empty parenthetical, delete it.
+  3. If point is inside a non-empty parenthetical, move to a newline.
+  4. If point is at a blank line within dialogue, insert a parenthetical.
+  5. If point is at a note, cycle visibility of that note.
+  6. If point is at the end of line, call `completion-at-point'.
+  7. If point is a scene heading or section heading, cycle visibility of that
      heading."
   (interactive "p")
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
+        ((save-excursion
+           (beginning-of-line)
+           (looking-at "^()"))
+         (delete-region (match-beginning 0) (match-end 0)))
+        ((and (fountain-match-paren)
+              (fountain-blank-after-p))
+         (end-of-line)
+         (newline))
+        ((fountain-match-paren)
+         (forward-line))
+        ((and (bolp) (eolp)
+              (fountain-in-dialog-maybe))
+         (insert-parentheses))
+        ((and (eolp)
+              (fountain-in-dialog-maybe))
+         (newline 2)
+         (completion-at-point))
         ((fountain-match-note)
-         (outline-flag-region (match-beginning 1)
-                              (match-end 1)
-           (not (get-char-property (match-beginning 1) 'invisible))))
+         (outline-flag-region (match-beginning 1) (match-end 1)
+            (not (get-char-property (match-beginning 1) 'invisible))))
         ((eolp)
          (completion-at-point))
         ((or (fountain-match-section-heading)
