@@ -2986,6 +2986,20 @@ Return non-nil if match occurs." fn)))
            (forward-line))
          match))))
 
+(defun fountain-toggle-hide-emphasis-markup ()
+  (interactive)
+  (customize-set-variable 'fountain-hide-emphasis-markup
+                          (not fountain-hide-emphasis-markup))
+  (message "Emphasis markup is now %s"
+           (if fountain-hide-emphasis-markup "invisible" "visible")))
+
+(defun fountain-toggle-hide-element-markup ()
+  (interactive)
+  (customize-set-variable 'fountain-hide-element-markup
+                          (not fountain-hide-element-markup))
+  (message "Element markup is now %s"
+           (if fountain-hide-element-markup "invisible" "visible")))
+
 (defvar fountain--font-lock-keywords
   '((section-heading
      (quote eval)
@@ -3168,6 +3182,8 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     (define-key map (kbd "M-TAB") #'completion-at-point)
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
+    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
+    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-element-markup)
     ;; Navigation commands:
     (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
     (define-key map [remap end-of-defun] #'fountain-end-of-scene)
@@ -3278,14 +3294,10 @@ redisplay in margin. Otherwise, remove display text properties."
       :style radio
       :selected (= (fountain--get-font-lock-decoration) 3)]
      "---"
-     ["Hide Emphasis Markup"
-      (customize-set-variable 'fountain-hide-emphasis-markup
-                              (not fountain-hide-emphasis-markup))
+     ["Hide Emphasis Markup" fountain-toggle-hide-emphasis-markup
       :style toggle
       :selected fountain-hide-emphasis-markup]
-     ["Hide Element Markup"
-      (customize-set-variable 'fountain-hide-element-markup
-                              (not fountain-hide-element-markup))
+     ["Hide Element Markup" fountain-toggle-hide-element-markup
       :style toggle
       :selected fountain-hide-element-markup])
     "---"
