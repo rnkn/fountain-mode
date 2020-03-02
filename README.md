@@ -74,5 +74,4 @@ See: <https://github.com/rnkn/fountain-mode/releases>
 
 ## Bugs and Feature Requests ##
 
-To report bugs either use <https://github.com/rnkn/fountain-mode/issues>
-or send an email to <code@paulwrankin.com>.
+Report bugs and feature requests at: <https://github.com/rnkn/fountain-mode/issues>
