@@ -2846,7 +2846,7 @@ Export command profiles are defined in
 `fountain-export-command-profiles'."
   (interactive
    (list (let ((default (caar fountain-export-command-profiles)))
-           (completing-read-default
+           (completing-read
             (format "Export profile [default %s]: " default)
             (mapcar #'car fountain-export-command-profiles)
             nil t nil nil default))
