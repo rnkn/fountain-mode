@@ -476,6 +476,18 @@ e.g. `TO:' will match both the following:
                (when (derived-mode-p 'fountain-mode)
                  (font-lock-refresh-defaults)))))))
 
+(defcustom fountain-character-extension-list
+  '("(V.O.)" "(O.S.)" "(O.C.)")
+  "List of extensions after character names (case sensitive).
+
+`fountain-continued-dialog-string' is automatically added to this
+list.
+
+These are only used for auto-completion. Any character can have
+whatever extension you like."
+  :group 'fountain
+  :type '(repeat (string :tag "Extension")))
+
 (defconst fountain-action-regexp
   "^\\(!\\)?\\(.*\\)[\s\t]*$"
   "Regular expression for forced action.
@@ -1173,10 +1185,13 @@ Trigger completion with \\[fountain-dwim].
      `fountain-scene-heading-suffix-separator', offer completion
      candidates from `fountain-scene-heading-suffix-list'.
   2. If point is at a line matching `fountain-scene-heading-prefix-list',
-     offer completion candidates from `fountain--completion-locations' and
+     offer completion candidates from `fountain--completion-locations' plus
      `fountain-completion-additional-locations'.
-  3. If point is at beginning of line with a preceding blank line, offer
-     completion candidates from `fountain--completion-characters' and
+  3. If point is at a possible character name with an opening parenthetical
+     extension, offer completion candidates from
+     `fountain-character-extension-list' plus `fountain-continued-dialog-string'.
+  4. If point is at beginning of line with a preceding blank line, offer
+     completion candidates from `fountain--completion-characters' plus
      `fountain-completion-additional-characters'. For more information of
      character completion sorting, see `fountain-completion-get-characters'.
 
@@ -1206,6 +1221,14 @@ Added to `completion-at-point-functions'."
                 (append
                  fountain-completion-additional-locations
                  fountain--completion-locations))))
+        ;; Return character extension
+        ((and (fountain-match-character t)
+              (match-string-no-properties 4))
+         (list (match-beginning 4)
+               (line-end-position)
+               (completion-table-case-fold
+                (append fountain-character-extension-list
+                        (list fountain-continued-dialog-string)))))
         ((and (eolp)
               (fountain-blank-before-p))
          ;; Return character completion
@@ -1942,7 +1965,7 @@ to scene number or point."
          (fountain-outline-cycle arg))
         ((save-excursion
            (beginning-of-line)
-           (looking-at "^()"))
+           (looking-at "()"))
          (delete-region (match-beginning 0) (match-end 0)))
         ((and (fountain-match-paren)
               (fountain-blank-after-p))
@@ -1961,7 +1984,7 @@ to scene number or point."
         ((fountain-match-note)
          (outline-flag-region (match-beginning 1) (match-end 1)
             (not (get-char-property (match-beginning 1) 'invisible))))
-        ((eolp)
+        ((or (eolp) (looking-at ")$"))
          (completion-at-point))
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading)
