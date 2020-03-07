@@ -931,7 +931,7 @@ buffers."
         (and (save-restriction
                (widen)
                (forward-line -1)
-               (or (fountain-match-character t)
+               (or (fountain-match-character 'loose)
                    (fountain-match-dialog)))))))
 
 (defun fountain-match-metadata ()
@@ -1222,7 +1222,7 @@ Added to `completion-at-point-functions'."
                  fountain-completion-additional-locations
                  fountain--completion-locations))))
         ;; Return character extension
-        ((and (fountain-match-character t)
+        ((and (fountain-match-character 'loose)
               (match-string-no-properties 4))
          (list (match-beginning 4)
                (line-end-position)
