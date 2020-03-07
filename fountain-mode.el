@@ -908,15 +908,15 @@ buffers."
           (and (bolp) (eolp))
           (forward-comment 1)))))
 
-(defun fountain-in-dialog-maybe ()
+(defun fountain-maybe-in-dialog-p ()
+  "Return non-nil if point may be in dialogue."
   (save-excursion
-    (save-restriction
-      (widen)
-      (or (fountain-match-dialog)
-          (fountain-match-paren)
-          (and (forward-line -1)
-               (or (let (case-fold-search)
-                     (looking-at fountain-character-regexp))
+    (or (fountain-match-dialog)
+        (fountain-match-paren)
+        (and (save-restriction
+               (widen)
+               (forward-line -1)
+               (or (fountain-match-character t)
                    (fountain-match-dialog)))))))
 
 (defun fountain-match-metadata ()
@@ -968,15 +968,17 @@ buffers."
     (and (looking-at fountain-scene-heading-regexp)
          (fountain-blank-before-p))))
 
-(defun fountain-match-character ()
-  "Match character if point is at character, nil otherwise."
+(defun fountain-match-character (&optional loose)
+  "Match character if point is at character, nil otherwise.
+When LOOSE is non-nil, do not require non-blank line after."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (beginning-of-line)
-      (and (let (case-fold-search)
+      (and (not (looking-at "!"))
+           (let (case-fold-search)
              (looking-at fountain-character-regexp))
            (fountain-blank-before-p)
-           (not (fountain-blank-after-p))))))
+           (if loose t (not (fountain-blank-after-p)))))))
 
 (defun fountain-match-dialog ()
   "Match dialog if point is at dialog, nil otherwise."
@@ -984,13 +986,13 @@ buffers."
               (fountain-match-paren)
               (fountain-match-note))
     (save-excursion
-      (beginning-of-line)
-      (and (looking-at fountain-dialog-regexp)
-           (save-match-data
-             (save-restriction
-               (widen)
-               (unless (bobp)
-                 (forward-line -1)
+      (save-restriction
+        (widen)
+        (beginning-of-line)
+        (and (looking-at fountain-dialog-regexp)
+             (unless (bobp)
+               (forward-line -1)
+               (save-match-data
                  (or (fountain-match-character)
                      (fountain-match-paren)
                      (fountain-match-dialog)))))))))
@@ -1946,10 +1948,11 @@ to scene number or point."
         ((fountain-match-paren)
          (forward-line))
         ((and (bolp) (eolp)
-              (fountain-in-dialog-maybe))
+              (fountain-maybe-in-dialog-p))
          (insert-parentheses))
-        ((and (eolp)
-              (fountain-in-dialog-maybe))
+        ((and fountain-dwim-insert-next-character
+              (eolp)
+              (fountain-maybe-in-dialog-p))
          (newline 2)
          (completion-at-point))
         ((fountain-match-note)
