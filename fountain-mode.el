@@ -497,17 +497,20 @@ e.g. `TO:' will match both the following:
 Requires `fountain-match-metadata' for `bobp'.")
 
 (defconst fountain-character-regexp
-  (concat "^[\s\t]*\\(?1:\\(?:"
-          "\\(?2:@\\)\\(?3:\\(?4:[^<>\n]+?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
+  (concat "^[\s\t]*"
+          "\\(?:\\(?1:@\\)\\(?2:[^<>\n]+?\\)"
           "\\|"
-          "\\(?3:\\(?4:[^!#a-z<>\n]*?[A-Z][^a-z<>\n]*?\\)\\(?:[\s\t]*(.*?)\\)*?\\)"
-          "\\)[\s\t]*\\(?5:\\^\\)?\\)[\s\t]*$")
+          "\\(?2:[^<>\n[:lower:]]*?[[:upper:]]+[^<>\n[:lower:]]*?\\)"
+          "\\)"
+          "\\(?3:[\s\t]*\\(?4:(\\).*?)\\)*?"
+          "\\(?5:[\s\t]*^\\)?"
+          "[\s\t]*$")
   "Regular expression for matching character names.
 
-  Group 1: match trimmed whitespace
-  Group 2: match leading @ for forced character
-  Group 3: match character name and parenthetical
-  Group 4: match character name only
+  Group 1: match leading @ for forced character
+  Group 2: match character name
+  Group 3: match parenthetical extension
+  Group 4: match opening parenthetical
   Group 5: match trailing ^ for dual dialog
 
 Requires `fountain-match-character' for preceding blank line.")
@@ -1143,7 +1146,7 @@ important."
         (fountain-forward-character 0 'scene)
         (while (not (or (bobp) (fountain-match-scene-heading)))
           (when (fountain-match-character)
-            (cl-pushnew (match-string-no-properties 4) scene-characters))
+            (cl-pushnew (match-string-no-properties 2) scene-characters))
           (fountain-forward-character -1 'scene))))
     (setq scene-characters (reverse scene-characters)
           alt-character (cadr scene-characters)
@@ -1243,7 +1246,7 @@ Add to `fountain-mode-hook' to have completion upon load."
       (goto-char (point-min))
       (while (< (point) (point-max))
         (when (fountain-match-character)
-          (let ((character (match-string-no-properties 4))
+          (let ((character (match-string-no-properties 2))
                 candidate lines)
             (setq candidate (assoc-string character
                                           fountain--completion-characters)
@@ -1856,7 +1859,7 @@ If LIMIT is 'scene, halt at next scene heading. If LIMIT is
       (widen)
       (fountain-forward-character n limit)
       (when (fountain-match-character)
-        (match-string-no-properties 4)))))
+        (match-string-no-properties 2)))))
 
 (defun fountain-read-metadata ()
   "Read metadata of current buffer and return as a property list.
@@ -1897,11 +1900,11 @@ within left-side dual dialogue, and nil otherwise."
         (when pos (goto-char pos))
         (cond ((progn (fountain-forward-character 0 'dialog)
                       (and (fountain-match-character)
-                           (stringp (match-string 5))))
+                           (stringp (match-string-no-properties 5))))
                'right)
               ((progn (fountain-forward-character 1 'dialog)
                       (and (fountain-match-character)
-                           (stringp (match-string 5))))
+                           (stringp (match-string-no-properties 5))))
                'left))))))
 
 
@@ -3056,7 +3059,7 @@ Return non-nil if match occurs." fn)))
     (character
      (define-fountain-font-lock-matcher fountain-match-character)
      (3 0 fountain-character)
-     (3 2 fountain-non-printing t t fountain-syntax-chars)
+     (3 1 fountain-non-printing t t fountain-syntax-chars)
      (3 5 highlight prepend t))
 
     (dialog
