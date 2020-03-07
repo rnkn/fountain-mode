@@ -1937,6 +1937,14 @@ within left-side dual dialogue, and nil otherwise."
   t
   "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
   :type 'boolean
+  :safe 'booleanp
+  :group 'fountain)
+
+(defcustom fountain-dwim-insert-next-character
+  nil
+  "When non-nil `fountain-dwim' inserts next character after dialogue."
+  :type 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (defun fountain-auto-upcase ()
