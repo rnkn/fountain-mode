@@ -1049,7 +1049,7 @@ Assumes that all other element matching has been done."
       (widen)
       (beginning-of-line)
       (or (and (looking-at fountain-action-regexp)
-               (match-string 1))
+               (match-string-no-properties 1))
           (and (not (or (and (bolp) (eolp))
                         (fountain-match-section-heading)
                         (fountain-match-scene-heading)
@@ -1197,14 +1197,14 @@ Trigger completion with \\[fountain-dwim].
 
 Added to `completion-at-point-functions'."
   (cond ((and (fountain-match-scene-heading)
-              (match-string 5))
+              (match-string-no-properties 5))
          ;; Return scene heading suffix completion
          (list (match-end 5)
                (point)
                (completion-table-case-fold
                 fountain-scene-heading-suffix-list)))
         ((and (fountain-match-scene-heading)
-              (match-string 3))
+              (match-string-no-properties 3))
          ;; Return scene location completion
          (list (match-end 3)
                (point)
@@ -1213,7 +1213,7 @@ Added to `completion-at-point-functions'."
                  fountain-completion-additional-locations
                  fountain--completion-locations))))
         ((and (fountain-match-scene-heading)
-              (match-string 1))
+              (match-string-no-properties 1))
          ;; Return scene location completion (forced)
          (list (match-end 1)
                (point)
@@ -1668,8 +1668,8 @@ outline visibility through the following states:
   "Return the heading's nesting level in the outline.
 Assumes that point is at the beginning of a heading and match
 data reflects `outline-regexp'."
-  (if (string-prefix-p "#" (match-string 0))
-      (string-width (match-string 2))
+  (if (string-prefix-p "#" (match-string-no-properties 0))
+      (string-width (match-string-no-properties 2))
     6))
 
 (defun fountain-insert-section-heading ()
@@ -1715,7 +1715,8 @@ buffer windows are opened."
         (setq beg (point))
         (when (or (fountain-match-section-heading)
                   (fountain-match-scene-heading))
-          (setq heading-name (string-trim (match-string 0) "[#\s]+")
+          (setq heading-name (string-trim (match-string-no-properties 0)
+                                          "[#\s]+")
                 target-buffer (concat base-buffer "-" heading-name))
           (outline-end-of-subtree)
           (setq end (point)))))
@@ -1805,13 +1806,15 @@ Ignores revised scene numbers scenes.
   (push-mark)
   (goto-char (point-min))
   (let ((scene (if (fountain-match-scene-heading)
-                   (car (fountain-scene-number-to-list (match-string 8)))
+                   (car (fountain-scene-number-to-list
+                         (match-string-no-properties 8)))
                  0)))
     (while (and (< scene n)
                 (< (point) (point-max)))
       (fountain-forward-scene 1)
       (when (fountain-match-scene-heading)
-        (setq scene (or (car (fountain-scene-number-to-list (match-string 8)))
+        (setq scene (or (car (fountain-scene-number-to-list
+                              (match-string-no-properties 8)))
                         (1+ scene)))))))
 
 (defun fountain-goto-page (n)
@@ -1824,8 +1827,8 @@ Ignores revised scene numbers scenes.
     (while (fountain-match-metadata) (forward-line))
     (if (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
     (while (< 1 i)
-      (if (and (fountain-match-page-break) (match-string 2))
-          (setq i (- n (string-to-number (match-string 2)))))
+      (if (and (fountain-match-page-break) (match-string-no-properties 2))
+          (setq i (- n (string-to-number (match-string-no-properties 2)))))
       (fountain-forward-page)
       (cl-decf i))))
 
@@ -1901,7 +1904,7 @@ string. e.g.
                 (value (match-string-no-properties 2)))
             (forward-line)
             (while (and (fountain-match-metadata)
-                        (null (match-string 1)))
+                        (null (match-string-no-properties 1)))
               (setq value
                     (concat value (when value "\n")
                             (match-string-no-properties 2)))
@@ -2209,8 +2212,8 @@ Or if nil:
     (when (stringp string)
       (if fountain-scene-numbers-prefix-revised
           (when (string-match "\\([a-z]*\\)[\\.-]*\\([0-9]+\\)[\\.-]*" string)
-            (setq number (string-to-number (match-string 2 string))
-                  revision (match-string 1 string))
+            (setq number (string-to-number (match-string-no-properties 2 string))
+                  revision (match-string-no-properties 1 string))
             (unless (string-empty-p revision) (setq number (1- number))))
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string))
@@ -2281,12 +2284,13 @@ to include external files."
           (goto-char (point-min))
           (while (not (or found (eobp)))
             (when (and (re-search-forward fountain-scene-heading-regexp nil 'move)
-                       (match-string 9))
+                       (match-string-no-properties 9))
               (setq found t))))
         (if found
             ;; There are scene numbers, so this scene number needs to be
             ;; calculated relative to those.
-            (let ((current-scene (fountain-scene-number-to-list (match-string 9)))
+            (let ((current-scene
+                   (fountain-scene-number-to-list (match-string-no-properties 9)))
                   last-scene next-scene)
               ;; Check if scene heading is already numbered and if there
               ;; is a NEXT-SCENE. No previousscene number can be greater
@@ -2378,7 +2382,7 @@ to include external files."
           (fountain-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (when (match-string 9)
+          (when (match-string-no-properties 9)
             (delete-region (match-beginning 7) (match-end 10)))
           (fountain-forward-scene 1))))))
 
@@ -2419,7 +2423,7 @@ scene number from being auto-upcased."
           (fountain-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (unless (match-string 9)
+          (unless (match-string-no-properties 9)
             (end-of-line)
             (delete-horizontal-space t)
             (insert "\s#" (fountain-scene-number-to-string (fountain-get-scene-number)) "#"))
@@ -3218,7 +3222,7 @@ redisplay in margin. Otherwise, remove display text properties."
   (while (< (point) (min end (point-max)))
     (when (fountain-match-scene-heading)
       (if (and fountain-scene-numbers-display-in-margin
-               (match-string 9))
+               (match-string-no-properties 9))
           (put-text-property (match-beginning 7) (match-end 10)
                              'display (list '(margin right-margin)
                                             (match-string-no-properties 9)))
