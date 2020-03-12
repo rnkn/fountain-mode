@@ -1139,19 +1139,17 @@ as a directory variable."
 (defun fountain-completion-get-characters ()
   "Return a list of characters for completion.
 
-First, return second-last speaking character, followed by each
-previously speaking character within scene. After that, return
-characters from `fountain-completion-additional-characters' then
+First, return second-last speaking character, then the last
+speaking character, followed by each previously speaking
+character within scene. After that, return characters from
+`fountain-completion-additional-characters' then
 `fountain--completion-characters'.
 
 n.b. `fountain-completion-additional-characters' are offered as
 candidates ahead of `fountain--completion-characters' because
 these need to be manually set, and so are considered more
 important."
-  (let (scene-characters
-        alt-character
-        contd-character
-        rest-characters)
+  (let (scene-characters alt-character contd-character rest-characters)
     (save-excursion
       (save-restriction
         (widen)
@@ -1165,17 +1163,13 @@ important."
           contd-character (car scene-characters)
           rest-characters (cddr scene-characters)
           scene-characters nil)
-    (when rest-characters
-      (setq scene-characters rest-characters))
-    (when contd-character
-      (setq scene-characters
-            (cons contd-character scene-characters)))
-    (when alt-character
-      (setq scene-characters
-            (cons alt-character scene-characters)))
-    (append scene-characters
-            fountain-completion-additional-characters
-            fountain--completion-characters)))
+    (when rest-characters (setq scene-characters rest-characters))
+    (when contd-character (push contd-character scene-characters))
+    (when alt-character (push alt-character scene-characters))
+    (delete-dups
+     (append scene-characters
+             fountain-completion-additional-characters
+             (mapcar 'car fountain--completion-characters)))))
 
 (defun fountain-completion-at-point ()
   "\\<fountain-mode-map>Return completion table for entity at point.
