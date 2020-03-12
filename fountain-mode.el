@@ -3474,6 +3474,7 @@ If POS is nil, use `point' instead."
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
 ;; require-final-newline: t
+;; sentence-end-double-space: nil
 ;; End:
 
 ;;; fountain-mode.el ends here
