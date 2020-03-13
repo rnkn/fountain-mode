@@ -136,15 +136,16 @@ Cycle buffers and call `font-lock-refresh-defaults' when
         (font-lock-refresh-defaults)))))
 
 (defcustom fountain-mode-hook
-  '(turn-on-visual-line-mode fountain-outline-hide-custom-level)
+  '(visual-line-mode)
   "Mode hook for `fountain-mode', run after the mode is turned on."
   :group 'fountain
   :type 'hook
-  :options '(turn-on-visual-line-mode
-             fountain-outline-hide-custom-level
-             fountain-completion-update
+  :options '(visual-line-mode
+             electric-pair-local-mode
              imenu-add-menubar-index
-             turn-on-flyspell))
+             fountain-completion-update
+             fountain-outline-hide-custom-level
+             flyspell-mode))
 
 (define-obsolete-variable-alias 'fountain-script-format
   'fountain-default-script-format "3.0.0")
@@ -161,7 +162,6 @@ Can be overridden in metadata with, e.g.
 (defcustom fountain-add-continued-dialog
   t
   "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
-
 When calling `fountain-continued-dialog-refresh', append
 `fountain-continued-dialog-string' to characters speaking in
 succession, or if nil, remove this string."
@@ -227,6 +227,21 @@ this option."
                    (add-to-invisibility-spec 'fountain-syntax-chars)
                  (remove-from-invisibility-spec 'fountain-syntax-chars))
                (font-lock-refresh-defaults))))))
+
+(defcustom fountain-auto-upcase-scene-headings
+  t
+  "If non-nil, automatically upcase scene headings as you type.
+Upcases lines matching `fountain-scene-heading-regexp'."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain)
+
+(defcustom fountain-dwim-insert-next-character
+  nil
+  "When non-nil `fountain-dwim' inserts next character after dialogue."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain)
 
 (defcustom fountain-note-template
   " %x - %n: "
@@ -1929,20 +1944,6 @@ within left-side dual dialogue, and nil otherwise."
 
 
 ;;; Editing
-
-(defcustom fountain-auto-upcase-scene-headings
-  t
-  "If non-nil, automatically upcase lines matching `fountain-scene-heading-regexp'."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain)
-
-(defcustom fountain-dwim-insert-next-character
-  nil
-  "When non-nil `fountain-dwim' inserts next character after dialogue."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain)
 
 (defun fountain-auto-upcase ()
   "Upcase all or part of the current line contextually.
