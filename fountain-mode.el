@@ -3167,7 +3167,7 @@ Return non-nil if match occurs." fn)))
   "Return a new list of `font-lock-keywords' for elements."
   (let ((dec (fountain--get-font-lock-decoration))
         keywords)
-
+    ;; For each fountain element...
     (dolist (element fountain--font-lock-keywords)
       (let ((matcher (eval (cadr element)))
             (subexp-hl (cddr element))
@@ -3183,8 +3183,10 @@ Return non-nil if match occurs." fn)))
                       fountain-default-script-format)
                   align-col)
                  (car align-col))))))
-
+        ;; For each match highlighter in each element...
         (dolist (match-hl subexp-hl)
+          ;; If the matcher is an elisp form, set the highlighter to that form,
+          ;; otherwise construct a font-lock facespec.
           (if (and use-form (<= (car match-hl) dec))
               (setq highlight (cdr match-hl))
             (let ((subexp (nth 1 match-hl))
@@ -3203,7 +3205,7 @@ Return non-nil if match occurs." fn)))
               (push (list subexp `(quote (face ,face ,@align ,@invisible))
                           override laxmatch)
                     highlight))))
-
+        ;; Add the matcher to the keywords list.
         (push (cons matcher (if use-form highlight (reverse highlight)))
               keywords)))
     (reverse keywords)))
