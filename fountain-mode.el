@@ -84,11 +84,13 @@
 
 ;;     M-x list-packages RET
 
-;; If you prefer the latest bu perhaps unstable version, do the above using
-;; [MELPA].
+;; If you prefer the latest but perhaps unstable version, do the above
+;; using [MELPA].
 
-;; Alternately, download the [latest release], move this file into your
-;; load-path and add to your init.el file:
+;; ## Advanced Installation ##
+
+;; Download the [latest release], move this file into your load-path and
+;; add to your init.el file:
 
 ;;     (require 'fountain-mode)
 
