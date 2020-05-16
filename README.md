@@ -53,7 +53,7 @@ The latest stable release of Fountain Mode is available via
 
     M-x customize-option RET package-archives RET
     
-Insert an entry named `melpa-stable` with the URL `https://melpa.org/packages/`.
+Insert an entry named `melpa-stable` with the URL `https://stable.melpa.org/packages/`.
 
 You can then find the latest stable version of `fountain-mode` in the
 list returned by:
