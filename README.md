@@ -38,13 +38,18 @@ functions and key-bindings, type `C-h m`.
 ## Exporting ##
 
 Earlier versions of Fountain Mode had export functionality, but this was
-never very good and there are several external tools available that better
-handle exporting:
+not very good and is better handled via interfacing with external shell
+tools, such as:
 
 - [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
 - [Wrap](https://github.com/Wraparound/wrap) (Go)
 - [screenplain](https://github.com/vilcans/screenplain) (Python 2)
 - [Textplay](https://github.com/olivertaylor/Textplay) (Ruby, requires PrinceXML for PDF)
+
+The option `fountain-export-command-profiles` provides some shell
+commands to interface with these tools, but you are encouraged to edit
+or completely replace these to suit your own needs. The format is simple
+while still allowing for a lot of flexibility.
 
 ## Installation ##
 
