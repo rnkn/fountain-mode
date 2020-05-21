@@ -2880,6 +2880,9 @@ pdf %b --use-courier-prime --out %B.pdf")
     ("textplay-fdx" . "textplay --fdx < %b > %B.fdx"))
   "Shell command profiles for exporting Fountain files.
 
+n.b. The default command profiles are only intended as examples.
+You are encouraged to edit/replace these to suit your own needs.
+
 Each profile is a cons-cell of PROFILE-NAME string and the
 COMMAND string.
 
@@ -2900,7 +2903,10 @@ buffer or active region to the command via stdin.
 If a command outputs to stdout, this will be redirected to
 `fountain-export-output-buffer'.
 
-The first profile is considered default."
+The first profile is considered default.
+
+COMMAND may be edited interactively when calling
+`fountain-export-command' prefixed with \\[universal-argument]."
   :type '(repeat (cons (string :tag "Name")
                        (string :tag "Shell command")))
   :group 'fountain-export)
