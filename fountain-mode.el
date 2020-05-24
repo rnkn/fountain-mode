@@ -277,6 +277,30 @@ The default \" %x - %n:\" inserts something like:
   :type 'string
   :safe 'stringp)
 
+(defcustom fountain-highlight-elements
+  '(section-heading scene-heading character dialog synopsis note
+                    metadata page-break)
+  "List of elements highlighted with `font-lock-mode'."
+  :type '(choice (const :tag "No Highlighting" nil)
+                 (set (const :tag "Section Headings" section-heading)
+                      (const :tag "Scene Headings" scene-heading)
+                      (const :tag "Action" action)
+                      (const :tag "Character Names" character)
+                      (const :tag "Dialogue" dialog)
+                      (const :tag "Parentheticals" paren)
+                      (const :tag "Transitions" trans)
+                      (const :tag "Synopses" synopsis)
+                      (const :tag "Notes" note)
+                      (const :tag "Metadata" metadata)
+                      (const :tag "Center Text" center)
+                      (const :tag "Page Breaks" page-break)))
+  :group 'fountain
+  :set 'fountain--set-and-refresh-font-lock)
+
+(defvar fountain-highlight-elements-always
+  '(underline italic bold bold-italic lyrics)
+  "List of elements always highlighted with `font-lock-mode'.")
+
 
 ;;; Faces
 
