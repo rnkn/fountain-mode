@@ -3098,7 +3098,17 @@ Return non-nil if match occurs." fn)))
            (forward-line))
          match))))
 
+(defun fountain-toggle-highlight-element (elt)
+  "Toggle the inclusion of ELEMENT in `fountain-highlight-elements'."
+  (interactive)
+  (if (memq elt fountain-highlight-elements)
+      (customize-set-variable 'fountain-highlight-elements
+                              (delq elt fountain-highlight-elements))
+    (customize-set-variable 'fountain-highlight-elements
+                            (cons elt fountain-highlight-elements))))
+
 (defun fountain-toggle-hide-emphasis-markup ()
+  "Toggle value of `fountain-hide-emphasis-markup'."
   (interactive)
   (customize-set-variable 'fountain-hide-emphasis-markup
                           (not fountain-hide-emphasis-markup))
@@ -3106,6 +3116,7 @@ Return non-nil if match occurs." fn)))
            (if fountain-hide-emphasis-markup "invisible" "visible")))
 
 (defun fountain-toggle-hide-element-markup ()
+  "Toggle value of `fountain-hide-element-markup'."
   (interactive)
   (customize-set-variable 'fountain-hide-element-markup
                           (not fountain-hide-element-markup))
