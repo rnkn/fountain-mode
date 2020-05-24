@@ -3391,18 +3391,59 @@ redisplay in margin. Otherwise, remove display text properties."
     ["Update Auto-Completion" fountain-completion-update]
     "---"
     ("Syntax Highlighting"
-     ["Minimum"
-      (fountain-set-font-lock-decoration 1)
-      :style radio
-      :selected (= (fountain--get-font-lock-decoration) 1)]
-     ["Default"
-      (fountain-set-font-lock-decoration 2)
-      :style radio
-      :selected (= (fountain--get-font-lock-decoration) 2)]
-     ["Maximum"
-      (fountain-set-font-lock-decoration 3)
-      :style radio
-      :selected (= (fountain--get-font-lock-decoration) 3)]
+     ["Section Headings"
+      (fountain-toggle-highlight-element 'section-heading)
+      :style toggle
+      :selected (memq 'section-heading fountain-highlight-elements)]
+     ["Scene Headings"
+      (fountain-toggle-highlight-element 'scene-heading)
+      :style toggle
+      :selected (memq 'scene-heading fountain-highlight-elements)]
+     ["Action"
+      (fountain-toggle-highlight-element 'action)
+      :style toggle
+      :selected (memq 'action fountain-highlight-elements)]
+     ["Character Names"
+      (fountain-toggle-highlight-element 'character)
+      :style toggle
+      :selected (memq 'character fountain-highlight-elements)]
+     ["Dialogue"
+      (fountain-toggle-highlight-element 'dialog)
+      :style toggle
+      :selected (memq 'dialog fountain-highlight-elements)]
+     ["Parentheticals"
+      (fountain-toggle-highlight-element 'paren)
+      :style toggle
+      :selected (memq 'paren fountain-highlight-elements)]
+     ["Transitions"
+      (fountain-toggle-highlight-element 'trans)
+      :style toggle
+      :selected (memq 'trans fountain-highlight-elements)]
+     ["Synopses"
+      (fountain-toggle-highlight-element 'synopsis)
+      :style toggle
+      :selected (memq 'synopsis fountain-highlight-elements)]
+     ["Notes"
+      (fountain-toggle-highlight-element 'note)
+      :style toggle
+      :selected (memq 'note fountain-highlight-elements)]
+     ["Metadata"
+      (fountain-toggle-highlight-element 'metadata)
+      :style toggle
+      :selected (memq 'metadata fountain-highlight-elements)]
+     ["Center Text"
+      (fountain-toggle-highlight-element 'center)
+      :style toggle
+      :selected (memq 'center fountain-highlight-elements)]
+     ["Page Breaks"
+      (fountain-toggle-highlight-element 'page-break)
+      :style toggle
+      :selected (memq 'page-break fountain-highlight-elements)]
+     "---"
+     ["No Highlighting"
+      (customize-set-variable 'fountain-highlight-elements nil)
+      :style toggle
+      :selected (null fountain-highlight-elements)]
      "---"
      ["Hide Emphasis Markup" fountain-toggle-hide-emphasis-markup
       :style toggle
