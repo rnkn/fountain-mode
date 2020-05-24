@@ -264,9 +264,9 @@ Upcases lines matching `fountain-scene-heading-regexp'."
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 Passed to `format-spec' with the following specification:
 
-  %u  user-login-name
-  %n  user-full-name
-  %e  user-mail-address
+  %u  `user-login-name'
+  %n  `user-full-name'
+  %e  `user-mail-address'
   %x  date in locale's preferred format
   %F  date in ISO format
 
