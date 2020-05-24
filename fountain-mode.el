@@ -48,7 +48,6 @@
 ;; - Intergration with auto-insert for title page metadata
 ;; - Automatically add/remove character (CONT'D)
 ;; - Toggle visibility of emphasis delimiters and syntax characters
-;; - 3 levels of syntax highlighting
 ;; - Optionally display scene numbers in the right margin
 ;; - Intelligent insertion of a page breaks
 
