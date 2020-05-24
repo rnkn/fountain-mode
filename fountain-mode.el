@@ -305,39 +305,10 @@ The default \" %x - %n:\" inserts something like:
 ;;; Faces
 
 (defgroup fountain-faces ()
-  "\\<fountain-mode-map>Faces used in `fountain-mode'.
-There are three levels of decoration, each with different
-elements fontified:
+  "Faces used in `fountain-mode'
 
-  1. minimum:   comments
-                emphasis
-
-  2. default:   comments
-                emphasis
-                element characters
-                section headings
-                scene headings
-                synopses
-                notes
-                metadata values
-
-  3. maximum:   comments
-                emphasis
-                element characters
-                section headings
-                scene headings
-                synopses
-                notes
-                metadata keys
-                metadata values
-                character names
-                parentheticals
-                dialog
-                transitions
-                center text
-
-To switch between these levels, customize the value of
-`font-lock-maximum-decoration'. This can be set with \\[fountain-set-font-lock-decoration]."
+Control which elements are highlighted with
+`fountain-highlight-elements'."
   :prefix "fountain-"
   :link '(info-link "(emacs) Font Lock")
   :group 'fountain)
