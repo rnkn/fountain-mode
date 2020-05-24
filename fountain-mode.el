@@ -3193,17 +3193,17 @@ If `fountain-scene-numbers-display-in-margin' is non-nil and
 scene heading has scene number, apply display text properties to
 redisplay in margin. Otherwise, remove display text properties."
   ;; FIXME: Why use jit-lock rather than font-lock?
-  (goto-char start)
-  (while (< (point) (min end (point-max)))
-    (when (fountain-match-scene-heading)
-      (if (and fountain-scene-numbers-display-in-margin
-               (match-string-no-properties 9))
-          (put-text-property (match-beginning 7) (match-end 10)
-                             'display (list '(margin right-margin)
-                                            (match-string-no-properties 9)))
-        (remove-text-properties (match-beginning 0) (match-end 0)
-                                '(display))))
-    (forward-line)))
+  (when fountain-scene-numbers-display-in-margin
+    (goto-char start)
+    (while (< (point) (min end (point-max)))
+      (when (fountain-match-scene-heading)
+        (if (match-string-no-properties 9)
+            (put-text-property (match-beginning 7) (match-end 10)
+                               'display (list '(margin right-margin)
+                                              (match-string-no-properties 9)))
+          (remove-text-properties (match-beginning 0) (match-end 0)
+                                  '(display))))
+      (forward-line))))
 
 
 ;;; Key Bindings
