@@ -3119,86 +3119,88 @@ Return non-nil if match occurs." fn)))
         0 '(fountain--get-section-heading-face)))
     (section-heading
      fountain-section-heading-regexp
-     (2 1 nil nil nil fountain-syntax-chars)
-     (2 2 fountain-non-printing prepend))
+     (1 nil nil nil fountain-syntax-chars)
+     (2 fountain-non-printing prepend))
     (scene-heading
      (define-fountain-font-lock-matcher fountain-match-scene-heading)
-     (2 0 fountain-scene-heading)
-     (2 8 fountain-non-printing prepend t fountain-syntax-chars)
-     (2 10 fountain-non-printing prepend t fountain-syntax-chars)
-     (3 1 fountain-non-printing prepend t fountain-syntax-chars))
+     (0 fountain-scene-heading)
+     (8 fountain-non-printing prepend t fountain-syntax-chars)
+     (10 fountain-non-printing prepend t fountain-syntax-chars)
+     (1 fountain-non-printing prepend t fountain-syntax-chars))
     (action
      (define-fountain-font-lock-matcher fountain-match-action)
-     (1 0 fountain-action)
-     (3 1 fountain-non-printing t t fountain-syntax-chars))
+     (0 fountain-action)
+     (1 fountain-non-printing t t fountain-syntax-chars))
     (character
      (define-fountain-font-lock-matcher fountain-match-character)
-     (3 0 fountain-character)
-     (3 1 fountain-non-printing t t fountain-syntax-chars)
-     (3 5 highlight prepend t))
+     (0 fountain-character)
+     (1 fountain-non-printing t t fountain-syntax-chars)
+     (5 highlight prepend t))
     (dialog
      (define-fountain-font-lock-matcher fountain-match-dialog)
-     (3 0 fountain-dialog))
+     (0 fountain-dialog))
     (paren
      (define-fountain-font-lock-matcher fountain-match-paren)
-     (3 0 fountain-paren))
+     (0 fountain-paren))
     (trans
      (define-fountain-font-lock-matcher fountain-match-trans)
-     (3 0 fountain-trans)
-     (2 1 fountain-non-printing t t fountain-syntax-chars))
+     (0 fountain-trans)
+     (1 fountain-non-printing t t fountain-syntax-chars))
     (synopsis
      (define-fountain-font-lock-matcher fountain-match-synopsis)
-     (2 0 fountain-synopsis)
-     (2 1 nil nil nil fountain-syntax-chars)
-     (2 2 fountain-non-printing prepend))
+     (0 fountain-synopsis)
+     (1 nil nil nil fountain-syntax-chars)
+     (2 fountain-non-printing prepend))
     (note
      (define-fountain-font-lock-matcher fountain-match-note)
-     (2 0 fountain-note))
+     (0 fountain-note))
     (metadata
      (define-fountain-font-lock-matcher fountain-match-metadata)
-     (3 0 fountain-metadata-key nil t)
-     (2 2 fountain-metadata-value t t))
+     (0 fountain-metadata-key nil t)
+     (2 fountain-metadata-value t t))
     (center
      fountain-center-regexp
-     (2 1 fountain-non-printing t nil fountain-syntax-chars)
-     (2 3 fountain-non-printing t nil fountain-syntax-chars))
+     (1 fountain-non-printing t nil fountain-syntax-chars)
+     (3 fountain-non-printing t nil fountain-syntax-chars))
     (page-break
      fountain-page-break-regexp
-     (2 0 fountain-page-break)
-     (2 2 fountain-page-number t t))
+     (0 fountain-page-break)
+     (2 fountain-page-number t t))
     (underline
      fountain-underline-regexp
-     (3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
-     (1 1 underline prepend)
-     (3 4 fountain-non-printing prepend nil fountain-emphasis-delim))
+     (2 fountain-non-printing prepend nil fountain-emphasis-delim)
+     (1 underline prepend)
+     (4 fountain-non-printing prepend nil fountain-emphasis-delim))
     (italic
      fountain-italic-regexp
-     (3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
-     (1 1 italic prepend)
-     (3 4 fountain-non-printing prepend nil fountain-emphasis-delim))
+     (2 fountain-non-printing prepend nil fountain-emphasis-delim)
+     (1 italic prepend)
+     (4 fountain-non-printing prepend nil fountain-emphasis-delim))
     (bold
      fountain-bold-regexp
-     (3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
-     (1 1 bold prepend)
-     (3 4 fountain-non-printing prepend nil fountain-emphasis-delim))
+     (2 fountain-non-printing prepend nil fountain-emphasis-delim)
+     (1 bold prepend)
+     (4 fountain-non-printing prepend nil fountain-emphasis-delim))
     (bold-italic
      fountain-bold-italic-regexp
-     (3 2 fountain-non-printing prepend nil fountain-emphasis-delim)
-     (1 1 bold-italic prepend)
-     (3 4 fountain-non-printing prepend nil fountain-emphasis-delim))
+     (2 fountain-non-printing prepend nil fountain-emphasis-delim)
+     (1 bold-italic prepend)
+     (4 fountain-non-printing prepend nil fountain-emphasis-delim))
     (lyrics
      fountain-lyrics-regexp
-     (3 1 fountain-non-printing prepend nil fountain-emphasis-delim)
-     (2 2 italic prepend)))
+     (1 fountain-non-printing prepend nil fountain-emphasis-delim)
+     (2 italic prepend)))
   "Association list of properties for generating `font-lock-keywords'.")
 
 (defun fountain-init-font-lock ()
   "Return a new list of `font-lock-keywords' for elements."
-  (let ((dec (fountain--get-font-lock-decoration))
-        keywords)
+  (let (keywords)
     ;; For each fountain element...
     (dolist (element fountain--font-lock-keywords)
-      (let ((matcher (eval (cadr element)))
+      (let ((highlightp (memq (car element)
+                              (append fountain-highlight-elements
+                                      fountain-highlight-elements-always)))
+            (matcher (eval (cadr element)))
             (subexp-hl (cddr element))
             highlight align-col use-form)
         (when (eq matcher 'eval) (setq use-form t))
@@ -3207,30 +3209,30 @@ Return non-nil if match occurs." fn)))
         (when (and align-col fountain-align-elements)
           (unless (integerp align-col)
             (setq align-col
-        (cdr (or (assoc-string
-                  (or (cdr (assq 'format (fountain-read-metadata)))
-                      fountain-default-script-format)
-                  align-col)
-                 (car align-col))))))
+                  (cdr (or (assoc-string
+                            (or (cdr (assq 'format (fountain-read-metadata)))
+                                fountain-default-script-format)
+                            align-col)
+                           (car align-col))))))
         ;; For each match highlighter in each element...
         (dolist (match-hl subexp-hl)
           ;; If the matcher is an elisp form, set the highlighter to that form,
           ;; otherwise construct a font-lock facespec.
-          (if (and use-form (<= (car match-hl) dec))
-              (setq highlight (cdr match-hl))
-            (let ((subexp (nth 1 match-hl))
+          (if use-form
+              (setq highlight (if highlightp (cdr match-hl) '(quote ignore)))
+            (let ((subexp (nth 0 match-hl))
                   (face
-                   (when (<= (nth 0 match-hl) dec)
-                     (nth 2 match-hl)))
+                   (when highlightp
+                     (nth 1 match-hl)))
                   (align
                    (when (integerp align-col)
                      `(line-prefix (space :align-to ,align-col)
                        wrap-prefix (space :align-to ,align-col))))
                   (invisible
-                   (when (nth 5 match-hl)
-                     `(invisible ,(nth 5 match-hl))))
-                  (override (nth 3 match-hl))
-                  (laxmatch (nth 4 match-hl)))
+                   (when (nth 4 match-hl)
+                     `(invisible ,(nth 4 match-hl))))
+                  (override (nth 2 match-hl))
+                  (laxmatch (nth 3 match-hl)))
               (push (list subexp `(quote (face ,face ,@align ,@invisible))
                           override laxmatch)
                     highlight))))
