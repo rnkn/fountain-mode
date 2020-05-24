@@ -3009,46 +3009,8 @@ The file is then passed to `dired-guess-default'."
 
 ;;; Font Lock
 
-(defun fountain--get-font-lock-decoration ()
-  "Return the value of `font-lock-maximum-decoration' for `fountain-mode'."
-  (let ((n (if (listp font-lock-maximum-decoration)
-               (cdr (or (assq 'fountain-mode font-lock-maximum-decoration)
-                        (assq 't font-lock-maximum-decoration)))
-             font-lock-maximum-decoration)))
-    (cond ((null n) 2)
-          ((eq n t) 3)
-          ((integerp n) n)
-          (t 2))))
-
-(defun fountain-set-font-lock-decoration (n)
-  "Set `font-lock-maximum-decoration' for `fountain-mode' to N."
-  (interactive
-   (list (or current-prefix-arg
-             (string-to-number (char-to-string
-    (read-char-choice "Maximum decoration (1-3): " '(?1 ?2 ?3)))))))
-  (when (and (integerp n)
-             (<= 1 n 3))
-    (let ((level (cond ((= n 1) 1)
-                       ((= n 2) nil)
-                       ((= n 3) t))))
-      (cond ((listp font-lock-maximum-decoration)
-             (setq font-lock-maximum-decoration
-                   (assq-delete-all 'fountain-mode font-lock-maximum-decoration))
-             (customize-set-variable 'font-lock-maximum-decoration
-                                     (cons (cons 'fountain-mode level)
-                                           font-lock-maximum-decoration)))
-            ((or (booleanp font-lock-maximum-decoration)
-                 (integerp font-lock-maximum-decoration))
-             (customize-set-variable 'font-lock-maximum-decoration
-                (list (cons 'fountain-mode level)
-                      (cons 't font-lock-maximum-decoration)))))
-      (message "Syntax highlighting is now: %s"
-               (cond ((= n 1) "minimum")
-                     ((= n 2) "default")
-                     ((= n 3) "maximum")))
-      (font-lock-refresh-defaults))))
-
 (defun fountain--get-section-heading-face ()
+  "Return appropriate face for current heading."
   (save-excursion
     (beginning-of-line)
     (looking-at outline-regexp)
@@ -3056,6 +3018,7 @@ The file is then passed to `dired-guess-default'."
                          (funcall outline-level)))))
 
 (defmacro define-fountain-font-lock-matcher (fn)
+  "Define a `font-lock-mode' matcher for FN."
   (let ((fn-name (intern (format "%s-font-lock" fn)))
         (docstring (format "\
 Call `%s' on each line before LIMIT.
