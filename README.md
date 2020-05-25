@@ -23,7 +23,8 @@ For more information on the Fountain format, visit <https://fountain.io>.
 - Integration with `imenu` (sections, scene headings, notes)
 - Intergration with `auto-insert` for title page metadata
 - Automatically add/remove character `(CONT'D)`
-- Toggle visibility of emphasis delimiters and syntax characters
+- Toggle syntax highlighting of each element
+- Toggle visibility of emphasis and syntax markup
 - Optionally display scene numbers in the right margin
 - Intelligent insertion of a page breaks
 
