@@ -6,7 +6,7 @@
 
 ;; Author: William Rankin <code@william.bydasein.com>
 ;; Keywords: wp, text
-;; Version: 3.1.0
+;; Version: 3.2.0-beta
 ;; Package-Requires: ((emacs "24.5") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -47,7 +47,8 @@
 ;; - Integration with imenu (sections, scene headings, notes)
 ;; - Intergration with auto-insert for title page metadata
 ;; - Automatically add/remove character (CONT'D)
-;; - Toggle visibility of emphasis delimiters and syntax characters
+;; - Toggle syntax highlighting of each element
+;; - Toggle visibility of emphasis and syntax markup
 ;; - Optionally display scene numbers in the right margin
 ;; - Intelligent insertion of a page breaks
 
