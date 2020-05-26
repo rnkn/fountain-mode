@@ -3222,7 +3222,6 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c C-x i") #'auto-insert)
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
     (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
-    (define-key map (kbd "C-c C-x f") #'fountain-set-font-lock-decoration)
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     (define-key map (kbd "M-TAB") #'completion-at-point)
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
