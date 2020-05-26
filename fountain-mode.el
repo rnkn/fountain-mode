@@ -3416,11 +3416,11 @@ redisplay in margin. Otherwise, remove display text properties."
                       fountain-auto-upcase-scene-headings
                       fountain-add-continued-dialog
                       fountain-scene-numbers-display-in-margin
+                      fountain-highlight-elements
                       fountain-hide-emphasis-markup
                       fountain-hide-element-markup
                       fountain-shift-all-elements
                       fountain-outline-fold-notes
-                      font-lock-maximum-decoration
                       fountain-page-size))
       (when (customize-mark-to-save option) (setq unsaved t)))
     (when unsaved (custom-save-all))))
