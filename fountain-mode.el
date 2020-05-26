@@ -3318,8 +3318,8 @@ redisplay in margin. Otherwise, remove display text properties."
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    ["Count Pages" fountain-count-pages]
     ["Insert Page Break..." fountain-insert-page-break]
+    ["Count Pages" fountain-count-pages]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
     "---"
