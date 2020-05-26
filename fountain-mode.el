@@ -4,7 +4,7 @@
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
 ;; Copyright (c) 2019-2020  Paul William Rankin
 
-;; Author: William Rankin <code@william.bydasein.com>
+;; Author: William Rankin <william@bydasein.com>
 ;; Keywords: wp, text
 ;; Version: 3.2.0-beta
 ;; Package-Requires: ((emacs "24.5") (seq "2.20"))
