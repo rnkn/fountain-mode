@@ -2130,6 +2130,37 @@ to remove previous string first."
             (progress-reporter-update job)))
         (progress-reporter-done job)))))
 
+;; TODO: make this apply AND remove markup.
+(defun fountain-bold-dwim ()
+  "Make the selected text bold.
+
+If no selected text, insert \"**\" before and after point."
+  (interactive)
+  (fountain--markup-dwim "**"))
+
+(defun fountain-italicize-dwim ()
+  "Make the selected text italic.
+
+If no selected text, insert \"*\" before and after point."
+  (interactive)
+  (fountain--markup-dwim "*"))
+
+(defun fountain--markup-dwim (markup)
+  "Mark up the text with MARKUP, at the front and back of the region.
+
+If there is no active region, insert MARKUP before and after point."
+  (save-excursion
+    (insert markup)
+    (when (use-region-p)
+      (goto-char (mark)))
+    (insert markup))
+  (when (or (< (point) (mark))
+            (not (use-region-p)))
+    ;; When point is before mark, that means the user highlighted backwards, and we're before the markup first in the buffer.
+    ;; When (not (use-region-p)), we've inserted the markup twice, and we're before the first markup.
+    ;; Either way, move forwards, so we're /after/ the first markup inserted.
+    (forward-char (length markup))))
+
 
 ;;; Scene Numbers
 
@@ -3213,6 +3244,8 @@ redisplay in margin. Otherwise, remove display text properties."
   (let ((map (make-sparse-keymap)))
     ;; Editing commands:
     (define-key map (kbd "TAB") #'fountain-dwim)
+    (define-key map (kbd "C-c b") #'fountain-bold-dwim)
+    (define-key map (kbd "C-c i") #'fountain-italicize-dwim)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
