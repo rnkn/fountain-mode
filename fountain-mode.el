@@ -2145,6 +2145,13 @@ If no selected text, insert \"*\" before and after point."
   (interactive)
   (fountain--markup-dwim "*"))
 
+(defun fountain-underline-dwim ()
+  "Make the selected text underscored.
+
+If no selected text, insert \"_\" before and after point."
+  (interactive)
+  (fountain--markup-dwim "_"))
+
 (defun fountain--markup-dwim (markup)
   "Mark up the text with MARKUP, at the front and back of the region.
 
@@ -3246,6 +3253,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "TAB") #'fountain-dwim)
     (define-key map (kbd "C-c C-f b") #'fountain-bold-dwim)
     (define-key map (kbd "C-c C-f i") #'fountain-italicize-dwim)
+    (define-key map (kbd "C-c C-f u") #'fountain-underline-dwim)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
