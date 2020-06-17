@@ -2156,17 +2156,18 @@ If no selected text, insert \"_\" before and after point."
   "Mark up the text with MARKUP, at the front and back of the region.
 
 If there is no active region, insert MARKUP before and after point."
-  (save-excursion
-    (insert markup)
-    (when (use-region-p)
-      (goto-char (mark)))
-    (insert markup))
-  (when (or (< (point) (mark))
-            (not (use-region-p)))
-    ;; When point is before mark, that means the user highlighted backwards, and we're before the markup first in the buffer.
-    ;; When (not (use-region-p)), we've inserted the markup twice, and we're before the first markup.
-    ;; Either way, move forwards, so we're /after/ the first markup inserted.
-    (forward-char (length markup))))
+  (let ((original-point (point)))
+    (if (use-region-p)
+        (let ((beginning (region-beginning))
+              (end (region-end)))
+          (goto-char end)
+          (insert markup)
+
+          (goto-char beginning)
+          (insert markup))
+      (insert markup markup))
+    ;;since we always insert markup once before point:
+    (goto-char (+ original-point (length markup)))))
 
 
 ;;; Scene Numbers
