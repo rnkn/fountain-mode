@@ -3032,14 +3032,20 @@ Return non-nil if match occurs." fn)))
            (forward-line))
          match))))
 
-(defun fountain-toggle-highlight-element (elt)
+(defun fountain-toggle-highlight-element (element)
   "Toggle the inclusion of ELEMENT in `fountain-highlight-elements'."
-  (interactive)
-  (if (memq elt fountain-highlight-elements)
+  (interactive
+   (list (intern
+          (completing-read "Element: "
+                           '(section-heading scene-heading action character
+                                             dialog paren trans synopsis note
+                                             metadata center page-break)
+                           nil t))))
+  (if (memq element fountain-highlight-elements)
       (customize-set-variable 'fountain-highlight-elements
-                              (delq elt fountain-highlight-elements))
+                              (delq element fountain-highlight-elements))
     (customize-set-variable 'fountain-highlight-elements
-                            (cons elt fountain-highlight-elements))))
+                            (cons element fountain-highlight-elements))))
 
 (defun fountain-toggle-hide-emphasis-markup ()
   "Toggle value of `fountain-hide-emphasis-markup'."
