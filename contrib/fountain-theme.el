@@ -3,7 +3,7 @@
 
 (custom-theme-set-faces
  'fountain
- '(fountain ((t (:height 120 :family "Courier Prime"))))
+ '(fountain ((t (:height 1.2 :family "Courier Prime"))))
  '(fountain-note
    ((((background light)) (:background "#eee7ad"))
     (((background dark)) (:foreground "goldenrod"))))
