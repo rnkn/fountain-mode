@@ -2130,44 +2130,50 @@ to remove previous string first."
             (progress-reporter-update job)))
         (progress-reporter-done job)))))
 
-;; TODO: make this apply AND remove markup.
-(defun fountain-bold-dwim ()
-  "Make the selected text bold.
+;; FIXME: make this apply AND remove markup.
+;;   or add a fn `fountain-remove-emphasis'
+(defun fountain-insert-emphasis (open &optional close)
+  "Insert emphasis markup OPEN and CLOSE around text.
 
-If no selected text, insert \"**\" before and after point."
+If region is active, insert around region, otherwise around point."
+  (let ((x (point-marker)))
+    (if (region-active-p)
+        (let ((start (region-beginning))
+              (end   (region-end)))
+          (when close
+            (goto-char end)
+            (insert close))
+          (goto-char start)
+          (insert-before-markers open)
+          (goto-char x))
+      (when close (insert close (if (looking-at "\\<") "\s" "")))
+      (goto-char x)
+      (insert (if (looking-at "\\>") "\s" "") open))
+    (set-marker x nil)))
+
+(defun fountain-insert-bold ()
+  "Insert bold emphasis around region if active, otherwise around point."
   (interactive)
-  (fountain--markup-dwim "**"))
+  (fountain-insert-emphasis "**" "**"))
 
-(defun fountain-italicize-dwim ()
-  "Make the selected text italic.
-
-If no selected text, insert \"*\" before and after point."
+(defun fountain-insert-italics ()
+  "Insert italics emphasis around region if active, otherwise around point."
   (interactive)
-  (fountain--markup-dwim "*"))
+  (fountain-insert-emphasis "*" "*"))
 
-(defun fountain-underline-dwim ()
-  "Make the selected text underscored.
-
-If no selected text, insert \"_\" before and after point."
+(defun fountain-insert-underline (&optional arg)
+  "Insert underline emphasis around region if active, otherwise around point."
   (interactive)
-  (fountain--markup-dwim "_"))
+  (fountain-insert-emphasis "_" "_"))
 
-(defun fountain--markup-dwim (markup)
-  "Mark up the text with MARKUP, at the front and back of the region.
-
-If there is no active region, insert MARKUP before and after point."
-  (let ((original-point (point)))
-    (if (use-region-p)
-        (let ((beginning (region-beginning))
-              (end (region-end)))
-          (goto-char end)
-          (insert markup)
-
-          (goto-char beginning)
-          (insert markup))
-      (insert markup markup))
-    ;;since we always insert markup once before point:
-    (goto-char (+ original-point (length markup)))))
+(defun fountain-insert-quote ()
+  "Insert quote (lyrics) emphasis at line beginning point."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (when (looking-at "~? ?")
+      (delete-region (match-beginning 0) (match-end 0)))
+    (fountain-insert-emphasis "~ ")))
 
 
 ;;; Scene Numbers
@@ -3248,13 +3254,20 @@ redisplay in margin. Otherwise, remove display text properties."
 
 ;;; Key Bindings
 
+(defvar fountain-emphasis-map
+  (let ((map (make-sparse-keymap
+              "Insert emphasis [Bold, Italic, Underline, Quote]")))
+    (define-key map (kbd "b") 'fountain-insert-bold)
+    (define-key map (kbd "i") 'fountain-insert-italics)
+    (define-key map (kbd "u") 'fountain-insert-underline)
+    (define-key map (kbd "q") 'fountain-insert-quote)
+    map)
+  "Keymap for manipulating emphasis markup.")
+
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
     ;; Editing commands:
     (define-key map (kbd "TAB") #'fountain-dwim)
-    (define-key map (kbd "C-c C-f b") #'fountain-bold-dwim)
-    (define-key map (kbd "C-c C-f i") #'fountain-italicize-dwim)
-    (define-key map (kbd "C-c C-f u") #'fountain-underline-dwim)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
@@ -3268,6 +3281,8 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
     (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
     (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-element-markup)
+    (define-key map (kbd "C-c C-f") fountain-emphasis-map)
+    (define-key map (kbd "M-o") fountain-emphasis-map)
     ;; Navigation commands:
     (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
     (define-key map [remap end-of-defun] #'fountain-end-of-scene)
@@ -3343,6 +3358,11 @@ redisplay in margin. Otherwise, remove display text properties."
                                              (not fountain-shift-all-elements))
       :style toggle
       :selected fountain-shift-all-elements])
+    ("Emphasis Markup"
+     ["Insert Bold" fountain-insert-bold]
+     ["Insert Italic" fountain-insert-italic]
+     ["Insert Underline" fountain-insert-underline]
+     ["Insert Quote" fountain-insert-quote])
     ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
