@@ -3028,7 +3028,7 @@ Return non-nil if match occurs." fn)))
        (let (match)
          (while (and (null match)
                      (< (point) limit))
-           (when (,fn) (setq match t))
+           (when ,(list fn) (setq match t))
            (forward-line))
          match))))
 
