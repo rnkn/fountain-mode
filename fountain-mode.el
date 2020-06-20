@@ -889,6 +889,14 @@ regular expression."
             imenu-generic-expression))
   (when (featurep 'imenu) (imenu-update-menubar)))
 
+(defun fountain-electric-pair-skip-self (char)
+  "Return non-nil if syntax before that of CHAR is word syntax."
+  (and electric-pair-preserve-balance
+       (save-excursion
+         (skip-syntax-backward (char-to-string (char-syntax char))
+                               (line-beginning-position))
+         (= (char-syntax (char-before)) ?w))))
+
 (defun fountain-init-vars ()
   "Initialize important variables.
 Needs to be called for every Fountain buffer because some
@@ -904,6 +912,7 @@ buffers."
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t)
+  (setq-local electric-pair-skip-self #'fountain-electric-pair-skip-self)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
