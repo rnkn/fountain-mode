@@ -20,6 +20,8 @@ For more information on the Fountain format, visit <https://fountain.io>.
 - Navigation by section, scene, character name, or page
 - Integration with `outline` to fold/cycle visibility of sections and
   scenes
+- Integration with `electric-pair-mode` to insert emphasis delimiters
+  with single key (i.e. `*` or `_`)
 - Integration with `imenu` (sections, scene headings, notes)
 - Intergration with `auto-insert` for title page metadata
 - Automatically add/remove character `(CONT'D)`
