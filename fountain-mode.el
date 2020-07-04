@@ -1508,7 +1508,7 @@ Return non-nil if empty newline was inserted."
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
-  (interactive "p")
+  (interactive "*p")
   (outline-back-to-heading)
   (let* (hanging-line
          (move-fun
@@ -1549,7 +1549,7 @@ Return non-nil if empty newline was inserted."
 
 (defun fountain-outline-shift-up (&optional n)
   "Move the current subtree up past N headings of same level."
-  (interactive "p")
+  (interactive "*p")
   (fountain-outline-shift-down (- n)))
 
 (defun fountain-outline-hide-level (n &optional silent)
@@ -1706,7 +1706,7 @@ data reflects `outline-regexp'."
 
 (defun fountain-insert-section-heading ()
   "Insert an empty section heading at the current outline level."
-  (interactive)
+  (interactive "*")
   (unless (and (bolp) (eolp))
     (if (bolp)
         (save-excursion (newline))
@@ -2024,7 +2024,7 @@ to scene number or point."
   "Upcase the line.
 If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
-  (interactive "P")
+  (interactive "*P")
   (when arg (save-excursion (beginning-of-line) (insert ".")))
   (upcase-region (line-beginning-position) (line-end-position)))
 
@@ -2032,13 +2032,11 @@ a scene heading."
   "Upcase the line and insert a newline.
 If prefixed with ARG, insert `.' at beginning of line to force
 a scene heading."
-  (interactive "P")
+  (interactive "*P")
   (when (and arg (not (fountain-match-scene-heading)))
-    (save-excursion
-      (beginning-of-line)
-      (insert ".")))
+    (save-excursion (beginning-of-line) (insert ".")))
   (upcase-region (line-beginning-position) (point))
-  (insert "\n"))
+  (newline))
 
 (defun fountain-delete-comments-in-region (start end)
   "Delete comments in region between START and END."
@@ -2055,7 +2053,7 @@ a scene heading."
 
 (defun fountain-insert-synopsis ()
   "Insert synopsis below scene heading of current scene."
-  (interactive)
+  (interactive "*")
   (widen)
   (when (outline-back-to-heading)
     (forward-line)
@@ -2072,7 +2070,7 @@ a scene heading."
 If region is active and it is appropriate to act on, only
 surround region with note delimiters (`[[ ]]'). If prefixed with
 ARG (\\[universal-argument]), only insert note delimiters."
-  (interactive "P")
+  (interactive "*P")
   (let ((comment-start "[[")
         (comment-end "]]"))
     (if (or arg (use-region-p))
@@ -2099,7 +2097,7 @@ succession, otherwise remove all occurences.
 
 If `fountain-continued-dialog-string' has changed, also attempt
 to remove previous string first."
-  (interactive)
+  (interactive "*")
   (save-excursion
     (save-restriction
       (widen)
@@ -2392,7 +2390,7 @@ to include external files."
 
 (defun fountain-remove-scene-numbers ()
   "Remove scene numbers from scene headings in current buffer."
-  (interactive)
+  (interactive "*")
   (save-excursion
     (save-restriction
       (widen)
@@ -2432,7 +2430,7 @@ add these scene numbers manually. Note that if
 `fountain-auto-upcase-scene-headings' is non-nil you will need to
 insert the scene number delimiters (\"##\") first, to protect the
 scene number from being auto-upcased."
-  (interactive)
+  (interactive "*")
   (save-excursion
     (save-restriction
       (widen)
@@ -2678,7 +2676,7 @@ final exported pages and so should not be used interactively."
 When optional argument ASK is non-nil (if prefixed with
 \\[universal-argument] when called interactively), prompt for PAGE-NUM
 as a string to force the page number."
-  (interactive "P")
+  (interactive "*P")
   (when ask
     (setq page-num (read-string "Page number (RET for none): ")))
   ;; Save a marker where we are.
@@ -2748,7 +2746,7 @@ n.b. This is an approximate calculation."
 
 Move through buffer with `fountain-forward-page' and call
 `fountain-insert-page-break'."
-  (interactive)
+  (interactive "*")
   (let ((job (make-progress-reporter "Paginating...")))
     (save-excursion
       (save-restriction
