@@ -1349,9 +1349,11 @@ Used by `fountain-outline-cycle'.")
                  (const :tag "Level 5" 5))
   :group 'fountain)
 
-(defcustom fountain-shift-all-elements
+(define-obsolete-variable-alias 'fountain-shift-all-elements
+  'fountain-transpose-all-elements "`fountain-mode' 3.2.0")
+(defcustom fountain-transpose-all-elements
   t
-  "\\<fountain-mode-map>Non-nil if \\[fountain-shift-up] and \\[fountain-shift-down] should operate on all elements.
+  "\\<fountain-mode-map>Non-nil if \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should operate on all elements.
 Otherwise, only operate on section and scene headings."
   :type 'boolean
   :safe 'boolean
@@ -1432,6 +1434,42 @@ Notes visibility can be cycled with \\[fountain-dwim]."
                  (setq end (point))))))
       (cons begin end))))
 
+(defun fountain-transpose (arg)
+  "Transpose the current element down past ARG elements.
+If ARG is negative, transpose element up instead."
+  (interactive "*p")
+  (if (outline-on-heading-p)
+      (fountain-outline-shift-down arg)
+    (let ((x (point))
+          (offset 0))
+      (unless (and (bolp) (eolp))
+        (save-excursion
+          (forward-paragraph 1)
+          (setq offset (- x (point)))))
+      (transpose-subr 'forward-paragraph arg)
+      (goto-char (+ (point) offset)))
+    (forward-paragraph arg)))
+
+(defun fountain-forward-paragraph-or-transpose (arg)
+  "Move forward to end of paragraph or transpose element forward.
+With argument ARG, do it ARG times.
+
+Which depends on option `fountain-transpose-all-elements'."
+  (interactive "p")
+  (if (outline-on-heading-p)
+      (fountain-outline-shift-down arg)
+    (if fountain-transpose-all-elements
+        (fountain-transpose arg)
+      (forward-paragraph arg))))
+
+(defun fountain-backward-paragraph-or-transpose (arg)
+  "Move backward to start of paragraph or transpose element backward.
+With argument ARG, do it ARG times.
+
+Which depends on option `fountain-transpose-all-elements'."
+  (interactive "p")
+  (fountain-forward-paragraph-or-transpose (- arg)))
+
 (defun fountain--insert-hanging-line-maybe ()
   "Insert a empty newline if needed.
 Return non-nil if empty newline was inserted."
@@ -1444,67 +1482,6 @@ Return non-nil if empty newline was inserted."
     (unless (eobp)
       (forward-char 1))
     hanging-line))
-
-;; FIXME: this implementation will wipe out any overlays on the next block of
-;; text that is deleted and reinserted. Must find a better way.
-(defun fountain-shift-down (&optional n)
-  "Move the current element down past N elements of the same level."
-  (interactive "p")
-  (unless n (setq n 1))
-  (if (outline-on-heading-p)
-      (fountain-outline-shift-down n)
-    (when fountain-shift-all-elements
-      (let ((forward (< 0 n))
-            hanging-line)
-        (when (and (bolp) (eolp))
-          (funcall (if forward #'skip-chars-forward #'skip-chars-backward)
-                   "\n\s\t"))
-        (save-excursion
-          (save-restriction
-            (widen)
-            (let ((block-bounds (fountain-get-block-bounds))
-                  outline-begin outline-end next-block-bounds)
-              (unless (and (car block-bounds)
-                           (cdr block-bounds))
-                (user-error "Not at a moveable element"))
-              (save-excursion
-                (when (not forward)
-                  (goto-char (cdr block-bounds))
-                  (when (setq hanging-line (fountain--insert-hanging-line-maybe))
-                    (setcdr block-bounds (point)))
-                  (goto-char (car block-bounds)))
-                (outline-previous-heading)
-                (setq outline-begin (point))
-                (outline-next-heading)
-                (setq outline-end (point)))
-              (if forward
-                  (goto-char (cdr block-bounds))
-                (goto-char (car block-bounds))
-                (backward-char)
-                (skip-chars-backward "\n\s\t"))
-              (setq next-block-bounds (fountain-get-block-bounds))
-              (unless (and (car next-block-bounds)
-                           (cdr next-block-bounds))
-                (user-error "Cannot shift element any further"))
-              (when forward
-                (goto-char (cdr next-block-bounds))
-                (when (setq hanging-line (fountain--insert-hanging-line-maybe))
-                  (setcdr next-block-bounds (point))))
-              (unless (< outline-begin (car next-block-bounds) outline-end)
-                (user-error "Cannot shift past higher level"))
-              (goto-char (if forward (car block-bounds) (cdr block-bounds)))
-              (insert-before-markers
-               (delete-and-extract-region (car next-block-bounds)
-                                          (cdr next-block-bounds))))
-            (when hanging-line
-              (goto-char (point-max))
-              (delete-char -1))))))))
-
-(defun fountain-shift-up (&optional n)
-  "Move the current element up past N elements of the same level."
-  (interactive "p")
-  (unless n (setq n 1))
-  (fountain-shift-down (- n)))
 
 (defun fountain-outline-shift-down (&optional n)
   "Move the current subtree down past N headings of same level."
@@ -3250,10 +3227,10 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
     ;; Block editing commands:
-    (define-key map (kbd "<M-down>") #'fountain-shift-down)
-    (define-key map (kbd "ESC <down>") #'fountain-shift-down)
-    (define-key map (kbd "<M-up>") #'fountain-shift-up)
-    (define-key map (kbd "ESC <up>") #'fountain-shift-up)
+    (define-key map (kbd "<M-down>") #'fountain-forward-paragraph-or-transpose)
+    (define-key map (kbd "ESC <down>") #'fountain-forward-paragraph-or-transpose)
+    (define-key map (kbd "<M-up>") #'fountain-backward-paragraph-or-transpose)
+    (define-key map (kbd "ESC <up>") #'fountain-backward-paragraph-or-transpose)
     ;; Outline commands:
     (define-key map [remap forward-list] #'fountain-outline-next)
     (define-key map [remap backward-list] #'fountain-outline-previous)
@@ -3313,10 +3290,10 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Shift Element Up" fountain-shift-up]
      ["Shift Element Down" fountain-shift-down]
      "---"
-     ["Shift All Elements" (customize-set-variable 'fountain-shift-all-elements
-                                             (not fountain-shift-all-elements))
+     ["Shift All Elements" (customize-set-variable 'fountain-transpose-all-elements
+                                             (not fountain-transpose-all-elements))
       :style toggle
-      :selected fountain-shift-all-elements])
+      :selected fountain-transpose-all-elements])
     ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
