@@ -1436,42 +1436,6 @@ Notes visibility can be cycled with \\[fountain-dwim]."
                  (setq end (point))))))
       (cons begin end))))
 
-(defun fountain-transpose (arg)
-  "Transpose the current element down past ARG elements.
-If ARG is negative, transpose element up instead."
-  (interactive "*p")
-  (if (outline-on-heading-p)
-      (fountain-outline-shift-down arg)
-    (let ((x (point))
-          (offset 0))
-      (unless (and (bolp) (eolp))
-        (save-excursion
-          (forward-paragraph 1)
-          (setq offset (- x (point)))))
-      (transpose-subr 'forward-paragraph arg)
-      (goto-char (+ (point) offset)))
-    (forward-paragraph arg)))
-
-(defun fountain-forward-paragraph-or-transpose (arg)
-  "Move forward to end of paragraph or transpose element forward.
-With argument ARG, do it ARG times.
-
-Which depends on option `fountain-transpose-all-elements'."
-  (interactive "p")
-  (if (outline-on-heading-p)
-      (fountain-outline-shift-down arg)
-    (if fountain-transpose-all-elements
-        (fountain-transpose arg)
-      (forward-paragraph arg))))
-
-(defun fountain-backward-paragraph-or-transpose (arg)
-  "Move backward to start of paragraph or transpose element backward.
-With argument ARG, do it ARG times.
-
-Which depends on option `fountain-transpose-all-elements'."
-  (interactive "p")
-  (fountain-forward-paragraph-or-transpose (- arg)))
-
 (defun fountain--insert-hanging-line-maybe ()
   "Insert a empty newline if needed.
 Return non-nil if empty newline was inserted."
@@ -1485,7 +1449,9 @@ Return non-nil if empty newline was inserted."
       (forward-char 1))
     hanging-line))
 
-(defun fountain-outline-shift-down (&optional n)
+(define-obsolete-function-alias 'fountain-outline-shift-down
+  'fountain-outline-move-subtree-down "`fountain-mode' 3.2")
+(defun fountain-outline-move-subtree-down (&optional n)
   "Move the current subtree down past N headings of same level."
   (interactive "*p")
   (outline-back-to-heading)
@@ -1526,10 +1492,12 @@ Return non-nil if empty newline was inserted."
         (delete-char -1)))
     (set-marker insert-point nil)))
 
-(defun fountain-outline-shift-up (&optional n)
+(define-obsolete-function-alias 'fountain-outline-shift-up
+  'fountain-outline-move-subtree-up "`fountain-mode' 3.2")
+(defun fountain-outline-move-subtree-up (&optional n)
   "Move the current subtree up past N headings of same level."
   (interactive "*p")
-  (fountain-outline-shift-down (- n)))
+  (fountain-outline-move-subtree-down (- n)))
 
 (defun fountain-outline-hide-level (n &optional silent)
   "Set outline visibilty to outline level N.
@@ -1682,6 +1650,37 @@ data reflects `outline-regexp'."
   (if (string-prefix-p "#" (match-string-no-properties 0))
       (string-width (match-string-no-properties 2))
     6))
+
+(defun fountain-transpose (arg)
+  "Transpose the current element forward past ARG elements.
+If ARG is negative, transpose element backward instead."
+  (interactive "*p")
+  (let ((x (point))
+        (offset 0))
+    (unless (and (bolp) (eolp))
+      (save-excursion
+        (forward-paragraph 1)
+        (setq offset (- x (point)))))
+    (transpose-subr 'forward-paragraph arg)
+    (goto-char (+ (point) offset))))
+
+(defun fountain-forward-paragraph-or-transpose (arg)
+  "Move forward to end of paragraph or transpose element forward.
+Which depends on option `fountain-transpose-all-elements'.
+With argument ARG, do it ARG times."
+  (interactive "p")
+  (if (outline-on-heading-p)
+      (fountain-outline-move-subtree-down arg)
+    (if fountain-transpose-all-elements
+        (fountain-transpose arg)
+      (forward-paragraph arg))))
+
+(defun fountain-backward-paragraph-or-transpose (arg)
+  "Move backward to start of paragraph or transpose element backward.
+Which depends on option `fountain-transpose-all-elements'.
+With argument ARG, do it ARG times."
+  (interactive "p")
+  (fountain-forward-paragraph-or-transpose (- arg)))
 
 (defun fountain-insert-section-heading ()
   "Insert an empty section heading at the current outline level."
