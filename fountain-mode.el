@@ -3006,18 +3006,18 @@ The file is then passed to `dired-guess-default'."
     (intern-soft (format "fountain-section-heading-%s"
                          (funcall outline-level)))))
 
-(defmacro define-fountain-font-lock-matcher (fn)
-  "Define a `font-lock-mode' matcher for FN."
-  (let ((fn-name (intern (format "%s-font-lock" fn)))
+(defmacro define-fountain-font-lock-matcher (fun)
+  "Define a `font-lock-mode' matcher for FUN."
+  (let ((fun-name (intern (format "%s-font-lock" fun)))
         (docstring (format "\
 Call `%s' on each line before LIMIT.
-Return non-nil if match occurs." fn)))
-    `(defun ,fn-name (limit)
+Return non-nil if match occurs." fun)))
+    `(defun ,fun-name (limit)
        ,docstring
        (let (match)
          (while (and (null match)
                      (< (point) limit))
-           (when ,(list fn) (setq match t))
+           (when ,(list fun) (setq match t))
            (forward-line))
          match))))
 
