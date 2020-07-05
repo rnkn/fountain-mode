@@ -148,10 +148,11 @@
 Cycle buffers and call `font-lock-refresh-defaults' when
 `fountain-mode' is active."
   (set-default symbol value)
-  (dolist (buffer (buffer-list))
-    (with-current-buffer buffer
-      (when (derived-mode-p 'fountain-mode)
-        (font-lock-refresh-defaults)))))
+  (mapc (lambda (buffer)
+          (with-current-buffer buffer
+            (when (derived-mode-p 'fountain-mode)
+              (font-lock-refresh-defaults))))
+        (buffer-list)))
 
 (defcustom fountain-mode-hook
   '(visual-line-mode)
@@ -220,13 +221,14 @@ this option."
   :safe 'booleanp
   :set (lambda (symbol value)
          (set-default symbol value)
-         (dolist (buffer (buffer-list))
-           (with-current-buffer buffer
-             (when (derived-mode-p 'fountain-mode)
-               (if fountain-hide-emphasis-markup
-                   (add-to-invisibility-spec 'fountain-emphasis-delim)
-                 (remove-from-invisibility-spec 'fountain-emphasis-delim))
-               (font-lock-refresh-defaults))))))
+         (mapc (lambda (buffer)
+                 (with-current-buffer buffer
+                   (when (derived-mode-p 'fountain-mode)
+                     (if fountain-hide-emphasis-markup
+                         (add-to-invisibility-spec 'fountain-emphasis-delim)
+                       (remove-from-invisibility-spec 'fountain-emphasis-delim))
+                     (font-lock-refresh-defaults))))
+               (buffer-list))))
 
 (define-obsolete-variable-alias 'fountain-hide-syntax-chars
   'fountain-hide-element-markup "`fountain-mode' 3.0")
@@ -238,13 +240,14 @@ this option."
   :safe 'booleanp
   :set (lambda (symbol value)
          (set-default symbol value)
-         (dolist (buffer (buffer-list))
-           (with-current-buffer buffer
-             (when (derived-mode-p 'fountain-mode)
-               (if fountain-hide-element-markup
-                   (add-to-invisibility-spec 'fountain-syntax-chars)
-                 (remove-from-invisibility-spec 'fountain-syntax-chars))
-               (font-lock-refresh-defaults))))))
+         (mapc (lambda (buffer)
+                 (with-current-buffer buffer
+                   (when (derived-mode-p 'fountain-mode)
+                     (if fountain-hide-element-markup
+                         (add-to-invisibility-spec 'fountain-syntax-chars)
+                       (remove-from-invisibility-spec 'fountain-syntax-chars))
+                     (font-lock-refresh-defaults))))
+               (buffer-list))))
 
 (defcustom fountain-auto-upcase-scene-headings
   t
@@ -435,15 +438,14 @@ so the following are equivalent:
   :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
-         ;; Don't call fountain-init-*' while in the middle of
-         ;; loading this file!
          (when (featurep 'fountain-mode)
            (fountain-init-scene-heading-regexp)
-           (dolist (buffer (buffer-list))
-             (with-current-buffer buffer
-               (when (derived-mode-p 'fountain-mode)
-                 (fountain-init-outline-regexp)
-                 (font-lock-refresh-defaults)))))))
+           (mapc (lambda (buffer)
+                   (with-current-buffer buffer
+                     (when (derived-mode-p 'fountain-mode)
+                       (fountain-init-outline-regexp)
+                       (font-lock-refresh-defaults))))
+                 (buffer-list)))))
 
 (define-obsolete-variable-alias 'fountain-scene-heading-suffix-sep
   'fountain-scene-heading-suffix-separator "`fountain-mode' 3.0")
@@ -495,14 +497,13 @@ e.g. `TO:' will match both the following:
   :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
-         ;; Don't call fountain-*' while in the middle of
-         ;; loading this file!
          (when (featurep 'fountain-mode)
            (fountain-init-trans-regexp)
-           (dolist (buffer (buffer-list))
-             (with-current-buffer buffer
-               (when (derived-mode-p 'fountain-mode)
-                 (font-lock-refresh-defaults)))))))
+           (mapc (lambda (buffer)
+                   (with-current-buffer buffer
+                     (when (derived-mode-p 'fountain-mode)
+                       (font-lock-refresh-defaults))))
+                 (buffer-list)))))
 
 (defcustom fountain-character-extension-list
   '("(V.O.)" "(O.S.)" "(O.C.)")
@@ -869,10 +870,11 @@ regular expression."
               (const :tag "Notes" note))
   :set (lambda (symbol value)
          (set-default symbol value)
-         (dolist (buffer (buffer-list))
-           (with-current-buffer buffer
-             (when (derived-mode-p 'fountain-mode)
-               (fountain-init-imenu))))))
+         (mapc (lambda (buffer)
+                 (with-current-buffer buffer
+                   (when (derived-mode-p 'fountain-mode)
+                     (fountain-init-imenu))))
+               (buffer-list))))
 
 (defun fountain-init-imenu ()
   "Initialize `imenu-generic-expression'."
@@ -3134,49 +3136,57 @@ Return non-nil if match occurs." fn)))
   "Return a new list of `font-lock-keywords' for elements."
   (let (keywords)
     ;; For each fountain element...
-    (dolist (element fountain--font-lock-keywords)
-      (let ((highlightp (memq (car element)
-                              (append fountain-highlight-elements
-                                      fountain-highlight-elements-always)))
-            (matcher (eval (cadr element)))
-            (subexp-hl (cddr element))
-            highlight align-col use-form)
-        (when (eq matcher 'eval) (setq use-form t))
-        (setq align-col
-              (eval (intern-soft (format "fountain-align-%s" (car element)))))
-        (when (and align-col fountain-align-elements)
-          (unless (integerp align-col)
-            (setq align-col
-                  (cdr (or (assoc-string
-                            (or (cdr (assq 'format (fountain-read-metadata)))
-                                fountain-default-script-format)
-                            align-col)
-                           (car align-col))))))
-        ;; For each match highlighter in each element...
-        (dolist (match-hl subexp-hl)
-          ;; If the matcher is an elisp form, set the highlighter to that form,
-          ;; otherwise construct a font-lock facespec.
-          (if use-form
-              (setq highlight (if highlightp (cdr match-hl) '(quote ignore)))
-            (let ((subexp (nth 0 match-hl))
-                  (face
-                   (when highlightp
-                     (nth 1 match-hl)))
-                  (align
-                   (when (integerp align-col)
-                     `(line-prefix (space :align-to ,align-col)
-                       wrap-prefix (space :align-to ,align-col))))
-                  (invisible
-                   (when (nth 4 match-hl)
-                     `(invisible ,(nth 4 match-hl))))
-                  (override (nth 2 match-hl))
-                  (laxmatch (nth 3 match-hl)))
-              (push (list subexp `(quote (face ,face ,@align ,@invisible))
-                          override laxmatch)
-                    highlight))))
-        ;; Add the matcher to the keywords list.
-        (push (cons matcher (if use-form highlight (reverse highlight)))
-              keywords)))
+    (mapc
+     (lambda (element)
+       (let ((highlightp (memq (car element)
+                               (append fountain-highlight-elements
+                                       fountain-highlight-elements-always)))
+             (matcher (eval (cadr element)))
+             (subexp-highlight-list (cddr element))
+             use-form align-col highlight)
+         ;; When MATCHED is 'eval, flag that we're using a form.
+         (when (eq matcher 'eval) (setq use-form t))
+         (setq align-col
+               (eval (intern-soft (format "fountain-align-%s" (car element)))))
+         ;; When we're aligning elements, find the align column for the current
+         ;; script format, defaulting to `fountain-default-script-format'.
+         (when (and align-col fountain-align-elements)
+           (unless (integerp align-col)
+             (setq align-col
+                   (cdr (or (assoc-string
+                             (or (cdr (assq 'format (fountain-read-metadata)))
+                                 fountain-default-script-format)
+                             align-col)
+                            (car align-col))))))
+         ;; For each match highlighter in each element...
+         (mapc (lambda (match-highlighter)
+                 ;; If the matcher is an elisp form, set the highlighter to that form,
+                 ;; otherwise construct a font-lock facespec.
+                 (if use-form
+                     (setq highlight
+                           (if highlightp (cdr match-highlighter) '(quote ignore)))
+                   (let ((subexp (nth 0 match-highlighter))
+                         (face
+                          (when highlightp
+                            (nth 1 match-highlighter)))
+                         (align
+                          (when (integerp align-col)
+                            `(line-prefix (space :align-to ,align-col)
+                              wrap-prefix (space :align-to ,align-col))))
+                         (invisible
+                          (when (nth 4 match-highlighter)
+                            `(invisible ,(nth 4 match-highlighter))))
+                         (override (nth 2 match-highlighter))
+                         (laxmatch (nth 3 match-highlighter)))
+                     ;; Push the face-spec to the highlighter.
+                     (push (list subexp `(quote (face ,face ,@align ,@invisible))
+                                 override laxmatch)
+                           highlight))))
+               subexp-highlight-list)
+         ;; Add the matcher-highlighter to the keywords list.
+         (push (cons matcher (if use-form highlight (reverse highlight)))
+               keywords)))
+     fountain--font-lock-keywords)
     (reverse keywords)))
 
 ;; FIXME: make scene numbers display in both margins, like a real script.
@@ -3405,17 +3415,18 @@ redisplay in margin. Otherwise, remove display text properties."
   "Save `fountain-mode' menu options with `customize'."
   (interactive)
   (let (unsaved)
-    (dolist (option '(fountain-align-elements
-                      fountain-auto-upcase-scene-headings
-                      fountain-add-continued-dialog
-                      fountain-scene-numbers-display-in-margin
-                      fountain-highlight-elements
-                      fountain-hide-emphasis-markup
-                      fountain-hide-element-markup
-                      fountain-shift-all-elements
-                      fountain-outline-fold-notes
-                      fountain-page-size))
-      (when (customize-mark-to-save option) (setq unsaved t)))
+    (mapc (lambda (option)
+            (when (customize-mark-to-save option) (setq unsaved t)))
+          '(fountain-add-continued-dialog
+            fountain-align-elements
+            fountain-auto-upcase-scene-headings
+            fountain-hide-element-markup
+            fountain-hide-emphasis-markup
+            fountain-highlight-elements
+            fountain-outline-fold-notes
+            fountain-page-size
+            fountain-scene-numbers-display-in-margin
+            fountain-transpose-all-elements))
     (when unsaved (custom-save-all))))
 
 
@@ -3454,13 +3465,14 @@ If POS is nil, use `point' instead."
     ;; This is impossible for users who have installed Emacs without
     ;; uncompiled source, so we need to demote errors.
     (with-demoted-errors "Error: %S"
-      (dolist (fun '(outline-back-to-heading
-                     outline-on-heading-p
-                     outline-next-visible-heading))
-        (let ((source (find-function-noselect fun)))
-          (with-current-buffer (car source)
-            (goto-char (cdr source))
-            (eval (read (current-buffer)) lexical-binding))))
+      (mapc (lambda (fun)
+              (let ((source (find-function-noselect fun)))
+                (with-current-buffer (car source)
+                  (goto-char (cdr source))
+                  (eval (read (current-buffer)) lexical-binding))))
+            '(outline-back-to-heading
+              outline-on-heading-p
+              outline-next-visible-heading))
       (message "fountain-mode: Function `outline-invisible-p' has been patched"))))
 
 
