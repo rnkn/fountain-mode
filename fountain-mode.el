@@ -166,7 +166,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              flyspell-mode))
 
 (define-obsolete-variable-alias 'fountain-script-format
-  'fountain-default-script-format "3.0.0")
+  'fountain-default-script-format "`fountain-mode' 3.0")
 (defcustom fountain-default-script-format
   "screenplay"
   "Default script format.
@@ -211,7 +211,7 @@ this option."
   :safe 'stringp)
 
 (define-obsolete-variable-alias 'fountain-hide-emphasis-delim
-  'fountain-hide-emphasis-markup "3.0.0")
+  'fountain-hide-emphasis-markup "`fountain-mode' 3.0")
 (defcustom fountain-hide-emphasis-markup
   nil
   "If non-nil, make emphasis delimiters invisible."
@@ -229,7 +229,7 @@ this option."
                (font-lock-refresh-defaults))))))
 
 (define-obsolete-variable-alias 'fountain-hide-syntax-chars
-  'fountain-hide-element-markup "3.0.0")
+  'fountain-hide-element-markup "`fountain-mode' 3.0")
 (defcustom fountain-hide-element-markup
   nil
   "If non-nil, make syntax characters invisible."
@@ -364,7 +364,7 @@ Control which elements are highlighted with
   "Default face for notes.")
 
 (define-obsolete-face-alias 'fountain-section-heading
-  'fountain-section-heading-1 "3.0.0")
+  'fountain-section-heading-1 "`fountain-mode' 3.0")
 (defface fountain-section-heading-1
   '((t (:inherit outline-1)))
   "Default face for section level 1 headings.")
@@ -446,7 +446,7 @@ so the following are equivalent:
                  (font-lock-refresh-defaults)))))))
 
 (define-obsolete-variable-alias 'fountain-scene-heading-suffix-sep
-  'fountain-scene-heading-suffix-separator)
+  'fountain-scene-heading-suffix-separator "`fountain-mode' 3.0")
 (defcustom fountain-scene-heading-suffix-separator
   " --? "
   "Regular expression separating scene heading location from suffix.
@@ -1350,7 +1350,7 @@ Used by `fountain-outline-cycle'.")
   :group 'fountain)
 
 (define-obsolete-variable-alias 'fountain-shift-all-elements
-  'fountain-transpose-all-elements "`fountain-mode' 3.2.0")
+  'fountain-transpose-all-elements "`fountain-mode' 3.2")
 (defcustom fountain-transpose-all-elements
   t
   "\\<fountain-mode-map>Non-nil if \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should operate on all elements.
@@ -1360,7 +1360,7 @@ Otherwise, only operate on section and scene headings."
   :group 'fountain)
 
 (define-obsolete-variable-alias 'fountain-fold-notes
-  'fountain-outline-fold-notes "3.0.0")
+  'fountain-outline-fold-notes "`fountain-mode' 3.0")
 (defcustom fountain-outline-fold-notes
   t
   "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling outline visibility.
@@ -2126,7 +2126,7 @@ to remove previous string first."
   :group 'fountain)
 
 (define-obsolete-variable-alias 'fountain-display-scene-numbers-in-margin
-  'fountain-scene-numbers-display-in-margin "3.0.0")
+  'fountain-scene-numbers-display-in-margin "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-display-in-margin
   nil
   "If non-nil, display scene numbers in the right margin.
@@ -2140,7 +2140,7 @@ This option does affect file contents."
   :set #'fountain--set-and-refresh-font-lock)
 
 (define-obsolete-variable-alias 'fountain-prefix-revised-scene-numbers
-  'fountain-scene-numbers-prefix-revised "3.0.0")
+  'fountain-scene-numbers-prefix-revised "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-prefix-revised
   nil
   "If non-nil, revised scene numbers are prefixed.
@@ -2166,7 +2166,7 @@ script may result in errors in output."
   :group 'fountain-scene-numbers)
 
 (define-obsolete-variable-alias 'fountain-scene-number-first-revision
-  'fountain-scene-numbers-first-revision-char "3.0.0")
+  'fountain-scene-numbers-first-revision-char "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-first-revision-char
   ?A
   "Character to start revised scene numbers."
@@ -2175,7 +2175,7 @@ script may result in errors in output."
   :group 'fountain-scene-numbers)
 
 (define-obsolete-variable-alias 'fountain-scene-number-separator
-  'fountain-scene-numbers-separator "3.0.0")
+  'fountain-scene-numbers-separator "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-separator
   nil
   "Character to separate scene numbers."
@@ -2436,7 +2436,7 @@ scene number from being auto-upcased."
   :prefix "fountain-page-")
 
 (define-obsolete-variable-alias 'fountain-export-page-size
-  'fountain-page-size "3.0.0")
+  'fountain-page-size "`fountain-mode' 3.0")
 (defcustom fountain-page-size
   'letter
   "Paper size to use on export."
@@ -2445,7 +2445,7 @@ scene number from being auto-upcased."
                 (const :tag "A4" a4)))
 
 (define-obsolete-variable-alias 'fountain-pages-max-lines
-  'fountain-page-max-lines "3.0.0")
+  'fountain-page-max-lines "`fountain-mode' 3.0")
 (defcustom fountain-page-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
@@ -2458,7 +2458,7 @@ you may get incorrect output."
                        (cons (const :tag "A4" a4) integer))))
 
 (define-obsolete-variable-alias 'fountain-pages-ignore-narrowing
-  'fountain-page-ignore-restriction "3.0.0")
+  'fountain-page-ignore-restriction "`fountain-mode' 3.0")
 (defcustom fountain-page-ignore-restriction
   nil
   "Non-nil if counting pages should ignore buffer narrowing."
