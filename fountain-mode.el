@@ -893,6 +893,8 @@ regular expression."
           imenu-generic-expression))
   (when (featurep 'imenu) (imenu-update-menubar)))
 
+(require 'elec-pair)
+
 (defun fountain-electric-pair-skip-self (char)
   "Return non-nil if syntax before that of CHAR is word syntax."
   (and electric-pair-preserve-balance
