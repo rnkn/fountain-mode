@@ -1380,15 +1380,21 @@ Notes visibility can be cycled with \\[fountain-dwim]."
 (defalias 'fountain-outline-backward 'outline-backward-same-level)
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
-(defalias 'fountain-outline-show-all 'outline-show-all)
 
-(when (< emacs-major-version 25)
-  (defalias 'outline-show-all 'show-all)
-  (defalias 'outline-show-entry 'show-entry)
-  (defalias 'outline-show-subtree 'show-subtree)
-  (defalias 'outline-show-children 'show-children)
-  (defalias 'outline-hide-subtree 'hide-subtree)
-  (defalias 'outline-hide-sublevels 'hide-sublevels))
+(if (< emacs-major-version 25)
+    (progn
+      (defalias 'fountain-outline-show-all 'show-all)
+      (defalias 'fountain-outline-show-entry 'show-entry)
+      (defalias 'fountain-outline-show-subtree 'show-subtree)
+      (defalias 'fountain-outline-show-children 'show-children)
+      (defalias 'fountain-outline-hide-subtree 'hide-subtree)
+      (defalias 'fountain-outline-hide-sublevels 'hide-sublevels))
+  (defalias 'fountain-outline-show-all 'outline-show-all)
+  (defalias 'fountain-outline-show-entry 'outline-show-entry)
+  (defalias 'fountain-outline-show-subtree 'outline-show-subtree)
+  (defalias 'fountain-outline-show-children 'outline-show-children)
+  (defalias 'fountain-outline-hide-subtree 'outline-hide-subtree)
+  (defalias 'fountain-outline-hide-sublevels 'outline-hide-sublevels))
 
 (defun fountain-get-block-bounds ()
   "Return the beginning and end bounds of current element block."
@@ -1487,7 +1493,7 @@ Return non-nil if empty newline was inserted."
     (set-marker insert-point (point))
     (insert (delete-and-extract-region beg end))
     (goto-char insert-point)
-    (when folded (outline-hide-subtree))
+    (when folded (fountain-outline-hide-subtree))
     (when hanging-line
       (save-excursion
         (goto-char (point-max))
@@ -1505,7 +1511,7 @@ Return non-nil if empty newline was inserted."
   "Set outline visibilty to outline level N.
 Display a message unless SILENT."
   (cond ((= n 0)
-         (outline-show-all)
+         (fountain-outline-show-all)
          (save-excursion
            (goto-char (point-min))
            (while (re-search-forward fountain-note-regexp nil 'move)
@@ -1513,10 +1519,10 @@ Display a message unless SILENT."
                                   fountain-outline-fold-notes)))
          (unless silent (message "Showing all")))
         ((= n 6)
-         (outline-hide-sublevels n)
+         (fountain-outline-hide-sublevels n)
          (unless silent (message "Showing scene headings")))
         (t
-         (outline-hide-sublevels n)
+         (fountain-outline-hide-sublevels n)
          (unless silent (message "Showing level %s headings" n))))
   (setq fountain--outline-cycle n))
 
@@ -1577,13 +1583,13 @@ Display a message unless SILENT."
             (t
              (fountain-outline-hide-level highest-level))))
           ((eq arg 16)
-           (outline-show-all)
+           (fountain-outline-show-all)
            (message "Showing all")
            (setq fountain--outline-cycle 0))
           ((eq arg 64)
            (if custom-level
                (fountain-outline-hide-level custom-level)
-             (outline-show-all)))
+             (fountain-outline-show-all)))
           (t
            (save-excursion
              (outline-back-to-heading)
@@ -1615,20 +1621,20 @@ Display a message unless SILENT."
                  (setq fountain--outline-cycle-subtree 0))
                 ((and (<= eosp eolp)
                       children)
-                 (outline-show-entry)
-                 (outline-show-children)
+                 (fountain-outline-show-entry)
+                 (fountain-outline-show-children)
                  (funcall fold-notes-fun eohp eosp)
                  (message "Showing headings")
                  (setq fountain--outline-cycle-subtree 2))
                 ((or (<= eosp eolp)
                      (= fountain--outline-cycle-subtree 2))
-                 (outline-show-subtree)
+                 (fountain-outline-show-subtree)
                  (goto-char eohp)
                  (funcall fold-notes-fun eohp eosp)
                  (message "Showing contents")
                  (setq fountain--outline-cycle-subtree 3))
                 (t
-                 (outline-hide-subtree)
+                 (fountain-outline-hide-subtree)
                  (message "Hiding contents")
                  (setq fountain--outline-cycle-subtree 1)))))))))
 
@@ -1739,7 +1745,7 @@ buffer windows are opened."
                (= (point) beg)))
         (pop-to-buffer target-buffer)
       (clone-indirect-buffer target-buffer t)
-      (outline-show-all))
+      (fountain-outline-show-all))
     (narrow-to-region beg end)))
 
 
