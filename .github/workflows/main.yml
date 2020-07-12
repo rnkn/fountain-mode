@@ -22,7 +22,7 @@ jobs:
           - 26.3
           - snapshot
     steps:
-    - uses: purcell/setup-emacs@v2
+    - uses: purcell/setup-emacs@v2.0
       with:
         version: ${{ matrix.emacs_version }}
     - uses: actions/checkout@v2
