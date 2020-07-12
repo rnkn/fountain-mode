@@ -1,6 +1,6 @@
 EMACS ?= emacs
 
-REQUIREMENTS = package-lint
+REQUIREMENTS = package-lint seq
 
 INIT='(progn \
   (require (quote package)) \
