@@ -1733,8 +1733,8 @@ buffer windows are opened."
         (setq beg (point))
         (when (or (fountain-match-section-heading)
                   (fountain-match-scene-heading))
-          (setq heading-name (string-trim (match-string-no-properties 0)
-                                          "[#\s]+")
+          (setq heading-name (replace-regexp-in-string
+                              "^[#\s]+" "" (match-string-no-properties 0))
                 target-buffer (concat base-buffer "-" heading-name))
           (outline-end-of-subtree)
           (setq end (point)))))
