@@ -1972,7 +1972,7 @@ to scene number or point."
   3. If point is inside a non-empty parenthetical, move to a newline.
   4. If point is at a blank line within dialogue, insert a parenthetical.
   5. If point is at a note, cycle visibility of that note.
-  6. If point is at the end of line, call `completion-at-point'.
+  6. If point is at the end of line, call `fountain-completion-at-point'.
   7. If point is a scene heading or section heading, cycle visibility of that
      heading."
   (interactive "p")
