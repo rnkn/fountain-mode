@@ -1725,7 +1725,7 @@ buffer windows are opened."
   (interactive)
   (let ((pop-up-windows fountain-pop-up-indirect-windows)
         (base-buffer (buffer-name (buffer-base-buffer)))
-        beg end heading-name target-buffer)
+        beg end target-buffer)
     (save-excursion
       (save-restriction
         (widen)
@@ -1733,9 +1733,12 @@ buffer windows are opened."
         (setq beg (point))
         (when (or (fountain-match-section-heading)
                   (fountain-match-scene-heading))
-          (setq heading-name (replace-regexp-in-string
-                              "^[#\s]+" "" (match-string-no-properties 0))
-                target-buffer (concat base-buffer "-" heading-name))
+          (let ((heading-name (match-string-no-properties 0)))
+            (setq target-buffer
+                  (concat base-buffer "-"
+                          (if (string-match "^[#\s]+" heading-name)
+                              (substring heading-name (match-end 0))
+                            heading-name))))
           (outline-end-of-subtree)
           (setq end (point)))))
     (if (and (get-buffer target-buffer)
