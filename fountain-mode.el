@@ -6,7 +6,7 @@
 
 ;; Author: William Rankin <william@bydasein.com>
 ;; Keywords: wp, text
-;; Version: 3.2.0-beta
+;; Version: 3.2.0
 ;; Package-Requires: ((emacs "24.5") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
