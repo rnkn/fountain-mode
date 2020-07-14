@@ -6,6 +6,9 @@ on:
       - "**.md"
       - "contrib/*"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "contrib/*"
 
 jobs:
   build:
@@ -14,6 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         emacs_version:
+          - 24.4
           - 24.5
           - 25.1
           - 25.2
@@ -34,4 +38,5 @@ jobs:
         uses: leotaku/elisp-check@master
         with:
           file: "*.el"
+          ignore_warnings: true
           check: ${{ matrix.emacs_check }}
