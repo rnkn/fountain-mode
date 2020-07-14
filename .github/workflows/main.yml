@@ -2,13 +2,11 @@ name: CI
 
 on:
   push:
-    paths-ignore:
-      - "**.md"
-      - "contrib/*"
+    paths:
+      - "fountain-mode.el"
   pull_request:
-    paths-ignore:
-      - "**.md"
-      - "contrib/*"
+    paths:
+      - "fountain-mode.el"
 
 jobs:
   build:
@@ -33,10 +31,10 @@ jobs:
       - uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs_version }}
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
       - name: Run checks
         uses: leotaku/elisp-check@master
         with:
-          file: "*.el"
+          file: "fountain-mode.el"
           ignore_warnings: true
           check: ${{ matrix.emacs_check }}
