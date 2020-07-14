@@ -11,6 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         emacs_version:
           - 24.5
@@ -21,10 +22,16 @@ jobs:
           - 26.2
           - 26.3
           - snapshot
+        emacs_check:
+          - package-lint
+          - byte-compile
     steps:
-      - uses: purcell/setup-emacs@v2.0
+      - uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs_version }}
       - uses: actions/checkout@v2
-      - name: Run tests
-        run: make
+      - name: Run checks
+        uses: leotaku/elisp-check@master
+        with:
+          file: "*.el"
+          check: ${{ matrix.emacs_check }}
