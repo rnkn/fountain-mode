@@ -6,7 +6,7 @@
 
 ;; Author: William Rankin <william@bydasein.com>
 ;; Keywords: wp, text
-;; Version: 3.2.0
+;; Version: 3.2.1
 ;; Package-Requires: ((emacs "24.5") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -3307,11 +3307,11 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Mark Subtree" fountain-outline-mark]
      ["Open Subtree in Indirect Buffer" fountain-outline-to-indirect-buffer]
      "---"
-     ["Shift Element Up" fountain-shift-up]
-     ["Shift Element Down" fountain-shift-down]
+     ["Transpose Element Backward" fountain-backward-paragraph-or-transpose]
+     ["Transpose Element Forward" fountain-forward-paragraph-or-transpose]
      "---"
-     ["Shift All Elements" (customize-set-variable 'fountain-transpose-all-elements
-                                             (not fountain-transpose-all-elements))
+     ["Transpose All Elements" (customize-set-variable 'fountain-transpose-all-elements
+                                                       (not fountain-transpose-all-elements))
       :style toggle
       :selected fountain-transpose-all-elements])
     ("Scene Numbers"
