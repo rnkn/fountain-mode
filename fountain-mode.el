@@ -34,6 +34,8 @@
 
 ;; For more information on the Fountain format, visit <https://fountain.io>.
 
+;; Community screenshots: <https://github.com/rnkn/fountain-mode/issues/114>
+
 ;; ## Features ##
 
 ;; - Support for Fountain 1.1 specification
