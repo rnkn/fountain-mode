@@ -1,13 +1,13 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2019  Paul William Rankin
+;; Copyright (c) 2014-2018  Paul William Rankin
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
 ;; Copyright (c) 2019-2020  Paul William Rankin
 
 ;; Author: William Rankin <william@bydasein.com>
 ;; Keywords: wp, text
 ;; Version: 3.2.1
-;; Package-Requires: ((emacs "24.5") (seq "2.20"))
+;; Package-Requires: ((emacs "24.4") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
 ;; This file is not part of GNU Emacs.
