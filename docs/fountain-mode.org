@@ -1,0 +1,231 @@
+#+TITLE: Fountain Mode
+
+#+LANGUAGE: en
+#+MACRO: version 3.2
+#+OPTIONS: num:nil toc:nil
+
+#+ATTR_TEXINFO: :tag n.b.
+#+BEGIN_QUOTE
+This file is a work in progress and does not represent official documentation.
+#+END_QUOTE
+
+Fountain is a markup format for writing scripts (both screenplays and stageplays) in plain text. It is designed to be easily readable and editable, and to look as much like a script as possible.
+
+This is the Fountain Mode Manual updated for version {{{version}}}.
+
+* Copyright
+  :PROPERTIES:
+  :COPYING:  t
+  :END:
+
+* Installation
+  :PROPERTIES:
+  :DESCRIPTION: Getting started.
+  :END:
+
+The latest stable release of Fountain Mode is available via [[https://stable.melpa.org/#/fountain-mode][MELPA-stable]]. First, add MELPA-stable to your package archives:
+
+: M-x customize-option RET package-archives RET
+    
+Insert an entry named ~melpa-stable~ with the URL ~https://stable.melpa.org/packages/~
+
+You can then find the latest stable version of ~fountain-mode~ in the list returned by:
+
+: M-x list-packages RET
+
+If you prefer the latest but perhaps unstable version, do the above using [[https://melpa.org/#/fountain-mode][MELPA]].
+
+** Advanced Installation
+   :PROPERTIES:
+   :DESCRIPTION: For the pros.
+   :END:
+
+Download the [[https://github.com/rnkn/fountain-mode/releases/latest][latest release]], move this file into your load-path and add to your ~init.el~ file:
+
+: (require 'fountain-mode)
+
+If you wish to contribute to or alter Fountain Mode's code, clone the repository into your load-path and require as above:
+
+: git clone https://github.com/rnkn/fountain-mode.git
+
+* Script Elements
+
+The main idea of writing a script in Fountain is that you should be able to just start writing what looks like a script and you'll get a script.
+
+** Metadata
+   :PROPERTIES:
+   :DESCRIPTION: Key-value info at the top of your script
+   :END:
+
+- ~title~
+- ~credit~
+- ~author~
+
+Calling ~auto-insert~ will guide you through adding the basic Fountain metadata.
+
+** Section Headings
+   :PROPERTIES:
+   :DESCRIPTION: Outline your script with # prefix headings
+   :END:
+
+Section headings are lines beginning with `#'.
+
+There are five levels of section headings. See [[Outlining]].
+
+** Scene Headings
+   :PROPERTIES:
+   :DESCRIPTION: Lines beginning with INT, EXT, etc.
+   :END:
+
+A scene begins with a scene heading.
+
+Scene headings begin with a prefix, specified in ~fountain-scene-heading-prefix-list~, which defaults to =INT, EXT, EST, INT./EXT., INT/EXT, I/E=.
+
+Each prefix may be followed by a dot and/or a space, so the following are equivalent:
+
+#+BEGIN_EXAMPLE
+INT HOUSE - DAY
+INT. HOUSE - DAY
+#+END_EXAMPLE
+
+#+ATTR_TEXINFO: :options fountain-scene-heading-prefix-list
+#+BEGIN_defopt
+This options allows setting your own scene heading prefixes. These entries are case insensitive.
+#+END_defopt
+
+#+ATTR_TEXINFO: :options fountain-scene-heading-suffix-sep
+#+BEGIN_defopt
+This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either ~ - ~ or ~ -- ~.
+#+END_defopt
+
+See [[Autocompletion]].
+
+** Characters
+   :PROPERTIES:
+   :DESCRIPTION: Names are in UPPERCASE
+   :END:
+
+See [[Do What I Mean]].
+
+** Dialogue
+   :PROPERTIES:
+   :DESCRIPTION: Text following character elements
+   :END:
+** Parenthetics
+   :PROPERTIES:
+   :DESCRIPTION: Text inside (parens) within dialogue
+   :END:
+
+See [[Do What I Mean]].
+
+** Transitions
+   :PROPERTIES:
+   :DESCRIPTION: Uppercase lines ending in TO:
+   :END:
+** Notes
+   :PROPERTIES:
+   :DESCRIPTION: Text within [[ double brackets ]]
+   :END:
+** Synopses
+   :PROPERTIES:
+   :DESCRIPTION: Lines beginning with =
+   :END:
+
+ A synopsis is a handy way to detail what a scene of section is about. A synopsis element is simply a line beginning with ~=~.
+
+ : INT. FISHING TRAWLER - DAY
+ : = The men eat the shark they caught.
+
+ Synopses are not included by most export tools.
+
+** Center Text
+   :PROPERTIES:
+   :DESCRIPTION: > Lines surrounded by greater/less than <
+   :END:
+** Comments
+   :PROPERTIES:
+   :DESCRIPTION: C-style multi-line comments (aka boneyard)
+   :END:
+* Outlining
+
+There are five levels of section headings. Scene headings count as the sixth level headings.
+
+Cycle an individual subtree visibility with ~TAB~. Cycle global outline visibility with ~S-TAB~ (shift-tab) or ~C-u TAB~.
+
+* Navigation
+  :PROPERTIES:
+  :DESCRIPTION: Fly through your script with ease.
+  :END:
+
+* Syntax Highlighting
+  :PROPERTIES:
+  :DESCRIPTION: Differentiate all the elements with colors.
+  :END:
+
+* Element Aligning
+  :PROPERTIES:
+  :DESCRIPTION: WYSIWYG visual indentation of script elements
+  :END:
+
+* Text Emphasis
+
+Text can be underlined, italic, bold, or a combination thereof.
+
+Underlined text is surrounded by ~_underscores_~.
+
+Italic text is surrounded by ~*single asterisks*~
+
+Bold text is surrounded by ~**double asterisks**~
+
+For the writer pursists who want to work the way our ancestors did on typewriters, stick to underlining.
+
+* Scene Numbering
+
+* Exporting
+  :PROPERTIES:
+  :DESCRIPTION: Sharing your great writing!
+  :END:
+
+- [[https://github.com/ifrost/afterwriting-labs][Afterwriting (JavaScript)]]
+- [[https://github.com/Wraparound/wrap][Wrap (Go)]]
+- [[https://github.com/vilcans/screenplain][Screenplain (Python 2)]]
+- [[https://github.com/olivertaylor/Textplay][Textplay (Ruby)]] [fn:1]
+
+[fn:1] Requires [[https://www.princexml.com][PrinceXML]] for PDF export.
+
+* Do What I Mean
+  :PROPERTIES:
+  :DESCRIPTION: Traditional TAB-style autocompletion
+  :END:
+
+Call a command based on context.
+
+#+ATTR_TEXINFO: :options fountain-dwim
+#+BEGIN_defun
+This command, bound to ~TAB~ by default, will perform different actions based on context.
+#+END_defun
+
+1. If prefixed with ARG, call ~fountain-outline-cycle~ and pass ARG.
+2. If point is inside an empty parenthetical, delete it.
+3. If point is inside a non-empty parenthetical, move to a newline.
+4. If point is at a blank line within dialogue, insert a parenthetical.
+5. If point is at a note, cycle visibility of that note.
+6. If point is at the end of line, call ~completion-at-point~.
+7. If point is a scene heading or section heading, cycle visibility of that heading.
+
+* Autocompletion
+* Indexes
+** Index of Commands
+   :PROPERTIES:
+   :INDEX:    cp
+   :END:
+** Index of Variables
+   :PROPERTIES:
+   :INDEX:    vr
+   :END:
+
+#+BEGIN_EXPORT texinfo
+@c Local Variables:
+@c compile-command: "makeinfo --html --css-include=style.css fountain-mode.texi"
+@c End:
+#+END_EXPORT

@@ -1,0 +1,18 @@
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    max-width: 80ex;
+    margin: 1em auto;
+    padding: 1em;
+}
+
+img {
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+}
+
+pre.example {
+    font-family: "Courier Prime", Courier, monospace;
+}
