@@ -1,18 +1,30 @@
+html {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+}
+
 body {
     font-family: Helvetica, Arial, sans-serif;
-    max-width: 80ex;
+    max-width: 640px;
     margin: 1em auto;
-    padding: 1em;
+    background-color: white;
 }
 
 img {
     width: 100%;
 }
 
-h1 {
-    text-align: center;
+code {
+    font-family: "DejaVu Sans Mono", Menlo, Monaco, monospace;
+    font-size: 0.8em;
+    background-color: rgb(240,240,240);
 }
 
 pre.example {
-    font-family: "Courier Prime", Courier, monospace;
+    font-family: "Courier Prime", Courier, "Courier New", monospace;
+}
+
+pre.menu-comment, pre.menu-preformatted {
+    font-family: initial;
 }
