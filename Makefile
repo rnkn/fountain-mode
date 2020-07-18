@@ -21,7 +21,11 @@ check:
 compile: clean
 	$(EMACS) -Q --eval $(INIT) -L . --batch -f batch-byte-compile *.el
 
+docs: clean
+	cd docs && \
+		makeinfo --html --css-ref=stylesheet.css --output . fountain-mode.texi
+
 clean:
-	rm -f *.elc
+	rm -f *.elc docs/*.html
 
 .PHONY:	all check compile
