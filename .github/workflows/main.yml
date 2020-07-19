@@ -32,9 +32,15 @@ jobs:
         with:
           version: ${{ matrix.emacs_version }}
       - uses: actions/checkout@master
-      - name: Run checks
+      - name: Run package-lint
         uses: leotaku/elisp-check@master
         with:
           file: "fountain-mode.el"
           ignore_warnings: true
-          check: ${{ matrix.emacs_check }}
+          check: package-lint
+      - name: Run byte-compile
+        uses: leotaku/elisp-check@master
+        with:
+          file: "fountain-mode.el"
+          ignore_warnings: true
+          check: byte-compile
