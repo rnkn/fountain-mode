@@ -1,8 +1,10 @@
 #+TITLE: Fountain Mode
-
 #+LANGUAGE: en
 #+MACRO: version 3.2
 #+OPTIONS: num:nil toc:nil
+#+TEXINFO_DIR_CATEGORY: Emacs
+#+TEXINFO_DIR_TITLE: Fountain Mode: (fountain-mode)
+#+TEXINFO_DIR_DESC: Write screenplays and stageplays
 
 #+ATTR_TEXINFO: :tag n.b.
 #+BEGIN_QUOTE
@@ -57,9 +59,9 @@ The main idea of writing a script in Fountain is that you should be able to just
    :DESCRIPTION: Key-value info at the top of your script
    :END:
 
-- ~title~
-- ~credit~
-- ~author~
+- =title=
+- =credit=
+- =author=
 
 Calling ~auto-insert~ will guide you through adding the basic Fountain metadata.
 
@@ -95,7 +97,7 @@ This options allows setting your own scene heading prefixes. These entries are c
 
 #+ATTR_TEXINFO: :options fountain-scene-heading-suffix-sep
 #+BEGIN_defopt
-This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either ~ - ~ or ~ -- ~.
+This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either = - = or = -- =.
 #+END_defopt
 
 See [[Autocompletion]].
