@@ -1,8 +1,14 @@
-EMACS ?= emacs
+PATH		:= /usr/local/opt/texinfo/bin:${PATH}
+NAME		:= fountain-mode
+DEPS		:= package-lint seq
+EMACS		?= emacs
+CSS_FILE	?= stylesheet.css
+DOCS_DIR	?= docs
+LISP_FILE	:= $(NAME).el
+TEXI_FILE	:= $(DOCS_DIR)/$(NAME).texi
+INFO_FILE	:= $(DOCS_DIR)/$(NAME).info
 
-REQUIREMENTS = package-lint seq
-
-INIT='(progn \
+INIT = '(progn \
   (require (quote package)) \
   (push (cons "melpa" "https://melpa.org/packages/") package-archives) \
   (package-initialize) \
@@ -11,21 +17,33 @@ INIT='(progn \
             (unless (assoc pkg package-archive-contents) \
               (package-refresh-contents)) \
             (package-install pkg))) \
-        (quote (${REQUIREMENTS}))))'
+        (quote ($(DEPS)))))'
 
-all: clean check compile
+all: clean check docs compile
 
-check:
-	$(EMACS) -Q --eval $(INIT) --batch -f package-lint-batch-and-exit *.el
+check: $(LISP_FILE)
+	$(EMACS) -Q --eval $(INIT) --batch -f package-lint-batch-and-exit $(LISP_FILE)
 
-compile: clean
-	$(EMACS) -Q --eval $(INIT) -L . --batch -f batch-byte-compile *.el
+compile: $(LISP_FILE)
+	$(EMACS) -Q --eval $(INIT) -L . --batch -f batch-byte-compile $(LISP_FILE)
 
-docs: clean
-	cd docs && \
-		makeinfo --html --css-ref=stylesheet.css --output . fountain-mode.texi
+info-manual: $(TEXI_FILE)
+	PATH=$(PATH) \
+	makeinfo $(TEXI_FILE)
+	install-info $(TEXI_FILE) dir
+
+html-manual: $(TEXI_FILE)
+	PATH=$(PATH) \
+	makeinfo --html --css-ref=$(CSS_FILE) --output $(DOCS_DIR) $(TEXI_FILE)
+
+pdf-manual: $(TEXI_FILE)
+	pdftex $(TEXI_FILE)
 
 clean:
-	rm -f *.elc docs/*.html
+	rm -f $(NAME).elc
+	rm -f $(INFO_FILE)
+	rm -f $(DOCS_DIR)/*.html
+	rm -f $(DOCS_DIR)/$(NAME).aux $(DOCS_DIR)/$(NAME).fn \
+		$(DOCS_DIR)/$(NAME).log $(DOCS_DIR)/$(NAME).toc $(DOCS_DIR)/$(NAME).vr
 
 .PHONY:	all check compile
