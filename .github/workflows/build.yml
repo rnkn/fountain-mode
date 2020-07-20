@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - "fountain-mode.el"
+      - "**/build.yml"
   pull_request:
     paths:
       - "fountain-mode.el"
+      - "**/build.yml"
 
 jobs:
   build:
@@ -24,9 +26,6 @@ jobs:
           - 26.2
           - 26.3
           - snapshot
-        emacs_check:
-          - package-lint
-          - byte-compile
     steps:
       - uses: purcell/setup-emacs@master
         with:
