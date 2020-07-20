@@ -6,7 +6,7 @@ CSS_FILE	?= stylesheet.css
 DOCS_DIR	?= docs
 LISP_FILE	:= $(NAME).el
 TEXI_FILE	:= $(DOCS_DIR)/$(NAME).texi
-INFO_FILE	:= $(DOCS_DIR)/$(NAME).info
+INFO_FILE	:= $(NAME).info
 
 INIT = '(progn \
   (require (quote package)) \
@@ -29,8 +29,8 @@ compile: $(LISP_FILE)
 
 info-manual: $(TEXI_FILE)
 	PATH=$(PATH) \
-	makeinfo $(TEXI_FILE)
-	install-info $(TEXI_FILE) dir
+	makeinfo $(TEXI_FILE) && \
+	install-info $(INFO_FILE) dir
 
 html-manual: $(TEXI_FILE)
 	PATH=$(PATH) \
@@ -42,8 +42,13 @@ pdf-manual: $(TEXI_FILE)
 clean:
 	rm -f $(NAME).elc
 	rm -f $(INFO_FILE)
+	rm -f dir
 	rm -f $(DOCS_DIR)/*.html
-	rm -f $(DOCS_DIR)/$(NAME).aux $(DOCS_DIR)/$(NAME).fn \
-		$(DOCS_DIR)/$(NAME).log $(DOCS_DIR)/$(NAME).toc $(DOCS_DIR)/$(NAME).vr
+	rm -f **$(NAME).aux
+	rm -f **$(NAME).fn
+	rm -f **$(NAME).log
+	rm -f **$(NAME).toc
+	rm -f **$(NAME).vr
+	rm -f **$(NAME).pdf
 
 .PHONY:	all check compile
