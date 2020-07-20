@@ -1,14 +1,14 @@
 html {
     margin: 0;
     padding: 0;
-    background-color: white;
+    background-color: #ffffff;
 }
 
 body {
     font-family: Helvetica, Arial, sans-serif;
     max-width: 640px;
     margin: 1em auto;
-    background-color: white;
+    background-color: #ffffff;
 }
 
 img {
@@ -18,13 +18,22 @@ img {
 code {
     font-family: "DejaVu Sans Mono", Menlo, Monaco, monospace;
     font-size: 0.8em;
-    background-color: rgb(240,240,240);
+    background-color: #f0f0f0;
+}
+
+samp {
+    font-family: "Courier Prime", Courier, "Courier Final Draft", "Courier New", monospace;
+}
+
+sup {
+    line-height: 0;
 }
 
 pre.example {
-    font-family: "Courier Prime", Courier, "Courier New", monospace;
+    font-family: "Courier Prime", Courier, "Courier Final Draft", "Courier New", monospace;
 }
 
 pre.menu-comment, pre.menu-preformatted {
     font-family: initial;
+    margin: 0;
 }
