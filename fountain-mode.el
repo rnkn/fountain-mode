@@ -533,7 +533,7 @@ whatever extension you like."
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
-  (concat "^\\([^:\s\t\n][^:\n]*\\):[\s\t]*\\(.+\\)?"
+  (concat "^\\([^:\s\t\n][^:[\n]*\\):[\s\t]*\\(.+\\)?"
           "\\|"
           "^[\s\t]+\\(?2:.+\\)")
   "Regular expression for matching multi-line metadata values.
