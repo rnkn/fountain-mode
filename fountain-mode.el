@@ -803,7 +803,7 @@ scene heading regular expression."
         (concat
          "^\\(?:"
          ;; Group 1: match leading . (for forced scene heading)
-         "\\(?1:\\.\\)"
+         "\\(?1:[\s\t]*\\.\\)"
          ;; Group 2: match scene heading without scene number
          "\\(?2:\\<"
          ;; Group 4: match location
