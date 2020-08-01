@@ -3007,7 +3007,7 @@ The file is then passed to `dired-guess-default'."
     (unless (listp command-list) (setq command-list (list command-list)))
     (setq command
           (seq-find (lambda (str)
-                      (locate-file str (exec-path) nil 'file-executable-p))
+                      (locate-file str exec-path nil 'file-executable-p))
                     command-list))
     (unless (stringp command)
       (user-error "%S not configured correctly" 'dired-guess-shell-alist-user))
