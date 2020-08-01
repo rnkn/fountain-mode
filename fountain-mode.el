@@ -3011,7 +3011,7 @@ The file is then passed to `dired-guess-default'."
                     command-list))
     (unless (stringp command)
       (user-error "%S not configured correctly" 'dired-guess-shell-alist-user))
-    (call-process command nil nil nil file)))
+    (call-process command nil 0 nil file)))
 
 
 ;;; Font Lock
