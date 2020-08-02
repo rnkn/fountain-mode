@@ -6,7 +6,7 @@ CSS_FILE	?= stylesheet.css
 DOCS_DIR	?= docs
 LISP_FILE	:= $(NAME).el
 TEXI_FILE	:= $(DOCS_DIR)/$(NAME).texi
-INFO_FILE	:= $(NAME).info
+INFO_FILE	:= $(DOCS_DIR)/$(NAME).info
 
 INIT = '(progn \
   (require (quote package)) \
