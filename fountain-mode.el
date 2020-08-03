@@ -2945,6 +2945,7 @@ Export command profiles are defined in
          current-prefix-arg))
   (unless profile-name
     (user-error "No `fountain-export-command-profiles' found"))
+  (save-some-buffers)
   (if (buffer-live-p (get-buffer fountain-export-output-buffer))
       (kill-buffer fountain-export-output-buffer))
   (let ((command
