@@ -2577,7 +2577,8 @@ Comments are assumed to be deleted."
   "Move point to column of ELEMENT fill limit suitable for breaking line.
 Skip over comments."
   (let ((fill-width
-         (intern-soft (concat "fountain-fill-" (symbol-name element)))))
+         (cdr (symbol-value
+               (intern-soft (format "fountain-fill-%s" element))))))
     (let ((i 0))
       (while (and (< i fill-width) (not (eolp)))
         (cond ((= (syntax-class (syntax-after (point))) 0)
@@ -2787,6 +2788,8 @@ The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
+(defvaralias 'fountain-fill-center 'fountain-fill-action)
+
 (defcustom fountain-fill-character
   '(20 . 38)
   "Cons cell of integers for indenting and filling character.
@@ -2826,6 +2829,7 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
+(defvaralias 'fountain-fill-lines 'fountain-fill-dialog)
 
 (defcustom fountain-fill-dual-dialog
   '(2 . 28)
