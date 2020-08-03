@@ -980,15 +980,16 @@ buffers."
 
 (defun fountain-match-metadata ()
   "Match metadata if point is at metadata, nil otherwise."
-  (save-excursion
-    (beginning-of-line)
-    (and (looking-at fountain-metadata-regexp)
-         (save-match-data
-           (save-restriction
-             (widen)
-             (or (bobp)
-                 (and (forward-line -1)
-                      (fountain-match-metadata))))))))
+  (unless (fountain-match-trans)
+    (save-excursion
+      (beginning-of-line)
+      (and (looking-at fountain-metadata-regexp)
+           (save-match-data
+             (save-restriction
+               (widen)
+               (or (bobp)
+                   (and (forward-line -1)
+                        (fountain-match-metadata)))))))))
 
 (defun fountain-match-page-break ()
   "Match page break if point is at page break, nil otherwise."
