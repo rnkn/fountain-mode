@@ -2721,7 +2721,7 @@ as a string to force the page number."
         (while (< (point) (point-max))
           (fountain-forward-page)
           (cl-incf total)
-          (when (and (not found) (< x (point)))
+          (when (and (not found) (<= x (point)))
             (setq current total found t)))
         (cons current total)))))
 
