@@ -2780,6 +2780,8 @@ The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
+(defvaralias 'fountain-fill-center 'fountain-fill-action)
+
 (defcustom fountain-fill-action
   '(0 . 61)
   "Cons cell of integers for indenting and filling action.
@@ -2787,8 +2789,6 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
-
-(defvaralias 'fountain-fill-center 'fountain-fill-action)
 
 (defcustom fountain-fill-character
   '(20 . 38)
@@ -2822,6 +2822,8 @@ The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
+(defvaralias 'fountain-fill-lines 'fountain-fill-dialog)
+
 (defcustom fountain-fill-dialog
   '(10 . 35)
   "Cons cell of integers for indenting and filling dialogue.
@@ -2829,7 +2831,6 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
-(defvaralias 'fountain-fill-lines 'fountain-fill-dialog)
 
 (defcustom fountain-fill-dual-dialog
   '(2 . 28)
