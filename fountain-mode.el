@@ -2505,6 +2505,8 @@ Comments are assumed to be deleted."
   (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
+     ;; End of buffer
+     ((eobp) nil)
      ;; If element is not included in export, we can safely break
      ;; before.
      ((not (memq element fountain-printed-elements))
@@ -2582,7 +2584,7 @@ Skip over comments."
          (cdr (symbol-value
                (intern-soft (format "fountain-fill-%s" element))))))
     (let ((i 0))
-      (while (and (< i fill-width) (not (eolp)))
+      (while (and (< i fill-width) (not (eolp)) (not (eobp)))
         (cond ((= (syntax-class (syntax-after (point))) 0)
                (forward-char 1) (cl-incf i))
               ((forward-comment 1))
@@ -2590,7 +2592,7 @@ Skip over comments."
                (forward-char 1) (cl-incf i)))))
     (skip-chars-forward "\s\t")
     (when (eolp) (forward-line))
-    (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
+    (unless (or (bolp) (eobp)) (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-forward-page ()
   "Move point forward by an approximately page.
