@@ -2945,7 +2945,6 @@ Export command profiles are defined in
          current-prefix-arg))
   (unless profile-name
     (user-error "No `fountain-export-command-profiles' found"))
-  (save-some-buffers)
   (if (buffer-live-p (get-buffer fountain-export-output-buffer))
       (kill-buffer fountain-export-output-buffer))
   (let ((command
@@ -2976,7 +2975,14 @@ Export command profiles are defined in
         (if use-stdin
             (shell-command-on-region start end command
                                      fountain-export-output-buffer)
-          (shell-command command fountain-export-output-buffer))
+          (progn
+            (when (and buffer-file-name
+                       (buffer-modified-p)
+                       (y-or-n-p (concat "Save file "
+                                   (buffer-file-name)
+                                   "? ")))
+              (save-buffer))
+           (shell-command command fountain-export-output-buffer)))
       (with-current-buffer fountain-export-output-buffer
         (if (< 0 (string-width (buffer-string)))
             (set-auto-mode t)
