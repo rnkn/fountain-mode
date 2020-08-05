@@ -130,8 +130,7 @@
 (eval-when-compile
   (require 'lisp-mnt)
   (defconst fountain-version
-    (lm-with-file load-file-name
-      (or (lm-header "package-version") (lm-version)))))
+    (lm-version load-file-name)))
 
 (defun fountain-version ()
   "Return `fountain-mode' version."
