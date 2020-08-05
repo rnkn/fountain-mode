@@ -2584,7 +2584,7 @@ Skip over comments."
          (cdr (symbol-value
                (intern-soft (format "fountain-fill-%s" element))))))
     (let ((i 0))
-      (while (and (< i fill-width) (not (eolp)) (not (eobp)))
+      (while (and (< i fill-width) (not (eolp)))
         (cond ((= (syntax-class (syntax-after (point))) 0)
                (forward-char 1) (cl-incf i))
               ((forward-comment 1))
