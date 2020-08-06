@@ -3010,7 +3010,7 @@ The file is then passed to `dired-guess-default'."
       (user-error "Could not find export file for %S"
                   (file-name-nondirectory (buffer-file-name))))
     (setq file (caar (seq-sort (lambda (a b)
-                                 (time-less-p (nth 5 b) (nth 5 a)))
+                                 (time-less-p (nth 6 b) (nth 6 a)))
                                file-list)))
     (unless (file-exists-p file)
       (user-error "File %S does not exist" file))
