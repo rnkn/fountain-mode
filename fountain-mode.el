@@ -2974,6 +2974,11 @@ Export command profiles are defined in
         (if use-stdin
             (shell-command-on-region start end command
                                      fountain-export-output-buffer)
+          (when (and buffer-file-name
+                     (buffer-modified-p)
+                     (y-or-n-p (format "Save file %s? "
+                                       (buffer-file-name))))
+            (save-buffer))
           (shell-command command fountain-export-output-buffer))
       (with-current-buffer fountain-export-output-buffer
         (if (< 0 (string-width (buffer-string)))
