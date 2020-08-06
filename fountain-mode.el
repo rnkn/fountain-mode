@@ -2504,6 +2504,8 @@ Comments are assumed to be deleted."
   (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
+     ;; End of buffer
+     ((eobp) nil)
      ;; If element is not included in export, we can safely break
      ;; before.
      ((not (memq element fountain-printed-elements))
@@ -2589,7 +2591,7 @@ Skip over comments."
                (forward-char 1) (cl-incf i)))))
     (skip-chars-forward "\s\t")
     (when (eolp) (forward-line))
-    (unless (bolp) (fill-move-to-break-point (line-beginning-position)))))
+    (unless (or (bolp) (eobp)) (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-forward-page ()
   "Move point forward by an approximately page.
@@ -2723,9 +2725,9 @@ as a string to force the page number."
         (while (< (point) (point-max))
           (fountain-forward-page)
           (cl-incf total)
-          (when (and (not found) (<= x (point)))
+          (when (and (not found) (< x (point)))
             (setq current total found t)))
-        (cons current total)))))
+        (cons (if found current total)  total)))))
 
 (defun fountain-count-pages ()
   "Message the current page of total pages in current buffer.
