@@ -2502,7 +2502,7 @@ Comments are assumed to be deleted."
      ;; of the current sentence. If previous line is a character or
      ;; parenthetical, call recursively on that element. Otherwise,
      ;; break page here.
-     ((eq element 'lines)
+     ((eq element 'dialog)
       (skip-chars-forward "\s\t")
       (unless (or (bolp)
                   (looking-back (sentence-end) nil))
@@ -2646,9 +2646,9 @@ as a string to force the page number."
     (fountain-goto-page-break-point)
     (setq element (fountain-get-element))
     ;; At this point, element can only be: section-heading,
-    ;; scene-heading, character, action, paren or lines. Only paren and
-    ;; lines require special treatment.
-    (if (memq element '(lines paren))
+    ;; scene-heading, character, action, paren or dialog. Only paren and
+    ;; dialog require special treatment.
+    (if (memq element '(dialog paren))
         (let ((name (fountain-get-character -1)))
           (delete-horizontal-space)
           (unless (bolp) (insert-before-markers "\n"))
