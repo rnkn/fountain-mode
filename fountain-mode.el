@@ -2688,14 +2688,14 @@ as a string to force the page number."
           (cl-incf total)
           (when (and (not found) (< x (point)))
             (setq current total found t)))
-        (cons (if found current total)  total)))))
+        (cons (if found current total) total)))))
 
 (defun fountain-count-pages ()
   "Message the current page of total pages in current buffer.
 n.b. This is an approximate calculation."
   (interactive)
   (let ((pages (fountain-get-page-count)))
-    (message "Page %d of %d" (car pages) (cdr pages))))
+    (message "Page %s of %s (approx.)" (car pages) (cdr pages))))
 
 (defun fountain-paginate-buffer ()
   "Add forced page breaks to buffer.
