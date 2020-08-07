@@ -1109,32 +1109,34 @@ Assumes that all other element matching has been done."
                         (fountain-match-note)))
                (looking-at fountain-action-regexp))))))
 
-;; FIXME: is it even worth bothering with dual-dialog?
 (defun fountain-get-element ()
   "Return element at point as a symbol."
   (cond
    ((and (bolp) (eolp)) nil)
-   ((fountain-match-metadata) 'metadata)
-   ((fountain-match-section-heading) 'section-heading)
-   ((fountain-match-scene-heading) 'scene-heading)
-   ((and (fountain-match-character)
-         (fountain-read-dual-dialog))
-    'character-dd)
-   ((fountain-match-character) 'character)
-   ((and (fountain-match-dialog)
-         (fountain-read-dual-dialog))
-    'lines-dd)
-   ((fountain-match-dialog) 'lines)
-   ((and (fountain-match-paren)
-         (fountain-read-dual-dialog))
-    'paren-dd)
-   ((fountain-match-paren) 'paren)
-   ((fountain-match-trans) 'trans)
-   ((fountain-match-center) 'center)
-   ((fountain-match-synopsis) 'synopsis)
-   ((fountain-match-page-break) 'page-break)
-   ((fountain-match-note) 'note)
-   (t 'action)))
+   ((fountain-match-section-heading)    'section-heading)
+   ((fountain-match-scene-heading)      'scene-heading)
+   ((fountain-match-character)
+    (cl-case (fountain-get-dual-dialog)
+      ((quote left)                     'dual-character-left)
+      ((quote right)                    'dual-character-right)
+      (t                                'character)))
+   ((fountain-match-dialog)
+    (cl-case (fountain-get-dual-dialog)
+      ((quote left)                     'dual-dialog-left)
+      ((quote right)                    'dual-dialog-right)
+      (t                                'dialog)))
+   ((fountain-match-paren)
+    (cl-case (fountain-get-dual-dialog)
+      ((quote left)                     'dual-paren-left)
+      ((quote right)                    'dual-paren-right)
+      (t                                'paren)))
+   ((fountain-match-trans)              'trans)
+   ((fountain-match-center)             'center)
+   ((fountain-match-synopsis)           'synopsis)
+   ((fountain-match-page-break)         'page-break)
+   ((fountain-match-metadata)           'metadata)
+   ((fountain-match-note)               'note)
+   (t                                   'action)))
 
 
 ;;; Auto-completion
@@ -1891,7 +1893,7 @@ string. e.g.
                   list)))
         list))))
 
-(defun fountain-read-dual-dialog (&optional pos)
+(defun fountain-get-dual-dialog (&optional pos)
   "Non-nil if point or POS is within dual dialogue.
 Returns \"right\" if within right-side dual dialogue, \"left\" if
 within left-side dual dialogue, and nil otherwise."
@@ -2440,9 +2442,18 @@ you may get incorrect output."
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
+(defvar fountain-dual-dialog-left-elements
+  '(dual-character-left dual-dialog-left dual-paren-left)
+  "List of elements constituent of left-side dual dialogue.")
+
+(defvar fountain-dual-dialog-right-elements
+  '(dual-character-right dual-dialog-right dual-paren-right)
+  "List of elements constituent of right-side dual dialogue.")
+
 (defvar fountain-printed-elements
-  '(scene-heading action character dialog paren trans center
-character-dd dialog-dd paren-dd lines lines-dd)
+  (append '(scene-heading action character dialog lines paren trans center)
+          fountain-dual-dialog-left-elements
+          fountain-dual-dialog-right-elements)
   "List of elements considered as printed.
 i.e. Only these elements count towards page length.")
 
@@ -2464,12 +2475,11 @@ Comments are assumed to be deleted."
       (beginning-of-line))
      ;; We cannot break page in dual dialogue. If we're at right dual
      ;; dialogue, skip back to previous character.
-     ((and (memq element '(character-dd lines-dd paren-dd))
-           (eq (fountain-read-dual-dialog) 'right))
+     ((memq element fountain-dual-dialog-right-elements)
       (fountain-forward-character 0)
       (fountain-forward-character -1))
      ;; If we're at left dual dialogue, break at character.
-     ((memq element '(character-dd lines-dd paren-dd))
+     ((memq element fountain-dual-dialog-left-elements)
       (fountain-forward-character 0))
      ;; If we're are a section heading, scene heading or character, we
      ;; can safely break before.
@@ -2595,14 +2605,13 @@ final exported pages and so should not be used interactively."
          ;; the latter.
          ;; FIXME: using block-bounds here could benefit.
          (t
-        (let ((element (fountain-get-element))
-              (dd (fountain-read-dual-dialog)))
+        (let ((element (fountain-get-element)))
           (if (memq element fountain-printed-elements)
               (progn
                 (fountain-move-to-fill-width element)
-                (cond ((eq dd 'left)
+                (cond ((memq element fountain-dual-dialog-left-elements)
                        (cl-incf line-count-left))
-                      ((eq dd 'right)
+                      ((memq element fountain-dual-dialog-right-elements)
                        (cl-incf line-count-right))
                       (t
                        (cl-incf line-count)))
@@ -2753,6 +2762,9 @@ The car sets `left-margin' and cdr `fill-column'."
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
 
+(defvaralias 'fountain-fill-dual-character-left 'fountain-fill-dual-character)
+(defvaralias 'fountain-fill-dual-character-right 'fountain-fill-dual-character)
+
 (defcustom fountain-fill-dual-character
   '(10 . 28)
   "Cons cell of integers for indenting and filling dual-dialogue character.
@@ -2768,6 +2780,9 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
+
+(defvaralias 'fountain-fill-dual-paren-left 'fountain-fill-dual-paren)
+(defvaralias 'fountain-fill-dual-paren-right 'fountain-fill-dual-paren)
 
 (defcustom fountain-fill-dual-paren
   '(5 . 16)
@@ -2786,6 +2801,9 @@ The car sets `left-margin' and cdr `fill-column'."
   :group 'fountain-fill
   :type '(cons (integer :tag "Indent")
                (integer :tag "Width")))
+
+(defvaralias 'fountain-fill-dual-dialog-left 'fountain-fill-dual-dialog)
+(defvaralias 'fountain-fill-dual-dialog-right 'fountain-fill-dual-dialog)
 
 (defcustom fountain-fill-dual-dialog
   '(2 . 28)
