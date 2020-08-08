@@ -2943,17 +2943,15 @@ Export command profiles are defined in
         (start (if (use-region-p) (region-beginning) (point-min)))
         (end   (if (use-region-p) (region-end) (point-max)))
         (metadata (fountain-read-metadata))
-        title author use-stdin)
-    (setq title  (cdr (assq 'title metadata))
-          author (cdr (assq 'author metadata)))
+        use-stdin)
     (unless (let (case-fold-search) (string-match "%b" command))
       (setq use-stdin t))
     (setq command (format-spec command
         (format-spec-make
          ?b (shell-quote-argument (or infile ""))
          ?B (shell-quote-argument (or infile-base ""))
-         ?t (shell-quote-argument (or title ""))
-         ?a (shell-quote-argument (or author ""))
+         ?t (shell-quote-argument (or (cdr (assq 'title metadata)) ""))
+         ?a (shell-quote-argument (or (cdr (assq 'author metadata)) ""))
          ?F (shell-quote-argument (format-time-string "%F"))
          ?x (shell-quote-argument (format-time-string "%x")))))
     (when edit-command
