@@ -1923,7 +1923,7 @@ within left-side dual dialogue, and nil otherwise."
 
 ;;; Editing
 
-(defun fountain-auto-upcase ()
+(defun fountain--auto-upcase-maybe ()
   "Upcase all or part of the current line contextually.
 
 If `fountain-auto-upcase-scene-headings' is non-nil and point is
@@ -3504,7 +3504,7 @@ If POS is nil, use `point' instead."
   :group 'fountain
   (fountain-init-vars)
   (face-remap-add-relative 'default 'fountain)
-  (add-hook 'post-self-insert-hook #'fountain-auto-upcase nil t)
+  (add-hook 'post-self-insert-hook #'fountain--auto-upcase-maybe nil t)
   (when fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (jit-lock-register #'fountain-redisplay-scene-numbers))
 
