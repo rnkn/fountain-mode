@@ -2763,7 +2763,7 @@ as a string to force the page number."
 n.b. This is an approximate calculation."
   (interactive)
   (unless (fountain-pagination-validate) (fountain-pagination-update))
-  (message "Page %s of %s (approx.)"
+  (message "Page %s of %s"
            (car (get-text-property
                  (if (eobp) (1- (point)) (point)) 'fountain-pagination))
            (car (get-text-property (1- (point-max)) 'fountain-pagination))))
