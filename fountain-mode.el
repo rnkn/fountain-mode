@@ -2643,41 +2643,40 @@ Skip over comments."
   (interactive)
   (save-excursion
     (save-restriction
-      (widen)
+      (when fountain-pagination-ignore-restriction (widen))
       (goto-char (point-min))
       (with-silent-modifications
-        (let ((page 0)
-              (previous-break (point)))
+        (let ((page-num 1)
+              (previous-page (point)))
           (while (< (point) (point-max))
             (fountain-move-forward-page)
-            (cl-incf page)
-            (put-text-property previous-break (point) 'fountain-pagination
-                               (cons page (- (point) previous-break)))
-            (setq previous-break (point)))))))
+            (put-text-property previous-page (point) 'fountain-pagination
+                               (cons page-num (- (point) previous-page)))
+            (cl-incf page-num)
+            (setq previous-page (point)))))))
   (message "Pagination properties updated"))
 
 (defun fountain-pagination-validate ()
   "Validate pagination properties in current buffer."
-  (let ((change 0) ordered)
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
+  (save-excursion
+    (save-restriction
+      (when fountain-pagination-ignore-restriction (widen))
+      (goto-char (point-min))
+      (let ((page-num 1)
+            (page-order t)
+            (change 0))
         (while (< (point) (point-max))
-          (let ((page-props (get-text-property (point) 'fountain-pagination))
-                (page-start (point))
-                page-num)
+          (let* ((page-props (get-text-property (point) 'fountain-pagination))
+                 (page-start (point)))
+            (unless (eobp) (setq page-order (= (car-safe page-props) page-num)))
             (goto-char (or (next-single-property-change (point) 'fountain-pagination)
                            (point-max)))
-            (setq page-num (car-safe page-props)
-                  change (max change (abs (- (point)
+            (setq change (max change (abs (- (point)
                                              page-start
                                              (or (cdr-safe page-props) 0)))))
-            (unless (eobp)
-              (setq ordered (= (car-safe (get-text-property (point) 'fountain-pagination))
-                               (1+ (or page-num 0)))))))))
-    (and (< change fountain-pagination-max-change)
-         ordered)))
+            (cl-incf page-num)))
+        (and (< change fountain-pagination-max-change)
+             page-order)))))
 
 (defun fountain-forward-page (n)
   "Move to Nth next page (or Nth previous if N is negative).
@@ -2763,10 +2762,12 @@ as a string to force the page number."
 n.b. This is an approximate calculation."
   (interactive)
   (unless (fountain-pagination-validate) (fountain-pagination-update))
-  (message "Page %s of %s"
-           (car (get-text-property
-                 (if (eobp) (1- (point)) (point)) 'fountain-pagination))
-           (car (get-text-property (1- (point-max)) 'fountain-pagination))))
+  (save-restriction
+    (when fountain-pagination-ignore-restriction (widen))
+    (message "Page %s of %s"
+             (car (get-text-property
+                   (if (eobp) (1- (point)) (point)) 'fountain-pagination))
+             (car (get-text-property (1- (point-max)) 'fountain-pagination)))))
 
 ;; (defun fountain-paginate-buffer ()
 ;;   "Add forced page breaks to buffer.
