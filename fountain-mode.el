@@ -1805,17 +1805,6 @@ Ignores revised scene numbers scenes.
                               (match-string-no-properties 8)))
                         (1+ scene)))))))
 
-(defun fountain-goto-page (n)
-  "Move point to Nth page in current buffer."
-  (interactive "NGo to page: ")
-  (widen)
-  (push-mark)
-  (goto-char (point-min))
-  (unless (fountain-pagination-validate) (fountain-pagination-update))
-  (while (< 1 n)
-    (fountain-forward-page 1)
-    (cl-decf n)))
-
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
 If LIMIT is 'dialog, halt at end of dialog. If LIMIT is 'scene,
@@ -2711,6 +2700,17 @@ This command first checks if pagination properties are valid and
 calls `fountain-pagination-update' if not."
   (interactive "^p")
   (fountain-forward-page (- n)))
+
+(defun fountain-goto-page (n)
+  "Move point to Nth page in current buffer."
+  (interactive "NGo to page: ")
+  (widen)
+  (push-mark)
+  (goto-char (point-min))
+  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (while (< 1 n)
+    (fountain-forward-page 1)
+    (cl-decf n)))
 
 (defun fountain-insert-page-break (&optional ask page-num)
   "Insert a page break at appropriate place preceding point.
