@@ -2583,11 +2583,8 @@ Skip over comments."
     (when (eolp) (forward-line))
     (unless (or (bolp) (eobp)) (fill-move-to-break-point (line-beginning-position)))))
 
-(defun fountain-forward-page ()
-  "Move point forward by an approximately page.
-
-Moves forward from point, which is unlikely to correspond to
-final exported pages and so should not be used interactively."
+(defun fountain-move-forward-page ()
+  "Move forward from point by an approximately page."
   (let ((skip-whitespace-fun
          (lambda ()
            (when (looking-at "[\n\s\t]*\n")
