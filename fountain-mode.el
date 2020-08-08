@@ -2531,6 +2531,7 @@ Comments are assumed to be deleted."
      ((eq element 'dialog)
       (skip-chars-forward "\s\t")
       (unless (or (bolp)
+                  fountain-pagination-break-sentences
                   (looking-back (sentence-end) nil))
         (forward-sentence -1))
       (let ((x (point)))
@@ -2552,6 +2553,7 @@ Comments are assumed to be deleted."
      ((eq element 'action)
       (skip-chars-forward "\s\t")
       (unless (or (bolp)
+                  fountain-pagination-break-sentences
                   (looking-back (sentence-end) nil))
         (forward-sentence -1))
       ;; Then, try to skip back to the previous element. If it is a
