@@ -2452,12 +2452,19 @@ you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
-(defcustom fountain-page-size
-  'letter
-  "Paper size to use on export."
-  :group 'fountain-pages
-  :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4)))
+(defcustom fountain-pagination-max-change
+  150
+  "Maximum change in page character size before pagination is invalid."
+  :group 'fountain-pagination
+  :type 'integer
+  :safe 'integerp)
+
+(defcustom fountain-pagination-break-sentences
+  nil
+  "When non-nil, allow breaking a page mid-sentence."
+  :group 'fountain-pagination
+  :type 'boolean
+  :safe 'booleanp)
 
 (defvar fountain-dual-dialog-left-elements
   '(dual-character-left dual-dialog-left dual-paren-left)
