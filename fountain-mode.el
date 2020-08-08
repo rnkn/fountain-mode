@@ -2758,49 +2758,35 @@ as a string to force the page number."
     (goto-char x)
     (set-marker x nil)))
 
-(defun fountain-get-page-count ()
-  "Return a cons of the current page number and the total pages."
-  (let ((x (point))
-        (total 0)
-        (current 0)
-        found)
-    (save-excursion
-      (save-restriction
-        (when fountain-page-ignore-restriction (widen))
-        (goto-char (point-min))
-        (while (< (point) (point-max))
-          (fountain-forward-page)
-          (cl-incf total)
-          (when (and (not found) (< x (point)))
-            (setq current total found t)))
-        (cons (if found current total) total)))))
-
 (defun fountain-count-pages ()
   "Message the current page of total pages in current buffer.
 n.b. This is an approximate calculation."
   (interactive)
-  (let ((pages (fountain-get-page-count)))
-    (message "Page %s of %s (approx.)" (car pages) (cdr pages))))
+  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (message "Page %s of %s (approx.)"
+           (car (get-text-property
+                 (if (eobp) (1- (point)) (point)) 'fountain-pagination))
+           (car (get-text-property (1- (point-max)) 'fountain-pagination))))
 
-(defun fountain-paginate-buffer ()
-  "Add forced page breaks to buffer.
+;; (defun fountain-paginate-buffer ()
+;;   "Add forced page breaks to buffer.
 
-Move through buffer with `fountain-forward-page' and call
-`fountain-insert-page-break'."
-  (interactive "*")
-  (let ((job (make-progress-reporter "Paginating...")))
-    (save-excursion
-      (save-restriction
-        (widen)
-        (goto-char (point-min))
-        (let ((page 1))
-          (fountain-forward-page)
-          (while (< (point) (point-max))
-            (cl-incf page)
-            (fountain-insert-page-break nil (number-to-string page))
-            (fountain-forward-page)
-            (progress-reporter-update job))
-          (progress-reporter-done job))))))
+;; Move through buffer with `fountain-move-forward-page' and call
+;; `fountain-insert-page-break'."
+;;   (interactive "*")
+;;   (let ((job (make-progress-reporter "Paginating...")))
+;;     (save-excursion
+;;       (save-restriction
+;;         (widen)
+;;         (goto-char (point-min))
+;;         (let ((page 1))
+;;           (fountain-move-forward-page)
+;;           (while (< (point) (point-max))
+;;             (cl-incf page)
+;;             (fountain-insert-page-break nil (number-to-string page))
+;;             (fountain-move-forward-page)
+;;             (progress-reporter-update job))
+;;           (progress-reporter-done job))))))
 
 
 ;;; Filling
