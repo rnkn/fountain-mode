@@ -2652,6 +2652,69 @@ Skip over comments."
     ;; remaining whitespace, then go back to page-break point.
     (fountain-goto-page-break-point)))
 
+(defun fountain-pagination-update ()
+  "Update pagination properties in current buffer."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (with-silent-modifications
+        (let ((page 0)
+              (previous-break (point)))
+          (while (< (point) (point-max))
+            (fountain-move-forward-page)
+            (cl-incf page)
+            (put-text-property previous-break (point) 'fountain-pagination
+                               (cons page (- (point) previous-break)))
+            (setq previous-break (point)))))))
+  (message "Pagination properties updated"))
+
+(defun fountain-pagination-validate ()
+  "Validate pagination properties in current buffer."
+  (let ((change 0) ordered)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (while (< (point) (point-max))
+          (let ((page-props (get-text-property (point) 'fountain-pagination))
+                (page-start (point))
+                page-num)
+            (goto-char (or (next-single-property-change (point) 'fountain-pagination)
+                           (point-max)))
+            (setq page-num (car-safe page-props)
+                  change (max change (abs (- (point)
+                                             page-start
+                                             (or (cdr-safe page-props) 0)))))
+            (unless (eobp)
+              (setq ordered (= (car-safe (get-text-property (point) 'fountain-pagination))
+                               (1+ (or page-num 0)))))))))
+    (and (< change fountain-pagination-max-change)
+         ordered)))
+
+(defun fountain-forward-page (n)
+  "Move to Nth next page (or Nth previous if N is negative).
+This command first checks if pagination properties are valid and
+calls `fountain-pagination-update' if not."
+  (interactive "^p")
+  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (let ((p (if (<= n 0) -1 1)))
+    (while (/= n 0)
+      (goto-char (or (funcall (if (< 0 n)
+                                  'next-single-property-change
+                                'previous-single-property-change)
+                              (point) 'fountain-pagination)
+                     (buffer-end p)))
+      (setq n (- n p)))))
+
+(defun fountain-backward-page (n)
+  "Move to Nth previous page (or Nth next if N is negative).
+This command first checks if pagination properties are valid and
+calls `fountain-pagination-update' if not."
+  (interactive "^p")
+  (fountain-forward-page (- n)))
+
 (defun fountain-insert-page-break (&optional ask page-num)
   "Insert a page break at appropriate place preceding point.
 When optional argument ASK is non-nil (if prefixed with
