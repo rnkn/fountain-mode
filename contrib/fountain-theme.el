@@ -10,7 +10,11 @@
  '(fountain-synopsis
    ((((background light)) (:background "light cyan" :foreground "grey50"))
     (((background dark)) (:foreground "dark cyan"))))
- '(fountain-section-heading ((t (:weight bold :inherit variable-pitch))))
+ '(fountain-section-heading-1 ((t (:height 1.1 :inherit fountain-section-heading-2))))
+ '(fountain-section-heading-2 ((t (:height 1.1 :inherit fountain-section-heading-3))))
+ '(fountain-section-heading-3 ((t (:height 1.1 :inherit fountain-section-heading-4))))
+ '(fountain-section-heading-4 ((t (:inherit fountain-section-heading-5))))
+ '(fountain-section-heading-5 ((t (:weight bold :inherit variable-pitch))))
  '(fountain-scene-heading ((t (:underline t)))))
 
 (provide-theme 'fountain)
