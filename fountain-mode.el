@@ -3339,6 +3339,8 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
     ;; Pages
+    (define-key map [remap forward-page] #'fountain-forward-page)
+    (define-key map [remap backward-page] #'fountain-backward-page)
     (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
     ;; Exporting commands:
     (define-key map (kbd "C-c C-e") #'fountain-export-command)
