@@ -1806,19 +1806,15 @@ Ignores revised scene numbers scenes.
                         (1+ scene)))))))
 
 (defun fountain-goto-page (n)
-  "Move point to Nth appropropriate page in current buffer."
+  "Move point to Nth page in current buffer."
   (interactive "NGo to page: ")
   (widen)
   (push-mark)
   (goto-char (point-min))
-  (let ((i n))
-    (while (fountain-match-metadata) (forward-line))
-    (if (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
-    (while (< 1 i)
-      (if (and (fountain-match-page-break) (match-string-no-properties 2))
-          (setq i (- n (string-to-number (match-string-no-properties 2)))))
-      (fountain-forward-page)
-      (cl-decf i))))
+  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (while (< 1 n)
+    (fountain-forward-page 1)
+    (cl-decf n)))
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
