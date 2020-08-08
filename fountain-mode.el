@@ -165,6 +165,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              electric-pair-local-mode
              imenu-add-menubar-index
              fountain-completion-update
+             fountain-pagination-update
              fountain-outline-hide-custom-level
              flyspell-mode))
 
