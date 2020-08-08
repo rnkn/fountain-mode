@@ -2412,10 +2412,11 @@ scene number from being auto-upcased."
 
 ;;; Pages
 
-(defgroup fountain-pages ()
+(defgroup fountain-pagination ()
   "Options for calculating page length."
   :group 'fountain
-  :prefix "fountain-page-")
+  :prefix "fountain-page-"
+  :prefix "fountain-pagination-")
 
 (define-obsolete-variable-alias 'fountain-export-page-size
   'fountain-page-size "`fountain-mode' 3.0")
@@ -2423,7 +2424,7 @@ scene number from being auto-upcased."
 (defcustom fountain-page-size
   'letter
   "Paper size to use on export."
-  :group 'fountain-pages
+  :group 'fountain-pagination
   :type '(radio (const :tag "US Letter" letter)
                 (const :tag "A4" a4)))
 
@@ -2436,7 +2437,7 @@ scene number from being auto-upcased."
 
 n.b. If you change this option after locking pages in a script,
 you may get incorrect output."
-  :group 'fountain-pages
+  :group 'fountain-pagination
   :type '(choice integer
                  (list (cons (const :tag "US Letter" letter) integer)
                        (cons (const :tag "A4" a4) integer))))
@@ -2446,8 +2447,8 @@ you may get incorrect output."
 
 (defcustom fountain-page-ignore-restriction
   nil
-  "Non-nil if counting pages should ignore buffer narrowing."
-  :group 'fountain-pages
+  "When non-nil, counting pages should ignore buffer narrowing."
+  :group 'fountain-pagination
   :type 'boolean
   :safe 'booleanp)
 
