@@ -2443,9 +2443,11 @@ you may get incorrect output."
                        (cons (const :tag "A4" a4) integer))))
 
 (define-obsolete-variable-alias 'fountain-pages-ignore-narrowing
-  'fountain-page-ignore-restriction "`fountain-mode' 3.0")
+  'fountain-pagination-ignore-restriction "`fountain-mode' 3.3")
+(define-obsolete-variable-alias 'fountain-page-ignore-restriction
+  'fountain-pagination-ignore-restriction "`fountain-mode' 3.3")
 
-(defcustom fountain-page-ignore-restriction
+(defcustom fountain-pagination-ignore-restriction
   nil
   "When non-nil, counting pages should ignore buffer narrowing."
   :group 'fountain-pagination
