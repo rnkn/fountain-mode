@@ -2759,19 +2759,27 @@ as a string to force the page number."
     (goto-char x)
     (set-marker x nil)))
 
-(defun fountain-count-pages ()
-  "Message the current page of total pages in current buffer.
-n.b. This is an approximate calculation."
-  (interactive)
-  (unless (fountain-pagination-validate) (fountain-pagination-update))
+(defun fountain-get-page-count ()
+  "Return a cons of the current page number and the total pages."
   (save-restriction
     (when fountain-pagination-ignore-restriction (widen))
-    (message "Page %s of %s"
-             (car (get-text-property
-                   (if (eobp) (1- (point)) (point)) 'fountain-pagination))
-             (car (get-text-property (1- (point-max)) 'fountain-pagination)))))
+    (unless (fountain-pagination-validate) (fountain-pagination-update))
+    (cons (car (get-text-property
+                (if (eobp) (1- (point)) (point)) 'fountain-pagination))
+          (car (get-text-property (1- (point-max)) 'fountain-pagination)))))
 
-;; (defun fountain-paginate-buffer ()
+(defun fountain-count-pages ()
+  "Print the current page of total page count of current buffer.
+
+This is an approximate calculation. Different export tools will
+paginate in slightly different ways. Customize options
+`fountain-page-max-lines' and `fountain-pagination-break-sentences'
+to suit your preferred tool's pagination method."
+  (interactive)
+  (let ((page-count (fountain-get-page-count)))
+    (message "Page %s of %s" (car page-count) (cdr page-count))))
+
+;; (defun fountain-lock-pages ()
 ;;   "Add forced page breaks to buffer.
 
 ;; Move through buffer with `fountain-move-forward-page' and call
@@ -2782,11 +2790,11 @@ n.b. This is an approximate calculation."
 ;;       (save-restriction
 ;;         (widen)
 ;;         (goto-char (point-min))
-;;         (let ((page 1))
+;;         (let ((page-num 1))
 ;;           (fountain-move-forward-page)
 ;;           (while (< (point) (point-max))
-;;             (cl-incf page)
-;;             (fountain-insert-page-break nil (number-to-string page))
+;;             (cl-incf page-num)
+;;             (fountain-insert-page-break nil (number-to-string page-num))
 ;;             (fountain-move-forward-page)
 ;;             (progress-reporter-update job))
 ;;           (progress-reporter-done job))))))
