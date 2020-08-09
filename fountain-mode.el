@@ -3338,7 +3338,8 @@ redisplay in margin. Otherwise, remove display text properties."
     ;; Pages
     (define-key map [remap forward-page] #'fountain-forward-page)
     (define-key map [remap backward-page] #'fountain-backward-page)
-    (define-key map (kbd "C-c C-x p") #'fountain-count-pages)
+    (define-key map (kbd "C-c C-p") #'fountain-count-pages)
+    (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
     ;; Exporting commands:
     (define-key map (kbd "C-c C-e") #'fountain-export-command)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
@@ -3364,13 +3365,12 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Previous Character" fountain-backward-character]
      "---"
      ["Go to Scene Heading..." fountain-goto-scene]
-     ["Go to Page..." fountain-goto-page]
      "---"
      ["Cycle Outline Visibility" fountain-outline-cycle]
      ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
      ["Show All" fountain-outline-show-all]
      "---"
-     ["Fold Notes When Cycling"
+     ["Fold Notes When Cycling Outline"
       (customize-set-variable 'fountain-outline-fold-notes
                               (not fountain-outline-fold-notes))
       :style toggle
@@ -3387,6 +3387,15 @@ redisplay in margin. Otherwise, remove display text properties."
                                                        (not fountain-transpose-all-elements))
       :style toggle
       :selected fountain-transpose-all-elements])
+    ("Pagination"
+     ["Forward Page" fountain-forward-page]
+     ["Backward Page" fountain-backward-page]
+     "---"
+     ["Count Pages" fountain-count-pages]
+     ["Go to Page..." fountain-goto-page]
+     "---"
+     ["Insert Page Break..." fountain-insert-page-break]
+     ["Update Pagination" fountain-pagination-update])
     ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
@@ -3404,8 +3413,6 @@ redisplay in margin. Otherwise, remove display text properties."
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    ["Insert Page Break..." fountain-insert-page-break]
-    ["Count Pages" fountain-count-pages]
     ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
     "---"
