@@ -2668,7 +2668,7 @@ Skip over comments."
         (while (< (point) (point-max))
           (let* ((page-props (get-text-property (point) 'fountain-pagination))
                  (page-start (point)))
-            (unless (eobp) (setq page-order (= (car-safe page-props) page-num)))
+            (unless (eobp) (setq page-order (equal (car-safe page-props) page-num)))
             (goto-char (or (next-single-property-change (point) 'fountain-pagination)
                            (point-max)))
             (setq change (max change (abs (- (point)
