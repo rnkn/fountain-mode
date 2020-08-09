@@ -2454,11 +2454,11 @@ you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
-(defvar fountain-dual-dialog-left-elements
+(defconst fountain-dual-dialog-left-elements
   '(dual-character-left dual-dialog-left dual-paren-left)
   "List of elements constituent of left-side dual dialogue.")
 
-(defvar fountain-dual-dialog-right-elements
+(defconst fountain-dual-dialog-right-elements
   '(dual-character-right dual-dialog-right dual-paren-right)
   "List of elements constituent of right-side dual dialogue.")
 
