@@ -2711,10 +2711,7 @@ calls `fountain-pagination-update' if not."
   (widen)
   (push-mark)
   (goto-char (point-min))
-  (unless (fountain-pagination-validate) (fountain-pagination-update))
-  (while (< 1 n)
-    (fountain-forward-page 1)
-    (cl-decf n)))
+  (fountain-forward-page n))
 
 (defun fountain-insert-page-break (&optional ask page-num)
   "Insert a page break at appropriate place preceding point.
