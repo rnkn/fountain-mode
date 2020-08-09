@@ -318,7 +318,7 @@ The default \" %x - %n:\" inserts something like:
 (defgroup fountain-faces ()
   "Faces used in `fountain-mode'
 
-Control which elements are highlighted with
+You can specify which elements are highlighted with the option
 `fountain-highlight-elements'."
   :prefix "fountain-"
   :link '(info-link "(emacs) Font Lock")
@@ -1785,7 +1785,8 @@ If N is 0, move to beginning of scene."
 (defun fountain-goto-scene (n)
   "Move point to Nth scene in current buffer.
 
-Ignores revised scene numbers scenes.
+This treats revised scene numbers as their parent scene number,
+e.g.
 
   10  = 10
   10B = 10
@@ -2442,14 +2443,16 @@ you may get incorrect output."
 
 (defcustom fountain-pagination-max-change
   150
-  "Maximum change in page character size before pagination is invalid."
+  "Maximum change in single page character size before pagination
+properties are considered invalid."
   :group 'fountain-pagination
   :type 'integer
   :safe 'integerp)
 
 (defcustom fountain-pagination-break-sentences
   nil
-  "When non-nil, allow breaking a page mid-sentence."
+  "When non-nil, pagination disregards sentences (i.e. page
+breaks occur mid-sentence)."
   :group 'fountain-pagination
   :type 'boolean
   :safe 'booleanp)
@@ -2638,8 +2641,19 @@ Skip over comments."
     ;; remaining whitespace, then go back to page-break point.
     (fountain-goto-page-break-point)))
 
+;; FIXME: this could be more efficient by only updating pagination props from
+;; the point where they're invalid.
 (defun fountain-pagination-update ()
-  "Update pagination properties in current buffer."
+  "Update pagination properties in current buffer.
+
+Gives buffer content a `fountain-pagination' text property
+of (PAGE . LENGTH) where PAGE is a linear page count using
+`fountain-move-forward-page' from `point-min' and LENGTH is the
+number of characters of each such page.
+
+If a page character length changes by more than
+`fountain-pagination-max-change' then the pagination properties
+are considered invalid (see `fountain-pagination-validate')."
   (interactive)
   (save-excursion
     (save-restriction
@@ -2657,7 +2671,14 @@ Skip over comments."
   (message "Pagination properties updated"))
 
 (defun fountain-pagination-validate ()
-  "Validate pagination properties in current buffer."
+  "Validate pagination properties in current buffer.
+
+Returns non-nil if the car of `fountain-pagination' text property
+equals the car of previous page + 1 (i.e. that pages are in
+order) and the cdr is within the length of the current page +/-
+`fountain-pagination-max-change' (i.e. that page length hasn't
+changed too much), otherwise pagination is considered invalid and
+returns nil."
   (save-excursion
     (save-restriction
       (when fountain-pagination-ignore-restriction (widen))
@@ -2681,8 +2702,9 @@ Skip over comments."
 
 (defun fountain-forward-page (n)
   "Move to Nth next page (or Nth previous if N is negative).
-This command first checks if pagination properties are valid and
-calls `fountain-pagination-update' if not."
+
+First check if pagination properties are valid and call
+`fountain-pagination-update' if not."
   (interactive "^p")
   (unless (fountain-pagination-validate) (fountain-pagination-update))
   (let ((p (if (<= n 0) -1 1)))
@@ -2700,13 +2722,18 @@ calls `fountain-pagination-update' if not."
 
 (defun fountain-backward-page (n)
   "Move to Nth previous page (or Nth next if N is negative).
-This command first checks if pagination properties are valid and
-calls `fountain-pagination-update' if not."
+
+This command simply calls `fountain-forward-page' with 1 - N."
   (interactive "^p")
   (fountain-forward-page (- n)))
 
 (defun fountain-goto-page (n)
-  "Move point to Nth page in current buffer."
+  "Move point to Nth page in current buffer.
+
+This is an approximate calculation. Different export tools will
+paginate in slightly different ways. Customize options
+`fountain-page-max-lines' and `fountain-pagination-break-sentences'
+to suit your preferred tool's pagination method."
   (interactive "NGo to page: ")
   (widen)
   (push-mark)
