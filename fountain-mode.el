@@ -2687,11 +2687,15 @@ calls `fountain-pagination-update' if not."
   (unless (fountain-pagination-validate) (fountain-pagination-update))
   (let ((p (if (<= n 0) -1 1)))
     (while (/= n 0)
-      (goto-char (or (funcall (if (< 0 n)
-                                  'next-single-property-change
-                                'previous-single-property-change)
-                              (point) 'fountain-pagination)
-                     (buffer-end p)))
+      (when (looking-at fountain-page-break-regexp)
+        (goto-char (funcall (if (< 0 p) #'match-end #'match-beginning) 0)))
+      (funcall (if (< 0 p) #'re-search-forward #'re-search-backward)
+               fountain-page-break-regexp
+               (funcall (if (< 0 p)
+                            #'next-single-property-change
+                          #'previous-single-property-change)
+                        (point) 'fountain-pagination)
+               'move)
       (setq n (- n p)))))
 
 (defun fountain-backward-page (n)
