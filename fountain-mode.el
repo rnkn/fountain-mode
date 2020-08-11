@@ -1828,10 +1828,10 @@ halt at end of scene."
     (if (/= n 0)
         (while (/= n 0)
           (when (fountain-match-character) (forward-line p))
-          (funcall move-fun)
+          (funcall move-fun p)
           (setq n (- n p)))
       (beginning-of-line)
-      (funcall move-fun))))
+      (funcall move-fun p))))
 
 (defun fountain-backward-character (&optional n)
   "Move backward N character (foward if N is negative)."
