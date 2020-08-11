@@ -2821,8 +2821,9 @@ as a string to force the page number."
 
 This is an approximate calculation. Different export tools will
 paginate in slightly different ways. Customize options
-`fountain-page-max-lines' and `fountain-pagination-break-sentences'
-to suit your preferred tool's pagination method."
+`fountain-page-max-lines', `fountain-pagination-break-sentences'
+and `fountain-pagination-double-space-scene-headings' to suit
+your preferred tool's pagination method."
   (interactive)
   (let ((page-count (fountain-get-page-count)))
     (message "Page %s of %s" (car page-count) (cdr page-count))))
