@@ -2576,8 +2576,11 @@ Skip over comments."
          (lambda ()
            (when (looking-at "[\n\s\t]*\n")
              (goto-char (match-end 0))))))
-    (while (fountain-match-metadata)
-      (forward-line 1))
+    ;; Consider the title page as page 0.
+    (if (fountain-match-metadata)
+        (progn
+          (while (fountain-match-metadata) (forward-line 1))
+          (funcall skip-whitespace-fun))
     ;; Pages don't begin with blank space, so skip over any at point.
     (funcall skip-whitespace-fun)
     ;; If we're at a page break, move to its end and skip over
@@ -2637,7 +2640,7 @@ Skip over comments."
             (funcall skip-whitespace-fun)))))))
     ;; We are not at the furthest point in a page. Skip over any
     ;; remaining whitespace, then go back to page-break point.
-    (fountain-goto-page-break-point)))
+    (fountain-goto-page-break-point))))
 
 ;; FIXME: this could be more efficient by only updating pagination props from
 ;; the point where they're invalid.
@@ -2658,7 +2661,7 @@ are considered invalid (see `fountain-pagination-validate')."
       (when fountain-pagination-ignore-restriction (widen))
       (goto-char (point-min))
       (with-silent-modifications
-        (let ((page-num 1)
+        (let ((page-num (if (fountain-match-metadata) 0 1))
               (previous-page (point)))
           (while (< (point) (point-max))
             (fountain-move-forward-page)
@@ -2681,7 +2684,7 @@ returns nil."
     (save-restriction
       (when fountain-pagination-ignore-restriction (widen))
       (goto-char (point-min))
-      (let ((page-num 1)
+      (let ((page-num (if (fountain-match-metadata) 0 1))
             (page-order t)
             (change 0))
         (while (and (< (point) (point-max))
