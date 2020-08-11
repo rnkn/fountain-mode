@@ -1721,29 +1721,27 @@ buffer windows are opened."
 
 ;;; Navigation
 
-(defun fountain-forward-scene (&optional n)
+(defun fountain-forward-scene (n)
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
   (interactive "^p")
-  (unless n (setq n 1))
-  (let* ((p (if (<= n 0) -1 1))
-         (move-fun
-          (lambda ()
-            (while (not (or (eq (point) (buffer-end p))
-                            (fountain-match-scene-heading)))
-              (forward-line p)))))
+  (let ((p (if (<= n 0) -1 1))
+        (move-fun
+         (lambda (p)
+           (while (not (or (= (point) (buffer-end p))
+                           (fountain-match-scene-heading)))
+             (forward-line p)))))
     (if (/= n 0)
         (while (/= n 0)
           (when (fountain-match-scene-heading) (forward-line p))
-          (funcall move-fun)
+          (funcall move-fun p)
           (setq n (- n p)))
       (beginning-of-line)
-      (funcall move-fun))))
+      (funcall move-fun p))))
 
-(defun fountain-backward-scene (&optional n)
+(defun fountain-backward-scene (n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
-  (unless n (setq n 1))
   (fountain-forward-scene (- n)))
 
 ;; FIXME: needed?
@@ -1812,21 +1810,21 @@ If LIMIT is 'dialog, halt at end of dialog. If LIMIT is 'scene,
 halt at end of scene."
   (interactive "^p")
   (unless n (setq n 1))
-  (let* ((p (if (<= n 0) -1 1))
-         (move-fun
-          (lambda ()
-            (while (cond ((eq limit 'dialog)
-                          (and (not (= (point) (buffer-end p)))
-                               (or (and (bolp) (eolp))
-                                   (fountain-match-dialog)
-                                   (fountain-match-paren))))
-                         ((eq limit 'scene)
-                          (not (or (= (point) (buffer-end p))
-                                   (fountain-match-character)
-                                   (fountain-match-scene-heading))))
-                         ((not (or (= (point) (buffer-end p))
-                                   (fountain-match-character)))))
-              (forward-line p)))))
+  (let ((p (if (<= n 0) -1 1))
+        (move-fun
+         (lambda (p)
+           (while (cond ((eq limit 'dialog)
+                         (and (not (= (point) (buffer-end p)))
+                              (or (and (bolp) (eolp))
+                                  (fountain-match-dialog)
+                                  (fountain-match-paren))))
+                        ((eq limit 'scene)
+                         (not (or (= (point) (buffer-end p))
+                                  (fountain-match-character)
+                                  (fountain-match-scene-heading))))
+                        ((not (or (= (point) (buffer-end p))
+                                  (fountain-match-character)))))
+             (forward-line p)))))
     (if (/= n 0)
         (while (/= n 0)
           (when (fountain-match-character) (forward-line p))
