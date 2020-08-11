@@ -2708,18 +2708,23 @@ First check if pagination properties are valid and call
 `fountain-pagination-update' if not."
   (interactive "^p")
   (unless (fountain-pagination-validate) (fountain-pagination-update))
-  (let ((p (if (<= n 0) -1 1)))
-    (while (/= n 0)
-      (when (looking-at fountain-page-break-regexp)
-        (goto-char (funcall (if (< 0 p) #'match-end #'match-beginning) 0)))
-      (funcall (if (< 0 p) #'re-search-forward #'re-search-backward)
-               fountain-page-break-regexp
-               (funcall (if (< 0 p)
-                            #'next-single-property-change
-                          #'previous-single-property-change)
-                        (point) 'fountain-pagination)
-               'move)
-      (setq n (- n p)))))
+  (let ((p (if (<= n 0) -1 1))
+        (move-fun
+         (lambda (p)
+           (funcall (if (< p 0) #'re-search-backward #'re-search-forward)
+                    fountain-page-break-regexp
+                    (funcall (if (< p 0)
+                                 #'previous-single-property-change
+                               #'next-single-property-change)
+                             (point) 'fountain-pagination)
+                    'move))))
+    (if (/= n 0)
+        (while (/= n 0)
+          (when (fountain-match-page-break) (forward-line p))
+          (funcall move-fun p)
+          (setq n (- n p)))
+      (beginning-of-line)
+      (unless (fountain-match-page-break) (funcall move-fun p)))))
 
 (defun fountain-backward-page (n)
   "Move to Nth previous page (or Nth next if N is negative).
