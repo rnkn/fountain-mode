@@ -2575,7 +2575,8 @@ Skip over comments."
                (forward-char 1) (cl-incf i)))))
     (skip-chars-forward "\s\t")
     (when (eolp) (forward-line))
-    (unless (or (bolp) (eobp)) (fill-move-to-break-point (line-beginning-position)))))
+    (unless (or (bolp) (eobp))
+      (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-move-forward-page ()
   "Move forward from point by an approximately page."
@@ -2590,8 +2591,7 @@ Skip over comments."
           (funcall skip-whitespace-fun))
     ;; Pages don't begin with blank space, so skip over any at point.
     (funcall skip-whitespace-fun)
-    ;; If we're at a page break, move to its end and skip over
-    ;; whitespace.
+    ;; If we're at a page break, move to its end and skip over whitespace.
     (when (fountain-match-page-break)
       (end-of-line)
       (funcall skip-whitespace-fun))
@@ -2600,51 +2600,55 @@ Skip over comments."
            (cdr (assq fountain-page-size fountain-page-max-lines)))
           (line-count 0)
           (line-count-left 0)
-          (line-count-right 0))
-      ;; Begin the main loop, which only halts if we reach the end
-      ;; of buffer, a forced page break, or after the maximum lines
-      ;; in a page.
+          (line-count-right 0)
+          (first-child t))
+      ;; Right away, if we're at dialogue it means it was broken from the
+      ;; previous page, so account for the additional line for character name.
+      (when (fountain-match-dialog) (cl-incf line-count))
+      ;; Begin the main loop, which only halts if we reach the end of buffer, a
+      ;; forced page break, or after the maximum lines in a page.
       (while (and (< line-count page-lines)
                   (not (eobp))
                   (not (fountain-match-page-break)))
         (cond
-         ;; If we're at the end of a line (but not also the
-         ;; beginning, i.e. not a blank line) then move forward a
-         ;; line and increment line-count.
+         ;; If we're at the end of a line (but not also the beginning, i.e. not
+         ;; a blank line) then move forward a line and increment line-count.
          ((and (eolp) (not (bolp)))
           (forward-line)
           (cl-incf line-count))
-         ;; If we're looking at newline, skip over it and any
-         ;; whitespace and increment line-count.
+         ;; If we're looking at newline, skip over it and any whitespace and
+         ;; increment line-count.
          ((funcall skip-whitespace-fun)
           (cl-incf line-count))
-         ;; We are at an element. Find what kind of element. If it is
-         ;; not included in export, skip over without incrementing
-         ;; line-count. Otherwise move to fill-width and increment
-         ;; appropriate line-count: for dual-dialogue, increment either
-         ;; LINE-COUNT-LEFT/RIGHT, otherwise increment LINE-COUNT. Once
-         ;; we're at a blank line, add the greater of the former two to
-         ;; the latter.
-         ;; FIXME: using block-bounds here could benefit.
          (t
-        (let ((element (fountain-get-element)))
-          (if (memq element fountain-printed-elements)
-              (progn
-                (fountain-move-to-fill-width element)
-                (cond ((memq element fountain-dual-dialog-left-elements)
-                       (cl-incf line-count-left))
-                      ((memq element fountain-dual-dialog-right-elements)
-                       (cl-incf line-count-right))
-                      (t
-                       (cl-incf line-count)))
-                (when (and (eolp) (bolp)
-                           (< 0 line-count-left) (< 0 line-count-right))
-                  (setq line-count
-                        (+ line-count (max line-count-left line-count-right)))))
-            ;; Element is not exported, so skip it without
-            ;; incrementing line-count.
-            (end-of-line)
-            (funcall skip-whitespace-fun)))))))
+    ;; We are at an element. Find what kind of element. If it is not included in
+    ;; export, skip over without incrementing line-count. Otherwise move to
+    ;; fill-width and increment appropriate line-count: for dual-dialogue,
+    ;; increment either line-count-left/right, otherwise increment line-count.
+    ;; Once we're at a blank line, add the greater of the former two to the
+    ;; latter.
+    (let ((element (fountain-get-element)))
+      (if (not (memq element fountain-printed-elements))
+          (progn (end-of-line) (funcall skip-whitespace-fun))
+        (fountain-move-to-fill-width element)
+        (cond
+         ;; Account for dual dialogue elements as distinct columns.
+         ((memq element fountain-dual-dialog-left-elements)
+          (cl-incf line-count-left))
+         ((memq element fountain-dual-dialog-right-elements)
+          (cl-incf line-count-right))
+         ;; All other elements.
+         (t (cl-incf line-count)))
+        (when (and (eolp) (bolp)
+                   (or (< 0 line-count-left)
+                       (< 0 line-count-right)))
+          (setq line-count
+                (+ line-count (max line-count-left line-count-right)))))
+      ;; Scene headings might count as two lines.
+      (when (and (eq element 'scene-heading) (not first-child)
+                 fountain-pagination-double-space-scene-headings)
+        (cl-incf line-count))
+      (setq first-child nil))))))
     ;; We are not at the furthest point in a page. Skip over any
     ;; remaining whitespace, then go back to page-break point.
     (fountain-goto-page-break-point))))
