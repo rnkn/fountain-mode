@@ -2688,6 +2688,7 @@ returns nil."
             (page-order t)
             (change 0))
         (while (and (< (point) (point-max))
+                    page-order
                     (<= change fountain-pagination-max-change))
           (let ((page-props (get-text-property (point) 'fountain-pagination))
                 (page-start (point)))
@@ -2698,8 +2699,7 @@ returns nil."
                                              page-start
                                              (or (cdr-safe page-props) 0)))))
             (cl-incf page-num)))
-        (and (<= change fountain-pagination-max-change)
-             page-order)))))
+        (and page-order (<= change fountain-pagination-max-change))))))
 
 (defun fountain-forward-page (n)
   "Move to Nth next page (or Nth previous if N is negative).
