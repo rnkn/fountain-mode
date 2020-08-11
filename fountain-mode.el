@@ -2741,10 +2741,14 @@ paginate in slightly different ways. Customize options
 `fountain-page-max-lines' and `fountain-pagination-break-sentences'
 to suit your preferred tool's pagination method."
   (interactive "NGo to page: ")
-  (widen)
-  (push-mark)
-  (goto-char (point-min))
-  (fountain-forward-page n))
+  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (save-restriction
+    (when fountain-pagination-ignore-restriction (widen))
+    (push-mark)
+    (goto-char (point-min))
+    (let ((p (car (get-text-property (point) 'fountain-pagination))))
+      (unless (<= n p)
+        (fountain-forward-page (- n p))))))
 
 (defun fountain-insert-page-break (&optional ask page-num)
   "Insert a page break at appropriate place preceding point.
