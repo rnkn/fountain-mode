@@ -2455,6 +2455,13 @@ breaks occur mid-sentence)."
   :type 'boolean
   :safe 'booleanp)
 
+(defcustom fountain-pagination-double-space-scene-headings
+  t
+  "When non-nil, pagination counts scene headings as two lines."
+  :group 'fountain-pagination
+  :type 'boolean
+  :safe 'booleanp)
+
 (defconst fountain-dual-dialog-left-elements
   '(dual-character-left dual-dialog-left dual-paren-left)
   "List of elements constituent of left-side dual dialogue.")
