@@ -15,22 +15,13 @@ img {
     width: 100%;
 }
 
-code {
-    font-family: "DejaVu Sans Mono", Menlo, Monaco, monospace;
-    font-size: 0.8em;
-    background-color: #f0f0f0;
-}
-
-samp {
-    font-family: "Courier Prime", Courier, "Courier Final Draft", "Courier New", monospace;
-}
-
 sup {
     line-height: 0;
 }
 
-pre.example {
-    font-family: "Courier Prime", Courier, "Courier Final Draft", "Courier New", monospace;
+pre, code, samp {
+    font-family: "DejaVu Sans Mono", Menlo, Monaco, monospace;
+    font-size: 0.9rem;
 }
 
 pre.menu-comment, pre.menu-preformatted {

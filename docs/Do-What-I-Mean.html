@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!--  -->
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Do What I Mean (Fountain Mode)</title>
+
+<meta name="description" content="Do What I Mean (Fountain Mode)">
+<meta name="keywords" content="Do What I Mean (Fountain Mode)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Indexes.html" rel="index" title="Indexes">
+<link href="index.html" rel="up" title="Top">
+<link href="Scene-Numbering.html" rel="next" title="Scene Numbering">
+<link href="Autocompletion.html" rel="prev" title="Autocompletion">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+<link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+
+</head>
+
+<body lang="en">
+<span id="Do-What-I-Mean"></span><div class="header">
+<p>
+Next: <a href="Scene-Numbering.html" accesskey="n" rel="next">Scene Numbering</a>, Previous: <a href="Autocompletion.html" accesskey="p" rel="prev">Autocompletion</a>, Up: <a href="index.html" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Indexes.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="Do-What-I-Mean-1"></span><h2 class="unnumbered">Do What I Mean</h2>
+
+<p>Call a command based on context.
+</p>
+<dl>
+<dt id="index-fountain_002ddwim">Function: <strong>fountain-dwim</strong></dt>
+<dd><p>This command, bound to <code>TAB</code> by default, will perform different actions based on context.
+</p></dd></dl>
+
+<ol>
+<li> If prefixed with ARG, call <code>fountain-outline-cycle</code> and pass ARG.
+</li><li> If point is inside an empty parenthetical, delete it.
+</li><li> If point is inside a non-empty parenthetical, move to a newline.
+</li><li> If point is at a blank line within dialogue, insert a parenthetical.
+</li><li> If point is at a note, cycle visibility of that note.
+</li><li> If point is at the end of line, call <code>completion-at-point</code>.
+</li><li> If point is a scene heading or section heading, cycle visibility of that heading.
+</li></ol>
+
+
+
+
+</body>
+</html>
