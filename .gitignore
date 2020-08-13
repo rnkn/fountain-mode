@@ -1,7 +1,6 @@
 *.elc
 *-autoloads.el
 *-pkg.el
-docs/*.html
 *.aux
 *.fn
 *.ilg
