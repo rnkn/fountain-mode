@@ -8,7 +8,7 @@
 
 #+attr_texinfo: :tag n.b.
 #+begin_quote
-This file is a work in progress and does not represent official documentation.
+This manual is a work in progress and does not represent complete documentation.
 #+end_quote
 
 Fountain is a markup format for writing scripts (both screenplays and stageplays) in plain text. It is designed to be easily readable and editable, and to look as much like a script as possible.
@@ -25,7 +25,9 @@ This is the Fountain Mode Manual updated for version {{{version}}}.
   :DESCRIPTION: Getting started.
   :END:
 
-The latest stable release of Fountain Mode is available via [[https://stable.melpa.org/#/fountain-mode][MELPA-stable]]. First, add MELPA-stable to your package archives:
+Fountain Mode is a major mode for Emacs, which is to say it is a program that runs inside Emacs --- an extensible, customizable, free/libre text editor.
+
+The latest stable release of Fountain Mode is available as an Emacs package via [[https://stable.melpa.org/#/fountain-mode][MELPA-stable]]. In order to install packages via MELPA-stable, you'll first need to add it to your package archives:
 
 : M-x customize-option RET package-archives RET
     
@@ -35,14 +37,14 @@ You can then find the latest stable version of ~fountain-mode~ in the list retur
 
 : M-x list-packages RET
 
-If you prefer the latest but perhaps unstable version, do the above using [[https://melpa.org/#/fountain-mode][MELPA]].
+If you like to live on the bleeding edge and prefer the latest but perhaps unstable version, do the above using [[https://melpa.org/#/fountain-mode][MELPA]]. Unless you are already familiar with debugging Elisp code, you are strongly encouraged to use the stable version.
 
 ** Advanced Installation
    :PROPERTIES:
    :DESCRIPTION: For the pros.
    :END:
 
-Download the [[https://github.com/rnkn/fountain-mode/releases/latest][latest release]], move this file into your load-path and add to your ~init.el~ file:
+Download the [[https://github.com/rnkn/fountain-mode/releases/latest][latest release]], move this file into your load-path and add the following to your ~init.el~ file:
 
 : (require 'fountain-mode)
 
@@ -85,8 +87,9 @@ Scene headings begin with a prefix, specified in ~fountain-scene-heading-prefix-
 
 Each prefix may be followed by a dot and/or a space, so the following are equivalent:
 
-#+begin_example
+#+begin_example fountain
 INT HOUSE - DAY
+
 INT. HOUSE - DAY
 #+end_example
 
@@ -181,20 +184,7 @@ Bold text is surrounded by ~**double asterisks**~
 
 For the writer pursists who want to work the way our ancestors did on typewriters, stick to underlining.
 
-* Scene Numbering
-
-* Exporting
-  :PROPERTIES:
-  :DESCRIPTION: Sharing your great writing!
-  :END:
-
-- [[https://github.com/ifrost/afterwriting-labs][Afterwriting (JavaScript)]]
-- [[https://github.com/Wraparound/wrap][Wrap (Go)]]
-- [[https://github.com/vilcans/screenplain][Screenplain (Python 2)]]
-- [[https://github.com/olivertaylor/Textplay][Textplay (Ruby)]] [fn:1]
-
-[fn:1] Requires [[https://www.princexml.com][PrinceXML]] for PDF export.
-
+* Autocompletion
 * Do What I Mean
   :PROPERTIES:
   :DESCRIPTION: Traditional TAB-style autocompletion
@@ -215,7 +205,20 @@ This command, bound to ~TAB~ by default, will perform different actions based on
 6. If point is at the end of line, call ~completion-at-point~.
 7. If point is a scene heading or section heading, cycle visibility of that heading.
 
-* Autocompletion
+* Scene Numbering
+* Pagination
+* Exporting
+  :PROPERTIES:
+  :DESCRIPTION: Sharing your great writing!
+  :END:
+
+- [[https://github.com/ifrost/afterwriting-labs][Afterwriting (JavaScript)]]
+- [[https://github.com/Wraparound/wrap][Wrap (Go)]]
+- [[https://github.com/vilcans/screenplain][Screenplain (Python 2)]]
+- [[https://github.com/olivertaylor/Textplay][Textplay (Ruby)]] [fn:1]
+
+[fn:1] Requires [[https://www.princexml.com][PrinceXML]] for PDF export.
+
 * Indexes
 ** Index of Commands
    :PROPERTIES:
