@@ -4,18 +4,18 @@
 <!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Advanced Installation (Fountain Mode)</title>
+<title>Requirements (Fountain Mode)</title>
 
-<meta name="description" content="Advanced Installation (Fountain Mode)">
-<meta name="keywords" content="Advanced Installation (Fountain Mode)">
+<meta name="description" content="Requirements (Fountain Mode)">
+<meta name="keywords" content="Requirements (Fountain Mode)">
 <meta name="resource-type" content="document">
 <meta name="distribution" content="global">
 <meta name="Generator" content="makeinfo">
 <link href="index.html" rel="start" title="Top">
 <link href="Indexes.html" rel="index" title="Indexes">
 <link href="Installation.html" rel="up" title="Installation">
-<link href="Script-Elements.html" rel="next" title="Script Elements">
-<link href="Requirements.html" rel="prev" title="Requirements">
+<link href="Advanced-Installation.html" rel="next" title="Advanced Installation">
+<link href="Installation.html" rel="prev" title="Installation">
 <style type="text/css">
 <!--
 a.summary-letter {text-decoration: none}
@@ -40,26 +40,19 @@ ul.no-bullet {list-style: none}
 </head>
 
 <body lang="en">
-<span id="Advanced-Installation"></span><div class="header">
+<span id="Requirements"></span><div class="header">
 <p>
-Previous: <a href="Requirements.html" accesskey="p" rel="prev">Requirements</a>, Up: <a href="Installation.html" accesskey="u" rel="up">Installation</a> &nbsp; [<a href="Indexes.html" title="Index" rel="index">Index</a>]</p>
+Next: <a href="Advanced-Installation.html" accesskey="n" rel="next">Advanced Installation</a>, Up: <a href="Installation.html" accesskey="u" rel="up">Installation</a> &nbsp; [<a href="Indexes.html" title="Index" rel="index">Index</a>]</p>
 </div>
 <hr>
-<span id="Advanced-Installation-1"></span><h3 class="unnumberedsec">Advanced Installation</h3>
+<span id="Requirements-1"></span><h3 class="unnumberedsec">Requirements</h3>
 
-<p>Download the <a href="https://github.com/rnkn/fountain-mode/releases/latest">latest release</a>, move this file into your load-path and add the following to your <code>init.el</code> file:
+<p>Fountain Mode is compatible with Emacs version 24.4 and later.
 </p>
-<div class="example">
-<pre class="example">(require 'fountain-mode)
-</pre></div>
-
-
-<p>If you wish to contribute to or alter Fountain Mode&rsquo;s code, clone the repository into your load-path and require as above:
+<p>For Emacs versions older than 26.1, there is a bug in the <code>outline</code> library. This will be automatically patched provided <code>fountain-patch-emacs-bugs</code> is non-nil and Emacs is installed with its Elisp source files.
 </p>
-<div class="example">
-<pre class="example">git clone https://github.com/rnkn/fountain-mode.git
-</pre></div>
-
+<p>For Emacs versions older than 25.1, the <code>seq</code> library will need to be installed; if you install using the Emacs package management system, <code>seq</code> will be installed automatically.
+</p>
 
 
 

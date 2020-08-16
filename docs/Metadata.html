@@ -47,13 +47,33 @@ Next: <a href="Section-Headings.html" accesskey="n" rel="next">Section Headings<
 <hr>
 <span id="Metadata-1"></span><h3 class="unnumberedsec">Metadata</h3>
 
+<p>A Fountain script usually starts with some metadata stating the basic info about the script. These are colon-separated key-value pairs at the start of a file, e.g. &lsquo;<samp>key: value</samp>&rsquo;.
+</p>
+<p>Other Fountain-compatible programs may refer to this as &ldquo;title page&rdquo; info, but metadata can store information not related to or present on the title page.
+</p>
+<p>Calling <code>auto-insert</code> will guide you through adding the most common Fountain metadata, prompting with likely defaults:
+</p>
 <ul>
-<li> &lsquo;<samp>title</samp>&rsquo;
-</li><li> &lsquo;<samp>credit</samp>&rsquo;
-</li><li> &lsquo;<samp>author</samp>&rsquo;
+<li> <code>title</code> is pretty obvious, and will default to base-name of the current buffer.
+</li><li> <code>credit</code> is not actually your name, but the type of credit given to the <code>author</code>, e.g. &lsquo;<samp>written by</samp>&rsquo; or &lsquo;<samp>screenplay by</samp>&rsquo;.
+</li><li> <code>author</code> is you or your writing team, and defaults to the value of variable <code>user-full-name</code>.
+</li><li> <code>format</code> will override the value of <code>fountain-default-script-format</code> for the current script. Accepted values are: &lsquo;<samp>screenplay</samp>&rsquo;, &lsquo;<samp>teleplay</samp>&rsquo;, &lsquo;<samp>stageplay</samp>&rsquo;.
+</li><li> <code>date</code> defaults to the current date in your locale&rsquo;s &ldquo;preferred&rdquo; format.
+</li><li> <code>source</code>, for if you&rsquo;re writing an adaptation.
+</li><li> <code>contact</code> is useful if the writer wants readers to ever get in touch to make the film/play!
 </li></ul>
 
-<p>Calling <code>auto-insert</code> will guide you through adding the basic Fountain metadata.
+<p>All metadata keys can take either a single line of input following the colon, or a newline followed multiple lines indented with whitespace:
+</p>
+<div class="example">
+<pre class="example">author:
+    Mary Maryland
+    and
+    Alan Smithee
+</pre></div>
+
+
+<p>Metadata keys are case-insensitive, e.g. <code>Title</code> is the same as <code>title</code>.
 </p>
 
 
