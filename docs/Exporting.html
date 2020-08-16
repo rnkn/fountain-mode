@@ -47,11 +47,30 @@ Next: <a href="Indexes.html" accesskey="n" rel="next">Indexes</a>, Previous: <a 
 <hr>
 <span id="Exporting-1"></span><h2 class="unnumbered">Exporting</h2>
 
+<p>Exporting a script in Fountain Mode is handled by one or more external command-line tools. By defining an &ldquo;export profile&rdquo;, you&rsquo;re able to easily interface with an external tool from within Emacs.
+</p>
+<p>Essentiall an export profile is just a shell command, interpolated with a selection of values.
+</p>
 <ul>
-<li> <a href="https://github.com/ifrost/afterwriting-labs">Afterwriting (JavaScript)</a>
-</li><li> <a href="https://github.com/Wraparound/wrap">Wrap (Go)</a>
-</li><li> <a href="https://github.com/vilcans/screenplain">Screenplain (Python 2)</a>
-</li><li> <a href="https://github.com/olivertaylor/Textplay">Textplay (Ruby)</a> <a id="DOCF1" href="#FOOT1"><sup>1</sup></a>
+<li> &lsquo;<samp>%b</samp>&rsquo; is the <code>buffer-file-name</code>
+</li><li> &lsquo;<samp>%B</samp>&rsquo; is the <code>buffer-file-name</code> sans extension
+</li><li> &lsquo;<samp>%n</samp>&rsquo; is the <code>user-full-name</code>
+</li><li> &lsquo;<samp>%t</samp>&rsquo; is the title (from Script <a href="Metadata.html">Metadata</a>)
+</li><li> &lsquo;<samp>%a</samp>&rsquo; is the author (from Script <a href="Metadata.html">Metadata</a>)
+</li><li> &lsquo;<samp>%F</samp>&rsquo; is the current date in ISO format
+</li><li> &lsquo;<samp>%x</samp>&rsquo; is the current date in your locale&rsquo;s &ldquo;preferred&rdquo; format
+</li></ul>
+
+<dl>
+<dt id="index-fountain_002dexport_002dcommand">Function: <strong>fountain-export-command</strong></dt>
+<dd><p>This command, bound to <code>C-c C-e</code> by default, will prompt for an export profile.
+</p></dd></dl>
+
+<ul>
+<li> <a href="https://github.com/ifrost/afterwriting-labs">Afterwriting</a> (JavaScript)
+</li><li> <a href="https://github.com/Wraparound/wrap">Wrap</a> (Go)
+</li><li> <a href="https://github.com/vilcans/screenplain">Screenplain</a> (Python 2)
+</li><li> <a href="https://github.com/olivertaylor/Textplay">Textplay</a> (Ruby) <a id="DOCF1" href="#FOOT1"><sup>1</sup></a>
 </li></ul>
 
 <div class="footnote">
