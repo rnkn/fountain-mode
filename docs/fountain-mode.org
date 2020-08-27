@@ -393,7 +393,7 @@ This command, bound to ~C-c C-e~ by default, will prompt for an export profile.
 
 - [[https://github.com/ifrost/afterwriting-labs][Afterwriting]] (JavaScript)
 - [[https://github.com/Wraparound/wrap][Wrap]] (Go)
-- [[https://github.com/vilcans/screenplain][Screenplain]] (Python 2)
+- [[https://github.com/vilcans/screenplain][Screenplain]] (Python 3)
 - [[https://github.com/olivertaylor/Textplay][Textplay]] (Ruby) [fn:1]
 
 [fn:1] Requires [[https://www.princexml.com][PrinceXML]] for PDF export.
