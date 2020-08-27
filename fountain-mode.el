@@ -71,7 +71,7 @@
 
 ;; - [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
 ;; - [Wrap](https://github.com/Wraparound/wrap) (Go)
-;; - [screenplain](https://github.com/vilcans/screenplain) (Python 2)
+;; - [screenplain](https://github.com/vilcans/screenplain) (Python 3)
 ;; - [Textplay](https://github.com/olivertaylor/Textplay) (Ruby, requires PrinceXML for PDF)
 
 ;; The option fountain-export-command-profiles provides some shell
