@@ -941,7 +941,7 @@ buffers."
   (setq case-fold-search t)
   (setq imenu-case-fold-search nil)
   (setq font-lock-multiline 'undecided)
-  (setq font-lock-defaults '(fountain-init-font-lock))
+  (setq font-lock-defaults '(fountain-init-font-lock nil t))
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-delim))
