@@ -124,21 +124,10 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'subr-x))
 (eval-when-compile (require 'cl-lib))
+(eval-when-compile (require 'subr-x))
 (require 'seq)
 
-(eval-when-compile
-  (require 'lisp-mnt)
-  (defconst fountain-version
-    (lm-version load-file-name)))
-
-(defun fountain-version ()
-  "Return `fountain-mode' version."
-  (interactive)
-  (message "Fountain Mode %s" fountain-version))
-
-
 ;;; Top-Level Options
 
 (defgroup fountain ()

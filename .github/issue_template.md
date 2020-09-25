@@ -3,13 +3,20 @@ name: Bug report
 about: For problems with Fountain Mode
 ---
 
-Please read first and then delete:
+(For feature requests, feel free to delete and disregard this.)
 
-For feature requests, feel free to delete and disregard this; for bugs:
+## Steps to Reproduce
 
-Please attempt to reproduce with `emacs -Q` then `M-x load-file RET
-[path to fountain-mode.el] RET`. Do not load your configuration file.
+You must begin your bug report with the following:
 
-Include the result of `M-x emacs-version` and `M-: fountain-version`.
+1. `$ emacs -Q -l fountain-mode.el`
+2. ... etc.
+
+## Configuration
+
+- `M-: emacs-version`
+- `M-: (lm-version "fountain-mode.el")`
+
+(You may need to `M-: (require 'lisp-mnt)`)
 
 Please don't link to your configuration files or paste configuration code.
