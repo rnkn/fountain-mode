@@ -3,7 +3,7 @@
 [![MELPA stable](https://stable.melpa.org/packages/fountain-mode-badge.svg)][melpa-stable]
 [![MELPA](https://melpa.org/packages/fountain-mode-badge.svg)][melpa]
 
-Fountain Mode is a scriptwriting program for GNU Emacs using the
+Fountain Mode is a screenwriting program for GNU Emacs using the
 Fountain plain text markup format.
 
 For more information on the Fountain format, visit <https://fountain.io>.
@@ -17,8 +17,9 @@ Community screenshots: <https://github.com/rnkn/fountain-mode/issues/114>
 - Support for Fountain 1.1 specification
 - WYSIWYG auto-align elements (display only, does not modify file
   contents) specific to script format, e.g. screenplay, stageplay or
-  user-defined format
+  user-defined formats
 - Traditional TAB auto-completion writing style
+- Highly accurate pagination calculation
 - Navigation by section, scene, character name, or page
 - Integration with `outline` to fold/cycle visibility of sections and
   scenes
@@ -30,14 +31,14 @@ Community screenshots: <https://github.com/rnkn/fountain-mode/issues/114>
 - Toggle syntax highlighting of each element
 - Toggle visibility of emphasis and syntax markup
 - Optionally display scene numbers in the right margin
-- Intelligent insertion of a page breaks
 
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`.
 
 ## Requirements ##
 
-- Emacs 24.5
+- Emacs 24.4
+- seq 2.20 (part of Emacs 25.1+)
 
 ## Exporting ##
 
@@ -58,7 +59,7 @@ while still allowing for a lot of flexibility.
 ## Installation ##
 
 The latest stable release of Fountain Mode is available via
-[MELPA-stable][]. First, add MELPA-stable to your package archives:
+[MELPA-stable][1]. First, add MELPA-stable to your package archives:
 
     M-x customize-option RET package-archives RET
     
@@ -70,11 +71,11 @@ list returned by:
     M-x list-packages RET
 
 If you prefer the latest but perhaps unstable version, do the above
-using [MELPA][].
+using [MELPA][2].
 
 ## Advanced Installation ##
 
-Download the [latest release][], move this file into your load-path and
+Download the [latest release][3], move this file into your load-path and
 add to your `init.el` file:
 
     (require 'fountain-mode)
@@ -84,9 +85,9 @@ repository into your load-path and require as above:
 
     git clone https://github.com/rnkn/fountain-mode.git
 
-[melpa]: https://melpa.org/#/fountain-mode "MELPA"
-[melpa-stable]: https://stable.melpa.org/#/fountain-mode "MELPA-stable"
-[latest release]: https://github.com/rnkn/fountain-mode/releases/latest "Fountain Mode latest release"
+[1]: https://stable.melpa.org/#/fountain-mode
+[2]: https://melpa.org/#/fountain-mode
+[3]: https://github.com/rnkn/fountain-mode/releases/latest
 
 ## History ##
 
