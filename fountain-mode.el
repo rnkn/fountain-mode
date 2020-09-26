@@ -133,7 +133,7 @@
 
 ;; [1]: https://stable.melpa.org/#/fountain-mode
 ;; [2]: https://melpa.org/#/fountain-mode
-;; [3]: https://github.com/rnkn/fountain-mode/releases/latest
+;; [3]: https://github.com/rnkn/fountain-mode/tags
 
 
 ;;; Code:
