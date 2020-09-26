@@ -1,11 +1,11 @@
-NAME		:= fountain-mode
+PROGRAM		:= fountain-mode
 DEPS		:= package-lint seq
 EMACS		?= emacs
 CSS_FILE	?= stylesheet.css
 DOCS_DIR	?= docs
-LISP_FILE	:= $(NAME).el
-TEXI_FILE	:= $(DOCS_DIR)/$(NAME).texi
-INFO_FILE	:= $(DOCS_DIR)/$(NAME).info
+LISP_FILE	:= $(PROGRAM).el
+TEXI_FILE	:= $(DOCS_DIR)/$(PROGRAM).texi
+INFO_FILE	:= $(DOCS_DIR)/$(PROGRAM).info
 
 INIT = '(progn \
   (require (quote package)) \
@@ -18,7 +18,7 @@ INIT = '(progn \
             (package-install pkg))) \
         (quote ($(DEPS)))))'
 
-all: clean check docs compile
+all: clean check compile
 
 check: $(LISP_FILE)
 	$(EMACS) -Q --eval $(INIT) --batch -f package-lint-batch-and-exit $(LISP_FILE)
@@ -37,15 +37,14 @@ pdf-manual: $(TEXI_FILE)
 	pdftex $(TEXI_FILE)
 
 clean:
-	rm -f $(NAME).elc
-	rm -f $(INFO_FILE)
+	rm -f $(PROGRAM).elc
 	rm -f dir
 	rm -f $(DOCS_DIR)/*.html
-	rm -f **$(NAME).aux
-	rm -f **$(NAME).fn
-	rm -f **$(NAME).log
-	rm -f **$(NAME).toc
-	rm -f **$(NAME).vr
-	rm -f **$(NAME).pdf
+	rm -f **$(PROGRAM).aux
+	rm -f **$(PROGRAM).fn
+	rm -f **$(PROGRAM).log
+	rm -f **$(PROGRAM).toc
+	rm -f **$(PROGRAM).vr
+	rm -f **$(PROGRAM).pdf
 
 .PHONY:	all check compile
