@@ -1,3 +1,5 @@
+;; To install this theme, copy or symlink it to your `user-emacs-directory'.
+
 (deftheme fountain
   "A theme for scriptwriting.")
 
@@ -5,10 +7,10 @@
  'fountain
  '(fountain ((t (:height 1.2 :family "Courier Prime"))))
  '(fountain-note
-   ((((background light)) (:background "#eee7ad"))
-    (((background dark)) (:foreground "goldenrod"))))
+   ((((background light)) (:background "#fefbe8" :foreground "grey30"))
+    (((background dark)) (:foreground "dark goldenrod"))))
  '(fountain-synopsis
-   ((((background light)) (:background "light cyan" :foreground "grey50"))
+   ((((background light)) (:background "light cyan" :foreground "grey30"))
     (((background dark)) (:foreground "dark cyan"))))
  '(fountain-section-heading-1 ((t (:height 1.1 :inherit fountain-section-heading-2))))
  '(fountain-section-heading-2 ((t (:height 1.1 :inherit fountain-section-heading-3))))
