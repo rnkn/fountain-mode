@@ -1,4 +1,3 @@
-PATH		:= /usr/local/opt/texinfo/bin:${PATH}
 NAME		:= fountain-mode
 DEPS		:= package-lint seq
 EMACS		?= emacs
@@ -28,12 +27,10 @@ compile: $(LISP_FILE)
 	$(EMACS) -Q --eval $(INIT) -L . --batch -f batch-byte-compile $(LISP_FILE)
 
 info-manual: $(TEXI_FILE)
-	PATH=$(PATH) \
 	makeinfo $(TEXI_FILE) && \
 	install-info $(INFO_FILE) dir
 
 html-manual: $(TEXI_FILE)
-	PATH=$(PATH) \
 	makeinfo --html --css-ref=$(CSS_FILE) --output $(DOCS_DIR) $(TEXI_FILE)
 
 pdf-manual: $(TEXI_FILE)
