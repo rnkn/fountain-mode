@@ -1,7 +1,7 @@
 # Fountain Mode #
 
-[![MELPA stable](https://stable.melpa.org/packages/fountain-mode-badge.svg)][melpa-stable]
-[![MELPA](https://melpa.org/packages/fountain-mode-badge.svg)][melpa]
+[![MELPA stable](https://stable.melpa.org/packages/fountain-mode-badge.svg)][1]
+[![MELPA](https://melpa.org/packages/fountain-mode-badge.svg)][2]
 
 Fountain Mode is a screenwriting program for GNU Emacs using the
 Fountain plain text markup format.
@@ -85,10 +85,6 @@ repository into your load-path and require as above:
 
     git clone https://github.com/rnkn/fountain-mode.git
 
-[1]: https://stable.melpa.org/#/fountain-mode
-[2]: https://melpa.org/#/fountain-mode
-[3]: https://github.com/rnkn/fountain-mode/releases/latest
-
 ## History ##
 
 See: <https://github.com/rnkn/fountain-mode/releases>
@@ -96,3 +92,7 @@ See: <https://github.com/rnkn/fountain-mode/releases>
 ## Bugs and Feature Requests ##
 
 Report bugs and feature requests at: <https://github.com/rnkn/fountain-mode/issues>
+
+[1]: https://stable.melpa.org/#/fountain-mode
+[2]: https://melpa.org/#/fountain-mode
+[3]: https://github.com/rnkn/fountain-mode/releases/latest
