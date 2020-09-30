@@ -1,11 +1,12 @@
-PROGRAM		:= fountain-mode
-DEPS		:= package-lint seq
-EMACS		?= emacs
-CSS_FILE	?= stylesheet.css
-DOCS_DIR	?= docs
-LISP_FILE	:= $(PROGRAM).el
-TEXI_FILE	:= $(DOCS_DIR)/$(PROGRAM).texi
-INFO_FILE	:= $(DOCS_DIR)/$(PROGRAM).info
+PROGRAM			:= fountain-mode
+DEPS			:= seq package-lint
+EMACS			?= emacs
+CSS_FILE		?= stylesheet.css
+DOCS_DIR		?= docs
+LISP_FILE		:= $(PROGRAM).el
+TEXI_FILE		:= $(DOCS_DIR)/$(PROGRAM).texi
+INFO_FILE		:= $(DOCS_DIR)/$(PROGRAM).info
+DOCS_OUTPUT_DIR	?= $(DOCS_DIR)
 
 INIT = '(progn \
   (require (quote package)) \
@@ -31,7 +32,7 @@ info-manual: $(TEXI_FILE)
 	install-info $(INFO_FILE) dir
 
 html-manual: $(TEXI_FILE)
-	makeinfo --html --css-ref=$(CSS_FILE) --output $(DOCS_DIR) $(TEXI_FILE)
+	makeinfo --html --css-ref=$(CSS_FILE) --output $(DOCS_OUTPUT_DIR) $(TEXI_FILE)
 
 pdf-manual: $(TEXI_FILE)
 	pdftex $(TEXI_FILE)
