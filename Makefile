@@ -1,12 +1,13 @@
-PROGRAM			:= fountain-mode
-DEPS			:= seq package-lint
-EMACS			?= emacs
-CSS_FILE		?= stylesheet.css
-DOCS_DIR		?= docs
-LISP_FILE		:= $(PROGRAM).el
-TEXI_FILE		:= $(DOCS_DIR)/$(PROGRAM).texi
-INFO_FILE		:= $(DOCS_DIR)/$(PROGRAM).info
-DOCS_OUTPUT_DIR	?= $(DOCS_DIR)
+PROGRAM		:= fountain-mode
+LISP_FILE	:= $(PROGRAM).el
+EMACS		?= emacs
+DEPS		:= seq package-lint
+DOCS_DIR	?= docs
+CSS_FILE	?= stylesheet.css
+TEXI_FILE	:= $(DOCS_DIR)/$(PROGRAM).texi
+INFO_FILE	:= $(DOCS_DIR)/$(PROGRAM).info
+HTML_DIR	?= $(DOCS_DIR)/html
+MAKEINFO	?= makeinfo
 
 INIT = '(progn \
   (require (quote package)) \
@@ -28,11 +29,12 @@ compile: $(LISP_FILE)
 	$(EMACS) -Q --eval $(INIT) -L . --batch -f batch-byte-compile $(LISP_FILE)
 
 info-manual: $(TEXI_FILE)
-	makeinfo $(TEXI_FILE) && \
-	install-info $(INFO_FILE) dir
+	$(MAKEINFO) $(TEXI_FILE) \
+		&& install-info $(INFO_FILE) dir
 
 html-manual: $(TEXI_FILE)
-	makeinfo --html --css-ref=$(CSS_FILE) --output $(DOCS_OUTPUT_DIR) $(TEXI_FILE)
+	$(MAKEINFO) --html --css-ref=$(CSS_FILE) --output $(HTML_DIR) $(TEXI_FILE) \
+		&& cp $(DOCS_DIR)/$(CSS_FILE) $(HTML_DIR)/$(CSS_FILE)
 
 pdf-manual: $(TEXI_FILE)
 	pdftex $(TEXI_FILE)
@@ -40,12 +42,12 @@ pdf-manual: $(TEXI_FILE)
 clean:
 	rm -f $(PROGRAM).elc
 	rm -f dir
-	rm -f $(DOCS_DIR)/*.html
 	rm -f **$(PROGRAM).aux
 	rm -f **$(PROGRAM).fn
 	rm -f **$(PROGRAM).log
 	rm -f **$(PROGRAM).toc
 	rm -f **$(PROGRAM).vr
 	rm -f **$(PROGRAM).pdf
+	rm -rf $(DOCS_DIR)/html
 
 .PHONY:	all check compile
