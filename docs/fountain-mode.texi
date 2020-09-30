@@ -37,7 +37,7 @@ Fountain Mode is a scriptwriting (both screenplays and stageplays) program for G
 
 This is the Fountain Mode Manual updated for version 3.3.
 
-The Fountain Mode code repository is located at @uref{https://github.com/rnkn/fountain-mode}.
+The upstream Fountain Mode repository is located at @uref{https://git.bydasein.com/fountain-mode}.
 @end ifnottex
 
 @menu
