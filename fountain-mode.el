@@ -1091,7 +1091,7 @@ When LOOSE is non-nil, do not require non-blank line after."
     (beginning-of-line)
     (looking-at fountain-center-regexp)))
 
-;; FIXME: too expensive
+;; FIXME: It's expensive to test all match functions for every block of action.
 (defun fountain-match-action ()
   "Match action text if point is at action, nil otherwise.
 Assumes that all other element matching has been done."
@@ -1269,6 +1269,9 @@ Added to `completion-at-point-functions'."
                  fountain-completion-additional-locations
                  fountain--completion-locations))))
         ;; Return character extension
+        ;;
+        ;; FIXME: REGRESSION - Fails to offer any completion.
+        ;;
         ((and (fountain-match-character 'loose)
               (match-string-no-properties 4))
          (list (match-beginning 4)
@@ -1276,9 +1279,9 @@ Added to `completion-at-point-functions'."
                (completion-table-case-fold
                 (append fountain-character-extension-list
                         (list fountain-continued-dialog-string)))))
+        ;; Return character completion
         ((and (eolp)
               (fountain-blank-before-p))
-         ;; Return character completion
          (list (line-beginning-position)
                (point)
                (completion-table-case-fold
@@ -1498,7 +1501,6 @@ Display a message unless SILENT."
   (when fountain-outline-custom-level
     (fountain-outline-hide-level fountain-outline-custom-level t)))
 
-;; FIXME: document
 (defun fountain-outline-cycle (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
 
@@ -1509,6 +1511,9 @@ Display a message unless SILENT."
   3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
   4. If ARG is 64, show outline visibility set in
      `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim])."
+  ;;
+  ;; FIXME: DOCUMENTATION
+  ;;
   (interactive "p")
   (let ((custom-level
          (when fountain-outline-custom-level
@@ -1537,6 +1542,7 @@ Display a message unless SILENT."
            (while (re-search-forward fountain-note-regexp eosp 'move)
              (outline-flag-region (match-beginning 1) (match-end 1)
                                   fountain-outline-fold-notes)))))
+    ;; FIXME: This could be better written with cl-case.
     (cond ((eq arg 4)
            (cond
             ((and (= fountain--outline-cycle 1) custom-level)
@@ -1721,6 +1727,8 @@ buffer windows are opened."
 
 ;;; Navigation
 
+;; FIXME: UNNEEDED - This is required by other functions, but interactive use
+;; duplicates functionality of `fountain-outline-next'.
 (defun fountain-forward-scene (n)
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
@@ -1739,18 +1747,19 @@ If N is 0, move to beginning of scene."
       (beginning-of-line)
       (funcall move-fun p))))
 
+;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-previous'.
 (defun fountain-backward-scene (n)
   "Move backward N scene headings (foward if N is negative)."
   (interactive "^p")
   (fountain-forward-scene (- n)))
 
-;; FIXME: needed?
+;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-previous'.
 (defun fountain-beginning-of-scene ()
   "Move point to beginning of current scene."
   (interactive "^")
   (fountain-forward-scene 0))
 
-;; FIXME: needed?
+;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-next'.
 (defun fountain-end-of-scene ()
   "Move point to end of current scene."
   (interactive "^")
@@ -1758,7 +1767,7 @@ If N is 0, move to beginning of scene."
   (unless (eobp)
     (backward-char)))
 
-;; FIXME: extending region
+;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-mark'.
 (defun fountain-mark-scene ()
   "Put mark at end of this scene, point at beginning."
   (interactive)
@@ -2165,9 +2174,11 @@ Or if nil:
 
   \"10\" -> (10)
   \"10AA\" -> (10 1 1)"
-  ;; FIXME: does not account for user option
-  ;; `fountain-scene-numbers-separator' or
-  ;; `fountain-scene-numbers-first-revision-char'.
+  ;;
+  ;; FIXME: This does not account for these user options:
+  ;; `fountain-scene-numbers-separator'
+  ;; `fountain-scene-numbers-first-revision-char'
+  ;;
   (let (number revision)
     (when (stringp string)
       (if fountain-scene-numbers-prefix-revised
@@ -2218,10 +2229,12 @@ Return Nth previous if N is negative.
 Scene numbers will not be accurate if buffer contains directives
 to include external files."
   (unless n (setq n 0))
-  ;; FIXME: the whole scene number (and page number) logic could be
+  ;;
+  ;; FIXME: The whole scene number (and page number) logic could be
   ;; improved by first generating a list of existing numbers,
   ;; e.g. '((4) (5) (5 1) (6))
   ;; then only calculating revised scene when current = next.
+  ;;
   (save-excursion
     (save-restriction
       (widen)
@@ -2233,13 +2246,17 @@ to include external files."
       (unless (fountain-match-scene-heading)
         (user-error "Before first scene heading"))
       (let ((x (point))
-            ;; FIXME: scenes should never be treated as out of order.
+            ;;
+            ;; FIXME: Scenes ought not be treated as out of order.
+            ;;
             (err-order "Scene %S seems to be out of order")
             found)
         ;; First, check if there are any scene numbers already. If not
         ;; we can save a lot of work.
-        ;; FIXME: this is just extra work since we're doing for each
-        ;; scene heading
+        ;;
+        ;; FIXME: This is just extra work since we're doing for each
+        ;; scene heading.
+        ;;
         (save-match-data
           (goto-char (point-min))
           (while (not (or found (eobp)))
@@ -2653,7 +2670,7 @@ Skip over comments."
     ;; remaining whitespace, then go back to page-break point.
     (fountain-goto-page-break-point))))
 
-;; FIXME: this could be more efficient by only updating pagination props from
+;; FIXME: This could be more efficient by only updating pagination props from
 ;; the point where they're invalid.
 (defun fountain-pagination-update ()
   "Update pagination properties in current buffer.
@@ -3319,7 +3336,7 @@ Return non-nil if match occurs." fun)))
      fountain--font-lock-keywords)
     (reverse keywords)))
 
-;; FIXME: make scene numbers display in both margins, like a real script.
+;; FIXME: Make scene numbers display in both margins (like a real script).
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
 
