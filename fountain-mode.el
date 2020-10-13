@@ -1,10 +1,10 @@
 ;;; fountain-mode.el --- Major mode for screenwriting in Fountain markup -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2014-2018  Paul William Rankin
+;; Copyright (c) 2014-2018  Paul W. Rankin
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
-;; Copyright (c) 2019-2020  Paul William Rankin
+;; Copyright (c) 2019-2020  Paul W. Rankin
 
-;; Author: William Rankin <william@bydasein.com>
+;; Author: Paul W. Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
 ;; Version: 3.3.1
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
