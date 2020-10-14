@@ -104,6 +104,8 @@ ensure you can reproduce with:
 
     $ emacs -Q -l fountain-mode.el
 
+Known issues are tracked with `FIXME` comments in the source.
+
 
 [1]: https://stable.melpa.org/#/fountain-mode
 [2]: https://melpa.org/#/fountain-mode
