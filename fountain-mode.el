@@ -933,6 +933,7 @@ buffers."
   (setq-local page-delimiter fountain-page-break-regexp)
   (setq-local outline-level #'fountain-outline-level)
   (setq-local require-final-newline mode-require-final-newline)
+  (setq-local completion-ignore-case t)
   (setq-local completion-cycle-threshold t)
   (setq-local completion-at-point-functions
               '(fountain-completion-at-point))
@@ -1250,51 +1251,41 @@ Added to `completion-at-point-functions'."
          ;; Return scene heading suffix completion
          (list (match-end 5)
                (point)
-               (completion-table-case-fold
-                fountain-scene-heading-suffix-list)))
+               fountain-scene-heading-suffix-list))
         ((and (fountain-match-scene-heading)
               (match-string-no-properties 3))
          ;; Return scene location completion
          (list (match-end 3)
                (point)
-               (completion-table-case-fold
-                (append
-                 fountain-completion-additional-locations
-                 fountain--completion-locations))))
+               (append fountain-completion-additional-locations
+                       fountain--completion-locations)))
         ((and (fountain-match-scene-heading)
               (match-string-no-properties 1))
          ;; Return scene location completion (forced)
          (list (match-end 1)
                (point)
-               (completion-table-case-fold
-                (append
-                 fountain-completion-additional-locations
-                 fountain--completion-locations))))
+               (append fountain-completion-additional-locations
+                       fountain--completion-locations)))
         ;; Return character extension
-        ;;
-        ;; FIXME: REGRESSION - Fails to offer any completion.
-        ;;
         ((and (fountain-match-character 'loose)
               (match-string-no-properties 4))
          (list (match-beginning 4)
                (line-end-position)
-               (completion-table-case-fold
-                (append fountain-character-extension-list
-                        (list fountain-continued-dialog-string)))))
+               (append fountain-character-extension-list
+                       (list fountain-continued-dialog-string))))
         ;; Return character completion
         ((and (eolp)
               (fountain-blank-before-p))
          (list (line-beginning-position)
                (point)
-               (completion-table-case-fold
-                (lambda (string pred action)
-                  (if (eq action 'metadata)
-                      (list 'metadata
-                            (cons 'display-sort-function 'identity)
-                            (cons 'cycle-sort-function 'identity))
-                    (complete-with-action
-                     action (fountain-completion-get-characters)
-                     string pred))))))))
+               (lambda (string pred action)
+                 (if (eq action 'metadata)
+                     (list 'metadata
+                           (cons 'display-sort-function 'identity)
+                           (cons 'cycle-sort-function 'identity))
+                   (complete-with-action
+                    action (fountain-completion-get-characters)
+                    string pred)))))))
 
 (defun fountain-completion-update ()
   "Update completion candidates for current buffer.
