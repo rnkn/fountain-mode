@@ -939,7 +939,7 @@ buffers."
               '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix invisible))
-  ;; This should be temporary. Feels better to ensure appropriate
+  ;; FIXME: This should be temporary. Feels better to ensure appropriate
   ;; case-fold within each function.
   (setq case-fold-search t)
   (setq imenu-case-fold-search nil)
