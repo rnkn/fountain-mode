@@ -4,11 +4,11 @@
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
 ;; Copyright (c) 2019-2020  Paul W. Rankin
 
-;; Author: Paul W. Rankin <hello@paulwrankin.com>
+;; Author: Paul W. Rankin <pwr@skeletons.cc>
 ;; Keywords: wp, text
 ;; Version: 3.3.2
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
-;; URL: https://github.com/rnkn/fountain-mode
+;; URL: https://git.skeletons.cc/fountain-mode
 
 ;; This file is not part of GNU Emacs.
 
