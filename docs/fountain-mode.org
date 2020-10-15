@@ -1,7 +1,7 @@
 #+TITLE: Fountain Mode
 #+LANGUAGE: en
 #+MACRO: version 3.3
-#+MACRO: repo https://git.bydasein.com/fountain-mode
+#+MACRO: repo https://git.skeletons.cc/fountain-mode
 #+MACRO: tbc Sorry, this node is not yet written.
 #+OPTIONS: num:nil toc:nil
 #+TEXINFO_DIR_CATEGORY: Emacs
@@ -17,7 +17,7 @@ Fountain Mode is a scriptwriting (both screenplays and stageplays) program for G
 
 This is the Fountain Mode Manual updated for version {{{version}}}.
 
-The upstream Fountain Mode repository is located at {{{repo}}}.
+The upstream Fountain Mode repository is located at {{{repo}}}
 
 * Copyright
   :PROPERTIES:
