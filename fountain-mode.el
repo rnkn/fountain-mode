@@ -976,7 +976,7 @@ buffers."
           (and (bolp) (eolp))
           (forward-comment 1)))))
 
-(defun fountain-maybe-in-dialog-p ()
+(defun fountain-in-dialog-maybe ()
   "Return non-nil if point may be in dialogue."
   (save-excursion
     (or (fountain-match-dialog)
@@ -1945,11 +1945,11 @@ to scene number or point."
         ((fountain-match-paren)
          (forward-line))
         ((and (bolp) (eolp)
-              (fountain-maybe-in-dialog-p))
+              (fountain-in-dialog-maybe))
          (insert-parentheses))
         ((and fountain-dwim-insert-next-character
               (eolp)
-              (fountain-maybe-in-dialog-p))
+              (fountain-in-dialog-maybe))
          (newline 2)
          (completion-at-point))
         ((fountain-match-note)
