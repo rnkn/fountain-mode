@@ -1936,10 +1936,9 @@ to scene number or point."
   (interactive "p")
   (cond ((and arg (< 1 arg))
          (fountain-outline-cycle arg))
-        ((save-excursion
-           (beginning-of-line)
-           (looking-at "()"))
-         (delete-region (match-beginning 0) (match-end 0)))
+        ((and (eq (char-before) ?\()
+              (eq (char-after)  ?\)))
+         (delete-region (1- (point)) (1+ (point))))
         ((and (fountain-match-paren)
               (fountain-blank-after-p))
          (end-of-line)
