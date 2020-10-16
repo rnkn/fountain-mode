@@ -1209,6 +1209,8 @@ important."
     (save-excursion
       (save-restriction
         (widen)
+        (when (fountain-match-character)
+          (fountain-forward-character -1 'scene))
         (fountain-forward-character 0 'scene)
         (while (not (or (bobp) (fountain-match-scene-heading)))
           (when (fountain-match-character)
