@@ -1,6 +1,8 @@
 *.elc
 *-autoloads.el
 *-pkg.el
+dir
+docs/html
 *.aux
 *.fn
 *.ilg
@@ -10,4 +12,3 @@
 *.pdf
 *.toc
 *.vr
-/docs/html
