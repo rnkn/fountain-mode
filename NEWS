@@ -1,4 +1,4 @@
-* Version 3.3.3 (pre-release)
+* current
 
 - Fix for adding current incomplete character to completion candidates
 - Rename fountain-maybe-in-dialog-p -> fountain-in-dialog-maybe
