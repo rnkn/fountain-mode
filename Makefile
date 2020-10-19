@@ -36,8 +36,8 @@ info-manual: $(TEXI_FILE)
 		&& install-info $(INFO_FILE) dir
 
 html-manual: $(TEXI_FILE)
-	$(MAKEINFO) --html --css-ref=$(CSS_FILE) --output $(HTML_DIR) $(TEXI_FILE) \
-		&& cp $(DOCS_DIR)/$(CSS_FILE) $(HTML_DIR)/$(CSS_FILE)
+	$(MAKEINFO) --html --css-ref=$(CSS_FILE) --output $(HTML_DIR) $(TEXI_FILE)
+	cp $(DOCS_DIR)/$(CSS_FILE) $(HTML_DIR)/$(CSS_FILE)
 
 pdf-manual: $(TEXI_FILE)
 	pdftex $(TEXI_FILE)
