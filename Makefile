@@ -3,11 +3,14 @@ LISP_FILE	:= $(PROGRAM).el
 EMACS		?= emacs
 DEPS		:= seq package-lint
 DOCS_DIR	?= docs
+NEWS_FILE	?= NEWS
 CSS_FILE	?= stylesheet.css
 TEXI_FILE	:= $(DOCS_DIR)/$(PROGRAM).texi
 INFO_FILE	:= $(DOCS_DIR)/$(PROGRAM).info
 HTML_DIR	?= $(DOCS_DIR)/html
 MAKEINFO	?= makeinfo
+VERS		:= $(shell grep -oE -m1 'Version:[ 0-9.]+' $(LISP_FILE) | tr -d :)
+TAG			:= $(shell echo $(VERS) | sed -E 's/Version:? ([0-9.]+)/v\1/')
 
 INIT = '(progn \
   (require (quote package)) \
@@ -38,6 +41,12 @@ html-manual: $(TEXI_FILE)
 
 pdf-manual: $(TEXI_FILE)
 	pdftex $(TEXI_FILE)
+
+tag-release: $(LISP_FILE)
+	sed -i~ '1 s/.*/* $(VERS)/' $(NEWS_FILE)
+	git add $(NEWS_FILE)
+	git commit -m 'Update $(NEWS_FILE)'
+	awk '/^* Version/ {v ++ 1} v == 1' $(NEWS_FILE) | sed 's/^* //' | git tag -sF - $(TAG)
 
 clean:
 	rm -f $(PROGRAM).elc
