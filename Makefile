@@ -42,7 +42,7 @@ pdf-manual: $(TEXI_FILE)
 
 tag-release: check compile
 	sed -i~ '1 s/.*/* $(VERS)/' $(NEWS_FILE)
-	git commit -m 'Update $(NEWS_FILE)' $(NEWS_FILE)
+	git commit -m 'Add $(VERS) to $(NEWS_FILE)' $(NEWS_FILE)
 	awk '/^* Version/ {v ++ 1} v == 1' $(NEWS_FILE) | sed 's/^* //' | git tag -sF - $(TAG)
 
 clean:
