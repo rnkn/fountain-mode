@@ -1,6 +1,7 @@
 *.elc
 *-autoloads.el
 *-pkg.el
+.dir-locals.el
 dir
 docs/html
 *.aux
