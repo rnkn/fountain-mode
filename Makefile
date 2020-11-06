@@ -24,21 +24,21 @@ INIT		= '(progn \
 all: clean check compile info-manual html-manual
 
 check: $(LISP_FILE)
-	emacs -Q --eval $(INIT) --batch -f package-lint-batch-and-exit $(LISP_FILE)
+	emacs -Q --eval $(INIT) --batch -f package-lint-batch-and-exit $<
 
 compile: $(LISP_FILE)
-	emacs -Q --eval $(INIT) -L . --batch -f batch-byte-compile $(LISP_FILE)
+	emacs -Q --eval $(INIT) -L . --batch -f batch-byte-compile $<
 
 info-manual: $(TEXI_FILE)
-	makeinfo $(TEXI_FILE) --output $(INFO_FILE)
+	makeinfo $< --output $(INFO_FILE)
 	install-info $(INFO_FILE) dir
 
 html-manual: $(TEXI_FILE)
-	makeinfo --html --css-ref=$(CSS_FILE) --output $(HTML_DIR) $(TEXI_FILE)
+	makeinfo --html --css-ref=$(CSS_FILE) --output $(HTML_DIR) $<
 	cp $(DOCS_DIR)/$(CSS_FILE) $(HTML_DIR)/$(CSS_FILE)
 
 pdf-manual: $(TEXI_FILE)
-	pdftex $(TEXI_FILE)
+	pdftex -output-directory=$(DOCS_DIR) $<
 
 tag-release: check compile
 	sed -i~ '1 s/.*/* $(VERS)/' $(NEWS_FILE)
