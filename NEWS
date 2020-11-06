@@ -330,7 +330,11 @@ right, in favour of making fountain-mode a solid writing environment.
 - Remove redundant option :group args
 - Updated copyright year
 
-* 
+* Version 2.6.1
+
+- Fix incorrect use of fountain-template-key-regexp instead of
+  fountain-template-regexp
+
 * Version 2.6.0
 
 Improvements
