@@ -15,23 +15,23 @@ For more information on the Fountain format: <https://fountain.io>
 Features
 --------
 
--  Support for Fountain 1.1 specification
--  WYSIWYG auto-align elements (display only, does not modify file
+ - Support for Fountain 1.1 specification
+ - WYSIWYG auto-align elements (display only, does not modify file
    contents) specific to script format, e.g. screenplay, stageplay or
    user-defined formats
--  Traditional TAB auto-completion writing style
--  Highly accurate pagination calculation
--  Navigation by section, scene, character name, or page
--  Integration with `outline` to fold/cycle visibility of sections and
+ - Traditional TAB auto-completion writing style
+ - Highly accurate pagination calculation
+ - Navigation by section, scene, character name, or page
+ - Integration with `outline` to fold/cycle visibility of sections and
    scenes
--  Integration with `electric-pair-mode` to insert emphasis delimiters
+ - Integration with `electric-pair-mode` to insert emphasis delimiters
    with single key (i.e. `*` or `_`)
--  Integration with `imenu` (sections, scene headings, notes)
--  Intergration with `auto-insert` for title page metadata
--  Automatically add/remove character `(CONT'D)`
--  Toggle syntax highlighting of each element
--  Toggle visibility of emphasis and syntax markup
--  Optionally display scene numbers in the right margin
+ - Integration with `imenu` (sections, scene headings, notes)
+ - Intergration with `auto-insert` for title page metadata
+ - Automatically add/remove character `(CONT'D)`
+ - Toggle syntax highlighting of each element
+ - Toggle visibility of emphasis and syntax markup
+ - Optionally display scene numbers in the right margin
 
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`.
@@ -40,8 +40,8 @@ functions and key-bindings, type `C-h m`.
 Requirements
 ------------
 
--  Emacs 24.4
--  seq 2.20 (part of Emacs 25.1+)
+ - Emacs 24.4
+ - seq 2.20 (part of Emacs 25.1+)
 
 
 Exporting
@@ -51,10 +51,10 @@ Earlier versions of Fountain Mode had export functionality, but this was
 not very good and is better handled via interfacing with external shell
 tools, such as:
 
--  [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
--  [Wrap](https://github.com/Wraparound/wrap) (Go)
--  [screenplain](https://github.com/vilcans/screenplain) (Python 3)
--  [Textplay](https://github.com/olivertaylor/Textplay) (Ruby, requires PrinceXML for PDF)
+ - [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
+ - [Wrap](https://github.com/Wraparound/wrap) (Go)
+ - [screenplain](https://github.com/vilcans/screenplain) (Python 3)
+ - [Textplay](https://github.com/olivertaylor/Textplay) (Ruby, requires PrinceXML for PDF)
 
 The option `fountain-export-command-profiles` provides some shell
 commands to interface with these tools, but you are encouraged to edit
