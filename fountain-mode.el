@@ -1337,9 +1337,9 @@ Add to `fountain-mode-hook' to have completion upon load."
 
 (require 'outline)
 
-(defvar-local fountain--outline-cycle
+(defvar-local fountain--outline-buffer-state
   0
-  "Internal local integer representing global outline cycling status.
+  "Internal local integer representing buffer outline cycle state.
 
   0: Show all
   1: Show level 1 section headings
@@ -1349,11 +1349,6 @@ Add to `fountain-mode-hook' to have completion upon load."
   5: Show level 5 section headings
   6: Show scene headings
 
-Used by `fountain-outline-cycle'.")
-
-(defvar-local fountain--outline-cycle-subtree
-  0
-  "Internal local integer representing subtree outline cycling status.
 Used by `fountain-outline-cycle'.")
 
 (defcustom fountain-outline-custom-level
@@ -1415,13 +1410,11 @@ Notes visibility can be cycled with \\[fountain-dwim]."
     (progn
       (defalias 'fountain-outline-show-all 'outline-show-all)
       (defalias 'fountain-outline-show-entry 'outline-show-entry)
-      (defalias 'fountain-outline-show-subtree 'outline-show-subtree)
       (defalias 'fountain-outline-show-children 'outline-show-children)
       (defalias 'fountain-outline-hide-subtree 'outline-hide-subtree)
       (defalias 'fountain-outline-hide-sublevels 'outline-hide-sublevels))
   (defalias 'fountain-outline-show-all 'show-all)
   (defalias 'fountain-outline-show-entry 'show-entry)
-  (defalias 'fountain-outline-show-subtree 'show-subtree)
   (defalias 'fountain-outline-show-children 'show-children)
   (defalias 'fountain-outline-hide-subtree 'hide-subtree)
   (defalias 'fountain-outline-hide-sublevels 'hide-sublevels))
@@ -1491,152 +1484,141 @@ Return non-nil if empty newline was inserted."
   (interactive "*p")
   (fountain-outline-move-subtree-down (- n)))
 
-(defun fountain-outline-hide-level (n &optional silent)
-  "Set outline visibilty to outline level N.
+(defun fountain-outline-flag-notes (start end)
+  (save-excursion
+    (goto-char start)
+    (while (re-search-forward fountain-note-regexp end 'move)
+      (outline-flag-region (match-beginning 1) (match-end 1)
+                           fountain-outline-fold-notes))))
+
+(defun fountain-outline-show-subtree ()
+  (interactive)
+  (outline-flag-subtree nil)
+  (save-excursion
+    (while (re-search-forward fountain-note-regexp nil 'move)
+           (outline-flag-region (match-beginning 1) (match-end 1)
+                                fountain-outline-fold-notes))))
+
+(defun fountain-outline-hide-buffer-sublevel (level &optional silent)
+  "Set buffer outline visibilty to outline LEVEL.
 Display a message unless SILENT."
-  (cond ((= n 0)
-         (fountain-outline-show-all)
-         (save-excursion
-           (goto-char (point-min))
-           (while (re-search-forward fountain-note-regexp nil 'move)
-             (outline-flag-region (match-beginning 1) (match-end 1)
-                                  fountain-outline-fold-notes)))
-         (unless silent (message "Showing all")))
-        ((= n 6)
-         (fountain-outline-hide-sublevels n)
-         (unless silent (message "Showing scene headings")))
-        (t
-         (fountain-outline-hide-sublevels n)
-         (unless silent (message "Showing level %s headings" n))))
-  (setq fountain--outline-cycle n))
+  (cl-case level
+    (0 (fountain-outline-show-all)
+       (fountain-outline-flag-notes (point-min) (point-max))
+       (unless silent (message "Showing all")))
+    (6 (fountain-outline-hide-sublevels level)
+       (unless silent (message "Showing scene headings")))
+    (t (fountain-outline-hide-sublevels level)
+       (unless silent (message "Showing level %s headings" level))))
+  (setq fountain--outline-buffer-state level))
 
 (defun fountain-outline-hide-custom-level ()
   "Set the outline visibilty to `fountain-outline-custom-level'."
   (when fountain-outline-custom-level
-    (fountain-outline-hide-level fountain-outline-custom-level t)))
+    (fountain-outline-hide-buffer-sublevel fountain-outline-custom-level t)))
 
-(defun fountain-outline-cycle (&optional arg)
-  "\\<fountain-mode-map>Cycle outline visibility depending on ARG.
+(defun fountain-outline-cycle ()
+  "Cycle outline visibility of heading at point.
 
-  1. If ARG is nil, cycle outline visibility of current subtree and
-     its children (\\[fountain-dwim]).
-  2. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-dwim],
-     same as \\[fountain-outline-cycle-global]).
-  3. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
-  4. If ARG is 64, show outline visibility set in
-     `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim])."
-  ;;
-  ;; FIXME: DOCUMENTATION
-  ;;
-  (interactive "p")
-  (let ((custom-level
-         (when fountain-outline-custom-level
-           (save-excursion
-             (goto-char (point-min))
-             (let (found)
-               (while (and (not found)
-                           (outline-next-heading))
-                 (when (= (funcall outline-level) fountain-outline-custom-level)
-                   (setq found t)))
-               (when found fountain-outline-custom-level)))))
-        (highest-level
-         (save-excursion
-           (goto-char (point-max))
-           (outline-back-to-heading t)
-           (let ((level (funcall outline-level)))
-             (while (and (not (bobp))
-                         (< 1 level))
-               (outline-up-heading 1 t)
-               (unless (bobp)
-                 (setq level (funcall outline-level))))
-             level)))
-        (fold-notes-fun
-         (lambda (eohp eosp)
-           (goto-char eohp)
-           (while (re-search-forward fountain-note-regexp eosp 'move)
-             (outline-flag-region (match-beginning 1) (match-end 1)
-                                  fountain-outline-fold-notes)))))
-    ;; FIXME: This could be better written with cl-case.
-    (cond ((eq arg 4)
-           (cond
-            ((and (= fountain--outline-cycle 1) custom-level)
-             (fountain-outline-hide-level custom-level))
-            ((< 0 fountain--outline-cycle 6)
-             (fountain-outline-hide-level 6))
-            ((= fountain--outline-cycle 6)
-             (fountain-outline-hide-level 0))
-            ((= highest-level 6)
-             (fountain-outline-hide-level 6))
-            (t
-             (fountain-outline-hide-level highest-level))))
-          ((eq arg 16)
-           (fountain-outline-show-all)
-           (message "Showing all")
-           (setq fountain--outline-cycle 0))
-          ((eq arg 64)
-           (if custom-level
-               (fountain-outline-hide-level custom-level)
-             (fountain-outline-show-all)))
-          (t
-           (save-excursion
-             (outline-back-to-heading)
-             (let ((eohp
-                    (save-excursion
-                      (outline-end-of-heading)
-                      (point)))
-                   (eosp
-                    (save-excursion
-                      (outline-end-of-subtree)
-                      (point)))
-                   (eolp
-                    (save-excursion
-                      (forward-line)
-                      (while (and (not (eobp))
-                                  (get-char-property (1- (point)) 'invisible))
-                        (forward-line))
-                      (point)))
-                   (children
-                    (save-excursion
-                      (outline-back-to-heading)
-                      (let ((level (funcall outline-level)))
-                        (outline-next-heading)
-                        (and (outline-on-heading-p t)
-                             (< level (funcall outline-level)))))))
-               (cond
-                ((= eosp eohp)
-                 (message "Empty heading")
-                 (setq fountain--outline-cycle-subtree 0))
-                ((and (<= eosp eolp)
-                      children)
-                 (fountain-outline-show-entry)
-                 (fountain-outline-show-children)
-                 (funcall fold-notes-fun eohp eosp)
-                 (message "Showing headings")
-                 (setq fountain--outline-cycle-subtree 2))
-                ((or (<= eosp eolp)
-                     (= fountain--outline-cycle-subtree 2))
-                 (fountain-outline-show-subtree)
-                 (goto-char eohp)
-                 (funcall fold-notes-fun eohp eosp)
-                 (message "Showing contents")
-                 (setq fountain--outline-cycle-subtree 3))
-                (t
-                 (fountain-outline-hide-subtree)
-                 (message "Hiding contents")
-                 (setq fountain--outline-cycle-subtree 1)))))))))
+Visibility cycles between showing just the heading, showing
+subheadings, and showing all.
 
-(defun fountain-outline-cycle-global ()
-  "Globally cycle outline visibility.
-
-Calls `fountain-outline-cycle' with argument 4 to cycle buffer
-outline visibility through the following states:
-
-  1. Top-level section headings
-  2. Value of `fountain-outline-custom-level'
-  3. All section headings and scene headings
-  4. Everything"
+See also `fountain-outline-show-synopses'."
   (interactive)
-  (fountain-outline-cycle 4))
+  (let (heading-start heading-end subtree-end overlay-list has-subheadings)
+    (save-excursion
+      (outline-back-to-heading t)
+      (setq heading-start (point))
+      (outline-end-of-heading)
+      (setq heading-end (point))
+      (outline-end-of-subtree)
+      (setq subtree-end (point)))
+    (save-excursion
+      (outline-back-to-heading t)
+      (setq has-subheadings
+            (< (save-excursion (outline-next-heading) (point))
+               (save-excursion (outline-end-of-subtree) (point)))))
+    (setq overlay-list
+          (seq-filter
+           (lambda (overlay)
+             (and (eq (overlay-get overlay 'invisible) 'outline)
+                  (save-excursion
+                    (goto-char (overlay-start overlay))
+                    (or (outline-on-heading-p t)
+                        (fountain-match-synopsis)))))
+           (overlays-in heading-start subtree-end)))
+    (cond ((= heading-end subtree-end)
+           (message "Empty heading"))
+          ((eq overlay-list nil)
+           (fountain-outline-hide-subtree)
+           (message "Hiding subtree"))
+          ((and has-subheadings
+                (eq (overlay-end (car overlay-list)) subtree-end)
+                (eq (overlay-start (car overlay-list)) heading-end))
+           ;; (fountain-outline-show-entry)
+           (fountain-outline-show-children)
+           (message "Showing headings"))
+          (t
+           (fountain-outline-show-subtree)
+           (message "Showing all")))))
+
+(define-obsolete-function-alias 'fountain-outline-cycle-global
+  'fountain-outline-cycle-buffer "3.4")
+
+(defun fountain-outline-cycle-buffer (&optional arg)
+  "\\<fountain-mode-map>Cycle outline visibility of the buffer.
+
+Visibility cycles between showing top-level headings, showing the
+value of `fountain-outline-custom-level', showing all headings,
+and showing all.
+
+When prefixed with ARG:
+
+  1. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-dwim],
+     same as \\[fountain-outline-cycle-buffer]).
+  2. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
+  3. If ARG is 64, show outline visibility set in
+     `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
+
+See also `fountain-outline-show-synopses'."
+  (interactive "P")
+  (unless arg (setq arg 4))
+  (let (highest-level custom-level)
+    (save-excursion
+      (goto-char (point-max))
+      (ignore-errors (outline-back-to-heading t))
+      (while (and (not (bobp)) (< 1 (or highest-level 6)))
+        (when (outline-on-heading-p t)
+          (setq highest-level (funcall outline-level))
+          (ignore-errors (outline-up-heading 1 t))))
+      (when fountain-outline-custom-level
+        (goto-char (point-min))
+        (let (found)
+          (while (and (not found)
+                      (outline-next-heading))
+            (when (= (funcall outline-level) fountain-outline-custom-level)
+              (setq found t)))
+          (when found (setq custom-level fountain-outline-custom-level)))))
+    (cl-case arg
+      ;; If `fountain-outline-custom-level' is set and custom level headings are
+      ;; present, show that level, otherwise show all.
+      (64 (if custom-level
+              (fountain-outline-hide-buffer-sublevel custom-level)
+            (fountain-outline-hide-buffer-sublevel 0)))
+      ;; Show all.
+      (16 (fountain-outline-hide-buffer-sublevel 0))
+      ;; Cycle whole buffer headings.
+      (4  (cond ((and custom-level
+                      (< 0 fountain--outline-buffer-state custom-level))
+                 (fountain-outline-hide-buffer-sublevel custom-level))
+                ((< 0 fountain--outline-buffer-state 6)
+                 (fountain-outline-hide-buffer-sublevel 6))
+                ((= fountain--outline-buffer-state 6)
+                 (fountain-outline-hide-buffer-sublevel 0))
+                (highest-level
+                 (fountain-outline-hide-buffer-sublevel highest-level))
+                (t
+                 (user-error "No headings")))))))
 
 (defun fountain-outline-level ()
   "Return the heading's nesting level in the outline.
@@ -1944,17 +1926,16 @@ to scene number or point."
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
 
-  1. If prefixed with ARG, call `fountain-outline-cycle' and pass ARG.
+  1. If prefixed with ARG, call `fountain-outline-cycle-buffer' and pass ARG.
   2. If point is inside an empty parenthetical, delete it.
   3. If point is inside a non-empty parenthetical, move to a newline.
   4. If point is at a blank line within dialogue, insert a parenthetical.
   5. If point is at a note, cycle visibility of that note.
   6. If point is at the end of line, call `fountain-completion-at-point'.
-  7. If point is a scene heading or section heading, cycle visibility of that
-     heading."
+  7. If point is an outline heading, call `fountain-outline-cycle'."
   (interactive "p")
-  (cond ((and arg (< 1 arg))
-         (fountain-outline-cycle arg))
+  (cond ((and arg (<= 4 arg))
+         (fountain-outline-cycle-buffer arg))
         ((and (eq (char-before) ?\()
               (eq (char-after)  ?\)))
          (delete-region (1- (point)) (1+ (point))))
@@ -3409,9 +3390,8 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map [remap backward-up-list] #'fountain-outline-up)
     (define-key map [remap mark-defun] #'fountain-outline-mark)
     (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
-    (define-key map (kbd "<backtab>") #'fountain-outline-cycle-global)
-    (define-key map (kbd "C-M-i") #'fountain-outline-cycle-global)
-    (define-key map (kbd "S-TAB") #'fountain-outline-cycle-global)
+    (define-key map (kbd "<backtab>") #'fountain-outline-cycle-buffer)
+    (define-key map (kbd "S-TAB") #'fountain-outline-cycle-buffer)
     (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
     ;; Pages
@@ -3446,7 +3426,7 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Go to Scene Heading..." fountain-goto-scene]
      "---"
      ["Cycle Outline Visibility" fountain-outline-cycle]
-     ["Cycle Global Outline Visibility" fountain-outline-cycle-global]
+     ["Cycle Buffer Outline Visibility" fountain-outline-cycle-buffer]
      ["Show All" fountain-outline-show-all]
      "---"
      ["Fold Notes When Cycling Outline"
