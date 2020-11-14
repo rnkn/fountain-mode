@@ -604,7 +604,7 @@ dialogue.")
   Group 3: match heading text")
 
 (defconst fountain-synopsis-regexp
-  "^\\(\\(=\\)[\s\t]*\\)\\([^=\n].*?\\)$"
+  "^\\(\\(=\\)[\s\t]*\\)\\([^=\n].*\\)"
   "Regular expression for matching synopses.
 
   Group 1: leading = and following whitespace
@@ -867,7 +867,11 @@ regular expression."
   (setq-local outline-regexp
               (concat fountain-section-heading-regexp
                       "\\|"
-                      fountain-scene-heading-regexp)))
+                      fountain-scene-heading-regexp))
+  (setq-local outline-heading-end-regexp
+              (if fountain-outline-show-synopses
+                  (concat "\n\\(" fountain-synopsis-regexp "\n\\)?")
+                "\n")))
 
 (require 'imenu)
 
@@ -1384,6 +1388,21 @@ Notes visibility can be cycled with \\[fountain-dwim]."
   :type 'boolean
   :safe 'boolean
   :group 'fountain)
+
+(defcustom fountain-outline-show-synopses
+  nil
+  "If non-nil, show synopses following headings when cycling outline visibility."
+  :type 'boolean
+  :safe 'boolean
+  :group 'fountain
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (when (featurep 'fountain-mode)
+           (mapc (lambda (buffer)
+                   (with-current-buffer buffer
+                     (when (derived-mode-p 'fountain-mode)
+                       (fountain-init-outline-regexp))))
+                 (buffer-list)))))
 
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
