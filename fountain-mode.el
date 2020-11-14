@@ -1237,19 +1237,24 @@ important."
   "\\<fountain-mode-map>Return completion table for entity at point.
 Trigger completion with \\[fountain-dwim].
 
-  1. If point is at a scene heading and matches
-     `fountain-scene-heading-suffix-separator', offer completion
-     candidates from `fountain-scene-heading-suffix-list'.
-  2. If point is at a line matching `fountain-scene-heading-prefix-list',
-     offer completion candidates from `fountain--completion-locations' plus
-     `fountain-completion-additional-locations'.
-  3. If point is at a possible character name with an opening parenthetical
-     extension, offer completion candidates from
-     `fountain-character-extension-list' plus `fountain-continued-dialog-string'.
-  4. If point is at beginning of line with a preceding blank line, offer
-     completion candidates from `fountain--completion-characters' plus
-     `fountain-completion-additional-characters'. For more information of
-     character completion sorting, see `fountain-completion-get-characters'.
+If point is at a scene heading and matches
+`fountain-scene-heading-suffix-separator', offer completion
+candidates from `fountain-scene-heading-suffix-list'.
+
+If point is at a line matching
+`fountain-scene-heading-prefix-list', offer location completion
+candidates plus `fountain-completion-additional-locations'.
+
+If point is at a possible character name with an opening
+parenthetical extension, offer character completion candidates
+from `fountain-character-extension-list' plus
+`fountain-continued-dialog-string'.
+
+If point is at beginning of line with a preceding blank line,
+offer character completion candidates plus
+`fountain-completion-additional-characters'. For more information
+of character completion sorting, see
+`fountain-completion-get-characters'.
 
 Added to `completion-at-point-functions'."
   (cond ((and (fountain-match-scene-heading)
