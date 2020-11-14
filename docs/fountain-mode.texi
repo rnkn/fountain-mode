@@ -18,7 +18,7 @@
 @finalout
 @titlepage
 @title Fountain Mode
-@author William Rankin
+@author Paul W@. Rankin
 @page
 @vskip 0pt plus 1filll
 @insertcopying
@@ -240,33 +240,33 @@ See @ref{Scene Heading Completion}.
 @node Characters
 @unnumberedsec Characters
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 See @ref{Character Name Completion}.
 
 @node Dialogue
 @unnumberedsec Dialogue
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 Dialogue is any test following a @ref{Characters, , character name}.
 
 @node Parenthetics
 @unnumberedsec Parenthetics
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 See @ref{Do What I Mean}.
 
 @node Transitions
 @unnumberedsec Transitions
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Notes
 @unnumberedsec Notes
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Synopses
 @unnumberedsec Synopses
@@ -284,12 +284,12 @@ Synopses are not included by most export tools.
 @node Center Text
 @unnumberedsec Center Text
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Comments
 @unnumberedsec Comments
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Outlining
 @unnumbered Outlining
@@ -307,17 +307,17 @@ If you like to work on discrete pieces of your script you can open these in indi
 @node Navigation
 @unnumbered Navigation
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Syntax Highlighting
 @unnumbered Syntax Highlighting
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Element Aligning
 @unnumbered Element Aligning
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Text Emphasis
 @unnumbered Text Emphasis
@@ -359,14 +359,14 @@ the remaining characters in the script in order of frequency (default if there a
 @code{TAB} will also offer character name completion if a line has a partial character name.
 
 @example
-MARY (┃
+MARY (|
 @end example
 
 When the cursor is after a character name and opening parenthesis, @code{TAB} will offer completions from @code{fountain-character-extension-list} plus @code{fountain-continued-dialog-string}.
 
 @example
 MARY
-┃
+|
 I'm hungry.
 @end example
 
@@ -374,7 +374,7 @@ When the cursor is at an empty line within dialogue, @code{TAB} will add an empt
 
 @example
 MARY
-(┃)
+(|)
 I'm hungry.
 @end example
 
@@ -382,7 +382,7 @@ Likewise, if the cursor is within an empty parenthetical, @code{TAB} will remove
 
 @example
 MARY
-(angry┃)
+(angry|)
 I'm hungry.
 @end example
 
@@ -391,7 +391,7 @@ When the cursor is at the end of a non-empty parenthetical, either inside or out
 @example
 MARY
 (angry)
-I'm hungry.┃
+I'm hungry.|
 @end example
 
 When the cursor is at the end of a non-empty line of dialogue, and the value of @code{fountain-dwim-insert-next-character} is non-nil, @code{TAB} will insert an empty line and the second-to-last previously speaking character.
@@ -401,7 +401,7 @@ MARY
 (angry)
 I'm hungry.
 
-JOHN┃
+JOHN|
 @end example
 
 The cursor will be left at the end of the next character, allowing successive presses of @code{TAB} to cycling through additional character completion candidates.
@@ -412,7 +412,7 @@ The cursor will be left at the end of the next character, allowing successive pr
 If the line has a partial scene heading, i.e. it begins with a prefix from @code{fountain-scene-heading-prefix-list} like so:
 
 @example
-INT. ┃
+INT. |
 @end example
 
 @code{TAB} will offer completions of previously used locations.
@@ -420,7 +420,7 @@ INT. ┃
 If the cursor is at the time-of-day, like so:
 
 @example
-INT. SUBMARINE - ┃
+INT. SUBMARINE - |
 @end example
 
 @code{TAB} will offer completions from @code{fountain-scene-heading-suffix-list}.
@@ -456,12 +456,12 @@ If point is a scene heading or section heading, cycle visibility of that heading
 @node Scene Numbering
 @unnumbered Scene Numbering
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Pagination
 @unnumbered Pagination
 
-Sorry, this node is not yet written.
+Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Exporting
 @unnumbered Exporting
