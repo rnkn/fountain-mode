@@ -1378,9 +1378,11 @@ Otherwise, only operate on section and scene headings."
   :group 'fountain)
 
 (define-obsolete-variable-alias 'fountain-fold-notes
-  'fountain-outline-fold-notes "`fountain-mode' 3.0")
+  'fountain-outline-hide-notes "`fountain-mode' 3.0")
+(define-obsolete-variable-alias 'fountain-outline-fold-notes
+  'fountain-outline-hide-notes "`fountain-mode' 3.4")
 
-(defcustom fountain-outline-fold-notes
+(defcustom fountain-outline-hide-notes
   t
   "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling outline visibility.
 
