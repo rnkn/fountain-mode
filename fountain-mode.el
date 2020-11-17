@@ -800,161 +800,6 @@ This option does not affect file contents."
   fountain-metadata-skeleton)
 
 
-;;; Initializing
-
-(defun fountain-init-scene-heading-regexp ()
-  "Initialize scene heading regular expression.
-Uses `fountain-scene-heading-prefix-list' to create non-forced
-scene heading regular expression."
-  (setq fountain-scene-heading-regexp
-        (concat
-         "^\\(?:"
-         ;; Group 1: match leading . (for forced scene heading)
-         "\\(?1:[\s\t]*\\.\\)"
-         ;; Group 2: match scene heading without scene number
-         "\\(?2:\\<"
-         ;; Group 4: match location
-         "\\(?4:.+?\\)"
-         ;; Group 5: match suffix separator
-         "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
-         ;; Group 6: match suffix
-         "\\(?6:.+?\\)?\\)?"
-         "\\)\\|"
-         ;; Group 2: match scene heading without scene number
-         "^\\(?2:"
-         ;; Group 3: match INT/EXT
-         "\\(?3:" (regexp-opt fountain-scene-heading-prefix-list) "\\.?\s+\\)"
-         ;; Group 4: match location
-         "\\(?4:.+?\\)?"
-         ;; Group 5: match suffix separator
-         "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
-         ;; Group 6: match suffix
-         "\\(?6:.+?\\)?\\)?"
-         "\\)\\)"
-         ;;; Match scene number
-         "\\(?:"
-         ;; Group 7: match space between scene heading and scene number
-         "\\(?7:\s+\\)"
-         ;; Group 8: match first # delimiter
-         "\\(?8:#\\)"
-         ;; Group 9: match scene number
-         "\\(?9:[0-9a-z\\.-]+\\)"
-         ;; Group 10: match last # delimiter
-         "\\(?10:#\\)\\)?"
-         "\s*$")))
-
-(defun fountain-init-trans-regexp ()
-  "Initialize transition regular expression.
-Uses `fountain-trans-suffix-list' to create non-forced tranistion
-regular expression."
-  (setq fountain-trans-regexp
-        (concat
-         "^\\(?:[\s\t]*"
-         ;; Group 1: match forced transition mark
-         "\\(>\\)[\s\t]*"
-         ;; Group 2: match forced transition
-         "\\([^<>\n]*?\\)"
-         "\\|"
-         ;; Group 2: match transition
-         "\\(?2:[[:upper:]\s\t]*"
-         (upcase (regexp-opt fountain-trans-suffix-list))
-         "\\)"
-         "\\)[\s\t]*$")))
-
-(defun fountain-init-outline-regexp ()
-  "Initialize `outline-regexp'."
-  (setq-local outline-regexp
-              (concat fountain-section-heading-regexp
-                      "\\|"
-                      fountain-scene-heading-regexp))
-  (setq-local outline-heading-end-regexp
-              (if fountain-outline-show-synopses
-                  (concat "\n\\(" fountain-synopsis-regexp "\n\\)?")
-                "\n")))
-
-(require 'imenu)
-
-(defcustom fountain-imenu-elements
-  '(section-heading scene-heading synopsis note)
-  "List of elements to include in `imenu'."
-  :type '(set (const :tag "Section Headings" section-heading)
-              (const :tag "Scene Headings" scene-heading)
-              (const :tag "Synopses" synopsis)
-              (const :tag "Notes" note))
-  :set (lambda (symbol value)
-         (set-default symbol value)
-         (mapc (lambda (buffer)
-                 (with-current-buffer buffer
-                   (when (derived-mode-p 'fountain-mode)
-                     (fountain-init-imenu))))
-               (buffer-list))))
-
-(defun fountain-init-imenu ()
-  "Initialize `imenu-generic-expression'."
-  (setq imenu-generic-expression nil)
-  (when (memq 'section-heading fountain-imenu-elements)
-    (push (list "Section Headings" fountain-section-heading-regexp 3)
-          imenu-generic-expression))
-  (when (memq 'scene-heading fountain-imenu-elements)
-    (push (list "Scene Headings" fountain-scene-heading-regexp 2)
-          imenu-generic-expression))
-  (when (memq 'synopsis fountain-imenu-elements)
-    (push (list "Synopses" fountain-synopsis-regexp 3)
-          imenu-generic-expression))
-  (when (memq 'note fountain-imenu-elements)
-    (push (list "Notes" fountain-note-regexp 1)
-          imenu-generic-expression))
-  (when (featurep 'imenu) (imenu-update-menubar)))
-
-(require 'elec-pair)
-
-(defun fountain-electric-pair-skip-self (char)
-  "Return non-nil if syntax before that of CHAR is word syntax."
-  (and electric-pair-preserve-balance
-       (save-excursion
-         (skip-syntax-backward (char-to-string (char-syntax char))
-                               (line-beginning-position))
-         (= (char-syntax (char-before)) ?w))))
-
-(defun fountain-init-vars ()
-  "Initialize important variables.
-Needs to be called for every Fountain buffer because some
-variatbles are required for functions to operate with temporary
-buffers."
-  (fountain-init-scene-heading-regexp)
-  (fountain-init-trans-regexp)
-  (fountain-init-outline-regexp)
-  (fountain-init-imenu)
-  (modify-syntax-entry (string-to-char "/") ". 14" nil)
-  (modify-syntax-entry (string-to-char "*") "$ 23" nil)
-  (modify-syntax-entry (string-to-char "_") "$"   nil)
-  (setq-local comment-start "/*")
-  (setq-local comment-end "*/")
-  (setq-local comment-use-syntax t)
-  (setq-local electric-pair-skip-self #'fountain-electric-pair-skip-self)
-  (setq-local font-lock-comment-face 'fountain-comment)
-  (setq-local page-delimiter fountain-page-break-regexp)
-  (setq-local outline-level #'fountain-outline-level)
-  (setq-local require-final-newline mode-require-final-newline)
-  (setq-local completion-ignore-case t)
-  (setq-local completion-cycle-threshold t)
-  (setq-local completion-at-point-functions
-              '(fountain-completion-at-point))
-  (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible))
-  ;; FIXME: This should be temporary. Feels better to ensure appropriate
-  ;; case-fold within each function.
-  (setq case-fold-search t)
-  (setq imenu-case-fold-search nil)
-  (setq font-lock-multiline 'undecided)
-  (setq font-lock-defaults '(fountain-init-font-lock nil t))
-  (add-to-invisibility-spec (cons 'outline t))
-  (when fountain-hide-emphasis-markup
-    (add-to-invisibility-spec 'fountain-emphasis-delim))
-  (when fountain-hide-element-markup
-    (add-to-invisibility-spec 'fountain-syntax-chars)))
-
-
 ;;; Element Matching
 
 (defun fountain-blank-before-p ()
@@ -3592,6 +3437,161 @@ If POS is nil, use `point' instead."
               outline-on-heading-p
               outline-next-visible-heading))
       (message "fountain-mode: Function `outline-invisible-p' has been patched"))))
+
+
+;;; Initializing
+
+(defun fountain-init-scene-heading-regexp ()
+  "Initialize scene heading regular expression.
+Uses `fountain-scene-heading-prefix-list' to create non-forced
+scene heading regular expression."
+  (setq fountain-scene-heading-regexp
+        (concat
+         "^\\(?:"
+         ;; Group 1: match leading . (for forced scene heading)
+         "\\(?1:[\s\t]*\\.\\)"
+         ;; Group 2: match scene heading without scene number
+         "\\(?2:\\<"
+         ;; Group 4: match location
+         "\\(?4:.+?\\)"
+         ;; Group 5: match suffix separator
+         "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
+         ;; Group 6: match suffix
+         "\\(?6:.+?\\)?\\)?"
+         "\\)\\|"
+         ;; Group 2: match scene heading without scene number
+         "^\\(?2:"
+         ;; Group 3: match INT/EXT
+         "\\(?3:" (regexp-opt fountain-scene-heading-prefix-list) "\\.?\s+\\)"
+         ;; Group 4: match location
+         "\\(?4:.+?\\)?"
+         ;; Group 5: match suffix separator
+         "\\(?:\\(?5:" fountain-scene-heading-suffix-separator "\\)"
+         ;; Group 6: match suffix
+         "\\(?6:.+?\\)?\\)?"
+         "\\)\\)"
+         ;;; Match scene number
+         "\\(?:"
+         ;; Group 7: match space between scene heading and scene number
+         "\\(?7:\s+\\)"
+         ;; Group 8: match first # delimiter
+         "\\(?8:#\\)"
+         ;; Group 9: match scene number
+         "\\(?9:[0-9a-z\\.-]+\\)"
+         ;; Group 10: match last # delimiter
+         "\\(?10:#\\)\\)?"
+         "\s*$")))
+
+(defun fountain-init-trans-regexp ()
+  "Initialize transition regular expression.
+Uses `fountain-trans-suffix-list' to create non-forced tranistion
+regular expression."
+  (setq fountain-trans-regexp
+        (concat
+         "^\\(?:[\s\t]*"
+         ;; Group 1: match forced transition mark
+         "\\(>\\)[\s\t]*"
+         ;; Group 2: match forced transition
+         "\\([^<>\n]*?\\)"
+         "\\|"
+         ;; Group 2: match transition
+         "\\(?2:[[:upper:]\s\t]*"
+         (upcase (regexp-opt fountain-trans-suffix-list))
+         "\\)"
+         "\\)[\s\t]*$")))
+
+(defun fountain-init-outline-regexp ()
+  "Initialize `outline-regexp'."
+  (setq-local outline-regexp
+              (concat fountain-section-heading-regexp
+                      "\\|"
+                      fountain-scene-heading-regexp))
+  (setq-local outline-heading-end-regexp
+              (if fountain-outline-show-synopses
+                  (concat "\n\\(" fountain-synopsis-regexp "\n\\)?")
+                "\n")))
+
+(require 'imenu)
+
+(defcustom fountain-imenu-elements
+  '(section-heading scene-heading synopsis note)
+  "List of elements to include in `imenu'."
+  :type '(set (const :tag "Section Headings" section-heading)
+              (const :tag "Scene Headings" scene-heading)
+              (const :tag "Synopses" synopsis)
+              (const :tag "Notes" note))
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (mapc (lambda (buffer)
+                 (with-current-buffer buffer
+                   (when (derived-mode-p 'fountain-mode)
+                     (fountain-init-imenu))))
+               (buffer-list))))
+
+(defun fountain-init-imenu ()
+  "Initialize `imenu-generic-expression'."
+  (setq imenu-generic-expression nil)
+  (when (memq 'section-heading fountain-imenu-elements)
+    (push (list "Section Headings" fountain-section-heading-regexp 3)
+          imenu-generic-expression))
+  (when (memq 'scene-heading fountain-imenu-elements)
+    (push (list "Scene Headings" fountain-scene-heading-regexp 2)
+          imenu-generic-expression))
+  (when (memq 'synopsis fountain-imenu-elements)
+    (push (list "Synopses" fountain-synopsis-regexp 3)
+          imenu-generic-expression))
+  (when (memq 'note fountain-imenu-elements)
+    (push (list "Notes" fountain-note-regexp 1)
+          imenu-generic-expression))
+  (when (featurep 'imenu) (imenu-update-menubar)))
+
+(require 'elec-pair)
+
+(defun fountain-electric-pair-skip-self (char)
+  "Return non-nil if syntax before that of CHAR is word syntax."
+  (and electric-pair-preserve-balance
+       (save-excursion
+         (skip-syntax-backward (char-to-string (char-syntax char))
+                               (line-beginning-position))
+         (= (char-syntax (char-before)) ?w))))
+
+(defun fountain-init-vars ()
+  "Initialize important variables.
+Needs to be called for every Fountain buffer because some
+variatbles are required for functions to operate with temporary
+buffers."
+  (fountain-init-scene-heading-regexp)
+  (fountain-init-trans-regexp)
+  (fountain-init-outline-regexp)
+  (fountain-init-imenu)
+  (modify-syntax-entry (string-to-char "/") ". 14" nil)
+  (modify-syntax-entry (string-to-char "*") "$ 23" nil)
+  (modify-syntax-entry (string-to-char "_") "$"   nil)
+  (setq-local comment-start "/*")
+  (setq-local comment-end "*/")
+  (setq-local comment-use-syntax t)
+  (setq-local electric-pair-skip-self #'fountain-electric-pair-skip-self)
+  (setq-local font-lock-comment-face 'fountain-comment)
+  (setq-local page-delimiter fountain-page-break-regexp)
+  (setq-local outline-level #'fountain-outline-level)
+  (setq-local require-final-newline mode-require-final-newline)
+  (setq-local completion-ignore-case t)
+  (setq-local completion-cycle-threshold t)
+  (setq-local completion-at-point-functions
+              '(fountain-completion-at-point))
+  (setq-local font-lock-extra-managed-props
+              '(line-prefix wrap-prefix invisible))
+  ;; FIXME: This should be temporary. Feels better to ensure appropriate
+  ;; case-fold within each function.
+  (setq case-fold-search t)
+  (setq imenu-case-fold-search nil)
+  (setq font-lock-multiline 'undecided)
+  (setq font-lock-defaults '(fountain-init-font-lock nil t))
+  (add-to-invisibility-spec (cons 'outline t))
+  (when fountain-hide-emphasis-markup
+    (add-to-invisibility-spec 'fountain-emphasis-delim))
+  (when fountain-hide-element-markup
+    (add-to-invisibility-spec 'fountain-syntax-chars)))
 
 
 ;;; Mode Definition
