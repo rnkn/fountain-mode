@@ -49,10 +49,10 @@ clean:
 	rm -f $(PROGRAM).elc
 	rm -f $(INFO_FILE)
 	rm -f dir
-	rm -f **$(PROGRAM).aux
-	rm -f **$(PROGRAM).fn
-	rm -f **$(PROGRAM).log
-	rm -f **$(PROGRAM).toc
-	rm -f **$(PROGRAM).vr
-	rm -f **$(PROGRAM).pdf
+	rm -f $(DOCS_DIR)/$(PROGRAM).aux
+	rm -f $(DOCS_DIR)/$(PROGRAM).fn
+	rm -f $(DOCS_DIR)/$(PROGRAM).log
+	rm -f $(DOCS_DIR)/$(PROGRAM).toc
+	rm -f $(DOCS_DIR)/$(PROGRAM).vr
+	rm -f $(DOCS_DIR)/$(PROGRAM).pdf
 	rm -rf $(DOCS_DIR)/html
