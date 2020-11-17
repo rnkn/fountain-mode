@@ -1319,7 +1319,7 @@ Add to `fountain-mode-hook' to have completion upon load."
         (when (fountain-match-scene-heading)
           (cl-pushnew (match-string-no-properties 4)
                       fountain--completion-locations))
-        (fountain-forward-scene 1))
+        (fountain-move-forward-scene 1))
       (goto-char (point-min))
       (while (< (point) (point-max))
         (when (fountain-match-character)
@@ -1730,12 +1730,9 @@ buffer windows are opened."
 
 ;;; Navigation
 
-;; FIXME: UNNEEDED - This is required by other functions, but interactive use
-;; duplicates functionality of `fountain-outline-next'.
-(defun fountain-forward-scene (n)
+(defun fountain-move-forward-scene (n)
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
-  (interactive "^p")
   (let ((p (if (<= n 0) -1 1))
         (move-fun
          (lambda (p)
@@ -1768,7 +1765,7 @@ e.g.
                  0)))
     (while (and (< scene n)
                 (< (point) (point-max)))
-      (fountain-forward-scene 1)
+      (fountain-move-forward-scene 1)
       (when (fountain-match-scene-heading)
         (setq scene (or (car (fountain-scene-number-to-list
                               (match-string-no-properties 8)))
@@ -2198,9 +2195,9 @@ to include external files."
     (save-restriction
       (widen)
       ;; Make sure we're at a scene heading.
-      (fountain-forward-scene 0)
+      (fountain-move-forward-scene 0)
       ;; Go to the Nth scene.
-      (unless (= n 0) (fountain-forward-scene n))
+      (unless (= n 0) (fountain-move-forward-scene n))
       ;; Unless we're at a scene heading now, raise a user error.
       (unless (fountain-match-scene-heading)
         (user-error "Before first scene heading"))
@@ -2233,7 +2230,7 @@ to include external files."
               ;; or equal to this.
               (goto-char x)
               (while (not (or next-scene (eobp)))
-                (fountain-forward-scene 1)
+                (fountain-move-forward-scene 1)
                 (when (fountain-match-scene-heading)
                   (setq next-scene (fountain-scene-number-to-list
                                     (match-string-no-properties 9)))))
@@ -2254,7 +2251,7 @@ to include external files."
         ;; if it's already numberd set it to that, or just (list 1).
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
-          (fountain-forward-scene 1))
+          (fountain-move-forward-scene 1))
         (when (<= (point) x)
           (setq current-scene
                 (or (fountain-scene-number-to-list
@@ -2264,7 +2261,7 @@ to include external files."
         ;; LAST-SCENE to CURRENT-SCENE and CURRENT-SCENE to an incement of (car
         ;; LAST-SCENE).
         (while (< (point) x (point-max))
-          (fountain-forward-scene 1)
+          (fountain-move-forward-scene 1)
           (when (fountain-match-scene-heading)
             (setq last-scene current-scene
                   current-scene (or (fountain-scene-number-to-list
@@ -2300,10 +2297,10 @@ to include external files."
           ;; the scenes.
           (goto-char (point-min))
           (unless (fountain-match-scene-heading)
-            (fountain-forward-scene 1))
+            (fountain-move-forward-scene 1))
           (let ((current-scene 1))
             (while (< (point) x)
-              (fountain-forward-scene 1)
+              (fountain-move-forward-scene 1)
               (when (fountain-match-scene-heading)
                 (cl-incf current-scene)))
             (list current-scene)))))))
@@ -2317,12 +2314,12 @@ to include external files."
       (let (buffer-invisibility-spec)
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
-          (fountain-forward-scene 1))
+          (fountain-move-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
           (when (match-string-no-properties 9)
             (delete-region (match-beginning 7) (match-end 10)))
-          (fountain-forward-scene 1))))))
+          (fountain-move-forward-scene 1))))))
 
 (defun fountain-add-scene-numbers ()
   "Add scene numbers to scene headings in current buffer.
@@ -2358,15 +2355,16 @@ scene number from being auto-upcased."
             buffer-invisibility-spec)
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
-          (fountain-forward-scene 1))
+          (fountain-move-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
           (unless (match-string-no-properties 9)
             (end-of-line)
             (delete-horizontal-space t)
             (insert "\s#" (fountain-scene-number-to-string
-                           (fountain-get-scene-number)) "#"))
-          (fountain-forward-scene 1)
+                           (fountain-get-scene-number))
+                    "#"))
+          (fountain-move-forward-scene 1)
           (progress-reporter-update job))
         (progress-reporter-done job)))))
 
