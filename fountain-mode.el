@@ -1750,48 +1750,6 @@ If N is 0, move to beginning of scene."
       (beginning-of-line)
       (funcall move-fun p))))
 
-;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-previous'.
-(defun fountain-backward-scene (n)
-  "Move backward N scene headings (foward if N is negative)."
-  (interactive "^p")
-  (fountain-forward-scene (- n)))
-
-;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-previous'.
-(defun fountain-beginning-of-scene ()
-  "Move point to beginning of current scene."
-  (interactive "^")
-  (fountain-forward-scene 0))
-
-;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-next'.
-(defun fountain-end-of-scene ()
-  "Move point to end of current scene."
-  (interactive "^")
-  (fountain-forward-scene 1)
-  (unless (eobp)
-    (backward-char)))
-
-;; FIXME: UNNEEDED - Duplicates functionality of `fountain-outline-mark'.
-(defun fountain-mark-scene ()
-  "Put mark at end of this scene, point at beginning."
-  (interactive)
-  ;; (if (or extend
-  ;;         (and (region-active-p)
-  ;;              (eq last-command this-command)))
-  ;;     (progn
-  ;;       (fountain-forward-scene 1)
-  ;;       (push-mark)
-  ;;       (exchange-point-and-mark))
-  (push-mark)
-  (fountain-forward-scene 0)
-  (if (not (or (fountain-match-section-heading)
-               (fountain-match-scene-heading)))
-      (progn
-        (goto-char (mark))
-        (user-error "Before first scene heading"))
-    (push-mark)
-    (fountain-forward-scene 1)
-    (exchange-point-and-mark)))
-
 (defun fountain-goto-scene (n)
   "Move point to Nth scene in current buffer.
 
