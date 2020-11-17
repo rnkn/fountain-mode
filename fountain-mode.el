@@ -3112,7 +3112,7 @@ The file is then passed to `dired-guess-default'."
 
 (defmacro define-fountain-font-lock-matcher (fun)
   "Define a `font-lock-mode' matcher for FUN."
-  (let ((fun-name (intern (format "%s-font-lock" fun)))
+  (let ((fun-name (intern (format "%s--font-lock" fun)))
         (docstring (format "\
 Call `%s' on each line before LIMIT.
 Return non-nil if match occurs." fun)))
