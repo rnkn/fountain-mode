@@ -1374,7 +1374,7 @@ Used by `fountain-outline-cycle'.")
   "\\<fountain-mode-map>Non-nil if \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should operate on all elements.
 Otherwise, only operate on section and scene headings."
   :type 'boolean
-  :safe 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (define-obsolete-variable-alias 'fountain-fold-notes
@@ -1388,14 +1388,14 @@ Otherwise, only operate on section and scene headings."
 
 Notes visibility can be cycled with \\[fountain-dwim]."
   :type 'boolean
-  :safe 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (defcustom fountain-outline-show-synopses
   nil
   "If non-nil, show synopses following headings when cycling outline visibility."
   :type 'boolean
-  :safe 'boolean
+  :safe 'booleanp
   :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
@@ -2999,7 +2999,7 @@ COMMAND may be edited interactively when calling
   "*Fountain Export*"
   "Buffer name for `fountain-export' output."
   :type 'string
-  :safe 'string
+  :safe 'stringp
   :group 'fountain-export)
 
 (require 'format-spec)
