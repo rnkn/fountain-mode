@@ -1,3 +1,25 @@
+* current
+
+- Add option fountain-outline-show-synopses; when non-nil, show synopses
+  following headings when cycling outline visibility
+- Rewrite outline cycling to better work with direction of Emacs outline
+- Better docstring for fountain-completion-at-point
+- Rename fountain-outline-fold-notes -> fountain-outline-hide-notes
+- Remove old unneeded commands duplicating fountain-outline-*
+  functionality:
+
+  fountain-backward-scene (duplicates fountain-outline-previous)
+  fountain-beginning-of-scene (duplicates fountain-outline-previous)
+  fountain-end-of-scene (duplicates fountain-outline-next)
+  fountain-mark-scene (duplicates fountain-outline-mark)
+
+- Remove interactive command fountain-forward-scene and rename function
+  to fountain-move-forward-scene (matching fountain-move-forward-page)
+- Name generated font-lock functions as internal
+- Fix option :safe predicates
+- Add export profile for using Makefiles (maybe there are crazy people
+  who do this?)
+
 * Version 3.3.3
 
 - Fix for adding current incomplete character to completion candidates
