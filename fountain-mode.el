@@ -2966,6 +2966,7 @@ The car sets `left-margin' and cdr `fill-column'."
 --setting print_profile=a4")
     ("wrap-usletterpdf-cprime" . "wrap \
 pdf %b --use-courier-prime --out %B.pdf")
+    ("make-pdf" . "make %B.pdf")
     ("textplay-fdx" . "textplay --fdx < %b > %B.fdx"))
   "Shell command profiles for exporting Fountain files.
 
