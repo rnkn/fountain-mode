@@ -168,7 +168,6 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              imenu-add-menubar-index
              fountain-completion-update
              fountain-pagination-update
-             fountain-outline-hide-custom-level
              flyspell-mode))
 
 (define-obsolete-variable-alias 'fountain-script-format
@@ -1343,27 +1342,20 @@ Add to `fountain-mode-hook' to have completion upon load."
 (require 'outline)
 
 (defvar-local fountain--outline-buffer-state
-  0
-  "Internal local integer representing buffer outline cycle state.
-
-  0: Show all
-  1: Show level 1 section headings
-  2: Show level 2 section headings
-  3: Show level 3 section headings
-  4: Show level 4 section headings
-  5: Show level 5 section headings
-  6: Show scene headings
-
+  nil
+  "Internal local representation of buffer outline cycle state.
 Used by `fountain-outline-cycle'.")
 
-(defcustom fountain-outline-custom-level
-  nil
-  "Additional section headings to include in outline cycling."
-  :type '(choice (const :tag "Only top-level" nil)
-                 (const :tag "Level 2" 2)
-                 (const :tag "Level 3" 3)
-                 (const :tag "Level 4" 4)
-                 (const :tag "Level 5" 5))
+(define-obsolete-variable-alias 'fountain-outline-custom-level
+  'fountain-outline-show-all-section-headings "`fountain-mode' 3.4")
+
+(defcustom fountain-outline-show-all-section-headings
+  t
+  "If non-nil, show all level section headings when cycling outline.
+Otherwise, cycle from showing top-level section headings to all
+section and scene headings."
+  :type 'boolean
+  :safe 'booleanp
   :group 'fountain)
 
 (define-obsolete-variable-alias 'fountain-shift-all-elements
@@ -1377,8 +1369,6 @@ Otherwise, only operate on section and scene headings."
   :safe 'booleanp
   :group 'fountain)
 
-(define-obsolete-variable-alias 'fountain-fold-notes
-  'fountain-outline-hide-notes "`fountain-mode' 3.0")
 (define-obsolete-variable-alias 'fountain-outline-fold-notes
   'fountain-outline-hide-notes "`fountain-mode' 3.4")
 
@@ -1506,23 +1496,34 @@ Return non-nil if empty newline was inserted."
            (outline-flag-region (match-beginning 1) (match-end 1)
                                 fountain-outline-fold-notes))))
 
-(defun fountain-outline-hide-buffer-sublevel (level &optional silent)
-  "Set buffer outline visibilty to outline LEVEL.
-Display a message unless SILENT."
-  (cl-case level
-    (0 (fountain-outline-show-all)
-       (fountain-outline-flag-notes (point-min) (point-max))
-       (unless silent (message "Showing all")))
-    (6 (fountain-outline-hide-sublevels level)
-       (unless silent (message "Showing scene headings")))
-    (t (fountain-outline-hide-sublevels level)
-       (unless silent (message "Showing level %s headings" level))))
-  (setq fountain--outline-buffer-state level))
+(defun fountain-outline-set-buffer-state (state &optional silent)
+  "Set buffer outline visibilty to outline level for STATE.
+Valid values for STATE are:
 
-(defun fountain-outline-hide-custom-level ()
-  "Set the outline visibilty to `fountain-outline-custom-level'."
-  (when fountain-outline-custom-level
-    (fountain-outline-hide-buffer-sublevel fountain-outline-custom-level t)))
+  top-level         (show level 1 section headings)
+  section-headings  (show all section headings)
+  scene-headings    (show all section and scene headings)
+  nil               (show all)
+
+Display a message unless SILENT."
+  (cl-case state
+    ((quote top-level)
+     (fountain-outline-hide-sublevels 1)
+     (unless silent (message "Showing top-level section headings")))
+    ((quote section-headings)
+     (fountain-outline-hide-sublevels 5)
+     (unless silent (message "Showing all section headings")))
+    ((quote scene-headings)
+     (fountain-outline-hide-sublevels 6)
+     (unless silent (message "Showing scene headings")))
+    (t
+     (fountain-outline-show-all)
+     (fountain-outline-flag-notes (point-min) (point-max))
+     (unless silent (message "Showing all"))))
+  (setq fountain--outline-buffer-state state))
+
+(make-obsolete 'fountain-outline-hide-custom-level
+  'fountain-outline-set-buffer-state "`fountain-mode' 3.4")
 
 (defun fountain-outline-cycle ()
   "Cycle outline visibility of heading at point.
@@ -1556,13 +1557,14 @@ See also `fountain-outline-show-synopses'."
            (overlays-in heading-start subtree-end)))
     (cond ((= heading-end subtree-end)
            (message "Empty heading"))
-          ((eq overlay-list nil)
+          ((null overlay-list)
            (fountain-outline-hide-subtree)
-           (message "Hiding subtree"))
+           (message "Hiding all"))
           ((and has-subheadings
-                (eq (overlay-end (car overlay-list)) subtree-end)
-                (eq (overlay-start (car overlay-list)) heading-end))
-           ;; (fountain-outline-show-entry)
+                (or (= subtree-end (point-max)
+                       (1+ (overlay-end (car overlay-list))))
+                    (= (overlay-end (car overlay-list)) subtree-end))
+                (= (overlay-start (car overlay-list)) heading-end))
            (fountain-outline-show-children)
            (message "Showing headings"))
           (t
@@ -1570,7 +1572,7 @@ See also `fountain-outline-show-synopses'."
            (message "Showing all")))))
 
 (define-obsolete-function-alias 'fountain-outline-cycle-global
-  'fountain-outline-cycle-buffer "3.4")
+  'fountain-outline-cycle-buffer "`fountain-mode' 3.4")
 
 (defun fountain-outline-cycle-buffer (&optional arg)
   "\\<fountain-mode-map>Cycle outline visibility of the buffer.
@@ -1584,48 +1586,51 @@ When prefixed with ARG:
   1. If ARG is 4, cycle outline visibility of buffer (\\[universal-argument] \\[fountain-dwim],
      same as \\[fountain-outline-cycle-buffer]).
   2. If ARG is 16, show all (\\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
-  3. If ARG is 64, show outline visibility set in
-     `fountain-outline-custom-level' (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
+  3. If ARG is 64, show top-level outline (\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[fountain-dwim]).
 
 See also `fountain-outline-show-synopses'."
   (interactive "P")
   (unless arg (setq arg 4))
-  (let (highest-level custom-level)
+  (let (has-top-level has-secondary-level has-scenes)
     (save-excursion
-      (goto-char (point-max))
-      (ignore-errors (outline-back-to-heading t))
-      (while (and (not (bobp)) (< 1 (or highest-level 6)))
+      (goto-char (point-min))
+      (while (not (eobp))
         (when (outline-on-heading-p t)
-          (setq highest-level (funcall outline-level))
-          (ignore-errors (outline-up-heading 1 t))))
-      (when fountain-outline-custom-level
-        (goto-char (point-min))
-        (let (found)
-          (while (and (not found)
-                      (outline-next-heading))
-            (when (= (funcall outline-level) fountain-outline-custom-level)
-              (setq found t)))
-          (when found (setq custom-level fountain-outline-custom-level)))))
+          (when (= (funcall outline-level) 1)
+            (setq has-top-level t))
+          (when (< 1 (funcall outline-level) 6)
+            (setq has-secondary-level t))
+          (when (= (funcall outline-level) 6)
+            (setq has-scenes t)))
+        (outline-next-heading)))
     (cl-case arg
-      ;; If `fountain-outline-custom-level' is set and custom level headings are
-      ;; present, show that level, otherwise show all.
-      (64 (if custom-level
-              (fountain-outline-hide-buffer-sublevel custom-level)
-            (fountain-outline-hide-buffer-sublevel 0)))
+      ;; Show top-level headings.
+      (64 (fountain-outline-set-buffer-state 'top-level))
       ;; Show all.
-      (16 (fountain-outline-hide-buffer-sublevel 0))
+      (16 (fountain-outline-set-buffer-state 'all))
       ;; Cycle whole buffer headings.
-      (4  (cond ((and custom-level
-                      (< 0 fountain--outline-buffer-state custom-level))
-                 (fountain-outline-hide-buffer-sublevel custom-level))
-                ((< 0 fountain--outline-buffer-state 6)
-                 (fountain-outline-hide-buffer-sublevel 6))
-                ((= fountain--outline-buffer-state 6)
-                 (fountain-outline-hide-buffer-sublevel 0))
-                (highest-level
-                 (fountain-outline-hide-buffer-sublevel highest-level))
-                (t
-                 (user-error "No headings")))))))
+      (4  (cond
+           ((and (null fountain--outline-buffer-state)
+                 has-top-level)
+            (fountain-outline-set-buffer-state 'top-level))
+           ((and (null fountain--outline-buffer-state)
+                 fountain-outline-show-all-section-headings
+                 has-secondary-level)
+            (fountain-outline-set-buffer-state 'section-headings))
+           ((and (null fountain--outline-buffer-state)
+                 has-scenes)
+            (fountain-outline-set-buffer-state 'scene-headings))
+           ((and (eq fountain--outline-buffer-state 'top-level)
+                 fountain-outline-show-all-section-headings
+                 has-secondary-level)
+            (fountain-outline-set-buffer-state 'section-headings))
+           ((and (eq fountain--outline-buffer-state 'top-level)
+                 has-scenes)
+            (fountain-outline-set-buffer-state 'scene-headings))
+           ((and (eq fountain--outline-buffer-state 'section-headings)
+                 has-scenes)
+            (fountain-outline-set-buffer-state 'scene-headings))
+           (t (fountain-outline-set-buffer-state nil)))))))
 
 (defun fountain-outline-level ()
   "Return the heading's nesting level in the outline.
