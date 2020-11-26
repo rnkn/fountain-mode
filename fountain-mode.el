@@ -3206,6 +3206,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
     (define-key map (kbd "<backtab>") #'fountain-outline-cycle-buffer)
     (define-key map (kbd "S-TAB") #'fountain-outline-cycle-buffer)
+    (define-key map (kbd "C-M-i") #'fountain-outline-cycle-buffer)
     (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
     ;; Pages
