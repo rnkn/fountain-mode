@@ -5,11 +5,11 @@
 - Rewrite outline cycling to better work with direction of Emacs outline
 - Better docstring for fountain-completion-at-point
 - Rename fountain-outline-fold-notes -> fountain-outline-hide-notes
+- Rename fountain-beginning-of-scene -> fountain-outline-beginning
 - Remove old unneeded commands duplicating fountain-outline-*
   functionality:
 
   fountain-backward-scene (duplicates fountain-outline-previous)
-  fountain-beginning-of-scene (duplicates fountain-outline-previous)
   fountain-end-of-scene (duplicates fountain-outline-next)
   fountain-mark-scene (duplicates fountain-outline-mark)
 

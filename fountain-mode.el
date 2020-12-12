@@ -1261,6 +1261,11 @@ Notes visibility can be cycled with \\[fountain-dwim]."
   (defalias 'fountain-outline-hide-subtree 'hide-subtree)
   (defalias 'fountain-outline-hide-sublevels 'hide-sublevels))
 
+(defun fountain-outline-beginning ()
+  "Move to the beginning of the current subtree."
+  (interactive)
+  (fountain-outline-forward 0))
+
 (defun fountain--insert-hanging-line-maybe ()
   "Insert a empty newline if needed.
 Return non-nil if empty newline was inserted."
@@ -3185,8 +3190,7 @@ redisplay in margin. Otherwise, remove display text properties."
     (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
     (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-element-markup)
     ;; Navigation commands:
-    (define-key map [remap beginning-of-defun] #'fountain-beginning-of-scene)
-    (define-key map [remap end-of-defun] #'fountain-end-of-scene)
+    (define-key map [remap beginning-of-defun] #'fountain-outline-beginning)
     (define-key map (kbd "M-g s") #'fountain-goto-scene)
     (define-key map (kbd "M-g p") #'fountain-goto-page)
     (define-key map (kbd "M-n") #'fountain-forward-character)
