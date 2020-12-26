@@ -35,7 +35,7 @@ This manual is a work in progress with many parts still missing. Please consult 
 
 Fountain Mode is a scriptwriting (both screenplays and stageplays) program for GNU Emacs version 24.4 or later. The Fountain markup format is a plain-text format designed to be easily readable and editable, portable and future-proof, and to look as much like a script as possible.
 
-This is the Fountain Mode Manual updated for version 3.3.
+This is the Fountain Mode Manual updated for version 3.4.
 
 The upstream Fountain Mode repository is located at @uref{https://git.skeletons.cc/fountain-mode}
 @end ifnottex
