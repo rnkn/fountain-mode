@@ -1,4 +1,4 @@
-* current
+* Version 3.4.0
 
 - Add option fountain-outline-show-synopses; when non-nil, show synopses
   following headings when cycling outline visibility
