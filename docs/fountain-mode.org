@@ -1,7 +1,7 @@
 #+TITLE: Fountain Mode
 #+LANGUAGE: en
 #+MACRO: version 3.4
-#+MACRO: repo https://git.skeletons.cc/fountain-mode
+#+MACRO: repo https://github.com/rnkn/fountain-mode
 #+MACRO: tbc Sorry, this node is not yet written. You can help by submitting a patch!
 #+OPTIONS: num:nil toc:nil
 #+TEXINFO_DIR_CATEGORY: Emacs
