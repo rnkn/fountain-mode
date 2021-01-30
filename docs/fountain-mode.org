@@ -35,7 +35,7 @@ The latest stable release of Fountain Mode is available as an Emacs package via 
 
 : M-x customize-option RET package-archives RET
     
-Insert an entry named =melpa-stable= with the URL =https://stable.melpa.org/packages/=
+Insert an entry named ~melpa-stable~ with the URL ~https://stable.melpa.org/packages/~
 
 You can then find the latest stable version of ~fountain-mode~ in the list returned by:
 
@@ -50,9 +50,9 @@ If you like to live on the bleeding edge and prefer the latest but perhaps unsta
 
 Fountain Mode is compatible with Emacs version 24.4 and later.
 
-For Emacs versions older than 26.1, there is a bug in the ~outline~ library. This will be automatically patched provided ~fountain-patch-emacs-bugs~ is non-nil and Emacs is installed with its Elisp source files.
-
 For Emacs versions older than 25.1, the ~seq~ library will need to be installed; if you install using the Emacs package management system, ~seq~ will be installed automatically.
+
+For Emacs versions older than 26.1, there is a bug in the ~outline~ library. This will be automatically patched provided ~fountain-patch-emacs-bugs~ is non-nil and Emacs is installed with its Elisp source files.
 
 ** Advanced Installation
    :PROPERTIES:
@@ -85,16 +85,16 @@ Fountain Mode uses the Fountain 1.1 syntax specification. While some programs us
    :ORDERED:  t
    :END:
 
-A Fountain script usually starts with some metadata stating the basic info about the script. These are colon-separated key-value pairs at the start of a file, e.g. =key: value=.
+A Fountain script usually starts with some metadata stating the basic info about the script. These are colon-separated key-value pairs at the start of a file, e.g. ~key: value~.
 
 Other Fountain-compatible programs may refer to this as ``title page'' info, but metadata can store information not related to or present on the title page.
 
 Calling ~auto-insert~ will guide you through adding the most common Fountain metadata, prompting with likely defaults:
 
 - ~title~ is pretty obvious, and will default to base-name of the current buffer.
-- ~credit~ is not actually your name, but the type of credit given to the ~author~, e.g. =written by= or =screenplay by=.
+- ~credit~ is not actually your name, but the type of credit given to the ~author~, e.g. ~written by~ or ~screenplay by~.
 - ~author~ is you or your writing team, and defaults to the value of variable ~user-full-name~.
-- ~format~ will override the value of ~fountain-default-script-format~ for the current script. Accepted values are: =screenplay=, =teleplay=, =stageplay=.
+- ~format~ will override the value of ~fountain-default-script-format~ for the current script. Accepted values are: ~screenplay~, ~teleplay~, ~stageplay~.
 - ~date~ defaults to the current date in your locale's ``preferred'' format.
 - ~source~, for if you're writing an adaptation.
 - ~contact~ is useful if the writer wants readers to ever get in touch to make the film/play!
@@ -124,7 +124,7 @@ There are five levels of section headings. See [[Outlining]].
 
 A scene begins with a scene heading.
 
-Scene headings begin with a prefix, specified in ~fountain-scene-heading-prefix-list~, which defaults to =INT, EXT, EST, INT./EXT., INT/EXT, I/E=.
+Scene headings begin with a prefix, specified in ~fountain-scene-heading-prefix-list~, which defaults to ~INT, EXT, EST, INT./EXT., INT/EXT, I/E~.
 
 Each prefix may be followed by a dot and/or a space, so the following are equivalent:
 
@@ -141,7 +141,7 @@ This options allows setting your own scene heading prefixes. These entries are c
 
 #+ATTR_TEXINFO: :options fountain-scene-heading-suffix-sep
 #+BEGIN_defopt
-This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either = - = or = -- =.
+This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either ~ - ~ or ~ -- ~.
 #+END_defopt
 
 See [[Scene Heading Completion]].
@@ -378,13 +378,13 @@ Exporting a script in Fountain Mode is handled by one or more external command-l
 
 Essentiall an export profile is just a shell command, interpolated with a selection of values.
 
-- =%b= is the ~buffer-file-name~
-- =%B= is the ~buffer-file-name~ sans extension
-- =%n= is the ~user-full-name~
-- =%t= is the title (from Script [[Metadata]])
-- =%a= is the author (from Script [[Metadata]])
-- =%F= is the current date in ISO format
-- =%x= is the current date in your locale's ``preferred'' format
+- ~%b~ is the ~buffer-file-name~
+- ~%B~ is the ~buffer-file-name~ sans extension
+- ~%n~ is the ~user-full-name~
+- ~%t~ is the title (from Script [[Metadata]])
+- ~%a~ is the author (from Script [[Metadata]])
+- ~%F~ is the current date in ISO format
+- ~%x~ is the current date in your locale's ``preferred'' format
 
 #+ATTR_TEXINFO: :options fountain-export-command
 #+BEGIN_defun
