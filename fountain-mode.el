@@ -3149,7 +3149,6 @@ Return non-nil if match occurs." fun)))
      fountain--font-lock-keywords)
     (reverse keywords)))
 
-;; FIXME: Make scene numbers display in both margins (like a real script).
 (defun fountain-redisplay-scene-numbers (start end)
   "Apply display text properties to scene numbers between START and END.
 
@@ -3157,17 +3156,26 @@ If `fountain-scene-numbers-display-in-margin' is non-nil and
 scene heading has scene number, apply display text properties to
 redisplay in margin. Otherwise, remove display text properties."
   ;; FIXME: Why use jit-lock rather than font-lock?
-  (when fountain-scene-numbers-display-in-margin
-    (goto-char start)
-    (while (< (point) (min end (point-max)))
-      (when (fountain-match-scene-heading)
-        (if (match-string-no-properties 9)
-            (put-text-property (match-beginning 7) (match-end 10)
-                               'display (list '(margin right-margin)
-                                              (match-string-no-properties 9)))
-          (remove-text-properties (match-beginning 0) (match-end 0)
-                                  '(display))))
-      (forward-line))))
+  (goto-char start)
+  (while (< (point) (min end (point-max)))
+    (when (fountain-match-scene-heading)
+      (if (and fountain-scene-numbers-display-in-margin
+               (match-string-no-properties 9))
+          (let ((scene-num (match-string-no-properties 9)))
+            (if (<= 28 emacs-major-version)
+                (progn
+                  (put-text-property (match-beginning 7) (match-end 8)
+                                     'display `((margin left-margin)
+                                                (space :width
+                                                       (- left-margin ,(+ (string-width scene-num) 4)))))
+                  (put-text-property (match-beginning 9) (match-end 9)
+                                     'display `((margin left-margin) ,scene-num))
+                  (put-text-property (match-beginning 10) (match-end 10)
+                                     'display `((margin right-margin) ,scene-num)))
+              (put-text-property (match-beginning 7) (match-end 10)
+                                 'display `((margin right-margin) ,scene-num))))
+        (remove-text-properties (match-beginning 0) (match-end 0) '(display))))
+    (forward-line)))
 
 
 ;;; Key Bindings
