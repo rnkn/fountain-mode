@@ -1602,6 +1602,8 @@ If N is 0, move to beginning of scene."
       (beginning-of-line)
       (funcall move-fun p))))
 
+;; FIXME: this could permit any string and search the current scene heading for
+;; that string before reverting to an integer count.
 (defun fountain-goto-scene (n)
   "Move point to Nth scene in current buffer.
 
@@ -3104,7 +3106,7 @@ Return non-nil if match occurs." fun)))
              (matcher (eval (cadr element)))
              (subexp-highlight-list (cddr element))
              use-form align-col highlight)
-         ;; When MATCHED is 'eval, flag that we're using a form.
+         ;; When MATCHER is 'eval, flag that we're using a form.
          (when (eq matcher 'eval) (setq use-form t))
          (setq align-col
                (eval (intern-soft (format "fountain-align-%s" (car element)))))
