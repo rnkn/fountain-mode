@@ -3024,9 +3024,9 @@ Return non-nil if match occurs." fun)))
     (scene-heading
      (define-fountain-font-lock-matcher fountain-match-scene-heading)
      (0 fountain-scene-heading)
-     (8 fountain-non-printing prepend t fountain-syntax-chars)
-     (10 fountain-non-printing prepend t fountain-syntax-chars)
-     (1 fountain-non-printing prepend t fountain-syntax-chars))
+     (8 nil prepend t fountain-syntax-chars)
+     (10 nil prepend t fountain-syntax-chars)
+     (1 nil prepend t fountain-syntax-chars))
     (action
      (define-fountain-font-lock-matcher fountain-match-action)
      (0 fountain-action)
