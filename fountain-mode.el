@@ -1705,9 +1705,12 @@ string. e.g.
                     (concat value (when value "\n")
                             (match-string-no-properties 2)))
               (forward-line))
-            (push (cons (intern (string-join (split-string (downcase
-                (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
-                    "[^[:alnum:]]+" t) "-")) value)
+            (push (cons
+                   (intern (string-join (split-string (downcase
+                       (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
+                      "[^[:alnum:]]+" t)
+                     "-"))
+                   value)
                   list)))
         list))))
 
@@ -3164,18 +3167,18 @@ redisplay in margin. Otherwise, remove display text properties."
       (if (and fountain-scene-numbers-display-in-margin
                (match-string-no-properties 9))
           (let ((scene-num (match-string-no-properties 9)))
-            (if (<= 28 emacs-major-version)
-                (progn
-                  (put-text-property (match-beginning 7) (match-end 8)
-                                     'display `((margin left-margin)
-                                                (space :width
-                                                       (- left-margin ,(+ (string-width scene-num) 4)))))
-                  (put-text-property (match-beginning 9) (match-end 9)
-                                     'display `((margin left-margin) ,scene-num))
-                  (put-text-property (match-beginning 10) (match-end 10)
-                                     'display `((margin right-margin) ,scene-num)))
-              (put-text-property (match-beginning 7) (match-end 10)
-                                 'display `((margin right-margin) ,scene-num))))
+        (if (<= 28 emacs-major-version)
+            (progn
+              (put-text-property (match-beginning 7) (match-end 8)
+               'display `((margin left-margin)
+                          (space :width (- left-margin
+                                           ,(+ (string-width scene-num) 4)))))
+              (put-text-property (match-beginning 9) (match-end 9)
+               'display `((margin left-margin) ,scene-num))
+              (put-text-property (match-beginning 10) (match-end 10)
+               'display `((margin right-margin) ,scene-num)))
+          (put-text-property (match-beginning 7) (match-end 10)
+           'display `((margin right-margin) ,scene-num))))
         (remove-text-properties (match-beginning 0) (match-end 0) '(display))))
     (forward-line)))
 
