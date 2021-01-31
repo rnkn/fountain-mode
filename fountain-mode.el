@@ -2,7 +2,7 @@
 
 ;; Copyright (c) 2014-2018  Paul W. Rankin
 ;; Copyright (c) 2019       Free Software Foundation, Inc.
-;; Copyright (c) 2019-2020  Paul W. Rankin
+;; Copyright (c) 2019-2021  Paul W. Rankin
 
 ;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
