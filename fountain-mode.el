@@ -370,7 +370,7 @@ You can specify which elements are highlighted with the option
   "Default face for centered text.")
 
 (defface fountain-note
-  '((t (:inherit font-lock-comment-face)))
+  '((t (:extend t :inherit font-lock-comment-face)))
   "Default face for notes.")
 
 (define-obsolete-face-alias 'fountain-section-heading

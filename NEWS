@@ -1,10 +1,14 @@
+* current
+
+- Add :extend property to notes face
+
 * Version 3.4.1
 
 - Scene numbers now display in both left and right margins (only on
   Emacs 28 and later due to an existing bug)
 - Fixed an issue where scene numbers displayed in margins would not
-  revert when toggling `fountain-display-scene-numbers-in-margin`
-- Updated email, URL
+  revert when toggling fountain-display-scene-numbers-in-margin
+- Updated copyright, email, URL
 
 * Version 3.4.0
 
