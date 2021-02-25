@@ -22,8 +22,8 @@ Features
  - Traditional TAB auto-completion writing style
  - Highly accurate pagination calculation
  - Navigation by section, scene, character name, or page
- - Integration with `outline` to fold/cycle visibility of sections and
-   scenes
+ - Integration with `outline` to fold/cycle visibility of sections,
+   scenes and notes
  - Integration with `electric-pair-mode` to insert emphasis delimiters
    with single key (i.e. `*` or `_`)
  - Integration with `imenu` (sections, scene headings, notes)
@@ -31,7 +31,8 @@ Features
  - Automatically add/remove character `(CONT'D)`
  - Toggle syntax highlighting of each element
  - Toggle visibility of emphasis and syntax markup
- - Optionally display scene numbers in the right margin
+ - Optionally display scene numbers in margins
+ - Intelligent insertion of page breaks
 
 Most common features are accessible from the menu. For a full list of
 functions and key-bindings, type `C-h m`.
