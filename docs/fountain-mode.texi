@@ -37,10 +37,11 @@ Fountain Mode is a scriptwriting (both screenplays and stageplays) program for G
 
 This is the Fountain Mode Manual updated for version 3.4.
 
-The upstream Fountain Mode repository is located at @uref{https://github.com/rnkn/fountain-mode}
+The public Fountain Mode repository is located at @uref{https://github.com/rnkn/fountain-mode}.
 @end ifnottex
 
 @menu
+* About Fountain Syntax::
 * Installation::                 Getting started.
 * Script Elements::              The constituent parts of Fountain.
 * Outlining::                    Organize your script in pieces.
@@ -89,6 +90,17 @@ Indexes
 
 @end detailmenu
 @end menu
+
+@node About Fountain Syntax
+@unnumbered About Fountain Syntax
+
+Fountain Mode combines the simplicity of Fountain syntax with the extensibility of Emacs. It is a major-mode that enables the writer to engage with all aspects of realizing a screenplay - story development, outlining, drafting, rewriting - and to work in such a way that the hands never need to leave the keyboard.
+
+More traditional screenwriting software can frustrate the composition process. Attention gets distracted by clicking through menus or cycling through non-intuitive commands to get a line of text to format properly. The focus shifts from creativity to formatting text, not writing.
+
+After learning a handful of syntax rules and a few keyboard shortcuts, nothing stands between the writer and the text. The friction between thought and its expression on the page lessens, allowing the writer to more readily access a state of relaxed concentration that is conducive to creativity.
+
+With Fountain, all the writer needs to do is write.
 
 @node Installation
 @unnumbered Installation
@@ -147,6 +159,12 @@ git clone https://github.com/rnkn/fountain-mode.git
 @unnumbered Script Elements
 
 The main idea of writing a script in Fountain is that you should be able to just start writing --- as long as your text looks like a script, you should end up with a script.
+
+To quickly get up to speed with fountain syntax, memorize the rules for the six most used elements of the screenplay format: Scene Headings, Action, Character, Dialogue, Parentheticals, and Transitions.
+
+Then learn how to use Section Headings to Outline a story. These work similarly to markdown syntax with some useful techniques specific to Fountain Mode such as folding and the ability to reorder entire sections of text with a few keyboard shortcuts.
+
+Fountain syntax contains additional tools that support brainstorming, structuring, and capturing important ideas. These include Synopsis, Notes, and Boneyard. Though the text itself includes these elements, they are not included in final formatting. They track a range of useful information while keeping an accurate page count.
 
 @quotation n.b.
 Fountain Mode uses the Fountain 1.1 syntax specification. While some programs use custom additions to the specification, these aren't considered official. For the greatest cross-compatibility, stick with the 1.1 spec.
@@ -232,7 +250,7 @@ This options allows setting your own scene heading prefixes. These entries are c
 @end defopt
 
 @defopt fountain-scene-heading-suffix-sep
-This option allows setting the separator (a regular expression) between the scene location and time of day. The default @code{ --? } allows either @code{ - } or @code{ -- }.
+This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either ~ - ~ or ~ -- ~.
 @end defopt
 
 See @ref{Scene Heading Completion}.
@@ -240,7 +258,19 @@ See @ref{Scene Heading Completion}.
 @node Characters
 @unnumberedsec Characters
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+To write a character's name that you want to be followed by Dialogue, type in ALL CAPS@.
+
+@example
+JOLENE
+@end example
+
+Then hit return. The next line will automatically be considered Dialogue.
+
+If you do not want to write Dialogue and are instead writing Action, type the character's name normally.
+
+@example
+Jolene
+@end example
 
 See @ref{Character Name Completion}.
 
@@ -249,12 +279,23 @@ See @ref{Character Name Completion}.
 
 Sorry, this node is not yet written. You can help by submitting a patch!
 
-Dialogue is any test following a @ref{Characters, , character name}.
+Dialogue is any text following a @ref{Characters, , character name}. Just start typing dialogue and the text will auto-format itself into the correct position.
+
+@example
+JOLENE
+Have you seen trouble? I seem to have misplaced it.
+@end example
 
 @node Parenthetics
 @unnumberedsec Parenthetics
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+Anytime the writer types a (parens) inside of a dialogue block, the text auto-formats into the correct position.
+
+@example
+        JOLENE
+      (concerned)
+Have you seen trouble? I seem to have misplaced it.
+@end example
 
 See @ref{Do What I Mean}.
 
@@ -271,7 +312,7 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 @node Synopses
 @unnumberedsec Synopses
 
-A synopsis is a handy way to detail what a scene of section is about. A synopsis element is simply a line beginning with @code{=}.
+A synopsis is a handy way to detail what a scene or section is about. A synopsis element is simply a line beginning with @code{=}.
 
 @example
 INT. FISHING TRAWLER - DAY
@@ -297,6 +338,39 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 There are five levels of section headings. Scene headings count as the sixth level headings.
 
 Cycle an individual subtree visibility with @code{TAB}. Cycle global outline visibility with @code{S-TAB} (shift-tab) or @code{C-u TAB}.
+
+Acts, Sequences, Sections, and Scenes can be given meaningful titles, giving the writer a bird's eye view of the story and structure at a moments notice.
+
+There are many ways to approach writing a screenplay. Here's one example of how to use Fountain Mode to Outline a script.
+
+= Synopsis of an Act. A short summary of all the crazy things that happen for the next 30-60 pages. One way to think of it is to write what happens in the beginning, the middle, and the end of the Act.
+]
+
+## Sequence
+= Synopsis of a Sequence.
+]
+
+### Section
+= Synopsis of a Section.
+]
+
+#### Scene
+= Synopsis of a Scene. A short description of what happens.
+\[[Notes to remember for a scene, such as the following:
+@itemize
+@item
+Who wants what from whom?
+@item
+What are they willing to do get what they want?
+@item
+What happens if they don't get it?/]]
+@end itemize
+
+Experimenting with different structures can be accomplished by folding a Section Heading and moving the section to the new desired location using keyboard shortcuts.
+
+Note: all text contained within the fold is carried to the new location.
+
+Just as there are many ways to tell a story, there are many ways to outline a script. Because Fountain Mode uses plaintext, it does not force the writer into a single way of working. Possible structures are limited only by one's imagination.
 
 If you like to work on discrete pieces of your script you can open these in indirect buffers.
 

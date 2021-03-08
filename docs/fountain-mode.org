@@ -17,12 +17,22 @@ Fountain Mode is a scriptwriting (both screenplays and stageplays) program for G
 
 This is the Fountain Mode Manual updated for version {{{version}}}.
 
-The upstream Fountain Mode repository is located at {{{repo}}}
+The public Fountain Mode repository is located at {{{repo}}}.
 
 * Copyright
   :PROPERTIES:
   :COPYING:  t
   :END:
+
+* About Fountain Syntax
+
+Fountain Mode combines the simplicity of Fountain syntax with the extensibility of Emacs. It is a major-mode that enables the writer to engage with all aspects of realizing a screenplay - story development, outlining, drafting, rewriting - and to work in such a way that the hands never need to leave the keyboard.
+
+More traditional screenwriting software can frustrate the composition process. Attention gets distracted by clicking through menus or cycling through non-intuitive commands to get a line of text to format properly. The focus shifts from creativity to formatting text, not writing.
+
+After learning a handful of syntax rules and a few keyboard shortcuts, nothing stands between the writer and the text. The friction between thought and its expression on the page lessens, allowing the writer to more readily access a state of relaxed concentration that is conducive to creativity.
+
+With Fountain, all the writer needs to do is write.
 
 * Installation
   :PROPERTIES:
@@ -73,6 +83,12 @@ If you wish to contribute to or alter Fountain Mode's code, clone the repository
   :END:
 
 The main idea of writing a script in Fountain is that you should be able to just start writing --- as long as your text looks like a script, you should end up with a script.
+
+To quickly get up to speed with fountain syntax, memorize the rules for the six most used elements of the screenplay format: Scene Headings, Action, Character, Dialogue, Parentheticals, and Transitions.
+
+Then learn how to use Section Headings to Outline a story. These work similarly to markdown syntax with some useful techniques specific to Fountain Mode such as folding and the ability to reorder entire sections of text with a few keyboard shortcuts.
+
+Fountain syntax contains additional tools that support brainstorming, structuring, and capturing important ideas. These include Synopsis, Notes, and Boneyard. Though the text itself includes these elements, they are not included in final formatting. They track a range of useful information while keeping an accurate page count.
 
 #+ATTR_TEXINFO: :tag n.b.
 #+BEGIN_QUOTE
@@ -150,7 +166,20 @@ See [[Scene Heading Completion]].
    :PROPERTIES:
    :DESCRIPTION: Names are in UPPERCASE
    :END:
-{{{tbc}}}
+
+To write a character's name that you want to be followed by Dialogue, type in ALL CAPS.
+
+#+BEGIN_EXAMPLE
+JOLENE
+#+END_EXAMPLE
+
+Then hit return. The next line will automatically be considered Dialogue.
+
+If you do not want to write Dialogue and are instead writing Action, type the character's name normally.
+
+#+BEGIN_EXAMPLE
+Jolene
+#+END_EXAMPLE
 
 See [[Character Name Completion]].
 
@@ -160,13 +189,25 @@ See [[Character Name Completion]].
    :END:
 {{{tbc}}}
 
-Dialogue is any test following a [[Characters][character name]].
+Dialogue is any text following a [[Characters][character name]]. Just start typing dialogue and the text will auto-format itself into the correct position.
+
+#+BEGIN_EXAMPLE
+JOLENE
+Have you seen trouble? I seem to have misplaced it.
+#+END_EXAMPLE
 
 ** Parenthetics
    :PROPERTIES:
    :DESCRIPTION: Text inside (parens) within dialogue
    :END:
-{{{tbc}}}
+
+Anytime the writer types a (parens) inside of a dialogue block, the text auto-formats into the correct position.
+
+#+BEGIN_EXAMPLE
+                JOLENE
+              (concerned)
+        Have you seen trouble? I seem to have misplaced it.
+#+END_EXAMPLE
 
 See [[Do What I Mean]].
 
@@ -185,7 +226,7 @@ See [[Do What I Mean]].
    :DESCRIPTION: Lines beginning with =
    :END:
 
- A synopsis is a handy way to detail what a scene of section is about. A synopsis element is simply a line beginning with ~=~.
+ A synopsis is a handy way to detail what a scene or section is about. A synopsis element is simply a line beginning with ~=~.
 
  : INT. FISHING TRAWLER - DAY
  : = The men eat the shark they caught.
@@ -210,6 +251,35 @@ See [[Do What I Mean]].
 There are five levels of section headings. Scene headings count as the sixth level headings.
 
 Cycle an individual subtree visibility with ~TAB~. Cycle global outline visibility with ~S-TAB~ (shift-tab) or ~C-u TAB~.
+
+Acts, Sequences, Sections, and Scenes can be given meaningful titles, giving the writer a bird's eye view of the story and structure at a moments notice.
+
+There are many ways to approach writing a screenplay. Here's one example of how to use Fountain Mode to Outline a script.
+
+# Act
+= Synopsis of an Act. A short summary of all the crazy things that happen for the next 30-60 pages. One way to think of it is to write what happens in the beginning, the middle, and the end of the Act.
+\[[Act One Note. Useful for character motivation and obstacles. Ideas to remember. Etc.\]]
+
+## Sequence
+= Synopsis of a Sequence.
+\[[Sequence Notes. A sequence can be thought of as a series of several scenes that make up their own mini-story. Generally between 10-20 pages, although this can vary widely.\]]
+
+### Section
+= Synopsis of a Section.
+\[[Section Notes. A section is a handful of scenes that comprise part of the mini-story of the sequence.\]]
+
+#### Scene
+= Synopsis of a Scene. A short description of what happens.
+\[[Notes to remember for a scene, such as the following:
+- Who wants what from whom?
+- What are they willing to do get what they want?
+- What happens if they don't get it?/]]
+
+Experimenting with different structures can be accomplished by folding a Section Heading and moving the section to the new desired location using keyboard shortcuts.
+
+Note: all text contained within the fold is carried to the new location.
+
+Just as there are many ways to tell a story, there are many ways to outline a script. Because Fountain Mode uses plaintext, it does not force the writer into a single way of working. Possible structures are limited only by one's imagination.
 
 If you like to work on discrete pieces of your script you can open these in indirect buffers.
 
