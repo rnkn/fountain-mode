@@ -9,7 +9,7 @@ INFO_FILE	= ${DOCS_DIR}/${PROG}.info
 CSS_FILE	= ${DOCS_DIR}/style.css
 HTML_DIR	= ${DOCS_DIR}/html
 VERS		!= grep -oE -m1 'Version:[ 0-9.]+' ${LISP_FILE} | tr -d :
-TAG		!= echo ${VERS} | sed -E 's/Version:? ([0-9.]+)/v\1/'
+TAG			!= echo ${VERS} | sed -E 's/Version:? ([0-9.]+)/v\1/'
 INIT		= '(progn \
   (require (quote package)) \
   (push (cons "melpa" "https://melpa.org/packages/") package-archives) \
@@ -37,7 +37,7 @@ html-manual:
 	makeinfo --force --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
 
 pdf-manual:
-	pdftex -output-directory=${DOCS_DIR} ${TEXI_FILE}
+	texi2pdf --clean ${TEXI_FILE}
 
 tag-release: check compile
 	sed -i~ '1 s/.*/* ${VERS}/' ${NEWS_FILE}
