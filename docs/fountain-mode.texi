@@ -23,9 +23,10 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 @end macro
 
 @copying
-@center Copyright @copyright{} 2021 Paul W. Rankin
-@center The following people contributed to this documentation:
-@center Paul W. Rankin, Kohl Sudduth
+Copyright @copyright{} 2021 Paul W. Rankin
+
+The following people contributed to this documentation:@*
+Paul W. Rankin, Kohl Sudduth
 @end copying
 
 @finalout
@@ -42,7 +43,11 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 
 @node Top
 @top Fountain Mode
-@insertcopying
+
+@quotation n.b.
+This manual is a work in progress with many parts still missing. Please
+consult the help functions within Emacs for current documentation.
+@end quotation
 
 Fountain Mode is a scriptwriting (both screenplays and stageplays)
 program for GNU Emacs version 24.4 or later. The Fountain markup format
@@ -82,11 +87,6 @@ The public Fountain Mode repository is hosted on
 
 @node Introduction
 @unnumbered Introduction
-
-@quotation n.b.
-This manual is a work in progress with many parts still missing. Please
-consult the help functions within Emacs for current documentation.
-@end quotation
 
 Fountain Mode combines the simplicity of Fountain syntax with the
 extensibility of Emacs. Fountain Mode is a major mode for Emacs, which
