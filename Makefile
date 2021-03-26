@@ -34,7 +34,7 @@ info-manual:
 	install-info ${INFO_FILE} dir
 
 html-manual:
-	makeinfo --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
+	makeinfo --force --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
 
 pdf-manual:
 	pdftex -output-directory=${DOCS_DIR} ${TEXI_FILE}
