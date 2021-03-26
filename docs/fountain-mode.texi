@@ -2,132 +2,151 @@
 @c %**start of header
 @setfilename fountain-mode.info
 @settitle Fountain Mode
-@documentencoding UTF-8
-@documentlanguage en
+@c @documentencoding UTF-8
+@c @documentlanguage en
 @c %**end of header
-
-@copying
-
-@end copying
 
 @dircategory Emacs
 @direntry
 * Fountain Mode: (fountain-mode). Write screenplays and stageplays.
 @end direntry
 
+@c macros
+@macro version
+3.4
+@end macro
+@macro repository
+https://github.com/rnkn/fountain-mode
+@end macro
+@macro tbc
+Sorry, this node is not yet written. You can help by submitting a patch!
+@end macro
+
+@copying
+@center Copyright @copyright{} 2021 Paul W. Rankin
+@center The following people contributed to this documentation:
+@center Paul W. Rankin, Kohl Sudduth
+@end copying
+
 @finalout
 @titlepage
 @title Fountain Mode
-@author Paul W@. Rankin
+@subtitle GNU Emacs major mode for scriptwriting in Fountain markup
+@author Paul W. Rankin
 @page
 @vskip 0pt plus 1filll
 @insertcopying
 @end titlepage
 
 @ifnottex
+
 @node Top
 @top Fountain Mode
 
-@quotation n.b.
-This manual is a work in progress with many parts still missing. Please consult the help functions within Emacs for current documentation.
+Fountain Mode is a scriptwriting (both screenplays and stageplays)
+program for GNU Emacs version 24.4 or later. The Fountain markup format
+is a plain-text format designed to be easily readable and editable,
+portable and future-proof, and to look as much like a script as
+possible.
 
-@end quotation
+This is the Fountain Mode Manual updated for version @version.
 
-Fountain Mode is a scriptwriting (both screenplays and stageplays) program for GNU Emacs version 24.4 or later. The Fountain markup format is a plain-text format designed to be easily readable and editable, portable and future-proof, and to look as much like a script as possible.
+@ifhtml
+Check out the 
+@uref{https://fountain-mode.org/images/gallery.html, screenshot gallery}.
+@emph{Please send me your screenshots!}
+@end ifhtml
 
-This is the Fountain Mode Manual updated for version 3.4.
+The public Fountain Mode repository is hosted on
+@uref{@repository, GitHub}.
 
-The public Fountain Mode repository is located at @uref{https://github.com/rnkn/fountain-mode}.
 @end ifnottex
 
+@quotation n.b.
+This manual is a work in progress with many parts still missing. Please
+consult the help functions within Emacs for current documentation.
+@end quotation
+
 @menu
-* About Fountain Syntax::
-* Installation::                 Getting started.
-* Script Elements::              The constituent parts of Fountain.
-* Outlining::                    Organize your script in pieces.
-* Navigation::                   Fly through your script with ease.
-* Syntax Highlighting::          Differentiate all the elements with colors.
-* Element Aligning::             WYSIWYG visual indentation of script elements.
-* Text Emphasis::                Bold, italic and underline.
-* Autocompletion::               Completion of frequently used text.
-* Do What I Mean::               Traditional TAB-style autocompletion.
-* Scene Numbering::              Adding numbers to a script scenes.
-* Pagination::                   Counting a navigating script pages.
-* Exporting::                    Sharing your great writing!
+* Introduction::                The pitch.
+* Installation::                Getting started.
+* Script Elements::             The constituent parts of Fountain.
+* Outlining::                   Organize your script in pieces.
+* Navigation::                  Fly through your script with ease.
+* Syntax Highlighting::         Differentiate all the elements with colors.
+* Element Aligning::            WYSIWYG visual indentation of script elements.
+* Text Emphasis::               Bold, italic and underline.
+* Autocompletion::              Completion of frequently used text.
+* Do What I Mean::              Traditional TAB-style autocompletion.
+* Scene Numbering::             Adding numbers to a script scenes.
+* Pagination::                  Counting a navigating script pages.
+* Exporting::                   Sharing your great writing!
 * Indexes::
-
-@detailmenu
---- The Detailed Node Listing ---
-
-Installation
-
-* Requirements::                 Do you have what it takes?
-* Advanced Installation::        For the pros.
-
-Script Elements
-
-* Metadata::                     Key-value info at the top of your script
-* Section Headings::             Outline your script with # prefix headings
-* Scene Headings::               Lines beginning with INT, EXT, etc.
-* Characters::                   Names are in UPPERCASE
-* Dialogue::                     Text following character elements
-* Parenthetics::                 Text inside (parens) within dialogue
-* Transitions::                  Uppercase lines ending in TO:
-* Notes::                        Text within [[ double brackets ]]
-* Synopses::                     Lines beginning with =
-* Center Text::                  > Lines surrounded by greater/less than <
-* Comments::                     C-style multi-line comments (aka boneyard)
-
-Autocompletion
-
-* Character Name Completion::    For every time someone speaks.
-* Scene Heading Completion::     Complete times and places.
-
-Indexes
-
-* Index of Commands::
-* Index of Variables::
-
-@end detailmenu
 @end menu
 
-@node About Fountain Syntax
-@unnumbered About Fountain Syntax
+@node Introduction
+@unnumbered Introduction
 
-Fountain Mode combines the simplicity of Fountain syntax with the extensibility of Emacs. It is a major-mode that enables the writer to engage with all aspects of realizing a screenplay - story development, outlining, drafting, rewriting - and to work in such a way that the hands never need to leave the keyboard.
+Fountain Mode combines the simplicity of Fountain syntax with the
+extensibility of Emacs. Fountain Mode is a major mode for Emacs, which
+is to say it is a program that runs inside Emacs --- the extensible,
+customizable, free/libre text editor. It enables the writer to engage
+with all aspects of realizing a screenplay --- story development,
+outlining, drafting, rewriting --- and to work in such a way that the
+hands never need to leave the keyboard.
 
-More traditional screenwriting software can frustrate the composition process. Attention gets distracted by clicking through menus or cycling through non-intuitive commands to get a line of text to format properly. The focus shifts from creativity to formatting text, not writing.
+After learning a handful of syntax rules and a few keyboard shortcuts,
+nothing stands between the writer and the screenplay. The friction
+between thought and its expression on the page lessens, allowing the
+writer to more readily access a state of relaxed concentration that is
+conducive to creativity --- all the writer needs to do is write.
 
-After learning a handful of syntax rules and a few keyboard shortcuts, nothing stands between the writer and the text. The friction between thought and its expression on the page lessens, allowing the writer to more readily access a state of relaxed concentration that is conducive to creativity.
+To quickly get up to speed with Fountain syntax, memorize the rules for
+the six most used elements of the screenplay format: @ref{Scene Headings},
+@ref{Action}, @ref{Characters}, @ref{Dialogue}, @ref{Parentheticals}, and
+@ref{Transitions}.
 
-With Fountain, all the writer needs to do is write.
+Then learn how to use @ref{Section Headings} to outline a story. This will be
+familiar for anyone who has used Markdown, as the syntax is the same.
+Sections allow you to easily show or hide and reorder large parts of a
+script.
+
+There are additional Fountain syntax elements to allow for
+brainstorming, capturing ideas and omitting a part of the script without
+deleting it. These include @ref{Synopses}, @ref{Notes}, and
+@ref{Comments}. These elements are not usually included in the formatted
+output.
 
 @node Installation
 @unnumbered Installation
 
-Fountain Mode is a major mode for Emacs, which is to say it is a program that runs inside Emacs --- an extensible, customizable, free/libre text editor.
+The latest stable release of Fountain Mode is available as an Emacs
+package via
+@uref{https://stable.melpa.org/#/fountain-mode, MELPA-stable}.
+In order to install packages via MELPA-stable, you'll first need to add
+it to your package archives:
 
-The latest stable release of Fountain Mode is available as an Emacs package via @uref{https://stable.melpa.org/#/fountain-mode, MELPA-stable}. In order to install packages via MELPA-stable, you'll first need to add it to your package archives:
+@code{M-x customize-option RET package-archives RET}
 
-@example
-M-x customize-option RET package-archives RET
-@end example
+Insert an entry named @code{melpa-stable} with the URL
+@code{https://stable.melpa.org/packages/}
 
-
-Insert an entry named @code{melpa-stable} with the URL @code{https://stable.melpa.org/packages/}
-
-You can then find the latest stable version of @code{fountain-mode} in the list returned by:
+You can then find the latest stable version of @code{fountain-mode} in
+the list returned by:
 
 @example
 M-x list-packages RET
 @end example
 
-
-If you like to live on the bleeding edge and prefer the latest but perhaps unstable version, do the above using @uref{https://melpa.org/#/fountain-mode, MELPA}. Unless you are already familiar with debugging Elisp code, you are strongly encouraged to use the stable version.
+If you like to live on the bleeding edge and prefer the latest but
+perhaps unstable version, do the above using
+@uref{https://melpa.org/#/fountain-mode, MELPA}.
+Unless you are already familiar with debugging Elisp code, you are
+strongly encouraged to use the stable version.
 
 @menu
-* Requirements::                 Do you have what it takes?
-* Advanced Installation::        For the pros.
+* Requirements::                Do you have what it takes?
+* Advanced Installation::       For the pros.
 @end menu
 
 @node Requirements
@@ -135,83 +154,103 @@ If you like to live on the bleeding edge and prefer the latest but perhaps unsta
 
 Fountain Mode is compatible with Emacs version 24.4 and later.
 
-For Emacs versions older than 25.1, the @code{seq} library will need to be installed; if you install using the Emacs package management system, @code{seq} will be installed automatically.
+For Emacs versions older than 26.1, there is a bug in the @code{outline}
+library. This will be automatically patched provided
+@code{fountain-patch-emacs-bugs} is non-nil and Emacs is installed with
+its Elisp source files.
 
-For Emacs versions older than 26.1, there is a bug in the @code{outline} library. This will be automatically patched provided @code{fountain-patch-emacs-bugs} is non-nil and Emacs is installed with its Elisp source files.
+For Emacs versions older than 25.1, the @code{seq} library will need to
+be installed; if you install using the Emacs package management system,
+@code{seq} will be installed automatically.
 
 @node Advanced Installation
 @unnumberedsec Advanced Installation
 
-Download the @uref{https://github.com/rnkn/fountain-mode/releases/latest, latest release}, move this file into your load-path and add the following to your @code{init.el} file:
+Download the
+@uref{https://github.com/rnkn/fountain-mode/releases/latest, latest release},
+move this file into your load-path and add the following to your
+@code{init.el} file:
 
 @example
 (require 'fountain-mode)
 @end example
 
-
-If you wish to contribute to or alter Fountain Mode's code, clone the repository into your load-path and require as above:
+If you wish to contribute to or alter Fountain Mode's code, clone the
+repository into your load-path and require as above:
 
 @example
-git clone https://github.com/rnkn/fountain-mode.git
+git clone @repository
 @end example
 
 @node Script Elements
 @unnumbered Script Elements
 
-The main idea of writing a script in Fountain is that you should be able to just start writing --- as long as your text looks like a script, you should end up with a script.
-
-To quickly get up to speed with fountain syntax, memorize the rules for the six most used elements of the screenplay format: Scene Headings, Action, Character, Dialogue, Parentheticals, and Transitions.
-
-Then learn how to use Section Headings to Outline a story. These work similarly to markdown syntax with some useful techniques specific to Fountain Mode such as folding and the ability to reorder entire sections of text with a few keyboard shortcuts.
-
-Fountain syntax contains additional tools that support brainstorming, structuring, and capturing important ideas. These include Synopsis, Notes, and Boneyard. Though the text itself includes these elements, they are not included in final formatting. They track a range of useful information while keeping an accurate page count.
+The central idea of writing a script in Fountain is that you should be
+able to just start writing --- as long as your text looks like a script,
+you should get correctly formatted output.
 
 @quotation n.b.
-Fountain Mode uses the Fountain 1.1 syntax specification. While some programs use custom additions to the specification, these aren't considered official. For the greatest cross-compatibility, stick with the 1.1 spec.
-
+Fountain Mode uses the Fountain 1.1 syntax specification. While some
+programs use custom additions to the specification, these aren't
+considered official. For the greatest cross-compatibility, stick with
+the 1.1 spec.
 @end quotation
 
 @menu
-* Metadata::                     Key-value info at the top of your script
-* Section Headings::             Outline your script with # prefix headings
-* Scene Headings::               Lines beginning with INT, EXT, etc.
-* Characters::                   Names are in UPPERCASE
-* Dialogue::                     Text following character elements
-* Parenthetics::                 Text inside (parens) within dialogue
-* Transitions::                  Uppercase lines ending in TO:
-* Notes::                        Text within [[ double brackets ]]
-* Synopses::                     Lines beginning with =
-* Center Text::                  > Lines surrounded by greater/less than <
-* Comments::                     C-style multi-line comments (aka boneyard)
+* Metadata::                    Key-value info at the top of your script
+* Section Headings::            Outline your script with # prefix headings
+* Scene Headings::              Lines beginning with INT, EXT, etc.
+* Action::                      Anything that's not another.
+* Characters::                  Names are in UPPERCASE
+* Dialogue::                    Text following character elements
+* Parentheticals::              Text inside (parens) within dialogue
+* Transitions::                 Uppercase lines ending in TO:
+* Notes::                       Text within [[ double brackets ]]
+* Synopses::                    Lines beginning with =
+* Center Text::                 Put your titles > between these <
+* Comments::                    C-style multi-line comments (aka boneyard)
 @end menu
 
 @node Metadata
 @unnumberedsec Metadata
 
-A Fountain script usually starts with some metadata stating the basic info about the script. These are colon-separated key-value pairs at the start of a file, e.g. @code{key: value}.
+A Fountain script usually starts with some metadata stating the basic
+information about the script. These are colon-separated key-value pairs
+at the start of a file, e.g. @code{key: value}.
 
-Other Fountain-compatible programs may refer to this as ``title page'' info, but metadata can store information not related to or present on the title page.
+Other Fountain-compatible programs may refer to this as ``title page''
+info, but metadata can store information not related to or present on
+the title page.
 
-Calling @code{auto-insert} will guide you through adding the most common Fountain metadata, prompting with likely defaults:
+Calling @code{auto-insert} will guide you through adding the most common
+Fountain metadata, prompting with likely defaults:
 
 @itemize
 @item
-@code{title} is pretty obvious, and will default to base-name of the current buffer.
+@code{title} is pretty obvious, and will default to base-name of the
+current buffer.
 @item
-@code{credit} is not actually your name, but the type of credit given to the @code{author}, e.g. @code{written by} or @code{screenplay by}.
+@code{credit} is not actually your name, but the type of credit given to
+the @code{author}, e.g. @code{written by} or @code{screenplay by}.
 @item
-@code{author} is you or your writing team, and defaults to the value of variable @code{user-full-name}.
+@code{author} is you or your writing team, and defaults to the value of
+variable @code{user-full-name}.
 @item
-@code{format} will override the value of @code{fountain-default-script-format} for the current script. Accepted values are: @code{screenplay}, @code{teleplay}, @code{stageplay}.
+@code{format} will override the value of
+@code{fountain-default-script-format} for the current script. Accepted
+values are: @code{screenplay}, @code{teleplay}, @code{stageplay}.
 @item
-@code{date} defaults to the current date in your locale's ``preferred'' format.
+@code{date} defaults to the current date in your locale's ``preferred''
+format.
 @item
 @code{source}, for if you're writing an adaptation.
 @item
-@code{contact} is useful if the writer wants readers to ever get in touch to make the film/play!
+@code{contact} is useful if the writer wants readers to ever get in
+touch to make the film/play!
 @end itemize
 
-All metadata keys can take either a single line of input following the colon, or a newline followed multiple lines indented with whitespace:
+All metadata keys can take either a single line of input following the
+colon, or a newline followed multiple lines indented with whitespace:
 
 @example
 author:
@@ -220,24 +259,37 @@ author:
     Alan Smithee
 @end example
 
-
-Metadata keys are case-insensitive, e.g. @code{Title} is the same as @code{title}.
+Metadata keys are case-insensitive, e.g. @code{Title} is the same as
+@code{title}.
 
 @node Section Headings
 @unnumberedsec Section Headings
 
-Section headings are lines beginning with `#'.
+Section headings are lines beginning with @code{#} (number sign). There
+are five levels of section headings, with additional @code{#} characters
+demoting the outline level of a heading.
 
-There are five levels of section headings. See @ref{Outlining}.
+@example
+# Top-Level Heading
+
+## Sub-Heading
+
+### Sub-Sub-Heading
+@end example
+
+@xref{Outlining}.
 
 @node Scene Headings
 @unnumberedsec Scene Headings
 
 A scene begins with a scene heading.
 
-Scene headings begin with a prefix, specified in @code{fountain-scene-heading-prefix-list}, which defaults to @code{INT, EXT, EST, INT./EXT., INT/EXT, I/E}.
+Scene headings begin with a prefix, specified in
+@code{fountain-scene-heading-prefix-list}, which defaults to
+@code{INT, EXT, EST, INT./EXT., INT/EXT, I/E}.
 
-Each prefix may be followed by a dot and/or a space, so the following are equivalent:
+Each prefix may be followed by a dot and/or a space, so the following
+are equivalent:
 
 @example
 INT HOUSE - DAY
@@ -246,152 +298,223 @@ INT. HOUSE - DAY
 @end example
 
 @defopt fountain-scene-heading-prefix-list
-This options allows setting your own scene heading prefixes. These entries are case insensitive.
+This options allows setting your own scene heading prefixes. These
+entries are case-insensitive.
 @end defopt
 
 @defopt fountain-scene-heading-suffix-sep
-This option allows setting the separator (a regular expression) between the scene location and time of day. The default ~ --? ~ allows either ~ - ~ or ~ -- ~.
+This option allows setting the separator (a regular expression) between
+the scene location and time of day. The default @code{ --? } allows either
+@samp{ - } or @samp{ -- }.
 @end defopt
 
-See @ref{Scene Heading Completion}.
+@xref{Scene Heading Completion}.
+
+@node Action
+@unnumberedsec Action
+
+Action is the easiest Fountain element --- anything that isn't parsed as
+another element is considered action.
+
+Sometimes you may write some action that will be unintentionally parsed
+as dialogue, for example:
+
+@example
+Jack examines his shopping list...
+
+BLACK SHIRT
+BLACK PANTS
+EXPLOSIVES
+MAP
+@end example
+
+Here @code{BLACK SHIRT} would be parsed as a character, who then shouts
+``BLACK PANTS!...'' We don't want that. To prevent this, prefix the
+first line with @code{!} (exclamation mark). This is known as a
+``forced'' element.
+
+@example
+!BLACK SHIRT
+BLACK PANTS
+EXPLOSIVES
+MAP
+@end example
 
 @node Characters
 @unnumberedsec Characters
 
-To write a character's name that you want to be followed by Dialogue, type in ALL CAPS@.
+To write a character name to cue some dialogue, type the name in
+uppercase (ALL-CAPS).
 
 @example
 JOLENE
 @end example
 
-Then hit return. The next line will automatically be considered Dialogue.
+The next line will be parsed as dialogue.
 
-If you do not want to write Dialogue and are instead writing Action, type the character's name normally.
+Sometimes you might want to include lowercase letters in a character
+name. To force a line as a character name, prefix it with @code{@@} (at
+sign).
+
+@example
+@@JOLENE McCLOGGS
+@end example
+
+Some Fountain tools may not parse a line as a character name if the
+extension contains lowercase letters, requiring the @code{@@} prefix.
+
+@example
+@@JOLENE (cont'd)
+@end example
+
+If you are just writing the character's name within action, type the
+character's name normally.
 
 @example
 Jolene
 @end example
 
-See @ref{Character Name Completion}.
+If you prefer to write character names within action in uppercase,
+that's fine too. The following will still be parsed as action.
+
+@example
+JOLENE throws the chair at PHILIP.
+@end example
+
+@xref{Character Name Completion}.
 
 @node Dialogue
 @unnumberedsec Dialogue
 
-Sorry, this node is not yet written. You can help by submitting a patch!
-
-Dialogue is any text following a @ref{Characters, , character name}. Just start typing dialogue and the text will auto-format itself into the correct position.
+Dialogue is any text following @ref{Characters}. Just enter a newline
+and the next text entered will be parsed as dialogue.
 
 @example
 JOLENE
 Have you seen trouble? I seem to have misplaced it.
 @end example
 
-@node Parenthetics
-@unnumberedsec Parenthetics
+@node Parentheticals
+@unnumberedsec Parentheticals
 
-Anytime the writer types a (parens) inside of a dialogue block, the text auto-formats into the correct position.
+Anytime the writer types a (parens) inside of a dialogue block, the text
+auto-formats into the correct position.
 
 @example
-        JOLENE
-      (concerned)
+JOLENE
+(concerned)
 Have you seen trouble? I seem to have misplaced it.
 @end example
 
-See @ref{Do What I Mean}.
+@xref{Autocompletion}.
 
 @node Transitions
 @unnumberedsec Transitions
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Notes
 @unnumberedsec Notes
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Synopses
 @unnumberedsec Synopses
 
-A synopsis is a handy way to detail what a scene or section is about. A synopsis element is simply a line beginning with @code{=}.
+A synopsis is a handy way to detail what a scene or section is about. A
+synopsis element is simply a line beginning with @code{=} (equals sign).
 
 @example
 INT. FISHING TRAWLER - DAY
 = The men eat the shark they caught.
 @end example
 
-
 Synopses are not included by most export tools.
+
 
 @node Center Text
 @unnumberedsec Center Text
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Comments
 @unnumberedsec Comments
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Outlining
 @unnumbered Outlining
 
-There are five levels of section headings. Scene headings count as the sixth level headings.
+There are five levels of section headings. Scene headings count as the
+sixth level headings.
 
-Cycle an individual subtree visibility with @code{TAB}. Cycle global outline visibility with @code{S-TAB} (shift-tab) or @code{C-u TAB}.
+Cycle an individual subtree visibility with @code{TAB}. Cycle global
+outline visibility with @code{S-TAB} (shift-tab) or @code{C-u TAB}.
 
-Acts, Sequences, Sections, and Scenes can be given meaningful titles, giving the writer a bird's eye view of the story and structure at a moments notice.
+Acts, Sequences, Sections, and Scenes can be given meaningful titles,
+giving the writer a bird's eye view of the story and structure at a
+moments notice.
 
-There are many ways to approach writing a screenplay. Here's one example of how to use Fountain Mode to Outline a script.
+There are many ways to approach writing a screenplay. Here's one example
+of how to use Fountain Mode to Outline a script.
 
-= Synopsis of an Act. A short summary of all the crazy things that happen for the next 30-60 pages. One way to think of it is to write what happens in the beginning, the middle, and the end of the Act.
-]
+@example
+# Act
+
+= Synopsis of an Act. A short summary of all the crazy things that
+happen for the next 30-60 pages.
+
+[[ Act One Note. Useful for character motivation and obstacles. Ideas to
+remember, etc.]]
 
 ## Sequence
+
 = Synopsis of a Sequence.
-]
 
-### Section
-= Synopsis of a Section.
-]
+[[ Sequence Notes. A sequence can be thought of as a series of several
+scenes that make up their own mini-story. ]]
 
-#### Scene
-= Synopsis of a Scene. A short description of what happens.
-\[[Notes to remember for a scene, such as the following:
-@itemize
-@item
-Who wants what from whom?
-@item
-What are they willing to do get what they want?
-@item
-What happens if they don't get it?/]]
-@end itemize
+INT. SCENE - NIGHT
 
-Experimenting with different structures can be accomplished by folding a Section Heading and moving the section to the new desired location using keyboard shortcuts.
+= Synopsis of a scene.
+
+[[ Notes to remember for a scene, such as the following:
+- Who wants what from whom?
+- What are they willing to do get what they want?
+- What happens if they don't get it? ]]
+@end example
+
+Experimenting with different structures can be accomplished by folding a
+Section Heading and moving the section to the new desired location using
+keyboard shortcuts.
 
 Note: all text contained within the fold is carried to the new location.
 
-Just as there are many ways to tell a story, there are many ways to outline a script. Because Fountain Mode uses plaintext, it does not force the writer into a single way of working. Possible structures are limited only by one's imagination.
+Just as there are many ways to tell a story, there are many ways to
+outline a script. Because Fountain Mode uses plaintext, it does not
+force the writer into a single way of working. Possible structures are
+limited only by one's imagination.
 
-If you like to work on discrete pieces of your script you can open these in indirect buffers.
+If you like to work on discrete pieces of your script you can open these
+in indirect buffers.
 
 @defun fountain-outline-to-indirect-buffer
-
 @end defun
 
 @node Navigation
 @unnumbered Navigation
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Syntax Highlighting
 @unnumbered Syntax Highlighting
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Element Aligning
 @unnumbered Element Aligning
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Text Emphasis
 @unnumbered Text Emphasis
@@ -404,86 +527,25 @@ Italic text is surrounded by @code{*single asterisks*}
 
 Bold text is surrounded by @code{**double asterisks**}
 
-For the writer pursists who want to work the way our ancestors did on typewriters, stick to underlining.
+For the writer pursists who want to work the way our ancestors did on
+typewriters, stick to underlining.
 
 @node Autocompletion
 @unnumbered Autocompletion
 
-One of the nicest things about using a dedicated scriptwriting program is that it helps you type less of the things you need to type a lot.
+One of the nicest things about using a dedicated scriptwriting program
+is that it helps you type less of the things you need to type a lot.
 
 @menu
-* Character Name Completion::    For every time someone speaks.
-* Scene Heading Completion::     Complete times and places.
+* Scene Heading Completion::    Complete times and places.
+* Character Name Completion::   For every time someone speaks.
 @end menu
-
-@node Character Name Completion
-@unnumberedsec Character Name Completion
-
-The most basic use of this is when pressing @code{TAB} on an empty line. If there's an empty line above, this will offer to autocomplete a character name. Character names are suggested in the order:
-
-@enumerate
-@item
-the second-to-last previously speaking character within the current scene, i.e. a character's conversational partner;
-@item
-the last speaking character within the current scene, i.e. a character continuing speaking;
-@item
-the remaining characters in the script in order of frequency (default if there are not yet speaking characters in the current scene).
-@end enumerate
-
-@code{TAB} will also offer character name completion if a line has a partial character name.
-
-@example
-MARY (|
-@end example
-
-When the cursor is after a character name and opening parenthesis, @code{TAB} will offer completions from @code{fountain-character-extension-list} plus @code{fountain-continued-dialog-string}.
-
-@example
-MARY
-|
-I'm hungry.
-@end example
-
-When the cursor is at an empty line within dialogue, @code{TAB} will add an empty parenthetical.
-
-@example
-MARY
-(|)
-I'm hungry.
-@end example
-
-Likewise, if the cursor is within an empty parenthetical, @code{TAB} will remove the parenthetical.
-
-@example
-MARY
-(angry|)
-I'm hungry.
-@end example
-
-When the cursor is at the end of a non-empty parenthetical, either inside or outside the closing parenthesis, @code{TAB} will move to the beginning of the next line if the next line is non-empty, otherwise it will insert a newline.
-
-@example
-MARY
-(angry)
-I'm hungry.|
-@end example
-
-When the cursor is at the end of a non-empty line of dialogue, and the value of @code{fountain-dwim-insert-next-character} is non-nil, @code{TAB} will insert an empty line and the second-to-last previously speaking character.
-
-@example
-MARY
-(angry)
-I'm hungry.
-
-JOHN|
-@end example
-
-The cursor will be left at the end of the next character, allowing successive presses of @code{TAB} to cycling through additional character completion candidates.
 
 @node Scene Heading Completion
 @unnumberedsec Scene Heading Completion
 
-If the line has a partial scene heading, i.e. it begins with a prefix from @code{fountain-scene-heading-prefix-list} like so:
+If the line has a partial scene heading, i.e. it begins with a prefix
+from @code{fountain-scene-heading-prefix-list} like so:
 
 @example
 INT. |
@@ -497,17 +559,104 @@ If the cursor is at the time-of-day, like so:
 INT. SUBMARINE - |
 @end example
 
-@code{TAB} will offer completions from @code{fountain-scene-heading-suffix-list}.
+@code{TAB} will offer completions from
+@code{fountain-scene-heading-suffix-list}.
+
+@node Character Name Completion
+@unnumberedsec Character Name Completion
+
+The most basic use of this is when pressing @code{TAB} on an empty line.
+If there's an empty line above, this will offer to autocomplete a
+character name. Character names are suggested in the order:
+
+@enumerate
+@item
+the second-to-last previously speaking character within the current
+scene, i.e. a character's conversational partner;
+@item
+the last speaking character within the current scene, i.e. a character
+continuing speaking;
+@item
+the remaining characters in the script in order of frequency (default if
+there are not yet speaking characters in the current scene).
+@end enumerate
+
+@code{TAB} will also offer character name completion if a line has a
+partial character name.
+
+When the cursor is after a character name and opening parenthesis,
+@code{TAB} will offer completions from
+@code{fountain-character-extension-list} plus
+@code{fountain-continued-dialog-string}.
+
+@example
+MARY (|
+@end example
+
+When the cursor is at an empty line within dialogue, @code{TAB} will add
+an empty parenthetical.
+
+@example
+MARY
+|
+I'm hungry.
+@end example
+
+Likewise, if the cursor is within an empty parenthetical, @code{TAB}
+will remove the parenthetical.
+
+@example
+MARY
+(|)
+I'm hungry.
+@end example
+
+When the cursor is at the end of a non-empty parenthetical, either
+inside or outside the closing parenthesis, @code{TAB} will move to the
+beginning of the next line if the next line is non-empty, otherwise it
+will insert a newline.
+
+@example
+MARY
+(angry|)
+I'm hungry.
+@end example
+
+When the cursor is at the end of a non-empty line of dialogue, and the
+value of @code{fountain-dwim-insert-next-character} is non-nil,
+@code{TAB} will insert an empty line and the second-to-last previously
+speaking character.
+
+@example
+MARY
+(angry)
+I'm hungry.|
+@end example
+
+The cursor will be left at the end of the next character, allowing
+successive presses of @code{TAB} to cycling through additional character
+completion candidates.
+
+@example
+MARY
+(angry)
+I'm hungry.
+
+JOHN|
+@end example
 
 @node Do What I Mean
 @unnumbered Do What I Mean
 
-Like many scriptwriting programs, in Fountain Mode pressing @code{TAB} will do the thing you mean depending on context.
+Like many scriptwriting programs, in Fountain Mode pressing @code{TAB}
+will do the thing you mean depending on context.
 
-This all might seem complicated, but the idea is by covering all the cases you don't have to think about it.
+This all might seem complicated, but the idea is by covering all the
+cases you don't have to think about it.
 
 @defun fountain-dwim
-This command, bound to @code{TAB} by default, will perform different actions based on context.
+This command, bound to @code{TAB} by default, will perform different
+actions based on context.
 @end defun
 
 @enumerate
@@ -530,19 +679,22 @@ If point is a scene heading or section heading, cycle visibility of that heading
 @node Scene Numbering
 @unnumbered Scene Numbering
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Pagination
 @unnumbered Pagination
 
-Sorry, this node is not yet written. You can help by submitting a patch!
+@tbc
 
 @node Exporting
 @unnumbered Exporting
 
-Exporting a script in Fountain Mode is handled by one or more external command-line tools. By defining an ``export profile'', you're able to easily interface with an external tool from within Emacs.
+Exporting a script in Fountain Mode is handled by one or more external
+command-line tools. By defining an ``export profile'', you're able to
+easily interface with an external tool from within Emacs.
 
-Essentiall an export profile is just a shell command, interpolated with a selection of values.
+Essentiall an export profile is just a shell command, interpolated with
+a selection of values.
 
 @itemize
 @item
@@ -562,18 +714,22 @@ Essentiall an export profile is just a shell command, interpolated with a select
 @end itemize
 
 @defun fountain-export-command
-This command, bound to @code{C-c C-e} by default, will prompt for an export profile.
+This command, bound to @code{C-c C-e} by default, will prompt for an
+export profile.
 @end defun
 
 @itemize
 @item
-@uref{https://github.com/ifrost/afterwriting-labs, Afterwriting} (JavaScript)
+@uref{https://github.com/ifrost/afterwriting-labs, Afterwriting}
+(JavaScript)
 @item
 @uref{https://github.com/Wraparound/wrap, Wrap} (Go)
 @item
 @uref{https://github.com/vilcans/screenplain, Screenplain} (Python 3)
 @item
-@uref{https://github.com/olivertaylor/Textplay, Textplay} (Ruby) @footnote{Requires @uref{https://www.princexml.com, PrinceXML} for PDF export.}
+@uref{https://github.com/olivertaylor/Textplay, Textplay} (Ruby)
+@footnote{Requires @uref{https://www.princexml.com, PrinceXML} for PDF
+export.}
 @end itemize
 
 @node Indexes
