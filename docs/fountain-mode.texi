@@ -198,18 +198,18 @@ the 1.1 spec.
 @end quotation
 
 @menu
-* Metadata::                    Key-value info at the top of your script
-* Section Headings::            Outline your script with # prefix headings
-* Scene Headings::              Lines beginning with INT, EXT, etc.
-* Action::                      Anything that's not another.
-* Characters::                  Names are in UPPERCASE
-* Dialogue::                    Text following character elements
-* Parentheticals::              Text inside (parens) within dialogue
-* Transitions::                 Uppercase lines ending in TO:
-* Notes::                       Text within [[ double brackets ]]
-* Synopses::                    Lines beginning with =
-* Center Text::                 Put your titles > between these <
-* Comments::                    C-style multi-line comments (aka boneyard)
+* Metadata::                    Key-value info at the top of your script.
+* Section Headings::            Outline your script with @code{#}-prefixed headings.
+* Scene Headings::              Lines beginning with @code{INT}, @code{EXT}, etc.
+* Action::                      Anything that's not another element.
+* Characters::                  Names are in ALL-CAPS.
+* Dialogue::                    Text following character elements.
+* Parentheticals::              Text inside (parens) within dialogue.
+* Transitions::                 Uppercase lines ending in @code{TO:}.
+* Notes::                       Text within @code{[[} double brackets @code{]]}.
+* Synopses::                    Lines beginning with @code{=}.
+* Center Text::                 Put your titles @code{>} between these @code{<}.
+* Comments::                    C-style multi-line comments (aka ``Boneyard'').
 @end menu
 
 @node Metadata
