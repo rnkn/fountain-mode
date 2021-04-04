@@ -19,11 +19,6 @@ sup {
     line-height: 0;
 }
 
-pre, code, samp {
-    font-family: "DejaVu Sans Mono", Menlo, Monaco, monospace;
-    font-size: 0.9rem;
-}
-
 pre.menu-comment, pre.menu-preformatted {
     font-family: initial;
     margin: 0;
