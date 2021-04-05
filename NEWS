@@ -1,5 +1,11 @@
 * current
 
+- Remove forced page numbers feature, which is not part of Fountain 1.1
+  spec
+  - Remove optional args ASK and PAGE-NUM from
+    fountain-insert-page-break
+  - Remove page number group from fountain-page-break-regexp
+  - Remove fountain-page-number face
 - Add :extend property to notes face
 
 * Version 3.4.1

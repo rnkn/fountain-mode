@@ -354,10 +354,6 @@ You can specify which elements are highlighted with the option
   '((t (:inherit font-lock-constant-face)))
   "Default face for page breaks.")
 
-(defface fountain-page-number
-  '((t (:inherit font-lock-warning-face)))
-  "Default face for page numbers.")
-
 (defface fountain-scene-heading
   '((t (:inherit font-lock-function-name-face)))
   "Default face for scene headings.")
@@ -583,11 +579,10 @@ Requires `fountain-match-paren' for preceding character or
 dialogue.")
 
 (defconst fountain-page-break-regexp
-  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
+  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*$"
   "Regular expression for matching page breaks.
 
-  Group 1: leading ===
-  Group 2: forced page number")
+  Group 1: ===")
 
 (defconst fountain-note-regexp
   "\\[\\[[\s\t]*\\(\\(?:.\\|\n\\)*?\\)[\s\t]*]]"
@@ -2596,20 +2591,12 @@ to suit your preferred tool's pagination method."
       (unless (<= n p)
         (fountain-forward-page (- n p))))))
 
-(defun fountain-insert-page-break (&optional ask page-num)
-  "Insert a page break at appropriate place preceding point.
-When optional argument ASK is non-nil (if prefixed with
-\\[universal-argument] when called interactively), prompt for PAGE-NUM
-as a string to force the page number."
-  (interactive "*P")
-  (when ask
-    (setq page-num (read-string "Page number (RET for none): ")))
+(defun fountain-insert-page-break ()
+  "Insert a page break at appropriate place preceding point."
+  (interactive "*")
   ;; Save a marker where we are.
   (let ((x (point-marker))
-        (page-break
-         (concat "===" (when (and (stringp page-num)
-                                  (< 0 (string-width page-num)))
-                         (concat "\s" page-num "\s==="))))
+        (page-break "===")
         element)
     ;; Move point to appropriate place to break page.
     (fountain-goto-page-break-point)
@@ -2662,26 +2649,6 @@ your preferred tool's pagination method."
   (interactive)
   (let ((page-count (fountain-get-page-count)))
     (message "Page %s of %s" (car page-count) (cdr page-count))))
-
-;; (defun fountain-lock-pages ()
-;;   "Add forced page breaks to buffer.
-
-;; Move through buffer with `fountain-move-forward-page' and call
-;; `fountain-insert-page-break'."
-;;   (interactive "*")
-;;   (let ((job (make-progress-reporter "Paginating...")))
-;;     (save-excursion
-;;       (save-restriction
-;;         (widen)
-;;         (goto-char (point-min))
-;;         (let ((page-num 1))
-;;           (fountain-move-forward-page)
-;;           (while (< (point) (point-max))
-;;             (cl-incf page-num)
-;;             (fountain-insert-page-break nil (number-to-string page-num))
-;;             (fountain-move-forward-page)
-;;             (progress-reporter-update job))
-;;           (progress-reporter-done job))))))
 
 
 ;;; Filling
@@ -3070,8 +3037,7 @@ Return non-nil if match occurs." fun)))
      (3 fountain-non-printing t nil fountain-syntax-chars))
     (page-break
      fountain-page-break-regexp
-     (0 fountain-page-break)
-     (2 fountain-page-number t t))
+     (0 fountain-page-break))
     (underline
      fountain-underline-regexp
      (2 fountain-non-printing prepend nil fountain-emphasis-delim)
