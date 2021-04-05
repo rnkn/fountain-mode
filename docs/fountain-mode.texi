@@ -13,7 +13,7 @@
 
 @c macros
 @macro version
-3.4
+3.5
 @end macro
 @macro repository
 https://github.com/rnkn/fountain-mode
