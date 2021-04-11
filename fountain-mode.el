@@ -530,6 +530,14 @@ whatever extension you like."
   Group 1: match forced action mark
   Group 2: match trimmed whitespace")
 
+;; FIXME: a comment without whitespace will be fontified as italic, e.g.
+;;     /*comment*/
+;;
+;; This is especially problematic when `fountain-hide-emphasis-markup' is
+;; non-nil.
+;;
+;; Comments should not receive any fontification, i.e. the
+;; `fountain-comment' face should override any previous faces.
 (defconst fountain-comment-regexp
   (concat "\\(?://[\s\t]*\\(?:.*\\)\\)"
           "\\|"
