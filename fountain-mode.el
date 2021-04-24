@@ -167,6 +167,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
   :options '(visual-line-mode
              electric-pair-local-mode
              imenu-add-menubar-index
+             which-function-mode
              fountain-completion-update
              fountain-pagination-update
              flyspell-mode))
@@ -2646,17 +2647,20 @@ to suit your preferred tool's pagination method."
                 (if (eobp) (1- (point)) (point)) 'fountain-pagination))
           (car (get-text-property (1- (point-max)) 'fountain-pagination)))))
 
-(defun fountain-count-pages ()
-  "Print the current page of total page count of current buffer.
+(defun fountain-count-pages (&optional interactive)
+  "Return the current page of total page count of current buffer.
+When called interactively, return with `message'.
 
 This is an approximate calculation. Different export tools will
 paginate in slightly different ways. Customize options
 `fountain-page-max-lines', `fountain-pagination-break-sentences'
 and `fountain-pagination-double-space-scene-headings' to suit
 your preferred tool's pagination method."
-  (interactive)
-  (let ((page-count (fountain-get-page-count)))
-    (message "Page %s of %s" (car page-count) (cdr page-count))))
+  (interactive "p")
+  (let ((page-count (fountain-get-page-count))
+        string)
+    (setq string (format "Page %s of %s" (car page-count) (cdr page-count)))
+    (if interactive (message string) string)))
 
 
 ;;; Filling
@@ -3570,6 +3574,7 @@ buffers."
   (setq-local require-final-newline mode-require-final-newline)
   (setq-local completion-ignore-case t)
   (setq-local completion-cycle-threshold t)
+  (setq-local which-func-functions '(fountain-count-pages))
   (setq-local completion-at-point-functions
               '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props

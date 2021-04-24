@@ -1,5 +1,7 @@
 * current
 
+- Implement compatibility with which-function-mode to display page
+  numbers in mode-line, which option added to fountain-mode-hook
 - Remove forced page numbers feature, which is not part of Fountain 1.1
   spec
   - Remove optional args ASK and PAGE-NUM from
