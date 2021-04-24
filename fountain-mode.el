@@ -1540,9 +1540,9 @@ With argument ARG, do it ARG times."
         (ignore-errors
           (outline-back-to-heading t)
           (if (= (funcall outline-level) 6)
-              (outline-up-heading 1)))
+              (outline-up-heading 1 t)))
         (setq level
-              (if (outline-on-heading-p)
+              (if (outline-on-heading-p t)
                   (funcall outline-level)
                 1))))
     (insert (make-string level ?#) " ")))
