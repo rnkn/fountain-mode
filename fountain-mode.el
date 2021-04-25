@@ -3610,7 +3610,7 @@ buffers."
   ;; case-fold within each function.
   (setq case-fold-search t)
   (setq imenu-case-fold-search nil)
-  (setq font-lock-multiline 'undecided)
+  (setq font-lock-multiline t)
   (setq font-lock-defaults '(fountain-init-font-lock nil t))
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-markup
