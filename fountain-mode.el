@@ -2250,7 +2250,14 @@ scene number from being auto-upcased."
   "Paper size to use on export."
   :group 'fountain-pagination
   :type '(radio (const :tag "US Letter" letter)
-                (const :tag "A4" a4)))
+                (const :tag "A4" a4))
+  :set (lambda (symbol value)
+         (set-default symbol value)
+         (mapc (lambda (buffer)
+                 (with-current-buffer buffer
+                   (when (derived-mode-p 'fountain-mode)
+                     (fountain-pagination-update))))
+               (buffer-list))))
 
 (define-obsolete-variable-alias 'fountain-pages-max-lines
   'fountain-page-max-lines "`fountain-mode' 3.0")
