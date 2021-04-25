@@ -3223,7 +3223,7 @@ redisplay in margin. Otherwise, remove display text properties."
 
 (easy-menu-define fountain-mode-menu fountain-mode-map
   "Menu for `fountain-mode'."
-  '("Fountain"
+  `("Fountain"
     ("Navigate"
      ["Next Heading" fountain-outline-next]
      ["Previous Heading" fountain-outline-previous]
@@ -3238,13 +3238,20 @@ redisplay in margin. Otherwise, remove display text properties."
      "---"
      ["Cycle Outline Visibility" fountain-outline-cycle]
      ["Cycle Buffer Outline Visibility" fountain-outline-cycle-buffer]
-     ["Show All" fountain-outline-show-all]
+     ["Show All" fountain-outline-show-all
+      :keys ,(concat "C-u C-u "
+                     (key-description (list (car (rassq 'fountain-dwim fountain-mode-map)))))]
      "---"
-     ["Fold Notes When Cycling Outline"
-      (customize-set-variable 'fountain-outline-fold-notes
-                              (not fountain-outline-fold-notes))
+     ["Hide Notes When Cycling Outline"
+      (customize-set-variable 'fountain-outline-hide-notes
+                              (not fountain-outline-hide-notes))
       :style toggle
-      :selected fountain-outline-fold-notes])
+      :selected fountain-outline-hide-notes]
+     ["Show Synopses When Cycling Outline"
+      (customize-set-variable 'fountain-outline-show-synopses
+                              (not fountain-outline-show-synopses))
+      :style toggle
+      :selected fountain-outline-show-synopses])
     ("Edit Structure"
      ["Insert Section Heading" fountain-insert-section-heading]
      ["Mark Subtree" fountain-outline-mark]
