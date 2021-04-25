@@ -3271,8 +3271,21 @@ redisplay in margin. Otherwise, remove display text properties."
      ["Count Pages" fountain-count-pages]
      ["Go to Page..." fountain-goto-page]
      "---"
-     ["Insert Page Break..." fountain-insert-page-break]
-     ["Update Pagination" fountain-pagination-update])
+     ["Insert Page Break" fountain-insert-page-break]
+     ["Update Pagination" fountain-pagination-update]
+     "---"
+     ["US Letter" (customize-set-variable 'fountain-page-size 'letter)
+      :style radio
+      :selected (eq fountain-page-size 'letter)]
+     ["A4" (customize-set-variable 'fountain-page-size 'a4)
+      :style radio
+      :selected (eq fountain-page-size 'a4)]
+     "---"
+     ["Ignore Restriction"
+      (customize-set-variable 'fountain-pagination-ignore-restriction
+                              (not fountain-pagination-ignore-restriction))
+      :style toggle
+      :selected fountain-pagination-ignore-restriction])
     ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
      ["Remove Scene Numbers" fountain-remove-scene-numbers]
