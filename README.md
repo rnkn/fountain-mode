@@ -9,7 +9,7 @@ Fountain plain text markup format.
 
 For more information on the Fountain format: <https://fountain.io>
 
-![screenshot](screenshots/01.png)
+![screenshot](screenshots/02.png)
 
 
 Features
