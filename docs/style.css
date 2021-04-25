@@ -6,6 +6,7 @@ html {
 
 body {
     font-family: Helvetica, Arial, sans-serif;
+	line-height: 1.2;
     max-width: 640px;
     margin: 1em auto;
     background-color: #ffffff;
