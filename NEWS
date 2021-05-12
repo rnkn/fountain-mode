@@ -8,6 +8,7 @@
     fountain-insert-page-break
   - Remove page number group from fountain-page-break-regexp
   - Remove fountain-page-number face
+- Ensure fountain-note-regexp omits notes containing blank lines
 - Fixed an issue where action could be parsed as character/dialogue.
 - Add :extend property to notes face
 
