@@ -594,7 +594,7 @@ dialogue.")
   Group 1: ===")
 
 (defconst fountain-note-regexp
-  "\\[\\[[\s\t]*\\(\\(?:.\\|\n\\)*?\\)[\s\t]*]]"
+  "\\[\\[[\s\t]*\\(\\(?:\s\s\n\\|.\n?\\)*?\\)[\s\t]*]]"
   "Regular expression for matching notes.
 
   Group 1: note text")
@@ -879,9 +879,9 @@ This option does not affect file contents."
         (save-restriction
           (widen)
           (let ((x (point)))
-            (and (re-search-backward "\\[\\[" nil t)
-                 (looking-at fountain-note-regexp)
-                 (< x (match-end 0))))))))
+            (progn (re-search-backward "\\`\\|^$" nil 'move)
+                   (and (re-search-forward fountain-note-regexp nil t)
+                        (<= (match-beginning 0) x (match-end 0)))))))))
 
 (defun fountain-match-scene-heading ()
   "Match scene heading if point is at a scene heading, nil otherwise."
