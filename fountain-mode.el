@@ -554,9 +554,9 @@ Requires `fountain-match-metadata' for `bobp'.")
 
 (defconst fountain-character-regexp
   (concat "^[\s\t]*"
-          "\\(?:\\(?1:@\\)\\(?2:[^<>\n]+?\\)"
+          "\\(?:\\(?1:@\\)\\(?2:[^\n]+?\\)"
           "\\|"
-          "\\(?2:[^<>\n[:lower:]]*?[[:upper:]]+[^<>\n[:lower:]]*?\\)"
+          "\\(?2:[^<>\n[:lower:]\\\[]*?[[:upper:]]+[^<>\n[:lower:]\\\[]*?\\)"
           "\\)"
           "\\(?3:[\s\t]*\\(?4:\(\\)[^\)\n]*\)?\\)*?"
           "\\(?5:[\s\t]*^\\)?"
