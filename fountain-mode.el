@@ -2961,10 +2961,27 @@ Return non-nil if match occurs." fun)))
            (if fountain-hide-element-markup "invisible" "visible")))
 
 (defvar fountain--font-lock-keywords
+  ;; Generating `font-lock-keywords' is rather complex. The value of this alist
+  ;; is used by `fountain-init-font-lock' to dynamically create the keywords.
+  ;; Each alist element takes the form:
+  ;;
+  ;; (ELEMENT
+  ;;  MATCHER
+  ;;  (SUBEXP FACE [OVERRIDE LAXMATCH INVISIBLE])
+  ;;  (SUBEXP ...))
+  ;;
+  ;; MATCHER may be a regexp or function, or (quote eval), in which case, the
+  ;; element takes the form:
+  ;;
+  ;; (ELEMENT
+  ;;  (quote eval)
+  ;;  (FORM))
+  ;;
+  ;; Where FORM evaluates to (MATCHER . FACESPEC)
   '((section-heading
      (quote eval)
-     (2 list fountain-section-heading-regexp
-        0 '(fountain--get-section-heading-face)))
+     (list fountain-section-heading-regexp
+           0 '(fountain--get-section-heading-face)))
     (section-heading
      fountain-section-heading-regexp
      (1 nil nil nil fountain-syntax-chars)
@@ -3071,7 +3088,7 @@ Return non-nil if match occurs." fun)))
                  ;; otherwise construct a font-lock facespec.
                  (if use-form
                      (setq highlight
-                           (if highlightp (cdr match-highlighter) '(quote ignore)))
+                           (if highlightp match-highlighter '(quote ignore)))
                    (let ((subexp (nth 0 match-highlighter))
                          (face
                           (when highlightp
