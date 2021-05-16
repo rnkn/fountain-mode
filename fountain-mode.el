@@ -535,10 +535,10 @@ whatever extension you like."
 ;;
 ;; Comments should not receive any fontification, i.e. the
 ;; `fountain-comment' face should override any previous faces.
+;;
+;; Unused variable.
 (defconst fountain-comment-regexp
-  (concat "\\(?://[\s\t]*\\(?:.*\\)\\)"
-          "\\|"
-          "\\(?:\\(?:/\\*\\)[\s\t]*\\(?:\\(?:.\\|\n\\)*?\\)[\s\t]*\\*/\\)")
+  "/\\*+[.\n]*?\\*/"
   "Regular expression for matching comments.")
 
 (defconst fountain-metadata-regexp
