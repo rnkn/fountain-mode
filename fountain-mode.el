@@ -2834,6 +2834,7 @@ Export command profiles are defined in
         (format-spec-make
          ?b (shell-quote-argument (or infile ""))
          ?B (shell-quote-argument (or infile-base ""))
+         ?n (shell-quote-argument (or user-full-name ""))
          ?t (shell-quote-argument (or (cdr (assq 'title metadata)) ""))
          ?a (shell-quote-argument (or (cdr (assq 'author metadata)) ""))
          ?F (shell-quote-argument (format-time-string "%F"))
