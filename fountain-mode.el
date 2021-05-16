@@ -233,8 +233,8 @@ this option."
                  (with-current-buffer buffer
                    (when (derived-mode-p 'fountain-mode)
                      (if fountain-hide-emphasis-markup
-                         (add-to-invisibility-spec 'fountain-emphasis-delim)
-                       (remove-from-invisibility-spec 'fountain-emphasis-delim))
+                         (add-to-invisibility-spec 'fountain-emphasis-markup)
+                       (remove-from-invisibility-spec 'fountain-emphasis-markup))
                      (font-lock-refresh-defaults))))
                (buffer-list))))
 
@@ -253,8 +253,8 @@ this option."
                  (with-current-buffer buffer
                    (when (derived-mode-p 'fountain-mode)
                      (if fountain-hide-element-markup
-                         (add-to-invisibility-spec 'fountain-syntax-chars)
-                       (remove-from-invisibility-spec 'fountain-syntax-chars))
+                         (add-to-invisibility-spec 'fountain-element-markup)
+                       (remove-from-invisibility-spec 'fountain-element-markup))
                      (font-lock-refresh-defaults))))
                (buffer-list))))
 
@@ -3568,10 +3568,8 @@ buffers."
   (setq-local completion-ignore-case t)
   (setq-local completion-cycle-threshold t)
   (setq-local which-func-functions '(fountain-count-pages))
-  (setq-local completion-at-point-functions
-              '(fountain-completion-at-point))
-  (setq-local font-lock-extra-managed-props
-              '(line-prefix wrap-prefix invisible))
+  (setq-local completion-at-point-functions '(fountain-completion-at-point))
+  (setq-local font-lock-extra-managed-props '(line-prefix wrap-prefix invisible))
   ;; FIXME: This should be temporary. Feels better to ensure appropriate
   ;; case-fold within each function.
   (setq case-fold-search t)
@@ -3580,9 +3578,9 @@ buffers."
   (setq font-lock-defaults '(fountain-init-font-lock nil t))
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-markup
-    (add-to-invisibility-spec 'fountain-emphasis-delim))
+    (add-to-invisibility-spec 'fountain-emphasis-markup))
   (when fountain-hide-element-markup
-    (add-to-invisibility-spec 'fountain-syntax-chars)))
+    (add-to-invisibility-spec 'fountain-element-markup)))
 
 
 ;;; Mode Definition
