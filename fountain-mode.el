@@ -141,7 +141,7 @@
 (eval-when-compile (require 'subr-x))
 (require 'seq)
 
-;;; Top-Level Options
+;;; Top-Level Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
@@ -650,7 +650,7 @@ be specified with the bold-italic delimiters together, e.g.
   "Regular expression for matching lyrics.")
 
 
-;;; Aligning
+;;; Aligning ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-align ()
   "Options for element alignment.
@@ -786,7 +786,7 @@ This option does not affect file contents."
   :set #'fountain--set-and-refresh-font-lock)
 
 
-;;; Autoinsert
+;;; Autoinsert ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'autoinsert)
 
@@ -804,7 +804,14 @@ This option does not affect file contents."
   fountain-metadata-skeleton)
 
 
-;;; Element Matching
+;;; Element Matching ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defsubst fountain-comment-p ()
+  "Return non-nil if point is at comment (boneyard)."
+  (let ((faceprop (get-char-property (point) 'face)))
+    (if (listp faceprop)
+        (memq 'fountain-comment faceprop)
+      (eq 'fountain-comment faceprop))))
 
 (defun fountain-blank-before-p ()
   "Return non-nil if preceding line is blank or a comment."
@@ -1000,7 +1007,7 @@ Assumes that all other element matching has been done."
    (t                                   'action)))
 
 
-;;; Auto-completion
+;;; Auto-completion ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar-local fountain--completion-locations
   nil
@@ -1186,7 +1193,7 @@ Add to `fountain-mode-hook' to have completion upon load."
   (message "Completion candidates updated"))
 
 
-;;; Outlining
+;;; Outlining ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'outline)
 
@@ -1587,7 +1594,7 @@ buffer windows are opened."
     (narrow-to-region beg end)))
 
 
-;;; Navigation
+;;; Navigation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun fountain-move-forward-scene (n)
   "Move forward N scene headings (backward if N is negative).
@@ -1668,7 +1675,7 @@ halt at end of scene."
   (fountain-forward-character (- n)))
 
 
-;;; Parsing
+;;; Parsing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun fountain-get-character (&optional n limit)
   "Return Nth next character (or Nth previous if N is negative).
@@ -1737,7 +1744,7 @@ within left-side dual dialogue, and nil otherwise."
                'left))))))
 
 
-;;; Editing
+;;; Editing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun fountain--auto-upcase-maybe ()
   "Upcase all or part of the current line contextually.
@@ -1910,7 +1917,7 @@ to remove previous string first."
         (progress-reporter-done job)))))
 
 
-;;; Scene Numbers
+;;; Scene Numbers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-scene-numbers ()
   "Options for scene numbers."
@@ -2233,7 +2240,7 @@ scene number from being auto-upcased."
         (progress-reporter-done job)))))
 
 
-;;; Pages
+;;; Pages ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-pagination ()
   "Options for calculating page length."
@@ -2669,7 +2676,7 @@ your preferred tool's pagination method."
     (if interactive (message string) string)))
 
 
-;;; Filling
+;;; Filling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar fountain-fill-section-heading
   '(0 . 61)
@@ -2745,7 +2752,7 @@ The car sets `left-margin' and cdr `fill-column'.")
 The car sets `left-margin' and cdr `fill-column'.")
 
 
-;;; Exporting
+;;; Exporting ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-export ()
   "Options for exporting Fountain files."
@@ -3134,11 +3141,11 @@ takes the form:
              (4 '(face nil invisible fountain-emphasis-markup) prepend))))))
 
 
-;;; Key Bindings
+;;; Key Bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar fountain-mode-map
   (let ((map (make-sparse-keymap)))
-    ;; Editing commands:
+    ;; Editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map (kbd "TAB") #'fountain-dwim)
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
@@ -3153,18 +3160,18 @@ takes the form:
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
     (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
     (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-element-markup)
-    ;; Navigation commands:
+    ;; Navigation commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map [remap beginning-of-defun] #'fountain-outline-beginning)
     (define-key map (kbd "M-g s") #'fountain-goto-scene)
     (define-key map (kbd "M-g p") #'fountain-goto-page)
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
-    ;; Block editing commands:
+    ;; Block editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map (kbd "<M-down>") #'fountain-forward-paragraph-or-transpose)
     (define-key map (kbd "ESC <down>") #'fountain-forward-paragraph-or-transpose)
     (define-key map (kbd "<M-up>") #'fountain-backward-paragraph-or-transpose)
     (define-key map (kbd "ESC <up>") #'fountain-backward-paragraph-or-transpose)
-    ;; Outline commands:
+    ;; Outline commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map [remap forward-list] #'fountain-outline-next)
     (define-key map [remap backward-list] #'fountain-outline-previous)
     (define-key map [remap forward-sexp] #'fountain-outline-forward)
@@ -3177,19 +3184,19 @@ takes the form:
     (define-key map (kbd "C-M-i") #'fountain-outline-cycle-buffer)
     (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
-    ;; Pages
+    ;; Pagination commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map [remap forward-page] #'fountain-forward-page)
     (define-key map [remap backward-page] #'fountain-backward-page)
     (define-key map (kbd "C-c C-p") #'fountain-count-pages)
     (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
-    ;; Exporting commands:
+    ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map (kbd "C-c C-e") #'fountain-export-command)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
 
 
-;;; Menu
+;;; Menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'easymenu)
 
@@ -3378,7 +3385,7 @@ takes the form:
     (when unsaved (custom-save-all))))
 
 
-;;; Emacs Bugs
+;;; Emacs Bugs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcustom fountain-patch-emacs-bugs
   t
@@ -3424,7 +3431,7 @@ If POS is nil, use `point' instead."
       (message "fountain-mode: Function `outline-invisible-p' has been patched"))))
 
 
-;;; Initializing
+;;; Initializing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun fountain-init-scene-heading-regexp ()
   "Initialize scene heading regular expression.
@@ -3578,7 +3585,7 @@ buffers."
     (add-to-invisibility-spec 'fountain-element-markup)))
 
 
-;;; Mode Definition
+;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
