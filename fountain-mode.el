@@ -909,7 +909,7 @@ When LOOSE is non-nil, do not require non-blank line after."
   "Match dialog if point is at dialog, nil otherwise."
   (unless (or (and (bolp) (eolp))
               (fountain-match-paren)
-              (fountain-match-note))
+              (fountain-comment-p))
     (save-excursion
       (save-restriction
         (widen)
