@@ -306,7 +306,6 @@ The default \" %x - %n:\" inserts something like:
                       (const :tag "Synopses" synopsis)
                       (const :tag "Notes" note)
                       (const :tag "Metadata" metadata)
-                      (const :tag "Center Text" center)
                       (const :tag "Page Breaks" page-break)))
   :group 'fountain
   :set 'fountain--set-and-refresh-font-lock)
@@ -3320,10 +3319,6 @@ takes the form:
       (fountain-toggle-highlight-element 'metadata)
       :style toggle
       :selected (memq 'metadata fountain-highlight-elements)]
-     ["Center Text"
-      (fountain-toggle-highlight-element 'center)
-      :style toggle
-      :selected (memq 'center fountain-highlight-elements)]
      ["Page Breaks"
       (fountain-toggle-highlight-element 'page-break)
       :style toggle
