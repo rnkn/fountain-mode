@@ -523,12 +523,9 @@ whatever extension you like."
   :group 'fountain
   :type '(repeat (string :tag "Extension")))
 
-(defconst fountain-action-regexp
-  "^\\(!\\)?\\(.*\\)[\s\t]*$"
-  "Regular expression for forced action.
-
-  Group 1: match forced action mark
-  Group 2: match trimmed whitespace")
+(defconst fountain-forced-action-regexp
+  "^\\(!\\)\\(.*\\)[\s\t]*$"
+  "Regular expression for forced action.")
 
 ;; FIXME: a comment without whitespace will be fontified as italic, e.g.
 ;;     /*comment*/
@@ -902,7 +899,7 @@ When LOOSE is non-nil, do not require non-blank line after."
   (unless (fountain-match-scene-heading)
     (save-excursion
       (beginning-of-line)
-      (and (not (looking-at "!"))
+      (and (not (looking-at fountain-forced-action-regexp))
            (let (case-fold-search)
              (looking-at fountain-character-regexp))
            (fountain-blank-before-p)
@@ -953,34 +950,11 @@ When LOOSE is non-nil, do not require non-blank line after."
     (beginning-of-line)
     (looking-at fountain-center-regexp)))
 
-;; FIXME: It's expensive to test all match functions for every block of action.
-(defun fountain-match-action ()
-  "Match action text if point is at action, nil otherwise.
-Assumes that all other element matching has been done."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (beginning-of-line)
-      (or (and (looking-at fountain-action-regexp)
-               (match-string-no-properties 1))
-          (and (not (or (and (bolp) (eolp))
-                        (fountain-match-section-heading)
-                        (fountain-match-scene-heading)
-                        (fountain-match-page-break)
-                        (fountain-match-character)
-                        (fountain-match-dialog)
-                        (fountain-match-paren)
-                        (fountain-match-trans)
-                        (fountain-match-center)
-                        (fountain-match-synopsis)
-                        (fountain-match-metadata)
-                        (fountain-match-note)))
-               (looking-at fountain-action-regexp))))))
-
 (defun fountain-get-element ()
   "Return element at point as a symbol."
   (cond
-   ((and (bolp) (eolp)) nil)
+   ((and (bolp) (eolp))                 nil)
+   ((fountain-comment-p)                nil)
    ((fountain-match-section-heading)    'section-heading)
    ((fountain-match-scene-heading)      'scene-heading)
    ((fountain-match-character)
@@ -1005,6 +979,17 @@ Assumes that all other element matching has been done."
    ((fountain-match-metadata)           'metadata)
    ((fountain-match-note)               'note)
    (t                                   'action)))
+
+(defun fountain-match-action ()
+  "Match action text if point is at action, nil otherwise.
+Assumes that all other element matching has been done."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (beginning-of-line)
+      (or (looking-at fountain-forced-action-regexp)
+          (and (eq (fountain-get-element) 'action)
+               (looking-at ".+"))))))
 
 
 ;;; Auto-completion ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
