@@ -9,8 +9,23 @@
   - Remove page number group from fountain-page-break-regexp
   - Remove fountain-page-number face
 - Ensure fountain-note-regexp omits notes containing blank lines
-- Fixed an issue where action could be parsed as character/dialogue.
+- Update pagination when changing page size
+- Add page size & pagination ignore restriction option to menu
+- Fixed an issue where action could be parsed as character/dialogue
+- Fix missing %n in fountain-export-command format spec
+- Fix fountain-insert-section-heading for invisible headings
+- Fix edge case of misidentified character within action
 - Add :extend property to notes face
+- Renamed invisibility property fountain-syntax-char ->
+  fountain-element-markup
+- Large rewrite of font-lock init code to greatly simplify
+  - New implementation of matching action
+  - Remove options for highlighting center text element, treating center
+    text as part of action element
+- Add fountain-comment-p function for more reliably matching comments
+  (experimental)
+- Make fountain-fill-* options into variables and remove option group
+- Set font-lock-multiline -> t
 
 * Version 3.4.1
 
@@ -1130,3 +1145,9 @@ hoping to finally have export (to HTML) functionality!
 
 - Added auto-indentation for character, parenthetical, dialogue and
   transition elements (display only, does not modify file contents)
+
+
+;; Local Variables:
+;; mode: text
+;; fill-column: 72
+;; End:
