@@ -274,7 +274,7 @@ Upcases lines matching `fountain-scene-heading-regexp'."
   :group 'fountain)
 
 (defcustom fountain-note-template
-  " %x - %n: "
+  "%P - %n %x"
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 Passed to `format-spec' with the following specification:
 
@@ -283,10 +283,11 @@ Passed to `format-spec' with the following specification:
   %e  `user-mail-address'
   %x  date in locale's preferred format
   %F  date in ISO format
+  %p  leave point here
 
-The default \" %x - %n:\" inserts something like:
+The default \"%P - %n %x\" inserts something like:
 
-  [[ 12/31/2017 - Alan Smithee: ]]"
+  [[ | - Alan Smithee 12/31/2017 ]]"
   :group 'fountain
   :type 'string
   :safe 'stringp)
@@ -1842,13 +1843,22 @@ ARG (\\[universal-argument]), only insert note delimiters."
       (unless (fountain-blank-after-p)
         (save-excursion
           (newline)))
-      (comment-indent)
-      (insert (format-spec fountain-note-template
-        (format-spec-make ?u user-login-name
-                          ?n user-full-name
-                          ?e user-mail-address
-                          ?F (format-time-string "%F")
-                          ?x (format-time-string "%x")))))))
+      (comment-dwim nil)
+      (let ((x (point))
+            (reposn "_POINT_")
+            bound)
+        (insert (format-spec fountain-note-template
+         (format-spec-make ?u user-login-name
+                           ?n user-full-name
+                           ?e user-mail-address
+                           ?P reposn
+                           ?F (format-time-string "%F")
+                           ?x (format-time-string "%x"))))
+        (setq bound (point))
+        (goto-char x)
+        (when (search-forward reposn bound 'move)
+          (delete-region (match-beginning 0)
+                         (match-end 0)))))))
 
 (defun fountain-continued-dialog-refresh ()
   "Add or remove continued dialog in buffer.
