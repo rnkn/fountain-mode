@@ -315,7 +315,7 @@ The default \" %x - %n:\" inserts something like:
   "List of elements always highlighted with `font-lock-mode'.")
 
 
-;;; Faces
+;;; Faces ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-faces ()
   "Faces used in `fountain-mode'
@@ -410,7 +410,7 @@ You can specify which elements are highlighted with the option
   "Default face for transitions.")
 
 
-;;; Regular Expressions
+;;; Regular Expressions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar fountain-scene-heading-regexp
   nil
@@ -909,6 +909,7 @@ When LOOSE is non-nil, do not require non-blank line after."
   "Match dialog if point is at dialog, nil otherwise."
   (unless (or (and (bolp) (eolp))
               (fountain-match-paren)
+              ;; FIXME: unnecessary given match-character tests for comment?
               (fountain-comment-p))
     (save-excursion
       (save-restriction
