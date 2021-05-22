@@ -8,6 +8,7 @@
     fountain-insert-page-break
   - Remove page number group from fountain-page-break-regexp
   - Remove fountain-page-number face
+- Add %P in fountain-note-template to reposition point
 - Ensure fountain-note-regexp omits notes containing blank lines
 - Update pagination when changing page size
 - Add page size & pagination ignore restriction option to menu
@@ -22,10 +23,10 @@
   - New implementation of matching action
   - Remove options for highlighting center text element, treating center
     text as part of action element
-- Add fountain-comment-p function for more reliably matching comments
-  (experimental)
 - Make fountain-fill-* options into variables and remove option group
 - Set font-lock-multiline -> t
+- Add fountain-comment-p function for more reliably matching comments
+  (experimental)
 
 * Version 3.4.1
 
