@@ -1845,7 +1845,7 @@ ARG (\\[universal-argument]), only insert note delimiters."
           (newline)))
       (comment-dwim nil)
       (let ((x (point))
-            (reposn "_POINT_")
+            (reposn "__POINT__")
             bound)
         (insert (format-spec fountain-note-template
          (format-spec-make ?u user-login-name
