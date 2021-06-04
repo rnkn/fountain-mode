@@ -146,6 +146,7 @@
 (defgroup fountain ()
   "Major mode for screenwriting in Fountain markup."
   :prefix "fountain-"
+  :link '(info-link "(fountain-mode) Fountain Mode")
   :group 'text)
 
 (defun fountain--set-and-refresh-font-lock (symbol value)
