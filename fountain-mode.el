@@ -395,7 +395,7 @@ You can specify which elements are highlighted with the option
 
 (defface fountain-dialog
   '((t (:inherit font-lock-string-face)))
-  "Default face for dialog.")
+  "Default face for dialogue.")
 
 (defface fountain-trans
   '((t nil))
@@ -554,7 +554,7 @@ Requires `fountain-match-metadata' for `bobp'.")
   Group 2: match character name
   Group 3: match parenthetical extension
   Group 4: match opening parenthetical
-  Group 5: match trailing ^ for dual dialog
+  Group 5: match trailing ^ for dual dialogue
 
 Requires `fountain-match-character' for preceding blank line.")
 
@@ -727,7 +727,7 @@ This option does not affect file contents."
 (defcustom fountain-align-dialog
   '(("screenplay" . 10)
     ("stageplay" . 0))
-  "Column integer to which dialog should be aligned.
+  "Column integer to which dialogue should be aligned.
 
 This option does not affect file contents."
   :group 'fountain-align
@@ -897,7 +897,7 @@ When LOOSE is non-nil, do not require non-blank line after."
            (if loose t (not (fountain-blank-after-p)))))))
 
 (defun fountain-match-dialog ()
-  "Match dialog if point is at dialog, nil otherwise."
+  "Match dialogue if point is at dialogue, nil otherwise."
   (unless (or (and (bolp) (eolp))
               (fountain-match-paren))
     (save-excursion
@@ -1610,7 +1610,7 @@ e.g.
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
-If LIMIT is 'dialog, halt at end of dialog. If LIMIT is 'scene,
+If LIMIT is 'dialog, halt at end of dialogue. If LIMIT is 'scene,
 halt at end of scene."
   (interactive "^p")
   (unless n (setq n 1))
@@ -1654,7 +1654,7 @@ character if N is negative, otherwise return nil. If N is nil or
 0, return character at point, otherwise return nil.
 
 If LIMIT is 'scene, halt at next scene heading. If LIMIT is
-'dialog, halt at next non-dialog element."
+'dialog, halt at next non-dialogue element."
   (unless n (setq n 0))
   (save-excursion
     (save-restriction
@@ -2282,7 +2282,7 @@ breaks occur mid-sentence)."
   'fountain-pagination-more-dialog-string "`fountain-mode' 3.5")
 (defcustom fountain-pagination-more-dialog-string
   "(MORE)"
-  "String to append to dialog when breaking across pages."
+  "String to append to dialogue when breaking across pages."
   :group 'fountain-pagination
   :type 'string
   :safe 'stringp)
