@@ -3264,7 +3264,10 @@ takes the form:
       :style radio
       :selected (eq fountain-page-size 'a4)]
      "---"
-     ["Ignore Restriction"
+     ["Display Page Count in Mode Line" which-function-mode
+      :style toggle
+      :selected which-function-mode]
+     ["Page Count Ignores Restriction"
       (customize-set-variable 'fountain-pagination-ignore-restriction
                               (not fountain-pagination-ignore-restriction))
       :style toggle
