@@ -3355,10 +3355,13 @@ takes the form:
             fountain-hide-element-markup
             fountain-hide-emphasis-markup
             fountain-highlight-elements
-            fountain-outline-fold-notes
+            fountain-outline-hide-notes
+            fountain-outline-show-synopses
             fountain-page-size
             fountain-scene-numbers-display-in-margin
-            fountain-transpose-all-elements))
+            fountain-transpose-all-elements
+            fountain-pagination-ignore-restriction
+            which-function-mode))
     (when unsaved (custom-save-all))))
 
 
