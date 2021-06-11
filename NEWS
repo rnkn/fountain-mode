@@ -16,6 +16,7 @@
 - Fix missing %n in fountain-export-command format spec
 - Fix fountain-insert-section-heading for invisible headings
 - Fix edge case of misidentified character within action
+- Fix fountain-imenu-elements option group
 - Add :extend property to notes face
 - Renamed invisibility property fountain-syntax-char ->
   fountain-element-markup
