@@ -2757,8 +2757,9 @@ The car sets `left-margin' and cdr `fill-column'.")
 ;;; Exporting ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-export ()
-  "Options for exporting Fountain files."
+  "Options for exporting files in `fountain-mode'."
   :prefix "fountain-export-"
+  :link '(info-link "(fountain-mode) Exporting")
   :group 'fountain)
 
 (defcustom fountain-export-command-profiles
