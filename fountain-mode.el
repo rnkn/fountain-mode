@@ -764,7 +764,7 @@ This option does not affect file contents."
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-trans
-  '(("screenplay" . 45)
+  '(("screenplay" . 50)
     ("stageplay" . 30))
   "Column integer to which transitions should be aligned.
 
