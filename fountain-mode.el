@@ -3545,11 +3545,16 @@ regular expression."
                                (line-beginning-position))
          (= (char-syntax (char-before)) ?w))))
 
-(defun fountain-init-vars ()
-  "Initialize important variables.
-Needs to be called for every Fountain buffer because some
-variatbles are required for functions to operate with temporary
-buffers."
+
+;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
+
+;;;###autoload
+(define-derived-mode fountain-mode text-mode "Fountain"
+  "Major mode for screenwriting in Fountain markup."
+  :group 'fountain
   (fountain-init-scene-heading-regexp)
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
@@ -3580,22 +3585,10 @@ buffers."
   (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-markup))
   (when fountain-hide-element-markup
-    (add-to-invisibility-spec 'fountain-element-markup)))
-
-
-;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
-
-;;;###autoload
-(define-derived-mode fountain-mode text-mode "Fountain"
-  "Major mode for screenwriting in Fountain markup."
-  :group 'fountain
-  (fountain-init-vars)
+    (add-to-invisibility-spec 'fountain-element-markup))
+  (when fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
   (face-remap-add-relative 'default 'fountain)
-  (add-hook 'post-self-insert-hook #'fountain--auto-upcase-maybe nil t)
-  (when fountain-patch-emacs-bugs (fountain-patch-emacs-bugs)))
+  (add-hook 'post-self-insert-hook #'fountain--auto-upcase-maybe nil t))
 
 (provide 'fountain-mode)
 
