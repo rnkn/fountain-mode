@@ -1,4 +1,4 @@
-* current
+* Version 3.5.0
 
 - Implement compatibility with which-function-mode to display page
   numbers in mode-line, which option added to fountain-mode-hook
