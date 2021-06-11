@@ -3348,7 +3348,9 @@ takes the form:
       :selected fountain-hide-emphasis-markup]
      ["Hide Element Markup" fountain-toggle-hide-element-markup
       :style toggle
-      :selected fountain-hide-element-markup])
+      :selected fountain-hide-element-markup]
+     "---"
+     ["Customize Faces" (customize-group 'fountain-faces)])
     "---"
     ["Display Elements Auto-Aligned"
      (customize-set-variable 'fountain-align-elements
@@ -3370,8 +3372,7 @@ takes the form:
     ["View Last Exported File" fountain-export-view]
     "---"
     ["Save Options" fountain-save-options]
-    ["Customize Mode" (customize-group 'fountain)]
-    ["Customize Faces" (customize-group 'fountain-faces)]))
+    ["Customize Mode" (customize-group 'fountain)]))
 
 (defun fountain-save-options ()
   "Save `fountain-mode' menu options with `customize'."
