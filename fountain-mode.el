@@ -345,11 +345,11 @@ You can specify which elements are highlighted with the option
   "Default face for element and emphasis markup.")
 
 (defface fountain-metadata-key
-  '((t (:inherit font-lock-constant-face)))
+  '((t (:inherit font-lock-keyword-face)))
   "Default face for metadata keys.")
 
 (defface fountain-metadata-value
-  '((t (:inherit font-lock-keyword-face)))
+  '((t (:inherit font-lock-string-face)))
   "Default face for metadata values.")
 
 (defface fountain-page-break
