@@ -3160,6 +3160,7 @@ takes the form:
     (define-key map (kbd "C-M-i") #'fountain-outline-cycle-buffer)
     (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
     (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
+    (define-key map (kbd "C-c C-q") #'fountain-outline-hide-sublevels)
     ;; Pagination commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map [remap forward-page] #'fountain-forward-page)
     (define-key map [remap backward-page] #'fountain-backward-page)
