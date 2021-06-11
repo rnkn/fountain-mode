@@ -185,15 +185,9 @@ Can be overridden in metadata with, e.g.
   :type 'string
   :safe 'string)
 
-(defcustom fountain-add-continued-dialog
-  t
-  "\\<fountain-mode-map>If non-nil, \\[fountain-continued-dialog-refresh] will mark continued dialogue.
-When calling `fountain-continued-dialog-refresh', append
-`fountain-continued-dialog-string' to characters speaking in
-succession, or if nil, remove this string."
-  :group 'fountain
-  :type 'boolean
-  :safe 'booleanp)
+(make-obsolete-variable 'fountain-add-continued-dialog
+                        "use command `fountain-add-continued-dialog' instead."
+                        "`fountain-mode' 3.5")
 
 (defcustom fountain-continued-dialog-string
   "(CONT'D)"
