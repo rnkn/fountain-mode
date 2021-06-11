@@ -1908,7 +1908,7 @@ to remove previous string first."
 ;;; Scene Numbers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-scene-numbers ()
-  "Options for scene numbers."
+  "Options for scene numbers in `fountain-mode'."
   :prefix "fountain-scene-numbers-"
   :group 'fountain)
 
