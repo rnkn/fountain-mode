@@ -1535,7 +1535,9 @@ With argument ARG, do it ARG times."
                 1))))
     (insert (make-string level ?#) " ")))
 
-(defcustom fountain-pop-up-indirect-windows
+(define-obsolete-variable-alias 'fountain-pop-up-indirect-windows
+  'fountain-outline-pop-up-indirect-windows "`fountain-mode' 3.5")
+(defcustom fountain-outline-pop-up-indirect-windows
   nil
   "Non-nil if opening indirect buffers should make a new window."
   :type 'boolean
