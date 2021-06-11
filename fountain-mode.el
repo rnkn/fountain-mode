@@ -310,6 +310,16 @@ The default \"%P - %n %x\" inserts something like:
   '(underline italic bold bold-italic lyrics)
   "List of elements always highlighted with `font-lock-mode'.")
 
+(define-obsolete-variable-alias 'fountain-shift-all-elements
+  'fountain-transpose-all-elements "`fountain-mode' 3.2")
+(defcustom fountain-transpose-all-elements
+  t
+  "\\<fountain-mode-map>Non-nil if \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should operate on all elements.
+Otherwise, only operate on outline elements."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain)
+
 
 ;;; Faces ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1184,9 +1194,13 @@ Add to `fountain-mode-hook' to have completion upon load."
   "Internal local representation of buffer outline cycle state.
 Used by `fountain-outline-cycle'.")
 
+(defgroup fountain-outline ()
+  "Options for outlining in `fountain-mode'."
+  :prefix "fountain-outline-"
+  :group 'fountain)
+
 (define-obsolete-variable-alias 'fountain-outline-custom-level
   'fountain-outline-show-all-section-headings "`fountain-mode' 3.4")
-
 (defcustom fountain-outline-show-all-section-headings
   t
   "If non-nil, show all level section headings when cycling outline.
@@ -1194,22 +1208,10 @@ Otherwise, cycle from showing top-level section headings to all
 section and scene headings."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain)
-
-(define-obsolete-variable-alias 'fountain-shift-all-elements
-  'fountain-transpose-all-elements "`fountain-mode' 3.2")
-
-(defcustom fountain-transpose-all-elements
-  t
-  "\\<fountain-mode-map>Non-nil if \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should operate on all elements.
-Otherwise, only operate on section and scene headings."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain)
+  :group 'fountain-outline)
 
 (define-obsolete-variable-alias 'fountain-outline-fold-notes
   'fountain-outline-hide-notes "`fountain-mode' 3.4")
-
 (defcustom fountain-outline-hide-notes
   t
   "\\<fountain-mode-map>If non-nil, fold contents of notes when cycling outline visibility.
@@ -1217,14 +1219,14 @@ Otherwise, only operate on section and scene headings."
 Notes visibility can be cycled with \\[fountain-dwim]."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain)
+  :group 'fountain-outline)
 
 (defcustom fountain-outline-show-synopses
   nil
   "If non-nil, show synopses following headings when cycling outline visibility."
   :type 'boolean
   :safe 'booleanp
-  :group 'fountain
+  :group 'fountain-outline
   :set (lambda (symbol value)
          (set-default symbol value)
          (when (featurep 'fountain-mode)
@@ -1539,7 +1541,7 @@ With argument ARG, do it ARG times."
   nil
   "Non-nil if opening indirect buffers should make a new window."
   :type 'boolean
-  :group 'fountain)
+  :group 'fountain-outline)
 
 (defun fountain-outline-to-indirect-buffer ()
   "Clone section/scene at point to indirect buffer.
