@@ -213,12 +213,6 @@ this option."
   :type 'string
   :safe 'stringp)
 
-(defcustom fountain-more-dialog-string
-  "(MORE)"
-  "String to append to dialog when breaking across pages."
-  :type 'string
-  :safe 'stringp)
-
 (define-obsolete-variable-alias 'fountain-hide-emphasis-delim
   'fountain-hide-emphasis-markup "`fountain-mode' 3.0")
 
@@ -2237,10 +2231,10 @@ scene number from being auto-upcased."
         (progress-reporter-done job)))))
 
 
-;;; Pages ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Pagination ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-pagination ()
-  "Options for calculating page length."
+  "Options for calculating page length in `fountain-mode'."
   :group 'fountain
   :prefix "fountain-page-"
   :prefix "fountain-pagination-")
@@ -2311,6 +2305,15 @@ breaks occur mid-sentence)."
   :type 'boolean
   :safe 'booleanp)
 
+(define-obsolete-variable-alias 'fountain-more-dialog-string
+  'fountain-pagination-more-dialog-string "`fountain-mode' 3.5")
+(defcustom fountain-pagination-more-dialog-string
+  "(MORE)"
+  "String to append to dialog when breaking across pages."
+  :group 'fountain-pagination
+  :type 'string
+  :safe 'stringp)
+
 (defconst fountain-dual-dialog-left-elements
   '(dual-character-left dual-dialog-left dual-paren-left)
   "List of elements constituent of left-side dual dialogue.")
@@ -2332,7 +2335,7 @@ This is usually before point, but may be after if only skipping
 over whitespace.
 
 Comments are assumed to be deleted."
-  (when (looking-at fountain-more-dialog-string) (forward-line))
+  (when (looking-at fountain-pagination-more-dialog-string) (forward-line))
   (when (looking-at "[\n\s\t]*\n") (goto-char (match-end 0)))
   (let ((element (fountain-get-element)))
     (cond
@@ -2628,7 +2631,7 @@ to suit your preferred tool's pagination method."
           (delete-horizontal-space)
           (unless (bolp) (insert-before-markers "\n"))
           (insert-before-markers
-           (concat fountain-more-dialog-string "\n\n"
+           (concat fountain-pagination-more-dialog-string "\n\n"
                    page-break "\n\n"
                    name "\s" fountain-continued-dialog-string "\n")))
       ;; Otherwise, insert the page break where we are. If the preceding
