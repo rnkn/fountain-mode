@@ -2,6 +2,14 @@
 
 - Implement compatibility with which-function-mode to display page
   numbers in mode-line, which option added to fountain-mode-hook
+- Add commands fountain-add-continued-dialog and
+  fountain-remove-continued-dialog, replacing command
+  fountain-refresh-continued-dialog and option fountain-add-continued-dialog
+- TAB now appropriately indents metadata values
+- Add fountain-outline-hide-sublevels (alias of outline-hide-sublevels)
+  on C-c C-q, allowing C-c C-q to quickly collapse all sections, and
+  M-[N] C-c C-q to hide N-sublevels
+  - These are added to a new "Dialogue" submenu
 - Remove forced page numbers feature, which is not part of Fountain 1.1
   spec
   - Remove optional args ASK and PAGE-NUM from
@@ -17,6 +25,8 @@
 - Fix fountain-insert-section-heading for invisible headings
 - Fix edge case of misidentified character within action
 - Fix fountain-imenu-elements option group
+- Fix spelling of "dialogue" in docstrings and comments
+- Fix some missing options from fountain-save-options menu item
 - Add :extend property to notes face
 - Renamed invisibility property fountain-syntax-char ->
   fountain-element-markup

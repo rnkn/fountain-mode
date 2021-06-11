@@ -1725,6 +1725,21 @@ to scene number or point."
              (fountain-match-scene-heading))
     (upcase-region (line-beginning-position) (or (match-end 2) (point)))))
 
+(defun fountain-indent-metadata ()
+  "Appropriately indent a metadata value.
+When point is at metadata value on its own line, indent to
+`tab-width'."
+  (unless (and (fountain-match-metadata) (match-string 1))
+    (let ((x (point-marker)))
+      (beginning-of-line)
+      (skip-chars-forward "\s\t")
+      (unless (= tab-width (current-column))
+        (delete-horizontal-space)
+        (indent-to tab-width))
+      (when (< (point) x) (goto-char x))
+      (set-marker x nil))))
+
+;; FIXME: tab in metadata should indent-for-tab
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
 
@@ -1738,6 +1753,10 @@ to scene number or point."
   (interactive "p")
   (cond ((and arg (<= 4 arg))
          (fountain-outline-cycle-buffer arg))
+        ((save-excursion
+           (forward-line -1)
+           (fountain-match-metadata))
+         (fountain-indent-metadata))
         ((and (eq (char-before) ?\()
               (eq (char-after)  ?\)))
          (delete-region (1- (point)) (1+ (point))))
