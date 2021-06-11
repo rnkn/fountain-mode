@@ -656,11 +656,10 @@ be specified with the bold-italic delimiters together, e.g.
 ;;; Aligning ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-align ()
-  "Options for element alignment.
-
-Each Fountain element align option can be an integer representing
-the align column for all formats, or a list where each element
-takes the form:
+  "Options for visual alignment of `fountain-mode' elements.
+Each element align option can be an integer representing the
+align column for all formats, or a list where each element takes
+the form:
 
   (FORMAT . INT)
 
