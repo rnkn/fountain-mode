@@ -3516,6 +3516,7 @@ regular expression."
               (const :tag "Scene Headings" scene-heading)
               (const :tag "Synopses" synopsis)
               (const :tag "Notes" note))
+  :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
          (mapc (lambda (buffer)
