@@ -901,7 +901,8 @@ This option does not affect file contents."
 (defun fountain-match-character (&optional loose)
   "Match character if point is at character, nil otherwise.
 When LOOSE is non-nil, do not require non-blank line after."
-  (unless (fountain-match-scene-heading)
+  (unless (or (fountain-match-scene-heading)
+              (fountain-comment-p))
     (save-excursion
       (beginning-of-line)
       (and (not (looking-at fountain-forced-action-regexp))
@@ -913,9 +914,7 @@ When LOOSE is non-nil, do not require non-blank line after."
 (defun fountain-match-dialog ()
   "Match dialog if point is at dialog, nil otherwise."
   (unless (or (and (bolp) (eolp))
-              (fountain-match-paren)
-              ;; FIXME: unnecessary given match-character tests for comment?
-              (fountain-comment-p))
+              (fountain-match-paren))
     (save-excursion
       (save-restriction
         (widen)
