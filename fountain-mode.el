@@ -191,17 +191,13 @@ Can be overridden in metadata with, e.g.
 
 (defcustom fountain-continued-dialog-string
   "(CONT'D)"
-  "String to append to character name speaking in succession.
-If `fountain-add-continued-dialog' is non-nil, append this string
-to characters speaking in succession when calling
-`fountain-continued-dialog-refresh'.
+  "\\<fountain-mode-map>String to append to character name speaking in succession.
+Append this string to characters speaking in succession when
+calling `fountain-add-continued-dialog' (\\[fountain-add-continued-dialog]).
 
-n.b. if you change this option then call
-`fountain-continued-dialog-refresh', strings matching the
-previous value will not be recognized. First remove all instances
-in your script by setting `fountain-add-continued-dialog' to nil
-and calling `fountain-continued-dialog-refresh', then customize
-this option."
+n.b. Before changing this option, first call
+`fountain-remove-continued-dialog' (\\[fountain-remove-continued-dialog])
+to remove any previous continued dialogue."
   :group 'fountain
   :type 'string
   :safe 'stringp)
