@@ -1852,57 +1852,50 @@ ARG (\\[universal-argument]), only insert note delimiters."
           (delete-region (match-beginning 0)
                          (match-end 0)))))))
 
-(defun fountain-continued-dialog-refresh ()
-  "Add or remove continued dialog in buffer.
+(define-obsolete-function-alias 'fountain-refresh-continued-dialog
+  'fountain-add-continued-dialog "`fountain-mode' 3.5")
 
-If `fountain-add-continued-dialog' is non-nil, add
-`fountain-continued-dialog-string' on characters speaking in
-succession, otherwise remove all occurences.
-
-If `fountain-continued-dialog-string' has changed, also attempt
-to remove previous string first."
+(defun fountain-remove-continued-dialog ()
+  "Remove continued dialogue in buffer.
+Remove `fountain-continued-dialog-string' on all characters in
+accessible portion of the buffer."
   (interactive "*")
   (save-excursion
-    (save-restriction
-      (widen)
-      (let ((job (make-progress-reporter "Refreshing continued dialog..."))
-            (backup (car (get 'fountain-continued-dialog-string
-                              'backup-value)))
-            (replace-fun
-             (lambda (string job)
-               (goto-char (point-min))
-               (unless (fountain-match-character)
-                 (fountain-forward-character))
-               (while (< (point) (point-max))
-                 (if (re-search-forward
-                      (concat "[\s\t]*" string) (line-end-position) t)
-                     (delete-region (match-beginning 0) (match-end 0)))
-                 (fountain-forward-character)
-                 (progress-reporter-update job))))
-            case-fold-search)
-        (when (string= fountain-continued-dialog-string backup)
-          (setq backup (eval (car (get 'fountain-continued-dialog-string
-                                       'standard-value))
-                             t)))
-        ;; Delete all matches of backup string.
-        (when (stringp backup) (funcall replace-fun backup job))
-        ;; Delete all matches of current string.
-        (funcall replace-fun fountain-continued-dialog-string job)
-        ;; When `fountain-add-continued-dialog', add string where
-        ;; appropriate.
-        (when fountain-add-continued-dialog
-          (goto-char (point-min))
-          (while (< (point) (point-max))
-            (when (and (not (looking-at-p
-                             (concat ".*" fountain-continued-dialog-string "$")))
-                       (fountain-match-character)
-                       (string= (fountain-get-character 0)
+    (goto-char (point-min))
+    (unless (fountain-match-character) (fountain-forward-character))
+    (let ((case-fold-search nil))
+      (while (< (point) (point-max))
+        (when (re-search-forward
+               (concat "[\s\t]*" fountain-continued-dialog-string "[\s\t]*")
+               (line-end-position) t)
+          (delete-region (match-beginning 0) (match-end 0)))
+        (fountain-forward-character)))))
+
+(defun fountain-add-continued-dialog ()
+  "Add or update continued dialogue in buffer.
+Add `fountain-continued-dialog-string' to characters speaking in
+succession, or remove where appropriate, in accessible portion of
+the buffer."
+  (interactive "*")
+  (save-excursion
+    (goto-char (point-min))
+    (unless (fountain-match-character) (fountain-forward-character))
+    (let ((case-fold-search nil))
+      (while (< (point) (point-max))
+        (when (fountain-match-character)
+          (let ((contd (string= (fountain-get-character 0)
                                 (fountain-get-character -1 'scene)))
-              (re-search-forward "\s*$" (line-end-position) t)
-              (replace-match (concat "\s" fountain-continued-dialog-string)))
-            (forward-line)
-            (progress-reporter-update job)))
-        (progress-reporter-done job)))))
+                (with-string (looking-at-p
+                              (concat ".*" fountain-continued-dialog-string "$"))))
+            (cond ((and contd (not with-string))
+                   (when (re-search-forward "\s*$" (line-end-position) t)
+                     (replace-match (concat "\s" fountain-continued-dialog-string))))
+                  ((and (not contd) with-string)
+                   (when (re-search-forward
+                          (concat "[\s\t]*" fountain-continued-dialog-string "[\s\t]*")
+                          (line-end-position) t)
+                     (delete-region (match-beginning 0) (match-end 0))))))
+          (fountain-forward-character))))))
 
 
 ;;; Scene Numbers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3142,7 +3135,8 @@ takes the form:
     (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
-    (define-key map (kbd "C-c C-d") #'fountain-continued-dialog-refresh)
+    (define-key map (kbd "C-c C-d") #'fountain-add-continued-dialog)
+    (define-key map (kbd "C-c C-x d") #'fountain-remove-continued-dialog)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
@@ -3231,10 +3225,14 @@ takes the form:
      ["Transpose Element Backward" fountain-backward-paragraph-or-transpose]
      ["Transpose Element Forward" fountain-forward-paragraph-or-transpose]
      "---"
-     ["Transpose All Elements" (customize-set-variable 'fountain-transpose-all-elements
-                                                       (not fountain-transpose-all-elements))
+     ["Transpose All Elements"
+      (customize-set-variable 'fountain-transpose-all-elements
+                              (not fountain-transpose-all-elements))
       :style toggle
       :selected fountain-transpose-all-elements])
+    ("Dialogue"
+     ["Add Continued Dialogue" fountain-add-continued-dialog]
+     ["Remove Continued Dialogue" fountain-remove-continued-dialog])
     ("Pagination"
      ["Forward Page" fountain-forward-page]
      ["Backward Page" fountain-backward-page]
@@ -3277,7 +3275,6 @@ takes the form:
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    ["Refresh Continued Dialog" fountain-continued-dialog-refresh]
     ["Update Auto-Completion" fountain-completion-update]
     "---"
     ("Syntax Highlighting"
@@ -3350,11 +3347,6 @@ takes the form:
                              (not fountain-auto-upcase-scene-headings))
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
-    ["Add Continued Dialog"
-     (customize-set-variable 'fountain-add-continued-dialog
-                             (not fountain-add-continued-dialog))
-     :style toggle
-     :selected fountain-add-continued-dialog]
     "---"
     ["Run Export Command..." fountain-export-command]
     ["View Last Exported File" fountain-export-view]
@@ -3368,8 +3360,7 @@ takes the form:
   (let (unsaved)
     (mapc (lambda (option)
             (when (customize-mark-to-save option) (setq unsaved t)))
-          '(fountain-add-continued-dialog
-            fountain-align-elements
+          '(fountain-align-elements
             fountain-auto-upcase-scene-headings
             fountain-hide-element-markup
             fountain-hide-emphasis-markup
