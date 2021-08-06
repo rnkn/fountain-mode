@@ -5,10 +5,10 @@ html {
 }
 
 body {
-	font-family: "Times New Roman", serif;
+	font-family: Helvetica, Arial, sans-serif;
 	font-size: 16px;
 	line-height: 1.2;
-	max-width: 600px;
+	max-width: 80ex;
 	margin: 1em auto;
 	background-color: white;
 }
