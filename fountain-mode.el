@@ -2646,9 +2646,10 @@ to suit your preferred tool's pagination method."
   (save-restriction
     (when fountain-pagination-ignore-restriction (widen))
     (unless (fountain-pagination-validate) (fountain-pagination-update))
-    (cons (car (get-text-property
-                (if (eobp) (1- (point)) (point)) 'fountain-pagination))
-          (car (get-text-property (1- (point-max)) 'fountain-pagination)))))
+    (cons (car (get-text-property (max (if (eobp) (1- (point)) (point)) 1)
+                                  'fountain-pagination))
+          (car (get-text-property (max (1- (point-max)) 1)
+                                  'fountain-pagination)))))
 
 (defun fountain-count-pages (&optional interactive)
   "Return the current page of total page count of current buffer.
