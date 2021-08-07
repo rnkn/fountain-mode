@@ -49,6 +49,8 @@
 ;;    with single key (i.e. * or _)
 ;;  - Integration with imenu (sections, scene headings, notes)
 ;;  - Intergration with auto-insert for title page metadata
+;;  - Integreation with which-function-mode to display live-update of current
+;;    page and page count in mode-line
 ;;  - Automatically add/remove character (CONT'D)
 ;;  - Toggle syntax highlighting of each element
 ;;  - Toggle visibility of emphasis and syntax markup
@@ -103,6 +105,9 @@
 ;; If you prefer the latest but perhaps unstable version, do the above
 ;; using [MELPA][2].
 
+;; Fountain Mode may be available via your system package manager; check at
+;; [Repology][3].
+
 
 ;; Advanced Installation
 ;; ---------------------
@@ -131,6 +136,7 @@
 
 ;; [1]: https://stable.melpa.org/#/fountain-mode
 ;; [2]: https://melpa.org/#/fountain-mode
+;; [3]: https://repology.org/project/emacs:fountain-mode/versions
 
 
 ;;; Code:
