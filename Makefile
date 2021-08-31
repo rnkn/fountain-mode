@@ -8,9 +8,9 @@ TEXI_FILE	= ${DOCS_DIR}/${PROG}.texi
 INFO_FILE	= ${DOCS_DIR}/${PROG}.info
 CSS_FILE	= ${DOCS_DIR}/style.css
 HTML_DIR	= ${DOCS_DIR}/html
-VERS		= $(shell grep -oE -m1 'Version:[ 0-9.]+' ${LISP_FILE} | tr -d :)
-TAG		= $(shell echo ${VERS} | sed -E 's/Version:? ([0-9.]+)/v\1/')
-INIT		= '(progn (require (quote package)) \
+VERS		= ${shell grep -oE -m1 'Version:[ 0-9.]+' ${LISP_FILE} | tr -d :}
+TAG		= ${shell echo ${VERS} | sed -E 's/Version:? ([0-9.]+)/v\1/'}
+INIT		= (progn (require (quote package)) \
   (push (cons "melpa" "https://melpa.org/packages/") package-archives) \
   (package-initialize) \
   (mapc (lambda (pkg) \
@@ -18,7 +18,7 @@ INIT		= '(progn (require (quote package)) \
             (unless (assoc pkg package-archive-contents) \
               (package-refresh-contents)) \
             (package-install pkg))) \
-        (quote (${DEPS}))))'
+        (quote (${DEPS}))))
 
 help:
 	@echo check
@@ -34,10 +34,10 @@ help:
 all: clean check compile info-manual html-manual pdf-manual
 
 check:
-	emacs -Q --eval ${INIT} --batch -f package-lint-batch-and-exit ${LISP_FILE}
+	emacs -Q --eval '${INIT}' --batch -f package-lint-batch-and-exit ${LISP_FILE}
 
 compile:
-	emacs -Q --eval ${INIT} -L . --batch -f batch-byte-compile ${LISP_FILE}
+	emacs -Q --eval '${INIT}' -L . --batch -f batch-byte-compile ${LISP_FILE}
 
 manuals: info-manual html-manual pdf-manual
 
@@ -60,10 +60,5 @@ clean:
 	rm -f ${PROG}.elc
 	rm -f ${INFO_FILE}
 	rm -f dir
-	rm -f ${DOCS_DIR}/${PROG}.aux
-	rm -f ${DOCS_DIR}/${PROG}.fn
-	rm -f ${DOCS_DIR}/${PROG}.log
-	rm -f ${DOCS_DIR}/${PROG}.toc
-	rm -f ${DOCS_DIR}/${PROG}.vr
-	rm -f ${DOCS_DIR}/${PROG}.pdf
+	rm -f ${DOCS_DIR}/${PROG}.{aux,fn,log,toc,vr,pdf}
 	rm -rf ${DOCS_DIR}/html
