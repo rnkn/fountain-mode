@@ -522,20 +522,6 @@ whatever extension you like."
   "^\\(!\\)\\(.*\\)[\s\t]*$"
   "Regular expression for forced action.")
 
-;; FIXME: a comment without whitespace will be fontified as italic, e.g.
-;;     /*comment*/
-;;
-;; This is especially problematic when `fountain-hide-emphasis-markup' is
-;; non-nil.
-;;
-;; Comments should not receive any fontification, i.e. the
-;; `fountain-comment' face should override any previous faces.
-;;
-;; Unused variable.
-(defconst fountain-comment-regexp
-  "/\\*+[.\n]*?\\*/"
-  "Regular expression for matching comments.")
-
 (defconst fountain-metadata-regexp
   (concat "^\\([^:\s\t\n][^:[\n]*\\):[\s\t]*\\(.+\\)?"
           "\\|"
