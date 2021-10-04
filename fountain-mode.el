@@ -2911,19 +2911,25 @@ The file is then passed to `dired-guess-default'."
 
 ;;; Font Lock ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro define-fountain-font-lock-matcher (fun)
-  "Define a `font-lock-mode' matcher for FUN."
-  (let ((fun-name (intern (format "%s--font-lock" fun)))
+(defmacro define-fountain-font-lock-matcher (matcher)
+  "Define a `font-lock-mode' matcher for MATCHER.
+MATCHER may be a function or regular expression."
+  (let ((fun-name (intern (format "%s--font-lock" matcher)))
+        (linewise-fun (functionp matcher))
         (docstring (format "\
-Call `%s' on each line before LIMIT.
-Return non-nil if match occurs." fun)))
+Match `%s' before LIMIT.
+Return non-nil if match occurs." matcher)))
     `(defun ,fun-name (limit)
        ,docstring
        (let (match)
          (while (and (null match)
                      (< (point) limit))
-           (when ,(list fun) (setq match t))
-           (forward-line))
+           (when (and (not (fountain-comment-p))
+                      ,(if linewise-fun
+                           (list matcher)
+                         (list 'looking-at matcher)))
+             (setq match t))
+           ,(if linewise-fun '(forward-line) '(forward-char)))
          match))))
 
 (defun fountain-toggle-highlight-element (element)
@@ -3090,7 +3096,7 @@ takes the form:
      ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'action highlight-elements) 'fountain-action))
            (align (fountain--normalize-align-facespec fountain-align-center)))
-       (cons fountain-center-regexp
+       (cons (define-fountain-font-lock-matcher fountain-match-center)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend)
@@ -3106,35 +3112,35 @@ takes the form:
      ;; Page-Break ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'page-break highlight-elements)
                    'fountain-page-break)))
-       (cons fountain-page-break-regexp
+       (cons (define-fountain-font-lock-matcher fountain-match-page-break)
                  `((0 '(face ,face)))))
 
      ;; Lyrics ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-lyrics-regexp
+     (cons (define-fountain-font-lock-matcher fountain-lyrics-regexp)
            '((1 '(face fountain-non-printing invisible fountain-element-markup)
                 prepend)
              (2 '(face italic) prepend)))
 
      ;; Underline ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-underline-regexp
+     (cons (define-fountain-font-lock-matcher fountain-underline-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face underline) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend)))
 
      ;; Italic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-italic-regexp
+     (cons (define-fountain-font-lock-matcher fountain-italic-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face italic) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend)))
 
      ;; Bold ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-bold-regexp
+     (cons (define-fountain-font-lock-matcher fountain-bold-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face bold) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend)))
 
      ;; Bold-Italic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-bold-italic-regexp
+     (cons (define-fountain-font-lock-matcher fountain-bold-italic-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face bold-italic) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend))))))
