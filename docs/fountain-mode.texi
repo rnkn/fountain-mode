@@ -1,4 +1,4 @@
-\input texinfo    @c -*- texinfo -*-
+\input texinfo		@c -*- texinfo -*-
 @c %**start of header
 @setfilename fountain-mode.info
 @settitle Fountain Mode
@@ -8,15 +8,21 @@
 
 @dircategory Emacs
 @direntry
-* Fountain Mode: (fountain-mode). Write screenplays and stageplays.
+* Fountain Mode: (fountain-mode).	Write screenplays.
 @end direntry
 
 @c macros
+@macro program
+@w{Fountain Mode}
+@end macro
 @macro version
 3.5
 @end macro
 @macro repository
 https://github.com/rnkn/fountain-mode
+@end macro
+@macro theauthor
+@uref{https://bydasein.com, Paul W. Rankin}
 @end macro
 @macro tbc
 Sorry, this node is not yet written. You can help by submitting a patch!
@@ -32,7 +38,7 @@ Paul W. Rankin, Kohl Sudduth
 @finalout
 @titlepage
 @title Fountain Mode
-@subtitle GNU Emacs major mode for scriptwriting in Fountain markup
+@subtitle @w{GNU Emacs} major mode for screenwriting in Fountain markup
 @author Paul W. Rankin
 @page
 @vskip 0pt plus 1filll
@@ -49,85 +55,85 @@ This manual is a work in progress with many parts still missing. Please
 consult the help functions within Emacs for current documentation.
 @end quotation
 
-Fountain Mode is a scriptwriting (both screenplays and stageplays)
-program for GNU Emacs version 24.4 or later. The Fountain markup format
-is a plain-text format designed to be easily readable and editable,
+@program is a screenwriting (and playwriting) program for
+@w{GNU Emacs} version 24.4 or later. The Fountain markup format is a
+plain-text format designed to be easily readable and editable,
 portable and future-proof, and to look as much like a script as
 possible.
 
-This is the Fountain Mode Manual updated for version @version.
+This is the @program Manual updated for version @version.
 
 @ifhtml
-Check out the 
+Check out the
 @uref{https://fountain-mode.org/images/gallery.html, screenshot gallery}.
 @emph{Please send me your screenshots!}
 @end ifhtml
 
-The public Fountain Mode repository is hosted on
+The public @program repository is hosted on
 @uref{@repository, GitHub}.
 
 @end ifnottex
 
 @menu
-* Introduction::                The pitch.
-* Installation::                Getting started.
-* Script Elements::             The constituent parts of Fountain.
-* Outlining::                   Organize your script in pieces.
-* Navigation::                  Fly through your script with ease.
-* Syntax Highlighting::         Differentiate all the elements with colors.
-* Element Aligning::            WYSIWYG visual indentation of script elements.
-* Text Emphasis::               Bold, italic and underline.
-* Autocompletion::              Completion of frequently used text.
-* Do What I Mean::              Traditional TAB-style autocompletion.
-* Scene Numbering::             Adding numbers to a script scenes.
-* Pagination::                  Counting a navigating script pages.
-* Exporting::                   Sharing your great writing!
+* Overview::			The pitch.
+* Installation::		Getting started.
+* Script Elements::		The constituent parts of Fountain.
+* Outlining::			Organize your script in pieces.
+* Navigation::			Fly through your script with ease.
+* Syntax Highlighting::		Differentiate all the elements with colors.
+* Element Aligning::		WYSIWYG visual indentation of script elements.
+* Text Emphasis::		Bold, italic and underline.
+* Autocompletion::		Completion of frequently used text.
+* Do What I Mean::		Traditional TAB-style autocompletion.
+* Scene Numbering::		Adding numbers to a script scenes.
+* Pagination::			Counting a navigating script pages.
+* Exporting::			Sharing your great writing!
+* Donations::			Support @program development.
 * Indexes::
 @end menu
 
-@node Introduction
-@unnumbered Introduction
+@node Overview
+@unnumbered Overview
 
-Fountain Mode combines the simplicity of Fountain syntax with the
-extensibility of Emacs. Fountain Mode is a major mode for Emacs, which
+@program combines the simplicity of Fountain syntax with the
+extensibility of Emacs. @program is a major mode for Emacs, which
 is to say it is a program that runs inside Emacs --- the extensible,
 customizable, free/libre text editor. It enables the writer to engage
 with all aspects of realizing a screenplay --- story development,
-outlining, drafting, rewriting --- and to work in such a way that the
-hands never need to leave the keyboard.
-
-After learning a handful of syntax rules and a few keyboard shortcuts,
-nothing stands between the writer and the screenplay. The friction
-between thought and its expression on the page lessens, allowing the
-writer to more readily access a state of relaxed concentration that is
-conducive to creativity --- all the writer needs to do is write.
+outlining, drafting, and rewriting.
 
 To quickly get up to speed with Fountain syntax, memorize the rules for
 the six most used elements of the screenplay format: @ref{Scene Headings},
 @ref{Action}, @ref{Characters}, @ref{Dialogue}, @ref{Parentheticals}, and
 @ref{Transitions}.
 
-Then learn how to use @ref{Section Headings} to outline a story. This will be
-familiar for anyone who has used Markdown, as the syntax is the same.
-Sections allow you to easily show or hide and reorder large parts of a
-script.
+Then learn how to outline a script. @xref{Section Headings}. This will
+be familiar for anyone who has used Markdown, as the syntax is the
+same. Sections allow you to easily show or hide and reorder large
+parts of a script.
 
 There are additional Fountain syntax elements to allow for
-brainstorming, capturing ideas and omitting a part of the script without
-deleting it. These include @ref{Synopses}, @ref{Notes}, and
-@ref{Comments}. These elements are not usually included in the formatted
-output.
+brainstorming, capturing ideas and omitting a part of the script
+without deleting it. @xref{Synopses}, @ref{Notes}, and @ref{Comments}.
+These elements are not usually included in the formatted output.
+
+All of @program's capabilities are accessible via the menu, and all
+customization is performed via the @code{Fountain} option group.
+@xref{(emacs) Customization Groups}.
 
 @node Installation
 @unnumbered Installation
 
-The latest stable release of Fountain Mode is available as an Emacs
+The latest stable release of @program is available as an Emacs
 package via
 @uref{https://stable.melpa.org/#/fountain-mode, MELPA-stable}.
-In order to install packages via MELPA-stable, you'll first need to add
-it to your package archives:
 
-@code{M-x customize-option RET package-archives RET}
+In order to install packages via MELPA-stable, you'll first need to
+add it to your package archives:
+
+@example
+M-x customize-option RET package-archives RET
+@end example
 
 Insert an entry named @code{melpa-stable} with the URL
 @code{https://stable.melpa.org/packages/}
@@ -142,18 +148,18 @@ M-x list-packages RET
 If you like to live on the bleeding edge and prefer the latest but
 perhaps unstable version, do the above using
 @uref{https://melpa.org/#/fountain-mode, MELPA}.
-Unless you are already familiar with debugging Elisp code, you are
+Unless you are already familiar with debugging Elisp code, it is
 strongly encouraged to use the stable version.
 
 @menu
-* Requirements::                Do you have what it takes?
-* Advanced Installation::       For the pros.
+* Requirements::		Do you have what it takes?
+* Advanced Installation::	For the pros.
 @end menu
 
 @node Requirements
 @unnumberedsec Requirements
 
-Fountain Mode is compatible with Emacs version 24.4 and later.
+@program is compatible with Emacs version 24.4 and later.
 
 For Emacs versions older than 26.1, there is a bug in the @code{outline}
 library. This will be automatically patched provided
@@ -169,19 +175,21 @@ be installed; if you install using the Emacs package management system,
 
 Download the
 @uref{https://github.com/rnkn/fountain-mode/releases/latest, latest release},
-move this file into your load-path and add the following to your
+move this file into your @code{load-path} and add the following to your
 @code{init.el} file:
 
 @example
 (require 'fountain-mode)
 @end example
 
-If you wish to contribute to or alter Fountain Mode's code, clone the
+If you wish to contribute to or alter @program's code, clone the
 repository into your load-path and require as above:
 
 @example
 git clone @repository
 @end example
+
+@xref{(emacs) Lisp Libraries}.
 
 @node Script Elements
 @unnumbered Script Elements
@@ -191,25 +199,24 @@ able to just start writing --- as long as your text looks like a script,
 you should get correctly formatted output.
 
 @quotation n.b.
-Fountain Mode uses the Fountain 1.1 syntax specification. While some
-programs use custom additions to the specification, these aren't
-considered official. For the greatest cross-compatibility, stick with
-the 1.1 spec.
+@program uses the @w{Fountain 1.1} syntax specification.
+While some programs use custom additions to the specification, for the
+greatest cross-compatibility, stick with the 1.1 spec.
 @end quotation
 
 @menu
-* Metadata::                    Key-value info at the top of your script.
-* Section Headings::            Outline your script with @code{#}-prefixed headings.
-* Scene Headings::              Lines beginning with @code{INT}, @code{EXT}, etc.
-* Action::                      Anything that's not another element.
-* Characters::                  Names are in ALL-CAPS.
-* Dialogue::                    Text following character elements.
-* Parentheticals::              Text inside (parens) within dialogue.
-* Transitions::                 Uppercase lines ending in @code{TO:}.
-* Notes::                       Text within @code{[[} double brackets @code{]]}.
-* Synopses::                    Lines beginning with @code{=}.
-* Center Text::                 Put your titles @code{>} between these @code{<}.
-* Comments::                    C-style multi-line comments (aka ``Boneyard'').
+* Metadata::			Key-value info at the top of your script.
+* Section Headings::		Outline your script with @code{#}-prefixed headings.
+* Scene Headings::		Lines beginning with @code{INT}, @code{EXT}, etc.
+* Action::			Anything that's not another element.
+* Characters::			Names are in ALL-CAPS.
+* Dialogue::			Text following character elements.
+* Parentheticals::		Text inside (parens) within dialogue.
+* Transitions::			Uppercase lines ending in @code{TO:}.
+* Notes::			Text within @code{[[} double brackets @code{]]}.
+* Synopses::			Lines beginning with @code{=}.
+* Center Text::			Put your titles @code{>} between these @code{<}.
+* Comments::			C-style multi-line comments (aka ``Boneyard'').
 @end menu
 
 @node Metadata
@@ -217,7 +224,11 @@ the 1.1 spec.
 
 A Fountain script usually starts with some metadata stating the basic
 information about the script. These are colon-separated key-value pairs
-at the start of a file, e.g. @code{key: value}.
+at the start of a file:
+
+@example
+key: value
+@end example
 
 Other Fountain-compatible programs may refer to this as ``title page''
 info, but metadata can store information not related to or present on
@@ -255,9 +266,9 @@ colon, or a newline followed multiple lines indented with whitespace:
 
 @example
 author:
-    Mary Maryland
-    and
-    Alan Smithee
+	Mary Maryland
+	and
+	Alan Smithee
 @end example
 
 Metadata keys are case-insensitive, e.g. @code{Title} is the same as
@@ -286,8 +297,11 @@ demoting the outline level of a heading.
 A scene begins with a scene heading.
 
 Scene headings begin with a prefix, specified in
-@code{fountain-scene-heading-prefix-list}, which defaults to
-@code{INT, EXT, EST, INT./EXT., INT/EXT, I/E}.
+@code{fountain-scene-heading-prefix-list}, which defaults to:
+
+@example
+INT, EXT, EST, INT./EXT., INT/EXT, I/E
+@end example
 
 Each prefix may be followed by a dot and/or a space, so the following
 are equivalent:
@@ -304,9 +318,9 @@ entries are case-insensitive.
 @end defopt
 
 @defopt fountain-scene-heading-suffix-sep
-This option allows setting the separator (a regular expression) between
-the scene location and time of day. The default @code{ --? } allows either
-@samp{ - } or @samp{ -- }.
+This option allows setting the separator (a regular expression)
+between the scene location and time of day. The default @code{ --? }
+allows either one or two dashes.
 @end defopt
 
 @xref{Scene Heading Completion}.
@@ -432,7 +446,6 @@ INT. FISHING TRAWLER - DAY
 
 Synopses are not included by most export tools.
 
-
 @node Center Text
 @unnumberedsec Center Text
 
@@ -457,7 +470,7 @@ giving the writer a bird's eye view of the story and structure at a
 moments notice.
 
 There are many ways to approach writing a screenplay. Here's one example
-of how to use Fountain Mode to Outline a script.
+of how to use @program to Outline a script.
 
 @example
 # Act
@@ -492,7 +505,7 @@ keyboard shortcuts.
 Note: all text contained within the fold is carried to the new location.
 
 Just as there are many ways to tell a story, there are many ways to
-outline a script. Because Fountain Mode uses plaintext, it does not
+outline a script. Because @program uses plaintext, it does not
 force the writer into a single way of working. Possible structures are
 limited only by one's imagination.
 
@@ -538,8 +551,8 @@ One of the nicest things about using a dedicated scriptwriting program
 is that it helps you type less of the things you need to type a lot.
 
 @menu
-* Scene Heading Completion::    Complete times and places.
-* Character Name Completion::   For every time someone speaks.
+* Scene Heading Completion::	Complete times and places.
+* Character Name Completion::	For every time someone speaks.
 @end menu
 
 @node Scene Heading Completion
@@ -649,7 +662,7 @@ JOHN|
 @node Do What I Mean
 @unnumbered Do What I Mean
 
-Like many scriptwriting programs, in Fountain Mode pressing @code{TAB}
+Like many scriptwriting programs, in @program pressing @code{TAB}
 will do the thing you mean depending on context.
 
 This all might seem complicated, but the idea is by covering all the
@@ -674,7 +687,8 @@ If point is at a note, cycle visibility of that note.
 @item
 If point is at the end of line, call @code{completion-at-point}.
 @item
-If point is a scene heading or section heading, cycle visibility of that heading.
+If point is a scene heading or section heading, cycle visibility of
+that heading.
 @end enumerate
 
 @node Scene Numbering
@@ -690,12 +704,25 @@ If point is a scene heading or section heading, cycle visibility of that heading
 @node Exporting
 @unnumbered Exporting
 
-Exporting a script in Fountain Mode is handled by one or more external
-command-line tools. By defining an ``export profile'', you're able to
-easily interface with an external tool from within Emacs.
+Exporting a script in @program is handled by one or more external
+command-line tools. Here are some recommended export tools:
 
-Essentiall an export profile is just a shell command, interpolated with
-a selection of values.
+@itemize
+@item
+@uref{https://github.com/ifrost/afterwriting-labs, Afterwriting}
+@item
+@uref{https://github.com/Wraparound/wrap, Wrap}
+@item
+@uref{https://github.com/vilcans/screenplain, Screenplain}
+@item
+@uref{https://github.com/olivertaylor/Textplay, Textplay}
+@footnote{Requires @uref{https://www.princexml.com, PrinceXML} for PDF
+export.}
+@end itemize
+
+By defining an ``export profile'', you can easily interface with an
+external tool from within Emacs. A profile is essentially a shell
+command, interpolated with a selection of values:
 
 @itemize
 @item
@@ -705,9 +732,9 @@ a selection of values.
 @item
 @code{%n} is the @code{user-full-name}
 @item
-@code{%t} is the title (from Script @ref{Metadata})
+@code{%t} is the title (@xref{Metadata})
 @item
-@code{%a} is the author (from Script @ref{Metadata})
+@code{%a} is the author (@xref{Metadata})
 @item
 @code{%F} is the current date in ISO format
 @item
@@ -716,22 +743,25 @@ a selection of values.
 
 @defun fountain-export-command
 This command, bound to @code{C-c C-e} by default, will prompt for an
-export profile.
+export profile. The first profile is considered default, so just
+hitting RET is a quick way to export in your usual way.
 @end defun
 
-@itemize
-@item
-@uref{https://github.com/ifrost/afterwriting-labs, Afterwriting}
-(JavaScript)
-@item
-@uref{https://github.com/Wraparound/wrap, Wrap} (Go)
-@item
-@uref{https://github.com/vilcans/screenplain, Screenplain} (Python 3)
-@item
-@uref{https://github.com/olivertaylor/Textplay, Textplay} (Ruby)
-@footnote{Requires @uref{https://www.princexml.com, PrinceXML} for PDF
-export.}
-@end itemize
+@defun fountain-export-view
+This command, bound to @code{C-c C-v} by default, attempts to open the
+last exported file. This works by finding the other most recently
+modified file in the current directory matching the current file
+base-name.
+@end defun
+
+@node Donations
+@unnumbered Donations
+
+@program is written and maintained by @theauthor and contributors.
+
+If you would like to support development, donations are accepted via
+@uref{https://github.com/sponsors/rnkn, GitHub} and
+@uref{https://liberapay.com/rnkn/, Liberapay}.
 
 @node Indexes
 @unnumbered Indexes
@@ -744,7 +774,7 @@ export.}
 @node Index of Commands
 @unnumberedsec Index of Commands
 
-@printindex cp
+@printindex fn
 
 @node Index of Variables
 @unnumberedsec Index of Variables
