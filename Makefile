@@ -42,11 +42,11 @@ compile:
 manuals: info-manual html-manual pdf-manual
 
 info-manual:
-	makeinfo ${TEXI_FILE} --output ${INFO_FILE}
+	makeinfo --output ${INFO_FILE} ${TEXI_FILE}
 	install-info ${INFO_FILE} dir
 
 html-manual:
-	makeinfo --force --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
+	makeinfo --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
 
 pdf-manual:
 	texi2pdf --clean ${TEXI_FILE}
