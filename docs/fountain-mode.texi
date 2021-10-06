@@ -89,7 +89,7 @@ The public @program repository is hosted on
 * Pagination::			Counting a navigating script pages.
 * Exporting::			Sharing your great writing!
 * Donations::			Support @program development.
-* Indexes::
+* Indexes::			What are you looking for?
 @end menu
 
 @node Overview
