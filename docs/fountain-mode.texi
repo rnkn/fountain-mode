@@ -271,8 +271,8 @@ author:
 	Alan Smithee
 @end example
 
-Metadata keys are case-insensitive, e.g. @code{Title} is the same as
-@code{title}.
+Metadata keys are case-insensitive, e.g. @samp{Title} is the same as
+@samp{title}.
 
 @node Section Headings
 @unnumberedsec Section Headings
@@ -319,7 +319,7 @@ entries are case-insensitive.
 
 @defopt fountain-scene-heading-suffix-sep
 This option allows setting the separator (a regular expression)
-between the scene location and time of day. The default @code{ --? }
+between the scene location and time of day. The default @samp{ --? }
 allows either one or two dashes.
 @end defopt
 
@@ -462,8 +462,8 @@ Synopses are not included by most export tools.
 There are five levels of section headings. Scene headings count as the
 sixth level headings.
 
-Cycle an individual subtree visibility with @code{TAB}. Cycle global
-outline visibility with @code{S-TAB} (shift-tab) or @code{C-u TAB}.
+Cycle an individual subtree visibility with @kbd{TAB}. Cycle global
+outline visibility with @kbd{S-TAB} (shift-tab) or @kbd{C-u TAB}.
 
 Acts, Sequences, Sections, and Scenes can be given meaningful titles,
 giving the writer a bird's eye view of the story and structure at a
@@ -547,7 +547,7 @@ typewriters, stick to underlining.
 @node Autocompletion
 @unnumbered Autocompletion
 
-One of the nicest things about using a dedicated scriptwriting program
+One of the nicest things about using a dedicated screenwriting program
 is that it helps you type less of the things you need to type a lot.
 
 @menu
@@ -565,7 +565,7 @@ from @code{fountain-scene-heading-prefix-list} like so:
 INT. |
 @end example
 
-@code{TAB} will offer completions of previously used locations.
+@kbd{TAB} will offer completions of previously used locations.
 
 If the cursor is at the time-of-day, like so:
 
@@ -573,13 +573,13 @@ If the cursor is at the time-of-day, like so:
 INT. SUBMARINE - |
 @end example
 
-@code{TAB} will offer completions from
+@kbd{TAB} will offer completions from
 @code{fountain-scene-heading-suffix-list}.
 
 @node Character Name Completion
 @unnumberedsec Character Name Completion
 
-The most basic use of this is when pressing @code{TAB} on an empty line.
+The most basic use of this is when pressing @kbd{TAB} on an empty line.
 If there's an empty line above, this will offer to autocomplete a
 character name. Character names are suggested in the order:
 
@@ -595,11 +595,11 @@ the remaining characters in the script in order of frequency (default if
 there are not yet speaking characters in the current scene).
 @end enumerate
 
-@code{TAB} will also offer character name completion if a line has a
+@kbd{TAB} will also offer character name completion if a line has a
 partial character name.
 
 When the cursor is after a character name and opening parenthesis,
-@code{TAB} will offer completions from
+@kbd{TAB} will offer completions from
 @code{fountain-character-extension-list} plus
 @code{fountain-continued-dialog-string}.
 
@@ -607,7 +607,7 @@ When the cursor is after a character name and opening parenthesis,
 MARY (|
 @end example
 
-When the cursor is at an empty line within dialogue, @code{TAB} will add
+When the cursor is at an empty line within dialogue, @kbd{TAB} will add
 an empty parenthetical.
 
 @example
@@ -616,7 +616,7 @@ MARY
 I'm hungry.
 @end example
 
-Likewise, if the cursor is within an empty parenthetical, @code{TAB}
+Likewise, if the cursor is within an empty parenthetical, @kbd{TAB}
 will remove the parenthetical.
 
 @example
@@ -626,7 +626,7 @@ I'm hungry.
 @end example
 
 When the cursor is at the end of a non-empty parenthetical, either
-inside or outside the closing parenthesis, @code{TAB} will move to the
+inside or outside the closing parenthesis, @kbd{TAB} will move to the
 beginning of the next line if the next line is non-empty, otherwise it
 will insert a newline.
 
@@ -638,7 +638,7 @@ I'm hungry.
 
 When the cursor is at the end of a non-empty line of dialogue, and the
 value of @code{fountain-dwim-insert-next-character} is non-nil,
-@code{TAB} will insert an empty line and the second-to-last previously
+@kbd{TAB} will insert an empty line and the second-to-last previously
 speaking character.
 
 @example
@@ -648,7 +648,7 @@ I'm hungry.|
 @end example
 
 The cursor will be left at the end of the next character, allowing
-successive presses of @code{TAB} to cycling through additional character
+successive presses of @kbd{TAB} to cycling through additional character
 completion candidates.
 
 @example
@@ -662,34 +662,35 @@ JOHN|
 @node Do What I Mean
 @unnumbered Do What I Mean
 
-Like many scriptwriting programs, in @program pressing @code{TAB}
-will do the thing you mean depending on context.
+Like many screenwriting programs, in @program pressing @kbd{TAB}
+will do the most convenient thing based on context.
+
+The most common use is triggering autocompletion. If the point is at a
+blank line or the end of a non-blank line, pressing @kbd{TAB} will
+call @code{completion-at-point}. @xref{Autocompletion}.
+
+In @program, @kbd{TAB} is also used to control outline visibility. So
+if point is at a scene or section heading, it will cycle visibility of
+that scene of section between collapsed and expanded. To allow for
+more control over outline cycling, if @kbd{TAB} is prefixed with
+@code{ARG}, call @code{fountain-outline-cycle} and pass @code{ARG}.
+@xref{Outlining}.
+
+@kbd{TAB} also helps working with parentheticals. If the point is at a
+blank line within dialogue, it will insert a parenthetical; if the
+point is inside an empty parenthetical, it will delete it, or if
+inside a non-empty parenthetical, move to a newline.
+
+If the point is at or inside a note, @kbd{TAB} will cycle visibility
+of that note between collapsed and expanded.
 
 This all might seem complicated, but the idea is by covering all the
 cases you don't have to think about it.
 
 @defun fountain-dwim
-This command, bound to @code{TAB} by default, will perform different
-actions based on context.
+This is the command you'll use the most. Bound to @kbd{TAB}, it will
+perform the most convenient action based on the current context.
 @end defun
-
-@enumerate
-@item
-If prefixed with ARG, call @code{fountain-outline-cycle} and pass ARG@.
-@item
-If point is inside an empty parenthetical, delete it.
-@item
-If point is inside a non-empty parenthetical, move to a newline.
-@item
-If point is at a blank line within dialogue, insert a parenthetical.
-@item
-If point is at a note, cycle visibility of that note.
-@item
-If point is at the end of line, call @code{completion-at-point}.
-@item
-If point is a scene heading or section heading, cycle visibility of
-that heading.
-@end enumerate
 
 @node Scene Numbering
 @unnumbered Scene Numbering
@@ -742,16 +743,15 @@ command, interpolated with a selection of values:
 @end itemize
 
 @defun fountain-export-command
-This command, bound to @code{C-c C-e} by default, will prompt for an
-export profile. The first profile is considered default, so just
-hitting RET is a quick way to export in your usual way.
+This command, bound to @kbd{C-c C-e}, will prompt for an export
+profile. The first profile is considered default, so just hitting RET
+is a quick way to export in your usual way.
 @end defun
 
 @defun fountain-export-view
-This command, bound to @code{C-c C-v} by default, attempts to open the
-last exported file. This works by finding the other most recently
-modified file in the current directory matching the current file
-base-name.
+This command, bound to @kbd{C-c C-v}, attempts to open the last
+exported file. This works by finding the other most recently modified
+file in the current directory matching the current file base-name.
 @end defun
 
 @node Donations
