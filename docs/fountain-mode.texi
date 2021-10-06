@@ -61,7 +61,7 @@ plain-text format designed to be easily readable and editable,
 portable and future-proof, and to look as much like a script as
 possible.
 
-This is the @program Manual updated for version @version.
+This is the @program Manual updated for version @version@.
 
 @ifhtml
 Check out the
@@ -117,7 +117,7 @@ brainstorming, capturing ideas and omitting a part of the script
 without deleting it. @xref{Synopses}, @ref{Notes}, and @ref{Comments}.
 These elements are not usually included in the formatted output.
 
-All of @program's capabilities are accessible via the menu, and all
+All of @program@'s capabilities are accessible via the menu, and all
 customization is performed via the @code{Fountain} option group.
 @xref{(emacs) Customization Groups}.
 
@@ -182,7 +182,7 @@ move this file into your @code{load-path} and add the following to your
 (require 'fountain-mode)
 @end example
 
-If you wish to contribute to or alter @program's code, clone the
+If you wish to contribute to or alter @program@'s code, clone the
 repository into your load-path and require as above:
 
 @example
@@ -669,7 +669,7 @@ The most common use is triggering autocompletion. If the point is at a
 blank line or the end of a non-blank line, pressing @kbd{TAB} will
 call @code{completion-at-point}. @xref{Autocompletion}.
 
-In @program, @kbd{TAB} is also used to control outline visibility. So
+In @program@, @kbd{TAB} is also used to control outline visibility. So
 if point is at a scene or section heading, it will cycle visibility of
 that scene of section between collapsed and expanded. To allow for
 more control over outline cycling, if @kbd{TAB} is prefixed with
@@ -733,9 +733,9 @@ command, interpolated with a selection of values:
 @item
 @code{%n} is the @code{user-full-name}
 @item
-@code{%t} is the title (@xref{Metadata})
+@code{%t} is the title (@xref{Metadata}.)
 @item
-@code{%a} is the author (@xref{Metadata})
+@code{%a} is the author (@xref{Metadata}.)
 @item
 @code{%F} is the current date in ISO format
 @item
