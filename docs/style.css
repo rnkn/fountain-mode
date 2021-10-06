@@ -1,21 +1,28 @@
 html {
 	margin: 0;
 	padding: 0;
-	background-color: white;
+	background-color: #fff;
 }
 
 body {
 	font-family: Helvetica, Arial, sans-serif;
 	font-size: 16px;
-	line-height: 1.2;
+	line-height: 1.4;
 	max-width: 80ex;
 	margin: 1em auto;
-	background-color: white;
+	background-color: #fff;
 }
 
-pre, code {
-	font-family: "Courier", monospace;
-	font-size: 14px;
+pre, code, samp, kbd {
+	font-size: 0.9em;
+}
+
+kbd {
+	padding: 2px;
+	background-color: #f9f9f9;
+	border-width: 1px;
+	border-style: solid;
+	font-style: revert;
 }
 
 img {
