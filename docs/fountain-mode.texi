@@ -61,7 +61,7 @@ plain-text format designed to be easily readable and editable,
 portable and future-proof, and to look as much like a script as
 possible.
 
-This is the @program Manual updated for version @version@.
+This is the @program Manual updated for version @version{}.
 
 @ifhtml
 Check out the
@@ -70,7 +70,7 @@ Check out the
 @end ifhtml
 
 The public @program repository is hosted on
-@uref{@repository, GitHub}.
+@uref{@repository{}, GitHub}.
 
 @end ifnottex
 
@@ -83,8 +83,8 @@ The public @program repository is hosted on
 * Syntax Highlighting::		Differentiate all the elements with colors.
 * Element Aligning::		WYSIWYG visual indentation of script elements.
 * Text Emphasis::		Bold, italic and underline.
-* Autocompletion::		Completion of frequently used text.
 * Do What I Mean::		Traditional TAB-style autocompletion.
+* Autocompletion::		Completion of frequently used text.
 * Scene Numbering::		Adding numbers to a script scenes.
 * Pagination::			Counting a navigating script pages.
 * Exporting::			Sharing your great writing!
@@ -117,7 +117,7 @@ brainstorming, capturing ideas and omitting a part of the script
 without deleting it. @xref{Synopses}, @ref{Notes}, and @ref{Comments}.
 These elements are not usually included in the formatted output.
 
-All of @program@'s capabilities are accessible via the menu, and all
+All of @program{}'s capabilities are accessible via the menu, and all
 customization is performed via the @code{Fountain} option group.
 @xref{(emacs) Customization Groups}.
 
@@ -182,11 +182,11 @@ move this file into your @code{load-path} and add the following to your
 (require 'fountain-mode)
 @end example
 
-If you wish to contribute to or alter @program@'s code, clone the
+If you wish to contribute to or alter @program{}'s code, clone the
 repository into your load-path and require as above:
 
 @example
-git clone @repository
+git clone @repository{}
 @end example
 
 @xref{(emacs) Lisp Libraries}.
@@ -518,7 +518,43 @@ in indirect buffers.
 @node Navigation
 @unnumbered Navigation
 
-@tbc
+@defun fountain-outline-next
+Bound to @kbd{C-M-n}, move to the next visible heading line. Also
+@code{fountain-outline-previous}, bound to @kbd{C-M-p}.
+@end defun
+
+@defun fountain-outline-forward
+Bound to @kbd{C-M-f}, move forward to the ARG'th subheading at same
+level as this one. Also @code{fountain-outline-backward}, bound to
+@kbd{C-M-b}.
+@end defun
+
+@defun fountain-outline-beginning
+Bound to @kbd{C-M-a}, move to the beginning of the current subtree.
+@end defun
+
+@defun fountain-outline-up
+Bound to @kbd{C-M-u}, move to the visible heading line of which the
+present line is a subheading.
+@end defun
+
+@defun fountain-forward-character
+Bound to @kbd{M-n}, goto Nth next character (or Nth previous is N is
+negative). Also @code{fountain-backward-character}, bound to @kbd{M-p}.
+@end defun
+
+@defun fountain-forward-page
+Bound to @kbd{C-x ]}, move to Nth next page (or Nth previous if N is
+negative). Also @code{fountain-backward-page}, bound to @kbd{C-x [}.
+@end defun
+
+@defun fountain-goto-scene
+Bound to @kbd{M-g s}, move point to Nth scene in current buffer.
+@end defun
+
+@defun fountain-goto-page
+Bound to @kbd{M-g p}, move point to Nth page in current buffer.
+@end defun
 
 @node Syntax Highlighting
 @unnumbered Syntax Highlighting
@@ -544,11 +580,51 @@ Bold text is surrounded by @code{**double asterisks**}
 For the writer pursists who want to work the way our ancestors did on
 typewriters, stick to underlining.
 
+@node Do What I Mean
+@unnumbered Do What I Mean
+
+Like many screenwriting programs, in @program pressing @kbd{TAB}
+will do the most convenient thing based on context.
+
+The most common use is triggering autocompletion. If the point is at a
+blank line or the end of a non-blank line, pressing @kbd{TAB} will
+call @code{completion-at-point}. @xref{Autocompletion}.
+
+In @program{}, @kbd{TAB} is also used to control outline visibility. So
+if point is at a scene or section heading, it will cycle visibility of
+that scene of section between collapsed and expanded. To allow for
+more control over outline cycling, if @kbd{TAB} is prefixed with
+@code{ARG}, call @code{fountain-outline-cycle} and pass @code{ARG}.
+@xref{Outlining}.
+
+@kbd{TAB} also helps working with parentheticals. If the point is at a
+blank line within dialogue, it will insert a parenthetical; if the
+point is inside an empty parenthetical, it will delete it, or if
+inside a non-empty parenthetical, move to a newline.
+
+If the point is at or inside a note, @kbd{TAB} will cycle visibility
+of that note between collapsed and expanded.
+
+This all might seem complicated, but the idea is by covering all the
+cases you don't have to think about it.
+
+@defun fountain-dwim
+This is the command you'll use the most. Bound to @kbd{TAB}, it will
+perform the most convenient action based on the current context.
+@end defun
+
 @node Autocompletion
 @unnumbered Autocompletion
 
-One of the nicest things about using a dedicated screenwriting program
-is that it helps you type less of the things you need to type a lot.
+One of the nice things about using a dedicated screenwriting program
+is that it helps you type less of the things you need to type a
+lot. @program provides autocompletion for scene headings and character
+names.
+
+@defun fountain-completion-update
+This command, bound to @kbd{C-c C-x a} will update the completion
+candidates for current buffer.
+@end defun
 
 @menu
 * Scene Heading Completion::	Complete times and places.
@@ -659,39 +735,6 @@ I'm hungry.
 JOHN|
 @end example
 
-@node Do What I Mean
-@unnumbered Do What I Mean
-
-Like many screenwriting programs, in @program pressing @kbd{TAB}
-will do the most convenient thing based on context.
-
-The most common use is triggering autocompletion. If the point is at a
-blank line or the end of a non-blank line, pressing @kbd{TAB} will
-call @code{completion-at-point}. @xref{Autocompletion}.
-
-In @program@, @kbd{TAB} is also used to control outline visibility. So
-if point is at a scene or section heading, it will cycle visibility of
-that scene of section between collapsed and expanded. To allow for
-more control over outline cycling, if @kbd{TAB} is prefixed with
-@code{ARG}, call @code{fountain-outline-cycle} and pass @code{ARG}.
-@xref{Outlining}.
-
-@kbd{TAB} also helps working with parentheticals. If the point is at a
-blank line within dialogue, it will insert a parenthetical; if the
-point is inside an empty parenthetical, it will delete it, or if
-inside a non-empty parenthetical, move to a newline.
-
-If the point is at or inside a note, @kbd{TAB} will cycle visibility
-of that note between collapsed and expanded.
-
-This all might seem complicated, but the idea is by covering all the
-cases you don't have to think about it.
-
-@defun fountain-dwim
-This is the command you'll use the most. Bound to @kbd{TAB}, it will
-perform the most convenient action based on the current context.
-@end defun
-
 @node Scene Numbering
 @unnumbered Scene Numbering
 
@@ -701,6 +744,11 @@ perform the most convenient action based on the current context.
 @unnumbered Pagination
 
 @tbc
+
+@defun fountain-count-pages
+Bound @kbd{C-c C-p}, return both the current page and the total page
+count of the current buffer.
+@end defun
 
 @node Exporting
 @unnumbered Exporting
