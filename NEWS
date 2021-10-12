@@ -1,4 +1,4 @@
-* current
+* Version 3.5.2
 
 - Fix a longstanding bug where text within comments was fontified, e.g.
   /*comment*/ as italic
