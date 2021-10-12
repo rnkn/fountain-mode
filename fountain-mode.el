@@ -3069,7 +3069,7 @@ takes the form:
      ;; Synopses ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'synopsis highlight-elements) 'fountain-synopsis))
            (align (fountain--normalize-align-facespec fountain-align-synopsis)))
-       (cons (define-fountain-font-lock-matcher fountain-match-synopsis)
+       (cons (define-fountain-font-lock-matcher fountain-synopsis-regexp)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face nil invisible fountain-element-markup))
                (2 '(face fountain-non-printing) prepend))))
@@ -3082,7 +3082,7 @@ takes the form:
      ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'action highlight-elements) 'fountain-action))
            (align (fountain--normalize-align-facespec fountain-align-center)))
-       (cons (define-fountain-font-lock-matcher fountain-match-center)
+       (cons (define-fountain-font-lock-matcher fountain-center-regexp)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend)
@@ -3098,7 +3098,7 @@ takes the form:
      ;; Page-Break ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'page-break highlight-elements)
                    'fountain-page-break)))
-       (cons (define-fountain-font-lock-matcher fountain-match-page-break)
+       (cons (define-fountain-font-lock-matcher fountain-page-break-regexp)
                  `((0 '(face ,face)))))
 
      ;; Lyrics ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
