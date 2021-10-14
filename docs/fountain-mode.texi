@@ -22,7 +22,10 @@
 https://github.com/rnkn/fountain-mode
 @end macro
 @macro theauthor
-@uref{https://bydasein.com, Paul W. Rankin}
+Paul W. Rankin
+@end macro
+@macro authoremail
+@email{pwr@@bydasein.com}
 @end macro
 @macro tbc
 Sorry, this node is not yet written. You can help by submitting a patch!
@@ -88,7 +91,7 @@ The public @program repository is hosted on
 * Scene Numbering::		Adding numbers to a script scenes.
 * Pagination::			Counting a navigating script pages.
 * Exporting::			Sharing your great writing!
-* Donations::			Support @program development.
+* Contact::		        Help is never far away.
 * Indexes::			What are you looking for?
 @end menu
 
@@ -802,10 +805,24 @@ exported file. This works by finding the other most recently modified
 file in the current directory matching the current file base-name.
 @end defun
 
-@node Donations
-@unnumbered Donations
+@node Contact
+@unnumbered Contact
 
-@program is written and maintained by @theauthor and contributors.
+If you run into any trouble using @program, or you have a feature
+request, you can email the maintainer @theauthor directly at
+@authoremail.
+
+For bugs, please ensure you can reproduce with:
+
+@example
+$ emacs -Q -l fountain-mode.el
+@end example
+
+You can also try the @code{#emacs} IRC channel on
+@uref{https://libera.chat, Libera.chat}, but please note that most
+users on the channel are unlikely to be screenwriters.
+
+Known issues are tracked with @code{FIXME} comments in the source.
 
 If you would like to support development, donations are accepted via
 @uref{https://github.com/sponsors/rnkn, GitHub} and
