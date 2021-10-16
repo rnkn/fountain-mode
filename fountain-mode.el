@@ -105,9 +105,6 @@
 ;; If you prefer the latest but perhaps unstable version, do the above
 ;; using [MELPA][2].
 
-;; Fountain Mode may be available via your system package manager; check at
-;; [Repology][3].
-
 
 ;; Advanced Installation
 ;; ---------------------
@@ -136,7 +133,6 @@
 
 ;; [1]: https://stable.melpa.org/#/fountain-mode
 ;; [2]: https://melpa.org/#/fountain-mode
-;; [3]: https://repology.org/project/emacs:fountain-mode/versions
 
 
 ;;; Code:
