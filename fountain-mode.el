@@ -2890,19 +2890,24 @@ The file is then passed to `dired-guess-default'."
 
 ;;; Font Lock ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro define-fountain-font-lock-matcher (fun)
-  "Define a `font-lock-mode' matcher for FUN."
-  (let ((fun-name (intern (format "%s--font-lock" fun)))
+(defmacro define-fountain-font-lock-matcher (matcher)
+  "Define a `font-lock-mode' matcher for MATCHER.
+MATCHER must be a lisp form function call or regular expression."
+  (let ((fun-name (intern (format "%s--font-lock" matcher)))
+        (linewise (listp matcher))
         (docstring (format "\
-Call `%s' on each line before LIMIT.
-Return non-nil if match occurs." fun)))
+Match `%s' before LIMIT.
+Return non-nil if match occurs." matcher)))
     `(defun ,fun-name (limit)
        ,docstring
        (let (match)
          (while (and (null match)
                      (< (point) limit))
-           (when ,(list fun) (setq match t))
-           (forward-line))
+           (when (and (not (fountain-comment-p))
+                      ,(if linewise matcher
+                         (list 'looking-at matcher)))
+             (setq match t))
+           ,(list (if linewise 'forward-line 'forward-char)))
          match))))
 
 (defun fountain-toggle-highlight-element (element)
@@ -2979,14 +2984,6 @@ takes the form:
                display nil invisible fountain-element-markup)
       '(face nil display nil invisible nil))))
 
-;; FIXME: a comment without whitespace will be fontified as italic, e.g.
-;;     /*comment*/
-;;
-;; This is especially problematic when `fountain-hide-emphasis-markup' is
-;; non-nil.
-;;
-;; Comments should not receive any fontification, i.e. the
-;; `fountain-comment' face should override any previous faces.
 (defun fountain-init-font-lock ()
   "Return a new list of `font-lock-keywords'."
   (let ((highlight-elements
@@ -2998,7 +2995,7 @@ takes the form:
                    '(fountain--get-section-heading-face)))
            (align (fountain--normalize-align-facespec fountain-align-section-heading)))
        (cons 'eval
-             `(cons fountain-section-heading-regexp
+             `(cons (define-fountain-font-lock-matcher fountain-section-heading-regexp)
                     '((0 (list 'face ,face
                                'line-prefix (quote ,align)
                                'wrap-prefix (quote ,align)))
@@ -3011,7 +3008,7 @@ takes the form:
            (align (fountain--normalize-align-facespec fountain-align-scene-heading)))
        (cons 'eval
              `(cons
-               (define-fountain-font-lock-matcher fountain-match-scene-heading)
+               (define-fountain-font-lock-matcher (fountain-match-scene-heading))
                '((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                  (1 '(face fountain-non-printing
                            invisible fountain-element-markup)
@@ -3024,7 +3021,7 @@ takes the form:
      ;; Action ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'action highlight-elements) 'fountain-action))
            (align (fountain--normalize-align-facespec fountain-align-action)))
-       (cons (define-fountain-font-lock-matcher fountain-match-action)
+       (cons (define-fountain-font-lock-matcher (fountain-match-action))
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend t))))
@@ -3033,7 +3030,7 @@ takes the form:
      (let ((face (when (memq 'character highlight-elements)
                    'fountain-character))
            (align (fountain--normalize-align-facespec fountain-align-character)))
-       (cons (define-fountain-font-lock-matcher fountain-match-character)
+       (cons (define-fountain-font-lock-matcher (fountain-match-character))
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend t)
@@ -3043,20 +3040,20 @@ takes the form:
      (let ((face (when (memq 'dialog highlight-elements)
                    'fountain-dialog))
            (align (fountain--normalize-align-facespec fountain-align-dialog)))
-       (cons (define-fountain-font-lock-matcher fountain-match-dialog)
+       (cons (define-fountain-font-lock-matcher (fountain-match-dialog))
              `(0 '(face ,face line-prefix ,align wrap-prefix ,align))))
 
      ;; Parentheticals ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'paren highlight-elements)
                    'fountain-paren))
            (align (fountain--normalize-align-facespec fountain-align-paren)))
-       (cons (define-fountain-font-lock-matcher fountain-match-paren)
+       (cons (define-fountain-font-lock-matcher (fountain-match-paren))
              `(0 '(face ,face line-prefix ,align wrap-prefix ,align))))
 
      ;; Transitions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'trans highlight-elements) 'fountain-trans))
            (align (fountain--normalize-align-facespec fountain-align-trans)))
-       (cons (define-fountain-font-lock-matcher fountain-match-trans)
+       (cons (define-fountain-font-lock-matcher (fountain-match-trans))
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend t))))
@@ -3064,20 +3061,20 @@ takes the form:
      ;; Synopses ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'synopsis highlight-elements) 'fountain-synopsis))
            (align (fountain--normalize-align-facespec fountain-align-synopsis)))
-       (cons (define-fountain-font-lock-matcher fountain-match-synopsis)
+       (cons (define-fountain-font-lock-matcher fountain-synopsis-regexp)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face nil invisible fountain-element-markup))
                (2 '(face fountain-non-printing) prepend))))
 
      ;; Notes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'note highlight-elements) 'fountain-note)))
-       (cons (define-fountain-font-lock-matcher fountain-match-note)
+       (cons (define-fountain-font-lock-matcher (fountain-match-note))
              `(0 '(face ,face) t)))
 
      ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'action highlight-elements) 'fountain-action))
            (align (fountain--normalize-align-facespec fountain-align-center)))
-       (cons fountain-center-regexp
+       (cons (define-fountain-font-lock-matcher fountain-center-regexp)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend)
@@ -3086,42 +3083,42 @@ takes the form:
 
      ;; Metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (memq 'metadata highlight-elements)))
-       (cons (define-fountain-font-lock-matcher fountain-match-metadata)
+       (cons (define-fountain-font-lock-matcher (fountain-match-metadata))
              `((0 '(face ,(when face 'fountain-metadata-key)))
                (2 '(face ,(when face 'fountain-metadata-value)) t t))))
 
      ;; Page-Break ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'page-break highlight-elements)
                    'fountain-page-break)))
-       (cons fountain-page-break-regexp
+       (cons (define-fountain-font-lock-matcher fountain-page-break-regexp)
                  `((0 '(face ,face)))))
 
      ;; Lyrics ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-lyrics-regexp
+     (cons (define-fountain-font-lock-matcher fountain-lyrics-regexp)
            '((1 '(face fountain-non-printing invisible fountain-element-markup)
                 prepend)
              (2 '(face italic) prepend)))
 
      ;; Underline ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-underline-regexp
+     (cons (define-fountain-font-lock-matcher fountain-underline-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face underline) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend)))
 
      ;; Italic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-italic-regexp
+     (cons (define-fountain-font-lock-matcher fountain-italic-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face italic) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend)))
 
      ;; Bold ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-bold-regexp
+     (cons (define-fountain-font-lock-matcher fountain-bold-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face bold) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend)))
 
      ;; Bold-Italic ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     (cons fountain-bold-italic-regexp
+     (cons (define-fountain-font-lock-matcher fountain-bold-italic-regexp)
            '((2 '(face nil invisible fountain-emphasis-markup) prepend)
              (1 '(face bold-italic) prepend)
              (4 '(face nil invisible fountain-emphasis-markup) prepend))))))

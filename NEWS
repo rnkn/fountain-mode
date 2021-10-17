@@ -1,3 +1,9 @@
+* current
+
+- Reimplement fix for bug where text within comments was fontified, e.g.
+  /*comment*/ as italic (this time checking for free variables in
+  byte-compile)
+
 * Version 3.5.3
 
 - Rollback version 3.5.2, which introduced a compilation bug causing
