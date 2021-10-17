@@ -291,7 +291,7 @@ The default \"%P - %n %x\" inserts something like:
                       (const :tag "Metadata" metadata)
                       (const :tag "Page Breaks" page-break)))
   :group 'fountain
-  :set 'fountain--set-and-refresh-font-lock)
+  :set #'fountain--set-and-refresh-font-lock)
 
 (defvar fountain-highlight-elements-always
   '(underline italic bold bold-italic lyrics)
@@ -992,9 +992,8 @@ as a directory variable."
   :group 'fountain
   :type '(repeat (string :tag "Character"))
   :link '(info-link "(emacs) Directory Variables")
-  :safe '(lambda (value)
-           (and (listp value)
-                (seq-every-p 'stringp value))))
+  :safe (lambda (value)
+          (and (listp value) (seq-every-p 'stringp value))))
 
 (defcustom fountain-completion-additional-locations
   nil
@@ -1008,9 +1007,8 @@ as a directory variable."
   :group 'fountain
   :type '(repeat (string :tag "Location"))
   :link '(info-link "(emacs) Directory Variables")
-  :safe '(lambda (value)
-           (and (listp value)
-                (seq-every-p 'stringp value))))
+  :safe (lambda (value)
+          (and (listp value) (seq-every-p 'stringp value))))
 
 (defun fountain-completion-get-characters ()
   "Return a list of characters for completion.
@@ -1956,9 +1954,8 @@ script may result in errors in output."
   "Character to separate scene numbers."
   :type '(choice (const nil)
                  (character ?-))
-  :safe '(lambda (value)
-           (or (null value)
-               (characterp value)))
+  :safe (lambda (value)
+          (or (null value) (characterp value)))
   :group 'fountain-scene-numbers)
 
 (defun fountain-scene-number-to-list (string)
