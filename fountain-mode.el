@@ -1179,6 +1179,7 @@ completion upon load."
   (when (eq major-mode 'fountain-mode)
     (fountain-completion-update)))
 
+;;;###autoload
 (define-minor-mode fountain-completion-auto-update-mode
   "Updates `fountain-mode' completion candidates when idle.
 Calls `fountain-completion-update' in `fountain-mode' buffers
