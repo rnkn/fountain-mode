@@ -4,7 +4,7 @@
 
 ;; Author: Paul W. Rankin <pwr@bydasein.com>
 ;; Keywords: wp, text
-;; Version: 3.5.4
+;; Version: 3.6.0
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
 ;; URL: https://github.com/rnkn/fountain-mode
 
@@ -171,6 +171,7 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              which-function-mode
              fountain-completion-update
              fountain-pagination-update
+             fountain-completion-auto-update-mode
              flyspell-mode))
 
 (define-obsolete-variable-alias 'fountain-script-format
@@ -981,6 +982,26 @@ Each element is a cons (NAME . OCCUR) where NAME is a string, and
 OCCUR is an integer representing the character's number of
 occurrences.")
 
+(defvar fountain--completion-auto-update-timer
+  nil
+  "Timer to run `fountain--completion-auto-update'.
+See `fountain-completion-auto-update-mode'.")
+
+(defcustom fountain-completion-auto-update-delay
+  5.0
+  "Idle delay in seconds before updating completion candidates.
+See `fountain-completion-auto-update-mode'."
+  :group 'fountain
+  :type 'number
+  :safe 'numberp)
+
+(defcustom fountain-completion-auto-update-lighter
+  " FnAC"
+  "Lighter for `fountain-completion-auto-update-mode'."
+  :group 'fountain
+  :type 'string
+  :safe 'stringp)
+
 (defcustom fountain-completion-additional-characters
   nil
   "List of additional character strings to offer for completion.
@@ -1114,6 +1135,8 @@ Added to `completion-at-point-functions'."
 
 (defun fountain-completion-update ()
   "Update completion candidates for current buffer.
+Enable `fountain-completion-auto-update-mode' to automatically
+update completion candidates when idle.
 
 While `fountain--completion-locations' are left unsorted for
 `completion-at-point' to perform sorting,
@@ -1151,6 +1174,25 @@ completion upon load."
             (seq-sort (lambda (a b) (< (cdr b) (cdr a)))
                       fountain--completion-characters))))
   (message "Completion candidates updated"))
+
+(defun fountain--completion-auto-update ()
+  (when (eq major-mode 'fountain-mode)
+    (fountain-completion-update)))
+
+(define-minor-mode fountain-completion-auto-update-mode
+  "Updates `fountain-mode' completion candidates when idle.
+Calls `fountain-completion-update' in `fountain-mode' buffers
+after `fountain-completion-auto-update-delay'."
+  :init-value nil
+  :global t
+  :lighter fountain-completion-auto-update-lighter
+  (if fountain-completion-auto-update-mode
+      (setq fountain--completion-idle-timer
+            (run-with-idle-timer fountain-completion-auto-update-delay t
+                                 #'fountain--completion-auto-update))
+    (when (timerp fountain--completion-idle-timer)
+      (cancel-timer fountain--completion-idle-timer)
+      (setq fountain--completion-idle-timer nil))))
 
 
 ;;; Outlining ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3279,8 +3321,13 @@ takes the form:
     ["Insert Metadata..." auto-insert]
     ["Insert Synopsis" fountain-insert-synopsis]
     ["Insert Note" fountain-insert-note]
-    ["Update Auto-Completion" fountain-completion-update]
     "---"
+    ("Auto-Completion"
+     ["Update Auto-Completion" fountain-completion-update]
+     "---"
+     ["Update Auto-Completion When Idle" fountain-completion-auto-update-mode
+      :style toggle
+      :selected fountain-completion-auto-update-mode])
     ("Syntax Highlighting"
      ["Section Headings"
       (fountain-toggle-highlight-element 'section-heading)
