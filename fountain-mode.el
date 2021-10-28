@@ -311,7 +311,7 @@ Otherwise, only operate on outline elements."
 ;;; Faces ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-faces ()
-  "Faces used in `fountain-mode'
+  "Faces used in `fountain-mode'.
 You can specify which elements are highlighted with the option
 `fountain-highlight-elements'."
   :prefix "fountain-"
@@ -1121,7 +1121,8 @@ While `fountain--completion-locations' are left unsorted for
 For more information on character completion sorting, see
 `fountain-completion-get-characters'.
 
-Add to `fountain-mode-hook' to have completion upon load."
+Add this function to option `fountain-mode-hook' to have
+completion upon load."
   (interactive)
   (setq fountain--completion-locations nil
         fountain--completion-characters nil)
@@ -1294,19 +1295,21 @@ Return non-nil if empty newline was inserted."
   (fountain-outline-move-subtree-down (- n)))
 
 (defun fountain-outline-flag-notes (start end)
+  "Collapse notes between START and END."
   (save-excursion
     (goto-char start)
     (while (re-search-forward fountain-note-regexp end 'move)
       (outline-flag-region (match-beginning 1) (match-end 1)
-                           fountain-outline-fold-notes))))
+                           fountain-outline-hide-notes))))
 
 (defun fountain-outline-show-subtree ()
+  "Show everything after this heading at deeper levels."
   (interactive)
   (outline-flag-subtree nil)
   (save-excursion
     (while (re-search-forward fountain-note-regexp nil 'move)
            (outline-flag-region (match-beginning 1) (match-end 1)
-                                fountain-outline-fold-notes))))
+                                fountain-outline-hide-notes))))
 
 (defun fountain-outline-set-buffer-state (state &optional silent)
   "Set buffer outline visibilty to outline level for STATE.
@@ -1903,9 +1906,6 @@ the buffer."
 (defcustom fountain-scene-numbers-display-in-margin
   nil
   "If non-nil, display scene numbers in the right margin.
-
-If nil, do not change scene number display.
-
 This option does affect file contents."
   :group 'fountain-scene-numbers
   :type 'boolean
@@ -2259,16 +2259,15 @@ you may get incorrect output."
 
 (defcustom fountain-pagination-max-change
   150
-  "Maximum change in single page character size before pagination
-properties are considered invalid."
+  "Maximum change in page characters before invalidating pagination."
   :group 'fountain-pagination
   :type 'integer
   :safe 'integerp)
 
 (defcustom fountain-pagination-break-sentences
   nil
-  "When non-nil, pagination disregards sentences (i.e. page
-breaks occur mid-sentence)."
+  "When non-nil, pagination disregards sentences.
+That is, page breaks may occur mid-sentence."
   :group 'fountain-pagination
   :type 'boolean
   :safe 'booleanp)
@@ -2638,7 +2637,8 @@ to suit your preferred tool's pagination method."
 
 (defun fountain-count-pages (&optional interactive)
   "Return the current page of total page count of current buffer.
-When called interactively, return with `message'.
+When called interactively or with optional argument INTERACTIVE,
+return with `message'.
 
 This is an approximate calculation. Different export tools will
 paginate in slightly different ways. Customize options
@@ -3534,6 +3534,7 @@ regular expression."
 
 (require 'elec-pair)
 
+;; FIXME: improve this!
 (defun fountain-electric-pair-skip-self (char)
   "Return non-nil if syntax before that of CHAR is word syntax."
   (and electric-pair-preserve-balance
