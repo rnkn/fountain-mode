@@ -298,6 +298,18 @@ The default \"%P - %n %x\" inserts something like:
   '(underline italic bold bold-italic lyrics)
   "List of elements always highlighted with `font-lock-mode'.")
 
+(defcustom fountain-double-space-scene-headings
+  nil
+  "When non-nil, display an additional newline before scene headings.
+This option does not affect file contents.
+
+n.b. This option does not affect calculation of pagination, see
+instead `fountain-pagination-double-space-scene-headings'."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain
+  :set #'fountain--set-and-refresh-font-lock)
+
 (define-obsolete-variable-alias 'fountain-shift-all-elements
   'fountain-transpose-all-elements "`fountain-mode' 3.2")
 (defcustom fountain-transpose-all-elements
@@ -869,6 +881,14 @@ This option does not affect file contents."
     (beginning-of-line)
     (and (looking-at fountain-scene-heading-regexp)
          (fountain-blank-before-p))))
+
+(defun fountain-match-scene-heading-blank ()
+  "Match blank line directly before scene heading, nil otherwise."
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at fountain-scene-heading-regexp)
+         (fountain-blank-before-p)
+         (looking-back "\n" (line-beginning-position 0)))))
 
 (defun fountain-match-character (&optional loose)
   "Match character if point is at character, nil otherwise.
@@ -2317,7 +2337,10 @@ That is, page breaks may occur mid-sentence."
 
 (defcustom fountain-pagination-double-space-scene-headings
   t
-  "When non-nil, pagination counts scene headings as two lines."
+  "When non-nil, pagination counts scene headings as two lines.
+
+For displaying scene headings double-spaced, see
+`fountain-double-space-scene-headings'."
   :group 'fountain-pagination
   :type 'boolean
   :safe 'booleanp)
@@ -3061,6 +3084,11 @@ takes the form:
                  (9 (fountain--get-scene-number-facespec 9)  prepend t)
                 (10 (fountain--get-scene-number-facespec 10) prepend t)))))
 
+     (let ((display (when fountain-double-space-scene-headings "\n\n")))
+       (cons
+        (define-fountain-font-lock-matcher (fountain-match-scene-heading-blank))
+        `(0 '(face nil display ,display))))
+
      ;; Action ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'action highlight-elements) 'fountain-action))
            (align (fountain--normalize-align-facespec fountain-align-action)))
@@ -3394,6 +3422,11 @@ takes the form:
                              (not fountain-align-elements))
      :style toggle
      :selected fountain-align-elements]
+    ["Display Scene Headings Double-Spaced"
+     (customize-set-variable 'fountain-double-space-scene-headings
+                             (not fountain-double-space-scene-headings))
+     :style toggle
+     :selected fountain-double-space-scene-headings]
     ["Auto-Upcase Scene Headings"
      (customize-set-variable 'fountain-auto-upcase-scene-headings
                              (not fountain-auto-upcase-scene-headings))
@@ -3620,7 +3653,8 @@ regular expression."
   (setq-local completion-cycle-threshold t)
   (setq-local which-func-functions '(fountain-count-pages))
   (setq-local completion-at-point-functions '(fountain-completion-at-point))
-  (setq-local font-lock-extra-managed-props '(line-prefix wrap-prefix invisible))
+  (setq-local font-lock-extra-managed-props
+              '(line-prefix wrap-prefix display invisible))
   ;; FIXME: This should be temporary. Feels better to ensure appropriate
   ;; case-fold within each function.
   (setq case-fold-search t)
