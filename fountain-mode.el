@@ -1949,7 +1949,7 @@ the buffer."
 (defcustom fountain-scene-numbers-display-in-margin
   nil
   "If non-nil, display scene numbers in the right margin.
-This option does affect file contents."
+This option does not affect file contents."
   :group 'fountain-scene-numbers
   :type 'boolean
   :safe 'booleanp
