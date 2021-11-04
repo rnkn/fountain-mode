@@ -1,5 +1,7 @@
 * current
 
+- Implement option to display additional newline before scene headings
+  (available in menu as Display Scene Headings Double-Spaced)
 - Reimplement fix for bug where text within comments was fontified, e.g.
   /*comment*/ as italic (this time checking for free variables in
   byte-compile)
