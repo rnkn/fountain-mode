@@ -1019,7 +1019,7 @@ See `fountain-completion-auto-update-mode'."
   " FnAC"
   "Lighter for `fountain-completion-auto-update-mode'."
   :group 'fountain
-  :type 'string
+  :type '(choice (const :tag "No lighter" "") string)
   :safe 'stringp)
 
 (defcustom fountain-completion-additional-characters
