@@ -21,6 +21,7 @@ kbd {
 	border-width: 1px;
 	border-style: solid;
 	font-style: revert;
+	white-space: pre;
 }
 
 img {
