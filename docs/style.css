@@ -32,6 +32,16 @@ sup {
 	line-height: 0;
 }
 
+div.footnote h5 {
+	display: table-cell;
+	font-size: initial;
+}
+
+div.footnote p {
+	display: table-cell;
+	padding-left: 1em;
+}
+
 pre.menu-comment, pre.menu-preformatted {
 	font-family: initial;
 	margin: 0;
