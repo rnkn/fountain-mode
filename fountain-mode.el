@@ -808,8 +808,7 @@ This option does not affect file contents."
       (or (bobp)
           (progn (forward-line -1)
                  (or (and (bolp) (eolp))
-                     (progn (end-of-line)
-                            (forward-comment -1))))))))
+                     (fountain-comment-p)))))))
 
 (defun fountain-blank-after-p ()
   "Return non-nil if following line is blank or a comment."
@@ -819,7 +818,7 @@ This option does not affect file contents."
       (forward-line)
       (or (eobp)
           (and (bolp) (eolp))
-          (forward-comment 1)))))
+          (fountain-comment-p)))))
 
 (defun fountain-in-dialog-maybe ()
   "Return non-nil if point may be in dialogue."
