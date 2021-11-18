@@ -16,7 +16,7 @@
 @w{Fountain Mode}
 @end macro
 @macro version
-3.5
+3.6
 @end macro
 @macro repository
 https://github.com/rnkn/fountain-mode
