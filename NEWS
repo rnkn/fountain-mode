@@ -5,6 +5,9 @@
 - Reimplement fix for bug where text within comments was fontified, e.g.
   /*comment*/ as italic (this time checking for free variables in
   byte-compile)
+- Remove old obsolete option aliases
+- Improve special character syntax classes
+- Some improvements to Info docs
 
 * Version 3.5.3
 
