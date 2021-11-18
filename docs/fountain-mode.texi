@@ -320,7 +320,7 @@ This options allows setting your own scene heading prefixes. These
 entries are case-insensitive.
 @end defopt
 
-@defopt fountain-scene-heading-suffix-sep
+@defopt fountain-scene-heading-suffix-separator
 This option allows setting the separator (a regular expression)
 between the scene location and time of day. The default @samp{ --? }
 allows either one or two dashes.
