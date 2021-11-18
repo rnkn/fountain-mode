@@ -174,8 +174,6 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              fountain-completion-auto-update-mode
              flyspell-mode))
 
-(define-obsolete-variable-alias 'fountain-script-format
-  'fountain-default-script-format "`fountain-mode' 3.0")
 (defcustom fountain-default-script-format
   "screenplay"
   "Default script format.
@@ -203,8 +201,6 @@ to remove any previous continued dialogue."
   :type 'string
   :safe 'stringp)
 
-(define-obsolete-variable-alias 'fountain-hide-emphasis-delim
-  'fountain-hide-emphasis-markup "`fountain-mode' 3.0")
 (defcustom fountain-hide-emphasis-markup
   nil
   "If non-nil, make emphasis delimiters invisible."
@@ -222,8 +218,6 @@ to remove any previous continued dialogue."
                      (font-lock-refresh-defaults))))
                (buffer-list))))
 
-(define-obsolete-variable-alias 'fountain-hide-syntax-chars
-  'fountain-hide-element-markup "`fountain-mode' 3.0")
 (defcustom fountain-hide-element-markup
   nil
   "If non-nil, make syntax characters invisible."
@@ -457,8 +451,6 @@ so the following are equivalent:
                        (font-lock-refresh-defaults))))
                  (buffer-list)))))
 
-(define-obsolete-variable-alias 'fountain-scene-heading-suffix-sep
-  'fountain-scene-heading-suffix-separator "`fountain-mode' 3.0")
 (defcustom fountain-scene-heading-suffix-separator
   " --? "
   "Regular expression separating scene heading location from suffix.
@@ -2000,8 +1992,6 @@ script may result in errors in output."
   :safe 'booleanp
   :group 'fountain-scene-numbers)
 
-(define-obsolete-variable-alias 'fountain-scene-number-first-revision
-  'fountain-scene-numbers-first-revision-char "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-first-revision-char
   ?A
   "Character to start revised scene numbers."
@@ -2009,8 +1999,6 @@ script may result in errors in output."
   :safe 'characterp
   :group 'fountain-scene-numbers)
 
-(define-obsolete-variable-alias 'fountain-scene-number-separator
-  'fountain-scene-numbers-separator "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-separator
   nil
   "Character to separate scene numbers."
@@ -2279,8 +2267,6 @@ scene number from being auto-upcased."
   :prefix "fountain-page-"
   :prefix "fountain-pagination-")
 
-(define-obsolete-variable-alias 'fountain-export-page-size
-  'fountain-page-size "`fountain-mode' 3.0")
 (defcustom fountain-page-size
   'letter
   "Paper size to use on export."
@@ -2295,8 +2281,6 @@ scene number from being auto-upcased."
                      (fountain-pagination-update))))
                (buffer-list))))
 
-(define-obsolete-variable-alias 'fountain-pages-max-lines
-  'fountain-page-max-lines "`fountain-mode' 3.0")
 (defcustom fountain-page-max-lines
   '((letter . 55) (a4 . 60))
   "Integer representing maximum number of lines on a page.
@@ -2308,10 +2292,6 @@ you may get incorrect output."
                  (list (cons (const :tag "US Letter" letter) integer)
                        (cons (const :tag "A4" a4) integer))))
 
-(define-obsolete-variable-alias 'fountain-pages-ignore-narrowing
-  'fountain-pagination-ignore-restriction "`fountain-mode' 3.3")
-(define-obsolete-variable-alias 'fountain-page-ignore-restriction
-  'fountain-pagination-ignore-restriction "`fountain-mode' 3.3")
 (defcustom fountain-pagination-ignore-restriction
   nil
   "When non-nil, counting pages should ignore buffer narrowing."
