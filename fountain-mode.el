@@ -1016,11 +1016,11 @@ See `fountain-completion-auto-update-mode'."
   :safe 'numberp)
 
 (defcustom fountain-completion-auto-update-lighter
-  " FnAC"
+  nil
   "Lighter for `fountain-completion-auto-update-mode'."
   :group 'fountain
-  :type '(choice (const :tag "No lighter" "") string)
-  :safe 'stringp)
+  :type '(choice (const :tag "No lighter" nil) string)
+  :safe 'string-or-null-p)
 
 (defcustom fountain-completion-additional-characters
   nil
