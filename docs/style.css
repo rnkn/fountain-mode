@@ -46,3 +46,13 @@ pre.menu-comment, pre.menu-preformatted {
 	font-family: initial;
 	margin: 0;
 }
+
+
+@media (prefers-color-scheme: dark) {
+	html, body {
+		background-color: #1E1F21;
+		color: #EEEFF1;
+	}
+	a { color: #BAD7FF; }
+	a:visited { color: #D099FF; }
+}
