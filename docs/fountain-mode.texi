@@ -524,6 +524,7 @@ outline level.
 If you want to focus on discrete sections of your script you can open
 these in indirect buffers. Bound to @kbd{C-c C-x b}, this command
 clones the current section or scene to indirect buffer.
+
 @xref{(emacs) Indirect Buffers}
 @end deffn
 
@@ -843,9 +844,9 @@ file in the current directory matching the current file base-name.
 @node Contact
 @unnumbered Contact
 
-If you run into any trouble using @program, or you have a feature
+If you run into any trouble using @program{}, or you have a feature
 request, you can email the maintainer @theauthor directly at
-@authoremail.
+@authoremail{}.
 
 For bugs, please ensure you can reproduce with:
 
