@@ -50,9 +50,10 @@ pre.menu-comment, pre.menu-preformatted {
 
 @media (prefers-color-scheme: dark) {
 	html, body {
-		background-color: #1E1F21;
-		color: #EEEFF1;
+		background-color: #1e1f21;
+		color: #eeeff1;
 	}
-	a { color: #BAD7FF; }
-	a:visited { color: #D099FF; }
+	a { color: #bad7ff; }
+	a:visited { color: #d099ff; }
+	kbd { background-color: #404040 }
 }
