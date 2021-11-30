@@ -3,7 +3,7 @@
 *-pkg.el
 .dir-locals.el
 dir
-docs/html
+doc/html
 *.aux
 *.fn
 *.ilg
