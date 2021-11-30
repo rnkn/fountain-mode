@@ -1,4 +1,4 @@
-* current
+* Version 3.6.0
 
 - Implement option to display additional newline before scene headings
   (available in menu as Display Scene Headings Double-Spaced)
@@ -7,7 +7,8 @@
   byte-compile)
 - Remove old obsolete option aliases
 - Improve special character syntax classes
-- Some improvements to Info docs
+- Some improvements to Info docs (which is now in /doc rather than
+  /docs)
 
 * Version 3.5.3
 
