@@ -68,7 +68,7 @@ This is the @program Manual updated for version @version{}.
 
 @ifhtml
 Check out the
-@uref{https://fountain-mode.org/images/gallery.html, screenshot gallery}.
+@uref{images/, screenshot gallery}.
 @emph{Please send me your screenshots!}
 @end ifhtml
 
