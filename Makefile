@@ -61,4 +61,4 @@ clean:
 	rm -f ${INFO_FILE}
 	rm -f dir
 	rm -f ${DOCS_DIR}/${PROG}.{aux,fn,log,toc,vr,pdf}
-	rm -rf ${HTML_DIR}/*
+	rm -rf ${HTML_DIR}/*.html
