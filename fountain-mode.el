@@ -31,12 +31,12 @@
 ;; Fountain Mode is a screenwriting program for GNU Emacs using the
 ;; Fountain plain text markup format.
 
-;; For more information on the Fountain format: <https://fountain.io>
+;; For more information about the Fountain format, visit <https://fountain.io>
 
 ;; Features
 ;; --------
 
-;;  - Support for Fountain 1.1 specification
+;;  - Support for the Fountain 1.1 specification
 ;;  - WYSIWYG auto-align elements (display only, does not modify file
 ;;    contents) specific to script format, e.g. screenplay, stageplay or
 ;;    user-defined formats
@@ -48,8 +48,8 @@
 ;;  - Integration with electric-pair-mode to insert emphasis delimiters
 ;;    with single key (i.e. * or _)
 ;;  - Integration with imenu (sections, scene headings, notes)
-;;  - Intergration with auto-insert for title page metadata
-;;  - Integreation with which-function-mode to display live-update of current
+;;  - Integration with auto-insert for title page metadata
+;;  - Integration with which-function-mode to display live-update of current
 ;;    page and page count in mode-line
 ;;  - Automatically add/remove character (CONT'D)
 ;;  - Toggle syntax highlighting of each element
