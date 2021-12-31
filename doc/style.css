@@ -5,6 +5,7 @@ html {
 }
 
 body {
+	font-family: sans-serif;
 	line-height: 1.4;
 	max-width: 80ex;
 	margin: 1em auto;
