@@ -550,26 +550,31 @@ Requires `fountain-match-metadata' for `bobp'.")
 Requires `fountain-match-character' for preceding blank line.")
 
 (defconst fountain-dialog-regexp
-  "^\\(\s\s\\)$\\|^[\s\t]*\\([^<>\n]+?\\)[\s\t]*$"
+  "^\\(\s\s\\)$\\|^[\s\t]*\\(?2:[^<>\n]+?\\)[\s\t]*$"
   "Regular expression for matching dialogue.
 
-  Group 1: match trimmed whitespace
+  Group 1: omitted
+  Group 2: match dialogue
 
 Requires `fountain-match-dialog' for preceding character,
 parenthetical or dialogue.")
 
 (defconst fountain-paren-regexp
-  "^[\s\t]*([^)\n]*)[\s\t]*$"
+  "^[\s\t]*\\(?2:([^)\n]*)\\)[\s\t]*$"
   "Regular expression for matching parentheticals.
+
+  Group 1: omitted
+  Group 2: match parenthetical
 
 Requires `fountain-match-paren' for preceding character or
 dialogue.")
 
 (defconst fountain-page-break-regexp
-  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*$"
+  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
   "Regular expression for matching page breaks.
 
-  Group 1: ===")
+  Group 1: leading ===
+  Group 2: forced page number")
 
 (defconst fountain-note-regexp
   "\\[\\[[\s\t]*\\(\\(?:\s\s\n\\|.\n?\\)*?\\)[\s\t]*]]"
