@@ -3011,7 +3011,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (progn
           (fountain-export-region-to-troff start end temp-buffer)
           (with-current-buffer temp-buffer
-            (call-shell-region (point-min) (point-max) command)))
+            (call-process-region nil nil shell-file-name t nil nil
+                                 shell-command-switch command)))
       (kill-buffer temp-buffer))))
 
 (require 'format-spec)
