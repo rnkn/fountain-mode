@@ -3722,7 +3722,7 @@ regular expression."
         (concat
          "^\\(?:[\s\t]*"
          ;; Group 1: match forced transition mark
-         "\\(>\\)[\s\t]*"
+         "\\(>[\s\t]*\\)"
          ;; Group 2: match forced transition
          "\\([^<>\n]*?\\)"
          "\\|"
