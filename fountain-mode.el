@@ -966,7 +966,7 @@ When LOOSE is non-nil, do not require non-blank line after."
    ((fountain-match-page-break)         'page-break)
    ((fountain-match-metadata)           'metadata)
    ((fountain-match-note)               'note)
-   (t                                   'action)))
+   ((looking-at ".+")                   'action)))
 
 (defun fountain-match-action ()
   "Match action text if point is at action, nil otherwise.
@@ -976,8 +976,7 @@ Assumes that all other element matching has been done."
       (widen)
       (beginning-of-line)
       (or (looking-at fountain-forced-action-regexp)
-          (and (eq (fountain-get-element) 'action)
-               (looking-at ".+"))))))
+          (eq (fountain-get-element) 'action)))))
 
 
 ;;; Auto-completion ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2781,6 +2780,42 @@ The car sets `left-margin' and cdr `fill-column'.")
   :link '(info-link "(fountain-mode) Exporting")
   :group 'fountain)
 
+(defcustom fountain-export-format
+  'pdf
+  "Valid options are 'ps' or 'pdf'."
+  :type '(choice (const :tag "PDF" 'pdf)
+                 (const :tag "HTML" 'html)
+                 (const :tag "PostScript" 'ps))
+  :group 'fountain-export)
+
+(defcustom fountain-export-troff-command
+  "groff"
+  "Name of troff command."
+  :type 'string
+  :safe 'stringp
+  :group 'fountain-export)
+
+(defcustom fountain-export-troff-extra-options
+  nil
+  "Option flags passed to `fountain-export-troff-command'
+
+n.b. the -T dev option is calculated automatically from
+`fountain-export-format'."
+  :type '(repeat (string :tag "Option"))
+  :group 'fountain-export)
+
+(defconst fountain-export-troff-request-alist
+  '((scene-heading      . "SH")
+    (action             . "AA")
+    (character          . "CH")
+    (dialog             . "DL")
+    (paren              . "PR")
+    (trans              . "TR")
+    (center             . "CT")
+    (note               . "NT")
+    (page-break         . "NP"))
+  "List of elements and associated roff requests.")
+
 (defcustom fountain-export-command-profiles
   '(("afterwriting-usletterpdf-doublespace" . "afterwriting \
 --source %b --pdf %B.pdf --overwrite \
@@ -2833,6 +2868,151 @@ COMMAND may be edited interactively when calling
   :type 'string
   :safe 'stringp
   :group 'fountain-export)
+
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline)))
+
+(defvar fountain-export-troff-macro
+  "\
+.\\\" -*- mode: nroff -*-
+.if !rPS .nr PS 12
+.ps \\n[PS]
+.if !rVS .nr VS 12
+.vs \\n[VS]
+.if !rPW .nr PW 6
+.ll \\n[PW]i
+.if !rPL .nr PL 11
+.pl \\n[PL]i
+.if !rNF .nr NF 0
+.
+.if !rSS .nr SS 2
+.if !rSB .nr SB 0
+.if !rSU .nr SU 0
+.nr PP 1
+.ds PN 1
+.
+.nh
+.de RS
+.ft C
+.ad l
+.po 1.25i
+.ll \\n[PW]i
+.in 0
+..
+.de HD
+'sp 0.5i
+'tl '''\\\\*[PN].'
+'sp |1i
+..
+.de FH
+'sp |1i
+.wh 0 HD
+..
+.de SP
+.if !\\\\n[PP] .sp 1
+.nr PP 0
+..
+.de AA
+.RS
+.SP
+..
+.de SH
+.RS
+.if !\\\\n[PP] .sp \\n[SS]
+.if \\n[SB] .ft CB
+..
+.de CH
+.RS
+.SP
+.in 2.5i
+.ll -1i
+..
+.de PR
+.RS
+.in 2i
+.ll -2.4i
+.ti -8p
+..
+.de DL
+.RS
+.in 1.5i
+.ll -1i
+..
+.de TR
+.RS
+.SP
+.in 4i
+..
+.de CT
+.RS
+.ad c
+..
+.de NP
+.ds PN \\\\$1
+.nr PP 1
+.bp
+..
+.ie \\n[NF] .wh 0 HD
+.el .wh 0 FH
+.wh \\n[PL]i NP"
+  "Troff macro header for exporting to print formats.
+
+n.b. This is not intended to be used independently of buffers
+prepared with `fountain-export'.")
+
+(defun fountain-export-region-to-troff (start end &optional output)
+  "Convert from START to END to troff, sending to buffer OUTPUT.
+
+If OUTPUT in nil, `fountain-export-output-buffer' is used."
+  (unless output (setq output fountain-export-output-buffer))
+  (with-current-buffer (get-buffer-create output)
+    (erase-buffer)
+    (insert-before-markers fountain-export-troff-macro)
+    (unless (bolp) (newline)))
+  (save-excursion
+    (goto-char start)
+    (while (< (point) end)
+      (skip-chars-forward "\n\s\t")
+      (beginning-of-line)
+      (when (setq element (fountain-get-element))
+        (let ((request (cdr (assq element fountain-export-troff-request-alist)))
+              (delim (if (eq element 'page-break) " " "\n"))
+              ;;
+              ;; FIXME: using regexp group 2 works for all non-action elements
+              ;; except character, and we need a group with just the character
+              ;; name.
+              ;;
+              (content (or (match-string-no-properties 2)
+                           (match-string-no-properties 0))))
+          (with-current-buffer output
+            (insert-before-markers (format ".%s%s%s\n" request delim content)))))
+      (forward-line 1))))
+
+(defun fountain-export (start end)
+  (interactive "r")
+  (unless (region-active-p) (setq start (point-min)
+                                  end   (point-max)))
+  (let ((temp-buffer (generate-new-buffer " *Fountain temp*"))
+        (command
+         (format "%s > %s.%s"
+                 (string-join
+                  (cons fountain-export-troff-command
+                        (cons (format "-T%s" fountain-export-format)
+                              fountain-export-troff-extra-options))
+                  " ")
+                 (file-name-base (buffer-file-name))
+                 fountain-export-format)))
+    (unwind-protect
+        (progn
+          (fountain-export-region-to-troff start end temp-buffer)
+          (with-current-buffer temp-buffer
+            (call-shell-region (point-min) (point-max) command)))
+      (kill-buffer temp-buffer))))
 
 (require 'format-spec)
 
