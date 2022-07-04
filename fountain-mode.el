@@ -2,7 +2,7 @@
 
 ;; Copyright (c) 2014-2021  Paul W. Rankin
 
-;; Author: Paul W. Rankin <pwr@bydasein.com>
+;; Author: Paul W. Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
 ;; Version: 3.6.0
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
@@ -2349,7 +2349,7 @@ For displaying scene headings double-spaced, see
   (append '(scene-heading action character dialog lines paren trans center)
           fountain-dual-dialog-left-elements
           fountain-dual-dialog-right-elements)
-  "List of elements considered as printed.
+  "List of elements considered printed on a page.
 i.e. Only these elements count towards page length.")
 
 (defun fountain-goto-page-break-point ()
