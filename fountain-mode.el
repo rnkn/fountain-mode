@@ -2886,6 +2886,13 @@ COMMAND may be edited interactively when calling
   :safe 'stringp
   :group 'fountain-export)
 
+(defcustom fountain-export-troff-buffer
+  "*Fountain troff Output*"
+  "Buffer name for `fountain-export' troff output."
+  :type 'string
+  :safe 'stringp
+  :group 'fountain-export)
+
 (defcustom fountain-export-scene-heading-format
   '(double-space)
   "List of format options applied when exporting scene headings.
