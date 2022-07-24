@@ -2830,7 +2830,6 @@ n.b. the -T dev option is calculated automatically from
     (paren              . "PR")
     (trans              . "TR")
     (center             . "CT")
-    (note               . "NT")
     (page-break         . "NP"))
   "List of elements and associated roff requests.")
 
