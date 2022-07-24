@@ -3435,7 +3435,7 @@ takes the form:
     (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
 
     ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "C-c C-e") #'fountain-export-command)
+    (define-key map (kbd "C-c C-e") #'fountain-export)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
