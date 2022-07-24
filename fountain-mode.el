@@ -2912,15 +2912,14 @@ Options are: bold, double-space, underline."
 .ll \\n[PW]i
 .if !rPL .nr PL 11
 .pl \\n[PL]i
-.if !rNF .nr NF 0
 .
-.if !rSS .nr SS 2
-.if !rSB .nr SB 0
-.if !rSU .nr SU 0
+.nr SS %s
+.nr SB %b
+.nr SU %u
+.nr P1 %n
 .nr PP 1
-.ds PN 1
-.
 .nh
+.
 .de RS
 .ft C
 .ad l
@@ -2989,14 +2988,20 @@ Options are: bold, double-space, underline."
 n.b. This is not intended to be used independently of buffers
 prepared with `fountain-export'.")
 
-(defun fountain-export-region-to-troff (start end &optional output)
+(defun fountain-export-region-to-troff (start end &optional output-buffer)
   "Convert from START to END to troff, sending to buffer OUTPUT.
 
 If OUTPUT in nil, `fountain-export-output-buffer' is used."
-  (unless output (setq output fountain-export-output-buffer))
-  (with-current-buffer (get-buffer-create output)
+  (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
+  (with-current-buffer (get-buffer-create output-buffer)
     (erase-buffer)
-    (insert-before-markers fountain-export-troff-macro)
+    (insert-before-markers
+     (format-spec fountain-export-troff-macro
+      (format-spec-make
+       ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
+       ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
+       ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
+       ?n (if fountain-export-number-first-page 1 0))))
     (unless (bolp) (newline)))
   (save-excursion
     (goto-char start)
