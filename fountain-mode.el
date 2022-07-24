@@ -2929,10 +2929,10 @@ Options are: bold, double-space, underline."
 ..
 .de HD
 'sp 0.5i
-'tl '''\\\\*[PN].'
+'tl '''%%.'
 'sp |1i
 ..
-.de FH
+.de H1
 'sp |1i
 .wh 0 HD
 ..
@@ -2976,7 +2976,6 @@ Options are: bold, double-space, underline."
 .ad c
 ..
 .de NP
-.ds PN \\\\$1
 .nr PP 1
 .bp
 ..
