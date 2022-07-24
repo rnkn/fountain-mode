@@ -3022,27 +3022,33 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (insert-before-markers (format ".%s%s%s\n" request delim content))))))
       (forward-line 1))))
 
-(defun fountain-export (start end)
-  (interactive "r")
-  (unless (region-active-p) (setq start (point-min)
-                                  end   (point-max)))
-  (let ((temp-buffer (generate-new-buffer " *Fountain temp*"))
+(defun fountain-export ()
+  (interactive)
+  (let ((source-buffer (current-buffer))
+        (start (if (use-region-p) (region-beginning) (point-min)))
+        (end (if (use-region-p) (region-end) (point-max)))
+        (troff-buffer (get-buffer-create fountain-export-troff-buffer))
+        (output-buffer (get-buffer-create fountain-export-output-buffer))
         (command
-         (format "%s > %s.%s"
-                 (string-join
-                  (cons fountain-export-troff-command
-                        (cons (format "-T%s" fountain-export-format)
-                              fountain-export-troff-extra-options))
-                  " ")
-                 (file-name-base (buffer-file-name))
-                 fountain-export-format)))
-    (unwind-protect
-        (progn
-          (fountain-export-region-to-troff start end temp-buffer)
-          (with-current-buffer temp-buffer
-            (call-process-region nil nil shell-file-name t nil nil
-                                 shell-command-switch command)))
-      (kill-buffer temp-buffer))))
+         (string-join (cons fountain-export-troff-command
+                            (cons (format "-T%s" fountain-export-format)
+                                  fountain-export-troff-extra-options))
+                      " ")))
+    ;; Prepare script
+    (with-temp-buffer
+      (insert-buffer-substring source-buffer start end)
+      (fountain-delete-comments-in-region (point-min) (point-max))
+      (fountain-export-region-to-troff (point-min) (point-max) troff-buffer))
+    ;; Export to troff
+    (with-current-buffer troff-buffer
+      (call-process-region nil nil shell-file-name nil output-buffer nil
+                           shell-command-switch command))
+    ;; Convert troff
+    (with-current-buffer output-buffer
+      (write-file
+       (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
+               fountain-export-format)
+       t))))
 
 (require 'format-spec)
 
