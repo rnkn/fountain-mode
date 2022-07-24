@@ -3005,20 +3005,21 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
   (save-excursion
     (goto-char start)
     (while (< (point) end)
-      (skip-chars-forward "\n\s\t")
-      (beginning-of-line)
-      (when (setq element (fountain-get-element))
-        (let ((request (cdr (assq element fountain-export-troff-request-alist)))
-              (delim (if (eq element 'page-break) " " "\n"))
-              ;;
-              ;; FIXME: using regexp group 2 works for all non-action elements
-              ;; except character, and we need a group with just the character
-              ;; name.
-              ;;
-              (content (or (match-string-no-properties 2)
-                           (match-string-no-properties 0))))
-          (with-current-buffer output
-            (insert-before-markers (format ".%s%s%s\n" request delim content)))))
+      (let (element request)
+        (skip-chars-forward "\n\s\t")
+        (beginning-of-line)
+        (when (and (setq element (fountain-get-element))
+                   (setq request (cdr (assq element fountain-export-troff-request-alist))))
+          (let ((delim (if (eq element 'page-break) " " "\n"))
+                ;;
+                ;; FIXME: using regexp group 2 works for all non-action elements
+                ;; except character, and we need a group with just the character
+                ;; name.
+                ;;
+                (content (or (match-string-no-properties 2)
+                             (match-string-no-properties 0))))
+            (with-current-buffer output-buffer
+              (insert-before-markers (format ".%s%s%s\n" request delim content))))))
       (forward-line 1))))
 
 (defun fountain-export (start end)
