@@ -578,7 +578,7 @@ dialogue.")
   Group 1: note text")
 
 (defconst fountain-section-heading-regexp
-  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:[^#\n].*?\\)[\s\t]*$"
+  "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:.*\\)[\s\t]*$"
   "Regular expression for matching section headings.
 
   Group 1: match leading #'s and following whitespace
@@ -2939,17 +2939,22 @@ The file is then passed to `dired-guess-default'."
   "Define a `font-lock-mode' matcher for MATCHER.
 MATCHER must be a lisp form function call or regular expression."
   (let ((fun-name (intern (format "%s--font-lock" matcher)))
-        (linewise (listp matcher))
+        (linewise (functionp matcher))
         (docstring (format "\
 Match `%s' before LIMIT.
 Return non-nil if match occurs." matcher)))
+    ;;
+    ;; FIXME: limits fountain-mode to linewise fontification.
+    ;; What if we want linewrapping?
+    ;;
     `(defun ,fun-name (limit)
        ,docstring
        (let (match)
          (while (and (null match)
                      (< (point) limit))
            (when (and (not (fountain-comment-p))
-                      ,(if linewise matcher
+                      ,(if linewise
+                           (list matcher)
                          (list 'looking-at matcher)))
              (setq match t))
            ,(list (if linewise 'forward-line 'forward-char)))
@@ -3053,7 +3058,7 @@ takes the form:
            (align (fountain--normalize-align-facespec fountain-align-scene-heading)))
        (cons 'eval
              `(cons
-               (define-fountain-font-lock-matcher (fountain-match-scene-heading))
+               (define-fountain-font-lock-matcher fountain-match-scene-heading)
                '((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                  (1 '(face fountain-non-printing
                            invisible fountain-element-markup)
@@ -3065,13 +3070,13 @@ takes the form:
 
      (let ((display (when fountain-double-space-scene-headings "\n\n")))
        (cons
-        (define-fountain-font-lock-matcher (fountain-match-scene-heading-blank))
+        (define-fountain-font-lock-matcher fountain-match-scene-heading-blank)
         `(0 '(face nil display ,display))))
 
      ;; Action ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'action highlight-elements) 'fountain-action))
            (align (fountain--normalize-align-facespec fountain-align-action)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-action))
+       (cons (define-fountain-font-lock-matcher fountain-match-action)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend t))))
@@ -3080,7 +3085,7 @@ takes the form:
      (let ((face (when (memq 'character highlight-elements)
                    'fountain-character))
            (align (fountain--normalize-align-facespec fountain-align-character)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-character))
+       (cons (define-fountain-font-lock-matcher fountain-match-character)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend t)
@@ -3090,20 +3095,20 @@ takes the form:
      (let ((face (when (memq 'dialog highlight-elements)
                    'fountain-dialog))
            (align (fountain--normalize-align-facespec fountain-align-dialog)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-dialog))
+       (cons (define-fountain-font-lock-matcher fountain-match-dialog)
              `(0 '(face ,face line-prefix ,align wrap-prefix ,align))))
 
      ;; Parentheticals ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'paren highlight-elements)
                    'fountain-paren))
            (align (fountain--normalize-align-facespec fountain-align-paren)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-paren))
+       (cons (define-fountain-font-lock-matcher fountain-match-paren)
              `(0 '(face ,face line-prefix ,align wrap-prefix ,align))))
 
      ;; Transitions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'trans highlight-elements) 'fountain-trans))
            (align (fountain--normalize-align-facespec fountain-align-trans)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-trans))
+       (cons (define-fountain-font-lock-matcher fountain-match-trans)
              `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                (1 '(face fountain-non-printing invisible fountain-element-markup)
                   prepend t))))
@@ -3118,7 +3123,7 @@ takes the form:
 
      ;; Notes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (when (memq 'note highlight-elements) 'fountain-note)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-note))
+       (cons (define-fountain-font-lock-matcher fountain-match-note)
              `(0 '(face ,face) t)))
 
      ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3133,7 +3138,7 @@ takes the form:
 
      ;; Metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (let ((face (memq 'metadata highlight-elements)))
-       (cons (define-fountain-font-lock-matcher (fountain-match-metadata))
+       (cons (define-fountain-font-lock-matcher fountain-match-metadata)
              `((0 '(face ,(when face 'fountain-metadata-key)))
                (2 '(face ,(when face 'fountain-metadata-value)) t t))))
 
@@ -3141,7 +3146,7 @@ takes the form:
      (let ((face (when (memq 'page-break highlight-elements)
                    'fountain-page-break)))
        (cons (define-fountain-font-lock-matcher fountain-page-break-regexp)
-                 `((0 '(face ,face)))))
+             `((0 '(face ,face)))))
 
      ;; Lyrics ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
      (cons (define-fountain-font-lock-matcher fountain-lyrics-regexp)
