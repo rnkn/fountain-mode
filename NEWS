@@ -1,5 +1,8 @@
-* current
+* master
 
+- Optimize Font Lock keywords to use regular expression instead of
+  functions. This dramatically improves performance on slower machines
+  but reintroduces the bug where text within comments is fontified.
 - Build CI against Emacs 28.1
 
 * Version 3.6.0
