@@ -2822,6 +2822,17 @@ n.b. the -T dev option is calculated automatically from
   :type '(repeat (string :tag "Option"))
   :group 'fountain-export)
 
+(defcustom fountain-export-troff-post-process-command
+  nil
+  "Command to postprocess troff output.
+
+n.b. Usually this is not required, unless you're using BSD
+troff."
+  :type '(choice (string :tag "Command")
+                 (const :tag "No Post-Processing" nil))
+  :safe 'stringp
+  :group 'fountain-export)
+
 (defconst fountain-export-troff-request-alist
   '((scene-heading      . "SH")
     (action             . "AA")
