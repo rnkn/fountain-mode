@@ -2897,12 +2897,13 @@ COMMAND may be edited interactively when calling
   :safe 'stringp
   :group 'fountain-export)
 
-(defcustom fountain-export-troff-buffer
+(defvar fountain-export-troff-buffer
   "*Fountain troff Output*"
-  "Buffer name for `fountain-export' troff output."
-  :type 'string
-  :safe 'stringp
-  :group 'fountain-export)
+  "Buffer name for `fountain-export' troff output.")
+
+(defvar fountain-export-troff-pp-buffer
+  " *Fountain troff Post-Process*"
+  "Buffer name for `fountain-export' troff post-processing")
 
 (defcustom fountain-export-scene-heading-format
   '(double-space)
