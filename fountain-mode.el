@@ -2916,6 +2916,7 @@ Options are: bold, double-space, underline."
 (defvar fountain-export-troff-macro
   "\
 .\\\" -*- mode: nroff -*-
+.do xflag 3
 .if !rPS .nr PS 12
 .ps \\n[PS]
 .if !rVS .nr VS 12
