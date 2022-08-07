@@ -3037,16 +3037,24 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
 
 (defun fountain-export ()
   (interactive)
+  (when (get-buffer fountain-export-troff-pp-buffer)
+    (kill-buffer fountain-export-troff-pp-buffer))
   (let ((source-buffer (current-buffer))
-        (start (if (use-region-p) (region-beginning) (point-min)))
-        (end (if (use-region-p) (region-end) (point-max)))
-        (troff-buffer (get-buffer-create fountain-export-troff-buffer))
-        (output-buffer (get-buffer-create fountain-export-output-buffer))
+        (start
+         (if (use-region-p) (region-beginning) (point-min)))
+        (end
+         (if (use-region-p) (region-end) (point-max)))
+        (troff-buffer
+         (get-buffer-create fountain-export-troff-buffer))
+        (output-buffer
+         (get-buffer-create fountain-export-output-buffer))
         (command
          (string-join (cons fountain-export-troff-command
                             (cons (format "-T%s" fountain-export-format)
                                   fountain-export-troff-extra-options))
                       " ")))
+    (when (stringp fountain-export-troff-post-process-command)
+      (get-buffer-create fountain-export-troff-pp-buffer))
     ;; Prepare script
     (with-temp-buffer
       (insert-buffer-substring source-buffer start end)
@@ -3054,8 +3062,16 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
       (fountain-export-region-to-troff (point-min) (point-max) troff-buffer))
     ;; Export to troff
     (with-current-buffer troff-buffer
-      (call-process-region nil nil shell-file-name nil output-buffer nil
+      (call-process-region nil nil shell-file-name nil
+                           (list (or fountain-export-troff-pp-buffer output-buffer) nil) nil
                            shell-command-switch command))
+    ;; Possibly post-process troff
+    (when (get-buffer fountain-export-troff-pp-buffer)
+      (with-current-buffer fountain-export-troff-pp-buffer
+        (call-process-region nil nil shell-file-name nil
+                             (list output-buffer nil) nil
+                             shell-command-switch fountain-export-troff-post-process-command))
+      (kill-buffer fountain-export-troff-pp-buffer))
     ;; Convert troff
     (with-current-buffer output-buffer
       (write-file
