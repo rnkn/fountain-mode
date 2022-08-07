@@ -2807,7 +2807,7 @@ The car sets `left-margin' and cdr `fill-column'.")
   :group 'fountain-export)
 
 (defcustom fountain-export-troff-command
-  "groff"
+  "troff"
   "Name of troff command."
   :type 'string
   :safe 'stringp
