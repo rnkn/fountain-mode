@@ -3037,8 +3037,6 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
 
 (defun fountain-export ()
   (interactive)
-  (when (get-buffer fountain-export-troff-pp-buffer)
-    (kill-buffer fountain-export-troff-pp-buffer))
   (let ((source-buffer (current-buffer))
         (start
          (if (use-region-p) (region-beginning) (point-min)))
@@ -3053,8 +3051,6 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                             (cons (format "-T%s" fountain-export-format)
                                   fountain-export-troff-extra-options))
                       " ")))
-    (when (stringp fountain-export-troff-post-process-command)
-      (get-buffer-create fountain-export-troff-pp-buffer))
     ;; Prepare script
     (with-temp-buffer
       (insert-buffer-substring source-buffer start end)
@@ -3063,8 +3059,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     ;; Export to troff
     (with-current-buffer troff-buffer
       (call-process-region nil nil shell-file-name nil
-                           (list (or fountain-export-troff-pp-buffer output-buffer) nil) nil
-                           shell-command-switch command))
+                           (list (if (stringp fountain-export-troff-post-process-command)
+                                     (get-buffer-create fountain-export-troff-pp-buffer)
+                                   output-buffer)
+                                 nil)
+                           nil shell-command-switch command))
     ;; Possibly post-process troff
     (when (get-buffer fountain-export-troff-pp-buffer)
       (with-current-buffer fountain-export-troff-pp-buffer
