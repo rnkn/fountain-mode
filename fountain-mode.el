@@ -2826,8 +2826,7 @@ n.b. the -T dev option is calculated automatically from
   nil
   "Command to postprocess troff output.
 
-n.b. Usually this is not required, unless you're using BSD
-troff."
+n.b. Usually this is not required when using GNU groff."
   :type '(choice (string :tag "Command")
                  (const :tag "No Post-Processing" nil))
   :safe 'stringp
