@@ -25,14 +25,14 @@ https://github.com/rnkn/fountain-mode
 Paul W. Rankin
 @end macro
 @macro authoremail
-@email{pwr@@bydasein.com}
+@email{hello@@paulwrankin.com}
 @end macro
 @macro tbc
 Sorry, this node is not yet written. You can help by submitting a patch!
 @end macro
 
 @copying
-Copyright @copyright{} 2021 Paul W. Rankin
+Copyright @copyright{} 2022 Paul W. Rankin
 
 The following people contributed to this documentation:@*
 Paul W. Rankin, Kohl Sudduth
