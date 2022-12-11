@@ -1210,6 +1210,9 @@ completion upon load."
   (when (eq major-mode 'fountain-mode)
     (fountain-completion-update)))
 
+(defvar fountain--completion-idle-timer nil
+  "Idle timer used for `fountain-completion-auto-update-mode'.")
+
 ;;;###autoload
 (define-minor-mode fountain-completion-auto-update-mode
   "Updates `fountain-mode' completion candidates when idle.
