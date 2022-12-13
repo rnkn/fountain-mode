@@ -1,4 +1,4 @@
-* master
+* Version 3.6.1
 
 - Optimize Font Lock keywords to use regular expressions instead of
   functions. This dramatically improves performance on slower machines
