@@ -2960,28 +2960,16 @@ The file is then passed to `dired-guess-default'."
 
 (defmacro define-fountain-font-lock-matcher (matcher)
   "Define a `font-lock-mode' matcher for MATCHER.
-MATCHER must be a lisp form function call or regular expression."
-  (let ((fun-name (intern (format "%s--font-lock" matcher)))
-        (linewise (functionp matcher))
-        (docstring (format "\
-Match `%s' before LIMIT.
-Return non-nil if match occurs." matcher)))
-    ;;
-    ;; FIXME: limits fountain-mode to linewise fontification.
-    ;; What if we want linewrapping?
-    ;;
-    `(defun ,fun-name (limit)
-       ,docstring
-       (let (match)
-         (while (and (null match)
-                     (< (point) limit))
-           (when (and (not (fountain-comment-p))
-                      ,(if linewise
-                           (list matcher)
-                         (list 'looking-at matcher)))
-             (setq match t))
-           ,(list (if linewise 'forward-line 'forward-char)))
-         match))))
+MATCHER must be a lisp form."
+  `(lambda (limit)
+     (let (match)
+       (while (and (null match)
+                   (< (point) limit))
+         (when (and (not (fountain-comment-p))
+                    ,matcher)
+           (setq match t))
+         (forward-line))
+       match)))
 
 (defun fountain-toggle-highlight-element (element)
   "Toggle the inclusion of ELEMENT in `fountain-highlight-elements'."
