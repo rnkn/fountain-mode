@@ -3110,10 +3110,10 @@ takes the form:
              (fountain--normalize-align-facespec fountain-align-scene-heading)))
         (cons 'eval
               `(cons
-                (define-fountain-font-lock-matcher fountain-match-scene-heading)
+                (define-fountain-font-lock-matcher (fountain-match-scene-heading))
                 '((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                   (1 '(face fountain-non-printing invisible fountain-element-markup)
-                       prepend t)
+                     prepend t)
                   (7 (fountain--get-scene-number-facespec 7)  t t)
                   (8 (fountain--get-scene-number-facespec 8)  prepend t)
                   (9 (fountain--get-scene-number-facespec 9)  prepend t)
@@ -3121,14 +3121,14 @@ takes the form:
 
       (when fountain-double-space-scene-headings
         (cons
-         (define-fountain-font-lock-matcher fountain-match-scene-heading-blank)
+         (define-fountain-font-lock-matcher (fountain-match-scene-heading-blank))
          '(0 '(face nil display "\n\n"))))
 
       ;; Action ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (let ((face (when (memq 'action highlight-elements) 'fountain-action))
             (align (fountain--normalize-align-facespec fountain-align-action)))
         (if (or face (< 0 (nth 2 align)))
-            (cons (define-fountain-font-lock-matcher fountain-match-action)
+            (cons (define-fountain-font-lock-matcher (fountain-match-action))
                   `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                     (1 '(face fountain-non-printing invisible fountain-element-markup)
                        prepend t)))
@@ -3140,7 +3140,7 @@ takes the form:
       (let ((face (when (memq 'character highlight-elements)
                     'fountain-character))
             (align (fountain--normalize-align-facespec fountain-align-character)))
-        (cons (define-fountain-font-lock-matcher fountain-match-character)
+        (cons (define-fountain-font-lock-matcher (fountain-match-character))
               `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                 (1 '(face fountain-non-printing invisible fountain-element-markup)
                    prepend t)
@@ -3151,7 +3151,7 @@ takes the form:
                     'fountain-dialog))
             (align (fountain--normalize-align-facespec fountain-align-dialog)))
         (when (or face (< 0 (nth 2 align)))
-          (cons (define-fountain-font-lock-matcher fountain-match-dialog)
+          (cons (define-fountain-font-lock-matcher (fountain-match-dialog))
                 `(0 '(face ,face line-prefix ,align wrap-prefix ,align)))))
 
       ;; Parentheticals ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3159,14 +3159,14 @@ takes the form:
                     'fountain-paren))
             (align (fountain--normalize-align-facespec fountain-align-paren)))
         (when (or face (< 0 (nth 2 align)))
-          (cons (define-fountain-font-lock-matcher fountain-match-paren)
+          (cons (define-fountain-font-lock-matcher (fountain-match-paren))
                 `(0 '(face ,face line-prefix ,align wrap-prefix ,align)))))
 
       ;; Transitions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (let ((face (when (memq 'trans highlight-elements) 'fountain-trans))
             (align (fountain--normalize-align-facespec fountain-align-trans)))
         (when (or face (< 0 (nth 2 align)))
-          (cons (define-fountain-font-lock-matcher fountain-match-trans)
+          (cons (define-fountain-font-lock-matcher (fountain-match-trans))
                 `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                   (1 '(face fountain-non-printing invisible fountain-element-markup)
                      prepend t)))))
@@ -3181,7 +3181,7 @@ takes the form:
 
       ;; Notes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (when (memq 'note highlight-elements)
-        (cons (define-fountain-font-lock-matcher fountain-match-note)
+        (cons (define-fountain-font-lock-matcher (fountain-match-note))
               '(0 '(face 'fountain-note) t)))
 
       ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3196,7 +3196,7 @@ takes the form:
 
       ;; Metadata ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (when (memq 'metadata highlight-elements)
-        (cons (define-fountain-font-lock-matcher fountain-match-metadata)
+        (cons (define-fountain-font-lock-matcher (fountain-match-metadata))
               '((0 '(face fountain-metadata-key))
                 (2 '(face fountain-metadata-value) t t))))
 
