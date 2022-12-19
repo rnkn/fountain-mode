@@ -3016,14 +3016,16 @@ VALUE is from options group `fountain-align' and return value
 takes the form:
 
     (space :align-to N)"
-  (when (and value fountain-align-elements)
-    (list 'space :align-to
-          (if (integerp value) value
+  (list 'space :align-to
+        (if (and value fountain-align-elements)
+            (if (integerp value)
+                value
               (cdr (or (assoc-string
                         (or (cdr (assq 'format (fountain-read-metadata)))
                             fountain-default-script-format)
                         value)
-                       (car value)))))))
+                       (car value))))
+          0)))
 
 (defun fountain--get-scene-number-facespec (subexp)
   "Return `font-lock-mode' display faceprop for scene heading SUBEXP."
