@@ -1,5 +1,12 @@
 # NEWS
 
+## master
+
+- Fix bugs with `fountain-init-font-lock`.
+- Add a `font-lock-extend-after-change-region-function` to improve
+  fontifying character names.
+- Declare `outline` aliases as defined in `fountain-mode`.
+
 ## Version 3.6.1
 
 - Optimize Font Lock keywords to use regular expressions instead of
