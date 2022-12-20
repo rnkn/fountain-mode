@@ -1288,6 +1288,12 @@ Notes visibility can be cycled with \\[fountain-dwim]."
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
+(declare-function fountain-outline-show-all 'fountain-mode)
+(declare-function fountain-outline-show-entry 'fountain-mode)
+(declare-function fountain-outline-show-children 'fountain-mode)
+(declare-function fountain-outline-hide-subtree 'fountain-mode)
+(declare-function fountain-outline-hide-sublevels 'fountain-mode)
+
 (if (<= 25 emacs-major-version)
     (progn
       (defalias 'fountain-outline-show-all 'outline-show-all)
