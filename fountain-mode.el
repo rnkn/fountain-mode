@@ -3047,6 +3047,14 @@ takes the form:
                display nil invisible fountain-element-markup)
       '(face nil display nil invisible nil))))
 
+(defun fountain--font-lock-extend-region (beg end _old-len)
+  "Appropriately extend region to be fontified."
+  (save-match-data
+    (when (fountain-in-dialog-maybe)
+      (save-excursion
+        (fountain-backward-character)
+        (cons (min beg (point)) end)))))
+
 (defun fountain-init-font-lock ()
   "Return a new list of `font-lock-keywords'."
   (let ((highlight-elements
@@ -3703,6 +3711,8 @@ regular expression."
   (setq imenu-case-fold-search nil)
   (setq font-lock-multiline t)
   (setq font-lock-defaults '(fountain-init-font-lock nil t))
+  (setq font-lock-extend-after-change-region-function
+        #'fountain--font-lock-extend-region)
   (add-to-invisibility-spec (cons 'outline t))
   (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-markup))
