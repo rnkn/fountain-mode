@@ -42,11 +42,10 @@ help: usage
 all: clean check compile info-manual html-manual pdf-manual
 
 check:
-	emacs -Q --eval '${INIT}' --batch -f package-lint-batch-and-exit ${LISP_FILE}
-	@echo $$?
+	@emacs -Q --eval '${INIT}' --batch -f package-lint-batch-and-exit ${LISP_FILE}
 
 compile:
-	emacs -Q --eval '${INIT}' -L . --batch -f batch-byte-compile ${LISP_FILE}
+	@emacs -Q --eval '${INIT}' -L . --batch -f batch-byte-compile ${LISP_FILE}
 
 manuals: info-manual html-manual pdf-manual
 
