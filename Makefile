@@ -2,7 +2,7 @@
 PROG		= fountain-mode
 LISP_FILE	= ${PROG}.el
 DEPS		= seq package-lint
-NEWS_FILE	= NEWS
+NEWS_FILE	= NEWS.md
 DOCS_DIR	= doc
 TEXI_FILE	= ${DOCS_DIR}/${PROG}.texi
 INFO_FILE	= ${DOCS_DIR}/${PROG}.info
@@ -60,9 +60,9 @@ pdf-manual:
 	texi2pdf --clean ${TEXI_FILE}
 
 tag-release: check compile
-	sed -i~ '1 s/.*/* ${VERS}/' ${NEWS_FILE}
+	sed -i~ '/^## master/ s/master/${VERS}/' ${NEWS_FILE}
 	git commit -m 'Add ${VERS} to ${NEWS_FILE}' ${NEWS_FILE}
-	awk '/^* Version/ { v ++1 } v == 1' ${NEWS_FILE} | sed 's/^* //' | git tag -F - ${TAG}
+	awk '/^## Version/ { v ++1 } v == 1' ${NEWS_FILE} | sed 's/^## //' | tr -d \` | git tag -F - ${TAG}
 
 clean:
 	rm -f ${PROG}.elc
