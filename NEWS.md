@@ -1,6 +1,6 @@
 # NEWS
 
-## master
+## Version 3.6.2
 
 - Fix bugs with `fountain-init-font-lock`.
 - Add a `font-lock-extend-after-change-region-function` to improve
