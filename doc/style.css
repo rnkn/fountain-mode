@@ -6,7 +6,7 @@ html {
 
 body {
 	line-height: 1.4;
-	max-width: 80ex;
+	max-width: 45em;
 	margin: 1em auto;
 	padding: 0 1em;
 	background-color: #fff;
@@ -16,7 +16,7 @@ h1, h2, h3, h4, h5 {
 	font-family: sans-serif;
 }
 
-kbd {
+kbd, kbd.kbd {
 	padding: 2px;
 	background-color: #f9f9f9;
 	border-width: 1px;
@@ -56,5 +56,5 @@ pre.menu-comment, pre.menu-preformatted {
 	}
 	a { color: #bad7ff; }
 	a:visited { color: #d099ff; }
-	kbd { background-color: #404040 }
+	kbd, kbd.kbd { background-color: #404040 }
 }
