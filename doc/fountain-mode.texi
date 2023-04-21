@@ -457,7 +457,17 @@ Synopses are not included by most export tools.
 @node Comments
 @unnumberedsec Comments
 
-@tbc
+Text that are in C-style comments, /* like this */, is not exported by
+export tools. It's text that's ``in the boneyard''. Unlike other
+Fountain syntax, these comments can span newlines and other
+formatting; structurally, it's as if the text were removed.
+
+This ``boneyard'' is for text that you're on the brink of removing, or
+drafts that you aren't ready to ``uncomment'' and include yet, or just
+anything else you want to ignore.
+
+If you instead just want to annotate your screenplay, use @ref{Notes}
+or @ref{Synopses}.
 
 @node Outlining
 @unnumbered Outlining
