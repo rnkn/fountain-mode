@@ -32,7 +32,7 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 @end macro
 
 @copying
-Copyright @copyright{} 2022 Paul W. Rankin
+Copyright @copyright{} 2021--2023 Paul W. Rankin
 
 The following people contributed to this documentation:@*
 Paul W. Rankin, Kohl Sudduth
