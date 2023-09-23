@@ -3022,7 +3022,8 @@ VALUE is from options group `fountain-align' and return value
 takes the form:
 
     (space :align-to N)"
-  (list 'space :align-to
+  ;; workaround for bug in 29.1
+  (list 'space :width
         (if (and value fountain-align-elements)
             (if (integerp value)
                 value
