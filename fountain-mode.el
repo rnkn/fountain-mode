@@ -2922,7 +2922,7 @@ Export command profiles are defined in
             (set-auto-mode t)
           (kill-buffer))))))
 
-(require 'dired-x)
+(when (<= emacs-major-version 28) (require 'dired-x))
 
 (defun fountain-export-view ()
   "Attempt to open the last exported output file.
