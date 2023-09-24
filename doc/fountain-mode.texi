@@ -58,7 +58,7 @@ This manual is a work in progress with many parts still missing. Please
 consult the help functions within Emacs for current documentation.
 @end quotation
 
-@program is a screenwriting (and playwriting) program for
+@program is a screenwriting (and playwrighting) program for
 @w{GNU Emacs} version 24.4 or later. The Fountain markup format is a
 plain-text format designed to be easily readable and editable,
 portable and future-proof, and to look as much like a script as
