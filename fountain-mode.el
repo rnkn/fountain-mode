@@ -967,18 +967,18 @@ When LOOSE is non-nil, do not require non-blank line after."
    ((fountain-match-scene-heading)      'scene-heading)
    ((fountain-match-character)
     (cl-case (fountain-get-dual-dialog)
-      ((quote left)                     'dual-character-left)
-      ((quote right)                    'dual-character-right)
+      (left                             'dual-character-left)
+      (right                            'dual-character-right)
       (t                                'character)))
    ((fountain-match-dialog)
     (cl-case (fountain-get-dual-dialog)
-      ((quote left)                     'dual-dialog-left)
-      ((quote right)                    'dual-dialog-right)
+      (left                             'dual-dialog-left)
+      (right                            'dual-dialog-right)
       (t                                'dialog)))
    ((fountain-match-paren)
     (cl-case (fountain-get-dual-dialog)
-      ((quote left)                     'dual-paren-left)
-      ((quote right)                    'dual-paren-right)
+      (left                             'dual-paren-left)
+      (right                            'dual-paren-right)
       (t                                'paren)))
    ((fountain-match-trans)              'trans)
    ((fountain-match-center)             'center)
@@ -1405,13 +1405,13 @@ Valid values for STATE are:
 
 Display a message unless SILENT."
   (cl-case state
-    ((quote top-level)
+    (top-level
      (fountain-outline-hide-sublevels 1)
      (unless silent (message "Showing top-level section headings")))
-    ((quote section-headings)
+    (section-headings
      (fountain-outline-hide-sublevels 5)
      (unless silent (message "Showing all section headings")))
-    ((quote scene-headings)
+    (scene-headings
      (fountain-outline-hide-sublevels 6)
      (unless silent (message "Showing scene headings")))
     (t
