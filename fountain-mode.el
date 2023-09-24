@@ -581,8 +581,8 @@ dialogue.")
   "^\\(?1:\\(?2:#\\{1,5\\}\\)[\s\t]*\\)\\(?3:.*\\)[\s\t]*$"
   "Regular expression for matching section headings.
 
-  Group 1: match leading #'s and following whitespace
-  Group 2: match leading #'s
+  Group 1: match leading #s and following whitespace
+  Group 2: match leading #s
   Group 3: match heading text")
 
 (defconst fountain-section-heading-1-regexp
@@ -1680,7 +1680,7 @@ e.g.
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
-If LIMIT is 'dialog, halt at end of dialogue. If LIMIT is 'scene,
+If LIMIT is `dialog', halt at end of dialogue. If LIMIT is `scene',
 halt at end of scene."
   (interactive "^p")
   (unless n (setq n 1))
@@ -1723,8 +1723,8 @@ If N is non-nil, return Nth next character or Nth previous
 character if N is negative, otherwise return nil. If N is nil or
 0, return character at point, otherwise return nil.
 
-If LIMIT is 'scene, halt at next scene heading. If LIMIT is
-'dialog, halt at next non-dialogue element."
+If LIMIT is `scene', halt at next scene heading. If LIMIT is
+`dialog', halt at next non-dialogue element."
   (unless n (setq n 0))
   (save-excursion
     (save-restriction
@@ -3530,7 +3530,7 @@ See function `fountain-patch-emacs-bugs'."
 
 In Emacs versions prior to 26, adds advice to override
 `outline-invisible-p' to return non-nil only if the character
-after POS or point has invisible text property eq to 'outline.
+after POS or point has invisible text property eq to `outline'.
 See <http://debbugs.gnu.org/24073>."
   ;; In Emacs version prior to 26, `outline-invisible-p' returns non-nil for ANY
   ;; invisible property of text at point. We want to only return non-nil if
