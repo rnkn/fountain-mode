@@ -260,7 +260,7 @@ Passed to `format-spec' with the following specification:
   %e  `user-mail-address'
   %x  date in locale's preferred format
   %F  date in ISO format
-  %p  leave point here
+  %P  leave point here
 
 The default \"%P - %n %x\" inserts something like:
 
