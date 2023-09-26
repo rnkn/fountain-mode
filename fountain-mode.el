@@ -1856,20 +1856,19 @@ When point is at metadata value on its own line, indent to
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
-If prefixed with ARG, insert `.' at beginning of line to force
-a scene heading."
-  (interactive "*P")
-  (when arg (save-excursion (beginning-of-line) (insert ".")))
-  (upcase-region (line-beginning-position) (line-end-position)))
-
-(defun fountain-upcase-line-and-newline (&optional arg)
-  "Upcase the line and insert a newline.
-If prefixed with ARG, insert `.' at beginning of line to force
-a scene heading."
+If prefixed with ARG, insert `.' at beginning of line (if not
+already present) to force a scene heading."
   (interactive "*P")
   (when (and arg (not (fountain-match-scene-heading)))
     (save-excursion (beginning-of-line) (insert ".")))
-  (upcase-region (line-beginning-position) (point))
+  (upcase-region (line-beginning-position) (point)))
+
+(defun fountain-upcase-line-and-newline (&optional arg)
+  "Upcase the line and insert a newline.
+If prefixed with ARG, insert `.' at beginning of line (if not
+already present) to force a scene heading."
+  (interactive "*P")
+  (fountain-upcase-line arg)
   (newline))
 
 (defun fountain-delete-comments-in-region (start end)
