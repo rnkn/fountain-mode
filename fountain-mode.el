@@ -1492,7 +1492,7 @@ See also `fountain-outline-show-synopses'."
   (let (has-top-level has-secondary-level has-scenes)
     (save-excursion
       (goto-char (point-min))
-      (while (not (eobp))
+      (while (< (point) (point-max))
         (when (outline-on-heading-p t)
           (when (= (funcall outline-level) 1)
             (setq has-top-level t))
@@ -2507,7 +2507,7 @@ Skip over comments."
       ;; Begin the main loop, which only halts if we reach the end of buffer, a
       ;; forced page break, or after the maximum lines in a page.
       (while (and (< line-count page-lines)
-                  (not (eobp))
+                  (< (point) (point-max))
                   (not (fountain-match-page-break)))
         (cond
          ;; If we're at the end of a line (but not also the beginning, i.e. not
