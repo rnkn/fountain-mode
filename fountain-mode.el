@@ -2233,24 +2233,9 @@ to include external files."
                 (cl-incf current-scene)))
             (list current-scene)))))))
 
-(defun fountain-remove-scene-numbers ()
-  "Remove scene numbers from scene headings in current buffer."
-  (interactive "*")
-  (save-excursion
-    (save-restriction
-      (widen)
-      (let (buffer-invisibility-spec)
-        (goto-char (point-min))
-        (unless (fountain-match-scene-heading)
-          (fountain-move-forward-scene 1))
-        (while (and (fountain-match-scene-heading)
-                    (< (point) (point-max)))
-          (when (match-string-no-properties 9)
-            (delete-region (match-beginning 7) (match-end 10)))
-          (fountain-move-forward-scene 1))))))
-
-(defun fountain-add-scene-numbers ()
+(defun fountain-add-scene-numbers (&optional arg)
   "Add scene numbers to scene headings in current buffer.
+If prefixed with ARG, remove scene numbers.
 
 Adding scene numbers to scene headings after numbering existing
 scene headings will use a prefix or suffix letter, depending on
@@ -2275,26 +2260,31 @@ add these scene numbers manually. Note that if
 `fountain-auto-upcase-scene-headings' is non-nil you will need to
 insert the scene number delimiters (\"##\") first, to protect the
 scene number from being auto-upcased."
-  (interactive "*")
+  (interactive "*P")
   (save-excursion
     (save-restriction
       (widen)
-      (let ((job (make-progress-reporter "Adding scene numbers..."))
-            buffer-invisibility-spec)
+      (let (buffer-invisibility-spec)
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
           (fountain-move-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
-          (unless (match-string-no-properties 9)
-            (end-of-line)
-            (delete-horizontal-space t)
-            (insert "\s#" (fountain-scene-number-to-string
-                           (fountain-get-scene-number))
-                    "#"))
-          (fountain-move-forward-scene 1)
-          (progress-reporter-update job))
-        (progress-reporter-done job)))))
+          (if arg
+              (when (match-string-no-properties 9)
+                (delete-region (match-beginning 7) (match-end 10)))
+            (unless (match-string-no-properties 9)
+              (end-of-line)
+              (delete-horizontal-space t)
+              (insert "\s#" (fountain-scene-number-to-string
+                             (fountain-get-scene-number))
+                      "#")))
+            (fountain-move-forward-scene 1))))))
+
+(defun fountain-remove-scene-numbers ()
+  "Remove scene numbers from scene headings in current buffer."
+  (interactive "*")
+  (fountain-add-scene-numbers t))
 
 
 ;;; Pagination ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
