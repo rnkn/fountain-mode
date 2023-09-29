@@ -1652,31 +1652,41 @@ If N is 0, move to beginning of scene."
       (beginning-of-line)
       (funcall move-fun p))))
 
-;; FIXME: this could permit any string and search the current scene heading for
-;; that string before reverting to an integer count.
-(defun fountain-goto-scene (n)
-  "Move point to Nth scene in current buffer.
-
-This treats revised scene numbers as their parent scene number,
-e.g.
-
-  10  = 10
-  10B = 10
-  A10 =  9"
-  (interactive "NGo to scene: ")
+(defun fountain-goto-scene (scene)
+  "Move point to scene in current buffer.
+Scene can be a string or number."
+  (interactive "sGo to scene: ")
   (push-mark)
   (goto-char (point-min))
-  (let ((scene (if (fountain-match-scene-heading)
-                   (car (fountain-scene-number-to-list
-                         (match-string-no-properties 8)))
-                 0)))
-    (while (and (< scene n)
-                (< (point) (point-max)))
-      (fountain-move-forward-scene 1)
-      (when (fountain-match-scene-heading)
-        (setq scene (or (car (fountain-scene-number-to-list
-                              (match-string-no-properties 8)))
-                        (1+ scene)))))))
+  (unless (fountain-match-scene-heading)
+    (fountain-move-forward-scene 1))
+  ;; First search for a basic string match for SCENE.
+  (let (found)
+    (while (and (< (point) (point-max))
+                (fountain-match-scene-heading)
+                (not found))
+      (or (and (match-string 9)
+               (prog1 (setq found (search-forward scene (line-end-position) t))
+                 (beginning-of-line)))
+          (fountain-move-forward-scene 1)))
+    ;; SCENE is not found but is a number.
+    (when (and (not found)
+               (< 0 (setq scene (string-to-number scene))))
+      (goto-char (point-min))
+      (unless (fountain-match-scene-heading)
+        (fountain-move-forward-scene 1))
+      (let ((scene-count
+             (when (fountain-match-scene-heading)
+               (or (car (fountain-scene-number-to-list
+                         (match-string-no-properties 9)))
+                   1))))
+        (while (and (< (point) (point-max))
+                    (< scene-count scene))
+          (fountain-move-forward-scene 1)
+          (when (fountain-match-scene-heading)
+            (setq scene-count (or (car (fountain-scene-number-to-list
+                                        (match-string-no-properties 9)))
+                                  (1+ scene-count)))))))))
 
 (defun fountain-forward-character (&optional n limit)
   "Goto Nth next character (or Nth previous is N is negative).
