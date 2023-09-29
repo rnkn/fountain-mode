@@ -1,5 +1,21 @@
 # NEWS
 
+## master
+
+- Permit `fountain-goto-scene` to accept any string, which will navigate
+  to revised scene numbers, e.g. 10A.
+- `fountain-add-scene-numbers` can now be called with a prefix argument
+  to remove scene numbers.
+- Improve `fountain-theme` default face size.
+- When called with prefix argument `fountain-upcase-line` will only
+  prefix the scene with `.` if not already present.
+
+## Version 3.6.3
+
+- Fix dialogue aligning on Emacs 29.x.
+- Improve quoting style in docstrings.
+- Only require `dired-x` in Emacs < 29
+
 ## Version 3.6.2
 
 - Fix bugs with `fountain-init-font-lock`.
