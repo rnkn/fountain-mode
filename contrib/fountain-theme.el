@@ -5,7 +5,7 @@
 
 (custom-theme-set-faces
  'fountain
- '(fountain ((t (:height 1.2 :family "Courier Prime"))))
+ '(fountain ((t (:height 1.15 :family "Courier Prime"))))
  '(fountain-note
    ((((background light)) (:background "#fefbe8" :foreground "grey30"))
     (((background dark)) (:foreground "dark goldenrod"))))

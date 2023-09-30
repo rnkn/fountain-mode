@@ -32,7 +32,7 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 @end macro
 
 @copying
-Copyright @copyright{} 2021 Paul W. Rankin
+Copyright @copyright{} 2021--2023 Paul W. Rankin
 
 The following people contributed to this documentation:@*
 Paul W. Rankin, Kohl Sudduth
@@ -58,7 +58,7 @@ This manual is a work in progress with many parts still missing. Please
 consult the help functions within Emacs for current documentation.
 @end quotation
 
-@program is a screenwriting (and playwriting) program for
+@program is a screenwriting (and playwrighting) program for
 @w{GNU Emacs} version 24.4 or later. The Fountain markup format is a
 plain-text format designed to be easily readable and editable,
 portable and future-proof, and to look as much like a script as
@@ -457,7 +457,17 @@ Synopses are not included by most export tools.
 @node Comments
 @unnumberedsec Comments
 
-@tbc
+Text that are in C-style comments, /* like this */, is not exported by
+export tools. It's text that's ``in the boneyard''. Unlike other
+Fountain syntax, these comments can span newlines and other
+formatting; structurally, it's as if the text were removed.
+
+This ``boneyard'' is for text that you're on the brink of removing, or
+drafts that you aren't ready to ``uncomment'' and include yet, or just
+anything else you want to ignore.
+
+If you instead just want to annotate your screenplay, use @ref{Notes}
+or @ref{Synopses}.
 
 @node Outlining
 @unnumbered Outlining
