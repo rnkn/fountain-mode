@@ -2811,13 +2811,6 @@ The car sets `left-margin' and cdr `fill-column'.")
   :link '(info-link "(fountain-mode) Exporting")
   :group 'fountain)
 
-(defcustom fountain-export-format
-  'pdf
-  "Valid options are 'ps' or 'pdf'."
-  :type '(choice (const :tag "PDF" pdf)
-                 (const :tag "PostScript" ps))
-  :group 'fountain-export)
-
 (defcustom fountain-export-title-page
   t
   "When non-nil, include a title page in export."
@@ -3073,8 +3066,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
          (get-buffer-create fountain-export-output-buffer))
         (command
          (string-join (cons fountain-export-troff-command
-                            (cons (format "-T%s" fountain-export-format)
-                                  fountain-export-troff-extra-options))
+                            (cons "-Tpdf" fountain-export-troff-extra-options))
                       " ")))
     ;; Prepare script
     (with-temp-buffer
@@ -3099,8 +3091,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     ;; Convert troff
     (with-current-buffer output-buffer
       (write-file
-       (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
-               fountain-export-format)
+       (concat (file-name-base (buffer-file-name source-buffer)) ".pdf")
        t))))
 
 (require 'format-spec)
