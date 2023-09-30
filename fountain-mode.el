@@ -3056,7 +3056,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (insert-before-markers (format ".%s%s%s\n" request delim content))))))
       (forward-line 1))))
 
-(defun fountain-export ()
+(defun fountain-export-pdf ()
   (interactive)
   (let ((source-buffer (current-buffer))
         (start
