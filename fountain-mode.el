@@ -3075,6 +3075,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     (with-temp-buffer
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+        (fountain-move-forward-page)
+        (unless (eobp)
+          (fountain-insert-page-break)))
       (fountain-export-region-to-troff (point-min) (point-max) troff-buffer))
     ;; Export to troff
     (with-current-buffer troff-buffer
