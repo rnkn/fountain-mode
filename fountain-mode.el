@@ -2852,7 +2852,7 @@ n.b. Usually this is not required when using GNU groff."
   :group 'fountain-export)
 
 (defconst fountain-export-troff-request-alist
-  '((scene-heading      . "SH")
+  '((scene-heading      . "SC")
     (action             . "AA")
     (character          . "CH")
     (dialog             . "DL")
@@ -2975,7 +2975,7 @@ Options are: bold, double-space, underline."
 .RS
 .SP
 ..
-.de SH
+.de SC
 .RS
 .if !\\\\n[PP] .sp \\n[SS]
 .if \\n[SB] .ft CB
