@@ -3006,7 +3006,8 @@ Options are: bold, double-space, underline."
 ..
 .de CT
 .RS
-.ad c
+.SP
+.ce
 ..
 .de NP
 .nr PP 1
