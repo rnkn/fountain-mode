@@ -2964,6 +2964,8 @@ Options are: bold, double-space, underline."
 'sp |1i
 ..
 .de H1
+'sp 0.5i
+'tl ''''
 'sp |1i
 .wh 0 HD
 ..
