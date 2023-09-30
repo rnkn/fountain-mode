@@ -2936,7 +2936,7 @@ Options are: bold, double-space, underline."
 .\\\" -*- mode: nroff -*-
 .if !rPS .nr PS 12
 .ps \\n[PS]
-.if !rVS .nr VS 12
+.if !rVS .nr VS 12.5
 .vs \\n[VS]
 .if !rPW .nr PW 6
 .ll \\n[PW]i
