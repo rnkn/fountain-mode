@@ -2980,6 +2980,7 @@ Options are: bold, double-space, underline."
 .de SC
 .RS
 .if !\\\\n[PP] .sp \\n[SS]
+.nr PP 0
 .if \\n[SB] .ft CB
 ..
 .de CH
