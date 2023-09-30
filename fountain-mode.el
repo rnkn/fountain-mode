@@ -3013,9 +3013,9 @@ Options are: bold, double-space, underline."
 .nr PP 1
 .bp
 ..
-.ie \\n[NF] .wh 0 HD
-.el .wh 0 FH
-.wh \\n[PL]i NP"
+.ie \\n[P1] .wh 0 HD
+.el .wh 0 H1
+.."
   "Troff macro header for exporting to print formats.
 
 n.b. This is not intended to be used independently of buffers
