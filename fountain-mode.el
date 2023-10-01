@@ -1825,7 +1825,8 @@ When point is at metadata value on its own line, indent to
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
 
-  1. If prefixed with ARG, call `fountain-outline-cycle-buffer' and pass ARG.
+  1. If ARG is non-nil (when prefixed with \\[universal-argument]), call
+    `fountain-outline-cycle-buffer' and pass ARG.
   2. If point is inside an empty parenthetical, delete it.
   3. If point is inside a non-empty parenthetical, move to a newline.
   4. If point is at a blank line within dialogue, insert a parenthetical.
@@ -1868,8 +1869,8 @@ When point is at metadata value on its own line, indent to
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
-If prefixed with ARG, insert `.' at beginning of line (if not
-already present) to force a scene heading."
+If ARG is non-nil (when prefixed with \\[universal-argument]), insert `.' at
+beginning of line (if not already present) to force a scene heading."
   (interactive "*P")
   (when (and arg (not (fountain-match-scene-heading)))
     (save-excursion (beginning-of-line) (insert ".")))
@@ -1877,8 +1878,8 @@ already present) to force a scene heading."
 
 (defun fountain-upcase-line-and-newline (&optional arg)
   "Upcase the line and insert a newline.
-If prefixed with ARG, insert `.' at beginning of line (if not
-already present) to force a scene heading."
+If ARG is non-nil (when prefixed with \\[universal-argument]), insert `.' at
+beginning of line (if not already present) to force a scene heading."
   (interactive "*P")
   (fountain-upcase-line arg)
   (newline))
@@ -1913,8 +1914,8 @@ already present) to force a scene heading."
 (defun fountain-insert-note (&optional arg)
   "Insert a note based on `fountain-note-template' underneath current element.
 If region is active and it is appropriate to act on, only
-surround region with note delimiters (`[[ ]]'). If prefixed with
-ARG (\\[universal-argument]), only insert note delimiters."
+surround region with note delimiters (`[[ ]]'). If ARG is
+non-nil (when prefixed with (\\[universal-argument]), only insert note delimiters."
   (interactive "*P")
   (let ((comment-start "[[")
         (comment-end "]]"))
@@ -2237,7 +2238,8 @@ to include external files."
 
 (defun fountain-add-scene-numbers (&optional arg)
   "Add scene numbers to scene headings in current buffer.
-If prefixed with ARG, remove scene numbers.
+If ARG is non-nil (when prefixed with \\[universal-argument]), remove
+scene numbers.
 
 Adding scene numbers to scene headings after numbering existing
 scene headings will use a prefix or suffix letter, depending on
