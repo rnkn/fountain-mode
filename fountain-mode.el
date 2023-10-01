@@ -3005,10 +3005,10 @@ Options are: bold, double-space, underline."
 .ie \\n[P1] .wh 0 HD
 .el .wh 0 H1
 .."
-  "Troff macro header for exporting to print formats.
+  "Troff macro header for exporting to PDF.
 
 n.b. This is not intended to be used independently of buffers
-prepared with `fountain-export'.")
+prepared with `fountain-export-pdf'.")
 
 (defun fountain-export-region-to-troff (start end &optional output-buffer)
   "Convert from START to END to troff, sending to buffer OUTPUT.
