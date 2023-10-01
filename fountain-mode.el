@@ -3012,6 +3012,7 @@ prepared with `fountain-export'.")
   "Convert from START to END to troff, sending to buffer OUTPUT.
 
 If OUTPUT in nil, `fountain-export-output-buffer' is used."
+  (let ((job (make-progress-reporter "Converting to troff...")))
   (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
   (with-current-buffer (get-buffer-create output-buffer)
     (erase-buffer)
@@ -3023,28 +3024,49 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
        ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
        ?n (if fountain-export-number-first-page 1 0))))
     (unless (bolp) (newline)))
-  (save-excursion
-    (goto-char start)
-    (while (< (point) end)
-      (let (element request)
-        (skip-chars-forward "\n\s\t")
-        (beginning-of-line)
-        (when (and (setq element (fountain-get-element))
-                   (setq request (cdr (assq element fountain-export-troff-request-alist))))
-          (let ((delim (if (eq element 'page-break) " " "\n"))
-                ;;
-                ;; FIXME: using regexp group 2 works for all non-action elements
-                ;; except character, and we need a group with just the character
-                ;; name.
-                ;;
-                (content (or (match-string-no-properties 2)
-                             (match-string-no-properties 0))))
-            (with-current-buffer output-buffer
-              (insert-before-markers (format ".%s%s%s\n" request delim content))))))
-      (forward-line 1))))
+    (save-excursion
+      (goto-char start)
+      (while (< (point) end)
+        (let (element request)
+          (skip-chars-forward "\n\s\t")
+          (beginning-of-line)
+          (when (and (setq element (fountain-get-element))
+                     (setq request (cdr (assq element fountain-export-troff-request-alist))))
+            (let ((delim (if (eq element 'page-break) " " "\n"))
+                  ;;
+                  ;; FIXME: using regexp group 2 works for all non-action elements
+                  ;; except character, and we need a group with just the character
+                  ;; name and extension.
+                  ;;
+                  (content (if (eq element 'character)
+                               (concat (match-string-no-properties 2)
+                                       (match-string-no-properties 3))
+                             (or (match-string-no-properties 2)
+                                 (match-string-no-properties 0)))))
+              (setq content (replace-regexp-in-string "^\\." "\\&." content nil t))
+              (with-current-buffer output-buffer
+                (insert-before-markers (format ".%s%s%s\n" request delim content))))))
+        (forward-line 1)
+        (progress-reporter-update job)))
+  (with-current-buffer output-buffer
+    (goto-char (point-min))
+    (while (re-search-forward fountain-italic-regexp nil t)
+      (replace-match "\\\\f(CI\\3\\\\fC" nil nil nil 1)
+      (progress-reporter-update job))
+    (goto-char (point-min))
+    (while (re-search-forward fountain-bold-regexp nil t)
+      (replace-match "\\\\f(CB\\3\\\\fC" nil nil nil 1)
+      (progress-reporter-update job))
+    (goto-char (point-min))
+    (while (re-search-forward fountain-lyrics-regexp nil t)
+      (replace-match "\\\\f(CI\\2")
+      (progress-reporter-update job)))
+  (progress-reporter-done job)))
 
-(defun fountain-export-pdf ()
-  (interactive)
+(defun fountain-export-pdf (&optional arg)
+  (interactive "P")
+  (if arg
+      (fountain-export-command
   (let ((source-buffer (current-buffer))
         (start
          (if (use-region-p) (region-beginning) (point-min)))
@@ -3057,7 +3079,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (command
          (string-join (cons fountain-export-troff-command
                             (cons "-Tpdf" fountain-export-troff-extra-options))
-                      " ")))
+                      " "))
+        (job (make-progress-reporter "Preparing...")))
     ;; Prepare script
     (with-temp-buffer
       (insert-buffer-substring source-buffer start end)
@@ -3066,28 +3089,20 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
       (while (< (point) (point-max))
         (fountain-move-forward-page)
         (unless (eobp)
-          (fountain-insert-page-break)))
+          (fountain-insert-page-break))
+        (progress-reporter-update job))
+      (progress-reporter-done job)
       (fountain-export-region-to-troff (point-min) (point-max) troff-buffer))
     ;; Export to troff
     (with-current-buffer troff-buffer
       (call-process-region nil nil shell-file-name nil
-                           (list (if (stringp fountain-export-troff-post-process-command)
-                                     (get-buffer-create fountain-export-troff-pp-buffer)
-                                   output-buffer)
-                                 nil)
+                           (list output-buffer nil)
                            nil shell-command-switch command))
-    ;; Possibly post-process troff
-    (when (get-buffer fountain-export-troff-pp-buffer)
-      (with-current-buffer fountain-export-troff-pp-buffer
-        (call-process-region nil nil shell-file-name nil
-                             (list output-buffer nil) nil
-                             shell-command-switch fountain-export-troff-post-process-command))
-      (kill-buffer fountain-export-troff-pp-buffer))
-    ;; Convert troff
-    (with-current-buffer output-buffer
-      (write-file
-       (concat (file-name-base (buffer-file-name source-buffer)) ".pdf")
-       t))))
+    ;; Write PDF
+    (switch-to-buffer output-buffer)
+    (write-file
+     (concat (file-name-base (buffer-file-name source-buffer)) ".pdf")
+     t)))
 
 (require 'format-spec)
 
@@ -3532,7 +3547,7 @@ takes the form:
     (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
 
     ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "C-c C-e") #'fountain-export)
+    (define-key map (kbd "C-c C-e") #'fountain-export-pdf)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
