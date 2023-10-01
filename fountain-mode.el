@@ -3013,6 +3013,7 @@ Options are: bold, double-space, underline."
 .nr PP 1
 .bp
 ..
+.RS
 .ie \\n[P1] .wh 0 HD
 .el .wh 0 H1
 .."
