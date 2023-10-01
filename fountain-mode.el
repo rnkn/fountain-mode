@@ -3067,8 +3067,6 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
 
 (defun fountain-export-pdf (&optional arg)
   (interactive "P")
-  (if arg
-      (fountain-export-command
   (let ((source-buffer (current-buffer))
         (start
          (if (use-region-p) (region-beginning) (point-min)))
