@@ -2834,24 +2834,27 @@ The car sets `left-margin' and cdr `fill-column'.")
   :safe 'stringp
   :group 'fountain-export)
 
-(defcustom fountain-export-troff-extra-options
-  nil
-  "Option flags passed to `fountain-export-troff-command'
-
-n.b. the -T dev option is calculated automatically from
-`fountain-export-format'."
+(defcustom fountain-export-troff-options
+  '("-Tpdf")
+  "Option flags passed to `fountain-export-troff-command'"
   :type '(repeat (string :tag "Option"))
   :group 'fountain-export)
 
-(defconst fountain-export-troff-request-alist
-  '((scene-heading      . "SC")
-    (action             . "AA")
-    (character          . "CH")
-    (dialog             . "DL")
-    (paren              . "PR")
-    (trans              . "TR")
-    (center             . "CT")
-    (page-break         . "NP"))
+(defconst fountain-export-troff-requests
+  '(scene-heading
+    action
+    character
+    dialog
+    paren
+    dual-character-left
+    dual-character-right
+    dual-dialog-left
+    dual-dialog-right
+    dual-paren-left
+    dual-paren-right
+    trans
+    center
+    page-break)
   "List of elements and associated roff requests.")
 
 (defcustom fountain-export-command-profiles
@@ -2931,79 +2934,113 @@ Options are: bold, double-space, underline."
 .if !rPL .nr PL 11
 .pl \\n[PL]i
 .
-.nr SS %s
-.nr SB %b
-.nr SU %u
-.nr P1 %n
-.nr PP 1
+.nr scenespace %s
+.nr scenebold %b
+.nr sceneunderline %u
+.nr numberpage1 %n
+.nr pagetop 1
 .nh
 .
-.de RS
+.de reset
 .ft C
 .ad l
 .po 1.25i
 .ll \\n[PW]i
 .in 0
 ..
-.de HD
-'sp 0.5i
-'tl '''%%.'
-'sp |1i
+.de blank
+.sp |\\\\n[.h]u
+.ie \\\\n[pagetop] .sp |1i
+.el .sp 1
+.nr pagetop 0
 ..
-.de H1
-'sp 0.5i
-'tl ''''
-'sp |1i
-.wh 0 HD
+.de header
+.sp 0.5i
+.tl '''%%.'
+.sp |1i
 ..
-.de SP
-.if !\\\\n[PP] .sp 1
-.nr PP 0
+.de headerblank
+.sp 0.5i
+.tl ''''
+.sp |1i
+.wh 0 header
 ..
-.de AA
-.RS
-.SP
+.de action
+.reset
+.blank
 ..
-.de SC
-.RS
-.if !\\\\n[PP] .sp \\n[SS]
-.nr PP 0
-.if \\n[SB] .ft CB
+.de scene-heading
+.reset
+.sp |\\\\n[.h]u
+.ie \\\\n[pagetop] .sp |1i
+.el .sp \\n[scenespace]
+.nr pagetop 0
+.if \\\\n[scenebold] .ft CB
 ..
-.de CH
-.RS
-.SP
+.de character
+.reset
+.blank
 .in 2.5i
 .ll -1i
 ..
-.de PR
-.RS
+.de paren
+.reset
 .in 2i
 .ll -2.4i
 .ti -8p
 ..
-.de DL
-.RS
+.de dialog
+.reset
 .in 1.5i
 .ll -1i
 ..
-.de TR
-.RS
-.SP
+.de trans
+.reset
+.blank
 .in 4i
 ..
-.de CT
-.RS
-.SP
+.de dual-character-left
+.reset
+.blank
+.mk dualtop
+.in 1i
+.ll 2.9i
+..
+.de dual-paren-left
+.reset
+.in 0.5i
+.ti -8p
+..
+.de dual-dialog-left
+.reset
+.ll 2.9i
+..
+.de dual-character-right
+.reset
+.blank
+.sp |\\\\n[dualtop]u
+.in 4i
+..
+.de dual-paren-right
+.reset
+.in 3.3i
+..
+.de dual-dialog-right
+.reset
+.in 3.1i
+..
+.de center
+.reset
+.blank
 .ce
 ..
-.de NP
-.nr PP 1
+.de page-break
 .bp
+.nr pagetop 1
 ..
-.RS
-.ie \\n[P1] .wh 0 HD
-.el .wh 0 H1
+.reset
+.ie \\n[numberpage1] .wh 0 header
+.el .wh 0 headerblank
 .."
   "Troff macro header for exporting to PDF.
 
@@ -3015,17 +3052,17 @@ prepared with `fountain-export-pdf'.")
 
 If OUTPUT in nil, `fountain-export-output-buffer' is used."
   (let ((job (make-progress-reporter "Converting to troff...")))
-  (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
-  (with-current-buffer (get-buffer-create output-buffer)
-    (erase-buffer)
-    (insert-before-markers
-     (format-spec fountain-export-troff-macro
-      (format-spec-make
-       ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
-       ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
-       ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
-       ?n (if fountain-export-number-first-page 1 0))))
-    (unless (bolp) (newline)))
+    (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
+    (with-current-buffer (get-buffer-create output-buffer)
+      (erase-buffer)
+      (insert-before-markers
+       (format-spec fountain-export-troff-macro
+                    (format-spec-make
+                     ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
+                     ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
+                     ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
+                     ?n (if fountain-export-number-first-page 1 0))))
+      (unless (bolp) (newline)))
     (save-excursion
       (goto-char start)
       (while (< (point) end)
@@ -3033,7 +3070,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
           (skip-chars-forward "\n\s\t")
           (beginning-of-line)
           (when (and (setq element (fountain-get-element))
-                     (setq request (cdr (assq element fountain-export-troff-request-alist))))
+                     (setq request (car (memq element fountain-export-troff-requests))))
             (let ((delim (if (eq element 'page-break) " " "\n"))
                   ;;
                   ;; FIXME: using regexp group 2 works for all non-action elements
@@ -3050,22 +3087,22 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                 (insert-before-markers (format ".%s%s%s\n" request delim content))))))
         (forward-line 1)
         (progress-reporter-update job)))
-  (with-current-buffer output-buffer
-    (goto-char (point-min))
-    (while (re-search-forward fountain-italic-regexp nil t)
-      (replace-match "\\\\f(CI\\3\\\\fC" nil nil nil 1)
-      (progress-reporter-update job))
-    (goto-char (point-min))
-    (while (re-search-forward fountain-bold-regexp nil t)
-      (replace-match "\\\\f(CB\\3\\\\fC" nil nil nil 1)
-      (progress-reporter-update job))
-    (goto-char (point-min))
-    (while (re-search-forward fountain-lyrics-regexp nil t)
-      (replace-match "\\\\f(CI\\2")
-      (progress-reporter-update job)))
-  (progress-reporter-done job)))
+    (with-current-buffer output-buffer
+      (goto-char (point-min))
+      (while (re-search-forward fountain-italic-regexp nil t)
+        (replace-match "\\\\f[CI]\\3\\\\f[]" nil nil nil 1)
+        (progress-reporter-update job))
+      (goto-char (point-min))
+      (while (re-search-forward fountain-bold-regexp nil t)
+        (replace-match "\\\\f[CB]\\3\\\\f[]" nil nil nil 1)
+        (progress-reporter-update job))
+      (goto-char (point-min))
+      (while (re-search-forward fountain-lyrics-regexp nil t)
+        (replace-match "\\\\f[CI]\\2\f[]")
+        (progress-reporter-update job)))
+    (progress-reporter-done job)))
 
-(defun fountain-export-pdf (&optional arg)
+(defun fountain-export (&optional arg)
   (interactive "P")
   (let ((source-buffer (current-buffer))
         (start
@@ -3078,7 +3115,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
          (get-buffer-create fountain-export-output-buffer))
         (command
          (string-join (cons fountain-export-troff-command
-                            (cons "-Tpdf" fountain-export-troff-extra-options))
+                            fountain-export-troff-options)
                       " "))
         (job (make-progress-reporter "Preparing...")))
     ;; Prepare script
@@ -3547,7 +3584,7 @@ takes the form:
     (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
 
     ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "C-c C-e") #'fountain-export-pdf)
+    (define-key map (kbd "C-c C-e") #'fountain-export)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
