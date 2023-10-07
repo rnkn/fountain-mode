@@ -3319,7 +3319,7 @@ takes the form:
             (both (<= 28 emacs-major-version)))
         (cond ((and (= subexp 7) both)
                `(face nil display ((margin left-margin)
-                 (space :width (- left-margin ,(+ (string-width scene-num) 4))))))
+                 (space :width (- left-margin ,(+ (string-width scene-num) 2))))))
               ((and (= subexp 8) both)
                `(face nil display ((margin left-margin) ,scene-num)))
               ((= subexp 9)
