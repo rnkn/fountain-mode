@@ -2842,7 +2842,7 @@ The car sets `left-margin' and cdr `fill-column'.")
   :group 'fountain-export)
 
 (defcustom fountain-export-troff-extra-options
-  nil
+  '("-Kutf8")
   "Option flags passed to `fountain-export-troff-command'
 
 n.b. the `-Tdev' option is calculated automatically from
