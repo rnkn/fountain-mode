@@ -35,7 +35,7 @@ Sorry, this node is not yet written. You can help by submitting a patch!
 Copyright @copyright{} 2021--2023 Paul W. Rankin
 
 The following people contributed to this documentation:@*
-Paul W. Rankin, Kohl Sudduth
+Paul W. Rankin, Kohl Sudduth, Sandra Snan
 @end copying
 
 @finalout
@@ -297,8 +297,6 @@ demoting the outline level of a heading.
 @node Scene Headings
 @unnumberedsec Scene Headings
 
-A scene begins with a scene heading.
-
 Scene headings begin with a prefix, specified in
 @code{fountain-scene-heading-prefix-list}, which defaults to:
 
@@ -320,10 +318,29 @@ This options allows setting your own scene heading prefixes. These
 entries are case-insensitive.
 @end defopt
 
+@defopt fountain-scene-heading-suffix-list
+This options allows setting your own scene heading suffixes (or
+time-of-day). These entries are case-insensitive.
+@end defopt
+
 @defopt fountain-scene-heading-suffix-separator
 This option allows setting the separator (a regular expression)
 between the scene location and time of day. The default @samp{ --? }
 allows either one or two dashes.
+@end defopt
+
+@defopt fountain-auto-upcase-scene-headings
+Enabling this option will automatically upcase text after a scene
+heading prefix as you type.
+@end defopt
+
+@defopt fountain-double-space-scene-headings
+Enabling this option will display two blank lines above scene
+headings, regardless of what's in the file. n.b. This option does not
+affect calculation of pagination.
+@end defopt
+
+@defopt fountain-pagination-double-space-scene-headings
 @end defopt
 
 @xref{Scene Heading Completion}.
@@ -399,6 +416,10 @@ that's fine too. The following will still be parsed as action.
 JOLENE throws the chair at PHILIP.
 @end example
 
+@defopt fountain-character-extension-list
+This option allows setting your own character extensions, e.g. ``(O.C.)''.
+@end defopt
+
 @xref{Character Name Completion}.
 
 @node Dialogue
@@ -415,8 +436,8 @@ Have you seen trouble? I seem to have misplaced it.
 @node Parentheticals
 @unnumberedsec Parentheticals
 
-Anytime the writer types a (parens) inside of a dialogue block, the text
-auto-formats into the correct position.
+Any text inside parentheticals and within dialogue is parsed as a
+parenthetical element, e.g.
 
 @example
 JOLENE
@@ -466,7 +487,7 @@ This ``boneyard'' is for text that you're on the brink of removing, or
 drafts that you aren't ready to ``uncomment'' and include yet, or just
 anything else you want to ignore.
 
-If you instead just want to annotate your screenplay, use @ref{Notes}
+If you instead just want to annotate your screenplay, @ref{Notes}
 or @ref{Synopses}.
 
 @node Outlining
