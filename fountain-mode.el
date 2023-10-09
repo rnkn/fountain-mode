@@ -2813,6 +2813,13 @@ The car sets `left-margin' and cdr `fill-column'.")
   :link '(info-link "(fountain-mode) Exporting")
   :group 'fountain)
 
+(defcustom fountain-export-format
+  'pdf
+  "Valid options are 'ps' or 'pdf'."
+  :type '(choice (const :tag "PDF" pdf)
+                 (const :tag "PostScript" ps))
+  :group 'fountain-export)
+
 (defcustom fountain-export-title-page
   t
   "When non-nil, include a title page in export."
@@ -2834,9 +2841,12 @@ The car sets `left-margin' and cdr `fill-column'.")
   :safe 'stringp
   :group 'fountain-export)
 
-(defcustom fountain-export-troff-options
-  '("-Tpdf")
-  "Option flags passed to `fountain-export-troff-command'"
+(defcustom fountain-export-troff-extra-options
+  nil
+  "Option flags passed to `fountain-export-troff-command'
+
+n.b. the `-Tdev' option is calculated automatically from
+`fountain-export-format'."
   :type '(repeat (string :tag "Option"))
   :group 'fountain-export)
 
@@ -3115,7 +3125,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
          (get-buffer-create fountain-export-output-buffer))
         (command
          (string-join (cons fountain-export-troff-command
-                            fountain-export-troff-options)
+                            (cons (format "-T%s" fountain-export-format)
+                                  fountain-export-troff-extra-options))
                       " "))
         (job (make-progress-reporter "Preparing...")))
     ;; Prepare script
@@ -3138,7 +3149,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     ;; Write PDF
     (switch-to-buffer output-buffer)
     (write-file
-     (concat (file-name-base (buffer-file-name source-buffer)) ".pdf")
+     (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
+             fountain-export-format)
      t)))
 
 (require 'format-spec)
