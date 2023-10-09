@@ -3109,11 +3109,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                         (replace-match "\\\\z_\\&" t)))))
                 ;; Curly quotes
                 (goto-char (point-min))
-                (while (re-search-forward "\"\\b" nil t)
-                  (replace-match "\\[lq]" t t))
+                (while (re-search-forward "\\(\"\\)[\\b\\.¡?]" nil t)
+                  (replace-match "\\[lq]" t t nil 1))
                 (goto-char (point-min))
-                (while (re-search-forward "\\b\"" nil t)
-                  (replace-match "\\[rq]" t t))
+                (while (re-search-forward "[\\b\\.!?]\\(\"\\)" nil t)
+                  (replace-match "\\[rq]" t t nil 1))
                 ;; Bold
                 (goto-char (point-min))
                 (while (re-search-forward fountain-bold-regexp nil t)
