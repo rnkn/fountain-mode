@@ -648,7 +648,7 @@ be specified with the bold-italic delimiters together, e.g.
   This text is ***_stupendously significant_***.")
 
 (defconst fountain-lyrics-regexp
-  "^\\(~[\s\t]*\\)\\(.+\\)"
+  "^\\(\\(~[\s\t]*\\)\\(.+\\)\\)"
   "Regular expression for matching lyrics.")
 
 
@@ -3532,9 +3532,9 @@ takes the form:
 
       ;; Lyrics ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (cons fountain-lyrics-regexp
-            '((1 '(face fountain-non-printing invisible fountain-element-markup)
+            '((2 '(face fountain-non-printing invisible fountain-element-markup)
                  prepend)
-              (2 '(face italic) prepend)))
+              (1 '(face italic) prepend)))
 
       ;; Underline ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (cons fountain-underline-regexp
