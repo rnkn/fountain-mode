@@ -2847,7 +2847,8 @@ The car sets `left-margin' and cdr `fill-column'.")
   "Option flags passed to `fountain-export-troff-command'
 
 n.b. the `-Tdev' option is calculated automatically from
-`fountain-export-format'."
+`fountain-export-format' and the page size from
+`fountain-page-size'."
   :type '(repeat (string :tag "Option"))
   :group 'fountain-export)
 
@@ -3158,9 +3159,10 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (output-buffer
          (get-buffer-create fountain-export-output-buffer))
         (command
-         (string-join (cons fountain-export-troff-command
-                            (cons (format "-T%s" fountain-export-format)
-                                  fountain-export-troff-extra-options))
+         (string-join (append (list fountain-export-troff-command
+                                    (format "-T%s" fountain-export-format)
+                                    (format "-P-p%s" fountain-page-size))
+                              fountain-export-troff-extra-options)
                       " "))
         (job (make-progress-reporter "Preparing...")))
     ;; Prepare script
