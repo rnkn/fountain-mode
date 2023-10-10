@@ -2674,33 +2674,34 @@ to suit your preferred tool's pagination method."
     ;; Move point to appropriate place to break page.
     (fountain-goto-page-break-point)
     (setq element (fountain-get-element))
-    ;; At this point, element can only be: section-heading,
-    ;; scene-heading, character, action, paren or dialog. Only paren and
-    ;; dialog require special treatment.
-    (if (memq element '(dialog paren))
-        (let ((name (fountain-get-character -1)))
+    (unless (eq element 'page-break)
+      ;; At this point, element can only be: section-heading,
+      ;; scene-heading, character, action, paren or dialog. Only paren and
+      ;; dialog require special treatment.
+      (if (memq element '(dialog paren))
+          (let ((name (fountain-get-character -1)))
+            (delete-horizontal-space)
+            (unless (bolp) (insert-before-markers "\n"))
+            (insert-before-markers
+             (concat fountain-pagination-more-dialog-string "\n\n"
+                     page-break "\n\n"
+                     name "\s" fountain-continued-dialog-string "\n")))
+        ;; Otherwise, insert the page break where we are. If the preceding
+        ;; element is a page break, only replace the page number,
+        ;; otherwise, insert the page break.
+        (if (save-excursion
+              (save-restriction
+                (widen)
+                (skip-chars-backward "\n\s\t")
+                (fountain-match-page-break)))
+            (replace-match page-break t t)
           (delete-horizontal-space)
           (unless (bolp) (insert-before-markers "\n"))
-          (insert-before-markers
-           (concat fountain-pagination-more-dialog-string "\n\n"
-                   page-break "\n\n"
-                   name "\s" fountain-continued-dialog-string "\n")))
-      ;; Otherwise, insert the page break where we are. If the preceding
-      ;; element is a page break, only replace the page number,
-      ;; otherwise, insert the page break.
-      (if (save-excursion
-            (save-restriction
-              (widen)
-              (skip-chars-backward "\n\s\t")
-              (fountain-match-page-break)))
-          (replace-match page-break t t)
-        (delete-horizontal-space)
-        (unless (bolp) (insert-before-markers "\n"))
-        (unless (fountain-blank-before-p) (insert-before-markers "\n"))
-        (insert-before-markers page-break "\n\n")))
-    ;; Return to where we were.
-    (goto-char x)
-    (set-marker x nil)))
+          (unless (fountain-blank-before-p) (insert-before-markers "\n"))
+          (insert-before-markers page-break "\n\n")))
+      ;; Return to where we were.
+      (goto-char x)
+      (set-marker x nil))))
 
 (defun fountain-get-page-count ()
   "Return a cons of the current page number and the total pages."
