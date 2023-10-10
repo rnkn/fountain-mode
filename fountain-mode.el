@@ -3627,6 +3627,7 @@ takes the form:
 
     ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map (kbd "C-c C-e") #'fountain-export)
+    (define-key map (kbd "C-c C-x c") #'fountain-export-command)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
@@ -3808,6 +3809,9 @@ takes the form:
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
     "---"
+    ["Export" fountain-export
+     :label (format "Export to %s"
+             (if (eq fountain-export-format 'ps) "PostScript" "PDF"))]
     ["Run Export Command..." fountain-export-command]
     ["View Last Exported File" fountain-export-view]
     "---"
