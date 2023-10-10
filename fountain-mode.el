@@ -3058,6 +3058,51 @@ Options are: bold, double-space, underline."
 n.b. This is not intended to be used independently of buffers
 prepared with `fountain-export-pdf'.")
 
+(defun fountain-export-troff-request (string)
+  (with-temp-buffer
+    (insert string)
+    (goto-char (point-min))
+    (if (looking-at "\\.") (replace-match "\\&." nil t))
+    ;; Curly quotes
+    (goto-char (point-min))
+    (while (re-search-forward "\\(\\b\\|\\[\\.!?]\\)\\(\"\\)" nil t)
+      (replace-match "\\[rq]" t t nil 2))
+    (goto-char (point-min))
+    (while (re-search-forward "\"" nil t)
+      (replace-match "\\[lq]" t t))
+    ;; Bold-italic
+    (goto-char (point-min))
+    (while (re-search-forward fountain-bold-italic-regexp nil t)
+      (replace-match "\\\\f[9]\\3\\\\f[]" t nil nil 1))
+    ;; Bold
+    (goto-char (point-min))
+    (while (re-search-forward fountain-bold-regexp nil t)
+      (replace-match "\\\\f[8]\\3\\\\f[]" t nil nil 1))
+    ;; Italics
+    (goto-char (point-min))
+    (while (re-search-forward (concat "\\(?:" fountain-italic-regexp
+                                      "\\|"
+                                      fountain-lyrics-regexp
+                                      "\\)")
+                              nil t)
+      (replace-match "\\\\f[7]\\3\\\\f[]"))
+    (goto-char (point-min))
+    (while (re-search-forward fountain-underline-regexp nil t)
+      (let ((beg (match-beginning 2))
+            (end (progn
+                   (goto-char (match-end 0))
+                   (point-marker))))
+        (goto-char beg)
+        (while (re-search-forward "." end t)
+          (forward-char -1)
+          (cond ((= (char-after) ?_)
+                 (delete-forward-char 1))
+                ((looking-at "\\\\.?\\[.*?\\]")
+                 (goto-char (match-end 0)))
+                (t
+                 (replace-match "\\\\z_\\&" t))))))
+    (buffer-substring (point-min) (point-max))))
+
 (defun fountain-export-region-to-troff (start end &optional output-buffer)
   "Convert from START to END to troff, sending to buffer OUTPUT.
 
@@ -3093,49 +3138,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                                        (match-string-no-properties 3))
                              (or (match-string-no-properties 2)
                                  (match-string-no-properties 0)))))
-              (with-temp-buffer
-                (insert content)
-                (goto-char (point-min))
-                (if (looking-at "\\.") (replace-match "\\&." nil t))
-                ;; Curly quotes
-                (goto-char (point-min))
-                (while (re-search-forward "\\(\"\\)[\\b\\.¡?]" nil t)
-                  (replace-match "\\[lq]" t t nil 1))
-                (goto-char (point-min))
-                (while (re-search-forward "[\\b\\.!?]\\(\"\\)" nil t)
-                  (replace-match "\\[rq]" t t nil 1))
-                ;; Bold-italic
-                (goto-char (point-min))
-                (while (re-search-forward fountain-bold-italic-regexp nil t)
-                  (replace-match "\\\\f[9]\\3\\\\f[]" t nil nil 1))
-                ;; Bold
-                (goto-char (point-min))
-                (while (re-search-forward fountain-bold-regexp nil t)
-                  (replace-match "\\\\f[8]\\3\\\\f[]" t nil nil 1))
-                ;; Italics
-                (goto-char (point-min))
-                (while (re-search-forward (concat "\\(?:" fountain-italic-regexp
-                                                  "\\|"
-                                                  fountain-lyrics-regexp
-                                                  "\\)")
-                                          nil t)
-                  (replace-match "\\\\f[7]\\3\\\\f[]"))
-                (goto-char (point-min))
-                (while (re-search-forward fountain-underline-regexp nil t)
-                  (let ((beg (match-beginning 2))
-                        (end (progn
-                               (goto-char (match-end 0))
-                               (point-marker))))
-                    (goto-char beg)
-                    (while (re-search-forward "." end t)
-                      (forward-char -1)
-                      (cond ((= (char-after) ?_)
-                             (delete-forward-char 1))
-                            ((looking-at "\\\\.?\\[.*?\\]")
-                             (goto-char (match-end 0)))
-                            (t
-                             (replace-match "\\\\z_\\&" t))))))
-                (setq content (buffer-substring (point-min) (point-max))))
+              (setq content (fountain-export-troff-request content))
               ;; Finally insert the request
               (with-current-buffer output-buffer
                 (insert-before-markers (format ".%s%s%s\n" request delim content))))))
