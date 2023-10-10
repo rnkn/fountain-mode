@@ -2985,7 +2985,7 @@ Options are: bold, double-space, underline."
 .ie \\\\n[pagetop] .sp |1i
 .el .sp \\n[scenespace]
 .nr pagetop 0
-.if \\\\n[scenebold] .ft CB
+.if \\\\n[scenebold] .ft 8
 ..
 .de character
 .reset
