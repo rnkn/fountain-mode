@@ -3096,17 +3096,6 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                 (insert content)
                 (goto-char (point-min))
                 (if (looking-at "\\.") (replace-match "\\&." nil t))
-                (goto-char (point-min))
-                (while (re-search-forward fountain-underline-regexp nil t)
-                  (let ((beg (match-beginning 2))
-                        (end (progn
-                               (goto-char (match-end 4))
-                               (point-marker))))
-                    (goto-char beg)
-                    (while (re-search-forward "." end t)
-                      (if (= (char-before) ?_)
-                          (delete-backward-char 1)
-                        (replace-match "\\\\z_\\&" t)))))
                 ;; Curly quotes
                 (goto-char (point-min))
                 (while (re-search-forward "\\(\"\\)[\\b\\.¡?]" nil t)
@@ -3114,17 +3103,36 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                 (goto-char (point-min))
                 (while (re-search-forward "[\\b\\.!?]\\(\"\\)" nil t)
                   (replace-match "\\[rq]" t t nil 1))
+                ;; Bold-italic
+                (goto-char (point-min))
+                (while (re-search-forward fountain-bold-italic-regexp nil t)
+                  (replace-match "\\\\f[9]\\3\\\\f[]" t nil nil 1))
                 ;; Bold
                 (goto-char (point-min))
                 (while (re-search-forward fountain-bold-regexp nil t)
-                  (replace-match "\\\\f[CB]\\3\\\\f[]"))
+                  (replace-match "\\\\f[8]\\3\\\\f[]" t nil nil 1))
                 ;; Italics
                 (goto-char (point-min))
-                (while (re-search-forward fountain-italic-regexp nil t)
-                  (replace-match "\\\\f[CI]\\3\\\\f[]"))
+                (while (re-search-forward (concat fountain-italic-regexp
+                                                  "\\|"
+                                                  fountain-lyrics-regexp)
+                                          nil t)
+                  (replace-match "\\\\f[7]\\3\\\\f[]"))
                 (goto-char (point-min))
-                (while (re-search-forward fountain-lyrics-regexp nil t)
-                  (replace-match "\\\\f[CI]\\2\\\\f[]"))
+                (while (re-search-forward fountain-underline-regexp nil t)
+                  (let ((beg (match-beginning 2))
+                        (end (progn
+                               (goto-char (match-end 0))
+                               (point-marker))))
+                    (goto-char beg)
+                    (while (re-search-forward "." end t)
+                      (forward-char -1)
+                      (cond ((= (char-after) ?_)
+                             (delete-forward-char 1))
+                            ((looking-at "\\\\.?\\[.*?\\]")
+                             (goto-char (match-end 0)))
+                            (t
+                             (replace-match "\\\\z_\\&" t))))))
                 (setq content (buffer-substring (point-min) (point-max))))
               ;; Finally insert the request
               (with-current-buffer output-buffer
