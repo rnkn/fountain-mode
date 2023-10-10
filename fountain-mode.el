@@ -3113,9 +3113,10 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                   (replace-match "\\\\f[8]\\3\\\\f[]" t nil nil 1))
                 ;; Italics
                 (goto-char (point-min))
-                (while (re-search-forward (concat fountain-italic-regexp
+                (while (re-search-forward (concat "\\(?:" fountain-italic-regexp
                                                   "\\|"
-                                                  fountain-lyrics-regexp)
+                                                  fountain-lyrics-regexp
+                                                  "\\)")
                                           nil t)
                   (replace-match "\\\\f[7]\\3\\\\f[]"))
                 (goto-char (point-min))
