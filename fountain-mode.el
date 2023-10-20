@@ -1745,8 +1745,8 @@ If LIMIT is `scene', halt at next scene heading. If LIMIT is
       (when (fountain-match-character)
         (match-string-no-properties 2)))))
 
-(defun fountain-read-metadata ()
-  "Read metadata of current buffer and return as a property list.
+(defun fountain-get-metadata ()
+  "Return metadata of current buffer as an association list.
 
 Key string is slugified and interned. Value string remains a
 string. e.g.
@@ -1756,25 +1756,22 @@ string. e.g.
     (save-restriction
       (widen)
       (goto-char (point-min))
-      (let (list)
-        (while (and (bolp) (fountain-match-metadata))
+      (let (metadata)
+        (while (fountain-match-metadata)
           (let ((key (match-string-no-properties 1))
                 (value (match-string-no-properties 2)))
-            (forward-line)
-            (while (and (fountain-match-metadata)
-                        (null (match-string-no-properties 1)))
-              (setq value
-                    (concat value (when value "\n")
-                            (match-string-no-properties 2)))
-              (forward-line))
-            (push (cons
-                   (intern (string-join (split-string (downcase
-                       (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
-                      "[^[:alnum:]]+" t)
-                     "-"))
-                   value)
-                  list)))
-        list))))
+            (when (stringp key)
+              (setq key (intern (downcase (replace-regexp-in-string
+                                           "[^[:alnum:]]+" "-" key)))))
+            (forward-line 1)
+            (if value
+                (push (cons key value) metadata)
+              (while (and (fountain-match-metadata)
+                          (null (match-string 1)))
+                (push (match-string-no-properties 2) value)
+                (forward-line 1))
+              (push (cons key (string-join (reverse value) "\n")) metadata))))
+        metadata))))
 
 (defun fountain-get-dual-dialog (&optional pos)
   "Non-nil if point or POS is within dual dialogue.
@@ -3235,7 +3232,7 @@ Export command profiles are defined in
          (if buffer-file-name (file-name-base (buffer-file-name))))
         (start (if (use-region-p) (region-beginning) (point-min)))
         (end   (if (use-region-p) (region-end) (point-max)))
-        (metadata (fountain-read-metadata))
+        (metadata (fountain-get-metadata))
         use-stdin)
     (unless (let (case-fold-search) (string-match "%b" command))
       (setq use-stdin t))
@@ -3370,7 +3367,7 @@ takes the form:
             (if (integerp value)
                 value
               (cdr (or (assoc-string
-                        (or (cdr (assq 'format (fountain-read-metadata)))
+                        (or (cdr (assq 'format (fountain-get-metadata)))
                             fountain-default-script-format)
                         value)
                        (car value))))
