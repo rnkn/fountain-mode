@@ -3059,7 +3059,7 @@ Options are: bold, double-space, underline."
 n.b. This is not intended to be used independently of buffers
 prepared with `fountain-export-pdf'.")
 
-(defun fountain-export-troff-request (string)
+(defun fountain-export-troff-string (string)
   (with-temp-buffer
     (insert string)
     (goto-char (point-min))
@@ -3139,7 +3139,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                                        (match-string-no-properties 3))
                              (or (match-string-no-properties 2)
                                  (match-string-no-properties 0)))))
-              (setq content (fountain-export-troff-request content))
+              (setq content (fountain-export-troff-string content))
               ;; Finally insert the request
               (with-current-buffer output-buffer
                 (insert-before-markers (format ".%s%s%s\n" request delim content))))))
