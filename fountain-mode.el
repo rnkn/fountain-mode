@@ -3104,7 +3104,8 @@ prepared with `fountain-export-pdf'.")
                  (replace-match "\\\\z_\\&" t))))))
     (buffer-substring (point-min) (point-max))))
 
-(defun fountain-export-region-to-troff (start end &optional output-buffer)
+(defun fountain-export-region-to-troff (start end &optional
+                                              metadata output-buffer)
   "Convert from START to END to troff, sending to buffer OUTPUT.
 
 If OUTPUT in nil, `fountain-export-output-buffer' is used."
@@ -3164,19 +3165,34 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                                     (format "-P-p%s" fountain-page-size))
                               fountain-export-troff-extra-options)
                       " "))
-        (job (make-progress-reporter "Preparing...")))
+        (job (make-progress-reporter "Preparing..."))
+        metadata)
     ;; Prepare script
     (with-temp-buffer
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
       (goto-char (point-min))
+      ;; Parse metadata
+      (when fountain-export-title-page
+        (while (fountain-match-metadata)
+        (let ((key (downcase (match-string-no-properties 1)))
+              (value (match-string-no-properties 2)))
+          (forward-line 1)
+          (if value
+              (push (cons key value) metadata)
+            (while (and (fountain-match-metadata)
+                        (null (match-string 1)))
+              (push (match-string-no-properties 2) value)
+              (forward-line 1))
+          (push (cons key (string-join (reverse value) "\n")) metadata)))))
       (while (< (point) (point-max))
         (fountain-move-forward-page)
         (unless (eobp)
           (fountain-insert-page-break))
         (progress-reporter-update job))
       (progress-reporter-done job)
-      (fountain-export-region-to-troff (point-min) (point-max) troff-buffer))
+      (fountain-export-region-to-troff (point-min) (point-max)
+                                       metadata troff-buffer))
     ;; Export to troff
     (with-current-buffer troff-buffer
       (call-process-region nil nil shell-file-name nil
