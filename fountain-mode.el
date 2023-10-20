@@ -3100,7 +3100,7 @@ prepared with `fountain-export-pdf'.")
                  (goto-char (match-end 0)))
                 (t
                  (replace-match "\\\\z_\\&" t))))))
-    (buffer-substring (point-min) (point-max))))
+    (buffer-string)))
 
 (defun fountain-export-region-to-troff (start end &optional
                                               metadata output-buffer)
