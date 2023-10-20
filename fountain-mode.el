@@ -2813,7 +2813,7 @@ The car sets `left-margin' and cdr `fill-column'.")
 
 (defcustom fountain-export-format
   'pdf
-  "Valid options are 'ps' or 'pdf'."
+  "Valid options are `ps' or `pdf'."
   :type '(choice (const :tag "PDF" pdf)
                  (const :tag "PostScript" ps))
   :group 'fountain-export)
@@ -3104,7 +3104,7 @@ prepared with `fountain-export-pdf'.")
         (while (re-search-forward "." end t)
           (forward-char -1)
           (cond ((= (char-after) ?_)
-                 (delete-forward-char 1))
+                 (delete-char 1))
                 ((looking-at "\\\\.?\\[.*?\\]")
                  (goto-char (match-end 0)))
                 (t
@@ -3130,7 +3130,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
       (unless (bolp) (newline))
       (when metadata
         (insert ".sp |4i\n")
-        (let (title credit author source string)
+        (let (string)
           (dolist (var '(title credit author source))
             (when (setq string (cdr (assoc var metadata)))
               (setq metadata (delq (assoc var metadata) metadata))
