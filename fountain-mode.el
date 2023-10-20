@@ -3048,9 +3048,15 @@ Options are: bold, double-space, underline."
 .bp
 .nr pagetop 1
 ..
+.de titleline
 .reset
-.ie \\n[numberpage1] .wh 0 header
-.el .wh 0 headerblank
+.sp
+.ce 99
+..
+.de titlenote
+.reset
+.sp
+.ll 3i
 .."
   "Troff macro header for exporting to PDF.
 
@@ -3061,6 +3067,7 @@ prepared with `fountain-export-pdf'.")
   (with-temp-buffer
     (insert string)
     (goto-char (point-min))
+    ;; Leading dot
     (if (looking-at "\\.") (replace-match "\\&." nil t))
     ;; Curly quotes
     (goto-char (point-min))
@@ -3085,6 +3092,7 @@ prepared with `fountain-export-pdf'.")
                                       "\\)")
                               nil t)
       (replace-match "\\\\f[7]\\3\\\\f[]" t nil nil 1))
+    ;; Underline
     (goto-char (point-min))
     (while (re-search-forward fountain-underline-regexp nil t)
       (let ((beg (match-beginning 2))
@@ -3118,7 +3126,26 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                      ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
                      ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
                      ?n (if fountain-export-number-first-page 1 0))))
-      (unless (bolp) (newline)))
+      (unless (bolp) (newline))
+      (when metadata
+        (insert ".sp |4i\n")
+        (let (title credit author source string)
+          (dolist (var '(title credit author source))
+            (when (setq string (cdr (assoc var metadata)))
+              (setq metadata (delq (assoc var metadata) metadata))
+              (insert-before-markers
+               (format ".titleline\n%s\n" (fountain-export-troff-string string)))))
+          (when metadata
+            (insert ".sp |8i\n")
+            (dolist (var (reverse metadata))
+              (setq string (cdr var))
+              (insert (format ".titlenote\n%s\n" string)))
+            (insert ".page-break\n"))))
+      (insert-before-markers "\
+.ie \\n[numberpage1] .wh 0 header
+.el .wh 0 headerblank
+.nr %% -1
+."))
     (save-excursion
       (goto-char start)
       (while (< (point) end)
@@ -3164,25 +3191,13 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                               fountain-export-troff-extra-options)
                       " "))
         (job (make-progress-reporter "Preparing..."))
-        metadata)
+        (metadata
+         (when fountain-export-title-page (fountain-get-metadata))))
     ;; Prepare script
     (with-temp-buffer
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
       (goto-char (point-min))
-      ;; Parse metadata
-      (when fountain-export-title-page
-        (while (fountain-match-metadata)
-        (let ((key (downcase (match-string-no-properties 1)))
-              (value (match-string-no-properties 2)))
-          (forward-line 1)
-          (if value
-              (push (cons key value) metadata)
-            (while (and (fountain-match-metadata)
-                        (null (match-string 1)))
-              (push (match-string-no-properties 2) value)
-              (forward-line 1))
-          (push (cons key (string-join (reverse value) "\n")) metadata)))))
       (while (< (point) (point-max))
         (fountain-move-forward-page)
         (unless (eobp)
