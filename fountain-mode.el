@@ -1209,6 +1209,7 @@ completion upon load."
   (message "Completion candidates updated"))
 
 (defun fountain--completion-auto-update ()
+  "Convenience function for `fountain-completion-auto-update-mode'."
   (when (eq major-mode 'fountain-mode)
     (fountain-completion-update)))
 
@@ -1655,7 +1656,7 @@ If N is 0, move to beginning of scene."
       (funcall move-fun p))))
 
 (defun fountain-goto-scene (scene)
-  "Move point to scene in current buffer.
+  "Move point to SCENE in current buffer.
 Scene can be a string or number."
   (interactive "sGo to scene: ")
   (push-mark)
@@ -2841,7 +2842,7 @@ The car sets `left-margin' and cdr `fill-column'.")
 
 (defcustom fountain-export-troff-extra-options
   '("-Kutf8")
-  "Option flags passed to `fountain-export-troff-command'
+  "Option flags passed to `fountain-export-troff-command'.
 
 n.b. the `-Tdev' option is calculated automatically from
 `fountain-export-format' and the page size from
@@ -3065,6 +3066,7 @@ n.b. This is not intended to be used independently of buffers
 prepared with `fountain-export-pdf'.")
 
 (defun fountain-export-troff-string (string)
+  "Convert STRING to troff markup."
   (with-temp-buffer
     (insert string)
     (goto-char (point-min))
@@ -3113,7 +3115,9 @@ prepared with `fountain-export-pdf'.")
 
 (defun fountain-export-region-to-troff (start end &optional
                                               metadata output-buffer)
-  "Convert from START to END to troff, sending to buffer OUTPUT.
+  "Convert from START to END to troff.
+If passed METADATA, convert that info to title page. Send to
+buffer OUTPUT-BUFFER.
 
 If OUTPUT in nil, `fountain-export-output-buffer' is used."
   (let ((job (make-progress-reporter "Converting to troff...")))
@@ -3421,7 +3425,7 @@ takes the form:
       '(face nil display nil invisible nil))))
 
 (defun fountain--font-lock-extend-region (beg end _old-len)
-  "Appropriately extend region to be fontified."
+  "Appropriately extend region between BEG and END to be fontified."
   (save-match-data
     (when (fountain-in-dialog-maybe)
       (save-excursion
