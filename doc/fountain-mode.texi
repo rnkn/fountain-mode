@@ -72,7 +72,7 @@ Check out the
 @emph{Please send me your screenshots!}
 @end ifhtml
 
-The public @program repository is hosted on
+The public @program code repository is hosted on
 @uref{@repository{}, GitHub}.
 
 @end ifnottex

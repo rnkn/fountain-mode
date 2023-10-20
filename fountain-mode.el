@@ -548,26 +548,31 @@ Requires `fountain-match-metadata' for `bobp'.")
 Requires `fountain-match-character' for preceding blank line.")
 
 (defconst fountain-dialog-regexp
-  "^\\(\s\s\\)$\\|^[\s\t]*\\([^<>\n]+?\\)[\s\t]*$"
+  "^\\(\s\s\\)$\\|^[\s\t]*\\(?2:[^<>\n]+?\\)[\s\t]*$"
   "Regular expression for matching dialogue.
 
-  Group 1: match trimmed whitespace
+  Group 1: omitted
+  Group 2: match dialogue
 
 Requires `fountain-match-dialog' for preceding character,
 parenthetical or dialogue.")
 
 (defconst fountain-paren-regexp
-  "^[\s\t]*([^)\n]*)[\s\t]*$"
+  "^[\s\t]*\\(?2:([^)\n]*)\\)[\s\t]*$"
   "Regular expression for matching parentheticals.
+
+  Group 1: omitted
+  Group 2: match parenthetical
 
 Requires `fountain-match-paren' for preceding character or
 dialogue.")
 
 (defconst fountain-page-break-regexp
-  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*$"
+  "^[\s\t]*\\(=\\{3,\\}\\)[\s\t]*\\([a-z0-9\\.-]+\\)?.*$"
   "Regular expression for matching page breaks.
 
-  Group 1: ===")
+  Group 1: leading ===
+  Group 2: forced page number")
 
 (defconst fountain-note-regexp
   "\\[\\[[\s\t]*\\(\\(?:\s\s\n\\|.\n?\\)*?\\)[\s\t]*]]"
@@ -643,7 +648,7 @@ be specified with the bold-italic delimiters together, e.g.
   This text is ***_stupendously significant_***.")
 
 (defconst fountain-lyrics-regexp
-  "^\\(~[\s\t]*\\)\\(.+\\)"
+  "^\\(?1:\\(~[\s\t]*\\)\\(?3:.+\\)\\)"
   "Regular expression for matching lyrics.")
 
 
@@ -984,7 +989,7 @@ When LOOSE is non-nil, do not require non-blank line after."
    ((fountain-match-page-break)         'page-break)
    ((fountain-match-metadata)           'metadata)
    ((fountain-match-note)               'note)
-   (t                                   'action)))
+   ((looking-at ".+")                   'action)))
 
 (defun fountain-match-action ()
   "Match action text if point is at action, nil otherwise.
@@ -994,8 +999,7 @@ Assumes that all other element matching has been done."
       (widen)
       (beginning-of-line)
       (or (looking-at fountain-forced-action-regexp)
-          (and (eq (fountain-get-element) 'action)
-               (looking-at ".+"))))))
+          (eq (fountain-get-element) 'action)))))
 
 
 ;;; Auto-completion ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1741,8 +1745,8 @@ If LIMIT is `scene', halt at next scene heading. If LIMIT is
       (when (fountain-match-character)
         (match-string-no-properties 2)))))
 
-(defun fountain-read-metadata ()
-  "Read metadata of current buffer and return as a property list.
+(defun fountain-get-metadata ()
+  "Return metadata of current buffer as an association list.
 
 Key string is slugified and interned. Value string remains a
 string. e.g.
@@ -1752,25 +1756,22 @@ string. e.g.
     (save-restriction
       (widen)
       (goto-char (point-min))
-      (let (list)
-        (while (and (bolp) (fountain-match-metadata))
+      (let (metadata)
+        (while (fountain-match-metadata)
           (let ((key (match-string-no-properties 1))
                 (value (match-string-no-properties 2)))
-            (forward-line)
-            (while (and (fountain-match-metadata)
-                        (null (match-string-no-properties 1)))
-              (setq value
-                    (concat value (when value "\n")
-                            (match-string-no-properties 2)))
-              (forward-line))
-            (push (cons
-                   (intern (string-join (split-string (downcase
-                       (replace-regexp-in-string "[^\n\s\t[:alnum:]]" "" key))
-                      "[^[:alnum:]]+" t)
-                     "-"))
-                   value)
-                  list)))
-        list))))
+            (when (stringp key)
+              (setq key (intern (downcase (replace-regexp-in-string
+                                           "[^[:alnum:]]+" "-" key)))))
+            (forward-line 1)
+            (if value
+                (push (cons key value) metadata)
+              (while (and (fountain-match-metadata)
+                          (null (match-string 1)))
+                (push (match-string-no-properties 2) value)
+                (forward-line 1))
+              (push (cons key (string-join (reverse value) "\n")) metadata))))
+        metadata))))
 
 (defun fountain-get-dual-dialog (&optional pos)
   "Non-nil if point or POS is within dual dialogue.
@@ -1821,7 +1822,8 @@ When point is at metadata value on its own line, indent to
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
 
-  1. If prefixed with ARG, call `fountain-outline-cycle-buffer' and pass ARG.
+  1. If ARG is non-nil (when prefixed with \\[universal-argument]), call
+    `fountain-outline-cycle-buffer' and pass ARG.
   2. If point is inside an empty parenthetical, delete it.
   3. If point is inside a non-empty parenthetical, move to a newline.
   4. If point is at a blank line within dialogue, insert a parenthetical.
@@ -1864,8 +1866,8 @@ When point is at metadata value on its own line, indent to
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
-If prefixed with ARG, insert `.' at beginning of line (if not
-already present) to force a scene heading."
+If ARG is non-nil (when prefixed with \\[universal-argument]), insert `.' at
+beginning of line (if not already present) to force a scene heading."
   (interactive "*P")
   (when (and arg (not (fountain-match-scene-heading)))
     (save-excursion (beginning-of-line) (insert ".")))
@@ -1873,8 +1875,8 @@ already present) to force a scene heading."
 
 (defun fountain-upcase-line-and-newline (&optional arg)
   "Upcase the line and insert a newline.
-If prefixed with ARG, insert `.' at beginning of line (if not
-already present) to force a scene heading."
+If ARG is non-nil (when prefixed with \\[universal-argument]), insert `.' at
+beginning of line (if not already present) to force a scene heading."
   (interactive "*P")
   (fountain-upcase-line arg)
   (newline))
@@ -1909,8 +1911,8 @@ already present) to force a scene heading."
 (defun fountain-insert-note (&optional arg)
   "Insert a note based on `fountain-note-template' underneath current element.
 If region is active and it is appropriate to act on, only
-surround region with note delimiters (`[[ ]]'). If prefixed with
-ARG (\\[universal-argument]), only insert note delimiters."
+surround region with note delimiters (`[[ ]]'). If ARG is
+non-nil (when prefixed with (\\[universal-argument]), only insert note delimiters."
   (interactive "*P")
   (let ((comment-start "[[")
         (comment-end "]]"))
@@ -2233,7 +2235,8 @@ to include external files."
 
 (defun fountain-add-scene-numbers (&optional arg)
   "Add scene numbers to scene headings in current buffer.
-If prefixed with ARG, remove scene numbers.
+If ARG is non-nil (when prefixed with \\[universal-argument]), remove
+scene numbers.
 
 Adding scene numbers to scene headings after numbering existing
 scene headings will use a prefix or suffix letter, depending on
@@ -2371,7 +2374,7 @@ For displaying scene headings double-spaced, see
   (append '(scene-heading action character dialog lines paren trans center)
           fountain-dual-dialog-left-elements
           fountain-dual-dialog-right-elements)
-  "List of elements considered as printed.
+  "List of elements considered printed on a page.
 i.e. Only these elements count towards page length.")
 
 (defun fountain-goto-page-break-point ()
@@ -2668,33 +2671,34 @@ to suit your preferred tool's pagination method."
     ;; Move point to appropriate place to break page.
     (fountain-goto-page-break-point)
     (setq element (fountain-get-element))
-    ;; At this point, element can only be: section-heading,
-    ;; scene-heading, character, action, paren or dialog. Only paren and
-    ;; dialog require special treatment.
-    (if (memq element '(dialog paren))
-        (let ((name (fountain-get-character -1)))
+    (unless (eq element 'page-break)
+      ;; At this point, element can only be: section-heading,
+      ;; scene-heading, character, action, paren or dialog. Only paren and
+      ;; dialog require special treatment.
+      (if (memq element '(dialog paren))
+          (let ((name (fountain-get-character -1)))
+            (delete-horizontal-space)
+            (unless (bolp) (insert-before-markers "\n"))
+            (insert-before-markers
+             (concat fountain-pagination-more-dialog-string "\n\n"
+                     page-break "\n\n"
+                     name "\s" fountain-continued-dialog-string "\n")))
+        ;; Otherwise, insert the page break where we are. If the preceding
+        ;; element is a page break, only replace the page number,
+        ;; otherwise, insert the page break.
+        (if (save-excursion
+              (save-restriction
+                (widen)
+                (skip-chars-backward "\n\s\t")
+                (fountain-match-page-break)))
+            (replace-match page-break t t)
           (delete-horizontal-space)
           (unless (bolp) (insert-before-markers "\n"))
-          (insert-before-markers
-           (concat fountain-pagination-more-dialog-string "\n\n"
-                   page-break "\n\n"
-                   name "\s" fountain-continued-dialog-string "\n")))
-      ;; Otherwise, insert the page break where we are. If the preceding
-      ;; element is a page break, only replace the page number,
-      ;; otherwise, insert the page break.
-      (if (save-excursion
-            (save-restriction
-              (widen)
-              (skip-chars-backward "\n\s\t")
-              (fountain-match-page-break)))
-          (replace-match page-break t t)
-        (delete-horizontal-space)
-        (unless (bolp) (insert-before-markers "\n"))
-        (unless (fountain-blank-before-p) (insert-before-markers "\n"))
-        (insert-before-markers page-break "\n\n")))
-    ;; Return to where we were.
-    (goto-char x)
-    (set-marker x nil)))
+          (unless (fountain-blank-before-p) (insert-before-markers "\n"))
+          (insert-before-markers page-break "\n\n")))
+      ;; Return to where we were.
+      (goto-char x)
+      (set-marker x nil))))
 
 (defun fountain-get-page-count ()
   "Return a cons of the current page number and the total pages."
@@ -2807,6 +2811,61 @@ The car sets `left-margin' and cdr `fill-column'.")
   :link '(info-link "(fountain-mode) Exporting")
   :group 'fountain)
 
+(defcustom fountain-export-format
+  'pdf
+  "Valid options are 'ps' or 'pdf'."
+  :type '(choice (const :tag "PDF" pdf)
+                 (const :tag "PostScript" ps))
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-page
+  t
+  "When non-nil, include a title page in export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
+(defcustom fountain-export-number-first-page
+  nil
+  "When non-nil, first page is numbered in export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
+(defcustom fountain-export-troff-command
+  "groff"
+  "Name of troff command."
+  :type 'string
+  :safe 'stringp
+  :group 'fountain-export)
+
+(defcustom fountain-export-troff-extra-options
+  '("-Kutf8")
+  "Option flags passed to `fountain-export-troff-command'
+
+n.b. the `-Tdev' option is calculated automatically from
+`fountain-export-format' and the page size from
+`fountain-page-size'."
+  :type '(repeat (string :tag "Option"))
+  :group 'fountain-export)
+
+(defconst fountain-export-troff-requests
+  '(scene-heading
+    action
+    character
+    dialog
+    paren
+    dual-character-left
+    dual-character-right
+    dual-dialog-left
+    dual-dialog-right
+    dual-paren-left
+    dual-paren-right
+    trans
+    center
+    page-break)
+  "List of elements and associated roff requests.")
+
 (defcustom fountain-export-command-profiles
   '(("afterwriting-usletterpdf-doublespace" . "afterwriting \
 --source %b --pdf %B.pdf --overwrite \
@@ -2860,6 +2919,312 @@ COMMAND may be edited interactively when calling
   :safe 'stringp
   :group 'fountain-export)
 
+(defvar fountain-export-troff-buffer
+  "*Fountain troff Output*"
+  "Buffer name for `fountain-export' troff output.")
+
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline)))
+
+(defvar fountain-export-troff-macro
+  "\
+.\\\" -*- mode: nroff -*-
+.if !rPS .nr PS 12
+.ps \\n[PS]
+.if !rVS .nr VS 12.5
+.vs \\n[VS]
+.if !rPW .nr PW 6
+.ll \\n[PW]i
+.if !rPL .nr PL 11
+.pl \\n[PL]i
+.
+.nr scenespace %s
+.nr scenebold %b
+.nr sceneunderline %u
+.nr numberpage1 %n
+.nr pagetop 1
+.nh
+.
+.de reset
+.ft C
+.ad l
+.po 1.25i
+.ll \\n[PW]i
+'ce 0
+'in 0
+..
+.de blank
+.sp |\\\\n[.h]u
+.ie \\\\n[pagetop] .sp |1i
+.el .sp 1
+.nr pagetop 0
+..
+.de header
+.sp 0.5i
+.tl '''%%.'
+.sp |1i
+..
+.de headerblank
+.sp 0.5i
+.tl ''''
+.sp |1i
+.wh 0 header
+..
+.de action
+.reset
+.blank
+..
+.de scene-heading
+.reset
+.sp |\\\\n[.h]u
+.ie \\\\n[pagetop] .sp |1i
+.el .sp \\n[scenespace]
+.nr pagetop 0
+.if \\\\n[scenebold] .ft 8
+..
+.de character
+.reset
+.blank
+.in 2.5i
+.ll -1i
+..
+.de paren
+.reset
+.in 2i
+.ll -2.4i
+.ti -8p
+..
+.de dialog
+.reset
+.in 1.5i
+.ll -1i
+..
+.de trans
+.reset
+.blank
+.in 4i
+..
+.de dual-character-left
+.reset
+.blank
+.mk dualtop
+.in 1i
+.ll 2.9i
+..
+.de dual-paren-left
+.reset
+.in 0.5i
+.ti -8p
+..
+.de dual-dialog-left
+.reset
+.ll 2.9i
+..
+.de dual-character-right
+.reset
+.blank
+.sp |\\\\n[dualtop]u
+.in 4i
+..
+.de dual-paren-right
+.reset
+.in 3.3i
+..
+.de dual-dialog-right
+.reset
+.in 3.1i
+..
+.de center
+.reset
+.blank
+.ce
+..
+.de page-break
+.bp
+.nr pagetop 1
+..
+.de titleline
+.reset
+.sp
+.ce 99
+..
+.de titlenote
+.reset
+.sp
+.ll 3i
+..
+.reset"
+  "Troff macro header for exporting to PDF.
+
+n.b. This is not intended to be used independently of buffers
+prepared with `fountain-export-pdf'.")
+
+(defun fountain-export-troff-string (string)
+  (with-temp-buffer
+    (insert string)
+    (goto-char (point-min))
+    ;; Leading dot
+    (if (looking-at "\\.") (replace-match "\\&." nil t))
+    ;; Curly quotes
+    (goto-char (point-min))
+    (while (re-search-forward "\\(\\b\\|\\[\\.!?]\\)\\(\"\\)" nil t)
+      (replace-match "\\[rq]" t t nil 2))
+    (goto-char (point-min))
+    (while (re-search-forward "\"" nil t)
+      (replace-match "\\[lq]" t t))
+    ;; Bold-italic
+    (goto-char (point-min))
+    (while (re-search-forward fountain-bold-italic-regexp nil t)
+      (replace-match "\\\\f[9]\\3\\\\f[]" t nil nil 1))
+    ;; Bold
+    (goto-char (point-min))
+    (while (re-search-forward fountain-bold-regexp nil t)
+      (replace-match "\\\\f[8]\\3\\\\f[]" t nil nil 1))
+    ;; Italics
+    (goto-char (point-min))
+    (while (re-search-forward (concat "\\(?:" fountain-italic-regexp
+                                      "\\|"
+                                      fountain-lyrics-regexp
+                                      "\\)")
+                              nil t)
+      (replace-match "\\\\f[7]\\3\\\\f[]" t nil nil 1))
+    ;; Underline
+    (goto-char (point-min))
+    (while (re-search-forward fountain-underline-regexp nil t)
+      (let ((beg (match-beginning 2))
+            (end (progn
+                   (goto-char (match-end 0))
+                   (point-marker))))
+        (goto-char beg)
+        (while (re-search-forward "." end t)
+          (forward-char -1)
+          (cond ((= (char-after) ?_)
+                 (delete-forward-char 1))
+                ((looking-at "\\\\.?\\[.*?\\]")
+                 (goto-char (match-end 0)))
+                (t
+                 (replace-match "\\\\z_\\&" t))))))
+    (buffer-string)))
+
+(defun fountain-export-region-to-troff (start end &optional
+                                              metadata output-buffer)
+  "Convert from START to END to troff, sending to buffer OUTPUT.
+
+If OUTPUT in nil, `fountain-export-output-buffer' is used."
+  (let ((job (make-progress-reporter "Converting to troff...")))
+    (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
+    (with-current-buffer (get-buffer-create output-buffer)
+      (erase-buffer)
+      (insert
+       (format-spec fountain-export-troff-macro
+                    (format-spec-make
+                     ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
+                     ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
+                     ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
+                     ?n (if fountain-export-number-first-page 1 0))))
+      (unless (bolp) (newline))
+      (when metadata
+        (insert ".sp |4i\n")
+        (let (title credit author source string)
+          (dolist (var '(title credit author source))
+            (when (setq string (cdr (assoc var metadata)))
+              (setq metadata (delq (assoc var metadata) metadata))
+              (insert
+               (format ".titleline\n%s\n" (fountain-export-troff-string string)))))
+          (when metadata
+            (insert ".sp |8i\n")
+            (dolist (var (reverse metadata))
+              (setq string (cdr var))
+              (insert (format ".titlenote\n%s\n" string)))
+            (insert ".page-break\n"))))
+      (insert "\
+.br
+.nr % 0
+.ie \\n[numberpage1] .wh 0 header
+.el .wh 0 headerblank
+.nr nl -1
+"))
+    (save-excursion
+      (goto-char start)
+      (while (< (point) end)
+        (let (element request)
+          (skip-chars-forward "\n\s\t")
+          (beginning-of-line)
+          (when (and (setq element (fountain-get-element))
+                     (setq request (car (memq element fountain-export-troff-requests))))
+            (let ((delim (if (eq element 'page-break) " " "\n"))
+                  ;;
+                  ;; FIXME: using regexp group 2 works for all non-action elements
+                  ;; except character, and we need a group with just the character
+                  ;; name and extension.
+                  ;;
+                  (content (if (eq element 'character)
+                               (concat (match-string-no-properties 2)
+                                       (match-string-no-properties 3))
+                             (or (match-string-no-properties 2)
+                                 (match-string-no-properties 0)))))
+              (setq content (fountain-export-troff-string content))
+              ;; Finally insert the request
+              (with-current-buffer output-buffer
+                (insert (format ".%s%s%s\n" request delim content))))))
+        (forward-line 1)
+        (progress-reporter-update job)))
+    (progress-reporter-done job)))
+
+(defun fountain-export ()
+  (interactive)
+  (let ((source-buffer (current-buffer))
+        (start
+         (if (use-region-p) (region-beginning) (point-min)))
+        (end
+         (if (use-region-p) (region-end) (point-max)))
+        (troff-buffer
+         (get-buffer-create fountain-export-troff-buffer))
+        (output-buffer
+         (get-buffer-create fountain-export-output-buffer))
+        (command
+         (string-join (append (list fountain-export-troff-command
+                                    (format "-T%s" fountain-export-format)
+                                    (format "-P -p%s" fountain-page-size))
+                              fountain-export-troff-extra-options)
+                      " "))
+        (job (make-progress-reporter "Preparing..."))
+        (metadata
+         (when fountain-export-title-page (fountain-get-metadata))))
+    ;; Prepare script
+    (with-temp-buffer
+      (insert-buffer-substring source-buffer start end)
+      (fountain-delete-comments-in-region (point-min) (point-max))
+      (goto-char (point-min))
+      (while (fountain-match-metadata)
+        (forward-line))
+      (skip-chars-forward "\n\s\t")
+      ;; (delete-region (point-min) (point))
+      (while (< (point) (point-max))
+        (fountain-move-forward-page)
+        (unless (eobp)
+          (fountain-insert-page-break))
+        (progress-reporter-update job))
+      (progress-reporter-done job)
+      (fountain-export-region-to-troff (point-min) (point-max)
+                                       metadata troff-buffer))
+    ;; Export to troff
+    (with-current-buffer troff-buffer
+      (call-process-region nil nil shell-file-name nil
+                           (list output-buffer nil)
+                           nil shell-command-switch command))
+    ;; Write PDF
+    (switch-to-buffer output-buffer)
+    (write-file
+     (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
+             fountain-export-format)
+     t)))
+
 (require 'format-spec)
 
 (defun fountain-export-command (profile-name &optional edit-command)
@@ -2889,7 +3254,7 @@ Export command profiles are defined in
          (if buffer-file-name (file-name-base (buffer-file-name))))
         (start (if (use-region-p) (region-beginning) (point-min)))
         (end   (if (use-region-p) (region-end) (point-max)))
-        (metadata (fountain-read-metadata))
+        (metadata (fountain-get-metadata))
         use-stdin)
     (unless (let (case-fold-search) (string-match "%b" command))
       (setq use-stdin t))
@@ -3024,7 +3389,7 @@ takes the form:
             (if (integerp value)
                 value
               (cdr (or (assoc-string
-                        (or (cdr (assq 'format (fountain-read-metadata)))
+                        (or (cdr (assq 'format (fountain-get-metadata)))
                             fountain-default-script-format)
                         value)
                        (car value))))
@@ -3038,7 +3403,7 @@ takes the form:
             (both (<= 28 emacs-major-version)))
         (cond ((and (= subexp 7) both)
                `(face nil display ((margin left-margin)
-                 (space :width (- left-margin ,(+ (string-width scene-num) 4))))))
+                 (space :width (- left-margin ,(+ (string-width scene-num) 2))))))
               ((and (= subexp 8) both)
                `(face nil display ((margin left-margin) ,scene-num)))
               ((= subexp 9)
@@ -3066,7 +3431,7 @@ takes the form:
         (align-section-headings
          (fountain--normalize-align-facespec fountain-align-section-heading)))
 
-    (delete nil
+    (delq nil
      (list
       ;; Section Headings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (let ((face (when (memq 'section-heading highlight-elements)
@@ -3218,9 +3583,9 @@ takes the form:
 
       ;; Lyrics ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (cons fountain-lyrics-regexp
-            '((1 '(face fountain-non-printing invisible fountain-element-markup)
+            '((2 '(face fountain-non-printing invisible fountain-element-markup)
                  prepend)
-              (2 '(face italic) prepend)))
+              (1 '(face italic) prepend)))
 
       ;; Underline ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (cons fountain-underline-regexp
@@ -3303,7 +3668,8 @@ takes the form:
     (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
 
     ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "C-c C-e") #'fountain-export-command)
+    (define-key map (kbd "C-c C-e") #'fountain-export)
+    (define-key map (kbd "C-c C-x c") #'fountain-export-command)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")
@@ -3485,6 +3851,9 @@ takes the form:
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
     "---"
+    ["Export" fountain-export
+     :label (format "Export to %s"
+             (if (eq fountain-export-format 'ps) "PostScript" "PDF"))]
     ["Run Export Command..." fountain-export-command]
     ["View Last Exported File" fountain-export-view]
     "---"
@@ -3607,9 +3976,9 @@ Uses `fountain-trans-suffix-list' to create non-forced tranistion
 regular expression."
   (setq fountain-trans-regexp
         (concat
-         "^\\(?:[\s\t]*"
+         "^[\s\t]*\\(?:"
          ;; Group 1: match forced transition mark
-         "\\(>\\)[\s\t]*"
+         "\\(>[\s\t]*\\)"
          ;; Group 2: match forced transition
          "\\([^<>\n]*?\\)"
          "\\|"
