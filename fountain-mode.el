@@ -2953,10 +2953,10 @@ Options are: bold, double-space, underline."
 .de reset
 .ft C
 .ad l
-.ce 0
 .po 1.25i
 .ll \\n[PW]i
-.in 0
+'ce 0
+'in 0
 ..
 .de blank
 .sp |\\\\n[.h]u
@@ -3057,7 +3057,8 @@ Options are: bold, double-space, underline."
 .reset
 .sp
 .ll 3i
-.."
+..
+.reset"
   "Troff macro header for exporting to PDF.
 
 n.b. This is not intended to be used independently of buffers
@@ -3119,7 +3120,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
     (with-current-buffer (get-buffer-create output-buffer)
       (erase-buffer)
-      (insert-before-markers
+      (insert
        (format-spec fountain-export-troff-macro
                     (format-spec-make
                      ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
@@ -3133,7 +3134,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
           (dolist (var '(title credit author source))
             (when (setq string (cdr (assoc var metadata)))
               (setq metadata (delq (assoc var metadata) metadata))
-              (insert-before-markers
+              (insert
                (format ".titleline\n%s\n" (fountain-export-troff-string string)))))
           (when metadata
             (insert ".sp |8i\n")
@@ -3141,11 +3142,13 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (setq string (cdr var))
               (insert (format ".titlenote\n%s\n" string)))
             (insert ".page-break\n"))))
-      (insert-before-markers "\
+      (insert "\
+.br
+.nr % 0
 .ie \\n[numberpage1] .wh 0 header
 .el .wh 0 headerblank
-.nr %% -1
-."))
+.nr nl -1
+"))
     (save-excursion
       (goto-char start)
       (while (< (point) end)
@@ -3168,7 +3171,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (setq content (fountain-export-troff-string content))
               ;; Finally insert the request
               (with-current-buffer output-buffer
-                (insert-before-markers (format ".%s%s%s\n" request delim content))))))
+                (insert (format ".%s%s%s\n" request delim content))))))
         (forward-line 1)
         (progress-reporter-update job)))
     (progress-reporter-done job)))
@@ -3187,7 +3190,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (command
          (string-join (append (list fountain-export-troff-command
                                     (format "-T%s" fountain-export-format)
-                                    (format "-P-p%s" fountain-page-size))
+                                    (format "-P -p%s" fountain-page-size))
                               fountain-export-troff-extra-options)
                       " "))
         (job (make-progress-reporter "Preparing..."))
@@ -3198,6 +3201,10 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
       (goto-char (point-min))
+      (while (fountain-match-metadata)
+        (forward-line))
+      (skip-chars-forward "\n\s\t")
+      ;; (delete-region (point-min) (point))
       (while (< (point) (point-max))
         (fountain-move-forward-page)
         (unless (eobp)
