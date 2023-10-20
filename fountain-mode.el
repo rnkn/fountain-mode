@@ -2956,6 +2956,7 @@ Options are: bold, double-space, underline."
 .de reset
 .ft C
 .ad l
+.ce 0
 .po 1.25i
 .ll \\n[PW]i
 .in 0
