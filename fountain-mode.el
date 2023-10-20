@@ -3148,8 +3148,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (progress-reporter-update job)))
     (progress-reporter-done job)))
 
-(defun fountain-export (&optional arg)
-  (interactive "P")
+(defun fountain-export ()
+  (interactive)
   (let ((source-buffer (current-buffer))
         (start
          (if (use-region-p) (region-beginning) (point-min)))
