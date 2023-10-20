@@ -3411,7 +3411,7 @@ takes the form:
         (align-section-headings
          (fountain--normalize-align-facespec fountain-align-section-heading)))
 
-    (delete nil
+    (delq nil
      (list
       ;; Section Headings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (let ((face (when (memq 'section-heading highlight-elements)
