@@ -3177,6 +3177,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     (progress-reporter-done job)))
 
 (defun fountain-export ()
+  "Export region to `fountain-export-format' via troff.
+
+If region is not active, default to whole buffer.
+
+Requires a `troff' program."
   (interactive)
   (let ((source-buffer (current-buffer))
         (start
