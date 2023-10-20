@@ -648,7 +648,7 @@ be specified with the bold-italic delimiters together, e.g.
   This text is ***_stupendously significant_***.")
 
 (defconst fountain-lyrics-regexp
-  "^\\(\\(~[\s\t]*\\)\\(?3:.+\\)\\)"
+  "^\\(?1:\\(~[\s\t]*\\)\\(?3:.+\\)\\)"
   "Regular expression for matching lyrics.")
 
 
@@ -3086,7 +3086,7 @@ prepared with `fountain-export-pdf'.")
                                       fountain-lyrics-regexp
                                       "\\)")
                               nil t)
-      (replace-match "\\\\f[7]\\3\\\\f[]"))
+      (replace-match "\\\\f[7]\\3\\\\f[]" t nil nil 1))
     (goto-char (point-min))
     (while (re-search-forward fountain-underline-regexp nil t)
       (let ((beg (match-beginning 2))
