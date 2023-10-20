@@ -3956,7 +3956,7 @@ Uses `fountain-trans-suffix-list' to create non-forced tranistion
 regular expression."
   (setq fountain-trans-regexp
         (concat
-         "^\\(?:[\s\t]*"
+         "^[\s\t]*\\(?:"
          ;; Group 1: match forced transition mark
          "\\(>[\s\t]*\\)"
          ;; Group 2: match forced transition
