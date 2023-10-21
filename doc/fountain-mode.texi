@@ -447,7 +447,14 @@ Have you seen trouble? I seem to have misplaced it.
 @node Transitions
 @unnumberedsec Transitions
 
-@tbc
+A transition is any line ending with @code{TO:}, or you can force a
+transition by prefixing it with @code{>}.
+
+@defopt fountain-trans-suffix-list
+This option allows setting your own transition suffixes, so that lines
+ending in these will be parsed as transitions. These entries are
+case-insensitive.
+@end defopt
 
 @node Notes
 @unnumberedsec Notes
