@@ -3289,7 +3289,9 @@ Export command profiles are defined in
             (set-auto-mode t)
           (kill-buffer))))))
 
-(when (<= emacs-major-version 28) (require 'dired-x))
+(if (<= emacs-major-version 28)
+    (require 'dired-x)
+  (declare-function dired-guess-default 'dired-aux))
 
 (defun fountain-export-view ()
   "Attempt to open the last exported output file.
