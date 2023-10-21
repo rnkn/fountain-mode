@@ -2903,7 +2903,7 @@ of the following values:
   %F is the current date in ISO format
   %x is the current date in your locale's \"preferred\" format
 
-If a command does not include %b, `fountain-export' will pass the
+If a command does not include %b, `fountain-export-command' will pass the
 buffer or active region to the command via stdin.
 
 If a command outputs to stdout, this will be redirected to
@@ -2926,7 +2926,7 @@ COMMAND may be edited interactively when calling
 
 (defvar fountain-export-troff-buffer
   "*Fountain troff Output*"
-  "Buffer name for `fountain-export' troff output.")
+  "Buffer name for `fountain-export-troff' output.")
 
 (defcustom fountain-export-scene-heading-format
   '(double-space)
