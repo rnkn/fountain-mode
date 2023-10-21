@@ -16,7 +16,7 @@
 @w{Fountain Mode}
 @end macro
 @macro version
-3.6
+3.7
 @end macro
 @macro repository
 https://github.com/rnkn/fountain-mode
@@ -849,15 +849,40 @@ This is the target format for export, which can be set to Postscript
 (@code{ps}) or PDF (@code{pdf}).
 @end defopt
 
+@defopt fountain-export-troff-command
+The name of the @code{troff} program on your system.
+@end defopt
+
+@defopt fountain-export-troff-extra-options
+Extra option flags passed to the @code{troff} program. The default
+tells @code{troff} the you're exporting in UTF-8.
+@end defopt
+
+@defopt fountain-export-title-page
+Whether to include a title page in export. This only affects the
+internal troff export.
+@end defopt
+
+@defopt fountain-export-number-first-page
+Whether to include a page number on the first page in export. This
+only affects the internal troff export.
+@end defopt
+
+@defopt fountain-export-scene-heading-format
+A list specifying the export scene heading format. Available options
+are zero or more of @code{bold}, @code{double-space}, and
+@code{underline}. This option only affects the internal troff export.
+@end defopt
+
 @menu
-* External Programs::		Using an external command-line program.
+* External Programs::		Export using an external program.
 @end menu
 
 @node External Programs
 @unnumberedsec External Programs
 
-It's easy to construct an export command to send to an external
-program.
+As an alternative to the internal export system you can use an
+external command-line program.
 
 Here are some recommended export programs:
 
@@ -874,8 +899,8 @@ Here are some recommended export programs:
 export.}
 @end itemize
 
-By defining an ``export profile'', you can easily interface with an
-external tool from within Emacs. A profile is essentially a shell
+By defining an ``export profile'' you can easily interface with an
+external program from within Emacs. A profile is essentially a shell
 command, interpolated with a selection of values:
 
 @itemize
@@ -895,12 +920,21 @@ command, interpolated with a selection of values:
 @code{%x} is the current date in your locale's ``preferred'' format
 @end itemize
 
+The default command profiles are only intended as examples. You are
+encouraged to edit/replace these to suit your own needs.
+
 @deffn Command fountain-export-command
 This command, bound to @kbd{C-c C-e e}, will prompt for an export
 profile. The first profile is considered default, so just hitting RET
 is a quick way to export in your usual way.
 @end deffn
 @kindex C-c C-e e
+
+@defopt fountain-export-command-profiles
+This option contains the list of shell command profiles for exporting.
+The first profile is considered the default.
+@end defopt
+
 
 @node Contact
 @unnumbered Contact

@@ -2818,9 +2818,9 @@ The car sets `left-margin' and cdr `fill-column'.")
 
 (defcustom fountain-export-format
   'pdf
-  "Valid options are `ps' or `pdf'."
-  :type '(choice (const :tag "PDF" pdf)
-                 (const :tag "PostScript" ps))
+  "Target format for export. Valid options are `ps' or `pdf'."
+  :type '(choice (const :tag "PostScript" ps)
+                 (const :tag "PDF" pdf))
   :group 'fountain-export)
 
 (defcustom fountain-export-title-page
