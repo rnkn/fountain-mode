@@ -804,7 +804,38 @@ JOHN|
 @node Pagination
 @unnumbered Pagination
 
-@tbc
+@program features internal pagination. This is achieved by
+periodically calculating page breaks and applying pagination
+properties to the text. When the text is changed enough to invalidate
+these properties they are recalculated.
+
+@defopt fountain-pagination-max-change
+Maximum change in page characters before invalidating pagination. Set
+this to a lower value to get more accurate pagination, high if you
+find the updates annoying.
+@end defopt
+
+@defopt fountain-page-size
+An important factor in calculating pagination is the page size. This
+is the target page size. Valid options are @code{letter} or @code{a4}.
+@end defopt
+
+@defopt fountain-page-max-lines
+This option specifies how many lines fit on each of the page sizes.
+@end defopt
+
+@defopt fountain-pagination-break-sentences
+Whether pagination will break pages within sentences, or only at
+sentence ends.
+@end defopt
+
+You can optionally show the current page and total page count in the
+mode line by enabling @code{which-function-mode}, @xref {(emacs) Which Function}.
+This will display something like this:
+
+@example
+[Page 31 of 108]
+@end example
 
 @deffn Command fountain-count-pages
 Bound to @kbd{C-c C-p}, return both the current page and the total
