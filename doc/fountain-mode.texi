@@ -821,8 +821,44 @@ page count of the current buffer.
 @node Exporting
 @unnumbered Exporting
 
-Exporting a script in @program is handled by one or more external
-command-line tools. Here are some recommended export tools:
+@program features an internal pagination and export system. This can
+export to PostScript or PDF, requiring only a @code{troff} program such as
+@uref{https://www.gnu.org/software/groff/, GNU roff}
+on your system. The export process uses the troff format as a
+intermediary.
+
+Alternately you can export using an external command-line program,
+which is covered further below.
+
+@deffn Command fountain-export-troff
+This command, bound to @kbd{C-c C-e t}, will export using the internal
+exporter and typeset using a @code{troff} program.
+@end deffn
+@kindex C-c C-e t
+
+@deffn Command fountain-export-view
+This command, bound to @kbd{C-c C-v}, attempts to open the last
+exported file. This works by finding the other most recently modified
+file in the current directory matching the current file base-name.
+@end deffn
+@kindex C-c C-v
+
+@defopt fountain-export-format
+This is the target format for export, which can be set to Postscript
+(@code{ps}) or PDF (@code{pdf}).
+@end defopt
+
+@menu
+* External Programs::		Using an external command-line program.
+@end menu
+
+@node External Programs
+@unnumberedsec External Programs
+
+It's easy to construct an export command to send to an external
+program.
+
+Here are some recommended export programs:
 
 @itemize
 @item
@@ -863,14 +899,7 @@ This command, bound to @kbd{C-c C-e e}, will prompt for an export
 profile. The first profile is considered default, so just hitting RET
 is a quick way to export in your usual way.
 @end deffn
-@kindex C-c C-e
-
-@deffn Command fountain-export-view
-This command, bound to @kbd{C-c C-v}, attempts to open the last
-exported file. This works by finding the other most recently modified
-file in the current directory matching the current file base-name.
-@end deffn
-@kindex C-c C-v
+@kindex C-c C-e e
 
 @node Contact
 @unnumbered Contact
