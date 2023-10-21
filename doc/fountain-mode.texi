@@ -96,7 +96,7 @@ The public @program code repository is hosted on
 @end menu
 
 @node Overview
-@unnumbered Overview of @program
+@unnumbered Overview
 
 @program combines the simplicity of Fountain syntax with the
 extensibility of Emacs. @program is a major mode for Emacs, which
