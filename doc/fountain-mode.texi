@@ -96,7 +96,7 @@ The public @program code repository is hosted on
 @end menu
 
 @node Overview
-@unnumbered Overview
+@unnumbered Overview of @program
 
 @program combines the simplicity of Fountain syntax with the
 extensibility of Emacs. @program is a major mode for Emacs, which
@@ -489,58 +489,18 @@ or @ref{Synopses}.
 
 @node Outlining
 @unnumbered Outlining
+@cindex outlining
 @kindex TAB
 @kindex S-TAB
+
+Acts and sequences can be given meaningful section titles, giving you
+an overview of the story structure.
 
 There are five levels of section headings. Scene headings count as the
 sixth level headings.
 
 Cycle an individual subtree visibility with @kbd{TAB}. Cycle global
 outline visibility with @kbd{S-TAB} (shift-tab) or @kbd{C-u TAB}.
-
-Acts, Sequences, Sections, and Scenes can be given meaningful titles,
-giving the writer a bird's eye view of the story and structure at a
-moments notice.
-
-There are many ways to approach writing a screenplay. Here's one example
-of how to use @program to Outline a script.
-
-@example
-# Act
-
-= Synopsis of an Act. A short summary of all the crazy things that
-happen for the next 30-60 pages.
-
-[[ Act One Note. Useful for character motivation and obstacles. Ideas to
-remember, etc.]]
-
-## Sequence
-
-= Synopsis of a Sequence.
-
-[[ Sequence Notes. A sequence can be thought of as a series of several
-scenes that make up their own mini-story. ]]
-
-INT. SCENE - NIGHT
-
-= Synopsis of a scene.
-
-[[ Notes to remember for a scene, such as the following:
-- Who wants what from whom?
-- What are they willing to do get what they want?
-- What happens if they don't get it? ]]
-@end example
-
-Experimenting with different structures can be accomplished by folding a
-Section Heading and moving the section to the new desired location using
-keyboard shortcuts.
-
-Note: all text contained within the fold is carried to the new location.
-
-Just as there are many ways to tell a story, there are many ways to
-outline a script. Because @program uses plaintext, it does not
-force the writer into a single way of working. Possible structures are
-limited only by one's imagination.
 
 @deffn Command fountain-insert-section-heading
 Bound to @kbd{M-RET}, insert an empty section heading at the current
@@ -566,55 +526,84 @@ option to spawn a new window.
 @node Navigation
 @unnumbered Navigation
 
-@deffn Command fountain-outline-next
-Bound to @kbd{C-M-n}, move to the next visible heading line. Also
-@code{fountain-outline-previous}, bound to @kbd{C-M-p}.
-@end deffn
+Because a Fountain script is structured text, there are plenty of
+ways to quickly move to where you want to be.
+
+@table @kbd
+
+@item C-M-n
 @kindex C-M-n
-@kindex C-M-p
+@findex outline-next
+Move to the next visible scene or section heading
+(@code{fountain-outline-next}).
 
-@deffn Command fountain-outline-forward
-Bound to @kbd{C-M-f}, move forward to the ARG'th subheading at same
-level as this one. Also @code{fountain-outline-backward}, bound to
-@kbd{C-M-b}.
-@end deffn
+@item C-M-p
+@kindex C-M-n
+@findex outline-previous
+Move to the previous visible scene or section heading
+(@code{fountain-outline-previous}).
+
+@item C-M-f
 @kindex C-M-f
+@findex outline-forward
+Move forward to the next visible scene or section heading at same
+outline level (@code{fountain-outline-forward})
+
+@item C-M-b
 @kindex C-M-b
+@findex outline-backward
+Move backward to the previous visible scene or section heading at the
+same outline level (@code{fountain-outline-backward}).
 
-@deffn Command fountain-outline-beginning
-Bound to @kbd{C-M-a}, move to the beginning of the current subtree.
-@end deffn
+@item C-M-a
 @kindex C-M-a
+@findex outline-beginning
+Move to the beginning of the current scene or section
+(@code{fountain-outline-beginning}).
 
-@deffn Command fountain-outline-up
-Bound to @kbd{C-M-u}, move to the visible heading line of which the
-present line is a subheading.
-@end deffn
+@item C-M-u
 @kindex C-M-u
+@findex outline-up
+Move up to the parent section heading (@code{fountain-outline-up}).
 
-@deffn Command fountain-forward-character
-Bound to @kbd{M-n}, goto Nth next character (or Nth previous is N is
-negative). Also @code{fountain-backward-character}, bound to @kbd{M-p}.
-@end deffn
+@item M-n
 @kindex M-n
+@findex forward-character
+Move to next character name (@code{fountain-forward-character}).
+
+@item M-p
 @kindex M-p
+@findex backward-character
+Move to previous character name (@code{fountain-backward-character}).
 
-@deffn Command fountain-forward-page
-Bound to @kbd{C-x ]}, move to Nth next page (or Nth previous if N is
-negative). Also @code{fountain-backward-page}, bound to @kbd{C-x [}.
-@end deffn
+@item C-x ]
 @kindex C-x ]
+@findex forward-page
+Move to next page. This command does not move by one page but actually
+moves to the next page-break point in the text pagination properties
+(@code{fountain-forward-page}).
+
+@item C-x [
 @kindex C-x [
+@findex backward-page
+Move to previous page (@code{fountain-backward-page}).
 
-@deffn Command fountain-goto-scene
-Bound to @kbd{M-g s}, move point to Nth scene in current buffer.
-@end deffn
+@item M-g s
 @kindex M-g s
+@findex goto-scene
+Move to the specified scene. If scenes are numbered, this command will
+take you to the scene matching the entered string, otherwise it will
+count the scenes from beginning of the accessible buffer,
+recalculating when encountering a numbered scene
+(@code{fountain-goto-scene}).
 
-@deffn Command fountain-goto-page
-Bound to @kbd{M-g p}, move point to Nth page in current buffer.
-@end deffn
+@item M-g p
 @kindex M-g p
+@findex goto-page
+Move to the specified page. This command does not count the script
+pages but uses the text pagination properties
+(@code{fountain-goto-page}).
+@end table
 
 @node Syntax Highlighting
 @unnumbered Syntax Highlighting
@@ -673,6 +662,7 @@ cases you don't have to think about it.
 This is the command you'll use the most. Bound to @kbd{TAB}, it will
 perform the most convenient action based on the current context.
 @end deffn
+@findex dwim
 
 @node Autocompletion
 @unnumbered Autocompletion
@@ -842,8 +832,8 @@ file in the current directory matching the current file base-name.
 @kindex C-c C-v
 
 @defopt fountain-export-format
-This is the target format for export, which can be set to Postscript
-(@code{ps}) or PDF (@code{pdf}).
+This is the target format for internal troff export. Valid options are
+Postscript (@code{ps}) or PDF (@code{pdf}).
 @end defopt
 
 @defopt fountain-export-troff-command
@@ -852,7 +842,7 @@ The name of the @code{troff} program on your system.
 
 @defopt fountain-export-troff-extra-options
 Extra option flags passed to the @code{troff} program. The default
-tells @code{troff} the you're exporting in UTF-8.
+tells @code{troff} the to use UTF-8.
 @end defopt
 
 @defopt fountain-export-title-page
@@ -876,7 +866,7 @@ are zero or more of @code{bold}, @code{double-space}, and
 @end menu
 
 @node External Programs
-@unnumberedsec External Programs
+@unnumberedsec Exporting Using an External Program
 
 As an alternative to the internal export system you can use an
 external command-line program.
@@ -948,15 +938,15 @@ $ emacs -Q -l fountain-mode.el
 
 You can also try the @code{#emacs} IRC channel on
 @uref{https://libera.chat, Libera.chat} where @program{}'s maintainer
-uses the nickname @code{rnkn}, but please note that most other users
+uses the nickname @code{pwr}, but please note that most other users
 on the channel are unlikely to be screenwriters.
 
-Known issues are tracked with @code{FIXME} comments in the source.
-
 Financial reward is not a consideration in maintaining @program{}, but
-if you would still like to support development, donations are
-graciously accepted via @uref{https://github.com/sponsors/rnkn,
-GitHub} or @uref{https://liberapay.com/rnkn/, Liberapay}.
+if you would like to support development, donations are graciously
+accepted via
+@uref{https://github.com/sponsors/rnkn, GitHub}
+or
+@uref{https://liberapay.com/rnkn/, Liberapay}.
 
 @node Indexes
 @unnumbered Indexes
