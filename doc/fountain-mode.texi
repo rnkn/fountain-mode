@@ -620,7 +620,18 @@ pages but uses the text pagination properties
 @node Element Aligning
 @unnumbered Element Aligning
 
-@tbc
+In addition to syntax highlighting, @program has the ability to
+automatically align, or indent, script elements, so your script looks
+more like real script. This is display only and does not change the
+file contents, and can be turned off if you don't like it.
+
+@defopt fountain-align-elements
+Whether to automatically align elements.
+@end defopt
+
+Different script formats have different alignment, so each element can
+be aligned on a per-format basis --- see the Customize group
+@code{fountain-align}.
 
 @node Text Emphasis
 @unnumbered Text Emphasis
