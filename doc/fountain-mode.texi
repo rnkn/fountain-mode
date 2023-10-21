@@ -105,7 +105,7 @@ customizable, free/libre text editor. It enables the writer to engage
 with all aspects of realizing a screenplay --- story development,
 outlining, drafting, and rewriting.
 
-To quickly get up to speed with Fountain syntax, memorize the rules for
+To quickly get up to speed with Fountain syntax, memorize the syntax for
 the six most used elements of the screenplay format: @ref{Scene Headings},
 @ref{Action}, @ref{Characters}, @ref{Dialogue}, @ref{Parentheticals}, and
 @ref{Transitions}.
@@ -514,6 +514,7 @@ Bound to @kbd{M-RET}, insert an empty section heading at the current
 outline level.
 @end deffn
 @kindex M-RET
+@findex insert-section-heading
 
 @deffn Command fountain-outline-to-indirect-buffer
 If you want to focus on discrete sections of your script you can open
@@ -522,6 +523,8 @@ clones the current section or scene to indirect buffer.
 
 @xref{(emacs) Indirect Buffers}
 @end deffn
+@kindex C-c C-x b
+@findex outline-to-indirect-buffer
 
 @defopt fountain-pop-up-indirect-windows
 Set this to control how indirect buffer windows are opened. Sometimes
@@ -637,12 +640,13 @@ be aligned on a per-format basis --- see the Customize group
 @unnumbered Text Emphasis
 
 Text can be underlined, italic, bold, or a combination thereof.
+Demarcate emphasized text with:
 
-Underlined text is surrounded by @code{_underscores_}.
-
-Italic text is surrounded by @code{*single asterisks*}
-
-Bold text is surrounded by @code{**double asterisks**}
+@itemize
+@item @code{_underscores_} for underline,
+@item @code{*single asterisks*} for @i{italic},
+@item and @code{**double asterisks**} for @b{bold}.
+@end itemize
 
 For the writer pursists who want to work the way our ancestors did on
 typewriters, stick to underlining.
@@ -695,6 +699,7 @@ This command, bound to @kbd{C-c C-x a} will update the completion
 candidates for current buffer.
 @end deffn
 @kindex C-c C-x a
+@findex completion-update
 
 @menu
 * Scene Heading Completion::	Complete times and places.
@@ -816,9 +821,9 @@ JOHN|
 @unnumbered Pagination
 
 @program features internal pagination. This is achieved by
-periodically calculating page breaks and applying pagination
-properties to the text. When the text is changed enough to invalidate
-these properties they are recalculated.
+periodically calculating where page breaks occur in the whole buffer
+and applying pagination properties to the text. When the text is
+changed enough to invalidate these properties they are recalculated.
 
 @defopt fountain-pagination-max-change
 Maximum change in page characters before invalidating pagination. Set
@@ -853,6 +858,7 @@ Bound to @kbd{C-c C-p}, return both the current page and the total
 page count of the current buffer.
 @end deffn
 @kindex C-c C-p
+@findex count-pages
 
 @node Exporting
 @unnumbered Exporting
@@ -879,6 +885,7 @@ exported file. This works by finding the other most recently modified
 file in the current directory matching the current file base-name.
 @end deffn
 @kindex C-c C-v
+@findex export-view
 
 @defopt fountain-export-format
 This is the target format for internal troff export. Valid options are
@@ -965,6 +972,7 @@ profile. The first profile is considered default, so just hitting RET
 is a quick way to export in your usual way.
 @end deffn
 @kindex C-c C-e e
+@findex export-command
 
 @defopt fountain-export-command-profiles
 This option contains the list of shell command profiles for exporting.
