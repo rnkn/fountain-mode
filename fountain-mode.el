@@ -300,7 +300,7 @@ The default \"%P - %n %x\" inserts something like:
 This option does not affect file contents.
 
 n.b. This option does not affect calculation of pagination, see
-instead `fountain-pagination-double-space-scene-headings'."
+instead `fountain-export-scene-heading-format'."
   :type 'boolean
   :safe 'booleanp
   :group 'fountain
@@ -2348,16 +2348,6 @@ That is, page breaks may occur mid-sentence."
   :type 'boolean
   :safe 'booleanp)
 
-(defcustom fountain-pagination-double-space-scene-headings
-  t
-  "When non-nil, pagination counts scene headings as two lines.
-
-For displaying scene headings double-spaced, see
-`fountain-double-space-scene-headings'."
-  :group 'fountain-pagination
-  :type 'boolean
-  :safe 'booleanp)
-
 (define-obsolete-variable-alias 'fountain-more-dialog-string
   'fountain-pagination-more-dialog-string "`fountain-mode' 3.5")
 (defcustom fountain-pagination-more-dialog-string
@@ -2551,7 +2541,7 @@ Skip over comments."
                 (+ line-count (max line-count-left line-count-right)))))
       ;; Scene headings might count as two lines.
       (when (and (eq element 'scene-heading) (not first-child)
-                 fountain-pagination-double-space-scene-headings)
+                 (memq 'double-space fountain-export-scene-heading-format))
         (cl-incf line-count))
       (setq first-child nil))))))
     ;; We are not at the furthest point in a page. Skip over any
@@ -2723,7 +2713,7 @@ return with `message'.
 This is an approximate calculation. Different export tools will
 paginate in slightly different ways. Customize options
 `fountain-page-max-lines', `fountain-pagination-break-sentences'
-and `fountain-pagination-double-space-scene-headings' to suit
+and `fountain-export-scene-heading-format' to suit
 your preferred tool's pagination method."
   (interactive "p")
   (let ((page-count (fountain-get-page-count))

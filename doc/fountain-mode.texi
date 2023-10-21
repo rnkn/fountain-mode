@@ -340,9 +340,6 @@ headings, regardless of what's in the file. n.b. This option does not
 affect calculation of pagination.
 @end defopt
 
-@defopt fountain-pagination-double-space-scene-headings
-@end defopt
-
 @xref{Scene Heading Completion}.
 
 @node Action
