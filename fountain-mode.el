@@ -37,6 +37,7 @@
 ;; --------
 
 ;;  - Support for the Fountain 1.1 specification
+;;  - Export to PostScript or PDF using troff
 ;;  - WYSIWYG auto-align elements (display only, does not modify file
 ;;    contents) specific to script format, e.g. screenplay, stageplay or
 ;;    user-defined formats
@@ -71,9 +72,12 @@
 ;; Exporting
 ;; ---------
 
-;; Earlier versions of Fountain Mode had export functionality, but this was
-;; not very good and is better handled via interfacing with external shell
-;; tools, such as:
+;; Fountain Mode can export to PostScript or PDF using the troff format as
+;; an intermediary. This requires only a troff program on your system,
+;; such as [GNU roff](https://www.gnu.org/software/groff/).
+
+;; Alternatively you can export using an external command-line program,
+;; such as:
 
 ;;  - [afterwriting](https://github.com/ifrost/afterwriting-labs/blob/master/docs/clients.md) (JavaScript)
 ;;  - [Wrap](https://github.com/Wraparound/wrap) (Go)
@@ -83,7 +87,7 @@
 ;; The option fountain-export-command-profiles provides some shell
 ;; commands to interface with these tools, but you are encouraged to edit
 ;; or completely replace these to suit your own needs. The format is simple
-;; while still allowing for a lot of flexibility.
+;; while still allowing for flexibility.
 
 
 ;; Installation
