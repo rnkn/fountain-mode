@@ -306,6 +306,14 @@ instead `fountain-export-scene-heading-format'."
   :group 'fountain
   :set #'fountain--set-and-refresh-font-lock)
 
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline)))
+
 (define-obsolete-variable-alias 'fountain-shift-all-elements
   'fountain-transpose-all-elements "`fountain-mode' 3.2")
 (defcustom fountain-transpose-all-elements
@@ -2917,14 +2925,6 @@ COMMAND may be edited interactively when calling
 (defvar fountain-export-troff-buffer
   "*Fountain troff Output*"
   "Buffer name for `fountain-export-troff' output.")
-
-(defcustom fountain-export-scene-heading-format
-  '(double-space)
-  "List of format options applied when exporting scene headings.
-Options are: bold, double-space, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Double-spaced" double-space)
-              (const :tag "Underlined" underline)))
 
 (defvar fountain-export-troff-macro
   "\
