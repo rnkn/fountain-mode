@@ -821,13 +821,14 @@ page count of the current buffer.
 @node Exporting
 @unnumbered Exporting
 
-@program features an internal pagination and export system. This can
-export to PostScript or PDF, requiring only a @code{troff} program such as
-@uref{https://www.gnu.org/software/groff/, GNU roff}
-on your system. The export process uses the troff format as a
-intermediary.
+@program can export to PostScript or PDF using the troff format as an
+intermediary. This requires only a @code{troff} program on your
+system, such as
+@uref{https://www.gnu.org/software/groff/, GNU roff}.
+One advantage of this is that the internal pagination will match the
+output exactly.
 
-Alternately you can export using an external command-line program,
+Alternatively you can export using an external command-line program,
 which is covered further below.
 
 @deffn Command fountain-export-troff
