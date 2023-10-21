@@ -3180,6 +3180,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (progress-reporter-update job)))
     (progress-reporter-done job)))
 
+(defalias 'fountain-export-troff 'fountain-export)
+
 (defun fountain-export ()
   "Export region to `fountain-export-format' via troff.
 
@@ -3677,8 +3679,8 @@ takes the form:
     (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
 
     ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "C-c C-e") #'fountain-export)
-    (define-key map (kbd "C-c C-x c") #'fountain-export-command)
+    (define-key map (kbd "C-c C-e t") #'fountain-export-troff)
+    (define-key map (kbd "C-c C-e e") #'fountain-export-command)
     (define-key map (kbd "C-c C-v") #'fountain-export-view)
     map)
   "Mode map for `fountain-mode'.")

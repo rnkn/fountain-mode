@@ -859,7 +859,7 @@ command, interpolated with a selection of values:
 @end itemize
 
 @deffn Command fountain-export-command
-This command, bound to @kbd{C-c C-e}, will prompt for an export
+This command, bound to @kbd{C-c C-e e}, will prompt for an export
 profile. The first profile is considered default, so just hitting RET
 is a quick way to export in your usual way.
 @end deffn
