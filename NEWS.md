@@ -2,13 +2,22 @@
 
 ## master
 
+- Implement internal export to PostScript/PDF requiring only a troff
+  program on your system (`fountain-export-troff` bound to `C-c C-e t`).
 - Permit `fountain-goto-scene` to accept any string, which will navigate
   to revised scene numbers, e.g. 10A.
 - `fountain-add-scene-numbers` can now be called with a prefix argument
   to remove scene numbers.
+- `fountain-add-continued-dialog` can now be called with a prefix
+  argument to remove continued dialogue.
+- Rename `fountain-export` to `fountain-export-command`
+- Add options `fountain-export-title-page`, `fountain-export-number-first-page`
 - Improve `fountain-theme` default face size.
 - When called with prefix argument `fountain-upcase-line` will only
   prefix the scene with `.` if not already present.
+- The info documentation, while not complete, now no longer has missing
+  nodes.
+- Other bug fixes and improvements.
 
 ## Version 3.6.3
 
