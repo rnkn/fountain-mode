@@ -1002,7 +1002,7 @@ When LOOSE is non-nil, do not require non-blank line after."
    ((fountain-match-page-break)         'page-break)
    ((fountain-match-metadata)           'metadata)
    ((fountain-match-note)               'note)
-   ((looking-at ".+")                   'action)))
+   ((looking-at "\\(?2:.+\\)")          'action)))
 
 (defun fountain-match-action ()
   "Match action text if point is at action, nil otherwise.
