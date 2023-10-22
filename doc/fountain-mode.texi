@@ -50,11 +50,6 @@ Paul W. Rankin, Kohl Sudduth, Sandra Snan
 @node Top
 @top Fountain Mode
 
-@quotation n.b.
-This manual is a work in progress with many parts still missing. Please
-consult the help functions within Emacs for current documentation.
-@end quotation
-
 @program is a screenwriting (and playwrighting) program for
 @w{GNU Emacs} version 24.4 or later. The Fountain markup format is a
 plain-text format designed to be easily readable and editable,
