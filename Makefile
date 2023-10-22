@@ -1,3 +1,6 @@
+# n.b. This Makefile is for development convenience only. It is not
+# required to build or install Fountain Mode.
+
 .POSIX:
 PROG		= fountain-mode
 LISP_FILE	= ${PROG}.el
@@ -20,25 +23,6 @@ INIT		=                                                       \
                    (package-refresh-contents))                          \
                  (package-install pkg)))                                \
              (quote (${DEPS}))))
-
-usage:
-	@echo \
-n.b. This Makefile is for development convenience only. It is not       \
-required to build or install ${PROG}.                                   \
-| fold -sw72
-	@echo
-	@echo Usage: make [target]
-	@echo '    check'
-	@echo '    compile'
-	@echo '    info-manual'
-	@echo '    html-manual'
-	@echo '    pdf-manual'
-	@echo '    manuals: info-manual html-manual pdf-manual'
-	@echo '    all: clean check compile manuals'
-	@echo '    tag-release: check compile'
-	@echo '    clean'
-
-help: usage
 
 all: clean check compile info-manual html-manual pdf-manual
 
