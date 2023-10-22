@@ -641,17 +641,17 @@ Move to previous page (@code{fountain-backward-page}).
 @item M-g s
 @kindex M-g s
 @findex goto-scene
-Move to the specified scene. If scenes are numbered, this command will
-take you to the scene matching the entered string, otherwise it will
-count the scenes from beginning of the accessible buffer,
-recalculating when encountering a numbered scene
+Prompt for a scene number string and move to the specified scene. If
+scenes are numbered, this command will take you to the scene matching
+that string, otherwise it will count the scenes from beginning of the
+accessible buffer, recalculating when encountering a numbered scene
 (@code{fountain-goto-scene}).
 
 @item M-g p
 @kindex M-g p
 @findex goto-page
-Move to the specified page. This command does not count the script
-pages but uses the text pagination properties
+Prompt for a number and move to the specified page. This command does
+not actually count pages but uses the text pagination properties
 (@code{fountain-goto-page}).
 @end table
 
@@ -878,7 +878,22 @@ JOHN|
 @node Scene Numbering
 @unnumbered Scene Numbering
 
-@tbc
+Scene numbers are appended to scene headings between @code{# #}
+(hash). @program can automatically add scene numbers for you.
+
+@deffn Command fountain-add-scene-numbers
+Bound to @kbd{C-c C-x #}, add scene numbers to scene headings in
+current buffer. Remove scene numbers by prefixing with @kbd{C-u}.
+@end deffn
+
+Whether scene numbers are applied or not, you can still navigate by
+scene number. @xref{Navigation}.
+
+Scene numbers can be displayed in the window margins.
+
+@defopt fountain-display-scene-numbers-in-margin
+Display scene numbers in left and right margins.
+@end defopt
 
 @node Pagination
 @unnumbered Pagination
@@ -922,6 +937,8 @@ page count of the current buffer.
 @end deffn
 @kindex C-c C-p
 @findex count-pages
+
+You can also navigate by page number. @xref{Navigation}.        
 
 @node Exporting
 @unnumbered Exporting
