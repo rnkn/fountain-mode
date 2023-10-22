@@ -1957,28 +1957,12 @@ non-nil (when prefixed with (\\[universal-argument]), only insert note delimiter
 (define-obsolete-function-alias 'fountain-refresh-continued-dialog
   'fountain-add-continued-dialog "`fountain-mode' 3.5")
 
-(defun fountain-remove-continued-dialog ()
-  "Remove continued dialogue in buffer.
-Remove `fountain-continued-dialog-string' on all characters in
-accessible portion of the buffer."
-  (interactive "*")
-  (save-excursion
-    (goto-char (point-min))
-    (unless (fountain-match-character) (fountain-forward-character))
-    (let ((case-fold-search nil))
-      (while (< (point) (point-max))
-        (when (re-search-forward
-               (concat "[\s\t]*" fountain-continued-dialog-string "[\s\t]*")
-               (line-end-position) t)
-          (delete-region (match-beginning 0) (match-end 0)))
-        (fountain-forward-character)))))
-
-(defun fountain-add-continued-dialog ()
+(defun fountain-add-continued-dialog (&optional delete)
   "Add or update continued dialogue in buffer.
 Add `fountain-continued-dialog-string' to characters speaking in
 succession, or remove where appropriate, in accessible portion of
 the buffer."
-  (interactive "*")
+  (interactive "*P")
   (save-excursion
     (goto-char (point-min))
     (unless (fountain-match-character) (fountain-forward-character))
@@ -1989,15 +1973,22 @@ the buffer."
                                 (fountain-get-character -1 'scene)))
                 (with-string (looking-at-p
                               (concat ".*" fountain-continued-dialog-string "$"))))
-            (cond ((and contd (not with-string))
-                   (when (re-search-forward "\s*$" (line-end-position) t)
-                     (replace-match (concat "\s" fountain-continued-dialog-string))))
-                  ((and (not contd) with-string)
+            (cond ((or delete (and (not contd) with-string))
                    (when (re-search-forward
                           (concat "[\s\t]*" fountain-continued-dialog-string "[\s\t]*")
                           (line-end-position) t)
-                     (delete-region (match-beginning 0) (match-end 0))))))
+                     (delete-region (match-beginning 0) (match-end 0))))
+                  ((and contd (not with-string))
+                   (when (re-search-forward "\s*$" (line-end-position) t)
+                     (replace-match (concat "\s" fountain-continued-dialog-string))))))
           (fountain-forward-character))))))
+
+(defun fountain-remove-continued-dialog ()
+  "Remove continued dialogue in buffer.
+Remove `fountain-continued-dialog-string' on all characters in
+accessible portion of the buffer."
+  (interactive "*")
+  (fountain-add-continued-dialog t))
 
 
 ;;; Scene Numbers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3630,7 +3621,6 @@ takes the form:
     (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
     (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
     (define-key map (kbd "C-c C-d") #'fountain-add-continued-dialog)
-    (define-key map (kbd "C-c C-x d") #'fountain-remove-continued-dialog)
     (define-key map (kbd "C-c C-z") #'fountain-insert-note)
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
@@ -3733,7 +3723,10 @@ takes the form:
       :selected fountain-transpose-all-elements])
     ("Dialogue"
      ["Add Continued Dialogue" fountain-add-continued-dialog]
-     ["Remove Continued Dialogue" fountain-remove-continued-dialog])
+     ["Remove Continued Dialogue" fountain-remove-continued-dialog
+      :keys ,(key-description
+              (vconcat [?\^u]
+                       (where-is-internal 'fountain-add-continued-dialog fountain-mode-map t)))])
     ("Pagination"
      ["Forward Page" fountain-forward-page]
      ["Backward Page" fountain-backward-page]
