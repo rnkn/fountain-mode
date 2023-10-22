@@ -3635,7 +3635,6 @@ takes the form:
     (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
     (define-key map (kbd "C-c C-x i") #'auto-insert)
     (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
-    (define-key map (kbd "C-c C-x _") #'fountain-remove-scene-numbers)
     (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
     (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
     (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
@@ -3761,7 +3760,10 @@ takes the form:
       :selected fountain-pagination-ignore-restriction])
     ("Scene Numbers"
      ["Add Scene Numbers" fountain-add-scene-numbers]
-     ["Remove Scene Numbers" fountain-remove-scene-numbers]
+     ["Remove Scene Numbers" fountain-remove-scene-numbers
+      :keys ,(key-description
+              (vconcat [?\^u]
+                       (where-is-internal 'fountain-add-scene-numbers fountain-mode-map t)))]
      "---"
      ["Display Scene Numbers in Margin"
       (customize-set-variable 'fountain-scene-numbers-display-in-margin
