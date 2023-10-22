@@ -3044,8 +3044,9 @@ prepared with `fountain-export-troff'.")
     (goto-char (point-min))
     (while (< (point) (point-max))
       (fountain-move-to-fill-width element t)
-      (unless (or (bolp) (eolp)) (insert "\n"))
-      (delete-horizontal-space))
+      (unless (or (bolp) (eolp))
+        (delete-horizontal-space)
+        (insert "\n")))
     (buffer-string)))
 
 (defun fountain-export-region-to-troff (start end &optional
