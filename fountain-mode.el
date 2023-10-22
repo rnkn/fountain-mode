@@ -2982,12 +2982,20 @@ COMMAND may be edited interactively when calling
 .sp
 ..
 .reset"
-  "Troff macro header for exporting to PDF.
+  "Troff macro header for exporting to PostScript/PDF.
 
 n.b. This is not intended to be used independently of buffers
-prepared with `fountain-export-pdf'.")
+prepared with `fountain-export-troff'.")
 
-(defun fountain-export-troff-string (string)
+(defvar fountain-export-troff-macro-start
+  ".br
+.nr % 0
+.ie \\n[numberpage1] .wh 0 header
+.el .wh 0 headerblank
+.nr nl -1"
+  "Troff macro for start of content when exporting to PostScript/PDF.")
+
+(defun fountain-export-troff-string (string element)
   "Convert STRING to troff markup."
   (with-temp-buffer
     (insert string)
@@ -3053,7 +3061,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                      ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
                      ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
                      ?n (if fountain-export-number-first-page 1 0))))
-      (unless (bolp) (newline))
+      (unless (bolp) (insert "\n"))
       (when metadata
         (insert ".sp |4i\n")
         (let (string)
@@ -3068,13 +3076,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (setq string (cdr var))
               (insert (format ".titlenote\n%s\n" string)))
             (insert ".page-break\n"))))
-      (insert "\
-.br
-.nr % 0
-.ie \\n[numberpage1] .wh 0 header
-.el .wh 0 headerblank
-.nr nl -1
-"))
+      (insert fountain-export-troff-macro-start)
+      (unless (bolp) (insert "\n")))
     (save-excursion
       (goto-char start)
       (while (< (point) end)
