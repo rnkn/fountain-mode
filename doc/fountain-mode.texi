@@ -459,7 +459,42 @@ case-insensitive.
 @node Notes
 @unnumberedsec Notes
 
-@tbc
+Text enclosed in @code{[[ ]]} (double brackets) is parsed as a note,
+and is generally not included in export. Use these for keeping draft
+notes, research, feedback, etc.
+
+@table @kbd
+
+@item C-c C-z
+@kindex C-c C-z
+This will insert a note based on @code{fountain-note-template} (see
+below) beneath the current element, or if the region is active,
+surround the region with note delimiters
+(@code{fountain-insert-note}).
+@findex insert-note
+
+@end table
+
+@defopt fountain-note-template
+Template for inserting a new note. Passed to @code{format-spec} with
+the following specification:
+
+@itemize
+@item @code{%u user-login-name}
+@item @code{%n user-full-name}
+@item @code{%e user-mail-address}
+@item @code{%x} date in locale’s preferred format
+@item @code{%F} date in ISO format
+@item @code{%P} leave point here
+@end itemize
+
+The default @code{%P - %n %x\}
+inserts something like:
+
+@example
+[[ | - Alan Smithee 12/31/2017 ]]"
+@end example
+@end defopt
 
 @node Synopses
 @unnumberedsec Synopses
@@ -477,7 +512,12 @@ Synopses are not included by most export tools.
 @node Center Text
 @unnumberedsec Center Text
 
-@tbc
+Any text surrounded with @code{>} and @code{<} (greater and less than
+signs) will be centered in output, e.g.:
+
+@example
+> Once Upon a Time... <
+@end example
 
 @node Comments
 @unnumberedsec Comments
