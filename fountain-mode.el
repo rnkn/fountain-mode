@@ -2365,8 +2365,28 @@ That is, page breaks may occur mid-sentence."
   '(dual-character-right dual-dialog-right dual-paren-right)
   "List of elements constituent of right-side dual dialogue.")
 
+(defvar fountain-fill-elements
+  '((section-heading      . 61)
+    (scene-heading        . 61)
+    (action               . 61)
+    (character            . 38)
+    (paren                . 26)
+    (dialog               . 35)
+    (dual-character-left  . 28)
+    (dual-character-right . 28)
+    (dual-paren-left      . 16)
+    (dual-paren-right     . 16)
+    (dual-dialog-left     . 28)
+    (dual-dialog-right    . 28)
+    (trans                . 16)
+    (center               . 61)
+    (synopsis             . 61)
+    (note                 . 61)
+    (page-break           . 61))
+  "Association list of elements and their widths in columns.")
+
 (defvar fountain-printed-elements
-  (append '(scene-heading action character dialog lines paren trans center)
+  (append '(scene-heading action character dialog paren trans center)
           fountain-dual-dialog-left-elements
           fountain-dual-dialog-right-elements)
   "List of elements considered printed on a page.
@@ -2459,8 +2479,7 @@ Comments are assumed to be deleted."
   "Move point to column of ELEMENT fill limit suitable for breaking line.
 Skip over comments."
   (let ((fill-width
-         (cdr (symbol-value
-               (intern-soft (format "fountain-fill-%s" element))))))
+         (cdr (assq element fountain-fill-elements))))
     (let ((i 0))
       (while (and (< i fill-width) (not (eolp)))
         (cond ((= (syntax-class (syntax-after (point))) 0)
@@ -2720,82 +2739,6 @@ your preferred tool's pagination method."
         string)
     (setq string (format "Page %s of %s" (car page-count) (cdr page-count)))
     (if interactive (message string) string)))
-
-
-;;; Filling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defvar fountain-fill-section-heading
-  '(0 . 61)
-  "Cons cell of integers for indenting and filling section headings.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvar fountain-fill-scene-heading
-  '(0 . 61)
-  "Cons cell of integers for indenting and filling scene headings.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvaralias 'fountain-fill-center 'fountain-fill-action)
-
-(defvar fountain-fill-action
-  '(0 . 61)
-  "Cons cell of integers for indenting and filling action.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvar fountain-fill-character
-  '(20 . 38)
-  "Cons cell of integers for indenting and filling character.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvaralias 'fountain-fill-dual-character-left 'fountain-fill-dual-character)
-(defvaralias 'fountain-fill-dual-character-right 'fountain-fill-dual-character)
-
-(defvar fountain-fill-dual-character
-  '(10 . 28)
-  "Cons cell of integers for indenting and filling dual-dialogue character.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvar fountain-fill-paren
-  '(15 . 26)
-  "Cons cell of integers for indenting and filling parenthetical.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvaralias 'fountain-fill-dual-paren-left 'fountain-fill-dual-paren)
-(defvaralias 'fountain-fill-dual-paren-right 'fountain-fill-dual-paren)
-
-(defvar fountain-fill-dual-paren
-  '(5 . 16)
-  "Cons cell of integers for indenting and filling dual-dialogue parenthetical.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvaralias 'fountain-fill-lines 'fountain-fill-dialog)
-
-(defvar fountain-fill-dialog
-  '(10 . 35)
-  "Cons cell of integers for indenting and filling dialogue.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvaralias 'fountain-fill-dual-dialog-left 'fountain-fill-dual-dialog)
-(defvaralias 'fountain-fill-dual-dialog-right 'fountain-fill-dual-dialog)
-
-(defvar fountain-fill-dual-dialog
-  '(2 . 28)
-  "Cons cell of integers for indenting and filling dual-dialogue.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvar fountain-fill-trans
-  '(42 . 16)
-  "Cons cell of integers for indenting and filling transition.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvar fountain-fill-synopsis
-  '(0 . 61)
-  "Cons cell of integers for indenting and filling synopses.
-The car sets `left-margin' and cdr `fill-column'.")
-
-(defvar fountain-fill-note
-  '(0 . 61)
-  "Cons cell of integers for indenting and filling notes.
-The car sets `left-margin' and cdr `fill-column'.")
 
 
 ;;; Exporting ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
