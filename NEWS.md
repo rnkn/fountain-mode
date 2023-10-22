@@ -10,7 +10,8 @@
   to remove scene numbers.
 - `fountain-add-continued-dialog` can now be called with a prefix
   argument to remove continued dialogue.
-- Rename `fountain-export` to `fountain-export-command`
+- Rename `fountain-export` to `fountain-export-command` and bind to `C-c
+  C-e e`.
 - Add options `fountain-export-title-page`, `fountain-export-number-first-page`
 - Improve `fountain-theme` default face size.
 - When called with prefix argument `fountain-upcase-line` will only
