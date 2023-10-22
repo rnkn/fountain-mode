@@ -3704,8 +3704,9 @@ takes the form:
      ["Cycle Outline Visibility" fountain-outline-cycle]
      ["Cycle Buffer Outline Visibility" fountain-outline-cycle-buffer]
      ["Show All" fountain-outline-show-all
-      :keys ,(concat "C-u C-u "
-                     (key-description (list (car (rassq 'fountain-dwim fountain-mode-map)))))]
+      :keys ,(key-description
+              (vconcat [?\^u] [?\^u]
+                       (where-is-internal 'fountain-dwim fountain-mode-map t)))]
      "---"
      ["Hide Notes When Cycling Outline"
       (customize-set-variable 'fountain-outline-hide-notes
