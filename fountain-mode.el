@@ -2872,21 +2872,18 @@ COMMAND may be edited interactively when calling
 .vs \\n[VS]
 .if !rPW .nr PW 6
 .ll \\n[PW]i
-.if !rPL .nr PL 11
-.pl \\n[PL]i
 .
 .nr scenespace %s
 .nr scenebold %b
 .nr sceneunderline %u
 .nr numberpage1 %n
 .nr pagetop 1
+.po 1.25i
+.nf
 .nh
 .
 .de reset
 .ft C
-.ad l
-.po 1.25i
-.ll \\n[PW]i
 'ce 0
 'in 0
 ..
@@ -2923,18 +2920,15 @@ COMMAND may be edited interactively when calling
 .reset
 .blank
 .in 2.5i
-.ll -1i
 ..
 .de paren
 .reset
 .in 2i
-.ll -2.4i
 .ti -8p
 ..
 .de dialog
 .reset
 .in 1.5i
-.ll -1i
 ..
 .de trans
 .reset
@@ -2946,7 +2940,6 @@ COMMAND may be edited interactively when calling
 .blank
 .mk dualtop
 .in 1i
-.ll 2.9i
 ..
 .de dual-paren-left
 .reset
@@ -2955,7 +2948,6 @@ COMMAND may be edited interactively when calling
 ..
 .de dual-dialog-left
 .reset
-.ll 2.9i
 ..
 .de dual-character-right
 .reset
@@ -2974,7 +2966,7 @@ COMMAND may be edited interactively when calling
 .de center
 .reset
 .blank
-.ce
+.ce 99
 ..
 .de page-break
 .bp
@@ -2988,7 +2980,6 @@ COMMAND may be edited interactively when calling
 .de titlenote
 .reset
 .sp
-.ll 3i
 ..
 .reset"
   "Troff macro header for exporting to PDF.
