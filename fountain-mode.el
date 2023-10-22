@@ -3041,6 +3041,11 @@ prepared with `fountain-export-troff'.")
                  (goto-char (match-end 0)))
                 (t
                  (replace-match "\\\\z_\\&" t))))))
+    (goto-char (point-min))
+    (while (< (point) (point-max))
+      (fountain-move-to-fill-width element t)
+      (unless (or (bolp) (eolp)) (insert "\n"))
+      (delete-horizontal-space))
     (buffer-string)))
 
 (defun fountain-export-region-to-troff (start end &optional
@@ -3069,7 +3074,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
             (when (setq string (cdr (assoc var metadata)))
               (setq metadata (delq (assoc var metadata) metadata))
               (insert
-               (format ".titleline\n%s\n" (fountain-export-troff-string string)))))
+               (format ".titleline\n%s\n" (fountain-export-troff-string string 'action)))))
           (when metadata
             (insert ".sp |8i\n")
             (dolist (var (reverse metadata))
@@ -3092,12 +3097,26 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                   ;; except character, and we need a group with just the character
                   ;; name and extension.
                   ;;
-                  (content (if (eq element 'character)
-                               (concat (match-string-no-properties 2)
-                                       (match-string-no-properties 3))
-                             (or (match-string-no-properties 2)
-                                 (match-string-no-properties 0)))))
-              (setq content (fountain-export-troff-string content))
+                  (content
+                   (cond ((eq element 'action)
+                          (let (action)
+                            (while (fountain-match-action)
+                              (push (match-string-no-properties 2) action)
+                              (forward-line 1))
+                            (string-join (reverse action) "\n")))
+                         ((eq element 'center)
+                          (let (center)
+                            (while (fountain-match-center)
+                              (push (match-string-no-properties 2) center)
+                              (forward-line 1))
+                            (string-join (reverse center) "\n")))
+                         ((eq element 'character)
+                                  (concat (match-string-no-properties 2)
+                                          (match-string-no-properties 3)))
+                                 (t
+                                  (or (match-string-no-properties 2)
+                                      (match-string-no-properties 0))))))
+              (setq content (fountain-export-troff-string content element))
               ;; Finally insert the request
               (with-current-buffer output-buffer
                 (insert (format ".%s%s%s\n" request delim content))))))
