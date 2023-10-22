@@ -658,7 +658,30 @@ pages but uses the text pagination properties
 @node Syntax Highlighting
 @unnumbered Syntax Highlighting
 
-@tbc
+In @program, each Fountain element can have Font Lock syntax
+highlighting toggled individually --- or none at all.
+@xref{(emacs) Font Lock}.
+
+In addition to faces for specific elements, @program uses an Emacs
+feature called face remapping, which means the @code{default} face is
+displayed using the @code{fountain} face. This allows you to customize
+the @code{fountain} face just for @program buffers. @xref{(emacs) Face
+Customization}.
+
+@defopt fountain-highlight-elements
+This option is a list of Fountain elements to be highlighted.
+@end defopt
+
+@deffn Command fountain-toggle-hide-emphasis-markup
+Bound to @kbd{C-c C-x *} this command will toggle the display of text
+emphasis markup. @xref{Text Emphasis}.
+@end deffn
+
+@deffn Command fountain-toggle-hide-element-markup
+Bound to @kbd{C-c C-x !}, this command, like above, will toggle the
+display of element markup. This means the leadings characters in
+section headings and forced elements.
+@end deffn
 
 @node Element Aligning
 @unnumbered Element Aligning
