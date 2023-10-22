@@ -882,6 +882,7 @@ Scene numbers are appended to scene headings between @code{# #}
 Bound to @kbd{C-c C-x #}, add scene numbers to scene headings in
 current buffer. Remove scene numbers by prefixing with @kbd{C-u}.
 @end deffn
+@kindex C-c C-x #
 
 Whether scene numbers are applied or not, you can still navigate by
 scene number. @xref{Navigation}.
