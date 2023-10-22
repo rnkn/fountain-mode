@@ -2475,14 +2475,16 @@ Comments are assumed to be deleted."
             (fountain-goto-page-break-point)
           (goto-char x)))))))
 
-(defun fountain-move-to-fill-width (element)
+(defun fountain-move-to-fill-width (element &optional troff)
   "Move point to column of ELEMENT fill limit suitable for breaking line.
 Skip over comments."
   (let ((fill-width
          (cdr (assq element fountain-fill-elements))))
     (let ((i 0))
       (while (and (< i fill-width) (not (eolp)))
-        (cond ((= (syntax-class (syntax-after (point))) 0)
+        (cond ((and troff (looking-at "\\\\\\(z.\\|f\\[.*?\\]\\)"))
+               (goto-char (match-end 0)))
+              ((= (syntax-class (syntax-after (point))) 0)
                (forward-char 1) (cl-incf i))
               ((forward-comment 1))
               (t
