@@ -27,9 +27,6 @@ Paul W. Rankin
 @macro authoremail
 @email{hello@@paulwrankin.com}
 @end macro
-@macro tbc
-Sorry, this node is not yet written. You can help by submitting a patch!
-@end macro
 
 @copying
 Copyright @copyright{} 2021--2023 Paul W. Rankin
