@@ -3813,7 +3813,7 @@ takes the form:
      :style toggle
      :selected fountain-auto-upcase-scene-headings]
     "---"
-    ["Export" fountain-export
+    ["Export" fountain-export-troff
      :label (format "Export to %s"
              (if (eq fountain-export-format 'ps) "PostScript" "PDF"))]
     ["Run Export Command..." fountain-export-command]
