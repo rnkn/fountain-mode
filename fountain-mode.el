@@ -4006,7 +4006,8 @@ regular expression."
        (save-excursion
          (skip-syntax-backward (char-to-string (char-syntax char))
                                (line-beginning-position))
-         (= (char-syntax (char-before)) ?w))))
+         (unless (bobp)
+           (= (char-syntax (char-before)) ?w)))))
 
 
 ;;; Mode Definition ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
