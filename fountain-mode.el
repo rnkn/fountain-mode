@@ -2708,7 +2708,7 @@ to suit your preferred tool's pagination method."
                 (skip-chars-backward "\n\s\t")
                 (fountain-match-page-break)))
             (replace-match page-break t t)
-          (delete-horizontal-space)
+          (beginning-of-line)
           (unless (bolp) (insert-before-markers "\n"))
           (unless (fountain-blank-before-p) (insert-before-markers "\n"))
           (insert-before-markers page-break "\n\n")))
