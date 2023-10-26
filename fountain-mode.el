@@ -2970,7 +2970,7 @@ COMMAND may be edited interactively when calling
 .ce 99
 ..
 .de page-break
-.bp
+.bp \\\\$1
 .nr pagetop 1
 ..
 .de titleline
@@ -3119,13 +3119,14 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                          ((eq element 'character)
                                   (concat (match-string-no-properties 2)
                                           (match-string-no-properties 3)))
-                                 (t
-                                  (or (match-string-no-properties 2)
-                                      (match-string-no-properties 0))))))
+                         (t
+                          (or (match-string-no-properties 2) "")))))
               (setq content (fountain-export-troff-string content element))
               ;; Finally insert the request
               (with-current-buffer output-buffer
-                (insert (format ".%s%s%s\n" request delim content))))))
+                (insert (format ".%s%s%s" request delim content))
+                (delete-horizontal-space)
+                (insert "\n")))))
         (forward-line 1)
         (progress-reporter-update job)))
     (progress-reporter-done job)))
