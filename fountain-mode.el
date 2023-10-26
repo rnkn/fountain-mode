@@ -3103,11 +3103,6 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
           (when (and (setq element (fountain-get-element))
                      (setq request (car (memq element fountain-export-troff-requests))))
             (let ((delim (if (eq element 'page-break) " " "\n"))
-                  ;;
-                  ;; FIXME: using regexp group 2 works for all non-action elements
-                  ;; except character, and we need a group with just the character
-                  ;; name and extension.
-                  ;;
                   (content
                    (cond ((eq element 'action)
                           (let (action)
@@ -3170,7 +3165,8 @@ Requires a `troff' program."
       (while (fountain-match-metadata)
         (forward-line))
       (skip-chars-forward "\n\s\t")
-      ;; (delete-region (point-min) (point))
+      (delete-region (point-min) (point))
+      (fountain-pagination-update)
       (while (< (point) (point-max))
         (fountain-move-forward-page)
         (unless (eobp)
