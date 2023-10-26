@@ -925,7 +925,7 @@ When LOOSE is non-nil, do not require non-blank line after."
     (save-excursion
       (beginning-of-line)
       (and (not (looking-at fountain-forced-action-regexp))
-           (let (case-fold-search)
+           (let ((case-fold-search nil))
              (looking-at fountain-character-regexp))
            (fountain-blank-before-p)
            (if loose t (not (fountain-blank-after-p)))))))
@@ -963,7 +963,7 @@ When LOOSE is non-nil, do not require non-blank line after."
   "Match transition if point is at a transition, nil otherwise."
   (save-excursion
     (beginning-of-line)
-    (and (let (case-fold-search)
+    (and (let ((case-fold-search nil))
            (looking-at fountain-trans-regexp))
          (fountain-blank-before-p)
          (fountain-blank-after-p))))
@@ -3219,7 +3219,7 @@ Export command profiles are defined in
         (end   (if (use-region-p) (region-end) (point-max)))
         (metadata (fountain-get-metadata))
         use-stdin)
-    (unless (let (case-fold-search) (string-match "%b" command))
+    (unless (let ((case-fold-search nil)) (string-match "%b" command))
       (setq use-stdin t))
     (setq command (format-spec command
         (format-spec-make
