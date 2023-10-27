@@ -1678,9 +1678,9 @@ Scene can be a string or number."
     (fountain-move-forward-scene 1))
   ;; First search for a basic string match for SCENE.
   (let (found)
-    (while (and (< (point) (point-max))
-                (fountain-match-scene-heading)
-                (not found))
+    (while (and (not found)
+                (< (point) (point-max))
+                (fountain-match-scene-heading))
       (or (and (match-string 9)
                (prog1 (setq found (search-forward scene (line-end-position) t))
                  (beginning-of-line)))
@@ -1696,8 +1696,8 @@ Scene can be a string or number."
                (or (car (fountain-scene-number-to-list
                          (match-string-no-properties 9)))
                    1))))
-        (while (and (< (point) (point-max))
-                    (< scene-count scene))
+        (while (and (< scene-count scene)
+                    (< (point) (point-max)))
           (fountain-move-forward-scene 1)
           (when (fountain-match-scene-heading)
             (setq scene-count (or (car (fountain-scene-number-to-list
@@ -1771,7 +1771,8 @@ string. e.g.
       (widen)
       (goto-char (point-min))
       (let (metadata)
-        (while (fountain-match-metadata)
+        (while (and (fountain-match-metadata)
+                    (< (point) (point-max)))
           (let ((key (match-string-no-properties 1))
                 (value (match-string-no-properties 2)))
             (when (stringp key)
@@ -1781,7 +1782,8 @@ string. e.g.
             (if value
                 (push (cons key value) metadata)
               (while (and (fountain-match-metadata)
-                          (null (match-string 1)))
+                          (null (match-string 1))
+                          (< (point) (point-max)))
                 (push (match-string-no-properties 2) value)
                 (forward-line 1))
               (push (cons key (string-join (reverse value) "\n")) metadata))))
@@ -2159,7 +2161,7 @@ to include external files."
                    (fountain-scene-number-to-list (match-string-no-properties 9)))
                   last-scene next-scene)
               ;; Check if scene heading is already numbered and if there
-              ;; is a NEXT-SCENE. No previousscene number can be greater
+              ;; is a NEXT-SCENE. No previous scene number can be greater
               ;; or equal to this.
               (goto-char x)
               (while (not (or next-scene (eobp)))
@@ -2193,7 +2195,7 @@ to include external files."
         ;; While before point X, go forward through each scene heading, setting
         ;; LAST-SCENE to CURRENT-SCENE and CURRENT-SCENE to an incement of (car
         ;; LAST-SCENE).
-        (while (< (point) x (point-max))
+        (while (and (< (point) x (point-max)))
           (fountain-move-forward-scene 1)
           (when (fountain-match-scene-heading)
             (setq last-scene current-scene
@@ -2503,7 +2505,9 @@ Skip over comments."
     ;; Consider the title page as page 0.
     (if (fountain-match-metadata)
         (progn
-          (while (fountain-match-metadata) (forward-line 1))
+          (while (and (fountain-match-metadata)
+                      (< (point) (point-max)))
+            (forward-line))
           (funcall skip-whitespace-fun))
     ;; Pages don't begin with blank space, so skip over any at point.
     (funcall skip-whitespace-fun)
@@ -2614,9 +2618,9 @@ returns nil."
       (let ((page-num (if (fountain-match-metadata) 0 1))
             (page-order t)
             (change 0))
-        (while (and (< (point) (point-max))
+        (while (and (<= change fountain-pagination-max-change)
                     page-order
-                    (<= change fountain-pagination-max-change))
+                    (< (point) (point-max)))
           (let ((page-props (get-text-property (point) 'fountain-pagination))
                 (page-start (point)))
             (unless (eobp) (setq page-order (equal (car-safe page-props) page-num)))
@@ -3106,13 +3110,15 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                   (content
                    (cond ((eq element 'action)
                           (let (action)
-                            (while (fountain-match-action)
+                            (while (and (fountain-match-action)
+                                        (< (point) (point-max)))
                               (push (match-string-no-properties 2) action)
                               (forward-line 1))
                             (string-join (reverse action) "\n")))
                          ((eq element 'center)
                           (let (center)
-                            (while (fountain-match-center)
+                            (while (and (fountain-match-center)
+                                        (< (point) (point-max)))
                               (push (match-string-no-properties 2) center)
                               (forward-line 1))
                             (string-join (reverse center) "\n")))
@@ -3163,7 +3169,9 @@ Requires a `troff' program."
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
       (goto-char (point-min))
-      (while (fountain-match-metadata)
+
+      (while (and (fountain-match-metadata)
+                  (< (point) (point-max)))
         (forward-line))
       (skip-chars-forward "\n\s\t")
       (delete-region (point-min) (point))
