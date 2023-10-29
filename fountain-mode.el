@@ -304,14 +304,6 @@ instead `fountain-export-scene-heading-format'."
   :group 'fountain
   :set #'fountain--set-and-refresh-font-lock)
 
-(defcustom fountain-export-scene-heading-format
-  '(double-space)
-  "List of format options applied when exporting scene headings.
-Options are: bold, double-space, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Double-spaced" double-space)
-              (const :tag "Underlined" underline)))
-
 (define-obsolete-variable-alias 'fountain-shift-all-elements
   'fountain-transpose-all-elements "`fountain-mode' 3.2")
 (defcustom fountain-transpose-all-elements
@@ -2751,6 +2743,15 @@ your preferred tool's pagination method."
   "Target format for export. Valid options are `ps' or `pdf'."
   :type '(choice (const :tag "PostScript" ps)
                  (const :tag "PDF" pdf))
+  :group 'fountain-export)
+
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline))
   :group 'fountain-export)
 
 (defcustom fountain-export-title-page
