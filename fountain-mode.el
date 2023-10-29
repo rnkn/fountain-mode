@@ -258,9 +258,9 @@ Upcases lines matching `fountain-scene-heading-regexp'."
   "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
 Passed to `format-spec' with the following specification:
 
-  %u  `user-login-name'
-  %n  `user-full-name'
-  %e  `user-mail-address'
+  %u  variable `user-login-name'
+  %n  variable `user-full-name'
+  %e  variable `user-mail-address'
   %x  date in locale's preferred format
   %F  date in ISO format
   %P  leave point here
@@ -1961,6 +1961,9 @@ non-nil (when prefixed with (\\[universal-argument]), only insert note delimiter
 
 (defun fountain-add-continued-dialog (&optional delete)
   "Add or update continued dialogue in buffer.
+If DELETE is non-nil (when prefixed with \\[universal-argument]), remove continued
+dialogue.
+
 Add `fountain-continued-dialog-string' to characters speaking in
 succession, or remove where appropriate, in accessible portion of
 the buffer."
@@ -2065,11 +2068,6 @@ Or if nil:
 
   \"10\" -> (10)
   \"10AA\" -> (10 1 1)"
-  ;;
-  ;; FIXME: This does not account for these user options:
-  ;; `fountain-scene-numbers-separator'
-  ;; `fountain-scene-numbers-first-revision-char'
-  ;;
   (let (number revision)
     (when (stringp string)
       (if fountain-scene-numbers-prefix-revised
@@ -2479,7 +2477,7 @@ Comments are assumed to be deleted."
 
 (defun fountain-move-to-fill-width (element &optional troff)
   "Move point to column of ELEMENT fill limit suitable for breaking line.
-Skip over comments."
+If TROFF is non-nil, consider troff escapes. Skip over comments."
   (let ((fill-width
          (cdr (assq element fountain-fill-elements))))
     (let ((i 0))
@@ -2834,9 +2832,9 @@ COMMAND string.
 COMMAND is passed to `format-spec' and allows for interpolation
 of the following values:
 
-  %b is the `buffer-file-name'
-  %B is the `buffer-file-name' sans extension
-  %n is the `user-full-name'
+  %b is the variable `buffer-file-name'
+  %B is the variable `buffer-file-name' sans extension
+  %n is the variable `user-full-name'
   %t is the title (from script metadata)
   %a is the author (from script metadata)
   %F is the current date in ISO format
@@ -3001,7 +2999,7 @@ prepared with `fountain-export-troff'.")
   "Troff macro for start of content when exporting to PostScript/PDF.")
 
 (defun fountain-export-troff-string (string element)
-  "Convert STRING to troff markup."
+  "Convert STRING of ELEMENT to troff markup."
   (with-temp-buffer
     (insert string)
     (goto-char (point-min))
@@ -3169,7 +3167,6 @@ Requires a `troff' program."
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
       (goto-char (point-min))
-
       (while (and (fountain-match-metadata)
                   (< (point) (point-max)))
         (forward-line))
@@ -3301,7 +3298,7 @@ The file is then passed to `dired-guess-default'."
 
 (defmacro define-fountain-font-lock-matcher (matcher)
   "Define a `font-lock-mode' matcher for MATCHER.
-MATCHER must be a lisp form."
+MATCHER must be a Lisp form."
   `(lambda (limit)
      (let (match)
        (while (and (null match)
