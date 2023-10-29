@@ -157,11 +157,10 @@
 Cycle buffers and call `font-lock-refresh-defaults' when
 `fountain-mode' is active."
   (set-default symbol value)
-  (mapc (lambda (buffer)
-          (with-current-buffer buffer
-            (when (derived-mode-p 'fountain-mode)
-              (font-lock-refresh-defaults))))
-        (buffer-list)))
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (when (derived-mode-p 'fountain-mode)
+        (font-lock-refresh-defaults)))))
 
 (defcustom fountain-mode-hook
   '(visual-line-mode)
@@ -212,14 +211,13 @@ to remove any previous continued dialogue."
   :safe 'booleanp
   :set (lambda (symbol value)
          (set-default symbol value)
-         (mapc (lambda (buffer)
-                 (with-current-buffer buffer
-                   (when (derived-mode-p 'fountain-mode)
-                     (if fountain-hide-emphasis-markup
-                         (add-to-invisibility-spec 'fountain-emphasis-markup)
-                       (remove-from-invisibility-spec 'fountain-emphasis-markup))
-                     (font-lock-refresh-defaults))))
-               (buffer-list))))
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (derived-mode-p 'fountain-mode)
+               (if fountain-hide-emphasis-markup
+                   (add-to-invisibility-spec 'fountain-emphasis-markup)
+                 (remove-from-invisibility-spec 'fountain-emphasis-markup))
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-hide-element-markup
   nil
@@ -229,14 +227,13 @@ to remove any previous continued dialogue."
   :safe 'booleanp
   :set (lambda (symbol value)
          (set-default symbol value)
-         (mapc (lambda (buffer)
-                 (with-current-buffer buffer
-                   (when (derived-mode-p 'fountain-mode)
-                     (if fountain-hide-element-markup
-                         (add-to-invisibility-spec 'fountain-element-markup)
-                       (remove-from-invisibility-spec 'fountain-element-markup))
-                     (font-lock-refresh-defaults))))
-               (buffer-list))))
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (derived-mode-p 'fountain-mode)
+               (if fountain-hide-element-markup
+                   (add-to-invisibility-spec 'fountain-element-markup)
+                 (remove-from-invisibility-spec 'fountain-element-markup))
+               (font-lock-refresh-defaults))))))
 
 (defcustom fountain-auto-upcase-scene-headings
   t
@@ -455,12 +452,11 @@ so the following are equivalent:
          (set-default symbol value)
          (when (featurep 'fountain-mode)
            (fountain-init-scene-heading-regexp)
-           (mapc (lambda (buffer)
-                   (with-current-buffer buffer
-                     (when (derived-mode-p 'fountain-mode)
-                       (fountain-init-outline-regexp)
-                       (font-lock-refresh-defaults))))
-                 (buffer-list)))))
+           (dolist (buffer (buffer-list))
+             (with-current-buffer buffer
+               (when (derived-mode-p 'fountain-mode)
+                 (fountain-init-outline-regexp)
+                 (font-lock-refresh-defaults)))))))
 
 (defcustom fountain-scene-heading-suffix-separator
   " --? "
@@ -512,11 +508,10 @@ e.g. `TO:' will match both the following:
          (set-default symbol value)
          (when (featurep 'fountain-mode)
            (fountain-init-trans-regexp)
-           (mapc (lambda (buffer)
-                   (with-current-buffer buffer
-                     (when (derived-mode-p 'fountain-mode)
-                       (font-lock-refresh-defaults))))
-                 (buffer-list)))))
+           (dolist (buffer (buffer-list))
+             (with-current-buffer buffer
+               (when (derived-mode-p 'fountain-mode)
+                 (font-lock-refresh-defaults)))))))
 
 (defcustom fountain-character-extension-list
   '("(V.O.)" "(O.S.)" "(O.C.)")
@@ -1291,11 +1286,10 @@ Notes visibility can be cycled with \\[fountain-dwim]."
   :set (lambda (symbol value)
          (set-default symbol value)
          (when (featurep 'fountain-mode)
-           (mapc (lambda (buffer)
-                   (with-current-buffer buffer
-                     (when (derived-mode-p 'fountain-mode)
-                       (fountain-init-outline-regexp))))
-                 (buffer-list)))))
+           (dolist (buffer (buffer-list))
+             (with-current-buffer buffer
+               (when (derived-mode-p 'fountain-mode)
+                 (fountain-init-outline-regexp)))))))
 
 (defalias 'fountain-outline-next 'outline-next-visible-heading)
 (defalias 'fountain-outline-previous 'outline-previous-visible-heading)
@@ -2309,11 +2303,10 @@ scene number from being auto-upcased."
                 (const :tag "A4" a4))
   :set (lambda (symbol value)
          (set-default symbol value)
-         (mapc (lambda (buffer)
-                 (with-current-buffer buffer
-                   (when (derived-mode-p 'fountain-mode)
-                     (fountain-pagination-update))))
-               (buffer-list))))
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (derived-mode-p 'fountain-mode)
+               (fountain-pagination-update))))))
 
 (defcustom fountain-page-max-lines
   '((letter . 55) (a4 . 60))
@@ -3839,20 +3832,20 @@ takes the form:
   "Save `fountain-mode' menu options with `customize'."
   (interactive)
   (let (unsaved)
-    (mapc (lambda (option)
-            (when (customize-mark-to-save option) (setq unsaved t)))
-          '(fountain-align-elements
-            fountain-auto-upcase-scene-headings
-            fountain-hide-element-markup
-            fountain-hide-emphasis-markup
-            fountain-highlight-elements
-            fountain-outline-hide-notes
-            fountain-outline-show-synopses
-            fountain-page-size
-            fountain-scene-numbers-display-in-margin
-            fountain-transpose-all-elements
-            fountain-pagination-ignore-restriction
-            which-function-mode))
+    (dolist (option
+             '(fountain-align-elements
+               fountain-auto-upcase-scene-headings
+               fountain-hide-element-markup
+               fountain-hide-emphasis-markup
+               fountain-highlight-elements
+               fountain-outline-hide-notes
+               fountain-outline-show-synopses
+               fountain-page-size
+               fountain-scene-numbers-display-in-margin
+               fountain-transpose-all-elements
+               fountain-pagination-ignore-restriction
+               which-function-mode))
+      (when (customize-mark-to-save option) (setq unsaved t)))
     (when unsaved (custom-save-all))))
 
 
@@ -3986,11 +3979,10 @@ regular expression."
   :group 'fountain
   :set (lambda (symbol value)
          (set-default symbol value)
-         (mapc (lambda (buffer)
-                 (with-current-buffer buffer
-                   (when (derived-mode-p 'fountain-mode)
-                     (fountain-init-imenu))))
-               (buffer-list))))
+         (dolist (buffer (buffer-list))
+           (with-current-buffer buffer
+             (when (derived-mode-p 'fountain-mode)
+               (fountain-init-imenu))))))
 
 (defun fountain-init-imenu ()
   "Initialize `imenu-generic-expression'."
