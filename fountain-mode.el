@@ -3852,48 +3852,50 @@ takes the form:
 
 ;;; Emacs Bugs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcustom fountain-patch-emacs-bugs
-  t
-  "If non-nil, attempt to patch known bugs in Emacs.
-See function `fountain-patch-emacs-bugs'."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain)
+(when (< emacs-major-version 26)
 
-(defun fountain-patch-emacs-bugs ()
-  "Attempt to patch known bugs in Emacs.
+  (defcustom fountain-patch-emacs-bugs
+    t
+    "If non-nil, attempt to patch known bugs in Emacs.
+See function `fountain-patch-emacs-bugs'."
+    :type 'boolean
+    :safe 'booleanp
+    :group 'fountain)
+
+  (defun fountain-patch-emacs-bugs ()
+    "Attempt to patch known bugs in Emacs.
 
 In Emacs versions prior to 26, adds advice to override
 `outline-invisible-p' to return non-nil only if the character
 after POS or point has invisible text property eq to `outline'.
 See <http://debbugs.gnu.org/24073>."
-  ;; In Emacs version prior to 26, `outline-invisible-p' returns non-nil for ANY
-  ;; invisible property of text at point. We want to only return non-nil if
-  ;; property is 'outline
-  (declare-function fountain-outline-invisible-p "fountain-mode")
-  (unless (or (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
-              (<= 26 emacs-major-version))
+    ;; In Emacs version prior to 26, `outline-invisible-p' returns non-nil for ANY
+    ;; invisible property of text at point. We want to only return non-nil if
+    ;; property is 'outline
+    (declare-function fountain-outline-invisible-p "fountain-mode")
+    (unless (or (advice-member-p 'fountain-outline-invisible-p 'outline-invisible-p)
+                (<= 26 emacs-major-version))
 
-    (defun fountain-outline-invisible-p (&optional pos)
-      "Non-nil if the character after POS has outline invisible property.
+      (defun fountain-outline-invisible-p (&optional pos)
+        "Non-nil if the character after POS has outline invisible property.
 If POS is nil, use `point' instead."
-      (eq (get-char-property (or pos (point)) 'invisible) 'outline))
+        (eq (get-char-property (or pos (point)) 'invisible) 'outline))
 
-    (advice-add 'outline-invisible-p :override #'fountain-outline-invisible-p)
-    ;; Because `outline-invisible-p' is an inline function, we need to
-    ;; reevaluate those functions that called the original bugged version.
-    ;; This is impossible for users who have installed Emacs without
-    ;; uncompiled source, so we need to demote errors.
-    (with-demoted-errors "Error: %S"
-      (mapc (lambda (fun)
-              (let ((source (find-function-noselect fun)))
-                (with-current-buffer (car source)
-                  (goto-char (cdr source))
-                  (eval (read (current-buffer)) lexical-binding))))
-            '(outline-back-to-heading
-              outline-on-heading-p
-              outline-next-visible-heading))
-      (message "fountain-mode: Function `outline-invisible-p' has been patched"))))
+      (advice-add 'outline-invisible-p :override #'fountain-outline-invisible-p)
+      ;; Because `outline-invisible-p' is an inline function, we need to
+      ;; reevaluate those functions that called the original bugged version.
+      ;; This is impossible for users who have installed Emacs without
+      ;; uncompiled source, so we need to demote errors.
+      (with-demoted-errors "Error: %S"
+        (mapc (lambda (fun)
+                (let ((source (find-function-noselect fun)))
+                  (with-current-buffer (car source)
+                    (goto-char (cdr source))
+                    (eval (read (current-buffer)) lexical-binding))))
+              '(outline-back-to-heading
+                outline-on-heading-p
+                outline-next-visible-heading))
+        (message "fountain-mode: Function `outline-invisible-p' has been patched")))))
 
 
 ;;; Initializing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4059,7 +4061,7 @@ regular expression."
     (add-to-invisibility-spec 'fountain-emphasis-markup))
   (when fountain-hide-element-markup
     (add-to-invisibility-spec 'fountain-element-markup))
-  (when fountain-patch-emacs-bugs (fountain-patch-emacs-bugs))
+  (when (bound-and-true-p fountain-patch-emacs-bugs) (fountain-patch-emacs-bugs))
   (face-remap-add-relative 'default 'fountain)
   (add-hook 'post-self-insert-hook #'fountain--auto-upcase-maybe nil t))
 
