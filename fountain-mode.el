@@ -2351,9 +2351,9 @@ That is, page breaks may occur mid-sentence."
   "List of elements constituent of right-side dual dialogue.")
 
 (defvar fountain-fill-elements
-  '((section-heading      . 61)
-    (scene-heading        . 61)
-    (action               . 61)
+  '((section-heading      . 63)
+    (scene-heading        . 59)
+    (action               . 63)
     (character            . 38)
     (paren                . 26)
     (dialog               . 35)
@@ -2364,10 +2364,10 @@ That is, page breaks may occur mid-sentence."
     (dual-dialog-left     . 28)
     (dual-dialog-right    . 28)
     (trans                . 16)
-    (center               . 61)
-    (synopsis             . 61)
-    (note                 . 61)
-    (page-break           . 61))
+    (center               . 63)
+    (synopsis             . 63)
+    (note                 . 63)
+    (page-break           . 63))
   "Association list of elements and their widths in columns.")
 
 (defvar fountain-printed-elements
