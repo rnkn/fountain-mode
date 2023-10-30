@@ -409,6 +409,122 @@ You can specify which elements are highlighted with the option
   "Default face for transitions.")
 
 
+;;; Export Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgroup fountain-export ()
+  "Options for exporting files in `fountain-mode'."
+  :prefix "fountain-export-"
+  :link '(info-link "(fountain-mode) Exporting")
+  :group 'fountain)
+
+(defcustom fountain-export-format
+  'pdf
+  "Target format for export. Valid options are `ps' or `pdf'."
+  :type '(choice (const :tag "PostScript" ps)
+                 (const :tag "PDF" pdf))
+  :group 'fountain-export)
+
+(defcustom fountain-export-scene-heading-format
+  '(double-space)
+  "List of format options applied when exporting scene headings.
+Options are: bold, double-space, underline."
+  :type '(set (const :tag "Bold" bold)
+              (const :tag "Double-spaced" double-space)
+              (const :tag "Underlined" underline))
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-page
+  t
+  "When non-nil, include a title page in export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
+(defcustom fountain-export-number-first-page
+  nil
+  "When non-nil, first page is numbered in export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
+(defcustom fountain-export-scene-numbers
+  nil
+  "When non-nil, include scene numbers in export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
+(defcustom fountain-export-troff-command
+  "groff"
+  "Name of troff command."
+  :type 'string
+  :safe 'stringp
+  :group 'fountain-export)
+
+(defcustom fountain-export-troff-extra-options
+  '("-Kutf8")
+  "Option flags passed to `fountain-export-troff-command'.
+
+n.b. the `-Tdev' option is calculated automatically from
+`fountain-export-format' and the page size from
+`fountain-page-size'."
+  :type '(repeat (string :tag "Option"))
+  :group 'fountain-export)
+
+(defcustom fountain-export-command-profiles
+  '(("afterwriting-usletterpdf-doublespace" . "afterwriting \
+--source %b --pdf %B.pdf --overwrite \
+--setting double_space_between_scenes=true \
+--setting print_profile=usletter")
+    ("afterwriting-a4pdf-doublespace" . "afterwriting \
+--source %b --pdf %B.pdf --overwrite \
+--setting double_space_between_scenes=true \
+--setting print_profile=a4")
+    ("wrap-usletterpdf-cprime" . "wrap \
+pdf %b --use-courier-prime --out %B.pdf")
+    ("make-pdf" . "make %B.pdf")
+    ("textplay-fdx" . "textplay --fdx < %b > %B.fdx"))
+  "Shell command profiles for exporting Fountain files.
+
+n.b. The default command profiles are only intended as examples.
+You are encouraged to edit/replace these to suit your own needs.
+
+Each profile is a cons-cell of PROFILE-NAME string and the
+COMMAND string.
+
+COMMAND is passed to `format-spec' and allows for interpolation
+of the following values:
+
+  %b is the variable `buffer-file-name'
+  %B is the variable `buffer-file-name' sans extension
+  %n is the variable `user-full-name'
+  %t is the title (from script metadata)
+  %a is the author (from script metadata)
+  %F is the current date in ISO format
+  %x is the current date in your locale's \"preferred\" format
+
+If a command does not include %b, `fountain-export-command' will pass the
+buffer or active region to the command via stdin.
+
+If a command outputs to stdout, this will be redirected to
+`fountain-export-output-buffer'.
+
+The first profile is considered default.
+
+COMMAND may be edited interactively when calling
+`fountain-export-command' prefixed with \\[universal-argument]."
+  :type '(repeat (cons (string :tag "Name")
+                       (string :tag "Shell command")))
+  :group 'fountain-export)
+
+(defcustom fountain-export-output-buffer
+  "*Fountain Export*"
+  "Buffer name for `fountain-export' output."
+  :type 'string
+  :safe 'stringp
+  :group 'fountain-export)
+
+
 ;;; Regular Expressions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar fountain-scene-heading-regexp
@@ -2737,66 +2853,6 @@ your preferred tool's pagination method."
 
 ;;; Exporting ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defgroup fountain-export ()
-  "Options for exporting files in `fountain-mode'."
-  :prefix "fountain-export-"
-  :link '(info-link "(fountain-mode) Exporting")
-  :group 'fountain)
-
-(defcustom fountain-export-format
-  'pdf
-  "Target format for export. Valid options are `ps' or `pdf'."
-  :type '(choice (const :tag "PostScript" ps)
-                 (const :tag "PDF" pdf))
-  :group 'fountain-export)
-
-(defcustom fountain-export-scene-heading-format
-  '(double-space)
-  "List of format options applied when exporting scene headings.
-Options are: bold, double-space, underline."
-  :type '(set (const :tag "Bold" bold)
-              (const :tag "Double-spaced" double-space)
-              (const :tag "Underlined" underline))
-  :group 'fountain-export)
-
-(defcustom fountain-export-title-page
-  t
-  "When non-nil, include a title page in export."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
-
-(defcustom fountain-export-number-first-page
-  nil
-  "When non-nil, first page is numbered in export."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
-
-(defcustom fountain-export-scene-numbers
-  nil
-  "When non-nil, include scene numbers in export."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-export)
-
-(defcustom fountain-export-troff-command
-  "groff"
-  "Name of troff command."
-  :type 'string
-  :safe 'stringp
-  :group 'fountain-export)
-
-(defcustom fountain-export-troff-extra-options
-  '("-Kutf8")
-  "Option flags passed to `fountain-export-troff-command'.
-
-n.b. the `-Tdev' option is calculated automatically from
-`fountain-export-format' and the page size from
-`fountain-page-size'."
-  :type '(repeat (string :tag "Option"))
-  :group 'fountain-export)
-
 (defconst fountain-export-troff-requests
   '(scene-heading
     action
@@ -2813,59 +2869,6 @@ n.b. the `-Tdev' option is calculated automatically from
     center
     page-break)
   "List of elements and associated roff requests.")
-
-(defcustom fountain-export-command-profiles
-  '(("afterwriting-usletterpdf-doublespace" . "afterwriting \
---source %b --pdf %B.pdf --overwrite \
---setting double_space_between_scenes=true \
---setting print_profile=usletter")
-    ("afterwriting-a4pdf-doublespace" . "afterwriting \
---source %b --pdf %B.pdf --overwrite \
---setting double_space_between_scenes=true \
---setting print_profile=a4")
-    ("wrap-usletterpdf-cprime" . "wrap \
-pdf %b --use-courier-prime --out %B.pdf")
-    ("make-pdf" . "make %B.pdf")
-    ("textplay-fdx" . "textplay --fdx < %b > %B.fdx"))
-  "Shell command profiles for exporting Fountain files.
-
-n.b. The default command profiles are only intended as examples.
-You are encouraged to edit/replace these to suit your own needs.
-
-Each profile is a cons-cell of PROFILE-NAME string and the
-COMMAND string.
-
-COMMAND is passed to `format-spec' and allows for interpolation
-of the following values:
-
-  %b is the variable `buffer-file-name'
-  %B is the variable `buffer-file-name' sans extension
-  %n is the variable `user-full-name'
-  %t is the title (from script metadata)
-  %a is the author (from script metadata)
-  %F is the current date in ISO format
-  %x is the current date in your locale's \"preferred\" format
-
-If a command does not include %b, `fountain-export-command' will pass the
-buffer or active region to the command via stdin.
-
-If a command outputs to stdout, this will be redirected to
-`fountain-export-output-buffer'.
-
-The first profile is considered default.
-
-COMMAND may be edited interactively when calling
-`fountain-export-command' prefixed with \\[universal-argument]."
-  :type '(repeat (cons (string :tag "Name")
-                       (string :tag "Shell command")))
-  :group 'fountain-export)
-
-(defcustom fountain-export-output-buffer
-  "*Fountain Export*"
-  "Buffer name for `fountain-export' output."
-  :type 'string
-  :safe 'stringp
-  :group 'fountain-export)
 
 (defvar fountain-export-troff-buffer
   "*Fountain troff Output*"
