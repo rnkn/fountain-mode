@@ -4049,6 +4049,8 @@ regular expression."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
 
+(declare-function fountain-patch-emacs-bugs "fountain-mode")
+
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
