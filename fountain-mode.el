@@ -4049,8 +4049,6 @@ regular expression."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.fountain\\'" . fountain-mode))
 
-(declare-function fountain-patch-emacs-bugs "fountain-mode")
-
 ;;;###autoload
 (define-derived-mode fountain-mode text-mode "Fountain"
   "Major mode for screenwriting in Fountain markup."
@@ -4090,9 +4088,10 @@ regular expression."
     (add-to-invisibility-spec 'fountain-emphasis-markup))
   (when fountain-hide-element-markup
     (add-to-invisibility-spec 'fountain-element-markup))
-  (when (bound-and-true-p fountain-patch-emacs-bugs) (fountain-patch-emacs-bugs))
   (face-remap-add-relative 'default 'fountain)
-  (add-hook 'post-self-insert-hook #'fountain--auto-upcase-maybe nil t))
+  (add-hook 'post-self-insert-hook #'fountain--auto-upcase-maybe nil t)
+  (declare-function fountain-patch-emacs-bugs "fountain-mode")
+  (when (bound-and-true-p fountain-patch-emacs-bugs) (fountain-patch-emacs-bugs)))
 
 (provide 'fountain-mode)
 
