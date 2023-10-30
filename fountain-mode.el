@@ -2773,6 +2773,13 @@ Options are: bold, double-space, underline."
   :safe 'booleanp
   :group 'fountain-export)
 
+(defcustom fountain-export-scene-numbers
+  nil
+  "When non-nil, include scene numbers in export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
 (defcustom fountain-export-troff-command
   "groff"
   "Name of troff command."
@@ -2878,7 +2885,8 @@ COMMAND may be edited interactively when calling
 .nr scenespace %s
 .nr scenebold %b
 .nr sceneunderline %u
-.nr numberpage1 %n
+.nr numberfirst %f
+.nr scenenumbers %n
 .nr pagetop 1
 .po 1.25i
 .nf
@@ -2917,6 +2925,9 @@ COMMAND may be edited interactively when calling
 .el .sp \\n[scenespace]
 .nr pagetop 0
 .if \\\\n[scenebold] .ft 8
+.if \\\\n[scenenumbers] \\{\\
+\\h[|-0.75i] \\\\$1 \\h[|6i] \\\\$1
+.sp -1 \\}
 ..
 .de character
 .reset
@@ -2992,7 +3003,7 @@ prepared with `fountain-export-troff'.")
 (defvar fountain-export-troff-macro-start
   ".br
 .nr % 0
-.ie \\n[numberpage1] .wh 0 header
+.ie \\n[numberfirst] .wh 0 header
 .el .wh 0 headerblank
 .nr nl -1"
   "Troff macro for start of content when exporting to PostScript/PDF.")
@@ -3077,7 +3088,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
                      ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
                      ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
                      ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
-                     ?n (if fountain-export-number-first-page 1 0))))
+                     ?n (if fountain-export-scene-numbers 1 0)
+                     ?f (if fountain-export-number-first-page 1 0))))
       (unless (bolp) (insert "\n"))
       (when metadata
         (insert ".sp |4i\n")
@@ -3103,7 +3115,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
           (beginning-of-line)
           (when (and (setq element (fountain-get-element))
                      (setq request (car (memq element fountain-export-troff-requests))))
-            (let ((delim (if (eq element 'page-break) " " "\n"))
+            (let ((param
+                   (cond ((eq element 'scene-heading)
+                          (match-string-no-properties 9))
+                         ((eq element 'page-break)
+                          (match-string-no-properties 2))))
                   (content
                    (cond ((eq element 'action)
                           (let (action)
@@ -3127,7 +3143,10 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (setq content (fountain-export-troff-string content element))
               ;; Finally insert the request
               (with-current-buffer output-buffer
-                (insert (format ".%s%s%s" request delim content))
+                (insert (format ".%s%s%s%s%s" request
+                                (if param " " "") (or param "")
+                                (if (eq element 'page-break) "" "\n")
+                                content))
                 (delete-horizontal-space)
                 (insert "\n")))))
         (forward-line 1)
