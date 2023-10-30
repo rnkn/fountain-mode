@@ -1406,11 +1406,11 @@ Notes visibility can be cycled with \\[fountain-dwim]."
 (defalias 'fountain-outline-up 'outline-up-heading)
 (defalias 'fountain-outline-mark 'outline-mark-subtree)
 
-(declare-function fountain-outline-show-all 'fountain-mode)
-(declare-function fountain-outline-show-entry 'fountain-mode)
-(declare-function fountain-outline-show-children 'fountain-mode)
-(declare-function fountain-outline-hide-subtree 'fountain-mode)
-(declare-function fountain-outline-hide-sublevels 'fountain-mode)
+(declare-function fountain-outline-show-all "fountain-mode")
+(declare-function fountain-outline-show-entry "fountain-mode")
+(declare-function fountain-outline-show-children "fountain-mode")
+(declare-function fountain-outline-hide-subtree "fountain-mode")
+(declare-function fountain-outline-hide-sublevels "fountain-mode")
 
 (if (<= 25 emacs-major-version)
     (progn
@@ -3275,7 +3275,7 @@ Export command profiles are defined in
 
 (if (<= emacs-major-version 28)
     (require 'dired-x)
-  (declare-function dired-guess-default 'dired-aux))
+  (declare-function dired-guess-default "dired-aux"))
 
 (defun fountain-export-view ()
   "Attempt to open the last exported output file.
