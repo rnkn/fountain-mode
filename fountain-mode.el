@@ -2036,8 +2036,9 @@ script may result in errors in output."
 (defcustom fountain-scene-numbers-separator
   nil
   "Character to separate scene numbers."
-  :type '(choice (const nil)
-                 (character ?-))
+  :type '(choice (const :tag "None" nil)
+                 (const :tag "Dash" ?-)
+                 (const :tag "Period" ?.))
   :safe (lambda (value)
           (or (null value) (characterp value)))
   :group 'fountain-scene-numbers)
@@ -2064,7 +2065,11 @@ Or if nil:
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string))
                 revision (match-string-no-properties 2 string))))
-      (setq revision (mapcar (lambda (n) (- (upcase n) 64)) revision))
+      (setq revision
+            (mapcar (lambda (n)
+                      (1+ (- (upcase n)
+                             fountain-scene-numbers-first-revision-char)))
+                    revision))
       (cons number revision))))
 
 (defun fountain-scene-number-to-string (scene-num-list)
