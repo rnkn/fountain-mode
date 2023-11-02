@@ -1,6 +1,6 @@
 # NEWS
 
-## master
+## Version 3.7.0
 
 - Implement internal export to PostScript/PDF requiring only a troff
   program on your system (`fountain-export-troff` bound to `C-c C-e t`).
