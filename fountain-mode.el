@@ -2884,6 +2884,7 @@ your preferred tool's pagination method."
 .vs \\n[VS]
 .if !rPW .nr PW 6
 .ll \\n[PW]i
+.pl 999
 .
 .nr scenespace %s
 .nr scenebold %b
