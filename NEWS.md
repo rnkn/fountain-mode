@@ -1,5 +1,10 @@
 # NEWS
 
+## master
+
+- Fix for breaking page mid-line of element.
+- Fix to ensure troff page length is always longer than pagination.
+
 ## Version 3.7.0
 
 - Implement internal export to PostScript/PDF requiring only a troff
