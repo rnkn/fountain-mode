@@ -22,7 +22,7 @@
 https://github.com/rnkn/fountain-mode
 @end macro
 @macro theauthor
-Paul W. Rankin
+@w{Paul W. Rankin}
 @end macro
 @macro authoremail
 @email{hello@@paulwrankin.com}
@@ -50,13 +50,13 @@ Paul W. Rankin, Kohl Sudduth, Sandra Snan
 @node Top
 @top Fountain Mode
 
-@program is a screenwriting (and playwrighting) program for
+@program{} is a screenwriting (and playwrighting) program for
 @w{GNU Emacs} version 24.4 or later. The Fountain markup format is a
 plain-text format designed to be easily readable and editable,
 portable and future-proof, and to look as much like a script as
 possible.
 
-This is the @program Manual updated for version @version{}.
+This is the @program{} Manual updated for version @version{}.
 
 @ifhtml
 Check out the
@@ -64,7 +64,7 @@ Check out the
 @emph{Please send me your screenshots!}
 @end ifhtml
 
-The public @program code repository is hosted on
+The public @program{} code repository is hosted on
 @uref{@repository{}, GitHub}.
 
 @end ifnottex
@@ -90,8 +90,8 @@ The public @program code repository is hosted on
 @node Overview
 @unnumbered Overview
 
-@program combines the simplicity of Fountain syntax with the
-extensibility of Emacs. @program is a major mode for Emacs, which
+@program{} combines the simplicity of Fountain syntax with the
+extensibility of Emacs. @program{} is a major mode for Emacs, which
 is to say it is a program that runs inside Emacs --- the extensible,
 customizable, free/libre text editor. It enables the writer to engage
 with all aspects of realizing a screenplay --- story development,
@@ -119,7 +119,7 @@ customization is performed via the @code{Fountain} option group.
 @node Installation
 @unnumbered Installation
 
-The latest stable release of @program is available as an Emacs
+The latest stable release of @program{} is available as an Emacs
 package via
 @uref{https://stable.melpa.org/#/fountain-mode, MELPA-stable}.
 
@@ -154,7 +154,7 @@ strongly encouraged to use the stable version.
 @node Requirements
 @unnumberedsec Requirements
 
-@program is compatible with Emacs version 24.4 and later.
+@program{} is compatible with Emacs version 24.4 and later.
 
 For Emacs versions older than 26.1, there is a bug in the @code{outline}
 library. This will be automatically patched provided
@@ -194,7 +194,7 @@ able to just start writing --- as long as your text looks like a script,
 you should get correctly formatted output.
 
 @quotation n.b.
-@program uses the @w{Fountain 1.1} syntax specification.
+@program{} uses the @w{Fountain 1.1} syntax specification.
 While some programs use custom additions to the specification, for the
 greatest cross-compatibility, stick with the 1.1 spec.
 @end quotation
@@ -480,8 +480,7 @@ the following specification:
 @item @code{%P} leave point here
 @end itemize
 
-The default @code{%P - %n %x\}
-inserts something like:
+The default @code{%P - %n %x} inserts something like:
 
 @example
 [[ | - Alan Smithee 12/31/2017 ]]"
@@ -650,14 +649,14 @@ not actually count pages but uses the text pagination properties
 @node Syntax Highlighting
 @unnumbered Syntax Highlighting
 
-In @program, each Fountain element can have Font Lock syntax
+In @program{}, each Fountain element can have Font Lock syntax
 highlighting toggled individually --- or none at all.
 @xref{(emacs) Font Lock}.
 
-In addition to faces for specific elements, @program uses an Emacs
+In addition to faces for specific elements, @program{} uses an Emacs
 feature called face remapping, which means the @code{default} face is
 displayed using the @code{fountain} face. This allows you to customize
-the @code{fountain} face just for @program buffers. @xref{(emacs) Face
+the @code{fountain} face just for @program{} buffers. @xref{(emacs) Face
 Customization}.
 
 @defopt fountain-highlight-elements
@@ -678,7 +677,7 @@ section headings and forced elements.
 @node Element Aligning
 @unnumbered Element Aligning
 
-In addition to syntax highlighting, @program has the ability to
+In addition to syntax highlighting, @program{} has the ability to
 automatically align, or indent, script elements, so your script looks
 more like real script. This is display only and does not change the
 file contents, and can be turned off if you don't like it.
@@ -710,7 +709,7 @@ typewriters, stick to underlining.
 @unnumbered Do What I Mean
 @kindex TAB
 
-Like many screenwriting programs, in @program pressing @kbd{TAB}
+Like many screenwriting programs, in @program{} pressing @kbd{TAB}
 will do the most convenient thing based on context.
 
 The most common use is triggering autocompletion. If the point is at a
@@ -746,7 +745,7 @@ perform the most convenient action based on the current context.
 
 One of the nice things about using a dedicated screenwriting program
 is that it helps you type less of the things you need to type a
-lot. @program provides autocompletion for scene headings and character
+lot. @program{} provides autocompletion for scene headings and character
 names.
 
 @deffn Command fountain-completion-update
@@ -871,7 +870,7 @@ JOHN|
 @unnumbered Scene Numbering
 
 Scene numbers are appended to scene headings between @code{# #}
-(hash). @program can automatically add scene numbers for you.
+(hash). @program{} can automatically add scene numbers for you.
 
 @deffn Command fountain-add-scene-numbers
 Bound to @kbd{C-c C-x #}, add scene numbers to scene headings in
@@ -891,7 +890,7 @@ Display scene numbers in left and right margins.
 @node Pagination
 @unnumbered Pagination
 
-@program features internal pagination. This is achieved by
+@program{} features internal pagination. This is achieved by
 periodically calculating where page breaks occur in the whole buffer
 and applying pagination properties to the text. When the text is
 changed enough to invalidate these properties they are recalculated.
@@ -936,7 +935,7 @@ You can also navigate by page number. @xref{Navigation}.
 @node Exporting
 @unnumbered Exporting
 
-@program can export to PostScript or PDF using the troff format as an
+@program{} can export to PostScript or PDF using the troff format as an
 intermediary. This requires only a @code{troff} program on your
 system, such as
 @uref{https://www.gnu.org/software/groff/, GNU roff}.
@@ -1057,7 +1056,7 @@ The first profile is considered the default.
 @unnumbered Contact
 
 If you run into any trouble using @program{}, or you have a feature
-request, you can email the maintainer @theauthor directly at
+request, you can email the maintainer @theauthor{} directly at
 @authoremail{}.
 
 For bugs, please ensure you can reproduce with:
