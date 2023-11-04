@@ -1,6 +1,6 @@
 # NEWS
 
-## master
+## Version 3.7.1
 
 - Fix for breaking page mid-line of element.
 - Fix to ensure troff page length is always longer than pagination.
