@@ -11,5 +11,6 @@ doc/html
 *.info
 *.log
 *.pdf
+*.epub
 *.toc
 *.vr
