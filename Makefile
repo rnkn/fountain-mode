@@ -47,7 +47,7 @@ pdf-manual:
 	texi2pdf --clean --output ${DOCS_DIR}/${PROG}.pdf ${TEXI_FILE}
 
 tag-release: check compile
-	sed -i~ '/^## master/ s/master/${VERS}/' ${NEWS_FILE}
+	printf '%s\n' '/^## master/ s/master/${VERS}/' . w | ed -s ${NEWS_FILE}
 	git commit -m 'Add ${VERS} to ${NEWS_FILE}' ${NEWS_FILE}
 	awk '/^## Version/ { v ++1 } v == 1' ${NEWS_FILE} \
 	| sed 's/^## //' | tr -d \` \
