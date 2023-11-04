@@ -13,16 +13,15 @@ CSS_FILE	= ${DOCS_DIR}/style.css
 HTML_DIR	= ${DOCS_DIR}/html
 VERS		= ${shell grep -oE -m1 'Version:[ 0-9.]+' ${LISP_FILE} | tr -d :}
 TAG		= ${shell echo ${VERS} | sed -E 's/Version:? ([0-9.]+)/v\1/'}
-INIT		=                                                       \
-(progn (require (quote package))                                        \
+INIT		= \
+(progn (require (quote package)) \
        (push (cons "melpa" "https://melpa.org/packages/") package-archives) \
-       (package-initialize)                                             \
-       (mapc (lambda (pkg)                                              \
-               (unless (package-installed-p pkg)                        \
-                 (unless (assoc pkg package-archive-contents)           \
-                   (package-refresh-contents))                          \
-                 (package-install pkg)))                                \
-             (quote (${DEPS}))))
+       (package-initialize) \
+       (dolist (pkg (quote (${DEPS}))) \
+               (unless (package-installed-p pkg) \
+                       (unless (assoc pkg package-archive-contents) \
+                               (package-refresh-contents)) \
+                        (package-install pkg))))
 
 all: clean check compile info-manual html-manual pdf-manual
 
