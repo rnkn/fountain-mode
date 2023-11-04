@@ -23,7 +23,7 @@ INIT		= \
                                (package-refresh-contents)) \
                         (package-install pkg))))
 
-all: clean check compile info-manual html-manual pdf-manual
+all: clean check compile manuals
 
 check:
 	@emacs -Q --eval '${INIT}' --batch -f package-lint-batch-and-exit ${LISP_FILE}
@@ -31,28 +31,31 @@ check:
 compile:
 	@emacs -Q --eval '${INIT}' -L . --batch -f batch-byte-compile ${LISP_FILE}
 
-manuals: info-manual html-manual pdf-manual
+manuals: info-manual html-manual epub-manual pdf-manual
 
 info-manual:
 	makeinfo --output ${INFO_FILE} ${TEXI_FILE}
-	install-info ${INFO_FILE} dir
+	install-info ${INFO_FILE} ${DOCS_DIR}/dir
 
 html-manual:
-	makeinfo --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
+	texi2any --html --css-include=${CSS_FILE} --output ${HTML_DIR} ${TEXI_FILE}
+
+epub-manual:
+	texi2any --epub3 --output ${DOCS_DIR}/${PROG}.epub ${TEXI_FILE}
 
 pdf-manual:
-	texi2pdf --clean ${TEXI_FILE}
+	texi2pdf --clean --output ${DOCS_DIR}/${PROG}.pdf ${TEXI_FILE}
 
 tag-release: check compile
 	sed -i~ '/^## master/ s/master/${VERS}/' ${NEWS_FILE}
 	git commit -m 'Add ${VERS} to ${NEWS_FILE}' ${NEWS_FILE}
-	awk '/^## Version/ { v ++1 } v == 1' ${NEWS_FILE}               \
-	| sed 's/^## //' | tr -d \`                                     \
+	awk '/^## Version/ { v ++1 } v == 1' ${NEWS_FILE} \
+	| sed 's/^## //' | tr -d \` \
 	| git tag -F - ${TAG}
 
 clean:
 	rm -f ${PROG}.elc
 	rm -f ${INFO_FILE}
-	rm -f dir
-	rm -f ${DOCS_DIR}/${PROG}.{aux,fn,log,toc,vr,pdf}
+	rm -f ${DOCS_DIR}/dir
+	rm -f ${DOCS_DIR}/${PROG}.{aux,fn,log,toc,vr,epub,pdf}
 	rm -rf ${HTML_DIR}/*.html
