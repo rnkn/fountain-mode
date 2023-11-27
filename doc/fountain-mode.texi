@@ -1067,7 +1067,7 @@ $ emacs -Q -l fountain-mode.el
 
 You can also try the @code{#emacs} IRC channel on
 @uref{https://libera.chat, Libera.chat} where @program{}'s maintainer
-uses the nickname @code{pwr}, but please note that most other users
+uses the nickname @code{rnkn}, but please note that most other users
 on the channel are unlikely to be screenwriters.
 
 Financial reward is not a consideration in maintaining @program{}, but
