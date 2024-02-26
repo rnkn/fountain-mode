@@ -3110,8 +3110,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
             (insert ".sp |8i\n")
             (dolist (var (reverse metadata))
               (setq string (cdr var))
-              (insert (format ".titlenote\n%s\n" string)))
-            (insert ".page-break\n"))))
+              (insert (format ".titlenote\n%s\n" string))))
+          (insert ".page-break\n")))
       (insert fountain-export-troff-macro-start)
       (unless (bolp) (insert "\n")))
     (save-excursion
