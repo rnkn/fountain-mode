@@ -58,11 +58,6 @@ possible.
 
 This is the @program{} Manual updated for version @version{}.
 
-@ifhtml
-Check out the
-@uref{images/, screenshot gallery}.
-@emph{Please send me your screenshots!}
-@end ifhtml
 
 The public @program{} code repository is hosted on
 @uref{@repository{}, GitHub}.
