@@ -1,5 +1,10 @@
 # NEWS
 
+## Version 3.7.2
+
+- Fix to ensure page-break after any title page metadata in troff
+  export.
+
 ## Version 3.7.1
 
 - Fix for breaking page mid-line of element.
