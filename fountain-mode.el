@@ -4,7 +4,7 @@
 
 ;; Author: Paul W. Rankin <hello@paulwrankin.com>
 ;; Keywords: wp, text
-;; Version: 3.7.2
+;; Version: 3.7.3
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
 ;; URL: https://www.fountain-mode.org
 ;; URL: https://github.com/rnkn/fountain-mode
@@ -3865,17 +3865,20 @@ takes the form:
   (interactive)
   (let (unsaved)
     (dolist (option
-             '(fountain-align-elements
+             '(fountain-highlight-elements
+               fountain-align-elements
+               fountain-double-space-scene-headings
                fountain-auto-upcase-scene-headings
-               fountain-hide-element-markup
-               fountain-hide-emphasis-markup
-               fountain-highlight-elements
                fountain-outline-hide-notes
                fountain-outline-show-synopses
-               fountain-page-size
-               fountain-scene-numbers-display-in-margin
                fountain-transpose-all-elements
+               fountain-page-size
                fountain-pagination-ignore-restriction
+               fountain-scene-numbers-display-in-margin
+               fountain-highlight-elements
+               fountain-hide-element-markup
+               fountain-hide-emphasis-markup
+               fountain-completion-auto-update-mode
                which-function-mode))
       (when (customize-mark-to-save option) (setq unsaved t)))
     (when unsaved (custom-save-all))))
