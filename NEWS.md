@@ -1,5 +1,9 @@
 # NEWS
 
+## master
+
+- Check for scene heading location before adding to autocomplete.
+
 ## Version 3.7.3
 
 - Add missing options to Save Options command
