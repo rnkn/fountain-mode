@@ -3,6 +3,7 @@
 ## master
 
 - Check for scene heading location before adding to autocomplete.
+- Fix export for when first text could be mistaken for metadata.
 
 ## Version 3.7.3
 
