@@ -2603,7 +2603,7 @@ If TROFF is non-nil, consider troff escapes. Skip over comments."
       (fill-move-to-break-point (line-beginning-position)))))
 
 (defun fountain-move-forward-page ()
-  "Move forward from point by an approximately page."
+  "Move forward from point by an approximate page."
   (let ((skip-whitespace-fun
          (lambda ()
            (when (looking-at "[\n\s\t]*\n")
@@ -3198,7 +3198,6 @@ Requires a `troff' program."
                   (< (point) (point-max)))
         (forward-line))
       (skip-chars-forward "\n\s\t")
-      (delete-region (point-min) (point))
       (fountain-pagination-update)
       (while (< (point) (point-max))
         (fountain-move-forward-page)
