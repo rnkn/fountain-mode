@@ -3108,7 +3108,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (insert
                (format ".titleline\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".sp |8i\n")
-          (dolist (var '(draft draft-date contact))
+          (dolist (var '(draft date draft-date contact))
             (when (setq string (cdr (assq var metadata)))
               (insert
                (format ".titlenote\n%s\n" (fountain-export-troff-string string 'action)))))
