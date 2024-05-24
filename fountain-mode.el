@@ -923,6 +923,10 @@ This option does not affect file contents."
 
 ;;; Element Matching ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defvar fountain-max-metadata-length
+  1000
+  "Maximum length in characters to test for metadata.")
+
 (defsubst fountain-comment-p ()
   "Return non-nil if point is at comment (boneyard)."
   (let ((faceprop (get-char-property (point) 'face)))
@@ -967,13 +971,16 @@ This option does not affect file contents."
   (unless (fountain-match-trans)
     (save-excursion
       (beginning-of-line)
-      (and (looking-at fountain-metadata-regexp)
-           (save-match-data
-             (save-restriction
-               (widen)
-               (or (bobp)
-                   (and (forward-line -1)
-                        (fountain-match-metadata)))))))))
+      (when (< (or (save-excursion (re-search-forward "\n[\s\t]*\n" nil t))
+                   (point-max))
+               fountain-max-metadata-length)
+        (and (looking-at fountain-metadata-regexp)
+             (save-match-data
+               (save-restriction
+                 (widen)
+                 (or (bobp)
+                     (and (forward-line -1)
+                          (fountain-match-metadata))))))))))
 
 (defun fountain-match-page-break ()
   "Match page break if point is at page break, nil otherwise."
