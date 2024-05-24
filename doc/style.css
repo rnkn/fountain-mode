@@ -54,7 +54,13 @@ pre.menu-comment, pre.menu-preformatted {
 		background-color: #1e1f21;
 		color: #eeeff1;
 	}
-	a { color: #bad7ff; }
-	a:visited { color: #d099ff; }
-	kbd, kbd.kbd { background-color: #404040 }
+	a {
+        color: #bad7ff;
+    }
+	a:visited {
+        color: #d099ff;
+    }
+	kbd, kbd.kbd {
+        background-color: #404040
+    }
 }
