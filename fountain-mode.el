@@ -3392,8 +3392,9 @@ takes the form:
             (if (integerp value)
                 value
               (cdr (or (assoc-string
-                        (or (cdr (or (assq 'x-format (fountain-get-metadata))
-                                     (assq 'format (fountain-get-metadata))))
+                        (or (let (metadata (fountain-get-metadata))
+                              (cdr (or (assq 'format metadata)
+                                       (assq 'x-format metadata))))
                             fountain-default-script-format)
                         value)
                        (car value))))
