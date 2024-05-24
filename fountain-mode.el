@@ -653,7 +653,7 @@ Requires `fountain-match-metadata' for `bobp'.")
           "\\(?2:[^<>\n[:lower:]]*?[[:upper:]]+[^<>\n[:lower:]]*?\\)"
           "\\)"
           "\\(?3:[\s\t]*\\(?4:\(\\)[^\)\n]*\)?\\)*?"
-          "[\s\t]*\\(?5:^\\)?"
+          "[\s\t]*\\(?5:[\s\t]*^\\)?"
           "[\s\t]*$")
   "Regular expression for matching character names.
 
