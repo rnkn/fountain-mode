@@ -3191,6 +3191,7 @@ Requires a `troff' program."
          (when fountain-export-title-page (fountain-get-metadata))))
     ;; Prepare script
     (with-temp-buffer
+      (fountain-init-comments)
       (insert-buffer-substring source-buffer start end)
       (fountain-delete-comments-in-region (point-min) (point-max))
       (goto-char (point-min))
@@ -3935,6 +3936,18 @@ If POS is nil, use `point' instead."
 
 ;;; Initializing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun fountain-init-comments ()
+  "Initialize comment variables.
+This is important for calling `fountain-delete-comments-in-region'
+during `fountain-export'."
+  (modify-syntax-entry (string-to-char "/") ". 14" nil)
+  (modify-syntax-entry (string-to-char "*") "$*23" nil)
+  (modify-syntax-entry (string-to-char "_") "$_"   nil)
+  (modify-syntax-entry (string-to-char "\\") "\\"  nil)
+  (setq-local comment-start "/*")
+  (setq-local comment-end "*/")
+  (setq-local comment-use-syntax t))
+
 (defun fountain-init-scene-heading-regexp ()
   "Initialize scene heading regular expression.
 Uses `fountain-scene-heading-prefix-list' to create non-forced
@@ -4065,13 +4078,7 @@ regular expression."
   (fountain-init-trans-regexp)
   (fountain-init-outline-regexp)
   (fountain-init-imenu)
-  (modify-syntax-entry (string-to-char "/") ". 14" nil)
-  (modify-syntax-entry (string-to-char "*") "$*23" nil)
-  (modify-syntax-entry (string-to-char "_") "$_"   nil)
-  (modify-syntax-entry (string-to-char "\\") "\\"  nil)
-  (setq-local comment-start "/*")
-  (setq-local comment-end "*/")
-  (setq-local comment-use-syntax t)
+  (fountain-init-comments)
   (setq-local electric-pair-skip-self #'fountain-electric-pair-skip-self)
   (setq-local font-lock-comment-face 'fountain-comment)
   (setq-local page-delimiter fountain-page-break-regexp)
