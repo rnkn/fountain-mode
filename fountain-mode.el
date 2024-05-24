@@ -176,7 +176,9 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              fountain-completion-auto-update-mode
              flyspell-mode))
 
-(defcustom fountain-default-script-format
+(define-obsolete-variable-alias 'fountain-default-script-format
+  'fountain-script-format "`fountain-mode' 3.8")
+(defcustom fountain-script-format
   "screenplay"
   "Default script format.
 Can be overridden in metadata with, e.g.
@@ -912,7 +914,7 @@ This option does not affect file contents."
     "title: " (skeleton-read "Title: " (file-name-base (buffer-name))) | -7 "\n"
     "credit: " (skeleton-read "Credit: " "written by") | -9 "\n"
     "author: " (skeleton-read "Author: " user-full-name) | -9 "\n"
-    "format: " (skeleton-read "Script format: " fountain-default-script-format) | -9 "\n"
+    "format: " (skeleton-read "Script format: " fountain-script-format) | -9 "\n"
     "source: " (skeleton-read "Source: ") | -9 "\n"
     "date: " (skeleton-read "Date: " (format-time-string "%x")) | -7 "\n"
     "contact:\n" ("Contact details, %s: " "    " str | -4 "\n") | -9))
@@ -3395,7 +3397,7 @@ takes the form:
                         (or (let (metadata (fountain-get-metadata))
                               (cdr (or (assq 'format metadata)
                                        (assq 'x-format metadata))))
-                            fountain-default-script-format)
+                            fountain-script-format)
                         value)
                        (car value))))
           0)))
