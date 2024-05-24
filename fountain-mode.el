@@ -893,8 +893,7 @@ This option does not affect file contents."
   :set #'fountain--set-and-refresh-font-lock)
 
 (defcustom fountain-align-center
-  '(("screenplay" . 20)
-    ("stageplay" . 20))
+  20
   "Column integer to which centered text should be aligned.
 
 This option does not affect file contents."
