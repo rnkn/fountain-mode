@@ -3105,13 +3105,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
         (let (string)
           (dolist (var '(title credit author authors source))
             (when (setq string (cdr (assq var metadata)))
-              (setq metadata (delq (assq var metadata) metadata))
               (insert
                (format ".titleline\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".sp |8i\n")
           (dolist (var '(draft draft-date contact))
             (when (setq string (cdr (assq var metadata)))
-              (setq metadata (delq (assq var metadata) metadata))
               (insert
                (format ".titlenote\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".page-break\n")))
