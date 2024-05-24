@@ -3103,16 +3103,17 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
       (when metadata
         (insert ".sp |4i\n")
         (let (string)
-          (dolist (var '(title credit author source))
-            (when (setq string (cdr (assoc var metadata)))
-              (setq metadata (delq (assoc var metadata) metadata))
+          (dolist (var '(title credit author authors source))
+            (when (setq string (cdr (assq var metadata)))
+              (setq metadata (delq (assq var metadata) metadata))
               (insert
                (format ".titleline\n%s\n" (fountain-export-troff-string string 'action)))))
-          (when metadata
-            (insert ".sp |8i\n")
-            (dolist (var (reverse metadata))
-              (setq string (cdr var))
-              (insert (format ".titlenote\n%s\n" string))))
+          (insert ".sp |8i\n")
+          (dolist (var '(draft draft-date contact))
+            (when (setq string (cdr (assq var metadata)))
+              (setq metadata (delq (assq var metadata) metadata))
+              (insert
+               (format ".titlenote\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".page-break\n")))
       (insert fountain-export-troff-macro-start)
       (unless (bolp) (insert "\n")))
