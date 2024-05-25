@@ -2,8 +2,15 @@
 
 ## master
 
+- Implement `fountain-(forward|backward)-this-character`.
+- Adhere to 1.1 spec for recognized title page keys.
 - Check for scene heading location before adding to autocomplete.
 - Fix export for when first text could be mistaken for metadata.
+- Fix dual dialogue regexp.
+- Rename `fountain-default-script-format` to `fountain-script-format`.
+- Add limit for matching metadata to prevent hanging when inserting a
+  huge amount of text.
+- Ensure comments are deleted in export temp buffer.
 
 ## Version 3.7.3
 
