@@ -3393,7 +3393,7 @@ takes the form:
             (if (integerp value)
                 value
               (cdr (or (assoc-string
-                        (or (let (metadata (fountain-get-metadata))
+                        (or (let ((metadata (fountain-get-metadata)))
                               (cdr (or (assq 'format metadata)
                                        (assq 'x-format metadata))))
                             fountain-script-format)
