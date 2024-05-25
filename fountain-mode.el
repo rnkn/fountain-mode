@@ -1863,10 +1863,15 @@ halt at end of scene."
   (fountain-forward-character (- n)))
 
 (defsubst fountain--unset-goal-character ()
+  "Unset `fountain-goal-character'."
   (setq fountain-goal-character nil)
   (message "No goal character"))
 
 (defun fountain-forward-this-character (character)
+  "\\<fountain-mode-map>Goto next appearance of CHARACTER.
+
+Successive calls to \\[fountain-backward-character] will continue to move forward by
+CHARACTER until \\[fountain-forward-this-character] is called with \\[universal-argument] or with an empty string."
   (interactive
    (list (unless current-prefix-arg
            (completing-read "Forward by character: "
@@ -1878,6 +1883,10 @@ halt at end of scene."
     (fountain-forward-character)))
 
 (defun fountain-backward-this-character (character)
+  "\\<fountain-mode-map>Goto previous appearance of CHARACTER.
+
+Successive calls to \\[fountain-backward-character] will continue to move backward by
+CHARACTER until \\[fountain-backward-this-character] is called with \\[universal-argument] or with an empty string."
   (interactive
    (list (unless current-prefix-arg
            (completing-read "Backward by character: "
@@ -1940,7 +1949,7 @@ string. e.g.
 
 (defun fountain-get-dual-dialog (&optional pos)
   "Non-nil if point or POS is within dual dialogue.
-Returns \"right\" if within right-side dual dialogue, \"left\" if
+Returns `'right' if within right-side dual dialogue, `left' if
 within left-side dual dialogue, and nil otherwise."
   (save-excursion
     (save-match-data
