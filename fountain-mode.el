@@ -485,6 +485,8 @@ n.b. the `-Tdev' option is calculated automatically from
     ("wrap-usletterpdf-cprime" . "wrap \
 pdf %b --use-courier-prime --out %B.pdf")
     ("make-pdf" . "make %B.pdf")
+    ("screenplain-html" . "screenplain \
+--format html > %B.html")
     ("textplay-fdx" . "textplay --fdx < %b > %B.fdx"))
   "Shell command profiles for exporting Fountain files.
 

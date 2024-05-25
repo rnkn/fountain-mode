@@ -768,10 +768,11 @@ INT. |
 
 @kbd{TAB} will offer completions of previously used locations.
 
-If the cursor is at the time-of-day, like so:
+If the cursor is at the time-of-day, like this:
 
 @example
 INT. SUBMARINE - |
+INT. SUBMARINE -- |
 @end example
 
 @kbd{TAB} will offer completions from
