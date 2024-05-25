@@ -1763,6 +1763,10 @@ buffer windows are opened."
 
 ;;; Navigation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defvar-local fountain-goal-character
+    nil
+  "Character to navigate by using `fountain-forward-this-character'.")
+
 (defun fountain-move-forward-scene (n)
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
@@ -1841,7 +1845,14 @@ halt at end of scene."
         (while (/= n 0)
           (when (fountain-match-character) (forward-line p))
           (funcall move-fun p)
-          (setq n (- n p)))
+          (if (and fountain-goal-character (fountain-match-character))
+              (when (string= (upcase fountain-goal-character)
+                             (upcase (fountain-get-character)))
+                (message "%s character %s"
+                         (if (<= n 0) "Backward" "Forward")
+                         fountain-goal-character)
+                (setq n (- n p)))
+            (setq n (- n p))))
       (beginning-of-line)
       (funcall move-fun p))))
 
@@ -1850,6 +1861,32 @@ halt at end of scene."
   (interactive "^p")
   (unless n (setq n 1))
   (fountain-forward-character (- n)))
+
+(defsubst fountain--unset-goal-character ()
+  (setq fountain-goal-character nil)
+  (message "No goal character"))
+
+(defun fountain-forward-this-character (character)
+  (interactive
+   (list (unless current-prefix-arg
+           (completing-read "Forward by character: "
+                            fountain--completion-characters
+                            nil t (fountain-get-character 0)))))
+  (if (or current-prefix-arg (string-empty-p character))
+      (fountain--unset-goal-character)
+    (setq fountain-goal-character character)
+    (fountain-forward-character)))
+
+(defun fountain-backward-this-character (character)
+  (interactive
+   (list (unless current-prefix-arg
+           (completing-read "Backward by character: "
+                            fountain--completion-characters
+                            nil t (fountain-get-character 0)))))
+  (if (or current-prefix-arg (string-empty-p character))
+      (fountain--unset-goal-character)
+    (setq fountain-goal-character character)
+    (fountain-backward-character)))
 
 
 ;;; Parsing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3643,6 +3680,8 @@ takes the form:
     (define-key map (kbd "M-g p") #'fountain-goto-page)
     (define-key map (kbd "M-n") #'fountain-forward-character)
     (define-key map (kbd "M-p") #'fountain-backward-character)
+    (define-key map (kbd "C-c M-n") #'fountain-forward-this-character)
+    (define-key map (kbd "C-c M-p") #'fountain-backward-this-character)
 
     ;; Block editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     (define-key map (kbd "<M-down>") #'fountain-forward-paragraph-or-transpose)
