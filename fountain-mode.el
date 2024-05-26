@@ -44,7 +44,8 @@
 ;;    user-defined formats
 ;;  - Traditional TAB auto-completion writing style
 ;;  - Highly accurate pagination calculation
-;;  - Navigation by section, scene, character name, or page
+;;  - Navigation by section, scene, character name, specified character
+;;    name, or page
 ;;  - Integration with outline to fold/cycle visibility of sections,
 ;;    scenes and notes
 ;;  - Integration with electric-pair-mode to insert emphasis delimiters
