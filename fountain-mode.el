@@ -1941,8 +1941,8 @@ by CHARACTER."
                             fountain--completion-characters
                             nil t (fountain-get-character 0)))))
   (unless n (setq n 1))
-  (setq n (abs n))
-  (let ((forward-key  (where-is-internal 'fountain-forward-character
+  (let ((nn (abs n))
+        (forward-key  (where-is-internal 'fountain-forward-character
                                          fountain-mode-map t))
         (backward-key (where-is-internal 'fountain-backward-character
                                          fountain-mode-map t)))
@@ -1951,13 +1951,13 @@ by CHARACTER."
        (let ((map (make-sparse-keymap)))
          (define-key map forward-key
                      (lambda () (interactive)
-                       (fountain-forward-character n nil character)))
+                       (fountain-forward-character nn nil character)))
          (define-key map backward-key
                      (lambda () (interactive)
-                       (fountain-forward-character (- n) nil character)))
+                       (fountain-forward-character (- nn) nil character)))
          map)
        t))
-    (message "%s by character %s (%s or %s to repeat)"
+    (message "%s by character %s (`%s' or `%s' to repeat)"
              (if (<= n 0) "Backward" "Forward")
              character
              (key-description forward-key)
