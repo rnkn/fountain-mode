@@ -317,6 +317,69 @@ Otherwise, only operate on outline elements."
   :group 'fountain)
 
 
+;;; Key Bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar fountain-mode-map
+  (let ((map (make-sparse-keymap)))
+    ;; Editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (define-key map (kbd "TAB") #'fountain-dwim)
+    (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
+    (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
+    (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
+    (define-key map (kbd "C-c C-d") #'fountain-add-continued-dialog)
+    (define-key map (kbd "C-c C-z") #'fountain-insert-note)
+    (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
+    (define-key map (kbd "C-c C-x i") #'auto-insert)
+    (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
+    (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
+    (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
+    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
+    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-element-markup)
+
+    ;; Navigation commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (define-key map [remap beginning-of-defun] #'fountain-outline-beginning)
+    (define-key map (kbd "M-g s") #'fountain-goto-scene)
+    (define-key map (kbd "M-g p") #'fountain-goto-page)
+    (define-key map (kbd "M-n") #'fountain-forward-character)
+    (define-key map (kbd "M-p") #'fountain-backward-character)
+    (define-key map (kbd "C-c M-n") #'fountain-forward-this-character)
+    (define-key map (kbd "C-c M-p") #'fountain-backward-this-character)
+
+    ;; Block editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (define-key map (kbd "<M-down>") #'fountain-forward-paragraph-or-transpose)
+    (define-key map (kbd "ESC <down>") #'fountain-forward-paragraph-or-transpose)
+    (define-key map (kbd "<M-up>") #'fountain-backward-paragraph-or-transpose)
+    (define-key map (kbd "ESC <up>") #'fountain-backward-paragraph-or-transpose)
+
+    ;; Outline commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (define-key map [remap forward-list] #'fountain-outline-next)
+    (define-key map [remap backward-list] #'fountain-outline-previous)
+    (define-key map [remap forward-sexp] #'fountain-outline-forward)
+    (define-key map [remap backward-sexp] #'fountain-outline-backward)
+    (define-key map [remap backward-up-list] #'fountain-outline-up)
+    (define-key map [remap mark-defun] #'fountain-outline-mark)
+    (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
+    (define-key map (kbd "<backtab>") #'fountain-outline-cycle-buffer)
+    (define-key map (kbd "S-TAB") #'fountain-outline-cycle-buffer)
+    (define-key map (kbd "C-M-i") #'fountain-outline-cycle-buffer)
+    (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
+    (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
+    (define-key map (kbd "C-c C-q") #'fountain-outline-hide-sublevels)
+
+    ;; Pagination commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (define-key map [remap forward-page] #'fountain-forward-page)
+    (define-key map [remap backward-page] #'fountain-backward-page)
+    (define-key map (kbd "C-c C-p") #'fountain-count-pages)
+    (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
+
+    ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (define-key map (kbd "C-c C-e t") #'fountain-export-troff)
+    (define-key map (kbd "C-c C-e e") #'fountain-export-command)
+    (define-key map (kbd "C-c C-v") #'fountain-export-view)
+    map)
+  "Mode map for `fountain-mode'.")
+
+
 ;;; Faces ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-faces ()
@@ -3680,69 +3743,6 @@ takes the form:
             '((2 '(face nil invisible fountain-emphasis-markup) prepend)
               (1 '(face bold-italic) prepend)
               (4 '(face nil invisible fountain-emphasis-markup) prepend)))))))
-
-
-;;; Key Bindings ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defvar fountain-mode-map
-  (let ((map (make-sparse-keymap)))
-    ;; Editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "TAB") #'fountain-dwim)
-    (define-key map (kbd "C-c RET") #'fountain-upcase-line-and-newline)
-    (define-key map (kbd "<S-return>") #'fountain-upcase-line-and-newline)
-    (define-key map (kbd "C-c C-c") #'fountain-upcase-line)
-    (define-key map (kbd "C-c C-d") #'fountain-add-continued-dialog)
-    (define-key map (kbd "C-c C-z") #'fountain-insert-note)
-    (define-key map (kbd "C-c C-a") #'fountain-insert-synopsis)
-    (define-key map (kbd "C-c C-x i") #'auto-insert)
-    (define-key map (kbd "C-c C-x #") #'fountain-add-scene-numbers)
-    (define-key map (kbd "C-c C-x RET") #'fountain-insert-page-break)
-    (define-key map (kbd "C-c C-x a") #'fountain-completion-update)
-    (define-key map (kbd "C-c C-x *") #'fountain-toggle-hide-emphasis-markup)
-    (define-key map (kbd "C-c C-x !") #'fountain-toggle-hide-element-markup)
-
-    ;; Navigation commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map [remap beginning-of-defun] #'fountain-outline-beginning)
-    (define-key map (kbd "M-g s") #'fountain-goto-scene)
-    (define-key map (kbd "M-g p") #'fountain-goto-page)
-    (define-key map (kbd "M-n") #'fountain-forward-character)
-    (define-key map (kbd "M-p") #'fountain-backward-character)
-    (define-key map (kbd "C-c M-n") #'fountain-forward-this-character)
-    (define-key map (kbd "C-c M-p") #'fountain-backward-this-character)
-
-    ;; Block editing commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "<M-down>") #'fountain-forward-paragraph-or-transpose)
-    (define-key map (kbd "ESC <down>") #'fountain-forward-paragraph-or-transpose)
-    (define-key map (kbd "<M-up>") #'fountain-backward-paragraph-or-transpose)
-    (define-key map (kbd "ESC <up>") #'fountain-backward-paragraph-or-transpose)
-
-    ;; Outline commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map [remap forward-list] #'fountain-outline-next)
-    (define-key map [remap backward-list] #'fountain-outline-previous)
-    (define-key map [remap forward-sexp] #'fountain-outline-forward)
-    (define-key map [remap backward-sexp] #'fountain-outline-backward)
-    (define-key map [remap backward-up-list] #'fountain-outline-up)
-    (define-key map [remap mark-defun] #'fountain-outline-mark)
-    (define-key map (kbd "C-c TAB") #'fountain-outline-cycle)
-    (define-key map (kbd "<backtab>") #'fountain-outline-cycle-buffer)
-    (define-key map (kbd "S-TAB") #'fountain-outline-cycle-buffer)
-    (define-key map (kbd "C-M-i") #'fountain-outline-cycle-buffer)
-    (define-key map (kbd "M-RET") #'fountain-insert-section-heading)
-    (define-key map (kbd "C-c C-x b") #'fountain-outline-to-indirect-buffer)
-    (define-key map (kbd "C-c C-q") #'fountain-outline-hide-sublevels)
-
-    ;; Pagination commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map [remap forward-page] #'fountain-forward-page)
-    (define-key map [remap backward-page] #'fountain-backward-page)
-    (define-key map (kbd "C-c C-p") #'fountain-count-pages)
-    (define-key map (kbd "C-c C-x p") #'fountain-pagination-update)
-
-    ;; Exporting commands ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (define-key map (kbd "C-c C-e t") #'fountain-export-troff)
-    (define-key map (kbd "C-c C-e e") #'fountain-export-command)
-    (define-key map (kbd "C-c C-v") #'fountain-export-view)
-    map)
-  "Mode map for `fountain-mode'.")
 
 
 ;;; Menu ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
