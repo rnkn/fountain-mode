@@ -1826,7 +1826,9 @@ Scene can be a string or number."
   "Goto Nth next character (or Nth previous if N is negative).
 
 If LIMIT is `dialog', halt at end of dialogue. If LIMIT is `scene',
-halt at end of scene."
+halt at end of scene.
+
+If CHARACTER is non-nil, goto Nth next CHARACTER."
   (interactive "^p")
   (unless n (setq n 1))
   (let ((p (if (<= n 0) -1 1))
@@ -1848,12 +1850,9 @@ halt at end of scene."
         (while (/= n 0)
           (when (fountain-match-character) (forward-line p))
           (funcall move-fun p)
-          (if (and fountain-goal-character (fountain-match-character))
-              (when (string= (upcase fountain-goal-character)
-                             (upcase (fountain-get-character)))
-                (message "%s character %s"
-                         (if (<= n 0) "Backward" "Forward")
-                         fountain-goal-character)
+          (if (and character (fountain-match-character))
+              (when (string= (upcase character)
+                             (upcase (match-string-no-properties 2)))
                 (setq n (- n p)))
             (setq n (- n p))))
       (beginning-of-line)
@@ -1865,40 +1864,56 @@ halt at end of scene."
   (unless n (setq n 1))
   (fountain-forward-character (- n)))
 
-(defsubst fountain--unset-goal-character ()
-  "Unset `fountain-goal-character'."
-  (setq fountain-goal-character nil)
-  (message "No goal character"))
+(defun fountain-forward-this-character (n character)
+  "\\<fountain-mode-map>Goto Nth next matching CHARACTER.
 
-(defun fountain-forward-this-character (character)
-  "\\<fountain-mode-map>Goto next appearance of CHARACTER.
-
-Successive calls to \\[fountain-backward-character] will continue to move forward by
-CHARACTER until \\[fountain-forward-this-character] is called with \\[universal-argument] or with an empty string."
+Successive calls to \\[fountain-forward-character] or \\[fountain-backward-character] will continue to navigate
+by CHARACTER."
   (interactive
-   (list (unless current-prefix-arg
+   (list current-prefix-arg
+         (if (fountain-match-character)
+              (match-string-no-properties 2)
            (completing-read "Forward by character: "
                             fountain--completion-characters
                             nil t (fountain-get-character 0)))))
-  (if (or current-prefix-arg (string-empty-p character))
-      (fountain--unset-goal-character)
-    (setq fountain-goal-character character)
-    (fountain-forward-character)))
+  (unless n (setq n 1))
+  (setq n (abs n))
+  (let ((forward-key  (where-is-internal 'fountain-forward-character
+                                         fountain-mode-map t))
+        (backward-key (where-is-internal 'fountain-backward-character
+                                         fountain-mode-map t)))
+    (when forward-key
+      (set-transient-map
+       (let ((map (make-sparse-keymap)))
+         (define-key map forward-key
+                     (lambda () (interactive)
+                       (fountain-forward-character n nil character)))
+         (define-key map backward-key
+                     (lambda () (interactive)
+                       (fountain-forward-character (- n) nil character)))
+         map)
+       t))
+    (message "%s by character %s (%s or %s to repeat)"
+             (if (<= n 0) "Backward" "Forward")
+             character
+             (key-description forward-key)
+             (key-description backward-key)))
+  (fountain-forward-character n nil character))
 
-(defun fountain-backward-this-character (character)
-  "\\<fountain-mode-map>Goto previous appearance of CHARACTER.
+(defun fountain-backward-this-character (n character)
+  "\\<fountain-mode-map>Goto Nth previous matching CHARACTER.
 
-Successive calls to \\[fountain-backward-character] will continue to move backward by
-CHARACTER until \\[fountain-backward-this-character] is called with \\[universal-argument] or with an empty string."
+Successive calls to \\[fountain-forward-character] or \\[fountain-backward-character] will continue to navigate
+by CHARACTER."
   (interactive
-   (list (unless current-prefix-arg
+   (list current-prefix-arg
+         (if (fountain-match-character)
+              (match-string-no-properties 2)
            (completing-read "Backward by character: "
                             fountain--completion-characters
                             nil t (fountain-get-character 0)))))
-  (if (or current-prefix-arg (string-empty-p character))
-      (fountain--unset-goal-character)
-    (setq fountain-goal-character character)
-    (fountain-backward-character)))
+  (unless n (setq n 1))
+  (fountain-forward-this-character (- n) character))
 
 
 ;;; Parsing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3744,8 +3759,10 @@ takes the form:
      ["Forward Heading Same Level" fountain-outline-forward]
      ["Backward Heading Same Level" fountain-outline-backward]
      "---"
-     ["Next Character" fountain-forward-character]
-     ["Previous Character" fountain-backward-character]
+     ["Forward Character" fountain-forward-character]
+     ["Backward Character" fountain-backward-character]
+     ["Forward This Character" fountain-forward-this-character]
+     ["Backward This Character" fountain-backward-this-character]
      "---"
      ["Go to Scene Heading..." fountain-goto-scene]
      "---"
