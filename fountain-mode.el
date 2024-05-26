@@ -1822,8 +1822,9 @@ Scene can be a string or number."
                                         (match-string-no-properties 9)))
                                   (1+ scene-count)))))))))
 
-(defun fountain-forward-character (&optional n limit)
-  "Goto Nth next character (or Nth previous is N is negative).
+(defun fountain-forward-character (&optional n limit character)
+  "Goto Nth next character (or Nth previous if N is negative).
+
 If LIMIT is `dialog', halt at end of dialogue. If LIMIT is `scene',
 halt at end of scene."
   (interactive "^p")
@@ -1859,7 +1860,7 @@ halt at end of scene."
       (funcall move-fun p))))
 
 (defun fountain-backward-character (&optional n)
-  "Move backward N character (foward if N is negative)."
+  "Goto Nth previous character (or Nth next if N is negative)."
   (interactive "^p")
   (unless n (setq n 1))
   (fountain-forward-character (- n)))
