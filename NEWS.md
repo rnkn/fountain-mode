@@ -5,6 +5,8 @@
 - Implement `fountain-(forward|backward)-this-character`.
 - Adhere to 1.1 spec for recognized title page keys.
 - Check for scene heading location before adding to autocomplete.
+- Call `indent-for-tab-command` when `fountain-dwim` is called at
+  metadata.
 - Fix export for when first text could be mistaken for metadata.
 - Fix dual dialogue regexp.
 - Rename `fountain-default-script-format` to `fountain-script-format`.
