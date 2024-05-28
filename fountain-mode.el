@@ -2065,16 +2065,10 @@ to scene number or point."
 When point is at metadata value on its own line, indent to
 `tab-width'."
   (unless (and (fountain-match-metadata) (match-string 1))
-    (let ((x (point-marker)))
-      (beginning-of-line)
-      (skip-chars-forward "\s\t")
-      (unless (= tab-width (current-column))
-        (delete-horizontal-space)
-        (indent-to tab-width))
-      (when (< (point) x) (goto-char x))
-      (set-marker x nil))))
+    (beginning-of-line)
+    (delete-horizontal-space)
+    (indent-to tab-width)))
 
-;; FIXME: tab in metadata should indent-for-tab
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
 
@@ -2092,7 +2086,7 @@ When point is at metadata value on its own line, indent to
         ((save-excursion
            (forward-line -1)
            (fountain-match-metadata))
-         (fountain-indent-metadata))
+         (indent-for-tab-command))
         ((and (eq (char-before) ?\()
               (eq (char-after)  ?\)))
          (delete-region (1- (point)) (1+ (point))))
@@ -4168,6 +4162,7 @@ regular expression."
   (setq-local completion-at-point-functions '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix display invisible))
+  (setq-local indent-line-function 'fountain-indent-metadata)
   ;; FIXME: This should be temporary. Feels better to ensure appropriate
   ;; case-fold within each function.
   (setq case-fold-search t)
