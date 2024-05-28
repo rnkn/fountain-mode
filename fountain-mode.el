@@ -2074,12 +2074,13 @@ When point is at metadata value on its own line, indent to
 
   1. If ARG is non-nil (when prefixed with \\[universal-argument]), call
     `fountain-outline-cycle-buffer' and pass ARG.
-  2. If point is inside an empty parenthetical, delete it.
-  3. If point is inside a non-empty parenthetical, move to a newline.
-  4. If point is at a blank line within dialogue, insert a parenthetical.
-  5. If point is at a note, cycle visibility of that note.
-  6. If point is at the end of line, call `fountain-completion-at-point'.
-  7. If point is an outline heading, call `fountain-outline-cycle'."
+  2. If point is at metadata, call `indent-for-tab-command'.
+  3. If point is inside an empty parenthetical, delete it.
+  4. If point is inside a non-empty parenthetical, move to a newline.
+  5. If point is at a blank line within dialogue, insert a parenthetical.
+  6. If point is at a note, cycle visibility of that note.
+  7. If point is at the end of line, call `fountain-completion-at-point'.
+  8. If point is an outline heading, call `fountain-outline-cycle'."
   (interactive "p")
   (cond ((and arg (<= 4 arg))
          (fountain-outline-cycle-buffer arg))
