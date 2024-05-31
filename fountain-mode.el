@@ -2060,14 +2060,15 @@ to scene number or point."
              (fountain-match-scene-heading))
     (upcase-region (line-beginning-position) (or (match-end 2) (point)))))
 
-(defun fountain-indent-metadata ()
+(defun fountain-indent ()
   "Appropriately indent a metadata value.
 When point is at metadata value on its own line, indent to
 `tab-width'."
-  (unless (and (fountain-match-metadata) (match-string 1))
-    (beginning-of-line)
-    (delete-horizontal-space)
-    (indent-to tab-width)))
+  (when (save-excursion (forward-line -1) (fountain-match-metadata))
+    (if (= tab-width (current-column))
+        (delete-horizontal-space)
+      (delete-horizontal-space)
+      (indent-to tab-width))))
 
 (defun fountain-dwim (&optional arg)
   "Call a command based on context (Do What I Mean).
@@ -2084,10 +2085,6 @@ When point is at metadata value on its own line, indent to
   (interactive "p")
   (cond ((and arg (<= 4 arg))
          (fountain-outline-cycle-buffer arg))
-        ((save-excursion
-           (forward-line -1)
-           (fountain-match-metadata))
-         (indent-for-tab-command))
         ((and (eq (char-before) ?\()
               (eq (char-after)  ?\)))
          (delete-region (1- (point)) (1+ (point))))
@@ -2113,7 +2110,8 @@ When point is at metadata value on its own line, indent to
         ((or (fountain-match-section-heading)
              (fountain-match-scene-heading)
              (eq (get-char-property (point) 'invisible) 'outline))
-         (fountain-outline-cycle))))
+         (fountain-outline-cycle))
+        ((indent-for-tab-command))))
 
 (defun fountain-upcase-line (&optional arg)
   "Upcase the line.
@@ -4163,7 +4161,7 @@ regular expression."
   (setq-local completion-at-point-functions '(fountain-completion-at-point))
   (setq-local font-lock-extra-managed-props
               '(line-prefix wrap-prefix display invisible))
-  (setq-local indent-line-function 'fountain-indent-metadata)
+  (setq-local indent-line-function 'fountain-indent)
   ;; FIXME: This should be temporary. Feels better to ensure appropriate
   ;; case-fold within each function.
   (setq case-fold-search t)
