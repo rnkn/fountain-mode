@@ -164,7 +164,7 @@ be installed; if you install using the Emacs package management system,
 @unnumberedsec Advanced Installation
 
 Download the
-@uref{https://github.com/rnkn/fountain-mode/releases/latest, latest release},
+@uref{https://github.com/rnkn/fountain-mode/tags, latest release},
 move this file into your @code{load-path} and add the following to your
 @code{init.el} file:
 
