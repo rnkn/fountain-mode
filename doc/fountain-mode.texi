@@ -172,12 +172,17 @@ move this file into your @code{load-path} and add the following to your
 (require 'fountain-mode)
 @end example
 
+If for some reason you can't or won't use GitHub, the latest release
+is @uref{https://fountain-mode.org/src/, available at here}.
+
 If you wish to contribute to or alter @program{}'s code, clone the
 repository into your load-path and require as above:
 
 @example
 git clone @repository{}
 @end example
+
+The code repository is currently only available via GitHub.
 
 @xref{(emacs) Lisp Libraries}.
 
