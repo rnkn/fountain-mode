@@ -592,6 +592,22 @@ COMMAND may be edited interactively when calling
   :safe 'stringp
   :group 'fountain-export)
 
+(defcustom fountain-export-title-page-title-keys
+  '("title" "credit" "author" "authors" "source")
+  "Elements to include in the title page title section."
+  :type '(repeat string)
+  :safe (lambda (value)
+          (and (listp value) (seq-every-p 'stringp value)))
+  :group 'fountain-export)
+
+(defcustom fountain-export-title-page-contact-keys
+  '("draft" "date" "draft date" "contact")
+  "Elements to include in the title page contact section."
+  :type '(repeat string)
+  :safe (lambda (value)
+          (and (listp value) (seq-every-p 'stringp value)))
+  :group 'fountain-export)
+
 
 ;;; Regular Expressions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -3232,13 +3248,19 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
       (when metadata
         (insert ".sp |4i\n")
         (let (string)
-          (dolist (var '(title credit author authors source))
-            (when (setq string (cdr (assq var metadata)))
+          (dolist (key fountain-export-title-page-title-keys)
+            (when (setq string (cdr (assq
+                                     (intern (downcase (replace-regexp-in-string
+                                                        "[^[:alnum:]]+" "-" key)))
+                                     metadata)))
               (insert
                (format ".titleline\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".sp |8i\n")
-          (dolist (var '(draft date draft-date contact))
-            (when (setq string (cdr (assq var metadata)))
+          (dolist (key fountain-export-title-page-contact-keys)
+            (when (setq string (cdr (assq
+                                     (intern (downcase (replace-regexp-in-string
+                                                        "[^[:alnum:]]+" "-" key)))
+                                     metadata)))
               (insert
                (format ".titlenote\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".page-break\n")))
