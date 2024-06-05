@@ -2367,10 +2367,7 @@ Or, if nil:
 
 (defun fountain-get-scene-number (&optional n)
   "Return the scene number of the Nth next scene as a list.
-Return Nth previous if N is negative.
-
-Scene numbers will not be accurate if buffer contains directives
-to include external files."
+Return Nth previous if N is negative."
   (unless n (setq n 0))
   ;;
   ;; FIXME: The whole scene number (and page number) logic could be
