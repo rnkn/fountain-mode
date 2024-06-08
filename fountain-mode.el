@@ -2,7 +2,7 @@
 
 ;; Copyright (c) 2014-2024  Paul W. Rankin
 
-;; Author: Paul W. Rankin <hello@paulwrankin.com>
+;; Author: Paul W. Rankin <rnkn@rnkn.xyz>
 ;; Keywords: wp, text
 ;; Version: 3.8.0
 ;; Package-Requires: ((emacs "24.4") (seq "2.20"))
