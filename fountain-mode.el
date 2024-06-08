@@ -2190,7 +2190,7 @@ non-nil (when prefixed with (\\[universal-argument]), only insert note delimiter
           (newline)))
       (comment-dwim nil)
       (let ((x (point))
-            (reposn "__POINT__")
+            (reposn "_point")
             bound)
         (insert (format-spec fountain-note-template
          (format-spec-make ?u user-login-name
