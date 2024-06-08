@@ -3362,10 +3362,11 @@ Requires a `troff' program."
                            nil shell-command-switch command))
     ;; Write PDF
     (switch-to-buffer output-buffer)
-    (write-file
-     (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
-             fountain-export-format)
-     t)))
+    (when (buffer-file-name source-buffer)
+      (write-file
+       (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
+               fountain-export-format)
+       t))))
 
 (require 'format-spec)
 
