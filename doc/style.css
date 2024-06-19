@@ -55,12 +55,16 @@ pre.menu-comment, pre.menu-preformatted {
 		color: #eeeff1;
 	}
 	a {
-        color: #bad7ff;
-    }
+		color: #bad7ff;
+	}
 	a:visited {
-        color: #d099ff;
-    }
+		color: #d099ff;
+	}
 	kbd, kbd.kbd {
-        background-color: #404040
-    }
+		background-color: #404040
+	}
 }
+
+/* Local Variables:
+ * indent-tabs-mode: t
+ * End: */
