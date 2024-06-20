@@ -1845,10 +1845,6 @@ buffer windows are opened."
 
 ;;; Navigation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar-local fountain-goal-character
-    nil
-  "Character to navigate by using `fountain-forward-this-character'.")
-
 (defun fountain-move-forward-scene (n)
   "Move forward N scene headings (backward if N is negative).
 If N is 0, move to beginning of scene."
