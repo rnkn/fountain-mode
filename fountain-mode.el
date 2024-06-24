@@ -177,6 +177,12 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              fountain-completion-auto-update-mode
              flyspell-mode))
 
+(defcustom fountain-insert-note-hook
+  nil
+  "Hook run after command `fountain-insert-note'."
+  :group 'fountain
+  :type 'hook)
+
 (define-obsolete-variable-alias 'fountain-default-script-format
   'fountain-script-format "`fountain-mode' 3.8")
 (defcustom fountain-script-format
@@ -253,24 +259,9 @@ Upcases lines matching `fountain-scene-heading-regexp'."
   :safe 'booleanp
   :group 'fountain)
 
-(defcustom fountain-note-template
-  "%P - %n %x"
-  "\\<fountain-mode-map>Template for inserting notes with \\[fountain-insert-note].
-Passed to `format-spec' with the following specification:
-
-  %u  variable `user-login-name'
-  %n  variable `user-full-name'
-  %e  variable `user-mail-address'
-  %x  date in locale's preferred format
-  %F  date in ISO format
-  %P  leave point here
-
-The default \"%P - %n %x\" inserts something like:
-
-  [[ | - Alan Smithee 12/31/2017 ]]"
-  :group 'fountain
-  :type 'string
-  :safe 'stringp)
+(make-obsolete-variable 'fountain-note-template
+                        "note templates are no longer supported."
+                        "`fountain-mode' 3.8")
 
 (defcustom fountain-highlight-elements
   '(section-heading scene-heading character dialog synopsis note
@@ -2169,37 +2160,14 @@ beginning of line (if not already present) to force a scene heading."
     (insert "= ")
     (when (outline-invisible-p) (fountain-outline-cycle))))
 
-(defun fountain-insert-note (&optional arg)
-  "Insert a note based on `fountain-note-template' underneath current element.
-If region is active and it is appropriate to act on, only
-surround region with note delimiters (`[[ ]]'). If ARG is
-non-nil (when prefixed with (\\[universal-argument]), only insert note delimiters."
-  (interactive "*P")
+(defun fountain-insert-note ()
+  "Call `comment-dwim' with note delimiters (`[[ ]]')."
+  (interactive)
   (let ((comment-start "[[")
-        (comment-end "]]"))
-    (if (or arg (use-region-p))
-        (comment-dwim nil)
-      (unless (and (bolp) (eolp))
-        (re-search-forward "^[\s\t]*$" nil 'move))
-      (unless (fountain-blank-after-p)
-        (save-excursion
-          (newline)))
-      (comment-dwim nil)
-      (let ((x (point))
-            (reposn "_point")
-            bound)
-        (insert (format-spec fountain-note-template
-         (format-spec-make ?u user-login-name
-                           ?n user-full-name
-                           ?e user-mail-address
-                           ?P reposn
-                           ?F (format-time-string "%F")
-                           ?x (format-time-string "%x"))))
-        (setq bound (point))
-        (goto-char x)
-        (when (search-forward reposn bound 'move)
-          (delete-region (match-beginning 0)
-                         (match-end 0)))))))
+        (comment-end "]]")
+        (comment-continue ""))
+    (comment-dwim nil)
+    (run-hooks 'fountain-insert-note-hook)))
 
 (define-obsolete-function-alias 'fountain-refresh-continued-dialog
   'fountain-add-continued-dialog "`fountain-mode' 3.5")
