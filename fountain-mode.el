@@ -4026,14 +4026,19 @@ If POS is nil, use `point' instead."
 
 ;;; Initializing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defvar fountain-mode-syntax-table
+  (let ((table (make-syntax-table text-mode-syntax-table)))
+    (modify-syntax-entry (string-to-char "/") ". 14" table)
+    (modify-syntax-entry (string-to-char "*") "$*23" table)
+    (modify-syntax-entry (string-to-char "_") "$_"   table)
+    (modify-syntax-entry (string-to-char "\\") "\\"  table)
+    table)
+  "Syntax table for `fountain-mode'.")
+
 (defun fountain-init-comments ()
   "Initialize comment variables.
 This is important for calling `fountain-delete-comments-in-region'
 during `fountain-export'."
-  (modify-syntax-entry (string-to-char "/") ". 14" nil)
-  (modify-syntax-entry (string-to-char "*") "$*23" nil)
-  (modify-syntax-entry (string-to-char "_") "$_"   nil)
-  (modify-syntax-entry (string-to-char "\\") "\\"  nil)
   (setq-local comment-start "/*")
   (setq-local comment-end "*/")
   (setq-local comment-use-syntax t))
