@@ -311,8 +311,8 @@ instead `fountain-export-scene-heading-format'."
   'fountain-transpose-all-elements "`fountain-mode' 3.2")
 (defcustom fountain-transpose-all-elements
   t
-  "\\<fountain-mode-map>Non-nil if \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should operate on all elements.
-Otherwise, only operate on outline elements."
+  "\\<fountain-mode-map>When non-nil, \\[fountain-forward-paragraph-or-transpose] and \\[fountain-backward-paragraph-or-transpose] should transpose all elements.
+Otherwise, only transpose outline elements."
   :type 'boolean
   :safe 'booleanp
   :group 'fountain)
