@@ -3011,42 +3011,48 @@ your preferred tool's pagination method."
 .ll \\n[PW]i
 .pl 999
 .
-.nr scenespace %s
-.nr scenebold %b
-.nr sceneunderline %u
-.nr numberfirst %f
-.nr scenenumbers %n
+.if !rscenespace .nr scenespace 2
+.if !rscenebold .nr scenebold 0
+.if !rsceneunderline .nr sceneunderline 0
+.if !rnumberfirst .nr numberfirst 0
+.if !rscenenumbers .nr scenenumbers 0
 .nr pagetop 1
 .po 1.25i
 .nf
 .nh
 .
+.\\\" Format reset
 .de reset
 .ft C
 'ce 0
 'in 0
 ..
+.\\\" Blank line
 .de blank
 .sp |\\\\n[.h]u
 .ie \\\\n[pagetop] .sp |1i
 .el .sp 1
 .nr pagetop 0
 ..
+.\\\" Normal page header
 .de header
 .sp 0.5i
-.tl '''%%.'
+.tl '''%.'
 .sp |1i
 ..
+.\\\" Blank page header
 .de headerblank
 .sp 0.5i
 .tl ''''
 .sp |1i
 .wh 0 header
 ..
+.\\\" Action
 .de action
 .reset
 .blank
 ..
+.\\\" Scene heading
 .de scene-heading
 .reset
 .sp |\\\\n[.h]u
@@ -3058,67 +3064,81 @@ your preferred tool's pagination method."
 \\h[|-0.75i] \\\\$1 \\h[|6i] \\\\$1
 .sp -1 \\}
 ..
+.\\\" Character name
 .de character
 .reset
 .blank
 .in 2.5i
 ..
+.\\\" Parenthetical
 .de paren
 .reset
 .in 2i
 .ti -8p
 ..
+.\\\" Dialogue
 .de dialog
 .reset
 .in 1.5i
 ..
+.\\\" Transition
 .de trans
 .reset
 .blank
 .in 4i
 ..
+.\\\" Dual-dialogue character name (left)
 .de dual-character-left
 .reset
 .blank
 .mk dualtop
 .in 1i
 ..
+.\\\" Dual-dialogue parenthetical (left)
 .de dual-paren-left
 .reset
 .in 0.5i
 .ti -8p
 ..
+.\\\" Dual dialogue (left)
 .de dual-dialog-left
 .reset
 ..
+.\\\" Dual-dialogue character name (right)
 .de dual-character-right
 .reset
 .blank
 .sp |\\\\n[dualtop]u
 .in 4i
 ..
+.\\\" Dual-dialogue parenthetical (right)
 .de dual-paren-right
 .reset
 .in 3.3i
 ..
+.\\\" Dual dialogue (right)
 .de dual-dialog-right
 .reset
 .in 3.1i
 ..
+.\\\" Center text
 .de center
 .reset
 .blank
 .ce 99
 ..
+.\\\" Page break
 .de page-break
 .bp \\\\$1
 .nr pagetop 1
 ..
+.\\\" Title page title section line
 .de titleline
 .reset
 .sp
 .ce 99
 ..
+.\\\" Title page contact/note section line
 .de titlenote
 .reset
 .sp
@@ -3211,17 +3231,11 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
     (unless output-buffer (setq output-buffer fountain-export-troff-buffer))
     (with-current-buffer (get-buffer-create output-buffer)
       (erase-buffer)
-      (insert
-       (format-spec fountain-export-troff-macro
-                    (format-spec-make
-                     ?s (if (memq 'double-space fountain-export-scene-heading-format) 2 1)
-                     ?b (if (memq 'bold fountain-export-scene-heading-format) 1 0)
-                     ?u (if (memq 'underline fountain-export-scene-heading-format) 1 0)
-                     ?n (if fountain-export-scene-numbers 1 0)
-                     ?f (if fountain-export-number-first-page 1 0))))
+      (insert fountain-export-troff-macro)
       (unless (bolp) (insert "\n"))
       (when metadata
-        (insert ".sp |4i\n")
+        (insert ".\\\" Title page\n"
+                ".sp |4i\n")
         (let (string)
           (dolist (key fountain-export-title-page-title-keys)
             (when (setq string (cdr (assq
@@ -3306,10 +3320,27 @@ Requires a `troff' program."
         (output-buffer
          (get-buffer-create fountain-export-output-buffer))
         (command
-         (string-join (append (list fountain-export-troff-command
-                                    (format "-T%s" fountain-export-format)
-                                    (format "-P -p%s" fountain-page-size))
-                              fountain-export-troff-extra-options)
+         (string-join (append
+                       (list fountain-export-troff-command
+                             (format "-T%s" fountain-export-format)
+                             (format "-rscenespace=%d"
+                                     (if (memq 'double-space
+                                               fountain-export-scene-heading-format)
+                                         2 1))
+                             (format "-rscenebold=%d"
+                                     (if (memq 'bold
+                                               fountain-export-scene-heading-format)
+                                         1 0))
+                             (format "-rsceneunderline=%d"
+                                     (if (memq 'underline
+                                               fountain-export-scene-heading-format)
+                                         1 0))
+                             (format "-rnumberfirst=%d"
+                                     (if fountain-export-number-first-page 1 0))
+                             (format "-rscenenumbers=%d"
+                                     (if fountain-export-scene-numbers 1 0))
+                             (format "-P -p%s" fountain-page-size))
+                       fountain-export-troff-extra-options)
                       " "))
         (metadata
          (when fountain-export-title-page (fountain-get-metadata)))
