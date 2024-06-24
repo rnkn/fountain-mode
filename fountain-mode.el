@@ -2547,6 +2547,14 @@ you may get incorrect output."
   :type 'boolean
   :safe 'booleanp)
 
+(defcustom fountain-pagination-update-invalid
+  nil
+  "\\<fountain-mode-map>When non-nil, update pagination properties when using paging commands.
+Otherwise, only update pagination with \\[fountain-pagination-update]."
+  :group 'fountain-pagination
+  :type 'boolean
+  :safe 'booleanp)
+
 (defcustom fountain-pagination-max-change
   150
   "Maximum change in page characters before invalidating pagination."
@@ -2853,7 +2861,8 @@ returns nil."
 First check if pagination properties are valid and call
 `fountain-pagination-update' if not."
   (interactive "^p")
-  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (when fountain-pagination-update-invalid
+    (unless (fountain-pagination-validate) (fountain-pagination-update)))
   (let ((p (if (<= n 0) -1 1))
         (move-fun
          (lambda (p)
@@ -2887,7 +2896,8 @@ paginate in slightly different ways. Customize options
 `fountain-page-max-lines' and `fountain-pagination-break-sentences'
 to suit your preferred tool's pagination method."
   (interactive "NGo to page: ")
-  (unless (fountain-pagination-validate) (fountain-pagination-update))
+  (when fountain-pagination-update-invalid
+    (unless (fountain-pagination-validate) (fountain-pagination-update)))
   (save-restriction
     (when fountain-pagination-ignore-restriction (widen))
     (push-mark)
@@ -2942,7 +2952,8 @@ to suit your preferred tool's pagination method."
   "Return a cons of the current page number and the total pages."
   (save-restriction
     (when fountain-pagination-ignore-restriction (widen))
-    (unless (fountain-pagination-validate) (fountain-pagination-update))
+    (when fountain-pagination-update-invalid
+      (unless (fountain-pagination-validate) (fountain-pagination-update)))
     (cons (car (get-text-property (max (if (eobp) (1- (point)) (point)) 1)
                                   'fountain-pagination))
           (car (get-text-property (max (1- (point-max)) 1)
@@ -3300,9 +3311,9 @@ Requires a `troff' program."
                                     (format "-P -p%s" fountain-page-size))
                               fountain-export-troff-extra-options)
                       " "))
-        (job (make-progress-reporter "Preparing..."))
         (metadata
-         (when fountain-export-title-page (fountain-get-metadata))))
+         (when fountain-export-title-page (fountain-get-metadata)))
+        job)
     ;; Prepare script
     (with-temp-buffer
       (fountain-init-comments)
@@ -3317,6 +3328,7 @@ Requires a `troff' program."
         (forward-line))
       (skip-chars-forward "\n\s\t")
       (fountain-pagination-update)
+      (setq job (make-progress-reporter "Preparing..."))
       (while (< (point) (point-max))
         (fountain-move-forward-page)
         (unless (eobp)
@@ -3806,6 +3818,11 @@ takes the form:
      ["Display Page Count in Mode Line" which-function-mode
       :style toggle
       :selected which-function-mode]
+     ["Keep Pagination Updated"
+      (customize-set-variable 'fountain-pagination-update-invalid
+                              (not fountain-pagination-update-invalid))
+      :style toggle
+      :selected fountain-pagination-update-invalid]
      ["Page Count Ignores Restriction"
       (customize-set-variable 'fountain-pagination-ignore-restriction
                               (not fountain-pagination-ignore-restriction))
