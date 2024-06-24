@@ -2799,20 +2799,23 @@ If a page character length changes by more than
 `fountain-pagination-max-change' then the pagination properties
 are considered invalid (see `fountain-pagination-validate')."
   (interactive)
-  (save-excursion
-    (save-restriction
-      (when fountain-pagination-ignore-restriction (widen))
-      (goto-char (point-min))
-      (with-silent-modifications
-        (let ((page-num (if (fountain-match-metadata) 0 1))
-              (previous-page (point)))
-          (while (< (point) (point-max))
-            (fountain-move-forward-page)
-            (put-text-property previous-page (point) 'fountain-pagination
-                               (cons page-num (- (point) previous-page)))
-            (cl-incf page-num)
-            (setq previous-page (point)))))))
-  (message "Pagination properties updated"))
+  (let ((job (make-progress-reporter "Updating pagination...")))
+    (save-excursion
+      (save-restriction
+        (when fountain-pagination-ignore-restriction (widen))
+        (goto-char (point-min))
+        (with-silent-modifications
+          (let ((page-num (if (fountain-match-metadata) 0 1))
+                (previous-page (point))
+                )
+            (while (< (point) (point-max))
+              (fountain-move-forward-page)
+              (put-text-property previous-page (point) 'fountain-pagination
+                                 (cons page-num (- (point) previous-page)))
+              (cl-incf page-num)
+              (setq previous-page (point))
+              (progress-reporter-update job))))))
+    (progress-reporter-done job)))
 
 (defun fountain-pagination-validate ()
   "Validate pagination properties in current buffer.
