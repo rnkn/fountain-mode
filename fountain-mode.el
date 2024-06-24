@@ -3149,13 +3149,14 @@ your preferred tool's pagination method."
 n.b. This is not intended to be used independently of buffers
 prepared with `fountain-export-troff'.")
 
-(defvar fountain-export-troff-macro-start
-  ".br
+(defvar fountain-export-troff-macro-page-1
+  "\
+.\\\" Page 1.
 .nr % 0
 .ie \\n[numberfirst] .wh 0 header
 .el .wh 0 headerblank
 .nr nl -1"
-  "Troff macro for start of content when exporting to PostScript/PDF.")
+  "Troff macro for page 1 when exporting to PostScript/PDF.")
 
 (defun fountain-export-troff-string (string element)
   "Convert STRING of ELEMENT to troff markup."
@@ -3253,7 +3254,7 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
               (insert
                (format ".titlenote\n%s\n" (fountain-export-troff-string string 'action)))))
           (insert ".page-break\n")))
-      (insert fountain-export-troff-macro-start)
+      (insert fountain-export-troff-macro-page-1)
       (unless (bolp) (insert "\n")))
     (save-excursion
       (goto-char start)
