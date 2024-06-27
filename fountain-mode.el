@@ -2329,6 +2329,32 @@ Or, if nil:
           (concat revision separator (number-to-string number)))
       (concat (number-to-string number) separator revision))))
 
+(defun fountain-calc-revision-number (low high)
+  "Find the next significant revision number between LOW and HIGH."
+  (if (version-list-< high low)
+      (user-error "Can't find revision between %s and %s"
+                  (fountain-scene-number-to-string low)
+                  (fountain-scene-number-to-string high))
+    (let ((rev (reverse low))
+          (inc-fun
+           (lambda (place n)
+             "Increment PLACE by semantic version offset N places."
+             (let (c)
+               (setq c (nthcdr (1- n) place))
+               (setq c (reverse (cons (1+ (car c)) (cdr c))))
+               c)))
+          current)
+      (setq current (funcall inc-fun rev (length low)))
+      (setq rev (cons 0 rev))
+      (while (and low high (version-list-<= high current))
+        (setq current (funcall inc-fun rev (length low)))
+        (setq low (cdr low)))
+      (setq rev (cdr rev))
+      (while (and high (version-list-<= high current))
+        (setq rev (cons -27 rev))
+        (setq current (funcall inc-fun rev (length low))))
+      current)))
+
 (defun fountain-get-scene-number (&optional n)
   "Return the scene number of the Nth next scene as a list.
 Return Nth previous if N is negative."
