@@ -2359,12 +2359,6 @@ Or, if nil:
   "Return the scene number of the Nth next scene as a list.
 Return Nth previous if N is negative."
   (unless n (setq n 0))
-  ;;
-  ;; FIXME: The whole scene number (and page number) logic could be
-  ;; improved by first generating a list of existing numbers,
-  ;; e.g. '((4) (5) (5 1) (6))
-  ;; then only calculating revised scene when current = next.
-  ;;
   (save-excursion
     (save-restriction
       (widen)
@@ -2376,108 +2370,54 @@ Return Nth previous if N is negative."
       (unless (fountain-match-scene-heading)
         (user-error "Before first scene heading"))
       (let ((x (point))
-            ;;
-            ;; FIXME: Scenes ought not be treated as out of order.
-            ;;
-            (err-order "Scene %S seems to be out of order")
-            found)
-        ;; First, check if there are any scene numbers already. If not
-        ;; we can save a lot of work.
-        ;;
-        ;; FIXME: This is just extra work since we're doing for each
-        ;; scene heading.
-        ;;
-        (save-match-data
-          (goto-char (point-min))
-          (while (not (or found (eobp)))
-            (when (and (re-search-forward fountain-scene-heading-regexp nil 'move)
-                       (match-string-no-properties 9))
-              (setq found t))))
-        (if found
-            ;; There are scene numbers, so this scene number needs to be
-            ;; calculated relative to those.
-            (let ((current-scene
-                   (fountain-scene-number-to-list (match-string-no-properties 9)))
-                  last-scene next-scene)
-              ;; Check if scene heading is already numbered and if there
-              ;; is a NEXT-SCENE. No previous scene number can be greater
-              ;; or equal to this.
-              (goto-char x)
-              (while (not (or next-scene (eobp)))
-                (fountain-move-forward-scene 1)
-                (when (fountain-match-scene-heading)
-                  (setq next-scene (fountain-scene-number-to-list
-                                    (match-string-no-properties 9)))))
-              (cond
-               ;; If there's both a NEXT-SCENE and CURRENT-SCENE, but
-               ;; NEXT-SCENE is less or equal to CURRENT-SCENE, scene
-               ;; numbers are out of order.
-               ((and current-scene next-scene
-                     (version-list-<= next-scene current-scene))
-                (user-error
-                 err-order (fountain-scene-number-to-string current-scene)))
-               ;; Otherwise, if there is a CURRENT-SCENE and either no
-               ;; NEXT-SCENE or there is and it's greater then
-               ;; CURRENT-SCENE, just return CURRENT-SCENE.
-               (current-scene)
-               (t
-        ;; There is no CURRENT-SCENE yet, so go to the first scene heading and
-        ;; if it's already numberd set it to that, or just (list 1).
-        (goto-char (point-min))
-        (unless (fountain-match-scene-heading)
-          (fountain-move-forward-scene 1))
-        (when (<= (point) x)
-          (setq current-scene
-                (or (fountain-scene-number-to-list
-                     (match-string-no-properties 9))
-                    (list 1))))
-        ;; While before point X, go forward through each scene heading, setting
-        ;; LAST-SCENE to CURRENT-SCENE and CURRENT-SCENE to an incement of (car
-        ;; LAST-SCENE).
-        (while (and (< (point) x (point-max)))
-          (fountain-move-forward-scene 1)
-          (when (fountain-match-scene-heading)
-            (setq last-scene current-scene
-                  current-scene (or (fountain-scene-number-to-list
-                                     (match-string-no-properties 9))
-                                    (list (1+ (car last-scene)))))
-            ;; However, this might make CURRENT-SCENE greater or equal to
-            ;; NEXT-SCENE (a problem), so if there is a NEXT-SCENE, and
-            ;; NEXT-SCENE is less or equal to CURRENT-SCENE:
-            ;;
-            ;; 1. pop (car LAST-SCENE), which should always be less than
-            ;;    NEXT-SCENE as N
-            ;; 2. set CURRENT-SCENE to (list TMP-SCENE (1+ N))
-            ;; 3. set TMP-SCENE to (list TMP-SCENE n)
-            ;;
-            ;; Loop through this so that the last (or only) element of
-            ;; CURRENT-SCENE is incremented by 1, and TMP-SCENE is appended with
-            ;; N or 1. e.g.
-            ;;
-            ;; CURRENT-SCENE (4 2) -> (4 3)
-            ;; TMP-SCENE (4 2) -> (4 2 1)
-            ;;
-            ;; Return CURRENT-SCENE.
-            (let (n tmp-scene)
-              (while (and next-scene (version-list-<= next-scene current-scene))
-                (setq n (pop last-scene)
-                      current-scene (append tmp-scene (list (1+ (or n 0))))
-                      tmp-scene (append tmp-scene (list (or n 1))))
-                (when (version-list-<= next-scene tmp-scene)
-                  (user-error
-                   err-order (fountain-scene-number-to-string current-scene)))))))
-        current-scene)))
-          ;; Otherwise there were no scene numbers, so we can just count
-          ;; the scenes.
+            low-number high-number)
+        ;; If scene heading is numbered, no further action is required.
+        (if (and (fountain-match-scene-heading)
+                 (match-string 9))
+            (fountain-scene-number-to-list (match-string 9))
+          ;; Find the next highest scene number by searching back from end.
+          (goto-char (point-max))
+          ;; Make sure we're at a scene heading.
+          (fountain-move-forward-scene 0)
+          ;; While we're at a scene heading, we're after point-min, but either
+          ;; after origin point X or not at a numbered scene heading...
+          (while (and (fountain-match-scene-heading)
+                      (< (point-min) (point))
+                      (or (< x (point))
+                          (not (match-string 9))))
+            ;; If we are at a numbered scene heading, set HIGH-NUMBER to the
+            ;; CURRENT scene number if it is lower than HIGH-NUMBER.
+            (when (and (fountain-match-scene-heading)
+                       (match-string 9))
+              (let ((current (fountain-scene-number-to-list (match-string 9))))
+                (if high-number
+                    (when (version-list-< current high-number)
+                      (setq high-number current))
+                  (setq high-number current))))
+            ;; Go backward scene heading.
+            (fountain-move-forward-scene -1))
+          ;; Go to point-min and make sure we're then at a scene heading.
           (goto-char (point-min))
           (unless (fountain-match-scene-heading)
             (fountain-move-forward-scene 1))
-          (let ((current-scene 1))
-            (while (< (point) x)
-              (fountain-move-forward-scene 1)
-              (when (fountain-match-scene-heading)
-                (cl-incf current-scene)))
-            (list current-scene)))))))
+          (setq low-number (or (and (fountain-match-scene-heading)
+                                    (fountain-scene-number-to-list (match-string 9)))
+                               (list 1)))
+          ;; While we're before origin point X, move forward scene headings.
+          (while (< (point) x)
+            (fountain-move-forward-scene 1)
+            ;; If we are at a numbered scene heading, set LOW-NUMBER to the
+            ;; CURRENT scene number if it is higher than LOW-NUMBER.
+            (if (and (fountain-match-scene-heading)
+                     (match-string 9))
+                (let ((current (fountain-scene-number-to-list (match-string 9))))
+                  (if low-number
+                      (when (version-list-< low-number current)
+                        (setq low-number current))
+                    (setq low-number current)))
+              (setq low-number
+                    (fountain-calc-revision-number low-number high-number))))
+          low-number)))))
 
 (defun fountain-add-scene-numbers (&optional arg)
   "Add scene numbers to scene headings in current buffer.
