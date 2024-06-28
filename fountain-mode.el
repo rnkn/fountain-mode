@@ -3002,6 +3002,50 @@ your preferred tool's pagination method."
     (if interactive (message string) string)))
 
 
+;;; Revisions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun fountain-compare-buffers (old new)
+  "Compare buffers OLD and NEW and apply text properties to new text.
+
+Applies the property `fountain-revision' with value `addition' to
+new text.
+
+OLD and NEW must be buffers visiting files."
+  ;; (interactive "bOld file buffer: \nbNew file buffer: ")
+  (let ((rev-buf (get-buffer-create "*Fountain Revision*"))
+        (old-file (or (buffer-file-name (get-buffer old))
+                      (user-error "%s must be visiting a file" old)))
+        (new-file (or (buffer-file-name (get-buffer new))
+                      (user-error "%s must be visiting a file" new)))
+        old-line-length new-line-length process)
+    (with-current-buffer old
+      (setq old-line-length (line-number-at-pos (point-max) t)))
+    (with-current-buffer new
+      (setq new-line-length (line-number-at-pos (point-max) t)))
+    (with-current-buffer rev-buf
+      (erase-buffer)
+      (call-process diff-command nil (list t nil) nil
+                    (format "-BbTU%d" (max old-line-length new-line-length))
+                    old-file new-file)
+      ;; Delete diff metadata output
+      (goto-char (point-min))
+      (when (re-search-forward "^@@.*@@\n" nil t)
+        (delete-region (point-min) (match-end 0)))
+      ;; Delete stuff we don't want - deleted lines and prefixes of unchanged
+      ;; lines
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(-\t.*\n\\|\s\t\\)" nil t)
+        (delete-region (match-beginning 0) (match-end 0)))
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(+\t\\)\\(.*?\\)$" nil t)
+        (put-text-property (match-beginning 2) (match-end 2)
+                           'fountain-revision 'addition)
+        (delete-region (match-beginning 1) (match-end 1))))
+    (switch-to-buffer rev-buf)
+    (goto-char (point-min))
+    (fountain-mode)))
+
+
 ;;; Exporting ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defconst fountain-export-troff-requests
