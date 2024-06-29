@@ -936,7 +936,7 @@ You can also navigate by page number. @xref{Navigation}.
 @node Exporting
 @unnumbered Exporting
 
-@program{} can export to PostScript or PDF using the troff format as an
+@program{} can export to PostScript or PDF using the Troff format as an
 intermediary. This requires only a @code{troff} program on your
 system, such as
 @uref{https://www.gnu.org/software/groff/, GNU roff}.
@@ -961,7 +961,7 @@ file in the current directory matching the current file base-name.
 @findex export-view
 
 @defopt fountain-export-format
-This is the target format for internal troff export. Valid options are
+This is the target format for internal Troff export. Valid options are
 Postscript (@code{ps}) or PDF (@code{pdf}).
 @end defopt
 
@@ -971,23 +971,23 @@ The name of the @code{troff} program on your system.
 
 @defopt fountain-export-troff-extra-options
 Extra option flags passed to the @code{troff} program. The default
-tells @code{troff} the to use UTF-8.
+tells @code{troff} to use UTF-8.
 @end defopt
 
 @defopt fountain-export-title-page
-Whether to include a title page in export. This only affects the
-internal troff export.
+Whether to include a title page in export. This option only affects
+the internal Troff export.
 @end defopt
 
 @defopt fountain-export-number-first-page
 Whether to include a page number on the first page in export. This
-only affects the internal troff export.
+option only affects the internal Troff export.
 @end defopt
 
 @defopt fountain-export-scene-heading-format
 A list specifying the export scene heading format. Available options
 are zero or more of @code{bold}, @code{double-space}, and
-@code{underline}. This option only affects the internal troff export.
+@code{underline}. This option only affects the internal Troff export.
 @end defopt
 
 @menu
