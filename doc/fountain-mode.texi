@@ -1,4 +1,4 @@
-\input texinfo		@c -*- texinfo -*-
+\input texinfo      @c -*- texinfo -*-
 @c %**start of header
 @setfilename fountain-mode.info
 @settitle Fountain Mode
@@ -8,7 +8,7 @@
 
 @dircategory Emacs
 @direntry
-* Fountain Mode: (fountain-mode).	Write screenplays.
+* Fountain Mode: (fountain-mode).   Write screenplays.
 @end direntry
 
 @c macros
@@ -65,21 +65,22 @@ The public @program{} code repository is hosted on
 @end ifnottex
 
 @menu
-* Overview::			The pitch.
-* Installation::		Getting started.
-* Script Elements::		The constituent parts of Fountain.
-* Outlining::			Organize your script in pieces.
-* Navigation::			Fly through your script with ease.
-* Syntax Highlighting::		Differentiate all the elements with colors.
-* Element Aligning::		WYSIWYG visual indentation of script elements.
-* Text Emphasis::		Bold, italic and underline.
-* Do What I Mean::		Traditional TAB-style autocompletion.
-* Autocompletion::		Completion of frequently used text.
-* Scene Numbering::		Adding numbers to a script scenes.
-* Pagination::			Counting a navigating script pages.
-* Exporting::			Sharing your great writing!
-* Contact::		        Help is never far away.
-* Indexes::			What are you looking for?
+* Overview::            The pitch.
+* Installation::        Getting started.
+* Script Elements::     The constituent parts of Fountain.
+* Outlining::           Organize your script in pieces.
+* Navigation::          Fly through your script with ease.
+* Syntax Highlighting:: Differentiate all the elements with colors.
+* Element Aligning::    WYSIWYG visual indentation of script elements.
+* Text Emphasis::       Bold, italic and underline.
+* Do What I Mean::      Traditional TAB-style autocompletion.
+* Autocompletion::      Completion of frequently used text.
+* Scene Numbering::     Adding numbers to a script scenes.
+* Pagination::          Counting a navigating script pages.
+* Exporting::           Sharing your great writing!
+* FAQ::                 You got questions? We got answers.
+* Contact::             Help is never far away.
+* Indexes::             What are you looking for?
 @end menu
 
 @node Overview
@@ -142,8 +143,8 @@ Unless you are already familiar with debugging Elisp code, it is
 strongly encouraged to use the stable version.
 
 @menu
-* Requirements::		Do you have what it takes?
-* Advanced Installation::	For the pros.
+* Requirements::        Do you have what it takes?
+* Advanced Installation::   For the pros.
 @end menu
 
 @node Requirements
@@ -200,18 +201,18 @@ greatest cross-compatibility, stick with the 1.1 spec.
 @end quotation
 
 @menu
-* Metadata::			Key-value info at the top of your script.
-* Section Headings::		Outline your script with @code{#}-prefixed headings.
-* Scene Headings::		Lines beginning with @code{INT}, @code{EXT}, etc.
-* Action::			Anything that's not another element.
-* Characters::			Names are in ALL-CAPS.
-* Dialogue::			Text following character elements.
-* Parentheticals::		Text inside (parens) within dialogue.
-* Transitions::			Uppercase lines ending in @code{TO:}.
-* Notes::			Text within @code{[[} double brackets @code{]]}.
-* Synopses::			Lines beginning with @code{=}.
-* Center Text::			Put your titles @code{>} between these @code{<}.
-* Comments::			C-style multi-line comments (aka ``Boneyard'').
+* Metadata::            Key-value info at the top of your script.
+* Section Headings::    Outline your script with @code{#}-prefixed headings.
+* Scene Headings::      Lines beginning with @code{INT}, @code{EXT}, etc.
+* Action::              Anything that's not another element.
+* Characters::          Names are in ALL-CAPS.
+* Dialogue::            Text following character elements.
+* Parentheticals::      Text inside (parens) within dialogue.
+* Transitions::         Uppercase lines ending in @code{TO:}.
+* Notes::               Text within @code{[[} double brackets @code{]]}.
+* Synopses::            Lines beginning with @code{=}.
+* Center Text::         Put your titles @code{>} between these @code{<}.
+* Comments::            C-style multi-line comments (aka ``Boneyard'').
 @end menu
 
 @node Metadata
@@ -261,9 +262,9 @@ colon, or a newline followed multiple lines indented with whitespace:
 
 @example
 author:
-	Mary Maryland
-	and
-	Alan Smithee
+    Mary Maryland
+    and
+    Alan Smithee
 @end example
 
 Metadata keys are case-insensitive, e.g. @samp{Title} is the same as
@@ -756,8 +757,8 @@ candidates for current buffer.
 @findex completion-update
 
 @menu
-* Scene Heading Completion::	Complete times and places.
-* Character Name Completion::	For every time someone speaks.
+* Scene Heading Completion::    Complete times and places.
+* Character Name Completion::   For every time someone speaks.
 @end menu
 
 @node Scene Heading Completion
@@ -991,7 +992,7 @@ are zero or more of @code{bold}, @code{double-space}, and
 @end defopt
 
 @menu
-* External Programs::		Export using an external program.
+* External Programs::       Export using an external program.
 @end menu
 
 @node External Programs
