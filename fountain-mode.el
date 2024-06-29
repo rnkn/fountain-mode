@@ -2423,8 +2423,26 @@ If ARG is non-nil (when prefixed with \\[universal-argument]), remove
 scene numbers.
 
 Adding scene numbers to scene headings after numbering existing
-scene headings will use a prefix or suffix letter, depending on
-the value of `fountain-prefix-revised-scene-numbers':
+scene headings will use a prefix or suffix letter. If
+`fountain-prefix-revised-scene-numbers' is non-nil:
+
+  10
+  A11 <- new scene
+  B11 <- new scene
+  11
+
+If further scene headings are inserted:
+
+  10
+  AA11 <- new scene
+  BA11 <- new scene
+  A11
+  AB11 <- new scene
+  BB11 <- new scene
+  B11
+  11
+
+If `fountain-prefix-revised-scene-numbers' is nil:
 
   10
   10A <- new scene
@@ -2434,17 +2452,13 @@ the value of `fountain-prefix-revised-scene-numbers':
 If further scene headings are inserted:
 
   10
-  10A
   10AA <- new scene
+  10AB <- new scene
+  10A
+  10BA <- new scene
+  10BB <- new scene
   10B
-  11
-
-In this example, you can't automatically number a new scene
-between 10 and 10A (which might be numbered as 10aA). Instead,
-add these scene numbers manually. Note that if
-`fountain-auto-upcase-scene-headings' is non-nil you will need to
-insert the scene number delimiters (\"##\") first, to protect the
-scene number from being auto-upcased."
+  11"
   (interactive "*P")
   (save-excursion
     (save-restriction
