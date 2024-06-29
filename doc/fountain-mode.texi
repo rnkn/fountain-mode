@@ -1009,6 +1009,8 @@ Here are some recommended export programs:
 @uref{https://github.com/Wraparound/wrap, Wrap}
 @item
 @uref{https://github.com/vilcans/screenplain, Screenplain}
+@footnote{Requires @uref{https://www.reportlab.com, ReportLab} for PDF
+export.}
 @item
 @uref{https://github.com/olivertaylor/Textplay, Textplay}
 @footnote{Requires @uref{https://www.princexml.com, PrinceXML} for PDF
