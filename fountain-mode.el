@@ -2227,8 +2227,6 @@ This option does not affect file contents."
   :safe 'booleanp
   :set #'fountain--set-and-refresh-font-lock)
 
-(define-obsolete-variable-alias 'fountain-prefix-revised-scene-numbers
-  'fountain-scene-numbers-prefix-revised "`fountain-mode' 3.0")
 (defcustom fountain-scene-numbers-prefix-revised
   nil
   "If non-nil, revised scene numbers are prefixed.
@@ -2426,7 +2424,7 @@ scene numbers.
 
 Adding scene numbers to scene headings after numbering existing
 scene headings will use a prefix or suffix letter, depending on
-the value of `fountain-scene-numbers-prefix-revised':
+the value of `fountain-prefix-revised-scene-numbers':
 
   10
   10A <- new scene
