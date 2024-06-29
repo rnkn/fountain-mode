@@ -2298,31 +2298,30 @@ Otherwise:
                     revision))
       (cons number revision))))
 
-(defun fountain-scene-number-to-string (scene-num-list)
-  "Read scene number SCENE-NUM-LIST and return a string.
+(defun fountain-revision-list-to-string (list &optional scene)
+  "Convert revision number LIST to a string.
 
-If `fountain-scene-numbers-prefix-revised' is non-nil:
+If SCENE and `fountain-prefix-revised-scene-numbers' are non-nil:
 
     (10) -> \"10\"
     (9 1 2) -> \"AB10\"
 
-Or, if nil:
+Otherwise:
 
     (10) -> \"10\"
     (9 1 2) -> \"9AB\""
-  (let ((number (car scene-num-list))
+  (let ((number (car list))
         separator revision)
-    (when (< 1 (length scene-num-list))
-      (setq separator
-            (if fountain-scene-numbers-separator
-                (char-to-string fountain-scene-numbers-separator)
-              "")
-            revision
+    (when (cdr list)
+      (setq separator (if fountain-scene-numbers-separator
+                         (char-to-string fountain-scene-numbers-separator)
+                       ""))
+      (setq revision
             (mapconcat (lambda (char)
                          (char-to-string
                           (+ (1- char) fountain-scene-numbers-first-revision-char)))
-                       (cdr scene-num-list) separator)))
-    (if fountain-scene-numbers-prefix-revised
+                       (cdr list) separator)))
+    (if (and scene fountain-prefix-revised-scene-numbers)
         (progn
           (unless (string-empty-p revision) (cl-incf number))
           (concat revision separator (number-to-string number)))
