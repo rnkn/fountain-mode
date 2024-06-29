@@ -2268,28 +2268,29 @@ script may result in errors in output."
           (or (null value) (characterp value)))
   :group 'fountain-scene-numbers)
 
-(defun fountain-scene-number-to-list (string)
-  "Read scene number STRING and return a list.
+(defun fountain-revision-string-to-list (string &optional scene)
+  "Convert revision number STRING to a list.
 
-If `fountain-scene-numbers-prefix-revised' is non-nil:
+If SCENE and `fountain-prefix-revised-scene-numbers' are non-nil:
 
   \"10\" -> (10)
   \"AA10\" -> (9 1 1)
 
-Or if nil:
+Otherwise:
 
   \"10\" -> (10)
   \"10AA\" -> (10 1 1)"
   (let (number revision)
     (when (stringp string)
-      (if fountain-scene-numbers-prefix-revised
+      (if (and scene fountain-prefix-revised-scene-numbers)
           (when (string-match "\\([a-z]*\\)[\\.-]*\\([0-9]+\\)[\\.-]*" string)
-            (setq number (string-to-number (match-string-no-properties 2 string))
-                  revision (match-string-no-properties 1 string))
-            (unless (string-empty-p revision) (setq number (1- number))))
+            (setq number (string-to-number (match-string-no-properties 2 string)))
+            (setq revision (match-string-no-properties 1 string))
+            (unless (string-empty-p revision)
+              (setq number (1- number))))
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
-          (setq number (string-to-number (match-string-no-properties 1 string))
-                revision (match-string-no-properties 2 string))))
+          (setq number (string-to-number (match-string-no-properties 1 string)))
+          (setq revision (match-string-no-properties 2 string))))
       (setq revision
             (mapcar (lambda (n)
                       (1+ (- (upcase n)
