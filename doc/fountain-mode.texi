@@ -1153,9 +1153,9 @@ m4_include(denouement.fountain)
 @node How do I support your work?
 @unnumberedsec How do I support your work?
 
-Financial reward is not a consideration in maintaining @program{}, but
-if you would like to support development, donations are graciously
-accepted via
+Although financial reward is not a consideration in maintaining
+@program{}, if you would like to support development, donations are
+graciously accepted via
 @uref{https://github.com/sponsors/rnkn, GitHub}
 or
 @uref{https://liberapay.com/rnkn/, Liberapay}.
@@ -1178,9 +1178,9 @@ You can also try the @code{#emacs} IRC channel on
 uses the nickname @code{rnkn}, but please note that most other users
 on the channel are unlikely to be screenwriters.
 
-Financial reward is not a consideration in maintaining @program{}, but
-if you would like to support development, donations are graciously
-accepted via
+Although financial reward is not a consideration in maintaining
+@program{}, if you would like to support development, donations are
+graciously accepted via
 @uref{https://github.com/sponsors/rnkn, GitHub}
 or
 @uref{https://liberapay.com/rnkn/, Liberapay}.
