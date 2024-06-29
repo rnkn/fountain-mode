@@ -1055,6 +1055,110 @@ This option contains the list of shell command profiles for exporting.
 The first profile is considered the default.
 @end defopt
 
+@node FAQ
+@unnumbered FAQ
+
+@menu
+* How do I get a scratchpad?::
+* How do I get tree-style navigation?::
+* How do I insert a marker?::
+* How do I include additional files?::
+* How do I support your work?::
+@end menu
+
+@node How do I get a scratchpad?
+@unnumberedsec How do I get a scratchpad?
+
+Emacs has its own ephemeral @code{*scratch*} buffer. Usually this is
+in Lisp Interaction Mode, but it can be set to any mode, including
+@program{}.
+
+If you would like a persistent scratchpad file, the author maintains
+the Emacs package @uref{https://github.com/rnkn/side-notes, Side
+Notes} to display and edit a notes file in a side window.
+
+@node How do I get tree-style navigation?
+@unnumberedsec How do I get tree-style navigation?
+
+Emacs uses a buffer definition navigation facility called Imenu. There
+are several packages to navigate Imenu to your liking. The author
+maintains the Emacs package @uref{https://github.com/rnkn/side-hustle,
+Side Hustle} to display and navigate the buffer Imenu in a tree style
+in a side window.
+
+@xref{(emacs) Imenu}.
+
+@node How do I insert a marker?
+@unnumberedsec How do I insert a marker?
+
+Emacs has several different facilities to navigate around arbitrary
+points in a buffer.
+
+The first and most obvious is the mark. Emacs keeps both a buffer
+local mark ring and a global mark ring. You can set the mark at the
+current point with @kbd{C-SPC} and it will be recorded in both rings.
+You can then ``pop'' back through the points in the local mark ring
+with @kbd{C-u C-SPC}, or through the points in the global mark ring
+with @kbd{C-x C-SPC}. The mark rings do not persist across Emacs
+sessions. @xref{(emacs) Mark}.
+
+The next is registers. Registers can save points, but also text,
+numbers, and a bunch of other things. For now we'll just focus on
+points. You can record a point in a register with @kbd{C-x r SPC X}
+where @kbd{X} is any keyboard character. Registers do not persist across
+Emacs sessions. @xref{(emacs) Registers}.
+
+You can also always insert a note with arbitrary text, e.g.
+@code{[[marker: next]]}, and this will be navigable via Imenu.
+@xref{Notes}.
+
+@node How do I include additional files?
+@unnumberedsec How do I include additional files?
+
+There is not a way specific to @program{} to include additional files.
+The author's advice is to leverage the power of other Unix tools. One
+way is to use a Makefile, like this:
+
+@example
+DRAFT    = Memoryhouse.fountain
+
+INCLUDE += prologue.fountain
+INCLUDE += act_1.fountain
+INCLUDE += act_2.fountain
+INCLUDE += act_3.fountain
+INCLUDE += denouement.fountain
+
+draft:
+	cat $(INCLUDE) > $(DRAFT)
+@end example
+
+A more complicated way could use M4:
+
+@example
+title: __TITLE__
+credit: written by
+author: __AUTHOR__
+
+m4_include(prologue.fountain)
+
+m4_include(act_1.fountain)
+
+m4_include(act_2.fountain)
+
+m4_include(act_3.fountain)
+
+m4_include(denouement.fountain)
+@end example
+
+@node How do I support your work?
+@unnumberedsec How do I support your work?
+
+Financial reward is not a consideration in maintaining @program{}, but
+if you would like to support development, donations are graciously
+accepted via
+@uref{https://github.com/sponsors/rnkn, GitHub}
+or
+@uref{https://liberapay.com/rnkn/, Liberapay}.
 
 @node Contact
 @unnumbered Contact
