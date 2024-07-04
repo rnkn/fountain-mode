@@ -2276,12 +2276,8 @@ script may result in errors in output."
   :safe 'booleanp
   :group 'fountain-scene-numbers)
 
-(defcustom fountain-scene-numbers-first-revision-char
-  ?A
-  "Character to start revised scene numbers."
-  :type 'character
-  :safe 'characterp
-  :group 'fountain-scene-numbers)
+(make-obsolete-variable 'fountain-scene-numbers-first-revision-char
+                        "use \"A\" and \"B\" system." "`fountain-mode' 3.8")
 
 (defcustom fountain-scene-numbers-separator
   nil
