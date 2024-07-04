@@ -583,6 +583,20 @@ COMMAND may be edited interactively when calling
   :safe 'stringp
   :group 'fountain-export)
 
+(defcustom fountain-export-switch-to-output-buffer
+  t
+  "When non-nil, switch to `fountain-export-output-buffer' on export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
+(defcustom fountain-export-kill-output-buffer
+  nil
+  "When non-nil, kill `fountain-export-output-buffer' on export."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-export)
+
 (defcustom fountain-export-title-page-title-keys
   '("title" "credit" "author" "authors" "source")
   "Elements to include in the title page title section."
@@ -3395,12 +3409,16 @@ Requires a `troff' program."
                            (list output-buffer nil)
                            nil shell-command-switch command))
     ;; Write PDF
-    (switch-to-buffer output-buffer)
-    (when (buffer-file-name source-buffer)
-      (write-file
-       (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
-               fountain-export-format)
-       t))))
+    (with-current-buffer output-buffer
+      (when (buffer-file-name source-buffer)
+        (write-file
+         (format "%s.%s" (file-name-base (buffer-file-name source-buffer))
+                 fountain-export-format)
+         t)))
+    (when fountain-export-switch-to-output-buffer
+      (switch-to-buffer output-buffer))
+    (when fountain-export-kill-output-buffer
+      (kill-buffer output-buffer))))
 
 (require 'format-spec)
 
