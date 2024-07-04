@@ -2216,9 +2216,7 @@ accessible portion of the buffer."
   :prefix "fountain-scene-numbers-"
   :group 'fountain)
 
-(define-obsolete-variable-alias 'fountain-display-scene-numbers-in-margin
-  'fountain-scene-numbers-display-in-margin "`fountain-mode' 3.0")
-(defcustom fountain-scene-numbers-display-in-margin
+(defcustom fountain-display-scene-numbers-in-margin
   nil
   "If non-nil, display scene numbers in the right margin.
 This option does not affect file contents."
@@ -3581,7 +3579,7 @@ takes the form:
 (defun fountain--get-scene-number-facespec (subexp)
   "Return `font-lock-mode' display faceprop for scene heading SUBEXP."
   (if (and (stringp (match-string-no-properties subexp))
-           fountain-scene-numbers-display-in-margin)
+           fountain-display-scene-numbers-in-margin)
       (let ((scene-num (match-string-no-properties 9))
             (both (<= 28 emacs-major-version)))
         (cond ((and (= subexp 7) both)
@@ -3890,10 +3888,10 @@ takes the form:
                        (where-is-internal 'fountain-add-scene-numbers fountain-mode-map t)))]
      "---"
      ["Display Scene Numbers in Margin"
-      (customize-set-variable 'fountain-scene-numbers-display-in-margin
-                              (not fountain-scene-numbers-display-in-margin))
+      (customize-set-variable 'fountain-display-scene-numbers-in-margin
+                              (not fountain-display-scene-numbers-in-margin))
       :style toggle
-      :selected fountain-scene-numbers-display-in-margin])
+      :selected fountain-display-scene-numbers-in-margin])
     "---"
     ["Do What I Mean" fountain-dwim]
     ["Upcase Line" fountain-upcase-line]
@@ -4008,7 +4006,7 @@ takes the form:
                fountain-transpose-all-elements
                fountain-page-size
                fountain-pagination-ignore-restriction
-               fountain-scene-numbers-display-in-margin
+               fountain-display-scene-numbers-in-margin
                fountain-highlight-elements
                fountain-hide-element-markup
                fountain-hide-emphasis-markup
