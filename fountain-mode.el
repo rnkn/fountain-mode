@@ -189,6 +189,12 @@ Cycle buffers and call `font-lock-refresh-defaults' when
   :group 'fountain
   :type 'hook)
 
+(defcustom fountain-insert-page-break-hook
+  nil
+  "Hook run after command `fountain-insert-page-break'."
+  :group 'fountain
+  :type 'hook)
+
 (define-obsolete-variable-alias 'fountain-default-script-format
   'fountain-script-format "`fountain-mode' 3.8")
 (defcustom fountain-script-format
@@ -2943,7 +2949,8 @@ to suit your preferred tool's pagination method."
           (insert-before-markers page-break "\n\n")))
       ;; Return to where we were.
       (goto-char x)
-      (set-marker x nil))))
+      (set-marker x nil)))
+  (run-hooks 'fountain-insert-page-break-hook))
 
 (defun fountain-get-page-count ()
   "Return a cons of the current page number and the total pages."
