@@ -2322,28 +2322,31 @@ script may result in errors in output."
 
 If SCENE and `fountain-prefix-revised-scene-numbers' are non-nil:
 
+  \"A10\" -> (10 -26)
+  \"BA10\" -> (10 -25 -26)
+  \"B10\" -> (10 -25)
   \"10\" -> (10)
-  \"AA10\" -> (9 1 1)
 
 Otherwise:
 
   \"10\" -> (10)
-  \"10AA\" -> (10 1 1)"
+  \"10A\" -> (11 -26)
+  \"10BA\" -> (11 -25 -26)
+  \"10B\" -> (11 -25)"
   (let (number revision)
     (when (stringp string)
       (if (and scene fountain-prefix-revised-scene-numbers)
           (when (string-match "\\([a-z]*\\)[\\.-]*\\([0-9]+\\)[\\.-]*" string)
             (setq number (string-to-number (match-string-no-properties 2 string)))
-            (setq revision (match-string-no-properties 1 string))
-            (unless (string-empty-p revision)
-              (setq number (1- number))))
+            (setq revision (match-string-no-properties 1 string)))
         (when (string-match "\\([0-9]+\\)[\\.-]*\\([a-z]*\\)[\\.-]*" string)
           (setq number (string-to-number (match-string-no-properties 1 string)))
-          (setq revision (match-string-no-properties 2 string))))
+          (unless (string-empty-p
+                   (setq revision (match-string-no-properties 2 string)))
+            (setq number (1+ number)))))
       (setq revision
             (mapcar (lambda (n)
-                      (1+ (- (upcase n)
-                             fountain-scene-numbers-first-revision-char)))
+                      (- (upcase n) 91)) ; hardcoded to A
                     revision))
       (cons number revision))))
 
