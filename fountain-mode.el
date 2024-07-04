@@ -2997,7 +2997,7 @@ OLD and NEW must be buffers visiting files."
                       (user-error "%s must be visiting a file" old)))
         (new-file (or (buffer-file-name (get-buffer new))
                       (user-error "%s must be visiting a file" new)))
-        old-line-length new-line-length process)
+        old-line-length new-line-length)
     (with-current-buffer old
       (setq old-line-length (line-number-at-pos (point-max) t)))
     (with-current-buffer new
