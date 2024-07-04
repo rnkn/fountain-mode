@@ -177,6 +177,12 @@ Cycle buffers and call `font-lock-refresh-defaults' when
              fountain-completion-auto-update-mode
              flyspell-mode))
 
+(defcustom fountain-insert-synopsis-hook
+  nil
+  "Hook run after command `fountain-insert-synopsis'."
+  :group 'fountain
+  :type 'hook)
+
 (defcustom fountain-insert-note-hook
   nil
   "Hook run after command `fountain-insert-note'."
@@ -2172,7 +2178,8 @@ beginning of line (if not already present) to force a scene heading."
       (save-excursion
         (newline)))
     (insert "= ")
-    (when (outline-invisible-p) (fountain-outline-cycle))))
+    (when (outline-invisible-p) (fountain-outline-cycle))
+    (run-hooks 'fountain-insert-synopsis-hook)))
 
 (defun fountain-insert-note ()
   "Call `comment-dwim' with note delimiters (`[[ ]]')."
