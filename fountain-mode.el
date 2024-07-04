@@ -2355,28 +2355,31 @@ Otherwise:
 
 If SCENE and `fountain-prefix-revised-scene-numbers' are non-nil:
 
+    (10 -26) -> \"A10\"
+    (10 -25 -26) -> \"BA10\"
+    (10 -25) -> \"B10\"
     (10) -> \"10\"
-    (9 1 2) -> \"AB10\"
 
 Otherwise:
 
     (10) -> \"10\"
-    (9 1 2) -> \"9AB\""
+    (11 -26) -> \"10A\"
+    (11 -25 -26) -> \"10BA\"
+    (11 -25) -> \"10B\""
   (let ((number (car list))
         separator revision)
     (when (cdr list)
       (setq separator (if fountain-scene-numbers-separator
                          (char-to-string fountain-scene-numbers-separator)
                        ""))
+      (setq number (1- number))
       (setq revision
             (mapconcat (lambda (char)
                          (char-to-string
-                          (+ (1- char) fountain-scene-numbers-first-revision-char)))
+                          (+ char 91))) ; hardcoded to A
                        (cdr list) separator)))
     (if (and scene fountain-prefix-revised-scene-numbers)
-        (progn
-          (unless (string-empty-p revision) (cl-incf number))
-          (concat revision separator (number-to-string number)))
+        (concat revision separator (number-to-string number))
       (concat (number-to-string number) separator revision))))
 
 (defun fountain-calc-revision-number (low high)
