@@ -2252,22 +2252,50 @@ This option does not affect file contents."
   :safe 'booleanp
   :set #'fountain--set-and-refresh-font-lock)
 
-(defcustom fountain-scene-numbers-prefix-revised
+(defcustom fountain-prefix-revised-scene-numbers
   nil
   "If non-nil, revised scene numbers are prefixed.
 
-If nil, when inserting new scene headings after numbering
+If non-nil, when inserting new scene headings after numbering
 existing scene headings, revised scene number format works as
 follows:
 
   10
-  10A <- new scene
+  A11 <- new scene
+  B11 <- new scene
   11
 
-If non-nil, revised scene number format works as follows:
+If further scene headings are inserted:
 
   10
-  A11 <- new scene
+  AA11 <- new scene
+  BA11 <- new scene
+  A11
+  AB11 <- new scene
+  BB11 <- new scene
+  B11
+  11
+
+Otherwise, when nil:
+
+  10
+  10A <- new scene
+  10B <- new scene
+  11
+
+And if further scene headings are inserted:
+
+  10
+  10AA <- new scene
+  10AB <- new scene
+  10A
+  10BA <- new scene
+  10BB <- new scene
+  10B
+  11
+
+  10
+  10A <- new scene
   11
 
 n.b. Using conflicting revised scene number format in the same
@@ -2444,42 +2472,8 @@ If ARG is non-nil (when prefixed with \\[universal-argument]), remove
 scene numbers.
 
 Adding scene numbers to scene headings after numbering existing
-scene headings will use a prefix or suffix letter. If
-`fountain-prefix-revised-scene-numbers' is non-nil:
-
-  10
-  A11 <- new scene
-  B11 <- new scene
-  11
-
-If further scene headings are inserted:
-
-  10
-  AA11 <- new scene
-  BA11 <- new scene
-  A11
-  AB11 <- new scene
-  BB11 <- new scene
-  B11
-  11
-
-If `fountain-prefix-revised-scene-numbers' is nil:
-
-  10
-  10A <- new scene
-  10B <- new scene
-  11
-
-If further scene headings are inserted:
-
-  10
-  10AA <- new scene
-  10AB <- new scene
-  10A
-  10BA <- new scene
-  10BB <- new scene
-  10B
-  11"
+scene headings will use a prefix or suffix letter, depending on
+the value of `fountain-prefix-revised-scene-numbers', which see."
   (interactive "*P")
   (save-excursion
     (save-restriction
