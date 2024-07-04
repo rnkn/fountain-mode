@@ -617,7 +617,7 @@ COMMAND may be edited interactively when calling
   Group 9: match scene number
   Group 10: match last # delimiter
 
-Contructed with `fountain-init-scene-heading-regexp'. Requires
+Constructed with `fountain-init-scene-heading-regexp'. Requires
 `fountain-match-scene-heading' for preceding blank line.")
 
 (defcustom fountain-scene-heading-prefix-list
@@ -2954,7 +2954,7 @@ your preferred tool's pagination method."
     (if interactive (message string) string)))
 
 
-;;; Revisions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Revisions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun fountain-compare-buffers (old new)
   "Compare buffers OLD and NEW and apply text properties to new text.
