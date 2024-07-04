@@ -2392,8 +2392,8 @@ Otherwise:
   "Find the next significant revision number between LOW and HIGH."
   (if (version-list-< high low)
       (user-error "Can't find revision between %s and %s"
-                  (fountain-scene-number-to-string low)
-                  (fountain-scene-number-to-string high))
+                  (fountain-revision-list-to-string low)
+                  (fountain-revision-list-to-string high))
     (let ((rev (reverse low))
           (inc-fun
            (lambda (place n)
@@ -2433,7 +2433,7 @@ Return Nth previous if N is negative."
         ;; If scene heading is numbered, no further action is required.
         (if (and (fountain-match-scene-heading)
                  (match-string 9))
-            (fountain-scene-number-to-list (match-string 9))
+            (fountain-revision-string-to-list (match-string 9))
           ;; Find the next highest scene number by searching back from end.
           (goto-char (point-max))
           ;; Make sure we're at a scene heading.
@@ -2448,7 +2448,7 @@ Return Nth previous if N is negative."
             ;; CURRENT scene number if it is lower than HIGH-NUMBER.
             (when (and (fountain-match-scene-heading)
                        (match-string 9))
-              (let ((current (fountain-scene-number-to-list (match-string 9))))
+              (let ((current (fountain-revision-string-to-list (match-string 9))))
                 (if high-number
                     (when (version-list-< current high-number)
                       (setq high-number current))
@@ -2460,7 +2460,7 @@ Return Nth previous if N is negative."
           (unless (fountain-match-scene-heading)
             (fountain-move-forward-scene 1))
           (setq low-number (or (and (fountain-match-scene-heading)
-                                    (fountain-scene-number-to-list (match-string 9)))
+                                    (fountain-revision-string-to-list (match-string 9)))
                                (list 1)))
           ;; While we're before origin point X, move forward scene headings.
           (while (< (point) x)
@@ -2469,7 +2469,7 @@ Return Nth previous if N is negative."
             ;; CURRENT scene number if it is higher than LOW-NUMBER.
             (if (and (fountain-match-scene-heading)
                      (match-string 9))
-                (let ((current (fountain-scene-number-to-list (match-string 9))))
+                (let ((current (fountain-revision-string-to-list (match-string 9))))
                   (if low-number
                       (when (version-list-< low-number current)
                         (setq low-number current))
@@ -2502,7 +2502,7 @@ the value of `fountain-prefix-revised-scene-numbers', which see."
             (unless (match-string-no-properties 9)
               (end-of-line)
               (delete-horizontal-space t)
-              (insert "\s#" (fountain-scene-number-to-string
+              (insert "\s#" (fountain-revision-list-to-string
                              (fountain-get-scene-number))
                       "#")))
             (fountain-move-forward-scene 1))))))
