@@ -2429,7 +2429,7 @@ List is comprised of cons cells of postion and page number list."
                   list)))
         (reverse list)))))
 
-(defun fountain-get-scene-number (&optional forced-scene-numbers)
+(defun fountain-get-scene-number ()
   (save-excursion
     (save-restriction
       (widen)
@@ -2444,22 +2444,20 @@ List is comprised of cons cells of postion and page number list."
           (fountain-revision-string-to-list (match-string 9) t)
         ;; Otherwise set position as X and get all forced scene numbers.
         (let ((x (point))
+              (forced (fountain-get-forced-scene-numbers))
               low high y)
           ;; While X is less than the top of SCENE-NUMBERS, pop and set to
           ;; PREVIOUS.
-          (while (and forced-scene-numbers (< (caar forced-scene-numbers) x))
-            (let ((previous (pop forced-scene-numbers)))
+          (while (and forced (< (caar forced) x))
+            (let ((previous (pop forced)))
               (setq y (car previous))
               (setq low (cdr previous))))
           ;; If we still have SCENE-NUMBERS the top is our HIGH scene number.
-          (when forced-scene-numbers
-            (setq high (cdr (car forced-scene-numbers))))
+          (when forced (setq high (cdr (car forced))))
           (goto-char (or y (point-min)))
           (while (< (point) x)
             (fountain-move-forward-scene 1)
-            (setq low (if (and low high)
-                          (fountain-calc-revision-number low high)
-                        (list (1+ (or (car low) 0))))))
+            (setq low (fountain-calc-revision-number low high)))
           low)))))
 
 (defun fountain-add-scene-numbers (&optional arg)
@@ -2476,7 +2474,6 @@ the value of `fountain-prefix-revised-scene-numbers', which see."
       (widen)
       (let ((job (make-progress-reporter
                   (format "%s scene numbers..." (if arg "Removing" "Adding"))))
-            (forced-scene-numbers (fountain-get-forced-scene-numbers))
             (n (list 0))
             buffer-invisibility-spec)
         (goto-char (point-min))
@@ -2492,9 +2489,7 @@ the value of `fountain-prefix-revised-scene-numbers', which see."
               (delete-horizontal-space t)
               (insert "\s#"
                       (fountain-revision-list-to-string
-                       (if forced-scene-numbers
-                           (fountain-get-scene-number forced-scene-numbers)
-                         (setq n (list (1+ (car n))))))
+                       (fountain-get-scene-number) t)
                       "#")))
           (fountain-move-forward-scene 1)
           (progress-reporter-update job))
