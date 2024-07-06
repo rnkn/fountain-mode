@@ -2474,22 +2474,31 @@ the value of `fountain-prefix-revised-scene-numbers', which see."
   (save-excursion
     (save-restriction
       (widen)
-      (let (buffer-invisibility-spec)
+      (let ((job (make-progress-reporter
+                  (format "%s scene numbers..." (if arg "Removing" "Adding"))))
+            (forced-scene-numbers (fountain-get-forced-scene-numbers))
+            (n (list 0))
+            buffer-invisibility-spec)
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
           (fountain-move-forward-scene 1))
         (while (and (fountain-match-scene-heading)
                     (< (point) (point-max)))
           (if arg
-              (when (match-string-no-properties 9)
+              (when (match-string 9)
                 (delete-region (match-beginning 7) (match-end 10)))
-            (unless (match-string-no-properties 9)
+            (unless (match-string 9)
               (end-of-line)
               (delete-horizontal-space t)
-              (insert "\s#" (fountain-revision-list-to-string
-                             (fountain-get-scene-number))
+              (insert "\s#"
+                      (fountain-revision-list-to-string
+                       (if forced-scene-numbers
+                           (fountain-get-scene-number forced-scene-numbers)
+                         (setq n (list (1+ (car n))))))
                       "#")))
-            (fountain-move-forward-scene 1))))))
+          (fountain-move-forward-scene 1)
+          (progress-reporter-update job))
+        (progress-reporter-done job)))))
 
 (defun fountain-remove-scene-numbers ()
   "Remove scene numbers from scene headings in current buffer."
