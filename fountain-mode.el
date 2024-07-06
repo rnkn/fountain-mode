@@ -2378,7 +2378,6 @@ Otherwise:
       (setq separator (if fountain-scene-numbers-separator
                          (char-to-string fountain-scene-numbers-separator)
                        ""))
-      (setq number (1- number))
       (setq revision
             (mapconcat (lambda (char)
                          (char-to-string
@@ -2386,7 +2385,8 @@ Otherwise:
                        (cdr list) separator)))
     (if (and scene fountain-prefix-revised-scene-numbers)
         (concat revision separator (number-to-string number))
-      (concat (number-to-string number) separator revision))))
+      (concat (number-to-string (if (cdr list) (1- number) number))
+              separator revision))))
 
 (defun fountain-calc-revision-number (low high)
   "Find the next significant revision number between LOW and HIGH."
