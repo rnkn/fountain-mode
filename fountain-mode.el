@@ -2390,7 +2390,7 @@ Otherwise:
 
 (defun fountain-calc-revision-number (low high)
   "Find the next significant revision number between LOW and HIGH."
-  ;; If we have HIGH and lOW is greater than HIGH, signal an error.
+  ;; If we have HIGH and LOW is greater than HIGH, signal an error.
   (if (and low high (version-list-< high low))
       (user-error "Can't find revision between %s and %s"
                   (fountain-revision-list-to-string low)
