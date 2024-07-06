@@ -2422,9 +2422,11 @@ Otherwise:
           (when (and (version-list-< low current)
                      (version-list-< current high))
             current)
-          ;; CURRENT should now be <= to HIGH. Append a revision and return.
-          (let ((rev (reverse current)))
-            (reverse (cons -26 rev)))))))
+          ;; HIGH should now be <= to CURRENT. Append a revision and return.
+          (while (and current (version-list-<= high current))
+            (let ((rev (reverse current)))
+              (setq current (reverse (cons -26 rev)))))
+          current))))
 
 (defun fountain-get-forced-scene-numbers ()
   "Return an association list of forced page number positions in buffer.
