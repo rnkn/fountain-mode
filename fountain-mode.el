@@ -2412,12 +2412,12 @@ Otherwise:
                      (version-list-< previous high))
             previous)
           ;; Set CURRENT to PREVIOUS. While CURRENT = LOW, increment the least
-          ;; significant number. We need to use a while loop here to return nil.
-          ;; Then move to next.
+          ;; significant number. We need to return nil to move to next.
           (progn (setq current previous)
-                 (while (version-list-= current low)
+                 (when (version-list-= current low)
                    (let ((rev (reverse current)))
-                     (setq current (reverse (cons (1+ (car rev)) (cdr rev)))))))
+                     (setq current (reverse (cons (1+ (car rev)) (cdr rev)))))
+                   nil))
           ;; When < LOW PREVIOUS HIGH, we have our number.
           (when (and (version-list-< low current)
                      (version-list-< current high))
