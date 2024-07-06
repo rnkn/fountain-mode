@@ -2394,89 +2394,73 @@ Otherwise:
       (user-error "Can't find revision between %s and %s"
                   (fountain-revision-list-to-string low)
                   (fountain-revision-list-to-string high))
-    (let ((rev (reverse low))
-          (inc-fun
-           (lambda (place n)
-             "Increment PLACE by semantic version offset N places."
-             (let (c)
-               (setq c (nthcdr (1- n) place))
-               (setq c (reverse (cons (1+ (car c)) (cdr c))))
-               c)))
-          current)
-      (setq current (funcall inc-fun rev (length low)))
-      (setq rev (cons 0 rev))
-      (while (and low high (version-list-<= high current))
-        (setq current (funcall inc-fun rev (length low)))
-        (setq low (cdr low)))
-      (setq rev (cdr rev))
-      (while (and high (version-list-<= high current))
-        (setq rev (cons -27 rev))
-        (setq current (funcall inc-fun rev (length low))))
-      current)))
+    (let ((current low) previous)
+      (or (while (and current (version-list-< current high))
+            (setq previous current
+                  current (butlast current)))
+          (when (and (version-list-< low previous)
+                     (version-list-< previous high))
+            previous)
+          (progn (setq current previous)
+                 (while (version-list-< current high)
+                   (let ((rev (reverse current)))
+                     (setq previous current
+                           current (reverse (cons (1+ (car rev)) (cdr rev)))))))
+          (when (and (version-list-< low previous)
+                     (version-list-< previous high))
+            previous)
+          (let ((rev (reverse current)))
+            (reverse (cons -26 rev)))))))
 
-(defun fountain-get-scene-number (&optional n)
-  "Return the scene number of the Nth next scene as a list.
-Return Nth previous if N is negative."
-  (unless n (setq n 0))
+(defun fountain-get-forced-scene-numbers ()
+  "Return an association list of forced page number positions in buffer.
+List is comprised of cons cells of postion and page number list."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (let (list)
+        (while (< (point) (point-max))
+          (fountain-move-forward-scene 1)
+          (when (and (fountain-match-scene-heading)
+                     (match-string 9))
+            (push (cons (point)
+                        (fountain-revision-string-to-list (match-string 9) t))
+                  list)))
+        (reverse list)))))
+
+(defun fountain-get-scene-number (&optional forced-scene-numbers)
   (save-excursion
     (save-restriction
       (widen)
       ;; Make sure we're at a scene heading.
       (fountain-move-forward-scene 0)
-      ;; Go to the Nth scene.
-      (unless (= n 0) (fountain-move-forward-scene n))
       ;; Unless we're at a scene heading now, raise a user error.
       (unless (fountain-match-scene-heading)
         (user-error "Before first scene heading"))
-      (let ((x (point))
-            low-number high-number)
-        ;; If scene heading is numbered, no further action is required.
-        (if (and (fountain-match-scene-heading)
-                 (match-string 9))
-            (fountain-revision-string-to-list (match-string 9))
-          ;; Find the next highest scene number by searching back from end.
-          (goto-char (point-max))
-          ;; Make sure we're at a scene heading.
-          (fountain-move-forward-scene 0)
-          ;; While we're at a scene heading, we're after point-min, but either
-          ;; after origin point X or not at a numbered scene heading...
-          (while (and (fountain-match-scene-heading)
-                      (< (point-min) (point))
-                      (or (< x (point))
-                          (not (match-string 9))))
-            ;; If we are at a numbered scene heading, set HIGH-NUMBER to the
-            ;; CURRENT scene number if it is lower than HIGH-NUMBER.
-            (when (and (fountain-match-scene-heading)
-                       (match-string 9))
-              (let ((current (fountain-revision-string-to-list (match-string 9))))
-                (if high-number
-                    (when (version-list-< current high-number)
-                      (setq high-number current))
-                  (setq high-number current))))
-            ;; Go backward scene heading.
-            (fountain-move-forward-scene -1))
-          ;; Go to point-min and make sure we're then at a scene heading.
-          (goto-char (point-min))
-          (unless (fountain-match-scene-heading)
-            (fountain-move-forward-scene 1))
-          (setq low-number (or (and (fountain-match-scene-heading)
-                                    (fountain-revision-string-to-list (match-string 9)))
-                               (list 1)))
-          ;; While we're before origin point X, move forward scene headings.
+      ;; If scene heading is numbered, no further action is required.
+      (if (and (fountain-match-scene-heading)
+               (match-string 9))
+          (fountain-revision-string-to-list (match-string 9) t)
+        ;; Otherwise set position as X and get all forced scene numbers.
+        (let ((x (point))
+              low high y)
+          ;; While X is less than the top of SCENE-NUMBERS, pop and set to
+          ;; PREVIOUS.
+          (while (and forced-scene-numbers (< (caar forced-scene-numbers) x))
+            (let ((previous (pop forced-scene-numbers)))
+              (setq y (car previous))
+              (setq low (cdr previous))))
+          ;; If we still have SCENE-NUMBERS the top is our HIGH scene number.
+          (when forced-scene-numbers
+            (setq high (cdr (car forced-scene-numbers))))
+          (goto-char (or y (point-min)))
           (while (< (point) x)
             (fountain-move-forward-scene 1)
-            ;; If we are at a numbered scene heading, set LOW-NUMBER to the
-            ;; CURRENT scene number if it is higher than LOW-NUMBER.
-            (if (and (fountain-match-scene-heading)
-                     (match-string 9))
-                (let ((current (fountain-revision-string-to-list (match-string 9))))
-                  (if low-number
-                      (when (version-list-< low-number current)
-                        (setq low-number current))
-                    (setq low-number current)))
-              (setq low-number
-                    (fountain-calc-revision-number low-number high-number))))
-          low-number)))))
+            (setq low (if (and low high)
+                          (fountain-calc-revision-number low high)
+                        (list (1+ (or (car low) 0))))))
+          low)))))
 
 (defun fountain-add-scene-numbers (&optional arg)
   "Add scene numbers to scene headings in current buffer.
