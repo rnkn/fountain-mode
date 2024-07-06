@@ -2390,25 +2390,39 @@ Otherwise:
 
 (defun fountain-calc-revision-number (low high)
   "Find the next significant revision number between LOW and HIGH."
-  (if (version-list-< high low)
+  ;; If we have HIGH and lOW is greater than HIGH, signal an error.
+  (if (and low high (version-list-< high low))
       (user-error "Can't find revision between %s and %s"
                   (fountain-revision-list-to-string low)
                   (fountain-revision-list-to-string high))
-    (let ((current low) previous)
-      (or (while (and current (version-list-< current high))
+    (let ((current (or low (list 0))) previous)
+      ;; First the easiest case, HIGH is null so we either chop off all
+      ;; revisions, or increment.
+      (or (and (null high)
+               (or (and (cdr low) (list (car low)))
+                   (list (1+ (car current)))))
+          ;; CURRENT is LOW. First chop off revisions to get to higher number.
+          ;; Set PREVIOUS so we remember the last number that was okay. Once we
+          ;; shoot over HIGH, move to next.
+          (while (and current (version-list-< current high))
             (setq previous current
                   current (butlast current)))
+          ;; When < LOW PREVIOUS HIGH, we have our number.
           (when (and (version-list-< low previous)
                      (version-list-< previous high))
             previous)
+          ;; Set CURRENT to PREVIOUS. While CURRENT = LOW, increment the least
+          ;; significant number. We need to use a while loop here to return nil.
+          ;; Then move to next.
           (progn (setq current previous)
-                 (while (version-list-< current high)
+                 (while (version-list-= current low)
                    (let ((rev (reverse current)))
-                     (setq previous current
-                           current (reverse (cons (1+ (car rev)) (cdr rev)))))))
-          (when (and (version-list-< low previous)
-                     (version-list-< previous high))
-            previous)
+                     (setq current (reverse (cons (1+ (car rev)) (cdr rev)))))))
+          ;; When < LOW PREVIOUS HIGH, we have our number.
+          (when (and (version-list-< low current)
+                     (version-list-< current high))
+            current)
+          ;; CURRENT should now be <= to HIGH. Append a revision and return.
           (let ((rev (reverse current)))
             (reverse (cons -26 rev)))))))
 
