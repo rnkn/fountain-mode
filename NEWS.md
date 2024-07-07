@@ -3,16 +3,48 @@
 ## master
 
 - Implement `fountain-(forward|backward)-this-character`.
+- Rewrite of scene number logic to now work accurately with traditional
+  and modern (suffix and prefix) format.
+- Add progress reporter to `fountain-add-scene-numbers`.
+- Add options `fountain-export-switch-to-output-buffer` and
+  `fountain-export-kill-output-buffer` to provide better experience when
+  exporting.
+- Simplify `fountain-insert-note`, which no longer takes a template.
+- Add `fountain-insert-note-hook`.
+- Add `fountain-insert-synopsis-hook`.
+- Add `fountain-insert-page-break-hook`.
+- Update `fountain-goto-scene` to use correct numbering format.
+- Use a progress reporter for updating pagination.
+- Add option `fountain-pagination-update-invalid` to avoid constant
+  updating of pagination when displaying page count in mode line.
+- Implement backend function `fountain-calc-revision-number` to find
+  page/scene revision numbers between a high and low.
+- Improve efficiency and accuracy of adding scene numbers.
 - Adhere to 1.1 spec for recognized title page keys.
+- Allow customization of title page keys.
 - Check for scene heading location before adding to autocomplete.
 - Call `indent-for-tab-command` when `fountain-dwim` is called at
   metadata.
+- Only write export output buffer when source buffer is visiting a file.
 - Fix export for when first text could be mistaken for metadata.
 - Fix dual dialogue regexp.
+- Define `fountain-mode-syntax-table` to avoid changing global syntax
+  table.
 - Rename `fountain-default-script-format` to `fountain-script-format`.
+- Rename `fountain-scene-numbers-prefix-revised` to
+  `fountain-prefix-revised-scene-numbers`.
+- Rename `fountain-scene-numbers-display-in-margin` to
+  `fountain-display-scene-numbers-in margin`.
+- Make option `fountain-scene-numbers-first-revision-char` obsolete.
+  This is now hardcoded to "A" to simplify the code.
 - Add limit for matching metadata to prevent hanging when inserting a
   huge amount of text.
 - Ensure comments are deleted in export temp buffer.
+- Add FAQ section to documentation.
+- Add Screenplain as export command profile.
+- Add accommodations to documentation for those who don't want to use
+  GitHub.
+- Rewrite repository history to avoid superfluous author emails.
 
 ## Version 3.7.3
 
