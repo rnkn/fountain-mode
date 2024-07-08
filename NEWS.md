@@ -20,6 +20,9 @@
 - Implement backend function `fountain-calc-revision-number` to find
   page/scene revision numbers between a high and low.
 - Improve efficiency and accuracy of adding scene numbers.
+- Synchronise `fountain-export-troff-macro` with
+  [mf](https://github.com/rnkn/mf). Configure `fountain-export` via
+  command line arguments.
 - Adhere to 1.1 spec for recognized title page keys.
 - Allow customization of title page keys.
 - Check for scene heading location before adding to autocomplete.
