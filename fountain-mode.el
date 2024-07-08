@@ -3375,27 +3375,28 @@ Requires a `troff' program."
         (output-buffer
          (get-buffer-create fountain-export-output-buffer))
         (command
-         (string-join (append
-                       (list fountain-export-troff-command
-                             (format "-T%s" fountain-export-format)
-                             (format "-rscenespace=%d"
-                                     (if (memq 'double-space
-                                               fountain-export-scene-heading-format)
-                                         2 1))
-                             (format "-rscenebold=%d"
-                                     (if (memq 'bold
-                                               fountain-export-scene-heading-format)
-                                         1 0))
-                             (format "-rsceneunderline=%d"
-                                     (if (memq 'underline
-                                               fountain-export-scene-heading-format)
-                                         1 0))
-                             (format "-rnumberfirst=%d"
-                                     (if fountain-export-number-first-page 1 0))
-                             (format "-rscenenumbers=%d"
-                                     (if fountain-export-scene-numbers 1 0))
-                             (format "-P -p%s" fountain-page-size))
-                       fountain-export-troff-extra-options)
+         (string-join
+          (append
+           (list fountain-export-troff-command
+                 (format "-T%s" fountain-export-format)
+                 (format "-rscenespace=%d"
+                         (if (memq 'double-space
+                                   fountain-export-scene-heading-format)
+                             2 1))
+                 (format "-rscenebold=%d"
+                         (if (memq 'bold
+                                   fountain-export-scene-heading-format)
+                             1 0))
+                 (format "-rsceneunderline=%d"
+                         (if (memq 'underline
+                                   fountain-export-scene-heading-format)
+                             1 0))
+                 (format "-rnumberfirst=%d"
+                         (if fountain-export-number-first-page 1 0))
+                 (format "-rscenenumbers=%d"
+                         (if fountain-export-scene-numbers 1 0))
+                 (format "-P -p%s" fountain-page-size))
+           fountain-export-troff-extra-options)
                       " "))
         (metadata
          (when fountain-export-title-page (fountain-get-metadata)))
