@@ -868,6 +868,8 @@ be specified with the bold-italic delimiters together, e.g.
   "^\\(?1:\\(~[\s\t]*\\)\\(?3:.+\\)\\)"
   "Regular expression for matching lyrics.")
 
+;; Match user selected fdx file
+
 
 ;;; Aligning ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
