@@ -869,6 +869,114 @@ be specified with the bold-italic delimiters together, e.g.
   "Regular expression for matching lyrics.")
 
 ;; Match user selected fdx file
+;; Final draft FDX uses the following tags (according at least, to a fadein exported version)
+;; <FinalDraft> at the top and bottom of the xml chain
+;; Then a content tag below (used twice)
+;; Each element such as scene or action is wrapped in a Paragraph tag
+;; The actual text such as dialogue is wrapped in a Text tag
+;; After the first content closing tag, there is a HeaderAndFooter tag to specify alignment and header information. Subtags such as header or foot contain paragraph tags
+;; Following that is misc settings such as SpellCheckIgnoreLists
+;; Following that is PageLayout
+;; Then a section for ElementSettings which brings the HeaderAndFooter portion to a close
+;; Then another content tag starts with some Paragraph alignment and indent information
+;; Then SmartType which appears to be a list of information for sidebar statistics
+;; Then MoresAndConinues is more formatting information
+;; Revision information is covered
+;; Then Macro and Aliases
+;; Followed lastly by some TagCategories info. And then it's at the end.
+;; Knowing this, The only portion that's truly valuable for fountain is the first chunk.
+
+
+
+(defun fountain-replace-segment (CRITERIA REP)
+  "A simple convenience function for replacing XML"
+  (goto-char (point-min))
+  (while (re-search-forward CRITERIA nil t)
+    (forward-line)
+    (insert REP)))
+  
+
+(defun fountain-import-fdx-file (FILE)
+  "Take a user submitted final draft xml file and convert it to fountain format and then open it in a new buffer"
+  (interactive "fPlease enter your fdx file to read: ")
+  ;;Store the name of the buffer into variable
+  (setq current-fountain-buffer (buffer-name))
+  ;;Take the input argument and store it into a temporary buffer
+  
+  (with-temp-buffer
+    (insert-file-contents FILE)
+    (goto-char (point-min))
+    (re-search-forward "Content>")
+    (forward-line 2)
+    (re-search-forward "Content>")
+    (delete-region (point)(point-max))
+    ;;Replace paragraph tags that are labeled with certain tags
+    (goto-char (point-min))
+    (fountain-replace-segment "Action" "AMATCH")
+    (fountain-replace-segment "Dialogue" "DMATCH")
+    (fountain-replace-segment "Character" "CHMATCH")
+    (fountain-replace-segment "Parenthetical" "PMATCH")
+    (fountain-replace-segment "Scene Heading" "SHMATCH")
+    (fountain-replace-segment "Transition" "TMATCH")
+    (fountain-replace-segment "</Paragraph>" "\n\n")
+
+    ;;Delete lines that contain <Paragraph or </Paragraph
+    (goto-char (point-min))
+    (flush-lines "<Paragraph")
+    (flush-lines "</Paragraph")
+    (flush-lines "</Content>")
+
+    (goto-char (point-min))
+    (replace-regexp "*MATCH.*" " ")
+    ;;Remove the tags
+    (goto-char (point-min))
+    (replace-regexp "<Text" " ")
+    (goto-char (point-min))
+    (replace-regexp "</Text>" " ")
+    (goto-char (point-min))
+    (replace-regexp ">" " ")
+    (goto-char (point-min))
+    (replace-regexp "<SceneProperties.*" " ")
+    (goto-char (point-min))
+    (while (re-search-forward "SHMATCH" nil t)
+      (delete-indentation 1))
+    (goto-char (point-min))
+
+    (while (re-search-forward "AMATCH" nil t)
+      (delete-indentation 1)
+      (delete-indentation 1))
+
+    ;;Now, terminate the start of the strings
+    (goto-char (point-min))
+    (replace-regexp "CHMATCH" "")
+    (goto-char (point-min))
+    (replace-regexp "SHMATCH" "")
+    (goto-char (point-min))
+    (replace-regexp "TMATCH" "")
+    (goto-char (point-min))
+    (replace-regexp "DMATCH" "")
+    (goto-char (point-min))
+    (replace-regexp "AMATCH" "")
+    (goto-char (point-min))
+    (replace-regexp "PMATCH" "")
+    (delete-trailing-whitespace)
+    (goto-char (point-min))
+    (delete-line)
+    (delete-line)
+    (delete-line)
+    (delete-whitespace-rectangle (point-min)(point-max))
+    (while (re-search-forward "[A-Z]" nil t)
+      (delete-indentation 1)
+      (delete-indentation 1))
+    
+    ;;(replace-string-in-region "<Content>" "<placeholderContent>")
+    ;;(delete-region 300 (point-max))
+    (setq buff (buffer-substring (point-min)(point-max)))
+    (insert-into-buffer current-fountain-buffer (point-min)(point-max))))
+  
+
+  
+
 
 
 ;;; Aligning ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
