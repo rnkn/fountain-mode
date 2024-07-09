@@ -3777,7 +3777,7 @@ takes the form:
 
       ;; Notes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (when (memq 'note highlight-elements)
-        (cons (define-fountain-font-lock-matcher (fountain-match-note))
+        (cons fountain-note-regexp
               '(0 '(face 'fountain-note) t)))
 
       ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
