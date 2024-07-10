@@ -1103,15 +1103,13 @@ This option does not affect file contents."
 (defun fountain-match-note ()
   "Match note if point is at note, nil otherwise."
   (save-excursion
-    (beginning-of-line)
-    (or (looking-at fountain-note-regexp)
-        (save-restriction
-          (widen)
-          (let ((x (point)))
-            (while (not (or (bobp) (and (bolp) (eolp))))
-              (forward-line -1))
-            (and (re-search-forward fountain-note-regexp nil t)
-                 (<= (match-beginning 0) x (match-end 0))))))))
+    (save-restriction
+      (widen)
+      (let ((x (point)))
+        (while (not (or (bobp) (and (bolp) (eolp))))
+          (forward-line -1))
+        (and (re-search-forward fountain-note-regexp nil t)
+             (<= (match-beginning 0) x (match-end 0)))))))
 
 (defun fountain-match-scene-heading ()
   "Match scene heading if point is at a scene heading, nil otherwise."
