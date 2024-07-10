@@ -1605,22 +1605,27 @@ Return non-nil if empty newline was inserted."
   (interactive "*p")
   (fountain-outline-move-subtree-down (- n)))
 
-(defun fountain-outline-flag-notes (start end)
-  "Collapse notes between START and END."
-  (save-excursion
-    (goto-char start)
-    (while (re-search-forward fountain-note-regexp end 'move)
-      (outline-flag-region (match-beginning 1) (match-end 1)
-                           fountain-outline-hide-notes))))
+;; Adapted from outline-flag-region
+(defun fountain-outline-flag-note (start end flag)
+  "Hide or show note text from START to END, according to FLAG.
+If FLAG is nil then text is shown, while if FLAG is t the text is hidden."
+  (remove-overlays start end 'invisible 'fountain-note)
+  (when flag
+    (let ((o (make-overlay start end nil 'front-advance)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'invisible 'fountain-note)
+      (overlay-put o 'isearch-open-invisible
+		           (or outline-isearch-open-invisible-function
+		               #'outline-isearch-open-invisible)))))
 
 (defun fountain-outline-show-subtree ()
   "Show everything after this heading at deeper levels."
   (interactive)
   (outline-flag-subtree nil)
   (save-excursion
-    (while (re-search-forward fountain-note-regexp nil 'move)
-           (outline-flag-region (match-beginning 1) (match-end 1)
-                                fountain-outline-hide-notes))))
+    (while (re-search-forward fountain-note-regexp nil t)
+      (fountain-outline-flag-note
+       (match-beginning 1) (match-end 1) fountain-outline-hide-notes))))
 
 (defun fountain-outline-set-buffer-state (state &optional silent)
   "Set buffer outline visibilty to outline level for STATE.
@@ -1644,7 +1649,11 @@ Display a message unless SILENT."
      (unless silent (message "Showing scene headings")))
     (t
      (fountain-outline-show-all)
-     (fountain-outline-flag-notes (point-min) (point-max))
+     (save-excursion
+       (goto-char (point-min))
+       (while (re-search-forward fountain-note-regexp nil t)
+         (fountain-outline-flag-note (match-beginning 1) (match-end 1)
+                                     fountain-outline-hide-notes)))
      (unless silent (message "Showing all"))))
   (setq fountain--outline-buffer-state state))
 
@@ -2139,8 +2148,9 @@ When point is at metadata value on its own line, indent to
          (newline 2)
          (completion-at-point))
         ((fountain-match-note)
-         (outline-flag-region (match-beginning 1) (match-end 1)
-            (not (get-char-property (match-beginning 1) 'invisible))))
+         (fountain-outline-flag-note
+          (match-beginning 1) (match-end 1)
+          (not (get-char-property (match-beginning 1) 'invisible))))
         ((or (eolp) (looking-at ")$"))
          (completion-at-point))
         ((or (fountain-match-section-heading)
@@ -4275,6 +4285,7 @@ regular expression."
   (setq font-lock-extend-after-change-region-function
         #'fountain--font-lock-extend-region)
   (add-to-invisibility-spec (cons 'outline t))
+  (add-to-invisibility-spec (cons 'fountain-note t))
   (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-markup))
   (when fountain-hide-element-markup
