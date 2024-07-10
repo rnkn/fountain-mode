@@ -1618,6 +1618,16 @@ If FLAG is nil then text is shown, while if FLAG is t the text is hidden."
 		           (or outline-isearch-open-invisible-function
 		               #'outline-isearch-open-invisible)))))
 
+(defun fountain-outline-flag-notes-in-region (start end)
+  "Hide of show note text in notes from START to END.
+Notes are hidden if `fountain-outline-hide-notes' is non-nil,
+shown otherwise."
+  (save-excursion
+    (goto-char start)
+    (while (re-search-forward fountain-note-regexp nil t)
+      (fountain-outline-flag-note (match-beginning 1) (match-end 1)
+                                  fountain-outline-hide-notes))))
+
 (defun fountain-outline-set-buffer-state (state &optional silent)
   "Set buffer outline visibilty to outline level for STATE.
 Valid values for STATE are:
@@ -1631,20 +1641,19 @@ Display a message unless SILENT."
   (cl-case state
     (top-level
      (fountain-outline-hide-sublevels 1)
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing top-level section headings")))
     (section-headings
      (fountain-outline-hide-sublevels 5)
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing all section headings")))
     (scene-headings
      (fountain-outline-hide-sublevels 6)
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing scene headings")))
     (t
      (fountain-outline-show-all)
-     (save-excursion
-       (goto-char (point-min))
-       (while (re-search-forward fountain-note-regexp nil t)
-         (fountain-outline-flag-note (match-beginning 1) (match-end 1)
-                                     fountain-outline-hide-notes)))
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing all"))))
   (setq fountain--outline-buffer-state state))
 
@@ -1695,6 +1704,7 @@ See also `fountain-outline-show-synopses'."
            (message "Showing headings"))
           (t
            (fountain-outline-show-subtree)
+           (fountain-outline-flag-notes-in-region heading-end subtree-end)
            (message "Showing all")))))
 
 (define-obsolete-function-alias 'fountain-outline-cycle-global
