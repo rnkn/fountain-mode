@@ -1108,9 +1108,10 @@ This option does not affect file contents."
         (save-restriction
           (widen)
           (let ((x (point)))
-            (progn (re-search-backward "\\`\\|^$" nil 'move)
-                   (and (re-search-forward fountain-note-regexp nil t)
-                        (<= (match-beginning 0) x (match-end 0)))))))))
+            (while (not (or (bobp) (and (bolp) (eolp))))
+              (forward-line -1))
+            (and (re-search-forward fountain-note-regexp nil t)
+                 (<= (match-beginning 0) x (match-end 0))))))))
 
 (defun fountain-match-scene-heading ()
   "Match scene heading if point is at a scene heading, nil otherwise."
