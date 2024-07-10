@@ -1524,11 +1524,13 @@ Notes visibility can be cycled with \\[fountain-dwim]."
     (progn
       (defalias 'fountain-outline-show-all 'outline-show-all)
       (defalias 'fountain-outline-show-entry 'outline-show-entry)
+      (defalias 'fountain-outline-show-subtree 'outline-show-subtree)
       (defalias 'fountain-outline-show-children 'outline-show-children)
       (defalias 'fountain-outline-hide-subtree 'outline-hide-subtree)
       (defalias 'fountain-outline-hide-sublevels 'outline-hide-sublevels))
   (defalias 'fountain-outline-show-all 'show-all)
   (defalias 'fountain-outline-show-entry 'show-entry)
+  (defalias 'fountain-outline-show-subtree 'show-subtree)
   (defalias 'fountain-outline-show-children 'show-children)
   (defalias 'fountain-outline-hide-subtree 'hide-subtree)
   (defalias 'fountain-outline-hide-sublevels 'hide-sublevels))
@@ -1615,15 +1617,6 @@ If FLAG is nil then text is shown, while if FLAG is t the text is hidden."
       (overlay-put o 'isearch-open-invisible
 		           (or outline-isearch-open-invisible-function
 		               #'outline-isearch-open-invisible)))))
-
-(defun fountain-outline-show-subtree ()
-  "Show everything after this heading at deeper levels."
-  (interactive)
-  (outline-flag-subtree nil)
-  (save-excursion
-    (while (re-search-forward fountain-note-regexp nil t)
-      (fountain-outline-flag-note
-       (match-beginning 1) (match-end 1) fountain-outline-hide-notes))))
 
 (defun fountain-outline-set-buffer-state (state &optional silent)
   "Set buffer outline visibilty to outline level for STATE.
