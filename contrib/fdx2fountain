@@ -61,19 +61,32 @@ my @content = $dom->findnodes('/FinalDraft/Content/Paragraph[@Type]');
 my $I = 1;
 
 while ($I < $#content) {
-	$I++;
 
+	#Using perl's grep() capabilities, we will check if a certain type is matched like Character or Action and printf it appropriately. Else, it just skips it. 
 	if (grep(/Character/, $content[$I])) {
-		print $content[$I]->to_literal(), "\n";
-	} elsif (grep(/Action/, $content[$I]), "\n") {
-		print $content[$I]->to_literal(), "\n\n";
+		printf "\n%s\n", $content[$I]->to_literal();
+		$I++;
+	} elsif (grep(/Action/, $content[$I])) {
+		printf "\n%s\n", $content[$I]->to_literal();
+		$I++;
 	} elsif (grep(/Dialogue/, $content[$I])) {
-		print $content[$I]->to_literal(), "\n";
+		printf "%s\n", $content[$I]->to_literal();
+		$I++;
 	} elsif (grep(/Scene Heading/, $content[$I])) {
-		print $content[$I]->to_literal();
-	} else {
+		printf "\n%s\n", $content[$I]->to_literal();
+		$I++
+	} elsif (grep(/Parenthetical/, $content[$I])) {
+		printf "%s\n", $content[$I]->to_literal();
+		$I++
+	} elsif (grep(/Transition/, $content[$I])) {
+		printf "\n%s\n\n", $content[$I]->to_literal();
+		$I++;
+	}
+	else {
 		next;
 	}
+	
 }
+
 
 # End of script
