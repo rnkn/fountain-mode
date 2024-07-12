@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+
+# Copyright (C) 2024 Matthew Polk.
+
+# fdx2fountain - A perl script to convert fdx (Final Draft XML) files
+# into fountain files.
+
+# This file is free software and licensed under the terms of the
+# GNU General Public License version 3.0. If you did not recieve a
+# file containing the license terms (Typically called COPYING or LICENSE),
+# then you can read it at <https://www.gnu.org/licenses/>.
+
+# <------------------------------------------------------------->
+
+use warnings;
+use strict;
+
+use XML::LibXML;
+use XML::LibXML::Reader;
+
+
+# I may introduce extensions to the fountain spec. These are based off
+# the extensions provided by Paul "rnkn" Rankin, from his fountain-mode
+# emacs package. You can view it at https://github.com/rnkn/fountain-mode
+
+#my fountain_extensions = 3;
+
+# A brief reminder of note for the fountain spec (not counting any extensions done by rnkn:
+# Scene Headings begins with INT., EXT., or a single period at the very start followed by a single blank line.
+# Action is anything that doesn't fit in the rest of the 
+# Character is all caps like JIM SMITH and has a single empty line before it. Anything after that is dialogue. You can force a character with a @
+# Dialogue is text that comes after the character name
+# Parentheticals are only used in dialogue and wrapped in ( )
+# Dual Dialog contains a ^. Might be ticky to implement.
+# Lyrics contain ~~
+# Transition contains something such as CUT TO: or FADE TO:, You can force a line be a transition with a >
+# Centered text is ><
+# Bold and Italics is * and ** respectively
+# Title page contains key: value such as Title:
+# Page breaks are ===
+# Deliberate line breaks ends with two spaces '  '
+# Notes are wrapped with [[ ]]. I may not immediatley convert notes and other such concepts in fdx or fade in markup yet.
+# Boneyard is wrapped in C style comments. /* and */
+# Sections and Synopsis is # and = respectively
+#
+#
+#
+
+my $fdxfile = $ARGV[0];
+if (@ARGV != 1) {
+	print STDERR "$0: You did not supply an fdx file.\n";
+}
+
+# Read the DOM
+my $dom = XML::LibXML->load_xml(location => $fdxfile, no_blanks => 1);
+
+# Store each node from the DOM into an array
+my @content = $dom->findnodes('/FinalDraft/Content/Paragraph[@Type]');
+
+# Iterate through array
+my $I = 1;
+
+while ($I < $#content) {
+	$I++;
+
+	if (grep(/Character/, $content[$I])) {
+		print $content[$I]->to_literal(), "\n";
+	} elsif (grep(/Action/, $content[$I]), "\n") {
+		print $content[$I]->to_literal(), "\n\n";
+	} elsif (grep(/Dialogue/, $content[$I])) {
+		print $content[$I]->to_literal(), "\n";
+	} elsif (grep(/Scene Heading/, $content[$I])) {
+		print $content[$I]->to_literal();
+	} else {
+		next;
+	}
+}
+
+# End of script
