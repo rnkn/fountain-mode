@@ -1103,14 +1103,13 @@ This option does not affect file contents."
 (defun fountain-match-note ()
   "Match note if point is at note, nil otherwise."
   (save-excursion
-    (beginning-of-line)
-    (or (looking-at fountain-note-regexp)
-        (save-restriction
-          (widen)
-          (let ((x (point)))
-            (progn (re-search-backward "\\`\\|^$" nil 'move)
-                   (and (re-search-forward fountain-note-regexp nil t)
-                        (<= (match-beginning 0) x (match-end 0)))))))))
+    (save-restriction
+      (widen)
+      (let ((x (point)))
+        (while (not (or (bobp) (and (bolp) (eolp))))
+          (forward-line -1))
+        (and (re-search-forward fountain-note-regexp nil t)
+             (<= (match-beginning 0) x (match-end 0)))))))
 
 (defun fountain-match-scene-heading ()
   "Match scene heading if point is at a scene heading, nil otherwise."
@@ -1525,11 +1524,13 @@ Notes visibility can be cycled with \\[fountain-dwim]."
     (progn
       (defalias 'fountain-outline-show-all 'outline-show-all)
       (defalias 'fountain-outline-show-entry 'outline-show-entry)
+      (defalias 'fountain-outline-show-subtree 'outline-show-subtree)
       (defalias 'fountain-outline-show-children 'outline-show-children)
       (defalias 'fountain-outline-hide-subtree 'outline-hide-subtree)
       (defalias 'fountain-outline-hide-sublevels 'outline-hide-sublevels))
   (defalias 'fountain-outline-show-all 'show-all)
   (defalias 'fountain-outline-show-entry 'show-entry)
+  (defalias 'fountain-outline-show-subtree 'show-subtree)
   (defalias 'fountain-outline-show-children 'show-children)
   (defalias 'fountain-outline-hide-subtree 'hide-subtree)
   (defalias 'fountain-outline-hide-sublevels 'hide-sublevels))
@@ -1604,22 +1605,28 @@ Return non-nil if empty newline was inserted."
   (interactive "*p")
   (fountain-outline-move-subtree-down (- n)))
 
-(defun fountain-outline-flag-notes (start end)
-  "Collapse notes between START and END."
+;; Adapted from outline-flag-region
+(defun fountain-outline-flag-note (start end flag)
+  "Hide or show note text from START to END, according to FLAG.
+If FLAG is nil then text is shown, while if FLAG is t the text is hidden."
+  (remove-overlays start end 'invisible 'fountain-note)
+  (when flag
+    (let ((o (make-overlay start end nil 'front-advance)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'invisible 'fountain-note)
+      (overlay-put o 'isearch-open-invisible
+		           (or outline-isearch-open-invisible-function
+		               #'outline-isearch-open-invisible)))))
+
+(defun fountain-outline-flag-notes-in-region (start end)
+  "Hide of show note text in notes from START to END.
+Notes are hidden if `fountain-outline-hide-notes' is non-nil,
+shown otherwise."
   (save-excursion
     (goto-char start)
-    (while (re-search-forward fountain-note-regexp end 'move)
-      (outline-flag-region (match-beginning 1) (match-end 1)
-                           fountain-outline-hide-notes))))
-
-(defun fountain-outline-show-subtree ()
-  "Show everything after this heading at deeper levels."
-  (interactive)
-  (outline-flag-subtree nil)
-  (save-excursion
-    (while (re-search-forward fountain-note-regexp nil 'move)
-           (outline-flag-region (match-beginning 1) (match-end 1)
-                                fountain-outline-hide-notes))))
+    (while (re-search-forward fountain-note-regexp nil t)
+      (fountain-outline-flag-note (match-beginning 1) (match-end 1)
+                                  fountain-outline-hide-notes))))
 
 (defun fountain-outline-set-buffer-state (state &optional silent)
   "Set buffer outline visibilty to outline level for STATE.
@@ -1634,16 +1641,19 @@ Display a message unless SILENT."
   (cl-case state
     (top-level
      (fountain-outline-hide-sublevels 1)
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing top-level section headings")))
     (section-headings
      (fountain-outline-hide-sublevels 5)
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing all section headings")))
     (scene-headings
      (fountain-outline-hide-sublevels 6)
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing scene headings")))
     (t
      (fountain-outline-show-all)
-     (fountain-outline-flag-notes (point-min) (point-max))
+     (fountain-outline-flag-notes-in-region (point-min) (point-max))
      (unless silent (message "Showing all"))))
   (setq fountain--outline-buffer-state state))
 
@@ -1694,6 +1704,7 @@ See also `fountain-outline-show-synopses'."
            (message "Showing headings"))
           (t
            (fountain-outline-show-subtree)
+           (fountain-outline-flag-notes-in-region heading-end subtree-end)
            (message "Showing all")))))
 
 (define-obsolete-function-alias 'fountain-outline-cycle-global
@@ -2138,8 +2149,9 @@ When point is at metadata value on its own line, indent to
          (newline 2)
          (completion-at-point))
         ((fountain-match-note)
-         (outline-flag-region (match-beginning 1) (match-end 1)
-            (not (get-char-property (match-beginning 1) 'invisible))))
+         (fountain-outline-flag-note
+          (match-beginning 1) (match-end 1)
+          (not (get-char-property (match-beginning 1) 'invisible))))
         ((or (eolp) (looking-at ")$"))
          (completion-at-point))
         ((or (fountain-match-section-heading)
@@ -3777,7 +3789,7 @@ takes the form:
 
       ;; Notes ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (when (memq 'note highlight-elements)
-        (cons (define-fountain-font-lock-matcher (fountain-match-note))
+        (cons fountain-note-regexp
               '(0 '(face 'fountain-note) t)))
 
       ;; Center ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4274,6 +4286,7 @@ regular expression."
   (setq font-lock-extend-after-change-region-function
         #'fountain--font-lock-extend-region)
   (add-to-invisibility-spec (cons 'outline t))
+  (add-to-invisibility-spec (cons 'fountain-note t))
   (when fountain-hide-emphasis-markup
     (add-to-invisibility-spec 'fountain-emphasis-markup))
   (when fountain-hide-element-markup
