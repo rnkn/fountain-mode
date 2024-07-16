@@ -2732,6 +2732,7 @@ If TROFF is non-nil, consider troff escapes. Skip over comments."
               ((forward-comment 1))
               (t
                (forward-char 1) (cl-incf i)))))
+    (skip-syntax-forward ".")
     (skip-chars-forward "\s\t")
     (when (eolp) (forward-line))
     (unless (or (bolp) (eobp))
