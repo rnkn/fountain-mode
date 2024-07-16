@@ -2835,8 +2835,7 @@ are considered invalid (see `fountain-pagination-validate')."
         (goto-char (point-min))
         (with-silent-modifications
           (let ((page-num (if (fountain-match-metadata) 0 1))
-                (previous-page (point))
-                )
+                (previous-page (point)))
             (while (< (point) (point-max))
               (fountain-move-forward-page)
               (put-text-property previous-page (point) 'fountain-pagination
