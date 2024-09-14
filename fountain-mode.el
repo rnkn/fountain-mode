@@ -1624,7 +1624,7 @@ Notes are hidden if `fountain-outline-hide-notes' is non-nil,
 shown otherwise."
   (save-excursion
     (goto-char start)
-    (while (re-search-forward fountain-note-regexp nil t)
+    (while (re-search-forward fountain-note-regexp end t)
       (fountain-outline-flag-note (match-beginning 1) (match-end 1)
                                   fountain-outline-hide-notes))))
 
