@@ -3369,6 +3369,8 @@ If OUTPUT in nil, `fountain-export-output-buffer' is used."
 
 (defalias 'fountain-export-troff 'fountain-export)
 
+(declare-function doc-view-kill-proc "doc-view")
+
 (defun fountain-export ()
   "Export region to `fountain-export-format' via troff.
 
@@ -3451,9 +3453,9 @@ Requires a `troff' program."
       (switch-to-buffer output-buffer))
     (when fountain-export-kill-output-buffer
       (with-current-buffer output-buffer
-        (if (derived-mode-p 'doc-view-mode)
-            (doc-view-kill-proc-and-buffer)
-          (kill-buffer))))))
+        (when (derived-mode-p 'doc-view-mode)
+          (doc-view-kill-proc))
+        (kill-buffer)))))
 
 (require 'format-spec)
 
