@@ -3451,7 +3451,10 @@ Requires a `troff' program."
     (when fountain-export-switch-to-output-buffer
       (switch-to-buffer output-buffer))
     (when fountain-export-kill-output-buffer
-      (kill-buffer output-buffer))))
+      (with-current-buffer output-buffer
+        (if (derived-mode-p 'doc-view-mode)
+            (doc-view-kill-proc-and-buffer)
+          (kill-buffer))))))
 
 (require 'format-spec)
 
