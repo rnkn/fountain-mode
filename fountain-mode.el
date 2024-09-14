@@ -751,7 +751,7 @@ Requires `fountain-match-metadata' for `bobp'.")
           "\\|"
           "\\(?2:[^<>\n[:lower:]]*?[[:upper:]]+[^<>\n[:lower:]]*?\\)"
           "\\)"
-          "\\(?3:[\s\t]*\\(?4:\(\\)[^\)\n]*\)?\\)*?"
+          "\\(?3:[\s\t]*\\(?4:(\\)[^)\n]*)?\\)*?"
           "[\s\t]*\\(?5:[\s\t]*^\\)?"
           "[\s\t]*$")
   "Regular expression for matching character names.
@@ -846,15 +846,15 @@ dialogue.")
   "Regular expression for matching underlined text.")
 
 (defconst fountain-italic-regexp
-  "\\(?:^\\|[^\\*\\]\\)\\(\\(\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
+  "\\(?:^\\|[^*\\]\\)\\(\\(\\*\\)\\([^\n\s\t*][^*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching italic text.")
 
 (defconst fountain-bold-regexp
-  "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
+  "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\)\\([^\n\s\t\\*][^*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching bold text.")
 
 (defconst fountain-bold-italic-regexp
-  "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\*\\)\\([^\n\s\t\\*][^\\*\n]*?\\)\\(\\2\\)\\)"
+  "\\(?:^\\|[^\\]\\)\\(\\(\\*\\*\\*\\)\\([^\n\s\t*][^*\n]*?\\)\\(\\2\\)\\)"
   "Regular expression for matching bold-italic text.
 
 Due to the nature of the syntax, bold-italic-underlined text must
