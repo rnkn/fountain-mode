@@ -1517,6 +1517,7 @@ Notes visibility can be cycled with \\[fountain-dwim]."
 (declare-function fountain-outline-show-all "fountain-mode")
 (declare-function fountain-outline-show-entry "fountain-mode")
 (declare-function fountain-outline-show-children "fountain-mode")
+(declare-function fountain-outline-show-subtree "fountain-mode")
 (declare-function fountain-outline-hide-subtree "fountain-mode")
 (declare-function fountain-outline-hide-sublevels "fountain-mode")
 
