@@ -2502,7 +2502,6 @@ the value of `fountain-prefix-revised-scene-numbers', which see."
       (widen)
       (let ((job (make-progress-reporter
                   (format "%s scene numbers..." (if arg "Removing" "Adding"))))
-            (n (list 0))
             buffer-invisibility-spec)
         (goto-char (point-min))
         (unless (fountain-match-scene-heading)
