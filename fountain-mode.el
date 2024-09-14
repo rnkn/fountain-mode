@@ -478,6 +478,88 @@ You can specify which elements are highlighted with the option
   "Default face for transitions.")
 
 
+;;; Scene Number Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgroup fountain-scene-numbers ()
+  "Options for scene numbers in `fountain-mode'."
+  :prefix "fountain-scene-numbers-"
+  :group 'fountain)
+
+(defcustom fountain-display-scene-numbers-in-margin
+  nil
+  "If non-nil, display scene numbers in the right margin.
+This option does not affect file contents."
+  :group 'fountain-scene-numbers
+  :type 'boolean
+  :safe 'booleanp
+  :set #'fountain--set-and-refresh-font-lock)
+
+(defcustom fountain-prefix-revised-scene-numbers
+  nil
+  "If non-nil, revised scene numbers are prefixed.
+
+If non-nil, when inserting new scene headings after numbering
+existing scene headings, revised scene number format works as
+follows:
+
+  10
+  A11 <- new scene
+  B11 <- new scene
+  11
+
+If further scene headings are inserted:
+
+  10
+  AA11 <- new scene
+  BA11 <- new scene
+  A11
+  AB11 <- new scene
+  BB11 <- new scene
+  B11
+  11
+
+Otherwise, when nil:
+
+  10
+  10A <- new scene
+  10B <- new scene
+  11
+
+And if further scene headings are inserted:
+
+  10
+  10AA <- new scene
+  10AB <- new scene
+  10A
+  10BA <- new scene
+  10BB <- new scene
+  10B
+  11
+
+  10
+  10A <- new scene
+  11
+
+n.b. Using conflicting revised scene number format in the same
+script may result in errors in output."
+  :type 'boolean
+  :safe 'booleanp
+  :group 'fountain-scene-numbers)
+
+(make-obsolete-variable 'fountain-scene-numbers-first-revision-char
+                        "use \"A\" and \"B\" system." "`fountain-mode' 3.8")
+
+(defcustom fountain-scene-numbers-separator
+  nil
+  "Character to separate scene numbers."
+  :type '(choice (const :tag "None" nil)
+                 (const :tag "Dash" ?-)
+                 (const :tag "Period" ?.))
+  :safe (lambda (value)
+          (or (null value) (characterp value)))
+  :group 'fountain-scene-numbers)
+
+
 ;;; Export Options ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defgroup fountain-export ()
@@ -2256,85 +2338,6 @@ accessible portion of the buffer."
 
 
 ;;; Scene Numbers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgroup fountain-scene-numbers ()
-  "Options for scene numbers in `fountain-mode'."
-  :prefix "fountain-scene-numbers-"
-  :group 'fountain)
-
-(defcustom fountain-display-scene-numbers-in-margin
-  nil
-  "If non-nil, display scene numbers in the right margin.
-This option does not affect file contents."
-  :group 'fountain-scene-numbers
-  :type 'boolean
-  :safe 'booleanp
-  :set #'fountain--set-and-refresh-font-lock)
-
-(defcustom fountain-prefix-revised-scene-numbers
-  nil
-  "If non-nil, revised scene numbers are prefixed.
-
-If non-nil, when inserting new scene headings after numbering
-existing scene headings, revised scene number format works as
-follows:
-
-  10
-  A11 <- new scene
-  B11 <- new scene
-  11
-
-If further scene headings are inserted:
-
-  10
-  AA11 <- new scene
-  BA11 <- new scene
-  A11
-  AB11 <- new scene
-  BB11 <- new scene
-  B11
-  11
-
-Otherwise, when nil:
-
-  10
-  10A <- new scene
-  10B <- new scene
-  11
-
-And if further scene headings are inserted:
-
-  10
-  10AA <- new scene
-  10AB <- new scene
-  10A
-  10BA <- new scene
-  10BB <- new scene
-  10B
-  11
-
-  10
-  10A <- new scene
-  11
-
-n.b. Using conflicting revised scene number format in the same
-script may result in errors in output."
-  :type 'boolean
-  :safe 'booleanp
-  :group 'fountain-scene-numbers)
-
-(make-obsolete-variable 'fountain-scene-numbers-first-revision-char
-                        "use \"A\" and \"B\" system." "`fountain-mode' 3.8")
-
-(defcustom fountain-scene-numbers-separator
-  nil
-  "Character to separate scene numbers."
-  :type '(choice (const :tag "None" nil)
-                 (const :tag "Dash" ?-)
-                 (const :tag "Period" ?.))
-  :safe (lambda (value)
-          (or (null value) (characterp value)))
-  :group 'fountain-scene-numbers)
 
 (defun fountain-revision-string-to-list (string &optional scene)
   "Convert revision number STRING to a list.
