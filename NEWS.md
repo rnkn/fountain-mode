@@ -10,6 +10,8 @@
   `fountain-export-kill-output-buffer` to provide better experience when
   exporting.
 - Simplify `fountain-insert-note`, which no longer takes a template.
+- Add face `fountain-character-dual-dialog` to highlight dual dialogue
+  mark.
 - Add `fountain-insert-note-hook`.
 - Add `fountain-insert-synopsis-hook`.
 - Add `fountain-insert-page-break-hook`.

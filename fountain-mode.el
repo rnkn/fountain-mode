@@ -473,6 +473,10 @@ You can specify which elements are highlighted with the option
   '((t (:inherit font-lock-string-face)))
   "Default face for dialogue.")
 
+(defface fountain-character-dual-dialog
+  '((t (:inherit highlight)))
+  "Default face for dual dialogue mark.")
+
 (defface fountain-trans
   '((t nil))
   "Default face for transitions.")
@@ -3760,7 +3764,7 @@ takes the form:
               `((0 '(face ,face line-prefix ,align wrap-prefix ,align))
                 (1 '(face fountain-non-printing invisible fountain-element-markup)
                    prepend t)
-                (5 '(face highlight) prepend t))))
+                (5 '(face fountain-character-dual-dialog) prepend t))))
 
       ;; Dialogue ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       (let ((face (when (memq 'dialog highlight-elements)
