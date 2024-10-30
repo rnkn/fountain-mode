@@ -78,13 +78,12 @@ The latest stable release of Fountain Mode is available via
 
     M-x customize-option RET package-archives RET
     
-Insert an entry named `melpa-stable` with URL:
-`https://stable.melpa.org/packages/`
+Insert an entry named `melpa-stable` with URL: `https://stable.melpa.org/packages/`
 
-You can then find the latest stable version of `fountain-mode` in the
-list returned by:
+Refresh the package archive and install:
 
-    M-x list-packages RET
+	M-x package-refresh-contents RET
+	M-x package-install RET fountain-mode RET
 
 If you prefer the latest but perhaps unstable version, do the above
 using [MELPA][2].
@@ -112,6 +111,14 @@ For bugs, please ensure you can reproduce with:
 
     $ emacs -Q -l fountain-mode.el
 
-
 [1]: https://stable.melpa.org/#/fountain-mode
 [2]: https://melpa.org/#/fountain-mode
+
+
+Donations
+---------
+
+Donations are graciously accepted via [Github][3], or [Liberapay][4].
+
+[3]: https://github.com/sponsors/rnkn
+[4]: https://liberapay.com/rnkn/
