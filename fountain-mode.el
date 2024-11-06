@@ -2268,8 +2268,10 @@ beginning of line (if not already present) to force a scene heading."
 If ARG is non-nil (when prefixed with \\[universal-argument]), insert `.' at
 beginning of line (if not already present) to force a scene heading."
   (interactive "*P")
-  (fountain-upcase-line arg)
-  (newline))
+  (newline)
+  (save-excursion
+    (forward-line -1)
+    (fountain-upcase-line arg)))
 
 (defun fountain-delete-comments-in-region (start end)
   "Delete comments in region between START and END."

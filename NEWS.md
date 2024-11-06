@@ -3,6 +3,8 @@
 ## master
 
 - Revert `fountain-upcase-line` to upcasing whole line.
+- Make `fountain-upcase-line-and-newline` only upcase text up to
+  point.
 - Implement `fountain-(forward|backward)-this-character`.
 - Rewrite of scene number logic to now work accurately with traditional
   and modern (suffix and prefix) format.
