@@ -2,6 +2,7 @@
 
 ## master
 
+- Revert `fountain-upcase-line` to upcasing whole line.
 - Implement `fountain-(forward|backward)-this-character`.
 - Rewrite of scene number logic to now work accurately with traditional
   and modern (suffix and prefix) format.

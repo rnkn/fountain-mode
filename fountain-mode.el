@@ -2261,7 +2261,7 @@ beginning of line (if not already present) to force a scene heading."
   (interactive "*P")
   (when (and arg (not (fountain-match-scene-heading)))
     (save-excursion (beginning-of-line) (insert ".")))
-  (upcase-region (line-beginning-position) (point)))
+  (upcase-region (line-beginning-position) (line-end-position)))
 
 (defun fountain-upcase-line-and-newline (&optional arg)
   "Upcase the line and insert a newline.
